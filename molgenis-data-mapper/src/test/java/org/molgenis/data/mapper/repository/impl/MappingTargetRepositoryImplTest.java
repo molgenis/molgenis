@@ -18,7 +18,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,9 +175,9 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		MolgenisUserService userService()
+		UserService userService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 
 		@Bean

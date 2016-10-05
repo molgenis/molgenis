@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.meta;
 
-import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,16 +24,16 @@ public class MappingProjectMetaData extends SystemEntityType
 	public static final String MAPPING_TARGETS = "mappingtargets";
 
 	private final MapperPackage mapperPackage;
-	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final UserMetaData userMetaData;
 	private final MappingTargetMetaData mappingTargetMetaData;
 
 	@Autowired
-	public MappingProjectMetaData(MapperPackage mapperPackage, MolgenisUserMetaData molgenisUserMetaData,
+	public MappingProjectMetaData(MapperPackage mapperPackage, UserMetaData userMetaData,
 			MappingTargetMetaData mappingTargetMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);
 		this.mapperPackage = requireNonNull(mapperPackage);
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.userMetaData = requireNonNull(userMetaData);
 		this.mappingTargetMetaData = requireNonNull(mappingTargetMetaData);
 	}
 
@@ -45,7 +45,7 @@ public class MappingProjectMetaData extends SystemEntityType
 
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
-		addAttribute(OWNER).setDataType(XREF).setRefEntity(molgenisUserMetaData);
+		addAttribute(OWNER).setDataType(XREF).setRefEntity(userMetaData);
 		addAttribute(MAPPING_TARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData);
 	}
 }

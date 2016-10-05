@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.controller;
 
 import com.google.common.collect.*;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
@@ -24,7 +24,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -66,7 +66,7 @@ public class MappingServiceController extends MolgenisPluginController
 	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
 
 	@Autowired
-	private MolgenisUserService molgenisUserService;
+	private UserService userService;
 
 	@Autowired
 	private MappingService mappingService;
@@ -909,9 +909,9 @@ public class MappingServiceController extends MolgenisPluginController
 		return result;
 	}
 
-	private MolgenisUser getCurrentUser()
+	private User getCurrentUser()
 	{
-		return molgenisUserService.getUser(getCurrentUsername());
+		return userService.getUser(getCurrentUsername());
 	}
 
 	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)

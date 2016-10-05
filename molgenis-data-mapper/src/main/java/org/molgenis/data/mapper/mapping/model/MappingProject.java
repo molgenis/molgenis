@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.mapping.model;
 
 import com.google.common.collect.Lists;
 import org.elasticsearch.repositories.Repository;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.model.EntityType;
@@ -17,13 +17,13 @@ public class MappingProject
 {
 	private String identifier;
 	private String name;
-	private MolgenisUser owner;
+	private User owner;
 	private Map<String, MappingTarget> mappingTargets;
 
 	/**
 	 * Creates a new empty mapping project. Used by the {@link MappingService}.
 	 */
-	public MappingProject(String name, MolgenisUser owner)
+	public MappingProject(String name, User owner)
 	{
 		this.identifier = null;
 		this.name = name;
@@ -35,7 +35,7 @@ public class MappingProject
 	 * Creates a new instance of {@link MappingProject}. Used by the {@link MappingProjectRepository} when recreating a
 	 * MappingProject from the {@link Repository}.
 	 */
-	public MappingProject(String identifier, String name, MolgenisUser owner, List<MappingTarget> mappingTargets)
+	public MappingProject(String identifier, String name, User owner, List<MappingTarget> mappingTargets)
 	{
 		this.identifier = identifier;
 		this.name = name;
@@ -76,14 +76,14 @@ public class MappingProject
 		this.name = name;
 	}
 
-	public MolgenisUser getOwner()
+	public User getOwner()
 	{
 		// For owner lazy load the molgenis username as system so that Freemarker is able to access it
 		runAsSystem(() -> owner.getUsername());
 		return owner;
 	}
 
-	public void setOwner(MolgenisUser owner)
+	public void setOwner(User owner)
 	{
 		this.owner = owner;
 	}

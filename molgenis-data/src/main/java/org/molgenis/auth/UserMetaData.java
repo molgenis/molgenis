@@ -13,10 +13,10 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MolgenisUserMetaData extends SystemEntityType
+public class UserMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "MolgenisUser";
-	public static final String MOLGENIS_USER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "User";
+	public static final String USER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String USERNAME = "username";
 	public static final String SUPERUSER = "superuser";
@@ -45,7 +45,7 @@ public class MolgenisUserMetaData extends SystemEntityType
 	private final SecurityPackage securityPackage;
 
 	@Autowired
-	public MolgenisUserMetaData(SecurityPackage securityPackage)
+	public UserMetaData(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);

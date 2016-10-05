@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.controller;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -16,7 +16,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -59,7 +59,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private MappingServiceController controller = new MappingServiceController();
 
 	@Mock
-	private MolgenisUserService molgenisUserService;
+	private UserService userService;
 
 	@Mock
 	private MappingService mappingService;
@@ -82,7 +82,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Mock
 	private MenuReaderService menuReaderService;
 
-	private MolgenisUser me;
+	private User me;
 
 	private EntityType lifeLines;
 	private EntityType hop;
@@ -94,7 +94,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeTest()
 	{
-		me = mock(MolgenisUser.class);
+		me = mock(User.class);
 		when(me.getUsername()).thenReturn("fdlk");
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("fdlk", null);
 		authentication.setAuthenticated(true);

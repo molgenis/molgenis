@@ -3,7 +3,7 @@ package org.molgenis.ontology.controller;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.csv.CsvWriter;
@@ -182,7 +182,7 @@ public class SortaServiceController extends MolgenisPluginController
 			SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 			try
 			{
-				MolgenisUser currentUser = userAccountService.getCurrentUser();
+				User currentUser = userAccountService.getCurrentUser();
 				if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 				{
 					RunAsSystemProxy.runAsSystem(() ->
@@ -243,7 +243,7 @@ public class SortaServiceController extends MolgenisPluginController
 		SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 		if (sortaJobExecution != null)
 		{
-			MolgenisUser currentUser = userAccountService.getCurrentUser();
+			User currentUser = userAccountService.getCurrentUser();
 			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
 				RunAsSystemProxy.runAsSystem(() ->
@@ -509,7 +509,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private List<Entity> getJobsForCurrentUser()
 	{
 		final List<Entity> jobs = new ArrayList<>();
-		MolgenisUser currentUser = userAccountService.getCurrentUser();
+		User currentUser = userAccountService.getCurrentUser();
 		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser.getUsername());
 		query.sort().on(JobExecutionMetaData.START_DATE, DESC);
 		RunAsSystemProxy.runAsSystem(() ->

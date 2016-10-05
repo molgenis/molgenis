@@ -2,9 +2,9 @@ package org.molgenis.file.ingest;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
-import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
@@ -49,7 +49,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 	private FileIngestFactory fileIngestFactory;
 
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
+	private UserFactory userFactory;
 
 	private JobExecutionContext contextMock;
 
@@ -74,11 +74,11 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		fileIngest.setTargetEntity(targetEntity);
 		when(dataService.findOneById(FileIngestMetaData.FILE_INGEST, "abcde", FileIngest.class)).thenReturn(fileIngest);
 
-		Query<MolgenisUser> queryMock = Mockito.mock(Query.class);
-		MolgenisUser admin = molgenisUserFactory.create();
+		Query<User> queryMock = Mockito.mock(Query.class);
+		User admin = userFactory.create();
 		admin.setUsername("admin");
-		when(dataService.query(MolgenisUserMetaData.MOLGENIS_USER, MolgenisUser.class)).thenReturn(queryMock);
-		when(queryMock.eq(MolgenisUserMetaData.USERNAME, "admin")).thenReturn(queryMock);
+		when(dataService.query(UserMetaData.USER, User.class)).thenReturn(queryMock);
+		when(queryMock.eq(UserMetaData.USERNAME, "admin")).thenReturn(queryMock);
 		when(queryMock.findOne()).thenReturn(admin);
 
 		ArgumentCaptor<FileIngestJobExecution> captor = ArgumentCaptor.forClass(FileIngestJobExecution.class);

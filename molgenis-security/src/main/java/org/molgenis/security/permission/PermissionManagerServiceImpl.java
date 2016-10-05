@@ -21,9 +21,9 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 @Service
@@ -48,17 +48,17 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisUser> getUsers()
+	public List<User> getUsers()
 	{
-		return dataService.findAll(MOLGENIS_USER, MolgenisUser.class).collect(toList());
+		return dataService.findAll(USER, User.class).collect(toList());
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisGroup> getGroups()
+	public List<Group> getGroups()
 	{
-		return dataService.findAll(MOLGENIS_GROUP, MolgenisGroup.class).collect(toList());
+		return dataService.findAll(GROUP, Group.class).collect(toList());
 	}
 
 	@Override
@@ -80,10 +80,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public Permissions getGroupPluginPermissions(String groupId)
 	{
-		MolgenisGroup molgenisGroup = dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
-		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+		Group group = dataService.findOneById(GROUP, groupId, Group.class);
+		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 
-		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
+		List<Authority> groupPermissions = getGroupPermissions(group);
 		Permissions permissions = createPermissions(groupPermissions, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
 		permissions.setGroupId(groupId);
 		return permissions;
@@ -94,9 +94,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public Permissions getGroupEntityClassPermissions(String groupId)
 	{
-		MolgenisGroup molgenisGroup = dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
-		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
-		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
+		Group group = dataService.findOneById(GROUP, groupId, Group.class);
+		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+		List<Authority> groupPermissions = getGroupPermissions(group);
 		Permissions permissions = createPermissions(groupPermissions, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 		permissions.setGroupId(groupId);
 		return permissions;
@@ -132,26 +132,26 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<? extends Authority> getUserPermissions(String userId, String authorityPrefix)
 	{
-		MolgenisUser molgenisUser = dataService.findOneById(MOLGENIS_USER, userId, MolgenisUser.class);
-		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
-		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
+		User user = dataService.findOneById(USER, userId, User.class);
+		if (user == null) throw new RuntimeException("unknown user id [" + userId + "]");
+		List<Authority> userPermissions = getUserPermissions(user, authorityPrefix);
 
-		List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
-				MolgenisGroupMember.class).collect(toList());
+		List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<MolgenisGroup> molgenisGroups = Lists
-					.transform(groupMembers, new Function<MolgenisGroupMember, MolgenisGroup>()
+			List<Group> groups = Lists
+					.transform(groupMembers, new Function<GroupMember, Group>()
 					{
 						@Override
-						public MolgenisGroup apply(MolgenisGroupMember molgenisGroupMember)
+						public Group apply(GroupMember molgenisGroupMember)
 						{
-							return molgenisGroupMember.getMolgenisGroup();
+							return molgenisGroupMember.getGroup();
 						}
 					});
-			List<Authority> groupAuthorities = getGroupPermissions(molgenisGroups, authorityPrefix);
+			List<Authority> groupAuthorities = getGroupPermissions(groups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 		}
 
@@ -176,15 +176,15 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private void replaceGroupPermissions(List<GroupAuthority> entityAuthorities, String groupId, String authorityPrefix)
 	{
-		MolgenisGroup molgenisGroup = dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
-		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+		Group group = dataService.findOneById(GROUP, groupId, Group.class);
+		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 
 		// inject user
 		for (GroupAuthority entityAuthority : entityAuthorities)
-			entityAuthority.setMolgenisGroup(molgenisGroup);
+			entityAuthority.setGroup(group);
 
 		// delete old plugin authorities
-		Stream<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix).stream();
+		Stream<Authority> oldEntityAuthorities = getGroupPermissions(group, authorityPrefix).stream();
 		if (oldEntityAuthorities != null) dataService.delete(GROUP_AUTHORITY, oldEntityAuthorities);
 
 		// insert new plugin authorities
@@ -209,15 +209,15 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, String userId, String authorityType)
 	{
-		MolgenisUser molgenisUser = dataService.findOneById(MOLGENIS_USER, userId, MolgenisUser.class);
-		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
+		User user = dataService.findOneById(USER, userId, User.class);
+		if (user == null) throw new RuntimeException("unknown user id [" + userId + "]");
 
 		// inject user
 		for (UserAuthority entityAuthority : entityAuthorities)
-			entityAuthority.setMolgenisUser(molgenisUser);
+			entityAuthority.setUser(user);
 
 		// delete old plugin authorities
-		List<? extends Authority> oldEntityAuthorities = getUserPermissions(molgenisUser, authorityType);
+		List<? extends Authority> oldEntityAuthorities = getUserPermissions(user, authorityType);
 		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty())
 			dataService.delete(USER_AUTHORITY, oldEntityAuthorities.stream());
 
@@ -225,10 +225,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (!entityAuthorities.isEmpty()) dataService.add(USER_AUTHORITY, entityAuthorities.stream());
 	}
 
-	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
+	private List<Authority> getUserPermissions(User user, final String authorityPrefix)
 	{
 		Stream<UserAuthority> authorities = dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser),
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
 				UserAuthority.class);
 
 		return authorities.filter(authority ->
@@ -237,25 +237,25 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		}).collect(toList());
 	}
 
-	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
+	private List<Authority> getGroupPermissions(Group group)
 	{
-		return getGroupPermissions(Arrays.asList(molgenisGroup));
+		return getGroupPermissions(Arrays.asList(group));
 	}
 
-	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup, String authorityPrefix)
+	private List<Authority> getGroupPermissions(Group group, String authorityPrefix)
 	{
-		return getGroupPermissions(Arrays.asList(molgenisGroup), authorityPrefix);
+		return getGroupPermissions(Arrays.asList(group), authorityPrefix);
 	}
 
-	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups)
+	private List<Authority> getGroupPermissions(List<Group> groups)
 	{
-		return getGroupPermissions(molgenisGroups, null);
+		return getGroupPermissions(groups, null);
 	}
 
-	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
+	private List<Authority> getGroupPermissions(List<Group> groups, final String authorityPrefix)
 	{
 		Stream<GroupAuthority> authorities = dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroups),
+				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
 				GroupAuthority.class);
 
 		return authorities.filter(authority ->
@@ -312,7 +312,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				permission.setType(authorityType);
 				if (authority instanceof GroupAuthority)
 				{
-					permission.setGroup(((GroupAuthority) authority).getMolgenisGroup().getName());
+					permission.setGroup(((GroupAuthority) authority).getGroup().getName());
 					permissions.addGroupPermission(authorityPluginId, permission);
 				}
 				else

@@ -11,27 +11,27 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MolgenisGroupMemberMetaData extends SystemEntityType
+public class GroupMemberMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "MolgenisGroupMember";
-	public static final String MOLGENIS_GROUP_MEMBER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "GroupMember";
+	public static final String GROUP_MEMBER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
-	public static final String MOLGENIS_USER = "molgenisUser";
-	public static final String MOLGENIS_GROUP = "molgenisGroup";
+	public static final String USER = "User";
+	public static final String GROUP = "Group";
 
 	private final SecurityPackage securityPackage;
-	private final MolgenisUserMetaData molgenisUserMetaData;
-	private final MolgenisGroupMetaData molgenisGroupMetaData;
+	private final UserMetaData userMetaData;
+	private final GroupMetaData groupMetaData;
 
 	@Autowired
-	MolgenisGroupMemberMetaData(SecurityPackage securityPackage, MolgenisUserMetaData molgenisUserMetaData,
-			MolgenisGroupMetaData molgenisGroupMetaData)
+	GroupMemberMetaData(SecurityPackage securityPackage, UserMetaData userMetaData,
+			GroupMetaData groupMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
-		this.molgenisGroupMetaData = requireNonNull(molgenisGroupMetaData);
+		this.userMetaData = requireNonNull(userMetaData);
+		this.groupMetaData = requireNonNull(groupMetaData);
 	}
 
 	@Override
@@ -41,9 +41,9 @@ public class MolgenisGroupMemberMetaData extends SystemEntityType
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData).setAggregatable(true)
+		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
-		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
+		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
 	}
 }

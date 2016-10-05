@@ -16,20 +16,20 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
-public class MolgenisUserDecorator implements Repository<MolgenisUser>
+public class UserDecorator implements Repository<User>
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final Repository<MolgenisUser> decoratedRepository;
+	private final Repository<User> decoratedRepository;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
-	public MolgenisUserDecorator(Repository<MolgenisUser> decoratedRepository,
+	public UserDecorator(Repository<User> decoratedRepository,
 			UserAuthorityFactory userAuthorityFactory, DataService dataService, PasswordEncoder passwordEncoder)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
@@ -39,7 +39,7 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public void add(MolgenisUser entity)
+	public void add(User entity)
 	{
 		encodePassword(entity);
 		decoratedRepository.add(entity);
@@ -47,7 +47,7 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public void update(MolgenisUser entity)
+	public void update(User entity)
 	{
 		updatePassword(entity);
 		decoratedRepository.update(entity);
@@ -55,23 +55,23 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public Integer add(Stream<MolgenisUser> entities)
+	public Integer add(Stream<User> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(molgenisUsers ->
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(users ->
 		{
-			molgenisUsers.forEach(this::encodePassword);
+			users.forEach(this::encodePassword);
 
-			Integer batchCount = decoratedRepository.add(molgenisUsers.stream());
+			Integer batchCount = decoratedRepository.add(users.stream());
 			count.addAndGet(batchCount);
 
-			molgenisUsers.forEach(this::addSuperuserAuthority);
+			users.forEach(this::addSuperuserAuthority);
 		});
 		return count.get();
 	}
 
 	@Override
-	public void update(Stream<MolgenisUser> entities)
+	public void update(Stream<User> entities)
 	{
 		entities = entities.map(entity ->
 		{
@@ -81,53 +81,53 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 		decoratedRepository.update(entities);
 	}
 
-	private void updatePassword(MolgenisUser molgenisUser)
+	private void updatePassword(User user)
 	{
-		MolgenisUser currentUser = findOneById(molgenisUser.getId());
+		User currentUser = findOneById(user.getId());
 
 		String currentPassword = currentUser.getPassword();
-		String password = molgenisUser.getPassword();
+		String password = user.getPassword();
 		//password is updated
 		if(!currentPassword.equals(password))
 		{
-			password = passwordEncoder.encode(molgenisUser.getPassword());
+			password = passwordEncoder.encode(user.getPassword());
 		}
-		molgenisUser.setPassword(password);
+		user.setPassword(password);
 	}
 
-	private void encodePassword(MolgenisUser molgenisUser)
+	private void encodePassword(User user)
 	{
-		String password = molgenisUser.getPassword();
+		String password = user.getPassword();
 		String encodedPassword = passwordEncoder.encode(password);
-		molgenisUser.setPassword(encodedPassword);
+		user.setPassword(encodedPassword);
 	}
 
-	private void addSuperuserAuthority(MolgenisUser molgenisUser)
+	private void addSuperuserAuthority(User user)
 	{
-		Boolean isSuperuser = molgenisUser.isSuperuser();
+		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
 		{
 			UserAuthority userAuthority = userAuthorityFactory.create();
-			userAuthority.setMolgenisUser(molgenisUser);
+			userAuthority.setUser(user);
 			userAuthority.setRole(AUTHORITY_SU);
 
 			getUserAuthorityRepository().add(userAuthority);
 		}
 	}
 
-	private void updateSuperuserAuthority(MolgenisUser molgenisUser)
+	private void updateSuperuserAuthority(User user)
 	{
 		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
-		UserAuthority suAuthority = userAuthorityRepo.query().eq(MOLGENIS_USER, molgenisUser).and()
+		UserAuthority suAuthority = userAuthorityRepo.query().eq(USER, user).and()
 				.eq(ROLE, AUTHORITY_SU).findOne();
 
-		Boolean isSuperuser = molgenisUser.isSuperuser();
+		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
 		{
 			if (suAuthority == null)
 			{
 				UserAuthority userAuthority = userAuthorityFactory.create();
-				userAuthority.setMolgenisUser(molgenisUser);
+				userAuthority.setUser(user);
 				userAuthority.setRole(AUTHORITY_SU);
 				userAuthorityRepo.add(userAuthority);
 			}
@@ -158,13 +158,13 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public Iterator<MolgenisUser> iterator()
+	public Iterator<User> iterator()
 	{
 		return decoratedRepository.iterator();
 	}
 
 	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<MolgenisUser>> consumer, int batchSize)
+	public void forEachBatched(Fetch fetch, Consumer<List<User>> consumer, int batchSize)
 	{
 		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
@@ -182,61 +182,61 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public Query<MolgenisUser> query()
+	public Query<User> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query<MolgenisUser> q)
+	public long count(Query<User> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<MolgenisUser> findAll(Query<MolgenisUser> q)
+	public Stream<User> findAll(Query<User> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public MolgenisUser findOne(Query<MolgenisUser> q)
+	public User findOne(Query<User> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
 
 	@Override
-	public MolgenisUser findOneById(Object id)
+	public User findOneById(Object id)
 	{
 		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public MolgenisUser findOneById(Object id, Fetch fetch)
+	public User findOneById(Object id, Fetch fetch)
 	{
 		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override
-	public Stream<MolgenisUser> findAll(Stream<Object> ids)
+	public Stream<User> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
-	public Stream<MolgenisUser> findAll(Stream<Object> ids, Fetch fetch)
+	public Stream<User> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
-	public void delete(MolgenisUser entity)
+	public void delete(User entity)
 	{
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
-	public void delete(Stream<MolgenisUser> entities)
+	public void delete(Stream<User> entities)
 	{
 		decoratedRepository.delete(entities);
 	}

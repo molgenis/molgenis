@@ -63,8 +63,8 @@ public class AttributeFilterToFetchConverter
 		});
 	}
 
-	private static void createFetchContentRec(AttributeFilter attrFilter, EntityType entityType,
-			AttributeMetaData attr, Fetch fetch, String languageCode)
+	private static void createFetchContentRec(AttributeFilter attrFilter, EntityType entityType, AttributeMetaData attr,
+			Fetch fetch, String languageCode)
 	{
 		AttributeType attrType = attr.getDataType();
 		switch (attrType)
@@ -153,14 +153,21 @@ public class AttributeFilterToFetchConverter
 	{
 		boolean hasRefAttr = false;
 		Fetch fetch = new Fetch();
-		for (AttributeMetaData attr : entityType.getAtomicAttributes())
+		try
 		{
-			Fetch subFetch = createDefaultAttributeFetch(attr, languageCode);
-			if (subFetch != null)
+			for (AttributeMetaData attr : entityType.getAtomicAttributes())
 			{
-				hasRefAttr = true;
+				Fetch subFetch = createDefaultAttributeFetch(attr, languageCode);
+				if (subFetch != null)
+				{
+					hasRefAttr = true;
+				}
+				fetch.field(attr.getName(), subFetch);
 			}
-			fetch.field(attr.getName(), subFetch);
+		}
+		catch (Exception e)
+		{
+			System.out.print("DEBUG");
 		}
 		return hasRefAttr ? fetch : null;
 	}

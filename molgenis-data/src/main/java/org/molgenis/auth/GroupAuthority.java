@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.auth.GroupAuthorityMetaData.ID;
-import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP;
 
 public class GroupAuthority extends Authority
 {
@@ -34,13 +34,13 @@ public class GroupAuthority extends Authority
 		set(ID, id);
 	}
 
-	public MolgenisGroup getMolgenisGroup()
+	public Group getGroup()
 	{
-		return getEntity(MOLGENIS_GROUP, MolgenisGroup.class);
+		return getEntity(GROUP, Group.class);
 	}
 
-	public void setMolgenisGroup(MolgenisGroup molgenisGroup)
+	public void setGroup(Group group)
 	{
-		set(MOLGENIS_GROUP, molgenisGroup);
+		set(GROUP, group);
 	}
 }

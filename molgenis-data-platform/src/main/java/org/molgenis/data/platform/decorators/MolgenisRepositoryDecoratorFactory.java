@@ -1,7 +1,7 @@
 package org.molgenis.data.platform.decorators;
 
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserDecorator;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l1.L1Cache;
@@ -42,7 +42,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
@@ -165,10 +165,10 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	 */
 	private Repository<Entity> applyCustomRepositoryDecorators(Repository<Entity> repo)
 	{
-		if (repo.getName().equals(MOLGENIS_USER))
+		if (repo.getName().equals(USER))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new MolgenisUserDecorator(
-					(Repository<MolgenisUser>) (Repository<? extends Entity>) repo, userAuthorityFactory, dataService,
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new UserDecorator(
+					(Repository<User>) (Repository<? extends Entity>) repo, userAuthorityFactory, dataService,
 					passwordEncoder);
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))

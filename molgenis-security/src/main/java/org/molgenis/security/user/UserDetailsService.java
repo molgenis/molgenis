@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collection;
@@ -23,17 +21,17 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
-public class MolgenisUserDetailsService implements UserDetailsService
+public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {
 	private final DataService dataService;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public MolgenisUserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
+	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
@@ -47,14 +45,14 @@ public class MolgenisUserDetailsService implements UserDetailsService
 	{
 		try
 		{
-			MolgenisUser user = dataService
-					.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, username),
-							MolgenisUser.class);
+			User user = dataService
+					.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
+							User.class);
 
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
 			Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
-			return new User(user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
+			return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
 		}
 		catch (Throwable e)
 		{
@@ -62,7 +60,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 		}
 	}
 
-	public Collection<? extends GrantedAuthority> getAuthorities(MolgenisUser user)
+	public Collection<? extends GrantedAuthority> getAuthorities(User user)
 	{
 		// user authorities
 		List<? extends Authority> authorities = getUserAuthorities(user);
@@ -99,33 +97,33 @@ public class MolgenisUserDetailsService implements UserDetailsService
 		return grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities);
 	}
 
-	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser)
+	private List<UserAuthority> getUserAuthorities(User user)
 	{
 		return dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser),
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
 				UserAuthority.class).collect(toList());
 	}
 
-	private List<GroupAuthority> getGroupAuthorities(MolgenisUser molgenisUser)
+	private List<GroupAuthority> getGroupAuthorities(User user)
 	{
-		List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
-				MolgenisGroupMember.class).collect(toList());
+		List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<MolgenisGroup> molgenisGroups = Lists
-					.transform(groupMembers, new Function<MolgenisGroupMember, MolgenisGroup>()
+			List<Group> groups = Lists
+					.transform(groupMembers, new Function<GroupMember, Group>()
 					{
 						@Override
-						public MolgenisGroup apply(MolgenisGroupMember molgenisGroupMember)
+						public Group apply(GroupMember groupMember)
 						{
-							return molgenisGroupMember.getMolgenisGroup();
+							return groupMember.getGroup();
 						}
 					});
 
 			return dataService.findAll(GROUP_AUTHORITY,
-					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroups),
+					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
 					GroupAuthority.class).collect(toList());
 		}
 		return null;

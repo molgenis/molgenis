@@ -5,8 +5,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -21,8 +21,8 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
@@ -84,7 +84,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private MappingService mappingService;
 
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
+	private UserFactory userFactory;
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -103,9 +103,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private MetaDataService metaDataService;
 
-	private MolgenisUser user;
+	private User user;
 	private EntityType hopMetaData;
 	private EntityType geneMetaData;
+
 	private Package package_;
 	private final UuidGenerator uuidGenerator = new UuidGenerator();
 
@@ -126,7 +127,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		reset(geneRepo);
 		reset(exonRepo);
 
-		user = molgenisUserFactory.create();
+		user = userFactory.create();
 		user.setUsername(USERNAME);
 
 		package_ = packageFactory.create("package");
@@ -509,8 +510,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingService.applyMappings(mappingTarget, targetRepositoryName, false);
 	}
 
-	private void createEntities(EntityType targetMeta, List<Entity> sourceGeneEntities,
-			List<Entity> expectedEntities)
+	private void createEntities(EntityType targetMeta, List<Entity> sourceGeneEntities, List<Entity> expectedEntities)
 	{
 		for (int i = 0; i < 4; ++i)
 		{

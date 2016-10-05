@@ -1,8 +1,8 @@
 package org.molgenis.security.permission;
 
 import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.framework.ui.MolgenisPlugin;
 
@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface PermissionManagerService
 {
-	List<MolgenisUser> getUsers();
+	List<User> getUsers();
 
-	List<MolgenisGroup> getGroups();
+	List<Group> getGroups();
 
 	List<MolgenisPlugin> getPlugins();
 

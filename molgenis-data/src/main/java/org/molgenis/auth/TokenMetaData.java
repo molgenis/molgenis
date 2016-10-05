@@ -12,27 +12,27 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MolgenisTokenMetaData extends SystemEntityType
+public class TokenMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "MolgenisToken";
-	public static final String MOLGENIS_TOKEN = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "Token";
+	public static final String TOKEN = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String TOKEN = "token";
+	public static final String TOKEN_ATTR = "token";
 	public static final String ID = "id";
-	public static final String MOLGENIS_USER = "molgenisUser";
+	public static final String USER = "User";
 	public static final String EXPIRATIONDATE = "expirationDate";
 	public static final String CREATIONDATE = "creationDate";
 	public static final String DESCRIPTION = "description";
 
 	private final SecurityPackage securityPackage;
-	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final UserMetaData userMetaData;
 
 	@Autowired
-	MolgenisTokenMetaData(SecurityPackage securityPackage, MolgenisUserMetaData molgenisUserMetaData)
+	TokenMetaData(SecurityPackage securityPackage, UserMetaData userMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.userMetaData = requireNonNull(userMetaData);
 	}
 
 	@Override
@@ -42,9 +42,9 @@ public class MolgenisTokenMetaData extends SystemEntityType
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData).setAggregatable(true)
+		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
-		addAttribute(TOKEN, ROLE_LABEL).setLabel("Token").setUnique(true).setDescription("").setNillable(false);
+		addAttribute(TOKEN_ATTR, ROLE_LABEL).setLabel("Token").setUnique(true).setDescription("").setNillable(false);
 		addAttribute(EXPIRATIONDATE).setDataType(DATE_TIME).setLabel("Expiration date").setNillable(true)
 				.setDescription("When expiration date is null it will never expire");
 		addAttribute(CREATIONDATE).setDataType(DATE_TIME).setLabel("Creation date").setAuto(true).setReadOnly(true)

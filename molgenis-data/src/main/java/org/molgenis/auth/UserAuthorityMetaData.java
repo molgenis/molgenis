@@ -19,20 +19,20 @@ public class UserAuthorityMetaData extends SystemEntityType
 	private static final String SIMPLE_NAME = "UserAuthority";
 	public static final String USER_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String MOLGENIS_USER = "molgenisUser";
+	public static final String USER = "User";
 	public static final String ID = "id";
 
 	private final SecurityPackage securityPackage;
-	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final UserMetaData userMetaData;
 	private final AuthorityMetaData authorityMetaData;
 
 	@Autowired
-	UserAuthorityMetaData(SecurityPackage securityPackage, MolgenisUserMetaData molgenisUserMetaData,
+	UserAuthorityMetaData(SecurityPackage securityPackage, UserMetaData userMetaData,
 			AuthorityMetaData authorityMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.userMetaData = requireNonNull(userMetaData);
 		this.authorityMetaData = requireNonNull(authorityMetaData);
 	}
 
@@ -44,7 +44,7 @@ public class UserAuthorityMetaData extends SystemEntityType
 
 		setExtends(authorityMetaData);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData).setAggregatable(true)
+		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
 	}
 

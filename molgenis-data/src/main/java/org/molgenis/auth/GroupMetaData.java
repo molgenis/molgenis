@@ -14,10 +14,10 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MolgenisGroupMetaData extends SystemEntityType
+public class GroupMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "MolgenisGroup";
-	public static final String MOLGENIS_GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "Group";
+	public static final String GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
 	public static final String ID = "id";
@@ -27,7 +27,7 @@ public class MolgenisGroupMetaData extends SystemEntityType
 	private final AuthorityMetaData authorityMetaData;
 
 	@Autowired
-	MolgenisGroupMetaData(SecurityPackage securityPackage, AuthorityMetaData authorityMetaData)
+	GroupMetaData(SecurityPackage securityPackage, AuthorityMetaData authorityMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);

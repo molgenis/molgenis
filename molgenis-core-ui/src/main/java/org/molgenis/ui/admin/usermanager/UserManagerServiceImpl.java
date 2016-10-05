@@ -19,9 +19,9 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.UserMetaData.USER;
 
 /**
  * Manage user in groups
@@ -30,21 +30,21 @@ import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 public class UserManagerServiceImpl implements UserManagerService
 {
 	private final DataService dataService;
-	private final MolgenisGroupMemberFactory molgenisGroupMemberFactory;
+	private final GroupMemberFactory groupMemberFactory;
 
 	@Autowired
-	public UserManagerServiceImpl(DataService dataService, MolgenisGroupMemberFactory molgenisGroupMemberFactory)
+	public UserManagerServiceImpl(DataService dataService, GroupMemberFactory groupMemberFactory)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.molgenisGroupMemberFactory = requireNonNull(molgenisGroupMemberFactory);
+		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisUserViewData> getAllMolgenisUsers()
+	public List<UserViewData> getAllUsers()
 	{
-		Stream<MolgenisUser> users = dataService.findAll(MOLGENIS_USER, MolgenisUser.class);
+		Stream<User> users = dataService.findAll(USER, User.class);
 		return this.parseToMolgenisUserViewData(users);
 	}
 
@@ -53,9 +53,9 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void setActivationUser(String userId, Boolean active)
 	{
-		MolgenisUser mu = this.dataService.findOneById(MOLGENIS_USER, userId, MolgenisUser.class);
+		User mu = this.dataService.findOneById(USER, userId, User.class);
 		mu.setActive(active);
-		this.dataService.update(MOLGENIS_USER, mu);
+		this.dataService.update(USER, mu);
 	}
 
 	@Override
@@ -63,23 +63,23 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void setActivationGroup(String groupId, Boolean active)
 	{
-		MolgenisGroup mg = this.dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
+		Group mg = this.dataService.findOneById(GROUP, groupId, Group.class);
 		mg.setActive(active);
-		this.dataService.update(MOLGENIS_GROUP, mg);
+		this.dataService.update(GROUP, mg);
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisGroup> getAllMolgenisGroups()
+	public List<Group> getAllGroups()
 	{
-		return dataService.findAll(MOLGENIS_GROUP, MolgenisGroup.class).collect(toList());
+		return dataService.findAll(GROUP, Group.class).collect(toList());
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisGroup> getGroupsWhereUserIsMember(String userId)
+	public List<Group> getGroupsWhereUserIsMember(String userId)
 	{
 		return this.getMolgenisGroups(userId);
 	}
@@ -87,39 +87,39 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisUserViewData> getUsersMemberInGroup(String groupId)
+	public List<UserViewData> getUsersMemberInGroup(String groupId)
 	{
 		return this.parseToMolgenisUserViewData(this.getMolgenisUsers(groupId).stream());
 	}
 
-	private List<MolgenisGroup> getMolgenisGroups(String userId)
+	private List<Group> getMolgenisGroups(String userId)
 	{
-		final MolgenisUser molgenisUser = dataService.findOneById(MOLGENIS_USER, userId, MolgenisUser.class);
+		final User user = dataService.findOneById(USER, userId, User.class);
 
-		if (molgenisUser == null)
+		if (user == null)
 		{
 			throw new RuntimeException("unknown user id [" + userId + "]");
 		}
 
-		final List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
-				MolgenisGroupMember.class).collect(toList());
+		final List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class).collect(toList());
 
 		return this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
 	}
 
-	private List<MolgenisUser> getMolgenisUsers(final String groupId)
+	private List<User> getMolgenisUsers(final String groupId)
 	{
-		final MolgenisGroup molgenisGroup = dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
+		final Group group = dataService.findOneById(GROUP, groupId, Group.class);
 
-		if (molgenisGroup == null)
+		if (group == null)
 		{
 			throw new RuntimeException("unknown user id [" + groupId + "]");
 		}
 
-		final List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, molgenisGroup),
-				MolgenisGroupMember.class).collect(toList());
+		final List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group),
+				GroupMember.class).collect(toList());
 
 		return this.getAllMolgenisUsersFromGroupMembers(groupMembers);
 	}
@@ -127,25 +127,25 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<MolgenisGroup> getGroupsWhereUserIsNotMember(final String userId)
+	public List<Group> getGroupsWhereUserIsNotMember(final String userId)
 	{
-		final MolgenisUser molgenisUser = dataService.findOneById(MOLGENIS_USER, userId, MolgenisUser.class);
+		final User user = dataService.findOneById(USER, userId, User.class);
 
-		if (molgenisUser == null)
+		if (user == null)
 		{
 			throw new RuntimeException("unknown user id [" + userId + "]");
 		}
 
-		final List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
-				MolgenisGroupMember.class).collect(toList());
+		final List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class).collect(toList());
 
-		final List<MolgenisGroup> groupsWhereUserIsMember = this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
+		final List<Group> groupsWhereUserIsMember = this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
 
-		Predicate<MolgenisGroup> predicate = new PredicateNotInMolgenisGroupList(groupsWhereUserIsMember);
-		List<MolgenisGroup> molgenisGroups = this.getAllMolgenisGroups();
+		Predicate<Group> predicate = new PredicateNotInMolgenisGroupList(groupsWhereUserIsMember);
+		List<Group> groups = this.getAllGroups();
 
-		return Lists.<MolgenisGroup>newArrayList(Iterables.filter(molgenisGroups, predicate));
+		return Lists.<Group>newArrayList(Iterables.filter(groups, predicate));
 	}
 
 	@Override
@@ -153,13 +153,13 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void addUserToGroup(String molgenisGroupId, String molgenisUserId)
 	{
-		MolgenisGroup group = dataService.findOneById(MOLGENIS_GROUP, molgenisGroupId, MolgenisGroup.class);
-		MolgenisUser user = dataService.findOneById(MOLGENIS_USER, molgenisUserId, MolgenisUser.class);
+		Group group = dataService.findOneById(GROUP, molgenisGroupId, Group.class);
+		User user = dataService.findOneById(USER, molgenisUserId, User.class);
 
-		MolgenisGroupMember molgenisGroupMember = molgenisGroupMemberFactory.create();
-		molgenisGroupMember.setMolgenisGroup(group);
-		molgenisGroupMember.setMolgenisUser(user);
-		dataService.add(MOLGENIS_GROUP_MEMBER, molgenisGroupMember);
+		GroupMember groupMember = groupMemberFactory.create();
+		groupMember.setGroup(group);
+		groupMember.setUser(user);
+		dataService.add(GROUP_MEMBER, groupMember);
 	}
 
 	@Override
@@ -167,40 +167,40 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void removeUserFromGroup(String molgenisGroupId, String molgenisUserId)
 	{
-		final MolgenisUser molgenisUser = dataService.findOneById(MOLGENIS_USER, molgenisUserId, MolgenisUser.class);
+		final User user = dataService.findOneById(USER, molgenisUserId, User.class);
 
-		if (molgenisUser == null)
+		if (user == null)
 		{
 			throw new RuntimeException("unknown user id [" + molgenisUserId + "]");
 		}
 
-		final MolgenisGroup molgenisGroup = dataService
-				.findOneById(MOLGENIS_GROUP, molgenisGroupId, MolgenisGroup.class);
+		final Group group = dataService
+				.findOneById(GROUP, molgenisGroupId, Group.class);
 
-		if (molgenisGroup == null)
+		if (group == null)
 		{
 			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
 		}
 
-		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>()
-				.eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser).and()
-				.eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, molgenisGroup);
+		Query<GroupMember> q = new QueryImpl<GroupMember>()
+				.eq(GroupMemberMetaData.USER, user).and()
+				.eq(GroupMemberMetaData.GROUP, group);
 
-		final List<MolgenisGroupMember> molgenisGroupMembers = dataService
-				.findAll(MOLGENIS_GROUP_MEMBER, q, MolgenisGroupMember.class).collect(toList());
+		final List<GroupMember> groupMembers = dataService
+				.findAll(GROUP_MEMBER, q, GroupMember.class).collect(toList());
 
-		if (null == molgenisGroupMembers || molgenisGroupMembers.isEmpty())
+		if (null == groupMembers || groupMembers.isEmpty())
 		{
 			throw new RuntimeException("molgenis group member is not found");
 		}
 
-		if (molgenisGroupMembers.size() > 1)
+		if (groupMembers.size() > 1)
 		{
 			throw new RuntimeException("there are more than one group member found");
 		}
 
-		MolgenisGroupMember molgenisGroupMember = molgenisGroupMembers.get(0);
-		dataService.delete(MOLGENIS_GROUP_MEMBER, molgenisGroupMember);
+		GroupMember groupMember = groupMembers.get(0);
+		dataService.delete(GROUP_MEMBER, groupMember);
 	}
 
 	/**
@@ -209,23 +209,23 @@ public class UserManagerServiceImpl implements UserManagerService
 	 * @param groupMembers A list of MolgenisGroupMember instances
 	 * @return List<MolgenisGroup>
 	 */
-	private List<MolgenisGroup> getAllMolgenisGroupsFromGroupMembers(final List<MolgenisGroupMember> groupMembers)
+	private List<Group> getAllMolgenisGroupsFromGroupMembers(final List<GroupMember> groupMembers)
 	{
-		List<MolgenisGroup> molgenisGroups = new ArrayList<MolgenisGroup>();
+		List<Group> groups = new ArrayList<Group>();
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			molgenisGroups = Lists.transform(groupMembers, new Function<MolgenisGroupMember, MolgenisGroup>()
+			groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
 			{
 				@Override
-				public MolgenisGroup apply(MolgenisGroupMember molgenisGroupMember)
+				public Group apply(GroupMember groupMember)
 				{
-					return molgenisGroupMember.getMolgenisGroup();
+					return groupMember.getGroup();
 				}
 			});
 		}
 
-		return molgenisGroups;
+		return groups;
 	}
 
 	/**
@@ -234,39 +234,39 @@ public class UserManagerServiceImpl implements UserManagerService
 	 * @param groupMembers A list of MolgenisGroupMember instances
 	 * @return List<MolgenisUser>
 	 */
-	private List<MolgenisUser> getAllMolgenisUsersFromGroupMembers(final List<MolgenisGroupMember> groupMembers)
+	private List<User> getAllMolgenisUsersFromGroupMembers(final List<GroupMember> groupMembers)
 	{
-		List<MolgenisUser> molgenisUser = new ArrayList<MolgenisUser>();
+		List<User> user = new ArrayList<User>();
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			molgenisUser = Lists.transform(groupMembers, new Function<MolgenisGroupMember, MolgenisUser>()
+			user = Lists.transform(groupMembers, new Function<GroupMember, User>()
 			{
 				@Override
-				public MolgenisUser apply(MolgenisGroupMember molgenisGroupMember)
+				public User apply(GroupMember groupMember)
 				{
-					return molgenisGroupMember.getMolgenisUser();
+					return groupMember.getUser();
 				}
 			});
 		}
 
-		return molgenisUser;
+		return user;
 	}
 
-	private static class PredicateNotInMolgenisGroupList implements Predicate<MolgenisGroup>
+	private static class PredicateNotInMolgenisGroupList implements Predicate<Group>
 	{
-		final List<MolgenisGroup> toFilterItemList;
+		final List<Group> toFilterItemList;
 
-		PredicateNotInMolgenisGroupList(List<MolgenisGroup> notInList)
+		PredicateNotInMolgenisGroupList(List<Group> notInList)
 		{
 			this.toFilterItemList = notInList;
 		}
 
 		@Override
-		public boolean apply(MolgenisGroup item)
+		public boolean apply(Group item)
 		{
 			Object id = item.getId();
-			for (MolgenisGroup toFilterItem : toFilterItemList)
+			for (Group toFilterItem : toFilterItemList)
 			{
 				if (toFilterItem.getId().equals(id)) return false;
 			}
@@ -275,8 +275,8 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	}
 
-	private List<MolgenisUserViewData> parseToMolgenisUserViewData(Stream<MolgenisUser> users)
+	private List<UserViewData> parseToMolgenisUserViewData(Stream<User> users)
 	{
-		return users.map(user -> new MolgenisUserViewData(user, getMolgenisGroups(user.getId()))).collect(toList());
+		return users.map(user -> new UserViewData(user, getMolgenisGroups(user.getId()))).collect(toList());
 	}
 }

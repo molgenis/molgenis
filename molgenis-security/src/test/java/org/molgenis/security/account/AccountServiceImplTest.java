@@ -3,15 +3,15 @@ package org.molgenis.security.account;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupMember;
-import org.molgenis.auth.MolgenisGroupMemberFactory;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.GroupMember;
+import org.molgenis.auth.GroupMemberFactory;
+import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.MolgenisUserException;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,9 +28,9 @@ import java.net.URISyntaxException;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
-import static org.molgenis.auth.MolgenisUserMetaData.*;
+import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.GroupMetaData.NAME;
+import static org.molgenis.auth.UserMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.testng.Assert.assertNotNull;
 
@@ -55,11 +55,11 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		reset(dataService);
 		when(appSettings.getSignUpModeration()).thenReturn(false);
 
-		MolgenisGroup allUsersGroup = mock(MolgenisGroup.class);
-		Query<MolgenisGroup> q = mock(Query.class);
+		Group allUsersGroup = mock(Group.class);
+		Query<Group> q = mock(Query.class);
 		when(q.eq(NAME, ALL_USER_GROUP)).thenReturn(q);
 		when(q.findOne()).thenReturn(allUsersGroup);
-		when(dataService.query(MOLGENIS_GROUP, MolgenisGroup.class)).thenReturn(q);
+		when(dataService.query(GROUP, Group.class)).thenReturn(q);
 		reset(javaMailSender);
 		MimeMessage mimeMessage = mock(MimeMessage.class);
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
@@ -68,18 +68,18 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser()
 	{
-		MolgenisUser user = mock(MolgenisUser.class);
-		Query<MolgenisUser> q = mock(Query.class);
+		User user = mock(User.class);
+		Query<User> q = mock(Query.class);
 		when(q.eq(ACTIVE, false)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(ACTIVATIONCODE, "123")).thenReturn(q);
 		when(q.findOne()).thenReturn(user);
-		when(dataService.query(MOLGENIS_USER, MolgenisUser.class)).thenReturn(q);
+		when(dataService.query(USER, User.class)).thenReturn(q);
 
 		accountService.activateUser("123");
 
-		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(dataService).update(eq(MOLGENIS_USER), argument.capture());
+		ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+		verify(dataService).update(eq(USER), argument.capture());
 		verify(user).setActive(true);
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
@@ -88,12 +88,12 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_invalidActivationCode()
 	{
-		Query<MolgenisUser> q = mock(Query.class);
+		Query<User> q = mock(Query.class);
 		when(q.eq(ACTIVE, false)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(ACTIVATIONCODE, "invalid")).thenReturn(q);
 		when(q.findOne()).thenReturn(null);
-		when(dataService.query(MOLGENIS_USER, MolgenisUser.class)).thenReturn(q);
+		when(dataService.query(USER, User.class)).thenReturn(q);
 
 		accountService.activateUser("invalid");
 	}
@@ -101,12 +101,12 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_alreadyActivated()
 	{
-		Query<MolgenisUser> q = mock(Query.class);
+		Query<User> q = mock(Query.class);
 		when(q.eq(ACTIVE, false)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(ACTIVATIONCODE, "456")).thenReturn(q);
 		when(q.findOne()).thenReturn(null);
-		when(dataService.query(MOLGENIS_USER, MolgenisUser.class)).thenReturn(q);
+		when(dataService.query(USER, User.class)).thenReturn(q);
 
 		accountService.activateUser("456");
 	}
@@ -114,11 +114,11 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void createUser() throws URISyntaxException, UsernameAlreadyExistsException, EmailAlreadyExistsException
 	{
-		MolgenisUser molgenisUser = mock(MolgenisUser.class);
-		when(molgenisUser.getEmail()).thenReturn("user@molgenis.org");
-		accountService.createUser(molgenisUser, "http://molgenis.org/activate");
-		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(dataService).add(eq(MOLGENIS_USER), argument.capture());
+		User user = mock(User.class);
+		when(user.getEmail()).thenReturn("user@molgenis.org");
+		accountService.createUser(user, "http://molgenis.org/activate");
+		ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+		verify(dataService).add(eq(USER), argument.capture());
 		verify(argument.getValue()).setActive(false);
 		// TODO improve test
 	}
@@ -127,17 +127,17 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resetPassword()
 	{
-		MolgenisUser molgenisUser = mock(MolgenisUser.class);
-		when(molgenisUser.getPassword()).thenReturn("password");
+		User user = mock(User.class);
+		when(user.getPassword()).thenReturn("password");
 
-		Query<MolgenisUser> q = mock(Query.class);
+		Query<User> q = mock(Query.class);
 		when(q.eq(EMAIL, "user@molgenis.org")).thenReturn(q);
-		when(q.findOne()).thenReturn(molgenisUser);
-		when(dataService.query(MOLGENIS_USER, MolgenisUser.class)).thenReturn(q);
+		when(q.findOne()).thenReturn(user);
+		when(dataService.query(USER, User.class)).thenReturn(q);
 
 		accountService.resetPassword("user@molgenis.org");
-		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(dataService).update(eq(MOLGENIS_USER), argument.capture());
+		ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+		verify(dataService).update(eq(USER), argument.capture());
 		assertNotNull(argument.getValue().getPassword());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 	}
@@ -145,13 +145,13 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void resetPassword_invalidEmailAddress()
 	{
-		MolgenisUser molgenisUser = mock(MolgenisUser.class);
-		when(molgenisUser.getPassword()).thenReturn("password");
+		User user = mock(User.class);
+		when(user.getPassword()).thenReturn("password");
 
-		Query<MolgenisUser> q = mock(Query.class);
+		Query<User> q = mock(Query.class);
 		when(q.eq(EMAIL, "invalid-user@molgenis.org")).thenReturn(q);
 		when(q.findOne()).thenReturn(null);
-		when(dataService.query(MOLGENIS_USER, MolgenisUser.class)).thenReturn(q);
+		when(dataService.query(USER, User.class)).thenReturn(q);
 
 		accountService.resetPassword("invalid-user@molgenis.org");
 	}
@@ -159,19 +159,19 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void changePassword()
 	{
-		MolgenisUser user = mock(MolgenisUser.class);
+		User user = mock(User.class);
 		when(user.getUsername()).thenReturn("test");
 		when(user.getPassword()).thenReturn("oldpass");
 
-		Query<MolgenisUser> q = mock(Query.class);
+		Query<User> q = mock(Query.class);
 		when(q.eq(USERNAME, "test")).thenReturn(q);
 		when(q.findOne()).thenReturn(user);
-		when(dataService.query(MOLGENIS_USER, MolgenisUser.class)).thenReturn(q);
+		when(dataService.query(USER, User.class)).thenReturn(q);
 
 		accountService.changePassword("test", "newpass");
 
-		ArgumentCaptor<MolgenisUser> captor = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(dataService).update(eq(MOLGENIS_USER), captor.capture());
+		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+		verify(dataService).update(eq(USER), captor.capture());
 		verify(captor.getValue()).setPassword("newpass");
 	}
 
@@ -204,24 +204,24 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisUserService molgenisUserService()
+		public UserService molgenisUserService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 
 		@Bean
-		public MolgenisGroupMemberFactory molgenisGroupMemberFactory()
+		public GroupMemberFactory molgenisGroupMemberFactory()
 		{
-			MolgenisGroupMemberFactory molgenisGroupMemberFactory = mock(MolgenisGroupMemberFactory.class);
-			when(molgenisGroupMemberFactory.create()).thenAnswer(new Answer<MolgenisGroupMember>()
+			GroupMemberFactory groupMemberFactory = mock(GroupMemberFactory.class);
+			when(groupMemberFactory.create()).thenAnswer(new Answer<GroupMember>()
 			{
 				@Override
-				public MolgenisGroupMember answer(InvocationOnMock invocationOnMock) throws Throwable
+				public GroupMember answer(InvocationOnMock invocationOnMock) throws Throwable
 				{
-					return mock(MolgenisGroupMember.class);
+					return mock(GroupMember.class);
 				}
 			});
-			return molgenisGroupMemberFactory;
+			return groupMemberFactory;
 		}
 	}
 }

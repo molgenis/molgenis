@@ -11,7 +11,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 @Component
 public class LanguageMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "languages";
+	private static final String SIMPLE_NAME = "language";
 	public static final String LANGUAGE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String CODE = "code";
