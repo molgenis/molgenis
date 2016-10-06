@@ -48,13 +48,8 @@
 </div>
 <div class="row">
     <div class="col-md-12 col-lg-12">
-<<<<<<< HEAD
         <center><h4>Mapping to <i>${entityMapping.targetEntityType.name}
-            .${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityType.name}</i>
-=======
-        <center><h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}
-            .${attributeMapping.targetAttribute.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i>
->>>>>>> 080e6d36d2fbf11f433e559ebb12c4cdcd01bea2
+            .${attributeMapping.targetAttribute.name}</i> from <i>${entityMapping.sourceEntityType.name}</i>
         </h4></center>
     </div>
 </div>
