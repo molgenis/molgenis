@@ -20,8 +20,8 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -74,7 +74,7 @@ public class CGDAnnotator implements AnnotatorConfig
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -142,7 +142,7 @@ public class CGDAnnotator implements AnnotatorConfig
 	{
 		AnnotatorInfo info = getAnnotatorInfo();
 		QueryCreator queryCreator = new AttributeEqualsQueryCreator(
-				attributeMetaDataFactory.create().setName(GENE.getAttributeName()));
+				attributeFactory.create().setName(GENE.getAttributeName()));
 		ResultFilter resultFilter = new FirstResultFilter();
 
 		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
@@ -158,15 +158,8 @@ public class CGDAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new RepositoryFactory()
-				{
-					@Override
-					public Repository<Entity> createRepository(File file) throws IOException
-					{
-						return new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(),
-								entityTypeFactory, attributeMetaDataFactory, SEPARATOR);
-					}
-				};
+				return file -> new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(),
+						entityTypeFactory, attributeFactory, SEPARATOR);
 			}
 		};
 
@@ -178,30 +171,30 @@ public class CGDAnnotator implements AnnotatorConfig
 				getOutputAttributes());
 	}
 
-	private List<AttributeMetaData> getOutputAttributes()
+	private List<Attribute> getOutputAttributes()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
+		List<Attribute> attributes = new ArrayList<>();
 
-		attributes.add(attributeMetaDataFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
-		attributes.add(attributeMetaDataFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
-		attributes.add(attributeMetaDataFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
+		attributes.add(attributeFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
+		attributes.add(attributeFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
+		attributes.add(attributeFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
 				.setLabel(CONDITION_LABEL));
-		attributes.add(attributeMetaDataFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
+		attributes.add(attributeFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
 				.setLabel(INHERITANCE_LABEL));
-		attributes.add(attributeMetaDataFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName())
+		attributes.add(attributeFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName())
 				.setDataType(TEXT).setLabel(GENERALIZED_INHERITANCE_LABEL));
-		attributes.add(attributeMetaDataFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
+		attributes.add(attributeFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
 				.setLabel(AGE_GROUP_LABEL));
-		attributes.add(attributeMetaDataFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName())
+		attributes.add(attributeFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName())
 				.setDataType(TEXT));
-		attributes.add(attributeMetaDataFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName())
+		attributes.add(attributeFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName())
 				.setDataType(TEXT));
-		attributes.add(attributeMetaDataFactory.create().setName(INTERVENTION_CATEGORIES.getAttributeName())
+		attributes.add(attributeFactory.create().setName(INTERVENTION_CATEGORIES.getAttributeName())
 				.setDataType(TEXT));
-		attributes.add(attributeMetaDataFactory.create().setName(COMMENTS.getAttributeName()).setDataType(TEXT));
-		attributes.add(attributeMetaDataFactory.create().setName(INTERVENTION_RATIONALE.getAttributeName())
+		attributes.add(attributeFactory.create().setName(COMMENTS.getAttributeName()).setDataType(TEXT));
+		attributes.add(attributeFactory.create().setName(INTERVENTION_RATIONALE.getAttributeName())
 				.setDataType(TEXT));
-		attributes.add(attributeMetaDataFactory.create().setName(REFERENCES.getAttributeName()).setDataType(TEXT));
+		attributes.add(attributeFactory.create().setName(REFERENCES.getAttributeName()).setDataType(TEXT));
 
 		return attributes;
 	}
@@ -216,7 +209,7 @@ public class CGDAnnotator implements AnnotatorConfig
 		}
 
 		@Override
-		protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
+		protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 		{
 			if (attr.getName().equals(GENERALIZED_INHERITANCE.getAttributeName()))
 			{

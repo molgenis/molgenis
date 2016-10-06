@@ -8,8 +8,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -68,7 +68,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attrFactory;
+	AttributeFactory attrFactory;
 
 	@BeforeMethod
 	public void setUp()
@@ -86,8 +86,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		entityType.addAttribute(attrFactory.create().setName(boolAttrName).setDataType(BOOL));
 		entityType.addAttribute(
 				attrFactory.create().setName(categoricalAttrName).setDataType(CATEGORICAL).setRefEntity(refEntityType));
-		AttributeMetaData compoundPart0Attr = attrFactory.create().setName(compoundPart0AttrName).setDataType(STRING);
-		AttributeMetaData compoundPart1Attr = attrFactory.create().setName(compoundPart1AttrName).setDataType(STRING);
+		Attribute compoundPart0Attr = attrFactory.create().setName(compoundPart0AttrName).setDataType(STRING);
+		Attribute compoundPart1Attr = attrFactory.create().setName(compoundPart1AttrName).setDataType(STRING);
 		entityType.addAttribute(attrFactory.create().setName(compoundAttrName).setDataType(COMPOUND)
 				.setAttributeParts(asList(compoundPart0Attr, compoundPart1Attr)));
 		entityType.addAttribute(attrFactory.create().setName(dateAttrName).setDataType(DATE));
@@ -178,7 +178,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleGreaterLong()
 	{
-		Long value = 1l;
+		Long value = 1L;
 		Query<Entity> q = new QueryImpl<>().gt(longAttrName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -257,7 +257,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleGreaterEqualLong()
 	{
-		Long value = 1l;
+		Long value = 1L;
 		Query<Entity> q = new QueryImpl<>().ge(longAttrName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -336,7 +336,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleLesserEqualLong()
 	{
-		Long value = 1l;
+		Long value = 1L;
 		Query<Entity> q = new QueryImpl<>().le(longAttrName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -533,8 +533,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleInLong()
 	{
-		Long value1 = 0l;
-		Long value2 = 1l;
+		Long value1 = 0L;
+		Long value2 = 1L;
 		Iterable<Object> values = Arrays.asList(value1, value2);
 		Query<Entity> q = new QueryImpl<>().in(longAttrName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityType);
@@ -720,7 +720,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleLesserLong()
 	{
-		Long value = 1l;
+		Long value = 1L;
 		Query<Entity> q = new QueryImpl<>().lt(longAttrName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);

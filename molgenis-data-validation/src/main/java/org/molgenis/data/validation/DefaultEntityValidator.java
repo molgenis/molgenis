@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
@@ -64,7 +64,7 @@ public class DefaultEntityValidator implements EntityValidator
 	{
 		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
 
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			if (!attr.isNillable() && !attr.equals(meta.getIdAttribute()) && !attr.isAuto())
 			{
@@ -87,11 +87,10 @@ public class DefaultEntityValidator implements EntityValidator
 		return violations;
 	}
 
-	public boolean mustDoNotNullCheck(EntityType entityType, AttributeMetaData attr, Entity entity)
+	public boolean mustDoNotNullCheck(EntityType entityType, Attribute attr, Entity entity)
 	{
 		// Do not validate if Questionnaire status is not SUBMITTED
-		if (EntityUtils.doesExtend(entityType, "Questionnaire") && entity.get("status") != "SUBMITTED")
-			return false;
+		if (EntityUtils.doesExtend(entityType, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
 
 		// Do not validate is visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression()) && !ValidationUtils
@@ -105,7 +104,7 @@ public class DefaultEntityValidator implements EntityValidator
 	{
 		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
 
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			if (attr.isUnique() && !attr.equals(meta.getIdAttribute()) && !(attr.equals(meta.getLabelAttribute()) && (
 					dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))

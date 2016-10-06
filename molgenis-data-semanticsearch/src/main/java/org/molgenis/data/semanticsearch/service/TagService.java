@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.service;
 
 import com.google.common.collect.Multimap;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -21,8 +21,7 @@ public interface TagService<ObjectType, CodeSystemType>
 	/**
 	 * Retrieves all tags for an attribute, and groups them by relation
 	 */
-	Multimap<Relation, ObjectType> getTagsForAttribute(EntityType entityType,
-			AttributeMetaData attributeMetaData);
+	Multimap<Relation, ObjectType> getTagsForAttribute(EntityType entityType, Attribute attribute);
 
 	/**
 	 * Retrieves all tags for a package
@@ -32,25 +31,23 @@ public interface TagService<ObjectType, CodeSystemType>
 	/**
 	 * Retrieves all tags for an entity.
 	 */
-	Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(
-			EntityType entityType);
+	Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(EntityType entityType);
 
 	/**
 	 * Tags an attribute.
 	 *
 	 * @param entityType the entity the tagged attribute sits on
-	 * @param tag            the tag to add
+	 * @param tag        the tag to add
 	 */
-	void addAttributeTag(EntityType entityType, SemanticTag<AttributeMetaData, ObjectType, CodeSystemType> tag);
+	void addAttributeTag(EntityType entityType, SemanticTag<Attribute, ObjectType, CodeSystemType> tag);
 
 	/**
 	 * Removes attribute tag
 	 *
 	 * @param entityType the entity the tagged attribute sits on
-	 * @param tag            the tag to remove
+	 * @param tag        the tag to remove
 	 */
-	void removeAttributeTag(EntityType entityType,
-			SemanticTag<AttributeMetaData, ObjectType, CodeSystemType> tag);
+	void removeAttributeTag(EntityType entityType, SemanticTag<Attribute, ObjectType, CodeSystemType> tag);
 
 	/**
 	 * Tags an entity.

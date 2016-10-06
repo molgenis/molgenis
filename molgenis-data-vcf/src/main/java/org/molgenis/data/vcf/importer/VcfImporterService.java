@@ -5,7 +5,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -93,14 +93,14 @@ public class VcfImporterService implements ImportService
 
 			// Available Attributes
 			List<String> availableAttributeNames = Lists.newArrayList();
-			for (AttributeMetaData attr : emd.getAtomicAttributes())
+			for (Attribute attr : emd.getAtomicAttributes())
 			{
 				availableAttributeNames.add(attr.getName());
 			}
 			report.getFieldsImportable().put(entityName, availableAttributeNames);
 
 			// Sample entity
-			AttributeMetaData sampleAttribute = emd.getAttribute(VcfAttributes.SAMPLES);
+			Attribute sampleAttribute = emd.getAttribute(VcfAttributes.SAMPLES);
 			if (sampleAttribute != null)
 			{
 				String sampleEntityName = sampleAttribute.getRefEntity().getName();
@@ -108,7 +108,7 @@ public class VcfImporterService implements ImportService
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
 				List<String> availableSampleAttributeNames = Lists.newArrayList();
-				for (AttributeMetaData attr : sampleAttribute.getRefEntity().getAtomicAttributes())
+				for (Attribute attr : sampleAttribute.getRefEntity().getAtomicAttributes())
 				{
 					availableSampleAttributeNames.add(attr.getName());
 				}
@@ -149,7 +149,7 @@ public class VcfImporterService implements ImportService
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
-		AttributeMetaData sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
+		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();

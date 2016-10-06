@@ -1,7 +1,7 @@
 package org.molgenis.test.data;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.context.annotation.Bean;
@@ -21,16 +21,16 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 	{
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
-		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext
-				.getBeansOfType(SystemEntityType.class);
+		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext.getBeansOfType(SystemEntityType.class);
 		new GenericDependencyResolver().resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
 				.stream().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate", "org.molgenis.test.data" })
+	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate",
+			"org.molgenis.test.data" })
 	public static class Config
 	{
 		@Bean

@@ -3,7 +3,7 @@ package org.molgenis.data.postgresql;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
 
 import java.util.Date;
@@ -28,7 +28,7 @@ class PostgreSqlUtils
 	 * @param attr   attribute
 	 * @return PostgreSQL value
 	 */
-	static Object getPostgreSqlValue(Entity entity, AttributeMetaData attr)
+	static Object getPostgreSqlValue(Entity entity, Attribute attr)
 	{
 		String attrName = attr.getName();
 		MolgenisFieldTypes.AttributeType attrType = attr.getDataType();
@@ -87,7 +87,7 @@ class PostgreSqlUtils
 	 * @param attr       attribute
 	 * @return PostgreSQL value
 	 */
-	static Object getPostgreSqlQueryValue(Object queryValue, AttributeMetaData attr)
+	static Object getPostgreSqlQueryValue(Object queryValue, Attribute attr)
 	{
 		while (true)
 		{

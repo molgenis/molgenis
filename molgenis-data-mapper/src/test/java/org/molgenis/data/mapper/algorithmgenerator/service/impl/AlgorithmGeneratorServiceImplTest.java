@@ -10,11 +10,11 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
@@ -51,7 +51,7 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	OntologyService ontologyService;
@@ -76,27 +76,27 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	public void testGenerateTemplateBasedAlgorithm()
 	{
 		EntityType targetEntityType = entityTypeFactory.create("target");
-		AttributeMetaData targetBMIAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetBMIAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetBMIAttribute.setLabel("BMI kg/m²");
 		targetBMIAttribute.setDataType(DECIMAL);
 		targetEntityType.addAttribute(targetBMIAttribute);
 
 		EntityType sourceEntityType = entityTypeFactory.create("source");
-		AttributeMetaData heightSourceAttribute = attrMetaFactory.create().setName("sourceHeight");
+		Attribute heightSourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		heightSourceAttribute.setDataType(DECIMAL);
 		heightSourceAttribute.setLabel("body length in cm");
 
-		AttributeMetaData weightSourceAttribute = attrMetaFactory.create().setName("sourceWeight");
+		Attribute weightSourceAttribute = attrMetaFactory.create().setName("sourceWeight");
 		weightSourceAttribute.setDataType(DECIMAL);
 		weightSourceAttribute.setLabel("weight in kg");
 
 		sourceEntityType.addAttribute(heightSourceAttribute);
 		sourceEntityType.addAttribute(weightSourceAttribute);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
-				ExplainedAttributeMetaData.create(heightSourceAttribute,
-						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
-				weightSourceAttribute, ExplainedAttributeMetaData.create(heightSourceAttribute,
+		Map<Attribute, ExplainedAttribute> sourceAttributes = ImmutableMap.of(heightSourceAttribute, ExplainedAttribute
+						.create(heightSourceAttribute,
+								singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
+				weightSourceAttribute, ExplainedAttribute.create(heightSourceAttribute,
 						Collections.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)),
 						true));
 
@@ -122,13 +122,13 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	public void testConvertUnitsAlgorithm()
 	{
 		EntityType targetEntityType = entityTypeFactory.create("target");
-		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(DECIMAL);
 		targetEntityType.addAttribute(targetAttribute);
 
 		EntityType sourceEntityType = entityTypeFactory.create("source");
-		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
+		Attribute sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDataType(DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityType.addAttribute(sourceAttribute);

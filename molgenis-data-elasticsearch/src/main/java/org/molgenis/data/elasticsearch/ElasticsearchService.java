@@ -19,7 +19,7 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
@@ -113,8 +113,7 @@ public class ElasticsearchService implements SearchService
 		createMappings(entityType, true, true);
 	}
 
-	private void createMappings(String index, EntityType entityType, boolean enableNorms,
-			boolean createAllIndex)
+	private void createMappings(String index, EntityType entityType, boolean enableNorms, boolean createAllIndex)
 	{
 		try (XContentBuilder jsonBuilder = XContentFactory.jsonBuilder())
 		{
@@ -197,14 +196,14 @@ public class ElasticsearchService implements SearchService
 	 * entities.
 	 *
 	 * @param entity                            the entity that should be indexed
-	 * @param entityType                    the {@link EntityType} of the entity
+	 * @param entityType                        the {@link EntityType} of the entity
 	 * @param type                              the sanitized mapping type of the entity
 	 * @param addRequestsForReferencingEntities boolean indicating if {@link IndexRequest}s should be added for all
 	 *                                          referencing entities.
 	 * @return Stream of {@link IndexRequest}s for the entity
 	 */
-	private Stream<IndexRequest> createIndexRequestStreamForEntity(Entity entity, EntityType entityType,
-			String type, boolean addRequestsForReferencingEntities)
+	private Stream<IndexRequest> createIndexRequestStreamForEntity(Entity entity, EntityType entityType, String type,
+			boolean addRequestsForReferencingEntities)
 	{
 		Stream<IndexRequest> result = Stream.of(createIndexRequestForEntity(entity, entityType, type));
 		if (addRequestsForReferencingEntities)
@@ -217,7 +216,7 @@ public class ElasticsearchService implements SearchService
 	/**
 	 * Creates {@link IndexRequest}s for {@link Entity}s that have a reference to a particular entity instance
 	 *
-	 * @param entity         the entity that is referenced by the entities that need to be updated
+	 * @param entity     the entity that is referenced by the entities that need to be updated
 	 * @param entityType {@link EntityType} of the referenced entity
 	 * @return Stream of {@link IndexRequest}s for the entities that reference entity.
 	 */
@@ -225,8 +224,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Stream<IndexRequest> references = Stream.of();
 		// Find entity metadata that is currently, in the database, referring to the entity we're reindexing
-		for (Pair<EntityType, List<AttributeMetaData>> pair : EntityUtils
-				.getReferencingEntityType(entityType, dataService))
+		for (Pair<EntityType, List<Attribute>> pair : EntityUtils.getReferencingEntityType(entityType, dataService))
 		{
 			EntityType refEntityType = pair.getA();
 
@@ -251,18 +249,18 @@ public class ElasticsearchService implements SearchService
 	 * Uses {@link #searchInternalWithScanScroll(Query, EntityType)} to scroll through the existing referring
 	 * entities in a context that remains valid even when the documents are getting updated.
 	 *
-	 * @param referredEntity          the entity that should be referred to in the documents
+	 * @param referredEntity      the entity that should be referred to in the documents
 	 * @param referringEntityType {@link EntityType} of the referring documents
-	 * @param referringAttributes     {@link List} of {@link AttributeMetaData} of attributes that may reference the #referredEntity
+	 * @param referringAttributes {@link List} of {@link Attribute} of attributes that may reference the #referredEntity
 	 * @return Stream of {@link Entity} references representing the documents.
 	 */
 	private Stream<Entity> findReferringDocuments(Entity referredEntity, EntityType referringEntityType,
-			List<AttributeMetaData> referringAttributes)
+			List<Attribute> referringAttributes)
 	{
 		// Find out which documents of this type currently, in ElasticSearch, contain a reference to
 		// the entity we're reindexing
 		QueryImpl<Entity> q = null;
-		for (AttributeMetaData attributeMetaData : referringAttributes)
+		for (Attribute attribute : referringAttributes)
 		{
 			if (q == null)
 			{
@@ -272,7 +270,7 @@ public class ElasticsearchService implements SearchService
 			{
 				q.or();
 			}
-			q.eq(attributeMetaData.getName(), referredEntity);
+			q.eq(attribute.getName(), referredEntity);
 		}
 		LOG.debug("q: [{}], referringEntityType: [{}]", q.toString(), referringEntityType.getName());
 		if (hasMapping(referringEntityType))
@@ -288,9 +286,9 @@ public class ElasticsearchService implements SearchService
 	/**
 	 * Creates an IndexRequest for an entity in index {@link #indexName}.
 	 *
-	 * @param entity         the entity that will be indexed
+	 * @param entity     the entity that will be indexed
 	 * @param entityType {@link EntityType} of the entity
-	 * @param type           sanitized mapper type of the entity, so it need not be recomputed
+	 * @param type       sanitized mapper type of the entity, so it need not be recomputed
 	 */
 	private IndexRequest createIndexRequestForEntity(Entity entity, EntityType entityType, String type)
 	{
@@ -391,9 +389,9 @@ public class ElasticsearchService implements SearchService
 	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityType entityType)
 	{
 		Query<Entity> q = aggregateQuery.getQuery();
-		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
-		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
-		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+		Attribute xAttr = aggregateQuery.getAttributeX();
+		Attribute yAttr = aggregateQuery.getAttributeY();
+		Attribute distinctAttr = aggregateQuery.getAttributeDistinct();
 		SearchRequest searchRequest = new SearchRequest(entityType.getName(), q, xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();

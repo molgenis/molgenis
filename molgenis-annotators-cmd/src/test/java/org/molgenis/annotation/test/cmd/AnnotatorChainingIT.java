@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
@@ -48,15 +48,14 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Test
 	public void chain() throws IOException
 	{
 		File vcf = ResourceUtils.getFile(getClass(), "/gonl/test_gonl_and_1000g.vcf");
-
 		try (VcfRepository repo = new VcfRepository(vcf, "vcf", vcfAttributes, entityTypeFactory,
-				attributeMetaDataFactory))
+				attributeFactory))
 		{
 			try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 					"org.molgenis.data.annotation.core", "org.molgenis.annotation.cmd"))
@@ -73,15 +72,14 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 				RepositoryAnnotator tgAnnotator = annotators.get("thousandGenomes");
 				tgAnnotator.getCmdLineAnnotatorSettingsConfigurer()
 						.addSettings(ResourceUtils.getFile(getClass(), "/1000g").getPath());
-
-				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityType(), attributeMetaDataFactory,
+				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityType(), attributeFactory,
 						gonlAnnotator);
 
 				Iterator<Entity> it = gonlAnnotator.annotate(repo);
 				assertNotNull(it);
 				assertTrue(it.hasNext());
 
-				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityType(), attributeMetaDataFactory,
+				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityType(), attributeFactory,
 						tgAnnotator);
 				it = tgAnnotator.annotate(it);
 				assertNotNull(it);

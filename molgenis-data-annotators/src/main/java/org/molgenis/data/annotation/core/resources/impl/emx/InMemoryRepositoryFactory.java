@@ -7,7 +7,7 @@ import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.DefaultPackage;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 
@@ -22,7 +22,7 @@ import java.util.stream.StreamSupport;
  */
 public class InMemoryRepositoryFactory implements RepositoryFactory
 {
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 	private final EntityTypeFactory entityTypeFactory;
 
 	private final String name;
@@ -31,11 +31,11 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 	private final MetaDataParser parser;
 
 	public InMemoryRepositoryFactory(String name, MetaDataParser parser, EntityTypeFactory entityTypeFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory)
+			AttributeFactory attributeFactory)
 	{
 		this.name = name;
 		this.parser = parser;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 		this.entityTypeFactory = entityTypeFactory;
 	}
 
@@ -45,7 +45,7 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 		try
 		{
 			repositoryCollection = new ExcelRepositoryCollection(file);
-			repositoryCollection.setAttributeMetaDataFactory(attributeMetaDataFactory);
+			repositoryCollection.setAttributeFactory(attributeFactory);
 			repositoryCollection.setEntityTypeFactory(entityTypeFactory);
 		}
 		catch (Exception e)
@@ -54,8 +54,8 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 					"Unable to create ExcelRepositoryCollection for file:" + file.getName() + " exception: " + e);
 		}
 
-		ImmutableMap<String, EntityType> entityMap = parser
-				.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT).getEntityMap();
+		ImmutableMap<String, EntityType> entityMap = parser.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT)
+				.getEntityMap();
 		if (!entityMap.containsKey(name))
 		{
 			throw new RuntimeException("Entity [" + name + "] is not found. Entities found: " + entityMap.keySet());

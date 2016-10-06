@@ -7,7 +7,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 
@@ -18,7 +18,7 @@ import java.util.Set;
 
 import static org.molgenis.MolgenisFieldTypes.getType;
 
-public class AttributeMetaDataResponse
+public class AttributeResponse
 {
 	private final String href;
 	private final AttributeType fieldType;
@@ -38,13 +38,13 @@ public class AttributeMetaDataResponse
 	private final Boolean unique;
 	private final Boolean visible;
 	private Boolean lookupAttribute;
-	private Boolean aggregateable;
+	private Boolean isAggregatable;
 	private Range range;
 	private String expression;
 	private String visibleExpression;
 	private String validationExpression;
 
-	public AttributeMetaDataResponse(String entityParentName, EntityType entityType, AttributeMetaData attr,
+	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		this(entityParentName, entityType, attr, null, null, permissionService, dataService, languageService);
@@ -57,7 +57,7 @@ public class AttributeMetaDataResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponse(final String entityParentName, EntityType entityType, AttributeMetaData attr,
+	public AttributeResponse(final String entityParentName, EntityType entityType, Attribute attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
@@ -129,32 +129,32 @@ public class AttributeMetaDataResponse
 		}
 		else this.refEntity = null;
 
-		AttributeMetaData mappedByAttr = attr.getMappedBy();
+		Attribute mappedByAttr = attr.getMappedBy();
 		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
-			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
+			Iterable<Attribute> attributeParts = attr.getAttributeParts();
 			this.attributes = attributeParts != null ? Lists
-					.newArrayList(Iterables.transform(attributeParts, new Function<AttributeMetaData, Object>()
+					.newArrayList(Iterables.transform(attributeParts, new Function<Attribute, Object>()
 					{
 
 						@Override
-						public Object apply(AttributeMetaData attributeMetaData)
+						public Object apply(Attribute attribute)
 						{
 							if (attributeExpandsSet != null && attributeExpandsSet
 									.containsKey("attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeMetaDataResponse(entityParentName, entityType, attributeMetaData,
-										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
-										permissionService, dataService, languageService);
+								return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,
+										Collections.singletonMap("refEntity".toLowerCase(), null), permissionService,
+										dataService, languageService);
 							}
 							else
 							{
 								return Collections.<String, Object>singletonMap("href",
 										Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName,
-												attributeMetaData.getName()));
+												attribute.getName()));
 							}
 						}
 					})) : null;
@@ -203,11 +203,11 @@ public class AttributeMetaDataResponse
 		}
 		else this.lookupAttribute = null;
 
-		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("isAggregatable".toLowerCase()))
 		{
-			this.aggregateable = attr.isAggregatable();
+			this.isAggregatable = attr.isAggregatable();
 		}
-		else this.aggregateable = null;
+		else this.isAggregatable = null;
 
 		if (attributesSet == null || attributesSet.contains("range".toLowerCase()))
 		{
@@ -319,9 +319,9 @@ public class AttributeMetaDataResponse
 		return lookupAttribute;
 	}
 
-	public Boolean isAggregateable()
+	public Boolean isAggregatable()
 	{
-		return aggregateable;
+		return isAggregatable;
 	}
 
 	public Boolean getNillable()
@@ -344,9 +344,9 @@ public class AttributeMetaDataResponse
 		return unique;
 	}
 
-	public Boolean getAggregateable()
+	public Boolean getAggregatable()
 	{
-		return aggregateable;
+		return isAggregatable;
 	}
 
 	public Range getRange()

@@ -3,7 +3,7 @@ package org.molgenis.data.index;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +45,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	public void addAttribute()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
-		AttributeMetaData attribute = when(mock(AttributeMetaData.class).getName()).thenReturn("attribute").getMock();
+		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.addAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityType, attribute);
 		verify(indexActionRegisterService).register("repo", null);
@@ -55,7 +55,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	public void deleteAttribute()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
-		AttributeMetaData attribute = when(mock(AttributeMetaData.class).getName()).thenReturn("attribute").getMock();
+		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.deleteAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityType, attribute);
 		verify(indexActionRegisterService).register("repo", null);

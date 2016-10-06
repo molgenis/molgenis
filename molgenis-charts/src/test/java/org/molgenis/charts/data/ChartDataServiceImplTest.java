@@ -6,8 +6,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -36,7 +36,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -49,10 +49,10 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	public void getDataMatrix()
 	{
 		String entityName = "entity";
-		List<Entity> entities = new ArrayList<Entity>();
+		List<Entity> entities = new ArrayList<>();
 
-		AttributeMetaData patientAttr = attrMetaFactory.create().setName("patient");
-		AttributeMetaData probeAttr = attrMetaFactory.create().setName("probe").setDataType(DECIMAL);
+		Attribute patientAttr = attrMetaFactory.create().setName("patient");
+		Attribute probeAttr = attrMetaFactory.create().setName("probe").setDataType(DECIMAL);
 		EntityType entityType = entityTypeFactory.create();
 		entityType.addAttributes(newArrayList(patientAttr, probeAttr));
 

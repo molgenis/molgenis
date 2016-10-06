@@ -3,7 +3,7 @@ package org.molgenis.ontology.sorta;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -243,9 +243,9 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void findOntologyTermEntities()
 	{
-		AttributeMetaData nameAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Name").getMock();
+		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("Name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData omimAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("OMIM").getMock();
+		Attribute omimAttr = when(mock(Attribute.class).getName()).thenReturn("OMIM").getMock();
 		when(omimAttr.getDataType()).thenReturn(STRING);
 
 		EntityType entityType = mock(EntityType.class);

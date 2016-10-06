@@ -1,7 +1,7 @@
 package org.molgenis.js;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.mozilla.javascript.EcmaError;
@@ -22,8 +22,7 @@ public class SandboxTest
 	protected static void beforeClass()
 	{
 		ScriptEvaluatorTest.beforeClass();
-		AttributeMetaData firstNameAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("firstName")
-				.getMock();
+		Attribute firstNameAttr = when(mock(Attribute.class).getName()).thenReturn("firstName").getMock();
 		when(firstNameAttr.getDataType()).thenReturn(SCRIPT);
 		personFirstNameEntityType = when(mock(EntityType.class).getName()).thenReturn("person").getMock();
 		when(personFirstNameEntityType.getAttribute("firstName")).thenReturn(firstNameAttr);

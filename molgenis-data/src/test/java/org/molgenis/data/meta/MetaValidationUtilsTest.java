@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.Test;
 
@@ -80,15 +80,14 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("aString").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName())
+		Attribute compoundAttrPart0 = when(mock(Attribute.class).getName())
 				.thenReturn("aCompStringWayTooLongToUseAsAnAttributeName1").getMock();
 		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString2")
-				.getMock();
+		Attribute compoundAttrPart1 = when(mock(Attribute.class).getName()).thenReturn("aCompString2").getMock();
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aComp").getMock();
+		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("aComp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
 		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
 		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
@@ -100,15 +99,13 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("aString").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString1")
-				.getMock();
+		Attribute compoundAttrPart0 = when(mock(Attribute.class).getName()).thenReturn("aCompString1").getMock();
 		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("2aCompString")
-				.getMock();
+		Attribute compoundAttrPart1 = when(mock(Attribute.class).getName()).thenReturn("2aCompString").getMock();
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aComp").getMock();
+		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("aComp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
 		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
 		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
@@ -121,15 +118,13 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("aString").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString1")
-				.getMock();
+		Attribute compoundAttrPart0 = when(mock(Attribute.class).getName()).thenReturn("aCompString1").getMock();
 		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString2")
-				.getMock();
+		Attribute compoundAttrPart1 = when(mock(Attribute.class).getName()).thenReturn("aCompString2").getMock();
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("a.Comp").getMock();
+		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("a.Comp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
 		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
 		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
@@ -142,7 +137,7 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(idAttr.getDefaultValue()).thenReturn("5");
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
@@ -155,7 +150,7 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData uniqueAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("uniqueAttr").getMock();
+		Attribute uniqueAttr = when(mock(Attribute.class).getName()).thenReturn("uniqueAttr").getMock();
 		when(uniqueAttr.isUnique()).thenReturn(true);
 		when(uniqueAttr.getDefaultValue()).thenReturn("5");
 		when(entityType.getAttributes()).thenReturn(singletonList(uniqueAttr));
@@ -167,8 +162,7 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData expressionAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("expressionAttr")
-				.getMock();
+		Attribute expressionAttr = when(mock(Attribute.class).getName()).thenReturn("expressionAttr").getMock();
 		when(expressionAttr.getExpression()).thenReturn("$('id').value()");
 		when(expressionAttr.getDefaultValue()).thenReturn("5");
 		when(entityType.getAttributes()).thenReturn(singletonList(expressionAttr));
@@ -180,8 +174,8 @@ public class MetaValidationUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getSimpleName()).thenReturn("entity");
-		AttributeMetaData attrWithDefaultValue = when(mock(AttributeMetaData.class).getName())
-				.thenReturn("attrWithDefaultValue").getMock();
+		Attribute attrWithDefaultValue = when(mock(Attribute.class).getName()).thenReturn("attrWithDefaultValue")
+				.getMock();
 		when(attrWithDefaultValue.getDataType()).thenReturn(STRING);
 		when(attrWithDefaultValue.getDefaultValue()).thenReturn("5");
 		when(entityType.getAttributes()).thenReturn(singletonList(attrWithDefaultValue));

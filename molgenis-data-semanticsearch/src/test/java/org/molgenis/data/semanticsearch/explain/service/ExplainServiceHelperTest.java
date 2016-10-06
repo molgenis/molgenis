@@ -5,7 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
@@ -47,15 +47,15 @@ public class ExplainServiceHelperTest
 	@Test
 	public void testFindQuery()
 	{
-		QueryRule queryRule_1 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "hypertension");
-		QueryRule queryRule_2 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+		QueryRule queryRule_1 = new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, "hypertension");
+		QueryRule queryRule_2 = new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH,
 				"hypertensive disorder");
-		QueryRule queryRule_3 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
+		QueryRule queryRule_3 = new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH,
 				"high blood pressure");
 
-		QueryRule queryRule_4 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "drug");
-		QueryRule queryRule_5 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "medication");
-		QueryRule queryRule_6 = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "pill");
+		QueryRule queryRule_4 = new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, "drug");
+		QueryRule queryRule_5 = new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, "medication");
+		QueryRule queryRule_6 = new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, "pill");
 
 		QueryRule disMaxQueryRule_1 = new QueryRule(Arrays.asList(queryRule_1, queryRule_2, queryRule_3));
 		disMaxQueryRule_1.setOperator(Operator.DIS_MAX);

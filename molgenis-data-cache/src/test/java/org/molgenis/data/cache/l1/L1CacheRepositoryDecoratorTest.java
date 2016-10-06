@@ -6,8 +6,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -62,7 +62,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Mock
 	private DataService dataService;
@@ -93,16 +93,15 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		authorMetaData = entityTypeFactory.create(authorEntityName);
 		bookMetaData = entityTypeFactory.create(bookEntityName);
 
-		authorMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
-		authorMetaData.addAttribute(attributeMetaDataFactory.create().setName("name"));
-		AttributeMetaData authorAttribute = attributeMetaDataFactory.create().setName("author").setDataType(XREF)
+		authorMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
+		authorMetaData.addAttribute(attributeFactory.create().setName("name"));
+		Attribute authorAttribute = attributeFactory.create().setName("author").setDataType(XREF)
 				.setRefEntity(authorMetaData);
 		authorMetaData.addAttribute(
-				attributeMetaDataFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
+				attributeFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
 						.setRefEntity(bookMetaData));
-
-		bookMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
-		bookMetaData.addAttribute(attributeMetaDataFactory.create().setName("title"));
+		bookMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
+		bookMetaData.addAttribute(attributeFactory.create().setName("title"));
 		bookMetaData.addAttribute(authorAttribute);
 
 		author = new DynamicEntity(authorMetaData);

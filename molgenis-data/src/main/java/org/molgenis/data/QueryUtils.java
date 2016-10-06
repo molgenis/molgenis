@@ -1,14 +1,14 @@
 package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.stream.StreamSupport.*;
+import static java.util.stream.StreamSupport.stream;
 
 public class QueryUtils
 {
@@ -42,8 +42,8 @@ public class QueryUtils
 
 	public static boolean containsComputedAttribute(Query<Entity> query, EntityType entityType)
 	{
-		return (containsComputedAttribute(query.getSort(), entityType) || containsComputedAttribute(
-				query.getRules(), entityType));
+		return (containsComputedAttribute(query.getSort(), entityType) || containsComputedAttribute(query.getRules(),
+				entityType));
 	}
 
 	public static boolean containsComputedAttribute(Sort sort, EntityType entityType)
@@ -61,9 +61,8 @@ public class QueryUtils
 			{
 				return true;
 			}
-
-			AttributeMetaData amd = entityType.getAttribute(rule.getField());
-			if (amd != null && amd.hasExpression())
+			Attribute attribute = entityType.getAttribute(rule.getField());
+			if (attribute != null && attribute.hasExpression())
 			{
 				return true;
 			}

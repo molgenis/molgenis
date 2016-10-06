@@ -3,7 +3,7 @@ package org.molgenis.data.validation;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
@@ -32,14 +32,12 @@ public class EntityAttributesValidatorTest
 	{
 		entityAttributesValidator = new EntityAttributesValidator();
 
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData intRangeMinAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("intrangemin")
-				.getMock();
+		Attribute intRangeMinAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
 		when(intRangeMinAttr.getDataType()).thenReturn(INT);
 		when(intRangeMinAttr.getRange()).thenReturn(new Range(1l, null));
-		AttributeMetaData intRangeMaxAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("intrangemin")
-				.getMock();
+		Attribute intRangeMaxAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
 		when(intRangeMaxAttr.getDataType()).thenReturn(INT);
 		when(intRangeMaxAttr.getRange()).thenReturn(new Range(null, 1l));
 
@@ -105,7 +103,7 @@ public class EntityAttributesValidatorTest
 	@Test(dataProvider = "checkXrefValidProvider")
 	public void checkXrefValid(AttributeType attrType)
 	{
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
+		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType refEntityType = mock(EntityType.class);
@@ -115,9 +113,9 @@ public class EntityAttributesValidatorTest
 
 		String idAttrName = "id";
 		String xrefAttrName = "xref";
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(xrefAttrName).getMock();
+		Attribute xrefAttr = when(mock(Attribute.class).getName()).thenReturn(xrefAttrName).getMock();
 		when(xrefAttr.getDataType()).thenReturn(attrType);
 		when(xrefAttr.getRefEntity()).thenReturn(refEntityType);
 
@@ -140,7 +138,7 @@ public class EntityAttributesValidatorTest
 	@Test(dataProvider = "checkXrefValidProvider")
 	public void checkXrefEntityWrongType(AttributeType attrType)
 	{
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
+		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType refEntityType = mock(EntityType.class);
@@ -148,8 +146,7 @@ public class EntityAttributesValidatorTest
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refIdAttr));
 
-		AttributeMetaData otherRefIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("otherRefId")
-				.getMock();
+		Attribute otherRefIdAttr = when(mock(Attribute.class).getName()).thenReturn("otherRefId").getMock();
 		when(otherRefIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType otherRefEntityType = mock(EntityType.class);
@@ -159,9 +156,9 @@ public class EntityAttributesValidatorTest
 
 		String idAttrName = "id";
 		String xrefAttrName = "xref";
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(xrefAttrName).getMock();
+		Attribute xrefAttr = when(mock(Attribute.class).getName()).thenReturn(xrefAttrName).getMock();
 		when(xrefAttr.getDataType()).thenReturn(attrType);
 		when(xrefAttr.getRefEntity()).thenReturn(refEntityType);
 
@@ -191,7 +188,7 @@ public class EntityAttributesValidatorTest
 	@Test(dataProvider = "checkMrefValidProvider")
 	public void checkMrefValid(AttributeType attrType)
 	{
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
+		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType refEntityType = mock(EntityType.class);
@@ -201,9 +198,9 @@ public class EntityAttributesValidatorTest
 
 		String idAttrName = "id";
 		String mrefAttrName = "mref";
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mrefAttrName).getMock();
+		Attribute mrefAttr = when(mock(Attribute.class).getName()).thenReturn(mrefAttrName).getMock();
 		when(mrefAttr.getDataType()).thenReturn(attrType);
 		when(mrefAttr.getRefEntity()).thenReturn(refEntityType);
 
@@ -229,7 +226,7 @@ public class EntityAttributesValidatorTest
 	@Test(dataProvider = "checkMrefValidProvider")
 	public void checkMrefValidWrongType(AttributeType attrType)
 	{
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
+		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType refEntityType = mock(EntityType.class);
@@ -239,9 +236,9 @@ public class EntityAttributesValidatorTest
 
 		String idAttrName = "id";
 		String mrefAttrName = "mref";
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mrefAttrName).getMock();
+		Attribute mrefAttr = when(mock(Attribute.class).getName()).thenReturn(mrefAttrName).getMock();
 		when(mrefAttr.getDataType()).thenReturn(attrType);
 		when(mrefAttr.getRefEntity()).thenReturn(refEntityType);
 
@@ -250,8 +247,7 @@ public class EntityAttributesValidatorTest
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
 
-		AttributeMetaData otherRefIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("otherRefId")
-				.getMock();
+		Attribute otherRefIdAttr = when(mock(Attribute.class).getName()).thenReturn("otherRefId").getMock();
 		when(otherRefIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType otherRefEntityType = mock(EntityType.class);
@@ -276,7 +272,7 @@ public class EntityAttributesValidatorTest
 	@Test(dataProvider = "checkMrefValidProvider")
 	public void checkMrefNullValue(AttributeType attrType)
 	{
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
+		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityType refEntityType = mock(EntityType.class);
@@ -286,9 +282,9 @@ public class EntityAttributesValidatorTest
 
 		String idAttrName = "id";
 		String mrefAttrName = "mref";
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mrefAttrName).getMock();
+		Attribute mrefAttr = when(mock(Attribute.class).getName()).thenReturn(mrefAttrName).getMock();
 		when(mrefAttr.getDataType()).thenReturn(attrType);
 		when(mrefAttr.getRefEntity()).thenReturn(refEntityType);
 

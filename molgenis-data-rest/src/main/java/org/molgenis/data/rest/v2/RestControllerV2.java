@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
@@ -237,18 +237,18 @@ class RestControllerV2
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+	public AttributeResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName)
 	{
-		return createAttributeMetaDataResponse(entityName, attributeName);
+		return createAttributeResponse(entityName, attributeName);
 	}
 
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+	public AttributeResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName)
 	{
-		return createAttributeMetaDataResponse(entityName, attributeName);
+		return createAttributeResponse(entityName, attributeName);
 	}
 
 	/**
@@ -414,7 +414,7 @@ class RestControllerV2
 
 		try
 		{
-			AttributeMetaData attr = meta.getAttribute(attributeName);
+			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
 				throw createUnknownAttributeException(entityName, attributeName);
@@ -543,7 +543,7 @@ class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	private AttributeResponseV2 createAttributeResponse(String entityName, String attributeName)
 	{
 		EntityType entity = dataService.getEntityType(entityName);
 		if (entity == null)
@@ -551,13 +551,13 @@ class RestControllerV2
 			throw new UnknownEntityException(entityName + " not found");
 		}
 
-		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		Attribute attribute = entity.getAttribute(attributeName);
 		if (attribute == null)
 		{
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, entity, attribute, null, permissionService, dataService,
+		return new AttributeResponseV2(entityName, entity, attribute, null, permissionService, dataService,
 				languageService);
 	}
 
@@ -579,18 +579,18 @@ class RestControllerV2
 		{
 			// return aggregates for aggregate query
 			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
-			AttributeMetaData xAttr = aggsQ.getAttributeX();
-			AttributeMetaData yAttr = aggsQ.getAttributeY();
+			Attribute xAttr = aggsQ.getAttributeX();
+			Attribute yAttr = aggsQ.getAttributeY();
 			if (xAttr == null && yAttr == null)
 			{
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse =
-					xAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, xAttr, fetch, permissionService,
+			AttributeResponseV2 xAttrResponse =
+					xAttr != null ? new AttributeResponseV2(entityName, meta, xAttr, fetch, permissionService,
 							dataService, languageService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse =
-					yAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, yAttr, fetch, permissionService,
+			AttributeResponseV2 yAttrResponse =
+					yAttr != null ? new AttributeResponseV2(entityName, meta, yAttr, fetch, permissionService,
 							dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
@@ -671,16 +671,16 @@ class RestControllerV2
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
 	{
-		Iterable<AttributeMetaData> attrs = entity.getEntityType().getAtomicAttributes();
+		Iterable<Attribute> attrs = entity.getEntityType().getAtomicAttributes();
 		createEntityValuesResponseRec(entity, attrs, fetch, responseData);
 	}
 
-	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs, Fetch fetch,
+	private void createEntityValuesResponseRec(Entity entity, Iterable<Attribute> attrs, Fetch fetch,
 			Map<String, Object> responseData)
 	{
-		responseData.put("_href",
-				Href.concatEntityHref(BASE_URI, entity.getEntityType().getName(), entity.getIdValue()));
-		for (AttributeMetaData attr : attrs) // TODO performance use fetch instead of attrs
+		responseData
+				.put("_href", Href.concatEntityHref(BASE_URI, entity.getEntityType().getName(), entity.getIdValue()));
+		for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();
 			if (fetch == null || fetch.hasField(attr))

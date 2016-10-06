@@ -3,7 +3,7 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMetaMetaData;
 
@@ -58,12 +58,12 @@ public class AttributeFilterToFetchConverter
 		attrFilter.forEach(entry ->
 		{
 			String attrName = entry.getKey();
-			AttributeMetaData attr = getAttribute(entityType, attrName);
+			Attribute attr = getAttribute(entityType, attrName);
 			createFetchContentRec(attrFilter, entityType, attr, fetch, languageCode);
 		});
 	}
 
-	private static void createFetchContentRec(AttributeFilter attrFilter, EntityType entityType, AttributeMetaData attr,
+	private static void createFetchContentRec(AttributeFilter attrFilter, EntityType entityType, Attribute attr,
 			Fetch fetch, String languageCode)
 	{
 		AttributeType attrType = attr.getDataType();
@@ -89,7 +89,7 @@ public class AttributeFilterToFetchConverter
 					subAttrFilter.forEach(entry ->
 					{
 						String attrPartName = entry.getKey();
-						AttributeMetaData attrPart = attr.getAttributePart(attrPartName);
+						Attribute attrPart = attr.getAttributePart(attrPartName);
 						createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode);
 					});
 				}
@@ -132,9 +132,9 @@ public class AttributeFilterToFetchConverter
 		}
 	}
 
-	private static AttributeMetaData getAttribute(EntityType entityType, String attrName)
+	private static Attribute getAttribute(EntityType entityType, String attrName)
 	{
-		AttributeMetaData attr = entityType.getAttribute(attrName);
+		Attribute attr = entityType.getAttribute(attrName);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException(
@@ -153,21 +153,14 @@ public class AttributeFilterToFetchConverter
 	{
 		boolean hasRefAttr = false;
 		Fetch fetch = new Fetch();
-		try
+		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			for (AttributeMetaData attr : entityType.getAtomicAttributes())
+			Fetch subFetch = createDefaultAttributeFetch(attr, languageCode);
+			if (subFetch != null)
 			{
-				Fetch subFetch = createDefaultAttributeFetch(attr, languageCode);
-				if (subFetch != null)
-				{
-					hasRefAttr = true;
-				}
-				fetch.field(attr.getName(), subFetch);
+				hasRefAttr = true;
 			}
-		}
-		catch (Exception e)
-		{
-			System.out.print("DEBUG");
+			fetch.field(attr.getName(), subFetch);
 		}
 		return hasRefAttr ? fetch : null;
 	}
@@ -179,7 +172,7 @@ public class AttributeFilterToFetchConverter
 	 * @param attr
 	 * @return default attribute fetch or null
 	 */
-	public static Fetch createDefaultAttributeFetch(AttributeMetaData attr, String languageCode)
+	public static Fetch createDefaultAttributeFetch(Attribute attr, String languageCode)
 	{
 		Fetch fetch;
 		if (isReferenceType(attr))

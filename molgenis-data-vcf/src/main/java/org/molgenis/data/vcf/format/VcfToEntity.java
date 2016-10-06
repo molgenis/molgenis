@@ -6,8 +6,8 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -42,12 +42,12 @@ public class VcfToEntity
 	private final VcfMeta vcfMeta;
 	private final VcfAttributes vcfAttributes;
 	private final EntityTypeFactory entityTypeFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final EntityType entityType;
 	private final EntityType sampleEntityType;
 
 	public VcfToEntity(String entityName, VcfMeta vcfMeta, VcfAttributes vcfAttributes,
-			EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
 		this.vcfMeta = requireNonNull(vcfMeta);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
@@ -61,8 +61,8 @@ public class VcfToEntity
 
 	private EntityType createEntityType(String entityName, VcfMeta vcfMeta)
 	{
-		AttributeMetaData idAttributeMetaData = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
-		idAttributeMetaData.setVisible(false);
+		Attribute idAttribute = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
+		idAttribute.setVisible(false);
 
 		EntityType entityType = entityTypeFactory.create().setSimpleName(entityName);
 		entityType.addAttribute(vcfAttributes.getChromAttribute());
@@ -72,10 +72,10 @@ public class VcfToEntity
 		entityType.addAttribute(vcfAttributes.getFilterAttribute());
 		entityType.addAttribute(vcfAttributes.getQualAttribute());
 		entityType.addAttribute(vcfAttributes.getIdAttribute());
-		entityType.addAttribute(idAttributeMetaData, ROLE_ID);
+		entityType.addAttribute(idAttribute, ROLE_ID);
 
-		AttributeMetaData infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
-		List<AttributeMetaData> metadataInfoField = new ArrayList<>();
+		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
+		List<Attribute> metadataInfoField = new ArrayList<>();
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 		{
 			// according to the VCF standard it is allowed to have info columns with names that equal default VCF cols.
@@ -103,19 +103,19 @@ public class VcfToEntity
 			{
 				name = name + "_";
 			}
-			AttributeMetaData attributeMetaData = attrMetaFactory.create().setName(name + postFix)
+			Attribute attribute = attrMetaFactory.create().setName(name + postFix)
 					.setDataType(vcfReaderFormatToMolgenisType(info)).setAggregatable(true);
 
-			attributeMetaData.setDescription(
+			attribute.setDescription(
 					StringUtils.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
 							.getDescription());
-			metadataInfoField.add(attributeMetaData);
+			metadataInfoField.add(attribute);
 		}
 		infoMetaData.setAttributeParts(metadataInfoField);
 		entityType.addAttribute(infoMetaData);
 		if (sampleEntityType != null)
 		{
-			AttributeMetaData samplesAttributeMeta = attrMetaFactory.create().setName(SAMPLES).setDataType(MREF)
+			Attribute samplesAttributeMeta = attrMetaFactory.create().setName(SAMPLES).setDataType(MREF)
 					.setRefEntity(sampleEntityType).setLabel("SAMPLES");
 			entityType.addAttribute(samplesAttributeMeta);
 		}
@@ -129,9 +129,9 @@ public class VcfToEntity
 		{
 			result = entityTypeFactory.create().setSimpleName(entityName + "_Sample");
 
-			AttributeMetaData idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
-			AttributeMetaData nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true);
-			AttributeMetaData originalNameAttr = attrMetaFactory.create().setName(ORIGINAL_NAME).setDataType(TEXT);
+			Attribute idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
+			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true);
+			Attribute originalNameAttr = attrMetaFactory.create().setName(ORIGINAL_NAME).setDataType(TEXT);
 
 			result.addAttribute(idAttr, ROLE_ID);
 			result.addAttribute(nameAttr, ROLE_LABEL, ROLE_LOOKUP);
@@ -143,7 +143,7 @@ public class VcfToEntity
 				{
 					name = name + "_";
 				}
-				AttributeMetaData attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?]", "_"))
+				Attribute attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?]", "_"))
 						.setDataType(vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true)
 						.setLabel(meta.getId());
 
@@ -325,11 +325,11 @@ public class VcfToEntity
 		{
 			String postFix = "";
 			List<String> names = new ArrayList<>();
-			for (AttributeMetaData attributeMetaData : entityType.getAttributes())
+			for (Attribute attribute : entityType.getAttributes())
 			{
-				if (attributeMetaData.getName().equals(info.getId()))
+				if (attribute.getName().equals(info.getId()))
 				{
-					names.add(attributeMetaData.getName());
+					names.add(attribute.getName());
 				}
 			}
 			if (names.contains(info.getId())) postFix = "_" + entity.getEntityType().getName();
@@ -343,11 +343,11 @@ public class VcfToEntity
 		{
 			String postFix = "";
 			List<String> names = new ArrayList<>();
-			for (AttributeMetaData attributeMetaData : entityType.getAttributes())
+			for (Attribute attribute : entityType.getAttributes())
 			{
-				if (attributeMetaData.getName().equals(vcfInfo.getKey()))
+				if (attribute.getName().equals(vcfInfo.getKey()))
 				{
-					names.add(attributeMetaData.getName());
+					names.add(attribute.getName());
 				}
 			}
 			if (vcfInfo.getKey().equals("."))

@@ -2,10 +2,7 @@ package org.molgenis.data.annotation.core.query;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -26,7 +23,7 @@ import static org.testng.Assert.assertEquals;
 public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -37,7 +34,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void createQueryEntity()
 	{
-		AttributeMetaData idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
+		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true);
 		EntityType emd = entityTypeFactory.create().setName("testEntity");
 		emd.addAttributes(Arrays.asList(idAttr, vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute()));
 		emd.setIdAttribute(idAttr);
@@ -52,7 +49,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getRequiredAttributes()
 	{
-		Iterator<AttributeMetaData> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes()
+		Iterator<Attribute> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes()
 				.iterator();
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getChromAttribute());
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getPosAttribute());

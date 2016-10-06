@@ -1,7 +1,7 @@
 package org.molgenis.util;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
@@ -25,16 +25,14 @@ public class DependencyResolverTest
 	public void resolveOneToMany()
 	{
 		EntityType oneToManyEntityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-		EntityType xrefEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity")
-				.getMock();
+		EntityType xrefEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
 
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getName()).thenReturn("oneToManyAttr");
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(oneToManyAttr.getRefEntity()).thenReturn(xrefEntityType);
 
-
-		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
+		Attribute xrefAttr = mock(Attribute.class);
 		when(xrefAttr.getName()).thenReturn("xrefAttr");
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityType);
@@ -63,19 +61,19 @@ public class DependencyResolverTest
 		when(e4.toString()).thenReturn("e4");
 		when(e5.toString()).thenReturn("e5");
 
-		AttributeMetaData e1RefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref").getMock();
+		Attribute e1RefAttr = when(mock(Attribute.class).getName()).thenReturn("ref").getMock();
 		when(e1RefAttr.getDataType()).thenReturn(XREF);
 		when(e1RefAttr.getRefEntity()).thenReturn(e5);
 
-		AttributeMetaData e3RefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref").getMock();
+		Attribute e3RefAttr = when(mock(Attribute.class).getName()).thenReturn("ref").getMock();
 		when(e3RefAttr.getDataType()).thenReturn(XREF);
 		when(e3RefAttr.getRefEntity()).thenReturn(e4);
 
-		AttributeMetaData e3SelfRefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refSelf").getMock();
+		Attribute e3SelfRefAttr = when(mock(Attribute.class).getName()).thenReturn("refSelf").getMock();
 		when(e3SelfRefAttr.getDataType()).thenReturn(XREF);
 		when(e3SelfRefAttr.getRefEntity()).thenReturn(e3);
 
-		AttributeMetaData e4RefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref").getMock();
+		Attribute e4RefAttr = when(mock(Attribute.class).getName()).thenReturn("ref").getMock();
 		when(e4RefAttr.getDataType()).thenReturn(XREF);
 		when(e4RefAttr.getRefEntity()).thenReturn(e2);
 
@@ -94,32 +92,33 @@ public class DependencyResolverTest
 	@Test
 	public void resolveSelfReferences()
 	{
-		EntityType emd = when(mock(EntityType.class).getName()).thenReturn("Person").getMock();
-		AttributeMetaData nameAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("Person").getMock();
+		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
+
 		when(nameAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData fatherAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("father").getMock();
+		Attribute fatherAttr = when(mock(Attribute.class).getName()).thenReturn("father").getMock();
 		when(fatherAttr.getDataType()).thenReturn(XREF);
-		when(fatherAttr.getRefEntity()).thenReturn(emd);
+		when(fatherAttr.getRefEntity()).thenReturn(entityType);
 		when(fatherAttr.isNillable()).thenReturn(true);
-		AttributeMetaData motherAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("mother").getMock();
-		when(emd.getIdAttribute()).thenReturn(nameAttr);
+		Attribute motherAttr = when(mock(Attribute.class).getName()).thenReturn("mother").getMock();
+		when(entityType.getIdAttribute()).thenReturn(nameAttr);
 		when(motherAttr.getDataType()).thenReturn(XREF);
 		when(motherAttr.isNillable()).thenReturn(true);
-		when(motherAttr.getRefEntity()).thenReturn(emd);
-		when(emd.getAtomicAttributes()).thenReturn(asList(nameAttr, fatherAttr, motherAttr));
-		when(emd.getAttribute("name")).thenReturn(nameAttr);
-		when(emd.getAttribute("father")).thenReturn(fatherAttr);
-		when(emd.getAttribute("mother")).thenReturn(motherAttr);
+		when(motherAttr.getRefEntity()).thenReturn(entityType);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(nameAttr, fatherAttr, motherAttr));
+		when(entityType.getAttribute("name")).thenReturn(nameAttr);
+		when(entityType.getAttribute("father")).thenReturn(fatherAttr);
+		when(entityType.getAttribute("mother")).thenReturn(motherAttr);
 
-		Entity piet = new DynamicEntity(emd);
+		Entity piet = new DynamicEntity(entityType);
 		piet.set("name", "Piet");
-		Entity klaas = new DynamicEntity(emd);
+		Entity klaas = new DynamicEntity(entityType);
 		klaas.set("name", "Klaas");
-		Entity jan = new DynamicEntity(emd);
+		Entity jan = new DynamicEntity(entityType);
 		jan.set("name", "Jan");
-		Entity katrijn = new DynamicEntity(emd);
+		Entity katrijn = new DynamicEntity(entityType);
 		katrijn.set("name", "Katrijn");
-		Entity marie = new DynamicEntity(emd);
+		Entity marie = new DynamicEntity(entityType);
 		marie.set("name", "Marie");
 
 		klaas.set("father", piet);
@@ -133,7 +132,7 @@ public class DependencyResolverTest
 
 		Iterable<Entity> entities = asList(piet, klaas, jan, katrijn, marie);
 
-		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, emd);
+		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, entityType);
 		assertEquals(newArrayList(sorted), asList(marie, piet, jan, katrijn, klaas));
 	}
 }

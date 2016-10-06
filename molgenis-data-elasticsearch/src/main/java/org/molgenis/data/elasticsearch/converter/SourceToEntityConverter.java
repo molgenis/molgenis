@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class SourceToEntityConverter
 		source.entrySet().forEach(entry ->
 		{
 			String attrName = entry.getKey();
-			AttributeMetaData attr = entityType.getAttribute(attrName);
+			Attribute attr = entityType.getAttribute(attrName);
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(
@@ -68,7 +68,8 @@ public class SourceToEntityConverter
 						// TODO store id for xrefs
 						if (sourceValue instanceof Map<?, ?>)
 						{
-							@SuppressWarnings("unchecked") Map<String, Object> sourceRefEntity = (Map<String, Object>) sourceValue;
+							@SuppressWarnings("unchecked")
+							Map<String, Object> sourceRefEntity = (Map<String, Object>) sourceValue;
 							EntityType refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
 							Object sourceRefEntityId = sourceRefEntity.get(refIdAttrName);
@@ -85,7 +86,8 @@ public class SourceToEntityConverter
 						if (sourceValue instanceof Iterable<?>)
 						{
 							// TODO store list of ids for mrefs
-							@SuppressWarnings("unchecked") Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
+							@SuppressWarnings("unchecked")
+							Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
 							EntityType refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
 							Iterable<Object> sourceRefEntityIds = () -> StreamSupport

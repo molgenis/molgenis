@@ -14,7 +14,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 
 /**
@@ -55,24 +55,24 @@ public class EntityTypeDependencyResolver
 				.collect(toSet());
 
 		// Sort nodes based on dependencies
-		List<EntityTypeNode> resolvedEntityTypeNodes = genericDependencyResolver
+		List<EntityTypeNode> resolvedEntityMetaNodes = genericDependencyResolver
 				.resolve(entityTypeNodes, EntityTypeNode::getDependencies);
 
 		// Map nodes back to EntityType
-		List<EntityType> resolvedEntityTypes = resolvedEntityTypeNodes.stream()
-				.map(EntityTypeNode::getEntityType).collect(toList());
+		List<EntityType> resolvedEntityMetas = resolvedEntityMetaNodes.stream().map(EntityTypeNode::getEntityType)
+				.collect(toList());
 
 		// getDependencies might have included items that are not in the input list, remove additional items
-		if (resolvedEntityTypes.size() == entityTypes.size())
+		if (resolvedEntityMetas.size() == entityTypes.size())
 		{
-			return resolvedEntityTypes;
+			return resolvedEntityMetas;
 		}
 		else
 		{
 			Map<String, EntityType> entityTypeMap = entityTypes.stream()
 					.collect(toMap(EntityType::getName, Function.identity()));
-			return resolvedEntityTypes.stream()
-					.filter(resolvedEntityType -> entityTypeMap.containsKey(resolvedEntityType.getName()))
+			return resolvedEntityMetas.stream()
+					.filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getName()))
 					.collect(toList());
 		}
 	}
@@ -82,29 +82,29 @@ public class EntityTypeDependencyResolver
 	 */
 	private static class EntityTypeNode
 	{
-		private final EntityType entityTypeData;
+		private final EntityType entityType;
 
-		EntityTypeNode(EntityType entityTypeData)
+		EntityTypeNode(EntityType entityType)
 		{
-			this.entityTypeData = requireNonNull(entityTypeData);
+			this.entityType = requireNonNull(entityType);
 		}
 
 		public EntityType getEntityType()
 		{
-			return entityTypeData;
+			return entityType;
 		}
 
 		/**
 		 * Returns dependencies of the given entity meta data.
 		 *
-		 * @param entityTypeDataNode entity meta data node
+		 * @param entityTypeNode entity meta data node
 		 * @return dependencies of the entity meta data node
 		 */
-		public static Set<EntityTypeNode> getDependencies(EntityTypeNode entityTypeDataNode)
+		public static Set<EntityTypeNode> getDependencies(EntityTypeNode entityTypeNode)
 		{
 			// get referenced entities excluding entities of mappedBy attributes
-			EntityType entityType = entityTypeDataNode.entityTypeData;
-			Set<EntityTypeNode> refEntityTypeSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
+			EntityType entityType = entityTypeNode.entityType;
+			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
 					.flatMap(attr ->
 					{
 						EntityType refEntity = attr.getRefEntity();
@@ -126,12 +126,12 @@ public class EntityTypeDependencyResolver
 						}
 					}).collect(toCollection(HashSet::new));
 
-			EntityType extendsEntityType = entityType.getExtends();
-			if (extendsEntityType != null)
+			EntityType extendsEntityMeta = entityType.getExtends();
+			if (extendsEntityMeta != null)
 			{
-				refEntityTypeSet.add(new EntityTypeNode(extendsEntityType));
+				refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
 			}
-			return refEntityTypeSet;
+			return refEntityMetaSet;
 		}
 
 		@Override
@@ -141,19 +141,19 @@ public class EntityTypeDependencyResolver
 			if (o == null || getClass() != o.getClass()) return false;
 
 			EntityTypeNode that = (EntityTypeNode) o;
-			return entityTypeData.getName().equals(that.entityTypeData.getName());
+			return entityType.getName().equals(that.entityType.getName());
 		}
 
 		@Override
 		public int hashCode()
 		{
-			return entityTypeData.getName().hashCode();
+			return entityType.getName().hashCode();
 		}
 
 		@Override
 		public String toString()
 		{
-			return entityTypeData.getName();
+			return entityType.getName();
 		}
 	}
 }

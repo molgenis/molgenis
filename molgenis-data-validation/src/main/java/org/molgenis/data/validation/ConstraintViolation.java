@@ -1,7 +1,7 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public class ConstraintViolation
 	private final String message;
 	private Object invalidValue;
 	private Entity entity;
-	private AttributeMetaData violatedAttribute;
+	private Attribute violatedAttribute;
 	private EntityType entityType;
 	private String importInfo;
 	private Long rownr;
@@ -29,14 +29,14 @@ public class ConstraintViolation
 		this.rownr = rownr;
 	}
 
-	public ConstraintViolation(String message, AttributeMetaData violatedAttribute, Long rownr)
+	public ConstraintViolation(String message, Attribute violatedAttribute, Long rownr)
 	{
 		this.message = message;
 		this.violatedAttribute = violatedAttribute;
 		this.rownr = rownr;
 	}
 
-	public ConstraintViolation(String message, Object invalidValue, Entity entity, AttributeMetaData violatedAttribute,
+	public ConstraintViolation(String message, Object invalidValue, Entity entity, Attribute violatedAttribute,
 			EntityType entityType, Long rownr)
 	{
 		this.message = message;
@@ -78,7 +78,7 @@ public class ConstraintViolation
 		return entity;
 	}
 
-	public AttributeMetaData getViolatedAttribute()
+	public Attribute getViolatedAttribute()
 	{
 		return violatedAttribute;
 	}

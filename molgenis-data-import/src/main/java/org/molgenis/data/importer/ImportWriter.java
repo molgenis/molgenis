@@ -97,8 +97,8 @@ public class ImportWriter
 			allEntityTypeMap.put(emd.getName(), emd);
 		}
 		scanMetaDataForSystemEntityType(allEntityTypeMap, existingMetaData);
-		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityTypeMap.values())),
-				job.source, job.dbAction, job.defaultPackage);
+		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityTypeMap.values())), job.source,
+				job.dbAction, job.defaultPackage);
 		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
 
 		return job.report;
@@ -145,8 +145,8 @@ public class ImportWriter
 
 		for (EntityType emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData
-					.getAttributeTags().get(emd))
+			for (SemanticTag<Attribute, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
+					.get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);
 			}
@@ -174,8 +174,7 @@ public class ImportWriter
 				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getName().toLowerCase()
 						.startsWith(defaultPackage.toLowerCase() + "_"))
 				{
-					emxEntityRepo = source
-							.getRepository(entityType.getName().substring(defaultPackage.length() + 1));
+					emxEntityRepo = source.getRepository(entityType.getName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -201,7 +200,7 @@ public class ImportWriter
 	private Entity toEntity(EntityType entityType, Entity emxEntity)
 	{
 		Entity entity = entityManager.create(entityType, POPULATE);
-		for (AttributeMetaData attr : entityType.getAtomicAttributes())
+		for (Attribute attr : entityType.getAtomicAttributes())
 		{
 			if (attr.getExpression() == null)
 			{
@@ -278,7 +277,7 @@ public class ImportWriter
 							else
 							{
 								EntityType mrefEntity = attr.getRefEntity();
-								AttributeMetaData refIdAttr = mrefEntity.getIdAttribute();
+								Attribute refIdAttr = mrefEntity.getIdAttribute();
 
 								String[] tokens = StringUtils.split(emxValue.toString(), ',');
 								List<Entity> mrefEntities = new ArrayList<>();
@@ -316,10 +315,10 @@ public class ImportWriter
 	{
 		return Iterables.filter(entities, entity ->
 		{
-			Iterator<AttributeMetaData> attributes = entity.getEntityType().getAttributes().iterator();
+			Iterator<Attribute> attributes = entity.getEntityType().getAttributes().iterator();
 			while (attributes.hasNext())
 			{
-				AttributeMetaData attribute = attributes.next();
+				Attribute attribute = attributes.next();
 				if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
 						.equals(entity.getEntityType().getName()))
 				{
@@ -389,7 +388,7 @@ public class ImportWriter
 					// inject identifiers
 					Map<String, String> attrNameIdentifierMap = stream(
 							existingEntityType.getOwnAllAttributes().spliterator(), false)
-							.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
+							.collect(toMap(Attribute::getName, Attribute::getIdentifier));
 					entityType.getOwnAllAttributes().forEach(attr ->
 					{
 						String identifier = attrNameIdentifierMap.get(attr.getName());

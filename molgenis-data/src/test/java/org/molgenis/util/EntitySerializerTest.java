@@ -3,7 +3,7 @@ package org.molgenis.util;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,18 +31,18 @@ public class EntitySerializerTest
 	@Test
 	public void testSerialize() throws Exception
 	{
-		EntityType entityMeta = mock(EntityType.class);
-		when(entityMeta.getName()).thenReturn("entity");
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
 
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
+		Attribute manyToOneAttr = mock(Attribute.class);
 		String manyToOneAttrName = "xrefAttr";
 		when(manyToOneAttr.getName()).thenReturn(manyToOneAttrName);
 		when(manyToOneAttr.getDataType()).thenReturn(XREF);
-		when(entityMeta.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
 
 		EntityType refEntityType = mock(EntityType.class);
 		when(refEntityType.getName()).thenReturn("refEntity");
@@ -71,7 +71,7 @@ public class EntitySerializerTest
 		when(manyToOneEntity.getLabelValue()).thenReturn(manyToOneEntityLabelValue);
 
 		Entity entity = mock(Entity.class);
-		when(entity.getEntityType()).thenReturn(entityMeta);
+		when(entity.getEntityType()).thenReturn(entityType);
 		when(entity.get(oneToManyAttrName)).thenReturn(oneToManyEntities);
 		when(entity.get(manyToOneAttrName)).thenReturn(manyToOneEntity);
 		when(entity.getEntities(oneToManyAttrName)).thenReturn(oneToManyEntities);

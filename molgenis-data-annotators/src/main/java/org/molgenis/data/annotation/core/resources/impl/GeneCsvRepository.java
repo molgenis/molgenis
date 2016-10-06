@@ -6,7 +6,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
@@ -26,7 +26,7 @@ public class GeneCsvRepository extends AbstractRepository
 	private final String targetAttributeName;
 
 	public GeneCsvRepository(File file, String sourceAttributeName, String targetAttributeName,
-			EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory, char separator)
+			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory, char separator)
 	{
 		this.repository = new CsvRepository(file, entityTypeFactory, attrMetaFactory, null, separator);
 		this.sourceAttributeName = sourceAttributeName;

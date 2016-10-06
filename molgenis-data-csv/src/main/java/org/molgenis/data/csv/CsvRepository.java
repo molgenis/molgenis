@@ -3,8 +3,8 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
@@ -27,31 +27,31 @@ public class CsvRepository extends AbstractRepository
 {
 	private final File file;
 	private final EntityTypeFactory entityTypeFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final String sheetName;
 	private List<CellProcessor> cellProcessors;
 	private EntityType entityType;
 	private Character separator = null;
 
-	public CsvRepository(String file, EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory)
+	public CsvRepository(String file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
 		this(new File(file), entityTypeFactory, attrMetaFactory, null);
 	}
 
-	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory,
 			@Nullable List<CellProcessor> cellProcessors, Character separator)
 	{
 		this(file, entityTypeFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
 		this.separator = separator;
 	}
 
-	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory,
 			@Nullable List<CellProcessor> cellProcessors)
 	{
 		this(file, entityTypeFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
 	}
 
-	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory,
 			String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
 		this.file = file;
@@ -75,7 +75,7 @@ public class CsvRepository extends AbstractRepository
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{
-				AttributeMetaData attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
+				Attribute attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
 				entityType.addAttribute(attr);
 			}
 		}

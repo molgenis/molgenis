@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.impl.tabix;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepository;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -33,7 +33,7 @@ import static org.testng.Assert.assertTrue;
 public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -52,9 +52,9 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
-		repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("CADD").setDataType(DECIMAL));
-		repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("CADD_SCALED").setDataType(DECIMAL));
-		repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("id").setVisible(false));
+		repoMetaData.addAttribute(attributeFactory.create().setName("CADD").setDataType(DECIMAL));
+		repoMetaData.addAttribute(attributeFactory.create().setName("CADD_SCALED").setDataType(DECIMAL));
+		repoMetaData.addAttribute(attributeFactory.create().setName("id").setVisible(false));
 		File file = ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz");
 		tabixRepository = new TabixRepository(file, repoMetaData);
 	}

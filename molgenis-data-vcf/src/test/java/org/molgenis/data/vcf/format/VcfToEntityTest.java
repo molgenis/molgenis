@@ -38,7 +38,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private VcfToEntity vcfToEntitySmall;
 	private VcfMeta vcfMetaSmall;
@@ -80,19 +80,19 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		expectedEntityType.addAttribute(vcfAttrs.getQualAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getIdAttribute());
 
-		AttributeMetaData internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING)
+		Attribute internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING)
 				.setVisible(false);
 		expectedEntityType.addAttribute(internalIdMeta, ROLE_ID);
 
-		AttributeMetaData infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
+		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
 
-		AttributeMetaData infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
+		Attribute infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
 				.setDescription("Number of Samples With Data").setAggregatable(true);
 		infoMetaData.addAttributePart(infoNS);
-		AttributeMetaData infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
+		Attribute infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
 				.setAggregatable(true);
 		infoMetaData.addAttributePart(infoDF);
-		AttributeMetaData infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
+		Attribute infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
 				.setDescription("Flag field 2").setAggregatable(true);
 		infoMetaData.addAttributePart(infoDF2);
 

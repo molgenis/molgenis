@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 
@@ -23,7 +23,7 @@ public class EntityTypeUtils
 	 * @param attr attribute
 	 * @return true if an attribute references a single entity
 	 */
-	public static boolean isSingleReferenceType(AttributeMetaData attr)
+	public static boolean isSingleReferenceType(Attribute attr)
 	{
 		AttributeType attrType = attr.getDataType();
 		switch (attrType)
@@ -61,7 +61,7 @@ public class EntityTypeUtils
 	 * @param attr attribute
 	 * @return true if an attribute references multiple entities
 	 */
-	public static boolean isMultipleReferenceType(AttributeMetaData attr)
+	public static boolean isMultipleReferenceType(Attribute attr)
 	{
 		AttributeType attrType = attr.getDataType();
 		switch (attrType)
@@ -99,7 +99,7 @@ public class EntityTypeUtils
 	 * @param attr attribute
 	 * @return true if the attribute references other entities
 	 */
-	public static boolean isReferenceType(AttributeMetaData attr)
+	public static boolean isReferenceType(Attribute attr)
 	{
 		return isReferenceType(attr.getDataType());
 	}
@@ -147,7 +147,7 @@ public class EntityTypeUtils
 	 * @param attr attribute
 	 * @return true if the attribute is a string type.
 	 */
-	public static boolean isStringType(AttributeMetaData attr)
+	public static boolean isStringType(Attribute attr)
 	{
 		AttributeType attrType = attr.getDataType();
 		switch (attrType)
@@ -184,7 +184,7 @@ public class EntityTypeUtils
 	 * @param attr attribute
 	 * @return true if the attribute is a text type.
 	 */
-	public static boolean isTextType(AttributeMetaData attr)
+	public static boolean isTextType(Attribute attr)
 	{
 		AttributeType attrType = attr.getDataType();
 		switch (attrType)
@@ -220,9 +220,9 @@ public class EntityTypeUtils
 	 *
 	 * @return attribute names
 	 */
-	public static Iterable<String> getAttributeNames(Iterable<AttributeMetaData> attrs)
+	public static Iterable<String> getAttributeNames(Iterable<Attribute> attrs)
 	{
-		return () -> stream(attrs.spliterator(), false).map(AttributeMetaData::getName).iterator();
+		return () -> stream(attrs.spliterator(), false).map(Attribute::getName).iterator();
 	}
 
 	/**
@@ -251,12 +251,12 @@ public class EntityTypeUtils
 	public static Fetch createFetchForReindexing(EntityType refEntityType)
 	{
 		Fetch fetch = new Fetch();
-		for (AttributeMetaData attr : refEntityType.getAtomicAttributes())
+		for (Attribute attr : refEntityType.getAtomicAttributes())
 		{
 			if (attr.getRefEntity() != null)
 			{
 				Fetch attributeFetch = new Fetch();
-				for (AttributeMetaData refAttr : attr.getRefEntity().getAtomicAttributes())
+				for (Attribute refAttr : attr.getRefEntity().getAtomicAttributes())
 				{
 					attributeFetch.field(refAttr.getName());
 				}
@@ -266,7 +266,6 @@ public class EntityTypeUtils
 			{
 				fetch.field(attr.getName());
 			}
-
 		}
 		return fetch;
 	}

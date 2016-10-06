@@ -13,7 +13,7 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.*;
@@ -24,8 +24,8 @@ import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.*;
 public class AggregateResponseParser
 {
 	@SuppressWarnings("unchecked")
-	public AggregateResult parseAggregateResponse(AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
-			AttributeMetaData aggAttrDistinct, Aggregations aggs, DataService dataService)
+	public AggregateResult parseAggregateResponse(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
+			Aggregations aggs, DataService dataService)
 	{
 		Map<String, Object> aggsMap = parseAggregations(aggAttr1, aggAttr2, aggAttrDistinct, aggs);
 
@@ -107,8 +107,8 @@ public class AggregateResponseParser
 		return new AggregateResult(matrix, xLabels, yLabels);
 	}
 
-	private Map<String, Object> parseAggregations(AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
-			AttributeMetaData aggAttrDistinct, Aggregations aggs)
+	private Map<String, Object> parseAggregations(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
+			Aggregations aggs)
 	{
 		Map<String, Object> counts = new HashMap<String, Object>();
 
@@ -315,7 +315,7 @@ public class AggregateResponseParser
 		return ((ReverseNested) agg).getAggregations();
 	}
 
-	private Terms getTermsAggregation(Aggregations aggs, AttributeMetaData attr)
+	private Terms getTermsAggregation(Aggregations aggs, Attribute attr)
 	{
 		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_TERMS_POSTFIX);
 		if (agg == null)
@@ -329,7 +329,7 @@ public class AggregateResponseParser
 		return (Terms) agg;
 	}
 
-	private Missing getMissingAggregation(Aggregations aggs, AttributeMetaData attr)
+	private Missing getMissingAggregation(Aggregations aggs, Attribute attr)
 	{
 		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_MISSING_POSTFIX);
 		if (agg == null)
@@ -343,7 +343,7 @@ public class AggregateResponseParser
 		return (Missing) agg;
 	}
 
-	private Cardinality getDistinctAggregation(Aggregations aggs, AttributeMetaData attr)
+	private Cardinality getDistinctAggregation(Aggregations aggs, Attribute attr)
 	{
 		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_DISTINCT_POSTFIX);
 		if (agg == null)

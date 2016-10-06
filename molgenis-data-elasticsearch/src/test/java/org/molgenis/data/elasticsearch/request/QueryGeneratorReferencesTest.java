@@ -8,8 +8,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
@@ -72,7 +72,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attrFactory;
+	AttributeFactory attrFactory;
 
 	@BeforeMethod
 	public void setUp()
@@ -82,12 +82,11 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		EntityType refEntityType = entityTypeFactory.create().setName("ref_entity");
 		refEntityType.addAttribute(attrFactory.create().setName(refIdAttributeName), ROLE_ID);
 		refEntityType.addAttribute(attrFactory.create().setName(refBoolAttributeName).setDataType(BOOL));
-		refEntityType.addAttribute(
-				attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
-						.setRefEntity(refEntityType).setNillable(true));
-		AttributeMetaData compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
+		refEntityType.addAttribute(attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
+				.setRefEntity(refEntityType).setNillable(true));
+		Attribute compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
 				.setDataType(STRING);
-		AttributeMetaData compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
+		Attribute compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
 				.setDataType(STRING);
 		refEntityType.addAttribute(attrFactory.create().setName(refCompoundAttributeName).setDataType(COMPOUND)
 				.setAttributeParts(Arrays.asList(compoundPart0Attribute, compoundPart1Attribute)));

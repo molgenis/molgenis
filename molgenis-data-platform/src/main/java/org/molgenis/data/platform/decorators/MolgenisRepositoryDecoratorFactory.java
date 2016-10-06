@@ -1,8 +1,8 @@
 package org.molgenis.data.platform.decorators;
 
 import org.molgenis.auth.User;
-import org.molgenis.auth.UserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
+import org.molgenis.auth.UserDecorator;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
@@ -21,7 +21,7 @@ import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
+import org.molgenis.data.meta.AttributeRepositoryDecorator;
 import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
@@ -45,7 +45,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.security.owned.OwnedEntityType.OWNED;
@@ -63,7 +63,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final SearchService searchService;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
 	private final EntityTypeMetadata entityTypeMeta;
 	private final I18nStringMetaData i18nStringMeta;
@@ -82,7 +82,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			ExpressionValidator expressionValidator, RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
-			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
+			AttributeFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityTypeMetadata entityTypeMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, L3Cache l3Cache,
@@ -173,8 +173,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
-					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry,
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryDecorator(
+					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry,
 					dataService, permissionService);
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))

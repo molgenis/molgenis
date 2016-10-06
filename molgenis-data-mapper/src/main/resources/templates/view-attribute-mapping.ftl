@@ -22,9 +22,9 @@
         <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.name?html}"/>
         <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.name?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
-               value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+               value="${attributeMapping.targetAttribute.name?html}"/>
         <input id="targetAttributeType" type="hidden" name="targetAttributeType"
-               value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
+               value="${attributeMapping.targetAttribute.dataType?html}"/>
         <input id="sourceAttributeSize" type="hidden" value="${sourceAttributesSize?html}"/>
         <input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
     </div>
@@ -48,8 +48,13 @@
 </div>
 <div class="row">
     <div class="col-md-12 col-lg-12">
+<<<<<<< HEAD
         <center><h4>Mapping to <i>${entityMapping.targetEntityType.name}
             .${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityType.name}</i>
+=======
+        <center><h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}
+            .${attributeMapping.targetAttribute.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i>
+>>>>>>> 080e6d36d2fbf11f433e559ebb12c4cdcd01bea2
         </h4></center>
     </div>
 </div>
@@ -64,14 +69,14 @@
             </tr>
             <tr>
                 <td class="td-align-top"><strong>Name</strong></td>
-                <td class="td-align-top">${attributeMapping.targetAttributeMetaData.name?html}
-                    (${attributeMapping.targetAttributeMetaData.dataType})
+                <td class="td-align-top">${attributeMapping.targetAttribute.name?html}
+                    (${attributeMapping.targetAttribute.dataType})
                 </td>
             </tr>
             <tr>
                 <td class="td-align-top"><strong>Label</strong></td>
-                <td class="td-align-top"><#if attributeMapping.targetAttributeMetaData.label??>
-                ${attributeMapping.targetAttributeMetaData.label?html}
+                <td class="td-align-top"><#if attributeMapping.targetAttribute.label??>
+                ${attributeMapping.targetAttribute.label?html}
                 <#else>
                     N/A
                 </#if>
@@ -80,8 +85,8 @@
             <tr>
                 <td class="td-align-top"><strong>Description</strong></td>
                 <td class="td-align-top">
-                <#if attributeMapping.targetAttributeMetaData.description??>
-                ${attributeMapping.targetAttributeMetaData.description?html}
+                <#if attributeMapping.targetAttribute.description??>
+                ${attributeMapping.targetAttribute.description?html}
                 <#else>
                     N/A
                 </#if>
@@ -104,8 +109,13 @@
             <tr>
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
+<<<<<<< HEAD
                 <#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
                     <#assign refEntityType = attributeMapping.targetAttributeMetaData.refEntity>
+=======
+                <#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical" && (categories)?has_content>
+                    <#assign refEntityMetaData = attributeMapping.targetAttribute.refEntity>
+>>>>>>> 080e6d36d2fbf11f433e559ebb12c4cdcd01bea2
                     <#list categories as category>
                         <#list refEntityType.attributes as attribute>
                             <#assign attributeName = attribute.name>
@@ -145,7 +155,7 @@
                     <legend>
                         Attributes
                         <i class="glyphicon glyphicon-question-sign" rel="tooltip" title="Select attribute(s) to map to
-						${attributeMapping.targetAttributeMetaData.name?html}. By checking one of the attributes below, 
+						${attributeMapping.targetAttribute.name?html}. By checking one of the attributes below,
 						an algorithm will be generated and the result of your selection will be shown."></i>
                     </legend>
                     <form>
@@ -183,8 +193,8 @@
                         Mapping
                         <i class="glyphicon glyphicon-question-sign" rel="tooltip" title="Use one of the methods below to map the values of the
 						selected attribute(s) to the target attribute. The script editor offers large control over your algorithm, but javascript knowledge is needed.
-						<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-                        attributeMapping.targetAttributeMetaData.dataType == "string">
+						<#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical" ||
+                        attributeMapping.targetAttribute.dataType == "string">
 				    		The Map tab allows you to map the various categorical values or strings to the categorical values of the target attribute.
 				    	</#if>"></i>
                     </legend>
@@ -198,7 +208,7 @@
                                                                                   role="tab"
                                                                                   data-toggle="tab">Script</a></li>
 
-                    <#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical">
+                    <#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical">
                         <li id="map-tab" role="presentation"><a href="#map" aria-controls="map" role="tab"
                                                                 data-toggle="tab">Map</a></li>
                     </#if>

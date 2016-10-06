@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -17,7 +17,7 @@ import org.molgenis.security.core.Permission;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
+import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
 class EntityTypeResponseV2
@@ -27,7 +27,7 @@ class EntityTypeResponseV2
 	private final String name;
 	private final String label;
 	private final String description;
-	private final List<AttributeMetaDataResponseV2> attributes;
+	private final List<AttributeResponseV2> attributes;
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
@@ -41,8 +41,8 @@ class EntityTypeResponseV2
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponseV2(EntityType meta, MolgenisPermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+	public EntityTypeResponseV2(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
+			LanguageService languageService)
 	{
 		this(meta, null, permissionService, dataService, languageService);
 	}
@@ -63,54 +63,48 @@ class EntityTypeResponseV2
 		this.label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
+		Iterable<Attribute> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
-		this.attributes = Lists.newArrayList(
-				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs, attr ->
+		{
+			Fetch subAttrFetch;
+			if (fetch != null)
+			{
+				if (attr.getDataType() == COMPOUND)
 				{
-					@Override
-					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
-					{
-						Fetch subAttrFetch;
-						if (fetch != null)
-						{
-							if (attr.getDataType() == COMPOUND)
-							{
-								subAttrFetch = fetch;
-							}
-							else
-							{
-								subAttrFetch = fetch.getFetch(attr);
-							}
-						}
-						else if (EntityTypeUtils.isReferenceType(attr))
-						{
-							subAttrFetch = AttributeFilterToFetchConverter
-									.createDefaultAttributeFetch(attr, languageCode);
-						}
-						else
-						{
-							subAttrFetch = null;
-						}
-						return new AttributeMetaDataResponseV2(name, meta, attr, subAttrFetch, permissionService,
-								dataService, languageService);
-					}
-				}));
+					subAttrFetch = fetch;
+				}
+				else
+				{
+					subAttrFetch = fetch.getFetch(attr);
+				}
+			}
+			else if (EntityTypeUtils.isReferenceType(attr))
+			{
+				subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr, languageCode);
+			}
+			else
+			{
+				subAttrFetch = null;
+			}
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService,
+					languageService);
+		}));
 
 		languageCode = languageService.getCurrentUserLanguageCode();
 
-		AttributeMetaData labelAttribute = meta.getLabelAttribute(languageCode);
+		Attribute labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 
-		AttributeMetaData idAttribute = meta.getIdAttribute();
+		Attribute idAttribute = meta.getIdAttribute();
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
-		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+		Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 		this.lookupAttributes = lookupAttributes != null ? Lists
-				.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+				.newArrayList(Iterables.transform(lookupAttributes, new Function<Attribute, String>()
 				{
 					@Override
-					public String apply(AttributeMetaData attribute)
+					public String apply(Attribute attribute)
 					{
 						return attribute.getName();
 					}
@@ -158,7 +152,7 @@ class EntityTypeResponseV2
 		return lookupAttributes;
 	}
 
-	public List<AttributeMetaDataResponseV2> getAttributes()
+	public List<AttributeResponseV2> getAttributes()
 	{
 		return attributes;
 	}

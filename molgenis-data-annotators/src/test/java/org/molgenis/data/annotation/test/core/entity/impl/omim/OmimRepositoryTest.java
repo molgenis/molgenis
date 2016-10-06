@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.test.core.entity.impl.omim;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.impl.omim.OmimRepository;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -35,7 +35,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -54,7 +54,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		repo = new OmimRepository(omimFile, entityTypeFactory, attributeMetaDataFactory);
+		repo = new OmimRepository(omimFile, entityTypeFactory, attributeFactory);
 
 		entity1 = new DynamicEntity(repo.getEntityType());
 		entity1.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, nonmedullary, 4}");

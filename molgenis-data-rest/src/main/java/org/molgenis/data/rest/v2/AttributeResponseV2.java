@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -21,7 +21,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.MolgenisFieldTypes.getType;
 
-class AttributeMetaDataResponseV2
+class AttributeResponseV2
 {
 	private final String href;
 	private final AttributeType fieldType;
@@ -41,7 +41,7 @@ class AttributeMetaDataResponseV2
 	private final Boolean unique;
 	private final Boolean visible;
 	private Boolean lookupAttribute;
-	private Boolean aggregateable;
+	private Boolean isAggregatable;
 	private Range range;
 	private String expression;
 	private String visibleExpression;
@@ -54,9 +54,8 @@ class AttributeMetaDataResponseV2
 	 * @param fetch             set of lowercase attribute names to include in response
 	 * @param permissionService
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, EntityType entityType, AttributeMetaData attr,
-			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -79,21 +78,21 @@ class AttributeMetaDataResponseV2
 		{
 			this.refEntity = null;
 		}
-		AttributeMetaData mappedByAttr = attr.getMappedBy();
+		Attribute mappedByAttr = attr.getMappedBy();
 		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
-		Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
+		Iterable<Attribute> attrParts = attr.getAttributeParts();
 		if (attrParts != null)
 		{
 			// filter attribute parts
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists
+					.newArrayList(Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
 					{
 						@Override
-						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
+						public AttributeResponseV2 apply(Attribute attr)
 						{
 							Fetch subAttrFetch;
 							if (fetch != null)
@@ -116,7 +115,7 @@ class AttributeMetaDataResponseV2
 							{
 								subAttrFetch = null;
 							}
-							return new AttributeMetaDataResponseV2(entityParentName, entityType, attr, subAttrFetch,
+							return new AttributeResponseV2(entityParentName, entityType, attr, subAttrFetch,
 									permissionService, dataService, languageService);
 						}
 					}));
@@ -133,21 +132,21 @@ class AttributeMetaDataResponseV2
 		this.labelAttribute = attr.equals(entityType.getLabelAttribute());
 		this.unique = attr.isUnique();
 		this.lookupAttribute = entityType.getLookupAttribute(attr.getName()) != null;
-		this.aggregateable = attr.isAggregatable();
+		this.isAggregatable = attr.isAggregatable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
 		this.visibleExpression = attr.getVisibleExpression();
 		this.validationExpression = attr.getValidationExpression();
 	}
 
-	public static Iterable<AttributeMetaData> filterAttributes(Fetch fetch, Iterable<AttributeMetaData> attrs)
+	public static Iterable<Attribute> filterAttributes(Fetch fetch, Iterable<Attribute> attrs)
 	{
 		if (fetch != null)
 		{
-			return Iterables.filter(attrs, new Predicate<AttributeMetaData>()
+			return Iterables.filter(attrs, new Predicate<Attribute>()
 			{
 				@Override
-				public boolean apply(AttributeMetaData attr)
+				public boolean apply(Attribute attr)
 				{
 					return filterAttributeRec(fetch, attr);
 				}
@@ -159,11 +158,11 @@ class AttributeMetaDataResponseV2
 		}
 	}
 
-	public static boolean filterAttributeRec(Fetch fetch, AttributeMetaData attr)
+	public static boolean filterAttributeRec(Fetch fetch, Attribute attr)
 	{
 		if (attr.getDataType() == COMPOUND)
 		{
-			for (AttributeMetaData attrPart : attr.getAttributeParts())
+			for (Attribute attrPart : attr.getAttributeParts())
 			{
 				if (filterAttributeRec(fetch, attrPart))
 				{
@@ -263,9 +262,9 @@ class AttributeMetaDataResponseV2
 		return lookupAttribute;
 	}
 
-	public Boolean isAggregateable()
+	public Boolean isAggregatable()
 	{
-		return aggregateable;
+		return isAggregatable;
 	}
 
 	public Boolean getNillable()
@@ -288,9 +287,9 @@ class AttributeMetaDataResponseV2
 		return unique;
 	}
 
-	public Boolean getAggregateable()
+	public Boolean getAggregatable()
 	{
-		return aggregateable;
+		return isAggregatable;
 	}
 
 	public Range getRange()

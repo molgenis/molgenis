@@ -2,7 +2,7 @@ package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Maps;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,28 +57,25 @@ public class SystemEntityTypeRegistry
 		systemEntityTypeMap.put(systemEntityTypeName, systemEntityType);
 	}
 
-	public boolean hasSystemAttributeMetaData(String attrIdentifier)
+	public boolean hasSystemAttribute(String attrIdentifier)
 	{
-		return getSystemAttributeMetaData(attrIdentifier) != null;
+		return getSystemAttribute(attrIdentifier) != null;
 	}
 
-	public AttributeMetaData getSystemAttributeMetaData(String attrIdentifier)
+	public Attribute getSystemAttribute(String attrIdentifier)
 	{
-		return getSystemEntityTypes()
-				.map(systemEntityType -> getSystemAttributeMetaData(systemEntityType, attrIdentifier))
+		return getSystemEntityTypes().map(systemEntityType -> getSystemAttribute(systemEntityType, attrIdentifier))
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaData(SystemEntityType systemEntityType,
-			String attrIdentifier)
+	private static Attribute getSystemAttribute(SystemEntityType systemEntityType, String attrIdentifier)
 	{
-		return getSystemAttributeMetaDataRec(systemEntityType.getAllAttributes(), attrIdentifier);
+		return getSystemAttributeRec(systemEntityType.getAllAttributes(), attrIdentifier);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs,
-			String attrIdentifier)
+	private static Attribute getSystemAttributeRec(Iterable<Attribute> attrs, String attrIdentifier)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			if (attr.getIdentifier() != null && attr.getIdentifier().equals(attrIdentifier))
 			{
@@ -88,7 +85,7 @@ public class SystemEntityTypeRegistry
 			{
 				if (attr.getDataType() == COMPOUND)
 				{
-					return getSystemAttributeMetaDataRec(attr.getAttributeParts(), attrIdentifier);
+					return getSystemAttributeRec(attr.getAttributeParts(), attrIdentifier);
 				}
 			}
 		}

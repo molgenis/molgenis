@@ -1,7 +1,7 @@
 package org.molgenis.data.rest.v2;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Collections;
@@ -90,7 +90,7 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 		return this;
 	}
 
-	public AttributeFilter getAttributeFilter(EntityType entityType, AttributeMetaData attr)
+	public AttributeFilter getAttributeFilter(EntityType entityType, Attribute attr)
 	{
 		if (idAttrFilter != null && attr.equals(entityType.getIdAttribute()))
 		{

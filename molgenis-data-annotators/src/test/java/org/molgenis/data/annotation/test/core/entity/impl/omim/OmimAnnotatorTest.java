@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -50,7 +50,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -86,11 +86,9 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		List<Entity> entitiesToAnnotate = newArrayList();
 
 		EntityType inputEntityType = entityTypeFactory.create().setName("Test");
-		inputEntityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
-		inputEntityType.addAttributes(
-				Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
-						omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(),
-						omimAnnotator.getTypeAttr()));
+		inputEntityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
+		inputEntityType.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
+				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
 
 		Entity inputEntity = new DynamicEntity(inputEntityType);
 		inputEntity.set(GENE_NAME, "CYP17A1");
@@ -99,7 +97,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
 		EntityType expectedEntityType = entityTypeFactory.create().setName("Test");
-		expectedEntityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
+		expectedEntityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		expectedEntityType.addAttribute(omimAnnotator.getPhenotypeAttr());
 		expectedEntityType.addAttribute(omimAnnotator.getMimNumberAttr());
 		expectedEntityType.addAttribute(omimAnnotator.getOmimLocationAttr());

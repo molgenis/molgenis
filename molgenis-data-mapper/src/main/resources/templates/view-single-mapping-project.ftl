@@ -127,7 +127,7 @@
                         <div>
                             <#if source.getAttributeMapping(attribute.name)??>
                                 <#assign attributeMapping = source.getAttributeMapping(attribute.name)>
-                                <#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
+                                <#list attributeMapping.sourceAttributes as mappedSourceAttribute>
                                 ${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
                                     <#if attributeMapping.algorithmState??></#if>
                                 </#list>

@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageSearchResultItem;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -267,7 +267,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		data.put("type", "entity");
 		data.put("href", "/api/v1/" + emd.getName() + "/meta");
 
-		for (AttributeMetaData amd : emd.getAttributes())
+		for (Attribute amd : emd.getAttributes())
 		{
 			result.add(createPackageTreeNode(amd, emd));
 		}
@@ -275,7 +275,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return new PackageTreeNode("entity", title, key, tooltip, folder, expanded, data, result);
 	}
 
-	private PackageTreeNode createPackageTreeNode(AttributeMetaData amd, EntityType emd)
+	private PackageTreeNode createPackageTreeNode(Attribute amd, EntityType emd)
 	{
 		String title = amd.getLabel();
 		String key = amd.getName();
@@ -291,7 +291,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		if (amd.getDataType() == AttributeType.COMPOUND)
 		{
-			for (AttributeMetaData subAmd : amd.getAttributeParts())
+			for (Attribute subAmd : amd.getAttributeParts())
 			{
 				result.add(createPackageTreeNode(subAmd, emd));
 			}

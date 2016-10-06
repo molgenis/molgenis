@@ -3,7 +3,7 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -55,7 +55,7 @@ public class PostgreSqlRepositoryTest
 		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
 		long count = 123L;
 		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
-		postgreSqlRepo.setMetaData(entityType);
+		postgreSqlRepo.setEntityType(entityType);
 		assertEquals(postgreSqlRepo.count(query), count);
 	}
 
@@ -77,19 +77,19 @@ public class PostgreSqlRepositoryTest
 		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
 		Entity entity0 = mock(Entity.class);
 		when(jdbcTemplate.query(sql, new Object[] { queryValue }, rowMapper)).thenReturn(singletonList(entity0));
-		postgreSqlRepo.setMetaData(entityType);
+		postgreSqlRepo.setEntityType(entityType);
 		assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
 	}
 
 	private static EntityType createEntityMetaOneToMany(String oneToManyAttrName)
 	{
 		String refIdAttrName = "refEntityId";
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getName()).thenReturn(refIdAttrName);
 		when(refIdAttr.getDataType()).thenReturn(INT);
 
 		String xrefAttrName = "xrefAttr";
-		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
+		Attribute xrefAttr = mock(Attribute.class);
 		when(xrefAttr.getName()).thenReturn(xrefAttrName);
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
@@ -99,11 +99,11 @@ public class PostgreSqlRepositoryTest
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 
 		String idAttrName = "entityId";
-		AttributeMetaData idAttr = mock(AttributeMetaData.class);
+		Attribute idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn(idAttrName);
 		when(idAttr.getDataType()).thenReturn(STRING);
 
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);

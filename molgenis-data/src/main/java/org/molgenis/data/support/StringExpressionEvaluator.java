@@ -3,35 +3,35 @@ package org.molgenis.data.support;
 import com.google.gson.Gson;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 public class StringExpressionEvaluator implements ExpressionEvaluator
 {
-	private AttributeMetaData targetAttributeMetaData;
-	private AttributeMetaData sourceAttributeMetaData;
+	private Attribute targetAttribute;
+	private Attribute sourceAttribute;
 
 	/**
 	 * Constructs a new expression evaluator for an attribute whose expression is a simple string.
 	 *
-	 * @param attrMeta   attribute meta data
+	 * @param attribute  attribute meta data
 	 * @param entityType entity meta data
 	 */
-	public StringExpressionEvaluator(AttributeMetaData attrMeta, EntityType entityType)
+	public StringExpressionEvaluator(Attribute attribute, EntityType entityType)
 	{
-		targetAttributeMetaData = attrMeta;
-		String expression = attrMeta.getExpression();
+		targetAttribute = attribute;
+		String expression = attribute.getExpression();
 		if (expression == null)
 		{
 			throw new NullPointerException("Attribute has no expression.");
 		}
 		Gson gson = new Gson();
 		String attributeName = gson.fromJson(expression, String.class);
-		sourceAttributeMetaData = entityType.getAttribute(attributeName);
-		if (sourceAttributeMetaData == null)
+		sourceAttribute = entityType.getAttribute(attributeName);
+		if (sourceAttribute == null)
 		{
 			throw new IllegalArgumentException(
-					"Expression for attribute '" + attrMeta.getName() + "' references non-existant attribute '"
+					"Expression for attribute '" + attribute.getName() + "' references non-existant attribute '"
 							+ attributeName + "'.");
 		}
 	}
@@ -39,7 +39,7 @@ public class StringExpressionEvaluator implements ExpressionEvaluator
 	@Override
 	public Object evaluate(Entity entity)
 	{
-		Object o = entity.get(sourceAttributeMetaData.getName());
-		return DataConverter.convert(o, targetAttributeMetaData);
+		Object o = entity.get(sourceAttribute.getName());
+		return DataConverter.convert(o, targetAttribute);
 	}
 }

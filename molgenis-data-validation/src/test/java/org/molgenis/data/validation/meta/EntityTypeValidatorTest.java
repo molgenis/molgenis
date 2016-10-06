@@ -4,7 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -18,8 +18,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.PARTS;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 
@@ -29,10 +29,10 @@ public class EntityTypeValidatorTest
 	private DataService dataService;
 
 	private EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-	private AttributeMetaData idAttr;
-	private AttributeMetaData labelAttr;
+	private Attribute idAttr;
+	private Attribute labelAttr;
 	private Query<EntityType> entityQ;
-	private Query<AttributeMetaData> attrQ;
+	private Query<Attribute> attrQ;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -49,12 +49,12 @@ public class EntityTypeValidatorTest
 		// valid entity meta
 		entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 
-		idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("#idAttr");
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(idAttr.isUnique()).thenReturn(true);
 		when(idAttr.isNillable()).thenReturn(false);
-		labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("labelAttr").getMock();
+		labelAttr = when(mock(Attribute.class).getName()).thenReturn("labelAttr").getMock();
 		when(labelAttr.getIdentifier()).thenReturn("#labelAttr");
 		when(labelAttr.getDataType()).thenReturn(STRING);
 
@@ -73,10 +73,10 @@ public class EntityTypeValidatorTest
 		//noinspection unchecked
 		attrQ = mock(Query.class);
 		//noinspection unchecked
-		Query<AttributeMetaData> attrQ0 = mock(Query.class);
+		Query<Attribute> attrQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<AttributeMetaData> attrQ1 = mock(Query.class);
-		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		Query<Attribute> attrQ1 = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ0);
 		when(attrQ.eq(PARTS, labelAttr)).thenReturn(attrQ1);
 		when(attrQ0.findOne()).thenReturn(null);
@@ -137,9 +137,10 @@ public class EntityTypeValidatorTest
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
 		when(entityQ0.findOne()).thenReturn(null);
+
 		EntityType ownerEntityType = when(mock(EntityType.class).getName()).thenReturn("ownerEntity").getMock();
 		when(entityQ1.findOne()).thenReturn(ownerEntityType);
-		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
 		entityTypeValidator.validate(entityType);
@@ -156,7 +157,7 @@ public class EntityTypeValidatorTest
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
 		when(entityQ0.findOne()).thenReturn(null);
 		when(entityQ1.findOne()).thenReturn(entityType); // same entity
-		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
 		entityTypeValidator.validate(entityType); // should not throw an exception
@@ -169,14 +170,14 @@ public class EntityTypeValidatorTest
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
 		//noinspection unchecked
-		Query<AttributeMetaData> attrQ0 = mock(Query.class);
+		Query<Attribute> attrQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<AttributeMetaData> attrQ1 = mock(Query.class);
-		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		Query<Attribute> attrQ1 = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ0);
 		when(attrQ.eq(PARTS, labelAttr)).thenReturn(attrQ1);
 		when(attrQ0.findOne()).thenReturn(null);
-		AttributeMetaData attrParent = when(mock(AttributeMetaData.class).getName()).thenReturn("attrParent").getMock();
+		Attribute attrParent = when(mock(Attribute.class).getName()).thenReturn("attrParent").getMock();
 		when(attrQ1.findOne()).thenReturn(attrParent);
 		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
@@ -193,14 +194,14 @@ public class EntityTypeValidatorTest
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
 		//noinspection unchecked
-		Query<AttributeMetaData> attrQ0 = mock(Query.class);
+		Query<Attribute> attrQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<AttributeMetaData> attrQ1 = mock(Query.class);
-		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		Query<Attribute> attrQ1 = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ0);
 		when(attrQ.eq(PARTS, labelAttr)).thenReturn(attrQ1);
 		when(attrQ0.findOne()).thenReturn(null);
-		AttributeMetaData attrParent = when(mock(AttributeMetaData.class).getName()).thenReturn("attrParent").getMock();
+		Attribute attrParent = when(mock(Attribute.class).getName()).thenReturn("attrParent").getMock();
 		when(attrQ1.findOne()).thenReturn(attrParent);
 		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
@@ -221,8 +222,7 @@ public class EntityTypeValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "An attribute with name \\[idAttr\\] already exists in entity \\[extendsEntity\\] or one of its parents")
 	public void testValidateAttributeOwnedByExtendedEntity()
 	{
-		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("extendsEntity")
-				.getMock();
+		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("extendsEntity").getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		entityTypeValidator.validate(entityType);
@@ -277,7 +277,7 @@ public class EntityTypeValidatorTest
 	public void testValidateOwnIdAttributeNullIdAttributeNotNull()
 	{
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
-		AttributeMetaData parentIdAttr = mock(AttributeMetaData.class);
+		Attribute parentIdAttr = mock(Attribute.class);
 		when(entityType.getIdAttribute()).thenReturn(parentIdAttr);
 		entityTypeValidator.validate(entityType); // valid
 	}

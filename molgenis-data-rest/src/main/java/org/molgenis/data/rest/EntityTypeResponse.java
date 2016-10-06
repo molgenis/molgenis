@@ -8,7 +8,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -37,8 +37,8 @@ public class EntityTypeResponse
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponse(EntityType meta, MolgenisPermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+	public EntityTypeResponse(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
+			LanguageService languageService)
 	{
 		this(meta, null, null, permissionService, dataService, languageService);
 	}
@@ -48,9 +48,8 @@ public class EntityTypeResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public EntityTypeResponse(EntityType meta, Set<String> attributesSet,
-			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -80,17 +79,16 @@ public class EntityTypeResponse
 			this.attributes = new LinkedHashMap<String, Object>();
 			//the newArraylist is a fix for concurrency trouble
 			//FIXME properly fix this by making metadata immutable
-			for (AttributeMetaData attr : Lists.newArrayList(meta.getAttributes()))
+			for (Attribute attr : Lists.newArrayList(meta.getAttributes()))
 			{
 				if (!attr.getName().equals("__Type"))
 				{
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-						this.attributes.put(attr.getName(),
-								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet, Collections
-										.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-										permissionService, dataService, languageService));
+						this.attributes.put(attr.getName(), new AttributeResponse(name, meta, attr, subAttributesSet,
+								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
+								permissionService, dataService, languageService));
 					}
 					else
 					{
@@ -104,26 +102,26 @@ public class EntityTypeResponse
 
 		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
-			AttributeMetaData labelAttribute = meta.getLabelAttribute(this.languageCode);
+			Attribute labelAttribute = meta.getLabelAttribute(this.languageCode);
 			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 		}
 		else this.labelAttribute = null;
 
 		if (attributesSet == null || attributesSet.contains("idAttribute".toLowerCase()))
 		{
-			AttributeMetaData idAttribute = meta.getIdAttribute();
+			Attribute idAttribute = meta.getIdAttribute();
 			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 		}
 		else this.idAttribute = null;
 
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
-			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 			this.lookupAttributes = lookupAttributes != null ? Lists
-					.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+					.newArrayList(Iterables.transform(lookupAttributes, new Function<Attribute, String>()
 					{
 						@Override
-						public String apply(AttributeMetaData attribute)
+						public String apply(Attribute attribute)
 						{
 							return attribute.getName();
 						}

@@ -8,7 +8,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -165,7 +165,7 @@ public class VcfImporterServiceTest
 		when(outSampleRepo0.getName()).thenReturn(sampleEntityName0);
 		when(metaDataService.createRepository(argThat(eqName(sampleEntityType0)))).thenReturn(outSampleRepo0);
 
-		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
+		Attribute sampleAttr = mock(Attribute.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
@@ -306,7 +306,7 @@ public class VcfImporterServiceTest
 		List<String> entityNames = Arrays.asList(entityName0);
 
 		String attrName0 = "attr0";
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
 		EntityType entityType0 = mock(EntityType.class);
@@ -347,7 +347,7 @@ public class VcfImporterServiceTest
 		List<String> entityNames = Arrays.asList(entityName0);
 
 		String attrName0 = "attr0";
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
 		EntityType entityType0 = mock(EntityType.class);
@@ -389,11 +389,11 @@ public class VcfImporterServiceTest
 		List<String> entityNames = Arrays.asList(entityName0);
 
 		String attrName0 = "attr0";
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
 		String sampleAttrName0 = "sampleAttr0";
-		AttributeMetaData sampleAttr0 = mock(AttributeMetaData.class);
+		Attribute sampleAttr0 = mock(Attribute.class);
 		when(sampleAttr0.getName()).thenReturn(sampleAttrName0);
 
 		String sampleEntityName0 = "entity0sample";
@@ -404,7 +404,7 @@ public class VcfImporterServiceTest
 		when(sampleEntityType0.getAtomicAttributes()).thenReturn(singleton(sampleAttr0));
 		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
-		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
+		Attribute sampleAttr = mock(Attribute.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
@@ -453,11 +453,11 @@ public class VcfImporterServiceTest
 		List<String> entityNames = Arrays.asList(entityName0);
 
 		String attrName0 = "attr0";
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
 		String sampleAttrName0 = "sampleAttr0";
-		AttributeMetaData sampleAttr0 = mock(AttributeMetaData.class);
+		Attribute sampleAttr0 = mock(Attribute.class);
 		when(sampleAttr0.getName()).thenReturn(sampleAttrName0);
 
 		String sampleEntityName0 = "entity0sample";
@@ -468,7 +468,7 @@ public class VcfImporterServiceTest
 		when(sampleEntityType0.getAtomicAttributes()).thenReturn(singleton(sampleAttr0));
 		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
-		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
+		Attribute sampleAttr = mock(Attribute.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);

@@ -5,7 +5,7 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
@@ -23,7 +23,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetaData.PARENT;
@@ -245,8 +245,8 @@ public class MetaDataServiceImplTest
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getBackend()).thenReturn(backendName);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
@@ -278,10 +278,11 @@ public class MetaDataServiceImplTest
 	{
 		String backendName = "backend";
 		Class<Package> entityClass = Package.class;
+
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getBackend()).thenReturn(backendName);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
@@ -445,8 +446,8 @@ public class MetaDataServiceImplTest
 	public void addEntityType()
 	{
 		EntityType entityType = mock(EntityType.class);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 		metaDataServiceImpl.addEntityType(entityType);
 
@@ -472,14 +473,14 @@ public class MetaDataServiceImplTest
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		when(entityType0.hasMappedByAttributes()).thenReturn(false);
-		AttributeMetaData entity0Attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData entity0Attr1 = mock(AttributeMetaData.class);
+		Attribute entity0Attr0 = mock(Attribute.class);
+		Attribute entity0Attr1 = mock(Attribute.class);
 		when(entityType0.getOwnAllAttributes()).thenReturn(newArrayList(entity0Attr0, entity0Attr1));
 
 		EntityType entityType1 = mock(EntityType.class);
 		when(entityType1.hasMappedByAttributes()).thenReturn(false);
-		AttributeMetaData entity1Attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData entity1Attr1 = mock(AttributeMetaData.class);
+		Attribute entity1Attr0 = mock(Attribute.class);
+		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
 		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
@@ -511,14 +512,14 @@ public class MetaDataServiceImplTest
 		when(entityType0.getSimpleName()).thenReturn("entity0");
 		when(entityType0.hasMappedByAttributes()).thenReturn(true);
 
-		AttributeMetaData entity0Attr0 = mock(AttributeMetaData.class);
+		Attribute entity0Attr0 = mock(Attribute.class);
 		when(entity0Attr0.getName()).thenReturn("entity0Attr0");
 		when(entity0Attr0.getIdentifier()).thenReturn("id00");
 		when(entity0Attr0.getAttributeParts()).thenReturn(emptyList());
 		when(entity0Attr0.getTags()).thenReturn(emptyList());
 		when(entity0Attr0.isMappedBy()).thenReturn(true);
 
-		AttributeMetaData entity0Attr1 = mock(AttributeMetaData.class);
+		Attribute entity0Attr1 = mock(Attribute.class);
 		when(entity0Attr1.getName()).thenReturn("entity0Attr1");
 		when(entity0Attr1.getIdentifier()).thenReturn("id01");
 		when(entity0Attr1.getAttributeParts()).thenReturn(emptyList());
@@ -531,8 +532,8 @@ public class MetaDataServiceImplTest
 
 		EntityType entityType1 = mock(EntityType.class);
 		when(entityType1.hasMappedByAttributes()).thenReturn(false);
-		AttributeMetaData entity1Attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData entity1Attr1 = mock(AttributeMetaData.class);
+		Attribute entity1Attr0 = mock(Attribute.class);
+		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
 		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
@@ -618,14 +619,14 @@ public class MetaDataServiceImplTest
 		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.hasMappedByAttributes()).thenReturn(true);
 
-		AttributeMetaData entity0Attr0 = mock(AttributeMetaData.class);
+		Attribute entity0Attr0 = mock(Attribute.class);
 		when(entity0Attr0.getName()).thenReturn("entity0Attr0");
 		when(entity0Attr0.getIdentifier()).thenReturn("id00");
 		when(entity0Attr0.getAttributeParts()).thenReturn(emptyList());
 		when(entity0Attr0.getTags()).thenReturn(emptyList());
 		when(entity0Attr0.isMappedBy()).thenReturn(true);
 
-		AttributeMetaData entity0Attr1 = mock(AttributeMetaData.class);
+		Attribute entity0Attr1 = mock(Attribute.class);
 		when(entity0Attr1.getName()).thenReturn("entity0Attr1");
 		when(entity0Attr1.getIdentifier()).thenReturn("id01");
 		when(entity0Attr1.getAttributeParts()).thenReturn(emptyList());
@@ -638,10 +639,11 @@ public class MetaDataServiceImplTest
 
 		EntityType entityType1 = mock(EntityType.class);
 		String entityName1 = "entity1";
+
 		when(entityType1.getName()).thenReturn(entityName1);
 		when(entityType1.hasMappedByAttributes()).thenReturn(false);
-		AttributeMetaData entity1Attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData entity1Attr1 = mock(AttributeMetaData.class);
+		Attribute entity1Attr0 = mock(Attribute.class);
+		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
 		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
@@ -674,27 +676,23 @@ public class MetaDataServiceImplTest
 		String attrShared1Name = "attrUpdated";
 		String attrAddedName = "attrAdded";
 		String attrDeletedName = "attrDeleted";
-		AttributeMetaData attrShared0 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared0Name)
-				.getMock();
+		Attribute attrShared0 = when(mock(Attribute.class).getName()).thenReturn(attrShared0Name).getMock();
 		when(attrShared0.getIdentifier()).thenReturn(attrShared0Name);
 		when(attrShared0.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared0.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1 = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1.getIdentifier()).thenReturn(attrShared1Name);
 		when(attrShared1.getLabel()).thenReturn("label");
 		when(attrShared1.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1Updated = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1Updated = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1Updated.getLabel()).thenReturn("new label");
 		when(attrShared1Updated.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1Updated.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrAdded = when(mock(AttributeMetaData.class).getName()).thenReturn(attrAddedName).getMock();
+		Attribute attrAdded = when(mock(Attribute.class).getName()).thenReturn(attrAddedName).getMock();
 		when(attrAdded.getAttributeParts()).thenReturn(emptyList());
 		when(attrAdded.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrDeleted = when(mock(AttributeMetaData.class).getName()).thenReturn(attrDeletedName)
-				.getMock();
+		Attribute attrDeleted = when(mock(Attribute.class).getName()).thenReturn(attrDeletedName).getMock();
 		when(attrDeleted.getIdentifier()).thenReturn(attrDeletedName);
 		when(attrDeleted.getAttributeParts()).thenReturn(emptyList());
 		when(attrDeleted.getTags()).thenReturn(emptyList());
@@ -770,27 +768,23 @@ public class MetaDataServiceImplTest
 		String attrShared1Name = "attrUpdated";
 		String attrAddedName = "attrAdded";
 		String attrDeletedName = "attrDeleted";
-		AttributeMetaData attrShared0 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared0Name)
-				.getMock();
+		Attribute attrShared0 = when(mock(Attribute.class).getName()).thenReturn(attrShared0Name).getMock();
 		when(attrShared0.getIdentifier()).thenReturn(attrShared0Name);
 		when(attrShared0.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared0.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1 = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1.getIdentifier()).thenReturn(attrShared1Name);
 		when(attrShared1.getLabel()).thenReturn("label");
 		when(attrShared1.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1Updated = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1Updated = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1Updated.getLabel()).thenReturn("new label");
 		when(attrShared1Updated.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1Updated.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrAdded = when(mock(AttributeMetaData.class).getName()).thenReturn(attrAddedName).getMock();
+		Attribute attrAdded = when(mock(Attribute.class).getName()).thenReturn(attrAddedName).getMock();
 		when(attrAdded.getAttributeParts()).thenReturn(emptyList());
 		when(attrAdded.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrDeleted = when(mock(AttributeMetaData.class).getName()).thenReturn(attrDeletedName)
-				.getMock();
+		Attribute attrDeleted = when(mock(Attribute.class).getName()).thenReturn(attrDeletedName).getMock();
 		when(attrDeleted.getIdentifier()).thenReturn(attrDeletedName);
 		when(attrDeleted.getAttributeParts()).thenReturn(emptyList());
 		when(attrDeleted.getTags()).thenReturn(emptyList());
@@ -805,10 +799,11 @@ public class MetaDataServiceImplTest
 		when(existingEntityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(existingEntityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
-		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<AttributeMetaData>>()
+
+		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
 		{
 			@Override
-			public Stream<AttributeMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.empty();
 			}
@@ -821,10 +816,11 @@ public class MetaDataServiceImplTest
 		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(entityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
-		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<AttributeMetaData>>()
+
+		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
 		{
 			@Override
-			public Stream<AttributeMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.empty();
 			}
@@ -866,29 +862,25 @@ public class MetaDataServiceImplTest
 		String attrShared1Name = "attrUpdated";
 		String attrAddedName = "attrAdded";
 		String attrDeletedName = "attrDeleted";
-		AttributeMetaData attrShared0 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared0Name)
-				.getMock();
+		Attribute attrShared0 = when(mock(Attribute.class).getName()).thenReturn(attrShared0Name).getMock();
 		when(attrShared0.getIdentifier()).thenReturn(attrShared0Name);
 		when(attrShared0.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared0.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1 = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1.getIdentifier()).thenReturn(attrShared1Name);
 		when(attrShared1.getLabel()).thenReturn("label");
 		when(attrShared1.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1.getTags()).thenReturn(emptyList());
 		when(attrShared1.isMappedBy()).thenReturn(true);
-		AttributeMetaData attrShared1Updated = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1Updated = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1Updated.getLabel()).thenReturn("new label");
 		when(attrShared1Updated.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1Updated.getTags()).thenReturn(emptyList());
 		when(attrShared1.isMappedBy()).thenReturn(false);
-		AttributeMetaData attrAdded = when(mock(AttributeMetaData.class).getName()).thenReturn(attrAddedName).getMock();
+		Attribute attrAdded = when(mock(Attribute.class).getName()).thenReturn(attrAddedName).getMock();
 		when(attrAdded.getAttributeParts()).thenReturn(emptyList());
 		when(attrAdded.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrDeleted = when(mock(AttributeMetaData.class).getName()).thenReturn(attrDeletedName)
-				.getMock();
+		Attribute attrDeleted = when(mock(Attribute.class).getName()).thenReturn(attrDeletedName).getMock();
 		when(attrDeleted.getIdentifier()).thenReturn(attrDeletedName);
 		when(attrDeleted.getAttributeParts()).thenReturn(emptyList());
 		when(attrDeleted.getTags()).thenReturn(emptyList());
@@ -903,10 +895,11 @@ public class MetaDataServiceImplTest
 		when(existingEntityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(existingEntityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
-		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<AttributeMetaData>>()
+
+		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
 		{
 			@Override
-			public Stream<AttributeMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.of(attrShared1);
 			}
@@ -920,10 +913,11 @@ public class MetaDataServiceImplTest
 		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(entityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
-		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<AttributeMetaData>>()
+
+		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
 		{
 			@Override
-			public Stream<AttributeMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.of(attrShared1Updated);
 			}
@@ -970,29 +964,25 @@ public class MetaDataServiceImplTest
 		String attrShared1Name = "attrUpdated";
 		String attrAddedName = "attrAdded";
 		String attrDeletedName = "attrDeleted";
-		AttributeMetaData attrShared0 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared0Name)
-				.getMock();
+		Attribute attrShared0 = when(mock(Attribute.class).getName()).thenReturn(attrShared0Name).getMock();
 		when(attrShared0.getIdentifier()).thenReturn(attrShared0Name);
 		when(attrShared0.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared0.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1 = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1.getIdentifier()).thenReturn(attrShared1Name);
 		when(attrShared1.getLabel()).thenReturn("label");
 		when(attrShared1.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1.getTags()).thenReturn(emptyList());
 		when(attrShared1.isMappedBy()).thenReturn(true);
-		AttributeMetaData attrShared1Updated = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
-				.getMock();
+		Attribute attrShared1Updated = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name).getMock();
 		when(attrShared1Updated.getLabel()).thenReturn("new label");
 		when(attrShared1Updated.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1Updated.getTags()).thenReturn(emptyList());
 		when(attrShared1Updated.isMappedBy()).thenReturn(false);
-		AttributeMetaData attrAdded = when(mock(AttributeMetaData.class).getName()).thenReturn(attrAddedName).getMock();
+		Attribute attrAdded = when(mock(Attribute.class).getName()).thenReturn(attrAddedName).getMock();
 		when(attrAdded.getAttributeParts()).thenReturn(emptyList());
 		when(attrAdded.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrDeleted = when(mock(AttributeMetaData.class).getName()).thenReturn(attrDeletedName)
-				.getMock();
+		Attribute attrDeleted = when(mock(Attribute.class).getName()).thenReturn(attrDeletedName).getMock();
 		when(attrDeleted.getIdentifier()).thenReturn(attrDeletedName);
 		when(attrDeleted.getAttributeParts()).thenReturn(emptyList());
 		when(attrDeleted.getTags()).thenReturn(emptyList());
@@ -1007,10 +997,11 @@ public class MetaDataServiceImplTest
 		when(existingEntityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(existingEntityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
-		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<AttributeMetaData>>()
+
+		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
 		{
 			@Override
-			public Stream<AttributeMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.of(attrShared1);
 			}
@@ -1024,10 +1015,11 @@ public class MetaDataServiceImplTest
 		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(entityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
-		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<AttributeMetaData>>()
+
+		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
 		{
 			@Override
-			public Stream<AttributeMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.empty();
 			}
@@ -1068,7 +1060,7 @@ public class MetaDataServiceImplTest
 	@Test
 	public void addAttribute()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		metaDataServiceImpl.addAttribute(attr);
 		verify(dataService).add(ATTRIBUTE_META_DATA, attr);
 	}

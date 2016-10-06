@@ -1,7 +1,7 @@
 package org.molgenis.test.data.staticentity.bidirectional.authorbook3;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +42,7 @@ public class AuthorMetaData3 extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
-		AttributeMetaData attribute = bookMetaData.getAttribute(BookMetaData3.AUTHOR);
+		Attribute attribute = bookMetaData.getAttribute(BookMetaData3.AUTHOR);
 		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute)
 				.setNillable(false);
 	}

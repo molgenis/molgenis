@@ -2,7 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
@@ -278,7 +278,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT))
 		{
-			List<AttributeMetaData> requiredValueAttrs = StreamSupport
+			List<Attribute> requiredValueAttrs = StreamSupport
 					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
@@ -289,7 +289,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private void initReferenceValidation(ValidationResource validationResource)
 	{
 		// get reference attrs
-		List<AttributeMetaData> refAttrs;
+		List<Attribute> refAttrs;
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs
@@ -337,7 +337,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		validationResource.setRefAttrs(refAttrs);
 	}
 
-	private boolean isDifferentBackend(String backend, AttributeMetaData attr)
+	private boolean isDifferentBackend(String backend, Attribute attr)
 	{
 		EntityType refEntity = attr.getRefEntity();
 		String refEntityBackend = dataService.getMeta().getBackend(refEntity).getName();
@@ -349,7 +349,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT))
 		{
 			// get unique attributes
-			List<AttributeMetaData> uniqueAttrs = StreamSupport
+			List<Attribute> uniqueAttrs = StreamSupport
 					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
@@ -393,8 +393,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
 		String idAttrName = getEntityType().getIdAttribute().getName();
-		List<AttributeMetaData> readonlyAttrs = StreamSupport
-				.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+		List<Attribute> readonlyAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.getName().equals(idAttrName))
 				.collect(toList());
 
@@ -514,8 +513,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			{
 				if (!refEntityIds.contains(refEntity.getIdValue()))
 				{
-					boolean selfReference = entity.getEntityType().getName()
-							.equals(refAttr.getRefEntity().getName());
+					boolean selfReference = entity.getEntityType().getName().equals(refAttr.getRefEntity().getName());
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
@@ -594,12 +592,12 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private static class ValidationResource implements AutoCloseable
 	{
 		private AtomicInteger rowNr = new AtomicInteger();
-		private List<AttributeMetaData> requiredValueAttrs;
-		private List<AttributeMetaData> refAttrs;
+		private List<Attribute> requiredValueAttrs;
+		private List<Attribute> refAttrs;
 		private Map<String, HugeSet<Object>> refEntitiesIds;
-		private List<AttributeMetaData> uniqueAttrs;
+		private List<Attribute> uniqueAttrs;
 		private Map<String, HugeMap<Object, Object>> uniqueAttrsValues;
-		private List<AttributeMetaData> readonlyAttrs;
+		private List<Attribute> readonlyAttrs;
 		private boolean selfReferencing;
 		private Set<ConstraintViolation> violations;
 
@@ -618,22 +616,22 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			rowNr.incrementAndGet();
 		}
 
-		public List<AttributeMetaData> getRequiredValueAttrs()
+		public List<Attribute> getRequiredValueAttrs()
 		{
 			return requiredValueAttrs != null ? unmodifiableList(requiredValueAttrs) : emptyList();
 		}
 
-		public void setRequiredValueAttrs(List<AttributeMetaData> requiredValueAttrs)
+		public void setRequiredValueAttrs(List<Attribute> requiredValueAttrs)
 		{
 			this.requiredValueAttrs = requiredValueAttrs;
 		}
 
-		public List<AttributeMetaData> getRefAttrs()
+		public List<Attribute> getRefAttrs()
 		{
 			return unmodifiableList(refAttrs);
 		}
 
-		public void setRefAttrs(List<AttributeMetaData> refAttrs)
+		public void setRefAttrs(List<Attribute> refAttrs)
 		{
 			this.refAttrs = refAttrs;
 		}
@@ -658,12 +656,12 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			}
 		}
 
-		public List<AttributeMetaData> getUniqueAttrs()
+		public List<Attribute> getUniqueAttrs()
 		{
 			return uniqueAttrs != null ? unmodifiableList(uniqueAttrs) : emptyList();
 		}
 
-		public void setUniqueAttrs(List<AttributeMetaData> uniqueAttrs)
+		public void setUniqueAttrs(List<Attribute> uniqueAttrs)
 		{
 			this.uniqueAttrs = uniqueAttrs;
 		}
@@ -678,12 +676,12 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			this.uniqueAttrsValues = uniqueAttrsValues;
 		}
 
-		public List<AttributeMetaData> getReadonlyAttrs()
+		public List<Attribute> getReadonlyAttrs()
 		{
 			return readonlyAttrs != null ? unmodifiableList(readonlyAttrs) : emptyList();
 		}
 
-		public void setReadonlyAttrs(List<AttributeMetaData> readonlyAttrs)
+		public void setReadonlyAttrs(List<Attribute> readonlyAttrs)
 		{
 			this.readonlyAttrs = readonlyAttrs;
 		}

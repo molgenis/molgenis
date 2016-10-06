@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMultimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -81,9 +81,9 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	{
 		vcf = mock(EntityType.class);
 		when(vcf.getName()).thenReturn("VCF");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData effAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("EFF").getMock();
+		Attribute effAttr = when(mock(Attribute.class).getName()).thenReturn("EFF").getMock();
 		when(effAttr.getDataType()).thenReturn(STRING);
 		when(vcf.getIdAttribute()).thenReturn(idAttr);
 		when(vcf.getAtomicAttributes()).thenReturn(asList(idAttr, effAttr));
@@ -121,7 +121,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
 		EntityType nonVcf = when(mock(EntityType.class).getName()).thenReturn("NonVCF").getMock();
-		AttributeMetaData idAttr = mock(AttributeMetaData.class);
+		Attribute idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn("id");
 		when(nonVcf.getIdAttribute()).thenReturn(idAttr);
 		when(nonVcf.getAtomicAttributes()).thenReturn(singletonList(idAttr));

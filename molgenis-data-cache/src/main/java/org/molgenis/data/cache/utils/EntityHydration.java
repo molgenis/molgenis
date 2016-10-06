@@ -3,7 +3,7 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class EntityHydration
 	 * Rehydrate an entity. Entity can be an {@link EntityWithComputedAttributes}
 	 * if there are attributes present with an expression
 	 *
-	 * @param entityType   metadata of the entity to rehydrate
+	 * @param entityType       metadata of the entity to rehydrate
 	 * @param dehydratedEntity map with key value pairs representing this entity
 	 * @return hydrated entity
 	 */
@@ -52,7 +52,7 @@ public class EntityHydration
 
 		Entity hydratedEntity = entityManager.create(entityType, NO_POPULATE);
 
-		for (AttributeMetaData attribute : entityType.getAtomicAttributes())
+		for (Attribute attribute : entityType.getAtomicAttributes())
 		{
 			// Only hydrate the attribute if it is NOT computed.
 			// Computed attributes will be calculated based on the metadata

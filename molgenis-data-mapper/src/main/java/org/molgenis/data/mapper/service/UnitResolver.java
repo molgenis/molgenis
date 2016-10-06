@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import javax.measure.quantity.Quantity;
@@ -15,5 +15,5 @@ public interface UnitResolver
 	 * @param entityType corresponding entity meta data for attribute
 	 * @return unit or null
 	 */
-	Unit<? extends Quantity> resolveUnit(AttributeMetaData attr, EntityType entityType);
+	Unit<? extends Quantity> resolveUnit(Attribute attr, EntityType entityType);
 }

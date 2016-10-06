@@ -2,7 +2,7 @@ package org.molgenis.data.populate;
 
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
@@ -32,29 +32,27 @@ public class EntityPopulatorTest
 	public void setUpBeforeMethod()
 	{
 		entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attrId = when(mock(AttributeMetaData.class).getName()).thenReturn(ATTR_ID).getMock();
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn(ATTR_ID).getMock();
 		when(attrId.getDataType()).thenReturn(STRING);
 		when(attrId.isAuto()).thenReturn(true);
-		AttributeMetaData attrDateAutoDefault = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(ATTR_DATE_AUTO_DEFAULT).getMock();
+		Attribute attrDateAutoDefault = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATE_AUTO_DEFAULT)
+				.getMock();
 		when(attrDateAutoDefault.getDataType()).thenReturn(DATE);
-		AttributeMetaData attrDateAutoFalse = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(ATTR_DATE_AUTO_FALSE).getMock();
+		Attribute attrDateAutoFalse = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATE_AUTO_FALSE).getMock();
 		when(attrDateAutoFalse.getDataType()).thenReturn(DATE);
 		when(attrDateAutoFalse.isAuto()).thenReturn(false);
-		AttributeMetaData attrDateAutoTrue = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(ATTR_DATE_AUTO_TRUE).getMock();
+		Attribute attrDateAutoTrue = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATE_AUTO_TRUE).getMock();
 		when(attrDateAutoTrue.getDataType()).thenReturn(DATE);
 		when(attrDateAutoTrue.isAuto()).thenReturn(true);
-		AttributeMetaData attrDateTimeAutoDefault = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(ATTR_DATETIME_AUTO_DEFAULT).getMock();
+		Attribute attrDateTimeAutoDefault = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATETIME_AUTO_DEFAULT)
+				.getMock();
 		when(attrDateTimeAutoDefault.getDataType()).thenReturn(DATE_TIME);
-		AttributeMetaData attrDateTimeAutoFalse = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(ATTR_DATETIME_AUTO_FALSE).getMock();
+		Attribute attrDateTimeAutoFalse = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATETIME_AUTO_FALSE)
+				.getMock();
 		when(attrDateTimeAutoFalse.getDataType()).thenReturn(DATE_TIME);
 		when(attrDateTimeAutoFalse.isAuto()).thenReturn(false);
-		AttributeMetaData attrDateTimeAutoTrue = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(ATTR_DATETIME_AUTO_TRUE).getMock();
+		Attribute attrDateTimeAutoTrue = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATETIME_AUTO_TRUE)
+				.getMock();
 		when(attrDateTimeAutoTrue.getDataType()).thenReturn(DATE_TIME);
 		when(attrDateTimeAutoTrue.isAuto()).thenReturn(true);
 		when(entityType.getIdAttribute()).thenReturn(attrId);

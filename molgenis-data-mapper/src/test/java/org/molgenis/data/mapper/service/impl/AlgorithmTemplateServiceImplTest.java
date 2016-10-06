@@ -3,11 +3,11 @@ package org.molgenis.data.mapper.service.impl;
 import com.google.common.collect.Maps;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -49,7 +49,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private AlgorithmTemplateServiceImpl algorithmTemplateServiceImpl;
@@ -85,18 +85,16 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
-		EntityType sourceEntityType = entityTypeFactory.create("source");
-		AttributeMetaData sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
-		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
-		sourceEntityType.addAttribute(sourceAttr0);
-		sourceEntityType.addAttribute(sourceAttr1);
+		EntityType sourceEntityMeta = entityTypeFactory.create("source");
+		Attribute sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
+		Attribute sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
+		sourceEntityMeta.addAttribute(sourceAttr0);
+		sourceEntityMeta.addAttribute(sourceAttr1);
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();
-		attrResults.put(sourceAttr0,
-				ExplainedAttributeMetaData.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
-		attrResults.put(sourceAttr1,
-				ExplainedAttributeMetaData.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
+		Map<Attribute, ExplainedAttribute> attrResults = Maps.newHashMap();
+		attrResults.put(sourceAttr0, ExplainedAttribute.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
+		attrResults.put(sourceAttr1, ExplainedAttribute.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 

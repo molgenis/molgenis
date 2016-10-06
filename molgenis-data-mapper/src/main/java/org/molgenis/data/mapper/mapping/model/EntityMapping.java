@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.mapping.model;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Collection;
@@ -8,9 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by charbonb on 14/01/15.
- */
 public class EntityMapping
 {
 	private String identifier;
@@ -26,7 +23,7 @@ public class EntityMapping
 		this.identifier = null;
 		this.sourceEntityType = source;
 		this.targetEntityType = target;
-		this.attributeMappings = new LinkedHashMap<String, AttributeMapping>();
+		this.attributeMappings = new LinkedHashMap<>();
 	}
 
 	public EntityMapping(String identifier, EntityType sourceEntityType, EntityType targetEntityType,
@@ -35,10 +32,10 @@ public class EntityMapping
 		this.identifier = identifier;
 		this.sourceEntityType = sourceEntityType;
 		this.targetEntityType = targetEntityType;
-		this.attributeMappings = new LinkedHashMap<String, AttributeMapping>();
+		this.attributeMappings = new LinkedHashMap<>();
 		for (AttributeMapping mapping : attributeMappings)
 		{
-			this.attributeMappings.put(mapping.getTargetAttributeMetaData().getName(), mapping);
+			this.attributeMappings.put(mapping.getTargetAttribute().getName(), mapping);
 		}
 	}
 
@@ -109,8 +106,8 @@ public class EntityMapping
 			throw new IllegalStateException(
 					"AttributeMapping already exists for target attribute " + targetAttributeName);
 		}
-		AttributeMetaData targetAttributeMetaData = targetEntityType.getAttribute(targetAttributeName);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		Attribute targetAttribute = targetEntityType.getAttribute(targetAttributeName);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMappings.put(targetAttributeName, attributeMapping);
 		return attributeMapping;
 	}

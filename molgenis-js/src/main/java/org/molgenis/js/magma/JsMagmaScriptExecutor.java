@@ -1,7 +1,7 @@
 package org.molgenis.js.magma;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -20,13 +20,13 @@ import static java.util.Objects.requireNonNull;
 public class JsMagmaScriptExecutor
 {
 	private final EntityTypeFactory entityTypeFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attributeFactory;
 
 	@Autowired
-	public JsMagmaScriptExecutor(EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory)
+	public JsMagmaScriptExecutor(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
-		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.attributeFactory = requireNonNull(attributeFactory);
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class JsMagmaScriptExecutor
 		EntityType entityType = entityTypeFactory.create().setSimpleName("entity");
 		parameters.keySet().stream().forEach(key ->
 		{
-			entityType.addAttribute(attrMetaFactory.create().setName(key));
+			entityType.addAttribute(attributeFactory.create().setName(key));
 		});
 		Entity entity = new DynamicEntity(entityType);
 		parameters.entrySet().forEach(parameter ->

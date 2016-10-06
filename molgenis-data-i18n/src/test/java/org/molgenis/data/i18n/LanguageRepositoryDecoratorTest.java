@@ -9,9 +9,9 @@ import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -38,7 +38,7 @@ import static org.testng.Assert.assertEquals;
 public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataMetaData attrMetaMeta;
+	private AttributeMetadata attrMetaMeta;
 
 	@Autowired
 	private EntityTypeMetadata entityTypeMeta;
@@ -50,7 +50,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private LanguageFactory languageFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Mock
 	private Repository<Language> decoratedRepo;
@@ -127,32 +127,26 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		i18nStringMetaData.addAttribute(attrMetaFactory.create().setName(de));
 
 		// Add language NL attributes for entity meta data
-		AttributeMetaData entityLabelNL = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + nl);
-		AttributeMetaData entityDescriptionNL = attrMetaFactory.create()
-				.setName(EntityTypeMetadata.DESCRIPTION + '-' + nl);
+		Attribute entityLabelNL = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + nl);
+		Attribute entityDescriptionNL = attrMetaFactory.create().setName(EntityTypeMetadata.DESCRIPTION + '-' + nl);
 		entityTypeMeta.addAttribute(entityLabelNL);
 		entityTypeMeta.addAttribute(entityDescriptionNL);
 
 		// Add language DE attributes for entity meta data
-		AttributeMetaData entityLabelDE = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + de);
-		AttributeMetaData entityDescriptionDE = attrMetaFactory.create()
-				.setName(EntityTypeMetadata.DESCRIPTION + '-' + de);
+		Attribute entityLabelDE = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + de);
+		Attribute entityDescriptionDE = attrMetaFactory.create().setName(EntityTypeMetadata.DESCRIPTION + '-' + de);
 		entityTypeMeta.addAttribute(entityLabelDE);
 		entityTypeMeta.addAttribute(entityDescriptionDE);
 
 		// Add language NL attributes for attribute meta data
-		AttributeMetaData attributeLabelNL = attrMetaFactory.create()
-				.setName(AttributeMetaDataMetaData.LABEL + '-' + nl);
-		AttributeMetaData attributeDescriptionNL = attrMetaFactory.create()
-				.setName(AttributeMetaDataMetaData.DESCRIPTION + '-' + nl);
+		Attribute attributeLabelNL = attrMetaFactory.create().setName(AttributeMetadata.LABEL + '-' + nl);
+		Attribute attributeDescriptionNL = attrMetaFactory.create().setName(AttributeMetadata.DESCRIPTION + '-' + nl);
 		attrMetaMeta.addAttribute(attributeLabelNL);
 		attrMetaMeta.addAttribute(attributeDescriptionNL);
 
 		// Add language DE attributes for attribute meta data
-		AttributeMetaData attributeLabelDE = attrMetaFactory.create()
-				.setName(AttributeMetaDataMetaData.LABEL + '-' + de);
-		AttributeMetaData attributeDescriptionDE = attrMetaFactory.create()
-				.setName(AttributeMetaDataMetaData.DESCRIPTION + '-' + de);
+		Attribute attributeLabelDE = attrMetaFactory.create().setName(AttributeMetadata.LABEL + '-' + de);
+		Attribute attributeDescriptionDE = attrMetaFactory.create().setName(AttributeMetadata.DESCRIPTION + '-' + de);
 		attrMetaMeta.addAttribute(attributeLabelDE);
 		attrMetaMeta.addAttribute(attributeDescriptionDE);
 

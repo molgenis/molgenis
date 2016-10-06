@@ -1,8 +1,8 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.testng.annotations.BeforeMethod;
@@ -18,24 +18,24 @@ import static org.testng.Assert.assertEquals;
 
 public class SystemEntityTypeTest
 {
-	AttributeMetaDataFactory metaDataFactory;
-	EntityTypeMetadata metaDataMetaData;
+	AttributeFactory attributeFactory;
+	EntityTypeMetadata entityTypeMetaData;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		metaDataFactory = mock(AttributeMetaDataFactory.class);
-		metaDataMetaData = mock(EntityTypeMetadata.class);
+		attributeFactory = mock(AttributeFactory.class);
+		entityTypeMetaData = mock(EntityTypeMetadata.class);
 
-		when(metaDataFactory.getAttributeMetaDataMetaData()).thenReturn(mock(AttributeMetaDataMetaData.class));
+		when(attributeFactory.getAttributeMetadata()).thenReturn(mock(AttributeMetadata.class));
 	}
 
 	@Test
 	public void testAssignRolesToAttributeParts()
 	{
 		TestCompoundEMD testEMD = new TestCompoundEMD("Test");
-		testEMD.setAttributeMetaDataFactory(metaDataFactory);
-		testEMD.bootstrap(metaDataMetaData);
+		testEMD.setAttributeFactory(attributeFactory);
+		testEMD.bootstrap(entityTypeMetaData);
 
 		assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
 		assertEquals(testEMD.getLabelAttribute().getName(), "labelAttr");
@@ -49,8 +49,8 @@ public class SystemEntityTypeTest
 	public void testAssignRolesToAttributePartsNested()
 	{
 		TestNestedCompoundEMD testEMD = new TestNestedCompoundEMD("Test");
-		testEMD.setAttributeMetaDataFactory(metaDataFactory);
-		testEMD.bootstrap(metaDataMetaData);
+		testEMD.setAttributeFactory(attributeFactory);
+		testEMD.bootstrap(entityTypeMetaData);
 
 		assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
 		assertEquals(testEMD.getLabelAttribute().getName(), "labelAttr");
@@ -72,7 +72,7 @@ public class SystemEntityTypeTest
 		@Override
 		protected void init()
 		{
-			AttributeMetaData compoundAttr1 = mock(AttributeMetaData.class);
+			Attribute compoundAttr1 = mock(Attribute.class);
 			addAttribute(compoundAttr1);
 			addAttribute("compoundAttr2", compoundAttr1);
 			addAttribute("idAttr", compoundAttr1, ROLE_ID);
@@ -94,7 +94,7 @@ public class SystemEntityTypeTest
 		@Override
 		protected void init()
 		{
-			AttributeMetaData compoundAttr = mock(AttributeMetaData.class);
+			Attribute compoundAttr = mock(Attribute.class);
 			addAttribute(compoundAttr);
 			addAttribute("idAttr", compoundAttr, ROLE_ID);
 			addAttribute("labelAttr", compoundAttr, ROLE_LABEL);

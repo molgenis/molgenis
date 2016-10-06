@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -37,7 +37,7 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -48,17 +48,17 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 	@Test
 	public void filterResults()
 	{
-		HpoResultFilter filter = new HpoResultFilter(entityTypeFactory, attributeMetaDataFactory, hpoAnnotator);
+		HpoResultFilter filter = new HpoResultFilter(entityTypeFactory, attributeFactory, hpoAnnotator);
 
 		EntityType resultEntityType = entityTypeFactory.create().setSimpleName("result");
 		resultEntityType.addAttribute(hpoAnnotator.getIdsAttr());
 		resultEntityType.addAttribute(hpoAnnotator.getTermsAttr());
 
 		EntityType entityType = entityTypeFactory.create().setSimpleName("HPO");
-		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
-		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
-		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
-		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_TERM_COL_NAME));
+		entityType.addAttribute(attributeFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
+		entityType.addAttribute(attributeFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
+		entityType.addAttribute(attributeFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
+		entityType.addAttribute(attributeFactory.create().setName(HPO_TERM_COL_NAME));
 
 		Entity e1 = new DynamicEntity(entityType);
 		e1.set(HPO_ID_COL_NAME, "id1");

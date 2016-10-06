@@ -6,8 +6,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.context.ApplicationContext;
@@ -24,7 +24,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -33,15 +33,16 @@ import static org.testng.Assert.assertEquals;
 public class SystemEntityTypePersisterTest
 {
 	private DataService dataService;
+
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private SystemEntityTypePersister systemEntityTypePersister;
-	private AttributeMetaDataMetaData attrMetaMeta;
+	private AttributeMetadata attrMetaMeta;
 	private MetaDataService metaDataService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		attrMetaMeta = mock(AttributeMetaDataMetaData.class);
+		attrMetaMeta = mock(AttributeMetadata.class);
 		metaDataService = mock(MetaDataService.class);
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
@@ -49,7 +50,7 @@ public class SystemEntityTypePersisterTest
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry);
-		systemEntityTypePersister.setAttributeMetaDataMetaData(attrMetaMeta);
+		systemEntityTypePersister.setAttributeMetadata(attrMetaMeta);
 	}
 
 	@Test
@@ -66,8 +67,7 @@ public class SystemEntityTypePersisterTest
 		EntityType removedMeta = when(mock(EntityType.class).getName()).thenReturn("removed").getMock();
 		when(removedMeta.getPackage()).thenReturn(systemPackage);
 		when(removedMeta.toString()).thenReturn("removed");
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getRefEntity()).thenReturn(refRemovedMeta)
-				.getMock();
+		Attribute refAttr = when(mock(Attribute.class).getRefEntity()).thenReturn(refRemovedMeta).getMock();
 		when(removedMeta.getAtomicAttributes()).thenReturn(singletonList(refAttr));
 
 		EntityType refEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
@@ -96,7 +96,7 @@ public class SystemEntityTypePersisterTest
 	@Test
 	public void persistSystemPackageChange()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_META_DATA, EntityType.class)).thenReturn(Stream.empty());
@@ -126,7 +126,7 @@ public class SystemEntityTypePersisterTest
 	@Test
 	public void persistSystemPackageNoChange()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_META_DATA, EntityType.class)).thenReturn(Stream.empty());

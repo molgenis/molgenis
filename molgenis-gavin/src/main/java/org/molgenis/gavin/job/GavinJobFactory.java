@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -44,7 +44,7 @@ public class GavinJobFactory
 	private MenuReaderService menuReaderService;
 	private VcfAttributes vcfAttributes;
 	private VcfUtils vcfUtils;
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
@@ -53,7 +53,7 @@ public class GavinJobFactory
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
 			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
 			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, VcfUtils vcfUtils,
-			AttributeMetaDataFactory attributeMetaDataFactory, EntityTypeFactory entityTypeFactory)
+			AttributeFactory attributeFactory, EntityTypeFactory entityTypeFactory)
 	{
 		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
 		this.dataService = requireNonNull(dataService);
@@ -69,7 +69,7 @@ public class GavinJobFactory
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 		this.vcfUtils = requireNonNull(vcfUtils);
-		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
+		this.attributeFactory = requireNonNull(attributeFactory);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
@@ -86,7 +86,7 @@ public class GavinJobFactory
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
 				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityTypeFactory,
-				attributeMetaDataFactory);
+				attributeFactory);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()

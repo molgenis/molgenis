@@ -3,8 +3,8 @@ package org.molgenis.ontology.sorta.repo;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
@@ -33,8 +33,7 @@ public class SortaCsvRepository extends AbstractRepository
 	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays
 			.asList(new LowerCaseProcessor(), new TrimProcessor());
 
-	public SortaCsvRepository(File file, EntityTypeFactory entityTypeFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+	public SortaCsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
 		this.csvRepository = new CsvRepository(file, entityTypeFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -43,7 +42,7 @@ public class SortaCsvRepository extends AbstractRepository
 	}
 
 	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile,
-			EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
 		this.csvRepository = new CsvRepository(uploadedFile, entityTypeFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -55,14 +54,13 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityType == null)
 		{
-			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+			AttributeFactory attrMetaFactory = getApplicationContext().getBean(AttributeFactory.class);
 
 			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS);
 			entityType.setName(entityName);
 			entityType.setLabel(entityLabel);
-			entityType
-					.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
-			AttributeMetaData nameAttribute = entityType.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+			entityType.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
+			Attribute nameAttribute = entityType.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{
 				entityType.setLabelAttribute(nameAttribute);

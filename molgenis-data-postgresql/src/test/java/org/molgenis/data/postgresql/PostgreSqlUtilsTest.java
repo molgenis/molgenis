@@ -3,7 +3,7 @@ package org.molgenis.data.postgresql;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaMetaData;
@@ -26,42 +26,42 @@ import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlUtilsTest
 {
-	private static AttributeMetaData attrBool;
-	private static AttributeMetaData attrBoolNillable;
-	private static AttributeMetaData attrCategorical;
-	private static AttributeMetaData attrCategoricalNillable;
-	private static AttributeMetaData attrCategoricalMref;
-	private static AttributeMetaData attrCategoricalMrefNillable;
-	private static AttributeMetaData attrDate;
-	private static AttributeMetaData attrDateNillable;
-	private static AttributeMetaData attrDateTime;
-	private static AttributeMetaData attrDateTimeNillable;
-	private static AttributeMetaData attrDecimal;
-	private static AttributeMetaData attrDecimalNillable;
-	private static AttributeMetaData attrEmail;
-	private static AttributeMetaData attrEmailNillable;
-	private static AttributeMetaData attrEnum;
-	private static AttributeMetaData attrEnumNillable;
-	private static AttributeMetaData attrFile;
-	private static AttributeMetaData attrFileNillable;
-	private static AttributeMetaData attrHtml;
-	private static AttributeMetaData attrHtmlNillable;
-	private static AttributeMetaData attrHyperlink;
-	private static AttributeMetaData attrHyperlinkNillable;
-	private static AttributeMetaData attrInt;
-	private static AttributeMetaData attrIntNillable;
-	private static AttributeMetaData attrLong;
-	private static AttributeMetaData attrLongNillable;
-	private static AttributeMetaData attrMref;
-	private static AttributeMetaData attrMrefNillable;
-	private static AttributeMetaData attrScript;
-	private static AttributeMetaData attrScriptNillable;
-	private static AttributeMetaData attrString;
-	private static AttributeMetaData attrStringNillable;
-	private static AttributeMetaData attrText;
-	private static AttributeMetaData attrTextNillable;
-	private static AttributeMetaData attrXref;
-	private static AttributeMetaData attrXrefNillable;
+	private static Attribute attrBool;
+	private static Attribute attrBoolNillable;
+	private static Attribute attrCategorical;
+	private static Attribute attrCategoricalNillable;
+	private static Attribute attrCategoricalMref;
+	private static Attribute attrCategoricalMrefNillable;
+	private static Attribute attrDate;
+	private static Attribute attrDateNillable;
+	private static Attribute attrDateTime;
+	private static Attribute attrDateTimeNillable;
+	private static Attribute attrDecimal;
+	private static Attribute attrDecimalNillable;
+	private static Attribute attrEmail;
+	private static Attribute attrEmailNillable;
+	private static Attribute attrEnum;
+	private static Attribute attrEnumNillable;
+	private static Attribute attrFile;
+	private static Attribute attrFileNillable;
+	private static Attribute attrHtml;
+	private static Attribute attrHtmlNillable;
+	private static Attribute attrHyperlink;
+	private static Attribute attrHyperlinkNillable;
+	private static Attribute attrInt;
+	private static Attribute attrIntNillable;
+	private static Attribute attrLong;
+	private static Attribute attrLongNillable;
+	private static Attribute attrMref;
+	private static Attribute attrMrefNillable;
+	private static Attribute attrScript;
+	private static Attribute attrScriptNillable;
+	private static Attribute attrString;
+	private static Attribute attrStringNillable;
+	private static Attribute attrText;
+	private static Attribute attrTextNillable;
+	private static Attribute attrXref;
+	private static Attribute attrXrefNillable;
 
 	private static Entity entity;
 
@@ -94,7 +94,7 @@ public class PostgreSqlUtilsTest
 	{
 		// create ref entities
 		String attrRefStringIdName = "refStringId";
-		AttributeMetaData attrRefStringId = mock(AttributeMetaData.class);
+		Attribute attrRefStringId = mock(Attribute.class);
 		when(attrRefStringId.getName()).thenReturn(attrRefStringIdName);
 		when(attrRefStringId.getDataType()).thenReturn(STRING);
 
@@ -103,7 +103,7 @@ public class PostgreSqlUtilsTest
 		when(refStringIdEntityType.toString()).thenReturn("refStringId");
 
 		String attrRefIntIdName = "refIntId";
-		AttributeMetaData attrRefIntId = mock(AttributeMetaData.class);
+		Attribute attrRefIntId = mock(Attribute.class);
 		when(attrRefIntId.getName()).thenReturn(attrRefIntIdName);
 		when(attrRefIntId.getDataType()).thenReturn(INT);
 
@@ -112,7 +112,7 @@ public class PostgreSqlUtilsTest
 		when(refIntIdEntityType.toString()).thenReturn("refIntId");
 
 		String attrRefFileIdName = FileMetaMetaData.ID;
-		AttributeMetaData attrRefFileId = mock(AttributeMetaData.class);
+		Attribute attrRefFileId = mock(Attribute.class);
 		when(attrRefFileId.getName()).thenReturn(attrRefFileIdName);
 		when(attrRefFileId.getDataType()).thenReturn(STRING);
 
@@ -212,8 +212,7 @@ public class PostgreSqlUtilsTest
 
 		categoricalMrefValueId0 = "id0";
 		categoricalMrefValueId1 = "id1";
-		categoricalMrefValue0 = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType)
-				.getMock();
+		categoricalMrefValue0 = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType).getMock();
 		when(categoricalMrefValue0.toString()).thenReturn("categoricalMrefValue0");
 		when(categoricalMrefValue0.getIdValue()).thenReturn(categoricalMrefValueId0);
 		Entity categoricalMrefValue1 = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType)
@@ -334,7 +333,7 @@ public class PostgreSqlUtilsTest
 	}
 
 	@Test(dataProvider = "getPostgreSqlValue")
-	public void getPostgreSqlValue(AttributeMetaData attr, Object postgreSqlValue)
+	public void getPostgreSqlValue(Attribute attr, Object postgreSqlValue)
 	{
 		assertEquals(PostgreSqlUtils.getPostgreSqlValue(entity, attr), postgreSqlValue);
 	}
@@ -383,7 +382,7 @@ public class PostgreSqlUtilsTest
 	}
 
 	@Test(dataProvider = "getPostgreSqlValueQuery")
-	public void getPostgreSqlValueQuery(Object value, AttributeMetaData attr, Object postgreSqlValue)
+	public void getPostgreSqlValueQuery(Object value, Attribute attr, Object postgreSqlValue)
 	{
 		assertEquals(PostgreSqlUtils.getPostgreSqlQueryValue(value, attr), postgreSqlValue);
 	}
@@ -417,24 +416,24 @@ public class PostgreSqlUtilsTest
 	}
 
 	@Test(dataProvider = "getPostgreSqlValueQueryException", expectedExceptions = MolgenisDataException.class)
-	public void getPostgreSqlValueQueryException(Object value, AttributeMetaData attr)
+	public void getPostgreSqlValueQueryException(Object value, Attribute attr)
 	{
 		PostgreSqlUtils.getPostgreSqlQueryValue(value, attr);
 	}
 
-	private static AttributeMetaData createAttr(String attrName, AttributeType attrType)
+	private static Attribute createAttr(String attrName, AttributeType attrType)
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getName()).thenReturn(attrName);
 		when(attr.getDataType()).thenReturn(attrType);
 		when(attr.toString()).thenReturn(attrName);
 		return attr;
 	}
 
-	private static AttributeMetaData createAttr(String attrName, AttributeType attrType, EntityType refEntityType)
+	private static Attribute createAttr(String attrName, AttributeType attrType, EntityType refEntityMeta)
 	{
-		AttributeMetaData attr = createAttr(attrName, attrType);
-		when(attr.getRefEntity()).thenReturn(refEntityType);
+		Attribute attr = createAttr(attrName, attrType);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		return attr;
 	}
 }

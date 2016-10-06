@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.mapper.service.UnitResolver;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,20 +26,20 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		this.unitResolver = requireNonNull(unitResolver);
 	}
 
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityType targetEntityType, EntityType sourceEntityType)
+	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
+			EntityType sourceEntityType)
 	{
 		StringBuilder algorithm = new StringBuilder();
 
 		if (sourceAttributes.size() == 1)
 		{
-			algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityType,
-					sourceAttributes.get(0), sourceEntityType));
+			algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityType, sourceAttributes.get(0),
+					sourceEntityType));
 		}
 		else if (sourceAttributes.size() > 1)
 		{
 			algorithm.append("var counter = 0;\nvar SUM=newValue(0);\n");
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			for (Attribute sourceAttribute : sourceAttributes)
 			{
 				String generate = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
 						sourceEntityType);
@@ -53,19 +53,19 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		return algorithm.toString();
 	}
 
-	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public boolean isSuitable(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		return isNumericDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isNumericDataType));
 	}
 
-	boolean isNumericDataType(AttributeMetaData attribute)
+	boolean isNumericDataType(Attribute attribute)
 	{
 		AttributeType enumType = attribute.getDataType();
 		return enumType == INT || enumType == LONG || enumType == DECIMAL;
 	}
 
-	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityType targetEntityType,
-			AttributeMetaData sourceAttribute, EntityType sourceEntityType)
+	String generateUnitConversionAlgorithm(Attribute targetAttribute, EntityType targetEntityType,
+			Attribute sourceAttribute, EntityType sourceEntityType)
 	{
 		String algorithm = null;
 

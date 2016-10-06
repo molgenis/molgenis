@@ -4,12 +4,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 
@@ -38,19 +37,19 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
-	public void addAttribute(EntityType entityType, AttributeMetaData attribute)
+	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void updateAttribute(EntityType entityType, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteAttribute(EntityType entityType, AttributeMetaData attr)
+	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
 		throw new UnsupportedOperationException();
 	}

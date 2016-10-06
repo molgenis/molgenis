@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Collection;
@@ -20,7 +20,7 @@ public interface AlgorithmService
 	 * @param sourceEntities
 	 * @return algorithm evaluation for each source entity
 	 */
-	Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+	Iterable<AlgorithmEvaluation> applyAlgorithm(Attribute targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities);
 
 	/**
@@ -48,8 +48,8 @@ public interface AlgorithmService
 	 * @param mapping
 	 * @param targetAttribute
 	 */
-	void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType,
-			EntityMapping mapping, AttributeMetaData targetAttribute);
+	void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping,
+			Attribute targetAttribute);
 
 	/**
 	 * Generates the algorithm based on the given targetAttribute and sourceAttribute
@@ -60,6 +60,6 @@ public interface AlgorithmService
 	 * @param sourceEntityType
 	 * @return the generate algorithm
 	 */
-	String generateAlgorithm(AttributeMetaData targetAttribute, EntityType targetEntityType,
-			List<AttributeMetaData> sourceAttributes, EntityType sourceEntityType);
+	String generateAlgorithm(Attribute targetAttribute, EntityType targetEntityType, List<Attribute> sourceAttributes,
+			EntityType sourceEntityType);
 }

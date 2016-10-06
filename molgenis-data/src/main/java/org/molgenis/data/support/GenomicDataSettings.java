@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import com.google.common.collect.Sets;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
@@ -21,13 +21,13 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		super(ID);
 	}
 
-	public AttributeMetaData getAttributeMetadataForAttributeNameArray(String propertyName, EntityType metadata)
+	public Attribute getAttributeMetadataForAttributeNameArray(String propertyName, EntityType entityType)
 	{
 		String attrNamesStr = getString(propertyName);
 		if (attrNamesStr != null)
 		{
 			Set<String> attrNames = Sets.newHashSet(attrNamesStr.split(","));
-			for (AttributeMetaData attr : metadata.getAtomicAttributes())
+			for (Attribute attr : entityType.getAtomicAttributes())
 			{
 				if (attrNames.contains(attr.getName()))
 				{
@@ -40,7 +40,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 
 	public String getAttributeNameForAttributeNameArray(String propertyName, EntityType metadata)
 	{
-		AttributeMetaData attribute = getAttributeMetadataForAttributeNameArray(propertyName, metadata);
+		Attribute attribute = getAttributeMetadataForAttributeNameArray(propertyName, metadata);
 		if (attribute != null)
 		{
 			return attribute.getName();

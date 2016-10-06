@@ -10,8 +10,8 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.ws.rs.HEAD;
 import java.util.List;
 import java.util.Map;
 
@@ -50,12 +51,12 @@ public class MappingServiceImpl implements MappingService
 	private final IdGenerator idGenerator;
 	private final MappingProjectRepository mappingProjectRepository;
 	private final PermissionSystemService permissionSystemService;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 
 	@Autowired
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -246,14 +247,14 @@ public class MappingServiceImpl implements MappingService
 	 */
 	private void compareTargetMetaDatas(EntityType targetRepositoryMetaData, EntityType mappingTargetMetaData)
 	{
-		Map<String, AttributeMetaData> targetRepositoryAttributeMap = newHashMap();
+		Map<String, Attribute> targetRepositoryAttributeMap = newHashMap();
 		targetRepositoryMetaData.getAtomicAttributes()
 				.forEach(attribute -> targetRepositoryAttributeMap.put(attribute.getName(), attribute));
 
-		for (AttributeMetaData mappingTargetAttribute : mappingTargetMetaData.getAtomicAttributes())
+		for (Attribute mappingTargetAttribute : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttributeName = mappingTargetAttribute.getName();
-			AttributeMetaData targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
+			Attribute targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
 			if (targetRepositoryAttribute == null)
 			{
 				throw new MolgenisDataException(format("Target repository does not contain the following attribute: %s",
@@ -336,7 +337,7 @@ public class MappingServiceImpl implements MappingService
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
 			EntityType entityType)
 	{
-		String targetAttributeName = attributeMapping.getTargetAttributeMetaData().getName();
+		String targetAttributeName = attributeMapping.getTargetAttribute().getName();
 		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType);
 		target.set(targetAttributeName, typedValue);
 	}

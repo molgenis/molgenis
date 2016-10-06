@@ -16,11 +16,11 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
@@ -44,9 +44,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	private String anonymousEmail;
 
 	@Autowired
-	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(UserFactory userFactory,
-			GroupFactory groupFactory, UserAuthorityFactory userAuthorityFactory,
-			GroupAuthorityFactory groupAuthorityFactory)
+	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(UserFactory userFactory, GroupFactory groupFactory,
+			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory)
 	{
 		this.userFactory = requireNonNull(userFactory);
 		this.groupFactory = requireNonNull(groupFactory);

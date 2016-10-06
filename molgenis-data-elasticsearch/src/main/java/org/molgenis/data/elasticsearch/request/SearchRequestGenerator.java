@@ -4,7 +4,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Arrays;
@@ -32,14 +32,13 @@ public class SearchRequestGenerator
 	 * @param searchRequestBuilder
 	 * @param entityName
 	 * @param searchType
-	 * @param query
 	 * @param aggAttr1             First Field to aggregate on
 	 * @param aggAttr2             Second Field to aggregate on
 	 * @param entityType
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
-			Query<Entity> query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
-			AttributeMetaData aggAttrDistinct, EntityType entityType)
+			Query<Entity> query, Attribute aggAttr1, Attribute aggAttr2,
+			Attribute aggAttrDistinct, EntityType entityType)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
@@ -63,6 +62,5 @@ public class SearchRequestGenerator
 		{
 			aggregateQueryGenerator.generate(searchRequestBuilder, aggAttr1, aggAttr2, aggAttrDistinct);
 		}
-
 	}
 }

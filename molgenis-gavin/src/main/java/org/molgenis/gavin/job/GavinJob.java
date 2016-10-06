@@ -5,7 +5,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -41,13 +41,13 @@ public class GavinJob extends Job<Void>
 	private final VcfAttributes vcfAttributes;
 	private final VcfUtils vcfUtils;
 	private final EntityTypeFactory entityTypeFactory;
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
 			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin,
 			VcfAttributes vcfAttributes, VcfUtils vcfUtils, EntityTypeFactory entityTypeFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory)
+			AttributeFactory attributeFactory)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.jobIdentifier = jobIdentifier;
@@ -59,7 +59,7 @@ public class GavinJob extends Job<Void>
 		this.vcfAttributes = vcfAttributes;
 		this.vcfUtils = vcfUtils;
 		this.entityTypeFactory = entityTypeFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 
 		this.inputFile = fileStore
 				.getFile(format("{0}{1}{2}{3}input.vcf", GAVIN_APP, separator, jobIdentifier, separator));
@@ -100,7 +100,7 @@ public class GavinJob extends Job<Void>
 	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
 			throws IOException, MolgenisInvalidFormatException
 	{
-		AnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeMetaDataFactory, vcfUtils,
-				inputFile, outputFile, emptyList(), update);
+		AnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils, inputFile,
+				outputFile, emptyList(), update);
 	}
 }

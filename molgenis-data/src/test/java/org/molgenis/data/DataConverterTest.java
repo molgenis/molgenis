@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -28,24 +28,24 @@ public class DataConverterTest
 	@Test
 	public void convertDate() throws ParseException
 	{
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(DATE);
 		assertEquals(DataConverter.convert("2015-06-04", attr), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
 	}
 
-	@DataProvider(name = "convertObjectAttributeMetaDataProvider")
-	public static Iterator<Object[]> convertObjectAttributeMetaDataProvider()
+	@DataProvider(name = "convertObjectAttributeProvider")
+	public static Iterator<Object[]> convertObjectAttributeProvider()
 	{
 		Object object = mock(Object.class);
 		return newArrayList(new Object[] { object, ONE_TO_MANY, object }, new Object[] { object, XREF, object })
 				.iterator();
 	}
 
-	@Test(dataProvider = "convertObjectAttributeMetaDataProvider")
-	public void convertObjectAttributeMetaData(Object source, AttributeType attrType, Object convertedValue)
+	@Test(dataProvider = "convertObjectAttributeProvider")
+	public void convertObjectAttribute(Object source, MolgenisFieldTypes.AttributeType attrType, Object convertedValue)
 			throws ParseException
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(attrType);
 		assertEquals(DataConverter.convert(source, attr), convertedValue);
 	}
@@ -59,7 +59,7 @@ public class DataConverterTest
 	@Test
 	public void convertDateTime() throws ParseException
 	{
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(DATE_TIME);
 		assertEquals(DataConverter.convert("2015-05-22T11:12:13+0500", attr),
 				MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500"));

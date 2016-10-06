@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -50,7 +50,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private EntityManager entityManager;
@@ -67,8 +67,8 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 		initMocks(this);
 
 		entityType = entityTypeFactory.create(repository);
-		entityType.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
-		entityType.addAttribute(attributeMetaDataFactory.create().setName("ATTRIBUTE_1"));
+		entityType.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
+		entityType.addAttribute(attributeFactory.create().setName("ATTRIBUTE_1"));
 
 		Mockito.when(entityManager.create(entityType, NO_POPULATE)).thenReturn(new DynamicEntity(entityType));
 

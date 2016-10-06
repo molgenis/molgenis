@@ -8,7 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -48,7 +48,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	RepositoryRangeHandlingDataSource source;
 	private DasFeature dasFeature;

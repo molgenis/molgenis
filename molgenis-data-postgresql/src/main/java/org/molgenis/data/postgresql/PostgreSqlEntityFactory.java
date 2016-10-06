@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,10 +63,10 @@ public class PostgreSqlEntityFactory
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = entityManager.create(entityType, fetch);
+			Entity e = entityManager.createFetch(entityType, fetch);
 
 			// TODO performance, iterate over fetch if available
-			for (AttributeMetaData attr : entityType.getAtomicAttributes())
+			for (Attribute attr : entityType.getAtomicAttributes())
 			{
 				if (fetch == null || fetch.hasField(attr.getName()))
 				{
@@ -90,7 +90,7 @@ public class PostgreSqlEntityFactory
 		 * @return value for the given attribute in the type defined by the attribute type
 		 * @throws SQLException if an error occurs reading from the result set
 		 */
-		private Object mapValue(ResultSet resultSet, AttributeMetaData attr) throws SQLException
+		private Object mapValue(ResultSet resultSet, Attribute attr) throws SQLException
 		{
 			return mapValue(resultSet, attr, attr.getName());
 		}
@@ -105,7 +105,7 @@ public class PostgreSqlEntityFactory
 		 * @return value for the given attribute in the type defined by the attribute type
 		 * @throws SQLException if an error occurs reading from the result set
 		 */
-		private Object mapValue(ResultSet resultSet, AttributeMetaData attr, String colName) throws SQLException
+		private Object mapValue(ResultSet resultSet, Attribute attr, String colName) throws SQLException
 		{
 			Object value;
 			switch (attr.getDataType())
@@ -177,7 +177,7 @@ public class PostgreSqlEntityFactory
 		 * @return mapped value
 		 * @throws SQLException if an error occurs while attempting to access the array
 		 */
-		private Object mapValueOneToMany(Array arrayValue, AttributeMetaData attr) throws SQLException
+		private Object mapValueOneToMany(Array arrayValue, Attribute attr) throws SQLException
 		{
 			EntityType entityType = attr.getRefEntity();
 			Object value;
@@ -187,7 +187,7 @@ public class PostgreSqlEntityFactory
 				Arrays.sort(mrefIdsAndOrder,
 						(arr0, arr1) -> Integer.compare(Integer.valueOf(arr0[0]), Integer.valueOf(arr1[0])));
 
-				AttributeMetaData idAttr = entityType.getIdAttribute();
+				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
 				for (int i = 0; i < mrefIdsAndOrder.length; ++i)
 				{
@@ -225,7 +225,7 @@ public class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
-				AttributeMetaData idAttr = entityType.getIdAttribute();
+				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
 				for (String[] mrefIdAndOrder : mrefIdsAndOrder)
 				{
@@ -252,7 +252,7 @@ public class PostgreSqlEntityFactory
 		 * @param idAttr     id attribute
 		 * @return entity value
 		 */
-		private static Object convertMrefIdValue(String idValueStr, AttributeMetaData idAttr)
+		private static Object convertMrefIdValue(String idValueStr, Attribute idAttr)
 		{
 			// use iteration instead of tail recursion
 			while (true)

@@ -1,6 +1,6 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GenericDependencyResolver;
 import org.testng.annotations.BeforeMethod;
@@ -12,7 +12,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -35,9 +35,9 @@ public class EntityTypeDependencyResolverTest
 		entityType1 = when(mock(EntityType.class).getName()).thenReturn("entity1").getMock();
 		entityType2 = when(mock(EntityType.class).getName()).thenReturn("entity2").getMock();
 
-		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
-		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
-		AttributeMetaData attr2 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr2").getMock();
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
+		Attribute attr2 = when(mock(Attribute.class).getName()).thenReturn("attr2").getMock();
 
 		when(entityType0.getOwnAllAttributes()).thenReturn(singleton(attr0));
 		when(entityType1.getOwnAllAttributes()).thenReturn(singleton(attr1));
@@ -90,9 +90,9 @@ public class EntityTypeDependencyResolverTest
 		EntityType entitiesMeta = when(mock(EntityType.class).getName()).thenReturn(ENTITY_META_DATA).getMock();
 		EntityType attrsMeta = when(mock(EntityType.class).getName()).thenReturn(ATTRIBUTE_META_DATA).getMock();
 
-		AttributeMetaData entitiesAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("attrs").getMock();
+		Attribute entitiesAttr = when(mock(Attribute.class).getName()).thenReturn("attrs").getMock();
 		when(entitiesAttr.getRefEntity()).thenReturn(attrsMeta);
-		AttributeMetaData attrAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("entity").getMock();
+		Attribute attrAttr = when(mock(Attribute.class).getName()).thenReturn("entity").getMock();
 		when(attrAttr.getRefEntity()).thenReturn(entitiesMeta);
 
 		when(entitiesMeta.getOwnAllAttributes()).thenReturn(singleton(entitiesAttr));

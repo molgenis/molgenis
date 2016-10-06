@@ -4,7 +4,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
-import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
@@ -54,7 +53,7 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -101,11 +100,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTypeMetadata entityTypeMetadata;
 	@Autowired
-	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+	private AttributeMetadata attributeMetadata;
 	@Autowired
 	private LanguageFactory languageFactory;
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -160,7 +159,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			metaDataService.addEntityType(refEntityTypeDynamic);
 			metaDataService.addEntityType(entityTypeDynamic);
 			metaDataService.addEntityType(selfXrefEntityType);
-		}); setAuthentication();
+		});
+		setAuthentication();
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
@@ -186,7 +186,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getName(), false, true, true));
 		authorities.addAll(makeAuthorities(selfXrefEntityType.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(languageMetaData.getName(), true, true, true));
-		authorities.addAll(makeAuthorities(attributeMetaDataMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(attributeMetadata.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
 		authorities.addAll(makeAuthorities(entityTypeMetadata.getName(), true, true, true));
 
@@ -242,8 +242,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				"simpleName");
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("nl").getName(),
 				"simpleName");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute().getName(),
-				"simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute().getName(), "simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
@@ -1305,7 +1304,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String COUNTRY = "Country";
 		final EntityType entityType = EntityType
 				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS);
-		final AttributeMetaData newAttr = attributeMetaDataFactory.create().setName(COUNTRY);
+		final Attribute newAttr = attributeFactory.create().setName(COUNTRY);
 
 		runAsSystem(() ->
 		{
@@ -1313,8 +1312,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.getMeta().updateEntityType(entityType);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities)
-					.collect(toList());
+			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
 
 			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
 			dataService.add(entityTypeDynamic.getName(), entities.stream());

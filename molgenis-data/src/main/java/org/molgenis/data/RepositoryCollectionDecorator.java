@@ -1,11 +1,10 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
@@ -92,19 +91,19 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public void addAttribute(EntityType entityType, AttributeMetaData attribute)
+	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		decoratedRepositoryCollection.addAttribute(entityType, attribute);
 	}
 
 	@Override
-	public void updateAttribute(EntityType entityType, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
 		decoratedRepositoryCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Override
-	public void deleteAttribute(EntityType entityType, AttributeMetaData attr)
+	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
 		decoratedRepositoryCollection.deleteAttribute(entityType, attr);
 	}

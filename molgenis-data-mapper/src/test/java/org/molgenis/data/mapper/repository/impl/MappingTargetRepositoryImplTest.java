@@ -5,16 +5,16 @@ import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -50,7 +50,7 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private DataService dataService;
@@ -91,10 +91,9 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		// POJOs
 		EntityType sourceEntityType = entityTypeFactory.create("source");
 		targetEntityType = entityTypeFactory.create("target");
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
-		targetEntityType.addAttribute(targetAttributeMetaData);
-		entityMappings = asList(
-				new EntityMapping("entityMappingID", sourceEntityType, targetEntityType, emptyList()));
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+		targetEntityType.addAttribute(targetAttribute);
+		entityMappings = asList(new EntityMapping("entityMappingID", sourceEntityType, targetEntityType, emptyList()));
 		mappingTargets = asList(new MappingTarget("mappingTargetID", targetEntityType, entityMappings));
 
 		// Entities

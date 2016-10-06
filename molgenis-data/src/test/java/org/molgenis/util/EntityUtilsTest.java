@@ -2,7 +2,7 @@ package org.molgenis.util;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
@@ -29,7 +29,7 @@ public class EntityUtilsTest
 	public void isEmptyAttributeValuesNull()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
 		when(entityType.getAttribute("attr")).thenReturn(attr);
@@ -40,7 +40,7 @@ public class EntityUtilsTest
 	public void isEmptyAttributeValuesNotNull()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
 		when(entityType.getAttribute("attr")).thenReturn(attr);
@@ -63,12 +63,12 @@ public class EntityUtilsTest
 	}
 
 	@Test
-	public void getTypedValueStringAttributeMetaDataEntityManagerOneToMany()
+	public void getTypedValueStringAttributeEntityManagerOneToMany()
 	{
 		String valueStr = "0,1,2";
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		EntityType refEntityType = mock(EntityType.class);
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(INT);
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		when(attr.getRefEntity()).thenReturn(refEntityType);
@@ -84,12 +84,12 @@ public class EntityUtilsTest
 	}
 
 	@Test
-	public void getTypedValueStringAttributeMetaDataEntityManagerXref()
+	public void getTypedValueStringAttributeEntityManagerXref()
 	{
 		String valueStr = "0";
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		EntityType refEntityType = mock(EntityType.class);
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		when(attr.getRefEntity()).thenReturn(refEntityType);

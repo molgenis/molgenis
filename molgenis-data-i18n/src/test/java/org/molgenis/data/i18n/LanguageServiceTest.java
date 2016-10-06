@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DynamicEntity;
@@ -45,12 +45,12 @@ public class LanguageServiceTest
 	public void getCurrentUserLanguageCode()
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		EntityType nlEntityType = mock(EntityType.class);
-		AttributeMetaData langCodeAtrr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
-		when(nlEntityType.getAttribute("languageCode")).thenReturn(langCodeAtrr);
-		DynamicEntity langEntity = new DynamicEntity(nlEntityType, of("languageCode", "nl"));
+		EntityType nlEntityMeta = mock(EntityType.class);
+		Attribute langCodeAtrr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		when(nlEntityMeta.getAttribute("languageCode")).thenReturn(langCodeAtrr);
+		DynamicEntity langEntity = new DynamicEntity(nlEntityMeta, of("languageCode", "nl"));
 		when(queryMock.findOne()).thenReturn(langEntity);
-		AttributeMetaData nlAtrr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute nlAtrr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		EntityType languageMeta = mock(EntityType.class);
 		when(languageMeta.getAttribute("nl")).thenReturn(nlAtrr);
 		DynamicEntity nlEntity = new DynamicEntity(languageMeta, of("nl", "Nederlands"));

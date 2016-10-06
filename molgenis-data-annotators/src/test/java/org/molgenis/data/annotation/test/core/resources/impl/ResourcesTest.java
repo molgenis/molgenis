@@ -7,8 +7,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
 public class ResourcesTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -56,7 +56,7 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 	public void beforeClass()
 	{
 		emd = entityTypeFactory.create().setName("resourceName");
-		AttributeMetaData attr = attributeMetaDataFactory.create().setName("id");
+		Attribute attr = attributeFactory.create().setName("id");
 		emd.addAttribute(attr);
 		emd.setLabelAttribute(attr);
 		emd.setIdAttribute(attr);

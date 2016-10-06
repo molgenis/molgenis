@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.mockito.Mock;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -56,7 +56,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@BeforeClass
 	public void beforeClass()
@@ -64,8 +64,8 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 		initMocks(this);
 
 		entityType = entityTypeFactory.create(repositoryName);
-		entityType.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
-		entityType.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
+		entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
+		entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
 
 		entity1 = new DynamicEntity(entityType);
 		entity1.set(ID, 1);

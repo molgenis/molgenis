@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -22,7 +22,7 @@ public class PartialEntityTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		meta = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(meta.getIdAttribute()).thenReturn(idAttr);
 

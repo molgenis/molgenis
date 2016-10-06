@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
@@ -40,10 +40,9 @@ public class CommandLineAnnotatorConfig
 	public void bootstrap()
 	{
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
-		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext
-				.getBeansOfType(SystemEntityType.class);
-		systemEntityTypeMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
+		systemEntityMetaMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}
 
 	@Value("${vcf-validator-location:@null}")

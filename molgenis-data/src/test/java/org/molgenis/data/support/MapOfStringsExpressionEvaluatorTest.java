@@ -34,24 +34,24 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	private EntityType createDynamicLocationMetaData()
 	{
 		return entityTypeFactory.create().setSimpleName("Location")
-				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName("Chromosome").setDataType(STRING))
-				.addAttribute(attributeMetaDataFactory.create().setName("Position").setDataType(STRING));
+				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName("Chromosome").setDataType(STRING))
+				.addAttribute(attributeFactory.create().setName("Position").setDataType(STRING));
 	}
 
 	private EntityType createDynamicSourceMetaData()
 	{
 		return entityTypeFactory.create().setSimpleName("Source")
-				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName("Int").setDataType(INT))
-				.addAttribute(attributeMetaDataFactory.create().setName("String").setDataType(STRING))
-				.addAttribute(attributeMetaDataFactory.create().setName("NonNumericString").setDataType(STRING))
-				.addAttribute(attributeMetaDataFactory.create().setName("Long").setDataType(LONG));
+				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName("Int").setDataType(INT))
+				.addAttribute(attributeFactory.create().setName("String").setDataType(STRING))
+				.addAttribute(attributeFactory.create().setName("NonNumericString").setDataType(STRING))
+				.addAttribute(attributeFactory.create().setName("Long").setDataType(LONG));
 	}
 
 	@BeforeMethod
@@ -70,7 +70,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		try
 		{
@@ -86,7 +86,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("location").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getExpression()).thenReturn("{'a':b}");
 		try
@@ -103,7 +103,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("location").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("hallo");
@@ -121,7 +121,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':{'hallo1':'bla'}}");
@@ -140,7 +140,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'hallo':String}");
@@ -158,7 +158,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':hallo}");
@@ -177,7 +177,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testEvaluate()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
@@ -199,10 +199,9 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	{
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
-		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext
-				.getBeansOfType(SystemEntityType.class);
-		systemEntityTypeMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
+		systemEntityMetaMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}
 
 	@Configuration
