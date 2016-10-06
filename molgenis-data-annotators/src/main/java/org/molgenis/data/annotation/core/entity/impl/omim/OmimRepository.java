@@ -57,6 +57,7 @@ public class OmimRepository extends AbstractRepository
 		return emptySet();
 	}
 
+	@Override
 	public EntityType getEntityType()
 	{
 		EntityType entityType = entityTypeFactory.create().setSimpleName(NAME);

@@ -46,6 +46,7 @@ public class HPORepository extends AbstractRepository
 		return Collections.emptySet();
 	}
 
+	@Override
 	public EntityType getEntityType()
 	{
 		EntityType entityType = entityTypeFactory.create().setSimpleName("HPO");

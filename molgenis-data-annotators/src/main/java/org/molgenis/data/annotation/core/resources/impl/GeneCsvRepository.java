@@ -39,6 +39,7 @@ public class GeneCsvRepository extends AbstractRepository
 		return repository.getCapabilities();
 	}
 
+	@Override
 	public EntityType getEntityType()
 	{
 		return repository.getEntityType();
