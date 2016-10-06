@@ -14,6 +14,7 @@ public class CmdLineSettingsEntity implements Entity
 
 	private final Map<String, Object> values = new LinkedCaseInsensitiveMap<>();
 
+	@Override
 	public EntityType getEntityType()
 	{
 		throw new UnsupportedOperationException();
