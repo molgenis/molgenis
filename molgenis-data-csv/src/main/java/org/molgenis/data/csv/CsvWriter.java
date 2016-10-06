@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
@@ -118,12 +118,12 @@ public class CsvWriter extends AbstractWritable
 	 * @param attributes
 	 * @throws IOException
 	 */
-	public void writeAttributes(Iterable<AttributeMetaData> attributes) throws IOException
+	public void writeAttributes(Iterable<Attribute> attributes) throws IOException
 	{
 		List<String> attributeNames = Lists.newArrayList();
 		List<String> attributeLabels = Lists.newArrayList();
 
-		for (AttributeMetaData attr : attributes)
+		for (Attribute attr : attributes)
 		{
 			attributeNames.add(attr.getName());
 			if (attr.getLabel() != null)

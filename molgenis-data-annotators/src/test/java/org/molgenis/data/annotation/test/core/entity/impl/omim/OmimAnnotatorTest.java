@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -50,7 +50,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -86,7 +86,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		List<Entity> entitiesToAnnotate = newArrayList();
 
 		EntityMetaData inputEntityMetaData = entityMetaDataFactory.create().setName("Test");
-		inputEntityMetaData.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
+		inputEntityMetaData.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		inputEntityMetaData.addAttributes(
 				Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 						omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(),
@@ -99,7 +99,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
 		EntityMetaData expectedEntityMetaData = entityMetaDataFactory.create().setName("Test");
-		expectedEntityMetaData.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
+		expectedEntityMetaData.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		expectedEntityMetaData.addAttribute(omimAnnotator.getPhenotypeAttr());
 		expectedEntityMetaData.addAttribute(omimAnnotator.getMimNumberAttr());
 		expectedEntityMetaData.addAttribute(omimAnnotator.getOmimLocationAttr());

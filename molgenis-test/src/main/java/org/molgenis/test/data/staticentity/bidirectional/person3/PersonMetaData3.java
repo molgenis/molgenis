@@ -1,7 +1,7 @@
 package org.molgenis.test.data.staticentity.bidirectional.person3;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.springframework.stereotype.Component;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
@@ -34,7 +34,7 @@ public class PersonMetaData3 extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
-		AttributeMetaData parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this).setNillable(true);
+		Attribute parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this).setNillable(true);
 		addAttribute(ATTR_CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
 				.setNillable(false);
 	}

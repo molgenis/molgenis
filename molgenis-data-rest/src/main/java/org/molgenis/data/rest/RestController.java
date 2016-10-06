@@ -13,7 +13,7 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -184,7 +184,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+	public AttributeResponse retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
@@ -192,7 +192,7 @@ public class RestController
 		Set<String> attributeSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
-		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
+		return getAttributePostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
 	}
 
 	/**
@@ -203,13 +203,13 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+	public AttributeResponse retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @Valid @RequestBody EntityMetaRequest request)
 	{
 		Set<String> attributeSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
-		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
+		return getAttributePostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
 	}
 
 	/**
@@ -484,7 +484,7 @@ public class RestController
 
 		// Check attribute names
 		Iterable<String> attributesIterable = Iterables
-				.transform(meta.getAtomicAttributes(), attributeMetaData -> attributeMetaData.getName().toLowerCase());
+				.transform(meta.getAtomicAttributes(), attribute -> attribute.getName().toLowerCase());
 
 		if (attributesSet != null)
 		{
@@ -496,7 +496,7 @@ public class RestController
 			}
 		}
 
-		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), AttributeMetaData::getName);
+		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), Attribute::getName);
 
 		if (attributesSet != null)
 		{
@@ -646,7 +646,7 @@ public class RestController
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
-		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
+		Attribute attr = entityMetaData.getAttribute(attributeName);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException(
@@ -1027,7 +1027,7 @@ public class RestController
 				{
 					if (queryRule.getValue() != null)
 					{
-						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
+						Attribute attribute = entityMetaData.getAttribute(queryRule.getField());
 						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
 						{
 							//noinspection unchecked
@@ -1081,14 +1081,14 @@ public class RestController
 		response.setStatus(HttpServletResponse.SC_CREATED);
 	}
 
-	private AttributeMetaDataResponse getAttributeMetaDataPostInternal(String entityName, String attributeName,
+	private AttributeResponse getAttributePostInternal(String entityName, String attributeName,
 			Set<String> attributeSet, Map<String, Set<String>> attributeExpandSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
-		if (attributeMetaData != null)
+		Attribute attribute = meta.getAttribute(attributeName);
+		if (attribute != null)
 		{
-			return new AttributeMetaDataResponse(entityName, meta, attributeMetaData, attributeSet, attributeExpandSet,
+			return new AttributeResponse(entityName, meta, attribute, attributeSet, attributeExpandSet,
 					molgenisPermissionService, dataService, languageService);
 		}
 		else
@@ -1104,7 +1104,7 @@ public class RestController
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
 		// Check if the entity has an attribute with name refAttributeName
-		AttributeMetaData attr = meta.getAttribute(refAttributeName);
+		Attribute attr = meta.getAttribute(refAttributeName);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException(entityName + " does not have an attribute named " + refAttributeName);
@@ -1124,11 +1124,11 @@ public class RestController
 			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
 				entityHasAttributeMap.put("href", attrHref);
-				@SuppressWarnings("unchecked") Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity
+				@SuppressWarnings("unchecked") Iterable<Attribute> attributeParts = (Iterable<Attribute>) entity
 						.get(refAttributeName);
-				for (AttributeMetaData attributeMetaData : attributeParts)
+				for (Attribute attribute : attributeParts)
 				{
-					String attrName = attributeMetaData.getName();
+					String attrName = attribute.getName();
 					entityHasAttributeMap.put(attrName, entity.get(attrName));
 				}
 				return entityHasAttributeMap;
@@ -1220,7 +1220,7 @@ public class RestController
 		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getName(), entity.getIdValue()));
 
 		// TODO system fields
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			// filter fields
 			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
@@ -1237,7 +1237,7 @@ public class RestController
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 						entityMap.put(attrName,
-								new AttributeMetaDataResponse(meta.getName(), meta, attr, subAttributesSet, null,
+								new AttributeResponse(meta.getName(), meta, attr, subAttributesSet, null,
 										molgenisPermissionService, dataService, languageService));
 					}
 					else
@@ -1376,7 +1376,7 @@ public class RestController
 		return null;
 	}
 
-	private static Object convert(AttributeMetaData attr, Object value)
+	private static Object convert(Attribute attr, Object value)
 	{
 		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
 		return fieldType.convert(value);

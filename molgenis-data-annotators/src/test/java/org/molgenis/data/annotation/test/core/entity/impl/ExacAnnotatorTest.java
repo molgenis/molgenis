@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.ExacAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -41,7 +41,7 @@ public class ExacAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -70,9 +70,9 @@ public class ExacAnnotatorTest extends AbstractMolgenisSpringTest
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
 		emdIn.addAttribute(vcfAttributes.getAltAttribute());
-		emdIn.addAttribute(exacAnnotator.getExacAFAttr(attributeMetaDataFactory));
-		emdIn.addAttribute(exacAnnotator.getExacAcHomAttr(attributeMetaDataFactory));
-		emdIn.addAttribute(exacAnnotator.getExacAcHetAttr(attributeMetaDataFactory));
+		emdIn.addAttribute(exacAnnotator.getExacAFAttr(attributeFactory));
+		emdIn.addAttribute(exacAnnotator.getExacAcHomAttr(attributeFactory));
+		emdIn.addAttribute(exacAnnotator.getExacAcHetAttr(attributeFactory));
 
 		Entity inputEntity = new DynamicEntity(emdIn);
 		inputEntity.set(VcfAttributes.CHROM, "1");

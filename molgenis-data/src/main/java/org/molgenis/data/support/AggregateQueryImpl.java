@@ -3,20 +3,20 @@ package org.molgenis.data.support;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 public class AggregateQueryImpl implements AggregateQuery
 {
-	private AttributeMetaData attrX;
-	private AttributeMetaData attrY;
-	private AttributeMetaData attrDistinct;
+	private Attribute attrX;
+	private Attribute attrY;
+	private Attribute attrDistinct;
 	private Query<Entity> q;
 
 	public AggregateQueryImpl()
 	{
 	}
 
-	public AggregateQueryImpl(AttributeMetaData attrX, AttributeMetaData attrY, AttributeMetaData attrDistinct,
+	public AggregateQueryImpl(Attribute attrX, Attribute attrY, Attribute attrDistinct,
 			Query<Entity> q)
 	{
 		this.attrX = attrX;
@@ -25,19 +25,19 @@ public class AggregateQueryImpl implements AggregateQuery
 		this.q = q;
 	}
 
-	public AggregateQueryImpl attrX(AttributeMetaData attrX)
+	public AggregateQueryImpl attrX(Attribute attrX)
 	{
 		this.attrX = attrX;
 		return this;
 	}
 
-	public AggregateQueryImpl attrY(AttributeMetaData attrY)
+	public AggregateQueryImpl attrY(Attribute attrY)
 	{
 		this.attrY = attrY;
 		return this;
 	}
 
-	public AggregateQueryImpl attrDistinct(AttributeMetaData attrDistinct)
+	public AggregateQueryImpl attrDistinct(Attribute attrDistinct)
 	{
 		this.attrDistinct = attrDistinct;
 		return this;
@@ -49,17 +49,17 @@ public class AggregateQueryImpl implements AggregateQuery
 		return this;
 	}
 
-	public void setAttributeX(AttributeMetaData attrX)
+	public void setAttributeX(Attribute attrX)
 	{
 		this.attrX = attrX;
 	}
 
-	public void setAttributeY(AttributeMetaData attrY)
+	public void setAttributeY(Attribute attrY)
 	{
 		this.attrY = attrY;
 	}
 
-	public void setAttributeDistinct(AttributeMetaData attrDistinct)
+	public void setAttributeDistinct(Attribute attrDistinct)
 	{
 		this.attrDistinct = attrDistinct;
 	}
@@ -76,19 +76,19 @@ public class AggregateQueryImpl implements AggregateQuery
 	}
 
 	@Override
-	public AttributeMetaData getAttributeX()
+	public Attribute getAttributeX()
 	{
 		return attrX;
 	}
 
 	@Override
-	public AttributeMetaData getAttributeY()
+	public Attribute getAttributeY()
 	{
 		return attrY;
 	}
 
 	@Override
-	public AttributeMetaData getAttributeDistinct()
+	public Attribute getAttributeDistinct()
 	{
 		return attrDistinct;
 	}

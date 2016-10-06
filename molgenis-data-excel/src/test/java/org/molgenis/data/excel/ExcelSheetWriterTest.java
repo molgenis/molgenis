@@ -1,7 +1,7 @@
 package org.molgenis.data.excel;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private ExcelWriter excelWriter;
 	private ByteArrayOutputStream bos;

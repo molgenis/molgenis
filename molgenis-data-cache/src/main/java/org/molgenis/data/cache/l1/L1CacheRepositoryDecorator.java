@@ -3,7 +3,7 @@ package org.molgenis.data.cache.l1;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Iterator;
@@ -198,9 +198,9 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private void evictBiDiReferencedEntityTypes()
 	{
-		getEntityMetaData().getMappedByAttributes().map(AttributeMetaData::getRefEntity).map(EntityMetaData::getName)
+		getEntityMetaData().getMappedByAttributes().map(Attribute::getRefEntity).map(EntityMetaData::getName)
 				.forEach(l1Cache::evictAll);
-		getEntityMetaData().getInversedByAttributes().map(AttributeMetaData::getRefEntity).map(EntityMetaData::getName)
+		getEntityMetaData().getInversedByAttributes().map(Attribute::getRefEntity).map(EntityMetaData::getName)
 				.forEach(l1Cache::evictAll);
 	}
 

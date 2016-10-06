@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
@@ -55,8 +55,8 @@ public class LazyEntity implements Entity
 	@Override
 	public Object getLabelValue()
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
-		AttributeMetaData labelAttr = entityMetaData.getLabelAttribute();
+		Attribute idAttr = entityMetaData.getIdAttribute();
+		Attribute labelAttr = entityMetaData.getLabelAttribute();
 		if (idAttr.equals(labelAttr))
 		{
 			return id;
@@ -70,7 +70,7 @@ public class LazyEntity implements Entity
 	@Override
 	public Object get(String attributeName)
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		Attribute idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
 			return id;
@@ -81,7 +81,7 @@ public class LazyEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		Attribute idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
 			return (String) id;
@@ -92,7 +92,7 @@ public class LazyEntity implements Entity
 	@Override
 	public Integer getInt(String attributeName)
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		Attribute idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
 			return (Integer) id;

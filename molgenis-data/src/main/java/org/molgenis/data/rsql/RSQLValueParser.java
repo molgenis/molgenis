@@ -2,7 +2,7 @@ package org.molgenis.data.rsql;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 @Service
 public class RSQLValueParser
 {
-	public Object parse(String valueString, AttributeMetaData attribute)
+	public Object parse(String valueString, Attribute attribute)
 	{
 		if (isEmpty(valueString))
 		{
@@ -64,7 +64,7 @@ public class RSQLValueParser
 		}
 	}
 
-	private static Date convertDateTime(AttributeMetaData attr, String paramValue)
+	private static Date convertDateTime(Attribute attr, String paramValue)
 	{
 		try
 		{
@@ -78,7 +78,7 @@ public class RSQLValueParser
 		}
 	}
 
-	private static Date convertDate(AttributeMetaData attr, String paramValue)
+	private static Date convertDate(Attribute attr, String paramValue)
 	{
 		try
 		{

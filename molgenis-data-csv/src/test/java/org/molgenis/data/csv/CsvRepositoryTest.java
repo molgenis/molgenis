@@ -3,8 +3,8 @@ package org.molgenis.data.csv;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -28,7 +28,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private static File test;
 	private static File testdata;
@@ -121,7 +121,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		{
 			csvRepository = new CsvRepository(testdata, entityMetaFactory, attrMetaFactory, null);
 			assertEquals(csvRepository.getName(), "testdata");
-			Iterator<AttributeMetaData> it = csvRepository.getEntityMetaData().getAttributes().iterator();
+			Iterator<Attribute> it = csvRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col1");
 			assertTrue(it.hasNext());

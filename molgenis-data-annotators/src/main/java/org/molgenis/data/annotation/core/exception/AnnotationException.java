@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.core.exception;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,9 +11,9 @@ public class AnnotationException extends RuntimeException
 	private final Integer entityNumber;
 	private final Entity failedEntity;
 	private final String annotatorName;
-	private final List<AttributeMetaData> requiredAttributes;
+	private final List<Attribute> requiredAttributes;
 
-	public AnnotationException(Entity failedEntity, int lineNumber, List<AttributeMetaData> requiredAttributes,
+	public AnnotationException(Entity failedEntity, int lineNumber, List<Attribute> requiredAttributes,
 			String annotatorName, Throwable cause)
 	{
 		super(cause);
@@ -39,7 +39,7 @@ public class AnnotationException extends RuntimeException
 		return failedEntity;
 	}
 
-	public List<AttributeMetaData> getRequiredAttributes()
+	public List<Attribute> getRequiredAttributes()
 	{
 		return requiredAttributes;
 	}

@@ -30,7 +30,7 @@ public interface EntityManager
 	 * @param fetch      entity data fetch
 	 * @return new entity
 	 */
-	Entity create(EntityMetaData entityMeta, Fetch fetch);
+	Entity createFetch(EntityMetaData entityMeta, Fetch fetch);
 
 	/**
 	 * Get an instance, whose state may be lazily fetched. If the requested instance does not exist in the repository,

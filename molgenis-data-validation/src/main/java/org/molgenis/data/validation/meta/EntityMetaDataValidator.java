@@ -3,10 +3,10 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.support.AttributeMetaDataUtils;
+import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +21,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaValidationUtils.validateName;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.PARTS;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
@@ -52,8 +52,8 @@ public class EntityMetaDataValidator
 		validateEntityName(entityMeta);
 		validateOwnAttributes(entityMeta);
 
-		Map<String, AttributeMetaData> ownAllAttrMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getIdentifier, Function.identity(), (u, v) ->
+		Map<String, Attribute> ownAllAttrMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
 				{
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedHashMap::new));
@@ -89,13 +89,13 @@ public class EntityMetaDataValidator
 	 * @throws MolgenisValidationException if one or more lookup attributes are not entity attributes
 	 */
 	private static void validateOwnLookupAttributes(EntityMetaData entityMeta,
-			Map<String, AttributeMetaData> ownAllAttrMap)
+			Map<String, Attribute> ownAllAttrMap)
 	{
 		// Validate lookup attributes
 		entityMeta.getOwnLookupAttributes().forEach(ownLookupAttr ->
 		{
 			// Validate that lookup attribute is in the attributes list
-			AttributeMetaData ownAttr = ownAllAttrMap.get(ownLookupAttr.getIdentifier());
+			Attribute ownAttr = ownAllAttrMap.get(ownLookupAttr.getIdentifier());
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
@@ -112,14 +112,14 @@ public class EntityMetaDataValidator
 	 * @throws MolgenisValidationException if the label attribute is not an entity attribute
 	 */
 	private static void validateOwnLabelAttribute(EntityMetaData entityMeta,
-			Map<String, AttributeMetaData> ownAllAttrMap)
+			Map<String, Attribute> ownAllAttrMap)
 	{
 		// Validate label attribute
-		AttributeMetaData ownLabelAttr = entityMeta.getOwnLabelAttribute();
+		Attribute ownLabelAttr = entityMeta.getOwnLabelAttribute();
 		if (ownLabelAttr != null)
 		{
 			// Validate that label attribute is in the attributes list
-			AttributeMetaData ownAttr = ownAllAttrMap.get(ownLabelAttr.getIdentifier());
+			Attribute ownAttr = ownAllAttrMap.get(ownLabelAttr.getIdentifier());
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
@@ -135,14 +135,14 @@ public class EntityMetaDataValidator
 	 * @param ownAllAttrMap attribute identifier to attribute map
 	 * @throws MolgenisValidationException if the ID attribute is not an entity attribute
 	 */
-	private static void validateOwnIdAttribute(EntityMetaData entityMeta, Map<String, AttributeMetaData> ownAllAttrMap)
+	private static void validateOwnIdAttribute(EntityMetaData entityMeta, Map<String, Attribute> ownAllAttrMap)
 	{
 		// Validate ID attribute
-		AttributeMetaData ownIdAttr = entityMeta.getOwnIdAttribute();
+		Attribute ownIdAttr = entityMeta.getOwnIdAttribute();
 		if (ownIdAttr != null)
 		{
 			// Validate that ID attribute is in the attributes list
-			AttributeMetaData ownAttr = ownAllAttrMap.get(ownIdAttr.getIdentifier());
+			Attribute ownAttr = ownAllAttrMap.get(ownIdAttr.getIdentifier());
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
@@ -150,7 +150,7 @@ public class EntityMetaDataValidator
 			}
 
 			// Validate that ID attribute data type is allowed
-			if (!AttributeMetaDataUtils.isIdAttributeTypeAllowed(ownIdAttr))
+			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("ID attribute [%s] type [%s] is not allowed", ownIdAttr.getName(),
@@ -205,9 +205,9 @@ public class EntityMetaDataValidator
 		EntityMetaData extendsEntityMeta = entityMeta.getExtends();
 		if (extendsEntityMeta != null)
 		{
-			Map<String, AttributeMetaData> extendsAllAttrMap = stream(
+			Map<String, Attribute> extendsAllAttrMap = stream(
 					extendsEntityMeta.getAllAttributes().spliterator(), false)
-					.collect(toMap(AttributeMetaData::getName, Function.identity(), (u, v) ->
+					.collect(toMap(Attribute::getName, Function.identity(), (u, v) ->
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
@@ -276,13 +276,13 @@ public class EntityMetaDataValidator
 	 * @param attr attribute
 	 * @return attribute owner
 	 */
-	private EntityMetaData getAttributeOwner(AttributeMetaData attr)
+	private EntityMetaData getAttributeOwner(Attribute attr)
 	{
 		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr)
 				.findOne();
 		if (entityMeta == null)
 		{
-			AttributeMetaData parentAttr = dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)
+			Attribute parentAttr = dataService.query(ATTRIBUTE_META_DATA, Attribute.class)
 					.eq(PARTS, attr).findOne();
 			if (parentAttr != null)
 			{

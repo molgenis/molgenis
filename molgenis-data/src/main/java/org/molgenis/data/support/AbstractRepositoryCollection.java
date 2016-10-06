@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.EnumSet;
@@ -38,19 +38,19 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
-	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
+	public void addAttribute(EntityMetaData entityMeta, Attribute attribute)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityMetaData entityMetaData, Attribute attr, Attribute updatedAttr)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
+	public void deleteAttribute(EntityMetaData entityMeta, Attribute attr)
 	{
 		throw new UnsupportedOperationException();
 	}

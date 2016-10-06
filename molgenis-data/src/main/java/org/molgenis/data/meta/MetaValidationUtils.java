@@ -3,14 +3,14 @@ package org.molgenis.data.meta;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.ReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
@@ -74,9 +74,9 @@ public class MetaValidationUtils
 	/**
 	 * Recursively traverses attributes and validates the names.
 	 */
-	private static void validateAttributes(Iterable<AttributeMetaData> amds)
+	private static void validateAttributes(Iterable<Attribute> amds)
 	{
-		for (AttributeMetaData amd : amds)
+		for (Attribute amd : amds)
 		{
 			validateAttribute(amd);
 			if (amd.getDataType() == COMPOUND)
@@ -86,7 +86,7 @@ public class MetaValidationUtils
 		}
 	}
 
-	protected static void validateAttribute(AttributeMetaData amd)
+	protected static void validateAttribute(Attribute amd)
 	{
 		validateName(amd.getName());
 		if (amd.getDefaultValue() != null)

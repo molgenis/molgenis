@@ -1,14 +1,14 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 public interface AggregateQuery
 {
 	Query<Entity> getQuery();
 
-	AttributeMetaData getAttributeX();
+	Attribute getAttributeX();
 
-	AttributeMetaData getAttributeY();
+	Attribute getAttributeY();
 
-	AttributeMetaData getAttributeDistinct();
+	Attribute getAttributeDistinct();
 }

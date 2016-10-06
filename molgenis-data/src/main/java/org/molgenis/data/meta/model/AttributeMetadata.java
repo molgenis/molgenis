@@ -16,7 +16,7 @@ import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class AttributeMetaDataMetaData extends SystemEntityMetaData
+public class AttributeMetadata extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "attributes";
 	public static final String ATTRIBUTE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -35,7 +35,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public static final String VISIBLE = "visible";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
-	public static final String AGGREGATEABLE = "aggregateable";
+	public static final String AGGREGATABLE = "isAggregatable";
 	public static final String ENUM_OPTIONS = "enumOptions";
 	public static final String RANGE_MIN = "rangeMin";
 	public static final String RANGE_MAX = "rangeMax";
@@ -50,7 +50,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	private TagMetaData tagMetaData;
 	private EntityMetaDataMetaData entityMetaMeta;
 
-	public AttributeMetaDataMetaData()
+	public AttributeMetadata()
 	{
 		super(SIMPLE_NAME, PACKAGE_META);
 	}
@@ -78,7 +78,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable");
+		addAttribute(AGGREGATABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable");
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM")
 				.setValidationExpression(getEnumOptionsValidationExpression());
 		addAttribute(RANGE_MIN).setDataType(LONG).setLabel("Range min");

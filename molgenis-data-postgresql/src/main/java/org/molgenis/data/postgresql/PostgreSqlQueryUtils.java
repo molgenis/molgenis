@@ -1,7 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.stream.Stream;
@@ -60,7 +60,7 @@ class PostgreSqlQueryUtils
 	 * @param attr       attribute
 	 * @return PostgreSQL junction table name
 	 */
-	static String getJunctionTableName(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getJunctionTableName(EntityMetaData entityMeta, Attribute attr)
 	{
 		if (attr.isMappedBy())
 		{
@@ -80,8 +80,8 @@ class PostgreSqlQueryUtils
 	 * @param idxAttr    indexed attribute
 	 * @return PostgreSQL junction table index name
 	 */
-	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
-			AttributeMetaData idxAttr)
+	static String getJunctionTableIndexName(EntityMetaData entityMeta, Attribute attr,
+			Attribute idxAttr)
 	{
 		if (attr.isMappedBy())
 		{
@@ -98,7 +98,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributes(EntityMetaData entityMeta)
+	static Stream<Attribute> getPersistedAttributes(EntityMetaData entityMeta)
 	{
 		return StreamSupport.stream(entityMeta.getAtomicAttributes().spliterator(), false)
 				.filter(atomicAttr -> atomicAttr.getExpression() == null);
@@ -110,7 +110,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of attributes persisted by PostgreSQL in junction tables
 	 */
-	static Stream<AttributeMetaData> getJunctionTableAttributes(EntityMetaData entityMeta)
+	static Stream<Attribute> getJunctionTableAttributes(EntityMetaData entityMeta)
 	{
 		// return all attributes referencing multiple entities except for one-to-many attributes that are mapped by
 		// another attribute
@@ -125,7 +125,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted non-MREF attributes
 	 */
-	static Stream<AttributeMetaData> getTableAttributes(EntityMetaData entityMeta)
+	static Stream<Attribute> getTableAttributes(EntityMetaData entityMeta)
 	{
 		return getPersistedAttributes(entityMeta)
 				.filter(attr -> !isMultipleReferenceType(attr) && !attr.isInversedBy());

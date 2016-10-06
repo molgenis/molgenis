@@ -2,7 +2,7 @@ package org.molgenis.data.index;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -309,13 +309,13 @@ public class IndexActionRepositoryDecoratorTest
 	{
 		EntityMetaData mappedByEntity = mock(EntityMetaData.class);
 		when(mappedByEntity.getName()).thenReturn("mappedByEntity");
-		AttributeMetaData mappedByAttr = mock(AttributeMetaData.class);
+		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn("mappedByAttr");
 		when(mappedByAttr.getRefEntity()).thenReturn(mappedByEntity);
 
 		EntityMetaData inversedByEntity = mock(EntityMetaData.class);
 		when(inversedByEntity.getName()).thenReturn("inversedByEntity");
-		AttributeMetaData inversedByAttr = mock(AttributeMetaData.class);
+		Attribute inversedByAttr = mock(Attribute.class);
 		when(inversedByAttr.getName()).thenReturn("inversedByAttr");
 		when(inversedByAttr.getRefEntity()).thenReturn(inversedByEntity);
 

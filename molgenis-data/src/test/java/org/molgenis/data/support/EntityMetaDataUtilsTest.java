@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -26,7 +26,7 @@ public class EntityMetaDataUtilsTest
 		List<Object[]> dataList = Lists.newArrayList();
 		for (AttributeType attrType : AttributeType.values())
 		{
-			AttributeMetaData attr = mock(AttributeMetaData.class);
+			Attribute attr = mock(Attribute.class);
 			when(attr.getDataType()).thenReturn(attrType);
 			when(attr.toString()).thenReturn("attr_" + attrType.toString());
 
@@ -38,7 +38,7 @@ public class EntityMetaDataUtilsTest
 	}
 
 	@Test(dataProvider = "isReferenceTypeAttrProvider")
-	public void isReferenceTypeAttr(AttributeMetaData attr, boolean isRefAttr)
+	public void isReferenceTypeAttr(Attribute attr, boolean isRefAttr)
 	{
 		assertEquals(EntityMetaDataUtils.isReferenceType(attr), isRefAttr);
 	}
@@ -68,7 +68,7 @@ public class EntityMetaDataUtilsTest
 		List<Object[]> dataList = Lists.newArrayList();
 		for (AttributeType attrType : AttributeType.values())
 		{
-			AttributeMetaData attr = mock(AttributeMetaData.class);
+			Attribute attr = mock(Attribute.class);
 			when(attr.getDataType()).thenReturn(attrType);
 			when(attr.toString()).thenReturn("attr_" + attrType.toString());
 
@@ -79,7 +79,7 @@ public class EntityMetaDataUtilsTest
 	}
 
 	@Test(dataProvider = "isMultipleReferenceTypeProvider")
-	public void isMultipleReferenceType(AttributeMetaData attr, boolean isMultipleRefAttr)
+	public void isMultipleReferenceType(Attribute attr, boolean isMultipleRefAttr)
 	{
 		assertEquals(EntityMetaDataUtils.isMultipleReferenceType(attr), isMultipleRefAttr);
 	}
@@ -87,8 +87,8 @@ public class EntityMetaDataUtilsTest
 	@Test
 	public void getAttributeNames()
 	{
-		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
-		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
 		assertEquals(newArrayList(EntityMetaDataUtils.getAttributeNames(asList(attr0, attr1))),
 				asList("attr0", "attr1"));
 	}

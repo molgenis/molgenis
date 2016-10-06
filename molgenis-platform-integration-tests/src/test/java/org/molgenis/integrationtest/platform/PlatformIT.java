@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -34,15 +33,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.annotation.PreDestroy;
-import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -58,7 +53,7 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -105,11 +100,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityMetaDataMetaData entityMetaDataMetaData;
 	@Autowired
-	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+	private AttributeMetadata attributeMetadata;
 	@Autowired
 	private LanguageFactory languageFactory;
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -193,7 +188,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(refEntityMetaDataDynamic.getName(), false, true, true));
 		authorities.addAll(makeAuthorities(selfXrefEntityMetaData.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(languageMetaData.getName(), true, true, true));
-		authorities.addAll(makeAuthorities(attributeMetaDataMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(attributeMetadata.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
 		authorities.addAll(makeAuthorities(entityMetaDataMetaData.getName(), true, true, true));
 
@@ -1315,7 +1310,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String COUNTRY = "Country";
 		final EntityMetaData emd = EntityMetaData
 				.newInstance(dataService.getEntityMetaData(entityMetaDataDynamic.getName()), DEEP_COPY_ATTRS);
-		final AttributeMetaData newAttr = attributeMetaDataFactory.create().setName(COUNTRY);
+		final Attribute newAttr = attributeFactory.create().setName(COUNTRY);
 
 		runAsSystem(() ->
 		{

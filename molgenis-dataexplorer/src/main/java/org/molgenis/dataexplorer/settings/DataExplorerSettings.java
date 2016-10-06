@@ -2,7 +2,7 @@ package org.molgenis.dataexplorer.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -104,7 +104,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private void addGeneralSettings()
 		{
-			AttributeMetaData generalAttr = addAttribute(GENERAL).setDataType(COMPOUND).setLabel("General");
+			Attribute generalAttr = addAttribute(GENERAL).setDataType(COMPOUND).setLabel("General");
 			addAttribute(GENERAL_SEARCHBOX, generalAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_SEARCHBOX)).setLabel("Show search box");
 			addAttribute(GENERAL_ITEM_SELECT_PANEL, generalAttr).setDataType(BOOL).setNillable(false)
@@ -120,7 +120,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private void addModulesSettings()
 		{
-			AttributeMetaData modAttr = addAttribute(MOD).setDataType(COMPOUND).setLabel("Modules");
+			Attribute modAttr = addAttribute(MOD).setDataType(COMPOUND).setLabel("Modules");
 
 			addAttribute(MOD_AGGREGATES, modAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_MOD_AGGREGATES)).setLabel("Aggregates");
@@ -137,9 +137,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			createModReportSettings(modAttr);
 		}
 
-		private void createModDataSettings(AttributeMetaData modAttr)
+		private void createModDataSettings(Attribute modAttr)
 		{
-			AttributeMetaData dataAttr = addAttribute(DATA, modAttr).setDataType(COMPOUND).setLabel("Data")
+			Attribute dataAttr = addAttribute(DATA, modAttr).setDataType(COMPOUND).setLabel("Data")
 					.setVisibleExpression("$('" + MOD_DATA + "').eq(true).value()");
 
 			addAttribute(DATA_GALAXY_EXPORT, dataAttr).setDataType(BOOL).setNillable(false)
@@ -150,11 +150,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 
 			// genome browser
-			AttributeMetaData genomeBrowserAttr = addAttribute(GENOMEBROWSER, dataAttr).setDataType(COMPOUND)
+			Attribute genomeBrowserAttr = addAttribute(GENOMEBROWSER, dataAttr).setDataType(COMPOUND)
 					.setLabel("Genome Browser")
 					.setVisibleExpression("$('" + DATA_GENOME_BROWSER + "').eq(true).value()");
 
-			AttributeMetaData genomeBrowserInitAttr = addAttribute(GENOMEBROWSER_INIT, genomeBrowserAttr)
+			Attribute genomeBrowserInitAttr = addAttribute(GENOMEBROWSER_INIT, genomeBrowserAttr)
 					.setDataType(COMPOUND).setLabel("Initialization");
 
 			addAttribute(GENOMEBROWSER_INIT_BROWSER_LINKS, genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
@@ -173,9 +173,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setDefaultValue(String.valueOf(DEFAULT_DATA_GENOME_BROWSER)).setLabel("Genome Browser");
 		}
 
-		private void createModAggregatesSettings(AttributeMetaData modAttr)
+		private void createModAggregatesSettings(Attribute modAttr)
 		{
-			AttributeMetaData aggregatesAttr = addAttribute(AGGREGATES, modAttr).setDataType(COMPOUND)
+			Attribute aggregatesAttr = addAttribute(AGGREGATES, modAttr).setDataType(COMPOUND)
 					.setLabel("Aggregates").setVisibleExpression("$('" + MOD_AGGREGATES + "').eq(true).value()");
 			addAttribute(AGGREGATES_DISTINCT_SELECT, aggregatesAttr).setNillable(false).setDataType(BOOL)
 					.setDefaultValue(String.valueOf(DEFAULT_AGGREGATES_DISTINCT_SELECT))
@@ -186,9 +186,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
 		}
 
-		private void createModReportSettings(AttributeMetaData modAttr)
+		private void createModReportSettings(Attribute modAttr)
 		{
-			AttributeMetaData reportsAttr = addAttribute(REPORTS, modAttr).setDataType(COMPOUND).setLabel("Reports")
+			Attribute reportsAttr = addAttribute(REPORTS, modAttr).setDataType(COMPOUND).setLabel("Reports")
 					.setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
 			addAttribute(REPORTS_ENTITIES, reportsAttr).setNillable(true).setDataType(TEXT).setLabel("Reports")
 					.setDescription(

@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.mapping.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import java.util.List;
 public class AttributeMapping
 {
 	private String identifier;
-	private final AttributeMetaData targetAttributeMetaData;
-	private final List<AttributeMetaData> sourceAttributeMetaDatas;
+	private final Attribute targetAttribute;
+	private final List<Attribute> sourceAttributes;
 	private String algorithm;
 	private AlgorithmState algorithmState;
 
@@ -35,18 +35,18 @@ public class AttributeMapping
 		}
 	}
 
-	public AttributeMapping(String identifier, AttributeMetaData targetAttributeMetaData, String algorithm,
-			List<AttributeMetaData> sourceAttributeMetaDatas)
+	public AttributeMapping(String identifier, Attribute targetAttribute, String algorithm,
+			List<Attribute> sourceAttributes)
 	{
-		this(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas, null);
+		this(identifier, targetAttribute, algorithm, sourceAttributes, null);
 	}
 
-	public AttributeMapping(String identifier, AttributeMetaData targetAttributeMetaData, String algorithm,
-			List<AttributeMetaData> sourceAttributeMetaDatas, String algorithmState)
+	public AttributeMapping(String identifier, Attribute targetAttribute, String algorithm,
+			List<Attribute> sourceAttributes, String algorithmState)
 	{
 		this.identifier = identifier;
-		this.targetAttributeMetaData = targetAttributeMetaData;
-		this.sourceAttributeMetaDatas = sourceAttributeMetaDatas;
+		this.targetAttribute = targetAttribute;
+		this.sourceAttributes = sourceAttributes;
 		this.algorithm = algorithm;
 		this.algorithmState = convertToEnum(algorithmState);
 	}
@@ -56,11 +56,11 @@ public class AttributeMapping
 	 *
 	 * @param target mapping target attribute
 	 */
-	public AttributeMapping(AttributeMetaData target)
+	public AttributeMapping(Attribute target)
 	{
 		this.identifier = null;
-		this.targetAttributeMetaData = target;
-		this.sourceAttributeMetaDatas = Lists.<AttributeMetaData>newArrayList();
+		this.targetAttribute = target;
+		this.sourceAttributes = Lists.<Attribute>newArrayList();
 		this.algorithm = null;
 		this.algorithmState = null;
 	}
@@ -70,14 +70,14 @@ public class AttributeMapping
 		return identifier;
 	}
 
-	public AttributeMetaData getTargetAttributeMetaData()
+	public Attribute getTargetAttribute()
 	{
-		return targetAttributeMetaData;
+		return targetAttribute;
 	}
 
-	public List<AttributeMetaData> getSourceAttributeMetaDatas()
+	public List<Attribute> getSourceAttributes()
 	{
-		return sourceAttributeMetaDatas;
+		return sourceAttributes;
 	}
 
 	public String getAlgorithm()
@@ -98,8 +98,8 @@ public class AttributeMapping
 		result = prime * result + ((algorithm == null) ? 0 : algorithm.hashCode());
 		result = prime * result + ((algorithmState == null) ? 0 : algorithmState.hashCode());
 		result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-		result = prime * result + ((sourceAttributeMetaDatas == null) ? 0 : sourceAttributeMetaDatas.hashCode());
-		result = prime * result + ((targetAttributeMetaData == null) ? 0 : targetAttributeMetaData.hashCode());
+		result = prime * result + ((sourceAttributes == null) ? 0 : sourceAttributes.hashCode());
+		result = prime * result + ((targetAttribute == null) ? 0 : targetAttribute.hashCode());
 		return result;
 	}
 
@@ -121,16 +121,16 @@ public class AttributeMapping
 			if (other.identifier != null) return false;
 		}
 		else if (!identifier.equals(other.identifier)) return false;
-		if (sourceAttributeMetaDatas == null)
+		if (sourceAttributes == null)
 		{
-			if (other.sourceAttributeMetaDatas != null) return false;
+			if (other.sourceAttributes != null) return false;
 		}
-		else if (!sourceAttributeMetaDatas.equals(other.sourceAttributeMetaDatas)) return false;
-		if (targetAttributeMetaData == null)
+		else if (!sourceAttributes.equals(other.sourceAttributes)) return false;
+		if (targetAttribute == null)
 		{
-			if (other.targetAttributeMetaData != null) return false;
+			if (other.targetAttribute != null) return false;
 		}
-		else if (!targetAttributeMetaData.equals(other.targetAttributeMetaData)) return false;
+		else if (!targetAttribute.equals(other.targetAttribute)) return false;
 		return true;
 	}
 
@@ -147,8 +147,8 @@ public class AttributeMapping
 	@Override
 	public String toString()
 	{
-		return "AttributeMapping [identifier=" + identifier + ", targetAttributeMetaData=" + targetAttributeMetaData
-				+ ", sourceAttributeMetaDatas=" + sourceAttributeMetaDatas + ", algorithm=" + algorithm
+		return "AttributeMapping [identifier=" + identifier + ", targetAttribute=" + targetAttribute
+				+ ", sourceAttributes=" + sourceAttributes + ", algorithm=" + algorithm
 				+ ", algorithmState=" + algorithmState + "]";
 	}
 

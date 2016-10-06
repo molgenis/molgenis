@@ -55,7 +55,7 @@ public class EntityTestHarness
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	TestEntityStaticMetaData staticTestEntityStaticMetaData;
@@ -110,9 +110,9 @@ public class EntityTestHarness
 				.addAttribute(createAttribute(ATTR_COMPUTED_INT, INT).setExpression(ATTR_INT));
 	}
 
-	private AttributeMetaData createAttribute(String name, AttributeType dataType)
+	private Attribute createAttribute(String name, AttributeType dataType)
 	{
-		return attributeMetaDataFactory.create().setName(name).setDataType(dataType);
+		return attributeFactory.create().setName(name).setDataType(dataType);
 	}
 
 	public List<Entity> createTestRefEntities(EntityMetaData refEntityMetaData, int numberOfEntities)

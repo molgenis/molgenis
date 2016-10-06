@@ -11,14 +11,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -32,7 +30,7 @@ public class SystemEntityMetaDataPersister
 	private final DataService dataService;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 	private TagMetaData tagMeta;
-	private AttributeMetaDataMetaData attrMetaMeta;
+	private AttributeMetadata attributeMetadata;
 	private PackageMetaData packageMeta;
 	private EntityMetaDataMetaData entityMetaMeta;
 
@@ -49,8 +47,8 @@ public class SystemEntityMetaDataPersister
 
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
-		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
-		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
+		// see the note in AttributeMetadata and the exception in DependencyResolver
+		attributeMetadata.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
 
 		// create meta entity tables
 		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityMetaData
@@ -58,9 +56,9 @@ public class SystemEntityMetaDataPersister
 		{
 			repositoryCollection.createRepository(tagMeta);
 		}
-		if (!repositoryCollection.hasRepository(attrMetaMeta))
+		if (!repositoryCollection.hasRepository(attributeMetadata))
 		{
-			repositoryCollection.createRepository(attrMetaMeta);
+			repositoryCollection.createRepository(attributeMetadata);
 		}
 		if (!repositoryCollection.hasRepository(packageMeta))
 		{
@@ -73,8 +71,8 @@ public class SystemEntityMetaDataPersister
 
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
-		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
-		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta);
+		// see the note in AttributeMetadata and the exception in DependencyResolver
+		attributeMetadata.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta);
 
 		// add default meta entities
 		ApplicationContext ctx = event.getApplicationContext();
@@ -101,9 +99,9 @@ public class SystemEntityMetaDataPersister
 	}
 
 	@Autowired
-	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
+	public void setAttributeMetadata(AttributeMetadata attributeMetadata)
 	{
-		this.attrMetaMeta = requireNonNull(attrMetaMeta);
+		this.attributeMetadata = requireNonNull(attributeMetadata);
 	}
 
 	@Autowired

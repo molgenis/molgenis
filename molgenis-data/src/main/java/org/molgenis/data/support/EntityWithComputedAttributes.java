@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
@@ -29,7 +29,7 @@ public class EntityWithComputedAttributes implements Entity
 		this.decoratedEntity = requireNonNull(decoratedEntity);
 		expressionEvaluators = newHashMap();
 		EntityMetaData emd = decoratedEntity.getEntityMetaData();
-		for (AttributeMetaData amd : emd.getAtomicAttributes())
+		for (Attribute amd : emd.getAtomicAttributes())
 		{
 			if (amd.getExpression() != null)
 			{

@@ -7,8 +7,8 @@ import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
@@ -40,20 +40,20 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	private final String spreadsheetKey;
 	private final String worksheetId;
 	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final Visibility visibility;
 
 	private EntityMetaData entityMetaData;
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityMetaDataFactory entityMetaFactory, AttributeFactory attrMetaFactory)
 			throws IOException, ServiceException
 	{
 		this(spreadsheetService, spreadsheetKey, worksheetId, entityMetaFactory, attrMetaFactory, Visibility.PUBLIC);
 	}
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory, Visibility visibility)
+			EntityMetaDataFactory entityMetaFactory, AttributeFactory attrMetaFactory, Visibility visibility)
 			throws IOException, ServiceException
 	{
 		this.spreadsheetService = requireNonNull(spreadsheetService);
@@ -94,10 +94,10 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			{
 				Entity entity = new DynamicEntity(getEntityMetaData());
 				CustomElementCollection customElements = it.next().getCustomElements();
-				for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
+				for (Attribute attribute : entityMetaData.getAttributes())
 				{
 					// see remark in getEntityMetaData
-					String colName = attributeMetaData.getLabel();
+					String colName = attribute.getLabel();
 					String normalizedColName = colName.replaceAll("_", "").toLowerCase();
 					String value = customElements.getValue(normalizedColName);
 					entity.set(colName, value);

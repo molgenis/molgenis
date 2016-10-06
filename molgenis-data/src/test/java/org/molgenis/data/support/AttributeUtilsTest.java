@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
-public class AttributeMetaDataUtilsTest
+public class AttributeUtilsTest
 {
 	@DataProvider(name = "isIdAttributeTypeAllowedProvider")
 	public static Iterator<Object[]> isIdAttributeTypeAllowedProvider()
@@ -30,7 +30,7 @@ public class AttributeMetaDataUtilsTest
 	@Test(dataProvider = "isIdAttributeTypeAllowedProvider")
 	public void isIdAttributeTypeAllowed(AttributeType attrType, boolean validIdAttrType) throws Exception
 	{
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(attrType).getMock();
-		assertEquals(AttributeMetaDataUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
+		Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(attrType).getMock();
+		assertEquals(AttributeUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
 	}
 }

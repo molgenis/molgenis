@@ -1,7 +1,7 @@
 package org.molgenis.data.csv;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
@@ -25,7 +25,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private EntityMetaData entityMeta;
 

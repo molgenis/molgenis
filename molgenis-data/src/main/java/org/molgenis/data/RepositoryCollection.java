@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Set;
@@ -82,7 +82,7 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 * @param attribute  attribute to add
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
-	void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute);
+	void addAttribute(EntityMetaData entityMeta, Attribute attribute);
 
 	/**
 	 * Updates {@link Repository repositories} for the given updated attribute.
@@ -92,7 +92,7 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 * @param updatedAttr    updated attribute
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
-	void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr);
+	void updateAttribute(EntityMetaData entityMetaData, Attribute attr, Attribute updatedAttr);
 
 	/**
 	 * Removes an attribute from an entity
@@ -101,5 +101,5 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 * @param attr       attribute to remove
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
-	void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr);
+	void deleteAttribute(EntityMetaData entityMeta, Attribute attr);
 }

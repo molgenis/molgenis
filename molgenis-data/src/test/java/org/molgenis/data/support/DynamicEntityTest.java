@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -47,7 +47,7 @@ public class DynamicEntityTest
 	private static void set(AttributeType attrType, Object value)
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		String attrName = "attr";
 		when(attr.getName()).thenReturn(attrName);
 		when(attr.getDataType()).thenReturn(attrType);

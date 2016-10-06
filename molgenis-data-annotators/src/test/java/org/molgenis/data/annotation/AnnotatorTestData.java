@@ -2,8 +2,8 @@ package org.molgenis.data.annotation;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -21,7 +21,7 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -32,12 +32,12 @@ public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 	public EntityMetaData metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
 	public EntityMetaData metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
 
-	public AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM)
+	public Attribute attributeChrom = attributeFactory.create().setName(CHROM)
 			.setDataType(STRING);
-	public AttributeMetaData attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(LONG);
-	public AttributeMetaData attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
-	public AttributeMetaData attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM)
+	public Attribute attributePos = attributeFactory.create().setName(POS).setDataType(LONG);
+	public Attribute attributeRef = attributeFactory.create().setName(REF).setDataType(STRING);
+	public Attribute attributeAlt = attributeFactory.create().setName(ALT).setDataType(STRING);
+	public Attribute attributeCantAnnotateChrom = attributeFactory.create().setName(CHROM)
 			.setDataType(LONG);
 	public ArrayList<Entity> input = new ArrayList<>();
 	public ArrayList<Entity> input1 = new ArrayList<>();
@@ -61,15 +61,15 @@ public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 
 	public void setValues()
 	{
-		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributePos);
+		metaDataCanAnnotate.addAttribute(attributeRef);
+		metaDataCanAnnotate.addAttribute(attributeAlt);
 
-		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributePos);
+		metaDataCantAnnotate.addAttribute(attributeRef);
+		metaDataCantAnnotate.addAttribute(attributeAlt);
 
 		entity = new DynamicEntity(metaDataCanAnnotate);
 		entity1 = new DynamicEntity(metaDataCanAnnotate);

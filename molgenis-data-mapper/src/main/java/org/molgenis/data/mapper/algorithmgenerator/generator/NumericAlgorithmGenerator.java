@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.mapper.service.UnitResolver;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +26,7 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		this.unitResolver = requireNonNull(unitResolver);
 	}
 
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		StringBuilder algorithm = new StringBuilder();
@@ -39,7 +39,7 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		else if (sourceAttributes.size() > 1)
 		{
 			algorithm.append("var counter = 0;\nvar SUM=newValue(0);\n");
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			for (Attribute sourceAttribute : sourceAttributes)
 			{
 				String generate = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);
@@ -53,19 +53,19 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		return algorithm.toString();
 	}
 
-	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public boolean isSuitable(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		return isNumericDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isNumericDataType));
 	}
 
-	boolean isNumericDataType(AttributeMetaData attribute)
+	boolean isNumericDataType(Attribute attribute)
 	{
 		AttributeType enumType = attribute.getDataType();
 		return enumType == INT || enumType == LONG || enumType == DECIMAL;
 	}
 
-	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
-			AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
+	String generateUnitConversionAlgorithm(Attribute targetAttribute, EntityMetaData targetEntityMetaData,
+			Attribute sourceAttribute, EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = null;
 

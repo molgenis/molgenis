@@ -3,7 +3,7 @@ package org.molgenis.data.importer;
 import com.google.common.collect.*;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -19,13 +19,13 @@ public final class ParsedMetaData
 {
 	private final ImmutableMap<String, EntityMetaData> entities;
 	private final ImmutableMap<String, Package> packages;
-	private final ImmutableSetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final ImmutableSetMultimap<EntityMetaData, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags;
 	private final ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 	private final ImmutableMap<String, Language> languages;
 	private final ImmutableMap<String, I18nString> i18nStrings;
 
 	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
-			SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
+			SetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags,
 			List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags,
 			Map<String, Language> languages, ImmutableMap<String, I18nString> i18nStrings)
 	{
@@ -45,7 +45,7 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
-		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
+		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<Attribute, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
 				.builder();
 		for (String simpleEntityName : attributeTags.keys())
 		{
@@ -54,7 +54,7 @@ public final class ParsedMetaData
 			{
 				throw new NullPointerException("Unknown entity [" + simpleEntityName + "]");
 			}
-			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags
+			for (SemanticTag<Attribute, LabeledResource, LabeledResource> tag : attributeTags
 					.get(simpleEntityName))
 			{
 				attrTagBuilder.put(emd, tag);
@@ -81,7 +81,7 @@ public final class ParsedMetaData
 		return packages;
 	}
 
-	public SetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public SetMultimap<EntityMetaData, SemanticTag<Attribute, LabeledResource, LabeledResource>> getAttributeTags()
 	{
 		return attributeTags;
 	}

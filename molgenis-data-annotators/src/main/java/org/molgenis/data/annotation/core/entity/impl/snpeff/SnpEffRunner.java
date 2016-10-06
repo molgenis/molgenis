@@ -4,13 +4,13 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -38,7 +38,7 @@ import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 public class SnpEffRunner
 {
 	private final EntityMetaDataFactory entityMetaDataFactory;
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 	private final VcfAttributes vcfAttributes;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
@@ -62,7 +62,7 @@ public class SnpEffRunner
 	@Autowired
 	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator,
 			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory)
+			AttributeFactory attributeFactory)
 	{
 		this.jarRunner = jarRunner;
 		this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
@@ -70,7 +70,7 @@ public class SnpEffRunner
 		this.vcfAttributes = vcfAttributes;
 		this.effectsMetaData = effectsMetaData;
 		this.entityMetaDataFactory = entityMetaDataFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 	}
 
 	public Iterator<Entity> getSnpEffects(Iterable<Entity> source)
@@ -103,7 +103,7 @@ public class SnpEffRunner
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
 			VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(), vcfAttributes,
-					entityMetaDataFactory, attributeMetaDataFactory);
+					entityMetaDataFactory, attributeFactory);
 
 			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
@@ -332,16 +332,16 @@ public class SnpEffRunner
 		EntityMetaData emd = entityMetaDataFactory.create()
 				.setSimpleName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX).setPackage(sourceEMD.getPackage());
 		emd.setBackend(sourceEMD.getBackend());
-		AttributeMetaData id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)
+		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true)
 				.setVisible(false);
 		emd.addAttribute(id);
 		emd.setIdAttribute(id);
-		for (AttributeMetaData attr : effectsMetaData.getOrderedAttributes())
+		for (Attribute attr : effectsMetaData.getOrderedAttributes())
 		{
 			emd.addAttribute(attr);
 		}
 		emd.addAttribute(
-				attributeMetaDataFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
+				attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
 						.setRefEntity(sourceEMD));
 		return emd;
 	}

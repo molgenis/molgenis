@@ -2,7 +2,7 @@ package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Maps;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,28 +57,28 @@ public class SystemEntityMetaDataRegistry
 		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityMetaData);
 	}
 
-	public boolean hasSystemAttributeMetaData(String attrIdentifier)
+	public boolean hasSystemAttribute(String attrIdentifier)
 	{
-		return getSystemAttributeMetaData(attrIdentifier) != null;
+		return getSystemAttribute(attrIdentifier) != null;
 	}
 
-	public AttributeMetaData getSystemAttributeMetaData(String attrIdentifier)
+	public Attribute getSystemAttribute(String attrIdentifier)
 	{
 		return getSystemEntityMetaDatas()
-				.map(systemEntityMetaData -> getSystemAttributeMetaData(systemEntityMetaData, attrIdentifier))
+				.map(systemEntityMetaData -> getSystemAttribute(systemEntityMetaData, attrIdentifier))
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
+	private static Attribute getSystemAttribute(SystemEntityMetaData systemEntityMetaData,
 			String attrIdentifier)
 	{
-		return getSystemAttributeMetaDataRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
+		return getSystemAttributeRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs,
+	private static Attribute getSystemAttributeRec(Iterable<Attribute> attrs,
 			String attrIdentifier)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			if (attr.getIdentifier() != null && attr.getIdentifier().equals(attrIdentifier))
 			{
@@ -88,7 +88,7 @@ public class SystemEntityMetaDataRegistry
 			{
 				if (attr.getDataType() == COMPOUND)
 				{
-					return getSystemAttributeMetaDataRec(attr.getAttributeParts(), attrIdentifier);
+					return getSystemAttributeRec(attr.getAttributeParts(), attrIdentifier);
 				}
 			}
 		}

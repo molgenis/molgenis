@@ -3,7 +3,7 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
@@ -28,7 +28,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetaData.PARENT;
@@ -206,7 +206,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void addEntityMeta(EntityMetaData entityMeta)
 	{
 		// create attributes
-		Stream<AttributeMetaData> attrs = stream(entityMeta.getOwnAllAttributes().spliterator(), false);
+		Stream<Attribute> attrs = stream(entityMeta.getOwnAllAttributes().spliterator(), false);
 		dataService.add(ATTRIBUTE_META_DATA, attrs);
 
 		// create entity
@@ -326,10 +326,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	 */
 	private static boolean hasNewMappedByAttrs(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
 	{
-		Set<String> mappedByAttrs = entityMeta.getOwnMappedByAttributes().map(AttributeMetaData::getName)
+		Set<String> mappedByAttrs = entityMeta.getOwnMappedByAttributes().map(Attribute::getName)
 				.collect(toSet());
 		Set<String> existingMappedByAttrs = existingEntityMeta.getOwnMappedByAttributes()
-				.map(AttributeMetaData::getName).collect(toSet());
+				.map(Attribute::getName).collect(toSet());
 		return !mappedByAttrs.equals(existingMappedByAttrs);
 	}
 
@@ -412,7 +412,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		// inject existing auto-generated identifiers in system entity meta data
 		Map<String, String> attrMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
+				.collect(toMap(Attribute::getName, Attribute::getIdentifier));
 		entityMeta.getOwnAllAttributes().forEach(attr ->
 		{
 			String attrIdentifier = attrMap.get(attr.getName());
@@ -425,7 +425,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addAttribute(AttributeMetaData attr)
+	public void addAttribute(Attribute attr)
 	{
 		dataService.add(ATTRIBUTE_META_DATA, attr);
 	}
@@ -514,10 +514,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	private void upsertAttributes(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
 	{
 		// analyze both compound and atomic attributes owned by the entity
-		Map<String, AttributeMetaData> attrsMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.identity()));
-		Map<String, AttributeMetaData> existingAttrsMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(),
-				false).collect(toMap(AttributeMetaData::getName, Function.identity()));
+		Map<String, Attribute> attrsMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(),
+				false).collect(toMap(Attribute::getName, Function.identity()));
 
 		// determine attributes to add, update and delete
 		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
@@ -564,14 +564,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			EntityMetaData oldEntityMetaData = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = stream(oldEntityMetaData.getAtomicAttributes().spliterator(),
+			List<Attribute> oldAtomicAttributes = stream(oldEntityMetaData.getAtomicAttributes().spliterator(),
 					false).collect(toList());
 
-			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = newLinkedHashMap();
+			LinkedHashMap<String, Attribute> newAtomicAttributesMap = newLinkedHashMap();
 			stream(newEntityMetaData.getAtomicAttributes().spliterator(), false)
 					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
-			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
+			for (Attribute oldAttribute : oldAtomicAttributes)
 			{
 				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
 				// FIXME This implies that an attribute can never be different when doing an update import?
@@ -861,73 +861,73 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public AttributeMetaData getIdAttribute()
+		public Attribute getIdAttribute()
 		{
 			return entityMeta.getIdAttribute();
 		}
 
 		@Override
-		public AttributeMetaData getOwnIdAttribute()
+		public Attribute getOwnIdAttribute()
 		{
 			return entityMeta.getOwnIdAttribute();
 		}
 
 		@Override
-		public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
+		public EntityMetaData setIdAttribute(Attribute idAttr)
 		{
 			return entityMeta.setIdAttribute(idAttr);
 		}
 
 		@Override
-		public AttributeMetaData getLabelAttribute()
+		public Attribute getLabelAttribute()
 		{
 			return entityMeta.getLabelAttribute();
 		}
 
 		@Override
-		public AttributeMetaData getLabelAttribute(String langCode)
+		public Attribute getLabelAttribute(String langCode)
 		{
 			return entityMeta.getLabelAttribute(langCode);
 		}
 
 		@Override
-		public AttributeMetaData getOwnLabelAttribute()
+		public Attribute getOwnLabelAttribute()
 		{
 			return entityMeta.getOwnLabelAttribute();
 		}
 
 		@Override
-		public AttributeMetaData getOwnLabelAttribute(String languageCode)
+		public Attribute getOwnLabelAttribute(String languageCode)
 		{
 			return entityMeta.getOwnLabelAttribute(languageCode);
 		}
 
 		@Override
-		public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
+		public EntityMetaData setLabelAttribute(Attribute labelAttr)
 		{
 			return entityMeta.setLabelAttribute(labelAttr);
 		}
 
 		@Override
-		public AttributeMetaData getLookupAttribute(String lookupAttrName)
+		public Attribute getLookupAttribute(String lookupAttrName)
 		{
 			return entityMeta.getLookupAttribute(lookupAttrName);
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getLookupAttributes()
+		public Iterable<Attribute> getLookupAttributes()
 		{
 			return entityMeta.getLookupAttributes();
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getOwnLookupAttributes()
+		public Iterable<Attribute> getOwnLookupAttributes()
 		{
 			return entityMeta.getOwnLookupAttributes();
 		}
 
 		@Override
-		public EntityMetaData setLookupAttributes(Iterable<AttributeMetaData> lookupAttrs)
+		public EntityMetaData setLookupAttributes(Iterable<Attribute> lookupAttrs)
 		{
 			return entityMeta.setLookupAttributes(lookupAttrs);
 		}
@@ -957,7 +957,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getOwnAttributes()
+		public Iterable<Attribute> getOwnAttributes()
 		{
 			// FIXME mappedBy attribute in compound not removed
 			return () -> stream(entityMeta.getOwnAttributes().spliterator(), false).filter(attr ->
@@ -974,37 +974,37 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public LinkedHashSet<AttributeMetaData> getCompoundOrderedAttributes()
+		public LinkedHashSet<Attribute> getCompoundOrderedAttributes()
 		{
 			return entityMeta.getCompoundOrderedAttributes();
 		}
 
 		@Override
-		public EntityMetaData setOwnAttributes(Iterable<AttributeMetaData> attrs)
+		public EntityMetaData setOwnAttributes(Iterable<Attribute> attrs)
 		{
 			return entityMeta.setOwnAttributes(attrs);
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getAttributes()
+		public Iterable<Attribute> getAttributes()
 		{
 			return entityMeta.getAttributes();
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getAtomicAttributes()
+		public Iterable<Attribute> getAtomicAttributes()
 		{
 			return entityMeta.getAtomicAttributes();
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getAllAttributes()
+		public Iterable<Attribute> getAllAttributes()
 		{
 			return entityMeta.getAllAttributes();
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getOwnAllAttributes()
+		public Iterable<Attribute> getOwnAllAttributes()
 		{
 			return () -> stream(entityMeta.getOwnAllAttributes().spliterator(), false).filter(attr ->
 			{
@@ -1020,25 +1020,25 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public AttributeMetaData getAttribute(String attrName)
+		public Attribute getAttribute(String attrName)
 		{
 			return entityMeta.getAttribute(attrName);
 		}
 
 		@Override
-		public EntityMetaData addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
+		public EntityMetaData addAttribute(Attribute attr, AttributeRole... attrTypes)
 		{
 			return entityMeta.addAttribute(attr, attrTypes);
 		}
 
 		@Override
-		public void addAttributes(Iterable<AttributeMetaData> attrs)
+		public void addAttributes(Iterable<Attribute> attrs)
 		{
 			entityMeta.addAttributes(attrs);
 		}
 
 		@Override
-		public void setAttributeRoles(AttributeMetaData attr, AttributeRole... attrTypes)
+		public void setAttributeRoles(Attribute attr, AttributeRole... attrTypes)
 		{
 			throw new UnsupportedOperationException();
 		}
@@ -1050,13 +1050,13 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public void removeAttribute(AttributeMetaData attr)
+		public void removeAttribute(Attribute attr)
 		{
 			entityMeta.removeAttribute(attr);
 		}
 
 		@Override
-		public void addLookupAttribute(AttributeMetaData lookupAttr)
+		public void addLookupAttribute(Attribute lookupAttr)
 		{
 			entityMeta.addLookupAttribute(lookupAttr);
 		}
@@ -1086,7 +1086,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public Iterable<AttributeMetaData> getOwnAtomicAttributes()
+		public Iterable<Attribute> getOwnAtomicAttributes()
 		{
 			return entityMeta.getOwnAtomicAttributes();
 		}
@@ -1104,13 +1104,13 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public Stream<AttributeMetaData> getOwnMappedByAttributes()
+		public Stream<Attribute> getOwnMappedByAttributes()
 		{
 			return entityMeta.getOwnMappedByAttributes();
 		}
 
 		@Override
-		public Stream<AttributeMetaData> getMappedByAttributes()
+		public Stream<Attribute> getMappedByAttributes()
 		{
 			return entityMeta.getMappedByAttributes();
 		}
@@ -1122,7 +1122,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public Stream<AttributeMetaData> getInversedByAttributes()
+		public Stream<Attribute> getInversedByAttributes()
 		{
 			return entityMeta.getInversedByAttributes();
 		}

@@ -12,7 +12,7 @@ The molgenis data api provides
 <img src="data-api-core-interfaces.png" />
 
 ### Entity
-An `Entity` is a modeled real world thing that can exist independently and can be uniquely identified (For example a 'Person' or 'Gene'). An entity has 'attributes', the properties of the Entity (For example 'Name' or 'Length'). The `EntityMetaData` interface descibes the Entity and the `AttributeMetaData` interface describes the Attributes. 
+An `Entity` is a modeled real world thing that can exist independently and can be uniquely identified (For example a 'Person' or 'Gene'). An entity has 'attributes', the properties of the Entity (For example 'Name' or 'Length'). The `EntityMetaData` interface descibes the Entity and the `Attribute` interface describes the Attributes.
 
 
 ### Repository
