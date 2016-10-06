@@ -181,9 +181,9 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 
 			Ontology ontology = Ontology.create(ontologyId, UNIT_ONTOLOGY_IRI, "unit ontology");
 			OntologyTermImpl KG_ONTOLOGY_TERM = OntologyTermImpl
-					.create(UNIT_ONTOLOGY_IRI, kgTerm, asList(kgTerm, "kg"));
+					.create("1", UNIT_ONTOLOGY_IRI, kgTerm, asList(kgTerm, "kg"));
 			OntologyTermImpl CM_ONTOLOGY_TERM = OntologyTermImpl
-					.create(UNIT_ONTOLOGY_IRI, cmTerm, asList(cmTerm, "cm"));
+					.create("2", UNIT_ONTOLOGY_IRI, cmTerm, asList(cmTerm, "cm"));
 
 			OntologyService ontologyService = mock(OntologyService.class);
 			when(ontologyService.getOntology(UNIT_ONTOLOGY_IRI)).thenReturn(ontology);

@@ -90,8 +90,8 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
 		sourceEntityMeta.addAttribute(sourceAttr0);
 		sourceEntityMeta.addAttribute(sourceAttr1);
-		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("b", param0Name, 1.0);
-		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("b", param1Name, 0.5);
+		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("b", param0Name, "tag1", 1.0f);
+		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("b", param1Name, "tag2", 0.5f);
 		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrResults = Maps.newHashMap();
 		attrResults.put(sourceAttr0,
 				ExplainedMatchCandidate.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
