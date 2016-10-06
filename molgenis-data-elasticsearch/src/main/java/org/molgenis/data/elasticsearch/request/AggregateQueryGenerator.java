@@ -33,20 +33,20 @@ public class AggregateQueryGenerator
 		// validate request
 		if (aggAttr1 == null)
 		{
-			throw new IllegalArgumentException("Aggregation requires at least one aggregatable attribute");
+			throw new IllegalArgumentException("Aggregation requires at least one isAggregatable attribute");
 		}
 		if (!aggAttr1.isAggregatable())
 		{
-			throw new IllegalArgumentException("Attribute is not aggregatable [ " + aggAttr1.getName() + "]");
+			throw new IllegalArgumentException("Attribute is not isAggregatable [ " + aggAttr1.getName() + "]");
 		}
 		if (aggAttr2 != null && !aggAttr2.isAggregatable())
 		{
-			throw new IllegalArgumentException("Attribute is not aggregatable [ " + aggAttr2.getName() + "]");
+			throw new IllegalArgumentException("Attribute is not isAggregatable [ " + aggAttr2.getName() + "]");
 		}
 		if (aggAttrDistinct != null && aggAttrDistinct.isNillable())
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1938
-			throw new IllegalArgumentException("Distinct aggregatable attribute cannot be nillable");
+			throw new IllegalArgumentException("Distinct isAggregatable attribute cannot be nillable");
 		}
 		AttributeType dataType1 = aggAttr1.getDataType();
 		if (aggAttr1.isNillable() && isReferenceType(aggAttr1))

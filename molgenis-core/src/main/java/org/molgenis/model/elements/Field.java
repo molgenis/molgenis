@@ -251,12 +251,12 @@ public class Field implements Serializable
 
 	public boolean isAggregatable()
 	{
-		return aggregatable;
+		return isAggregatable;
 	}
 
-	public void setAggregatable(boolean aggregatable)
+	public void setAggregatable(boolean isAggregatable)
 	{
-		this.aggregatable = aggregatable;
+		this.isAggregatable = isAggregatable;
 	}
 
 	public void setReadonly(boolean readonly)
@@ -913,7 +913,7 @@ public class Field implements Serializable
 	 * Whether this field is hidden.
 	 */
 	private boolean readonly;
-	private boolean aggregatable;
+	private boolean isAggregatable;
 	/**
 	 * The string that should be set as the default value (is passed to the database ...)
 	 */

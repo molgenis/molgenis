@@ -344,18 +344,18 @@ public class Attribute extends StaticEntity
 
 	/**
 	 * Whether this attribute can be used to aggregate on. Default only attributes of type 'BOOL', 'XREF' and
-	 * 'CATEGORICAL' are aggregatable.
+	 * 'CATEGORICAL' are isAggregatable.
 	 *
-	 * @return <tt>true</tt> if this attribute is aggregatable
+	 * @return <tt>true</tt> if this attribute is isAggregatable
 	 */
 	public boolean isAggregatable()
 	{
 		return requireNonNull(getBoolean(AGGREGATABLE));
 	}
 
-	public Attribute setAggregatable(boolean aggregatable)
+	public Attribute setAggregatable(boolean isAggregatable)
 	{
-		set(AGGREGATABLE, aggregatable);
+		set(AGGREGATABLE, isAggregatable);
 		return this;
 	}
 

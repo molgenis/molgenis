@@ -121,7 +121,7 @@
         <#if attribute.unique><#assign constraints = constraints + [ "unique" ] /></#if>
         <#if !attribute.visible><#assign constraints = constraints + [ "hidden" ] /></#if>
         <#if attribute.auto><#assign constraints = constraints + [ "auto" ] /></#if>
-        <#if attribute.aggregatable><#assign constraints = constraints + [ "aggregates" ] /></#if>
+        <#if attribute.isAggregatable><#assign constraints = constraints + [ "aggregates" ] /></#if>
         <#if attribute.range?has_content>
             <#assign range = "range [">
             <#if attribute.range.min?has_content>

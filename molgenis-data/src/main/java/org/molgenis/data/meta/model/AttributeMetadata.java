@@ -35,7 +35,7 @@ public class AttributeMetadata extends SystemEntityMetaData
 	public static final String VISIBLE = "visible";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
-	public static final String AGGREGATABLE = "aggregatable";
+	public static final String AGGREGATABLE = "isAggregatable";
 	public static final String ENUM_OPTIONS = "enumOptions";
 	public static final String RANGE_MIN = "rangeMin";
 	public static final String RANGE_MAX = "rangeMax";

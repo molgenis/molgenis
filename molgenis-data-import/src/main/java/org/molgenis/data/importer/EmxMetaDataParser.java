@@ -855,7 +855,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (isReferenceType(attr) && attr.isNillable() && attr.isAggregatable())
 			{
 				throw new IllegalArgumentException(
-						format("attributes.aggregatable error on line [%d] (%s.%s): aggregatable nillable attribute cannot be of type %s",
+						format("attributes.isAggregatable error on line [%d] (%s.%s): isAggregatable nillable attribute cannot be of type %s",
 								rowIndex, emxEntityName, emxName, attr.getDataType().toString()));
 			}
 

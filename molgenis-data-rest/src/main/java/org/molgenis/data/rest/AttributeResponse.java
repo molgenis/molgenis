@@ -38,7 +38,7 @@ public class AttributeResponse
 	private final Boolean unique;
 	private final Boolean visible;
 	private Boolean lookupAttribute;
-	private Boolean aggregatable;
+	private Boolean isAggregatable;
 	private Range range;
 	private String expression;
 	private String visibleExpression;
@@ -203,11 +203,11 @@ public class AttributeResponse
 		}
 		else this.lookupAttribute = null;
 
-		if (attributesSet == null || attributesSet.contains("aggregatable".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("isAggregatable".toLowerCase()))
 		{
-			this.aggregatable = attr.isAggregatable();
+			this.isAggregatable = attr.isAggregatable();
 		}
-		else this.aggregatable = null;
+		else this.isAggregatable = null;
 
 		if (attributesSet == null || attributesSet.contains("range".toLowerCase()))
 		{
@@ -321,7 +321,7 @@ public class AttributeResponse
 
 	public Boolean isAggregatable()
 	{
-		return aggregatable;
+		return isAggregatable;
 	}
 
 	public Boolean getNillable()
@@ -346,7 +346,7 @@ public class AttributeResponse
 
 	public Boolean getAggregatable()
 	{
-		return aggregatable;
+		return isAggregatable;
 	}
 
 	public Range getRange()

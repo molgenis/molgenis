@@ -743,7 +743,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("sourceAttributeIdAttribute", sourceAttributeIdAttribute);
 		model.addAttribute("sourceAttributeLabelAttribute", sourceAttributeLabelAttribute);
 
-		// Check if the selected source attribute is aggregatable
+		// Check if the selected source attribute is isAggregatable
 		Attribute sourceAttributeAttribute = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute);
 		if (sourceAttributeAttribute.isAggregatable())

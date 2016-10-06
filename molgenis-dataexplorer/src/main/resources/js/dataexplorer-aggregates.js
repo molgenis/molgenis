@@ -27,7 +27,7 @@
     function createAggregatesTable() {
         var attributes = getAttributes();
         var aggregableAttributes = $.grep(attributes, function (attribute) {
-            if (attribute.aggregatable) {
+            if (attribute.isAggregatable) {
                 if (attribute.nillable) {
                     return attribute.fieldType !== 'CATEGORICAL' && attribute.fieldType !== 'XREF' && attribute.fieldType !== 'MREF' && attribute.fieldType !== 'CATEGORICAL_MREF' && attribute.fieldType !== 'ONE_TO_MANY';
                 }

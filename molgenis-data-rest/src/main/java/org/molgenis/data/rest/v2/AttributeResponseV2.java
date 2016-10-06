@@ -41,7 +41,7 @@ class AttributeResponseV2
 	private final Boolean unique;
 	private final Boolean visible;
 	private Boolean lookupAttribute;
-	private Boolean aggregatable;
+	private Boolean isAggregatable;
 	private Range range;
 	private String expression;
 	private String visibleExpression;
@@ -133,7 +133,7 @@ class AttributeResponseV2
 		this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
 		this.unique = attr.isUnique();
 		this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
-		this.aggregatable = attr.isAggregatable();
+		this.isAggregatable = attr.isAggregatable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
 		this.visibleExpression = attr.getVisibleExpression();
@@ -265,7 +265,7 @@ class AttributeResponseV2
 
 	public Boolean isAggregatable()
 	{
-		return aggregatable;
+		return isAggregatable;
 	}
 
 	public Boolean getNillable()
@@ -290,7 +290,7 @@ class AttributeResponseV2
 
 	public Boolean getAggregatable()
 	{
-		return aggregatable;
+		return isAggregatable;
 	}
 
 	public Range getRange()
