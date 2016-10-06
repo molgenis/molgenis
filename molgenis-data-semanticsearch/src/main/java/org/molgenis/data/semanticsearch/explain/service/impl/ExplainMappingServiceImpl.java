@@ -1,7 +1,6 @@
 package org.molgenis.data.semanticsearch.explain.service.impl;
 
 import com.google.common.base.Joiner;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.bean.OntologyTermQueryExpansion;
@@ -13,7 +12,6 @@ import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
-import org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.utils.Stemmer;
@@ -26,9 +24,11 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.*;
 import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.stringMatching;
 import static org.molgenis.ontology.utils.Stemmer.splitAndStem;
@@ -41,8 +41,8 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 
 	final static MatchingCriterion STRICT_MATCHING_CRITERION = new StrictMatchingCriterion();
 
-	private final static ExplainedMatchCandidate<String> EMPTY_EXPLAINATION = ExplainedMatchCandidate
-			.create(StringUtils.EMPTY);
+	private final static ExplainedMatchCandidate<String> EMPTY_EXPLANATION = ExplainedMatchCandidate
+			.create(EMPTY);
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExplainMappingServiceImpl.class);
 
@@ -63,13 +63,14 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 
 		Set<String> matchedSourceWords = splitRemoveStopWords(matchedResult);
 
+		// The scope contains all matched ontology terms plus their children up to the default expansion level
 		List<OntologyTerm> ontologyTermScope = ontologyTermQueryExpansions.stream()
 				.map(OntologyTermQueryExpansion::getOntologyTerms).flatMap(List::stream).collect(toList());
 
 		LOG.debug("OntologyTerms {}", ontologyTermScope);
 
 		List<OntologyTerm> relevantOntologyTerms = ontologyService
-				.findOntologyTerms(ontologyService.getAllOntologiesIds(), matchedSourceWords, ontologyTermScope.size(),
+				.findOntologyTerms(ontologyService.getAllOntologyIds(), matchedSourceWords, ontologyTermScope.size(),
 						ontologyTermScope);
 
 		List<TagGroup> tagGroups = tagGroupGenerator
@@ -100,11 +101,11 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 			return max.get().getResult();
 		}
 
-		return EMPTY_EXPLAINATION;
+		return EMPTY_EXPLANATION;
 	}
 
 	/**
-	 * This functions computes the similarity score for the matched candidate using either ontologyterms and the target
+	 * Computes the similarity score for the matched candidate using either ontology terms and the target
 	 * label. Whichever gives higher similarity score gets selected as the final explanation
 	 *
 	 * @param queryExpansionSolution
@@ -126,7 +127,7 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 
 			String bestMatchingSynonym = findBestMatchingSynonym(match, sourceOntologyTerm);
 			String joinedMatchedWords = termJoiner.join(findMatchedWords(match, bestMatchingSynonym));
-			float score = (float) (Math.round(stringMatching(joinedMatchedWords, match) * 10) / 10f);
+			float score = Math.round(stringMatching(joinedMatchedWords, match) * 10) / 10f;
 			explainedUsingOntologyTerms.add(ExplainedQueryString
 					.create(joinedMatchedWords, bestMatchingSynonym, targetOntologyTerm.getLabel(), score));
 		}
@@ -136,7 +137,7 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 
 		float score = (float) (Math.round(stringMatching(targetQueryTerm, match) * 10) / 10f);
 		explainedUsingTargetLabel.add(ExplainedQueryString
-				.create(termJoiner.join(findMatchedWords(targetQueryTerm, match)), targetQueryTerm, StringUtils.EMPTY,
+				.create(termJoiner.join(findMatchedWords(targetQueryTerm, match)), targetQueryTerm, EMPTY,
 						score));
 
 		// Choose to be explained whether by ontology terms or target label depending one which one produces a higher
@@ -157,23 +158,23 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 				explainedUsingOntologyTerms.stream().map(ExplainedQueryString::getQueryString)
 						.collect(Collectors.joining(" "))));
 
-		float score = (float) (Math.round(stringMatching(combinedQuery, match) * 10) / 10f);
+		float score = Math.round(stringMatching(combinedQuery, match) * 10) / 10f;
 
 		return Hit.create(ExplainedMatchCandidate.create(match, explainedUsingOntologyTerms, isHighQuality), score);
 	}
 
 	/**
-	 * find matched words between two {@link String}s
+	 * Finds matched words between two {@link String}s
 	 *
-	 * @param string1
-	 * @param string2
-	 * @return
+	 * @param string1 the first string
+	 * @param string2 the second string
+	 * @return matched words that are in both strings
 	 */
 	private Set<String> findMatchedWords(String string1, String string2)
 	{
 		Set<String> intersectedWords = new LinkedHashSet<>();
 		Set<String> stemmedWordsFromString2 = splitAndStem(string2);
-		for (String wordFromString1 : SemanticSearchServiceUtils.splitIntoUniqueTerms(string1))
+		for (String wordFromString1 : splitIntoUniqueTerms(string1))
 		{
 			String stemmedSourceWord = Stemmer.stem(wordFromString1);
 			if (stemmedWordsFromString2.contains(stemmedSourceWord))
@@ -185,17 +186,17 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 	}
 
 	/**
-	 * Get a list of matched Synonym from {@link OntologyTerm}s for the given target query
+	 * Finds the best matching synonym from {@link OntologyTerm}s for the given target query
 	 *
-	 * @param ontologyTerms
-	 * @param targetQueryTerm
-	 * @return
+	 * @param attributeLabel the attribute label to match
+	 * @param ontologyTerm the OntologyTerm whose label and synonyms are candidates for the match
+	 * @return the best matching label or synonym
 	 */
 	private String findBestMatchingSynonym(String attributeLabel, OntologyTerm ontologyTerm)
 	{
 		Hit<String> hit = getLowerCaseTerms(ontologyTerm).stream()
 				.map(synonym -> Hit.create(synonym, (float) stringMatching(attributeLabel, synonym)))
-				.sorted(Comparator.reverseOrder()).findFirst().get();
+				.sorted(reverseOrder()).findFirst().get();
 
 		return hit.getResult();
 	}

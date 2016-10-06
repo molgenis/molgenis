@@ -10,7 +10,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 /**
- * A List {@link OntologyTerm}s that got matched to an attribute, plus the score of the match.
+ * A List of {@link OntologyTerm}s that got matched to an attribute, plus the score of the match.
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_TagGroup.class)
