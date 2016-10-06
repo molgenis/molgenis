@@ -112,7 +112,7 @@ public class OneToManyTestHarness
 	public static final String ATTR_CHILDREN = "children";
 
 	public enum TestCaseType{
-		BOTH_NULLABLE, XREF_REQUIRED, ONE_TO_MANY_REQUIRED, BOTH_REQUIRED;
+		XREF_NULLABLE, XREF_REQUIRED;
 	}
 
 	@PostConstruct
@@ -126,8 +126,6 @@ public class OneToManyTestHarness
 	 * <p>
 	 * Case 1: Author.books = nillable, Book.author = nillable | no ordering
 	 * Case 2: Author.books = nillable, Book.author = required | no ordering
-	 * Case 3: Author.books = required, Book.author = nillable | no ordering
-	 * Case 4: Author.books = required, Book.author = required | no ordering
 	 * Case 5: Author.books = nillable, Book.author = nillable | ascending order
 	 * Case 6: Author.books = nillable, Book.author = nillable | descending order
 	 */
@@ -135,14 +133,10 @@ public class OneToManyTestHarness
 	{
 		switch (testCase)
 		{
-			case BOTH_NULLABLE:
-				return createTestEntitiesSetAuthorField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
+			case XREF_NULLABLE:
+				return createTestEntitiesSetBooksField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
 			case XREF_REQUIRED:
 				return createTestEntitiesSetBooksField(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
-			case ONE_TO_MANY_REQUIRED:
-				return createTestEntitiesSetAuthorField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
-			case BOTH_REQUIRED:
-				return createTestEntitiesSetAuthorField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
 		}
@@ -161,31 +155,13 @@ public class OneToManyTestHarness
 	{
 		switch (testCase)
 		{
-			case BOTH_NULLABLE:
+			case XREF_NULLABLE:
 				return createPersonEntities(personFactory1);
 			case XREF_REQUIRED:
 				return createPersonEntities(personFactory2);
-			case ONE_TO_MANY_REQUIRED:
-				return createPersonEntities(personFactory3);
-			case BOTH_REQUIRED:
-				return createPersonEntities(personFactory4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
 		}
-	}
-
-	/**
-	 * Create Author and Book test entities and set the Author.books fields.
-	 */
-	private AuthorsAndBooks createTestEntitiesSetAuthorField(AbstractSystemEntityFactory authorFactory,
-			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
-	{
-		List<Entity> authors = createAuthorEntities(authorFactory);
-		List<Entity> books = createBookEntities(bookFactory);
-		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData, bookMetaData);
 	}
 
 	/**
@@ -254,9 +230,9 @@ public class OneToManyTestHarness
 		person3.set(PersonMetaData1.ID, PERSON_3);
 		person3.set(PersonMetaData1.LABEL, "Klaas");
 
-		person1.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2));
-		person2.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person3));
-		person3.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person1));
+		person1.set(PersonMetaData1.ATTR_PARENT, person3);
+		person2.set(PersonMetaData1.ATTR_PARENT, person1);
+		person3.set(PersonMetaData1.ATTR_PARENT, person2);
 
 		return newArrayList(person1, person2, person3);
 	}
