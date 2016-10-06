@@ -11,7 +11,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.*;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -135,11 +135,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>(rules).pageSize(100),
 				OntologyTermEntity.class)).thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
-		List<OntologyTermImpl> exactOntologyTerms = ontologyTermRepository
+		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
 				.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
 
 		assertEquals(exactOntologyTerms, singletonList(
-				OntologyTermImpl.create("12", "http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
+				OntologyTerm.create("12", "http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
 	}
 
 	@Test
@@ -158,10 +158,10 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(eq(ONTOLOGY_TERM), argumentCaptor.capture(), eq(OntologyTermEntity.class)))
 				.thenReturn(Stream.of(ontologyTermEntity));
 
-		List<OntologyTermImpl> terms = ontologyTermRepository
+		List<OntologyTerm> terms = ontologyTermRepository
 				.findOntologyTerms(asList("1", "2"), of("term1", "term2", "term3"), 100);
 
-		assertEquals(terms, singletonList(OntologyTermImpl
+		assertEquals(terms, singletonList(OntologyTerm
 				.create("12", "http://www.test.nl/iri", "Ontology term", singletonList("Ontology term synonym"))));
 
 		assertEquals(argumentCaptor.getValue().toString(),
@@ -236,8 +236,8 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 
 		List<String> iris = Arrays.asList("http://www.test.nl/iri");
 
-		List<OntologyTermImpl> ontologyTerm = ontologyTermRepository.getOntologyTerms(iris);
-		assertEquals(ontologyTerm, Arrays.asList(OntologyTermImpl
+		List<OntologyTerm> ontologyTerm = ontologyTermRepository.getOntologyTerms(iris);
+		assertEquals(ontologyTerm, Arrays.asList(OntologyTerm
 				.create("12", "http://www.test.nl/iri", "Ontology term", singletonList("Ontology term synonym"))));
 	}
 

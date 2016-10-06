@@ -144,7 +144,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.ontology.core.meta" })
 	public static class Config
 	{
 		@Autowired

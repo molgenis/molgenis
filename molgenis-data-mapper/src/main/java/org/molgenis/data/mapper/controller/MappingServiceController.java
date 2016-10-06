@@ -22,7 +22,7 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -469,7 +469,7 @@ public class MappingServiceController extends MolgenisPluginController
 				.getAttribute(targetAttribute);
 
 		// Find relevant attributes base on tags
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
+		Multimap<Relation, OntologyTagObject> tagsForAttribute = ontologyTagService
 				.getTagsForAttribute(entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
 
 		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> relevantAttributes = semanticSearchService
@@ -560,7 +560,7 @@ public class MappingServiceController extends MolgenisPluginController
 			model.addAttribute("categories", refEntities);
 		}
 
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
+		Multimap<Relation, OntologyTagObject> tagsForAttribute = ontologyTagService
 				.getTagsForAttribute(entityMapping.getTargetEntityMetaData(),
 						attributeMapping.getTargetAttributeMetaData());
 
@@ -914,9 +914,9 @@ public class MappingServiceController extends MolgenisPluginController
 		return molgenisUserService.getUser(getCurrentUsername());
 	}
 
-	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)
+	private Map<String, List<OntologyTagObject>> getTagsForAttribute(String target, MappingProject project)
 	{
-		Map<String, List<OntologyTerm>> attributeTagMap = new HashMap<>();
+		Map<String, List<OntologyTagObject>> attributeTagMap = new HashMap<>();
 		for (AttributeMetaData amd : project.getMappingTarget(target).getTarget().getAtomicAttributes())
 		{
 			EntityMetaData targetMetaData = RunAsSystemProxy.runAsSystem(() -> dataService.getEntityMetaData(target));

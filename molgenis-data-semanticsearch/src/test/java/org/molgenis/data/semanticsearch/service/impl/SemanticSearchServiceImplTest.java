@@ -19,8 +19,8 @@ import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 				.thenReturn(sourceEntityMetaDataEntity);
 
 		// Mock the ontologyterm
-		OntologyTermImpl standingHeight = OntologyTermImpl
+		OntologyTerm standingHeight = OntologyTerm
 				.create("1", "http://onto/height", "height", asList("height", "length"));
 
 		// Mock the search parameter
@@ -172,11 +172,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		sourceEntityMetaData.addAttribute(sourceAttributeHeight);
 		sourceEntityMetaData.addAttribute(sourceAttributeWeight);
 
-		OntologyTermImpl heightOntologyTermImpl = OntologyTermImpl.create("1", "iri1", "Height");
-		OntologyTermImpl weightOntologyTermImpl = OntologyTermImpl.create("2", "iri2", "Weight");
+		OntologyTerm heightOntologyTerm = OntologyTerm.create("1", "iri1", "Height");
+		OntologyTerm weightOntologyTerm = OntologyTerm.create("2", "iri2", "Weight");
 
-		TagGroup heightTagGroup = TagGroup.create(Arrays.asList(heightOntologyTermImpl), "height", 0.6f);
-		TagGroup weightTagGroup = TagGroup.create(Arrays.asList(weightOntologyTermImpl), "weight", 0.6f);
+		TagGroup heightTagGroup = TagGroup.create(Arrays.asList(heightOntologyTerm), "height", 0.6f);
+		TagGroup weightTagGroup = TagGroup.create(Arrays.asList(weightOntologyTerm), "weight", 0.6f);
 
 		when(dataService.getEntityMetaData("sourceEntityMetaData")).thenReturn(sourceEntityMetaData);
 		when(tagGroupGenerator.generateTagGroups(sourceAttributeHeight.getLabel(), Arrays.asList("1")))
@@ -184,11 +184,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(tagGroupGenerator.generateTagGroups(sourceAttributeWeight.getLabel(), Arrays.asList("1")))
 				.thenReturn(Arrays.asList(weightTagGroup));
 
-		Map<AttributeMetaData, Hit<OntologyTerm>> expected = new LinkedHashMap<AttributeMetaData, Hit<OntologyTerm>>();
+		Map<AttributeMetaData, Hit<OntologyTagObject>> expected = new LinkedHashMap<AttributeMetaData, Hit<OntologyTagObject>>();
 		expected.put(sourceAttributeHeight, Hit.create(heightTagGroup.getCombinedOntologyTerm(), 0.6f));
 		expected.put(sourceAttributeWeight, Hit.create(weightTagGroup.getCombinedOntologyTerm(), 0.6f));
 
-		Map<AttributeMetaData, Hit<OntologyTerm>> actual = semanticSearchService
+		Map<AttributeMetaData, Hit<OntologyTagObject>> actual = semanticSearchService
 				.findTags("sourceEntityMetaData", Arrays.asList("1"));
 		assertEquals(actual, expected);
 	}

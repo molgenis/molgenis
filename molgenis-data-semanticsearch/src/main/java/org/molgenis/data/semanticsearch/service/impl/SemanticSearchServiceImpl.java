@@ -22,7 +22,7 @@ import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -114,7 +114,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	@Override
 	public Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
-			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms)
+			Collection<OntologyTagObject> ontologyTagTermsFromTags, Set<String> searchTerms)
 	{
 		Set<String> queryTerms = createLexicalSearchQueryTerms(targetAttribute, searchTerms);
 
@@ -125,7 +125,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			String queryString = StringUtils.join(searchTerms, " ");
 			tagGroups = tagGroupGenerator.generateTagGroups(queryString, ontologyService.getAllOntologiesIds());
 		}
-		else if (isNull(ontologyTermsFromTags) || ontologyTermsFromTags.isEmpty())
+		else if (isNull(ontologyTagTermsFromTags) || ontologyTagTermsFromTags.isEmpty())
 		{
 			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
 			Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
@@ -138,7 +138,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 		else
 		{
-			tagGroups = ontologyTermsFromTags.stream().map(ot -> TagGroup
+			tagGroups = ontologyTagTermsFromTags.stream().map(ot -> TagGroup
 					.create(ontologyService.getOntologyTerms(ot.getAtomicIRIs()), ot.getLabel(), 1.0f))
 					.collect(toList());
 		}
@@ -181,17 +181,16 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
+	public Map<AttributeMetaData, Hit<OntologyTagObject>> findTags(String entity, List<String> ontologyIds)
 	{
-		Map<AttributeMetaData, Hit<OntologyTerm>> result = new LinkedHashMap<AttributeMetaData, Hit<OntologyTerm>>();
+		Map<AttributeMetaData, Hit<OntologyTagObject>> result = new LinkedHashMap<>();
 		EntityMetaData emd = dataService.getEntityMetaData(entity);
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
 			List<TagGroup> generateTagGroups = tagGroupGenerator.generateTagGroups(amd.getLabel(), ontologyIds);
-			Hit<OntologyTerm> tag = generateTagGroups.stream()
-					.map(tagGroup -> Hit.create(tagGroup.getCombinedOntologyTerm(), tagGroup.getScore())).findFirst()
-					.orElse(null);
-
+			Hit<OntologyTagObject> tag = generateTagGroups.stream()
+					.map(tagGroup -> Hit.<OntologyTagObject>create(tagGroup.getCombinedOntologyTerm(),
+							tagGroup.getScore())).findFirst().orElse(null);
 			if (tag != null)
 			{
 				result.put(amd, tag);

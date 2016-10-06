@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,9 +180,9 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 			List<String> ontologyIds = singletonList(ontologyId);
 
 			Ontology ontology = Ontology.create(ontologyId, UNIT_ONTOLOGY_IRI, "unit ontology");
-			OntologyTermImpl KG_ONTOLOGY_TERM = OntologyTermImpl
+			OntologyTerm KG_ONTOLOGY_TERM = OntologyTerm
 					.create("1", UNIT_ONTOLOGY_IRI, kgTerm, asList(kgTerm, "kg"));
-			OntologyTermImpl CM_ONTOLOGY_TERM = OntologyTermImpl
+			OntologyTerm CM_ONTOLOGY_TERM = OntologyTerm
 					.create("2", UNIT_ONTOLOGY_IRI, cmTerm, asList(cmTerm, "cm"));
 
 			OntologyService ontologyService = mock(OntologyService.class);

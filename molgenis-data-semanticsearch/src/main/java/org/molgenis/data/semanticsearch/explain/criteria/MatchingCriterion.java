@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.explain.criteria;
 
 import org.molgenis.ontology.core.meta.OntologyTermEntity;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 
 import java.util.Set;
 
@@ -14,5 +14,5 @@ public interface MatchingCriterion
 	 * @param ontologyTerm
 	 * @return
 	 */
-	public abstract boolean apply(Set<String> words, OntologyTermImpl ontologyTerm);
+	public abstract boolean apply(Set<String> words, OntologyTerm ontologyTerm);
 }
