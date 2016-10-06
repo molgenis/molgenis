@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
@@ -31,8 +31,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		implements MolgenisSecurityWebAppDatabasePopulatorService
 {
 	private static final String USERNAME_ADMIN = "admin";
-	private final MolgenisUserFactory molgenisUserFactory;
-	private final MolgenisGroupFactory molgenisGroupFactory;
+	private final UserFactory userFactory;
+	private final GroupFactory groupFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final GroupAuthorityFactory groupAuthorityFactory;
 
@@ -44,12 +44,12 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	private String anonymousEmail;
 
 	@Autowired
-	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(MolgenisUserFactory molgenisUserFactory,
-			MolgenisGroupFactory molgenisGroupFactory, UserAuthorityFactory userAuthorityFactory,
+	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(UserFactory userFactory,
+			GroupFactory groupFactory, UserAuthorityFactory userAuthorityFactory,
 			GroupAuthorityFactory groupAuthorityFactory)
 	{
-		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
-		this.molgenisGroupFactory = requireNonNull(molgenisGroupFactory);
+		this.userFactory = requireNonNull(userFactory);
+		this.groupFactory = requireNonNull(groupFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 	}
@@ -66,7 +66,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		}
 
 		// create admin user
-		MolgenisUser userAdmin = molgenisUserFactory.create();
+		User userAdmin = userFactory.create();
 		userAdmin.setUsername(USERNAME_ADMIN);
 		userAdmin.setPassword(adminPassword);
 		userAdmin.setEmail(adminEmail);
@@ -75,7 +75,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		userAdmin.setChangePassword(false);
 
 		// create anonymous user
-		MolgenisUser anonymousUser = molgenisUserFactory.create();
+		User anonymousUser = userFactory.create();
 		anonymousUser.setUsername(ANONYMOUS_USERNAME);
 		anonymousUser.setPassword(ANONYMOUS_USERNAME);
 		anonymousUser.setEmail(anonymousEmail);
@@ -85,25 +85,25 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 
 		// set anonymous role for anonymous user
 		UserAuthority anonymousAuthority = userAuthorityFactory.create();
-		anonymousAuthority.setMolgenisUser(anonymousUser);
+		anonymousAuthority.setUser(anonymousUser);
 		anonymousAuthority.setRole(AUTHORITY_ANONYMOUS);
 
 		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
-		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setUser(anonymousUser);
 		anonymousHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
 
 		// create all users group
-		MolgenisGroup allUsersGroup = molgenisGroupFactory.create();
+		Group allUsersGroup = groupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
 		// allow all users to see the home plugin
 		GroupAuthority usersGroupHomeAuthority = groupAuthorityFactory.create();
-		usersGroupHomeAuthority.setMolgenisGroup(allUsersGroup);
+		usersGroupHomeAuthority.setGroup(allUsersGroup);
 		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
 
 		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
-		usersGroupUserAccountAuthority.setMolgenisGroup(allUsersGroup);
+		usersGroupUserAccountAuthority.setGroup(allUsersGroup);
 		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + userAccountControllerId.toUpperCase());
 
 		// allow all users to read meta data entities
@@ -111,15 +111,15 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		Stream<GroupAuthority> entityGroupAuthorities = entityNames.stream().map(entityName ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
-			usersGroupAuthority.setMolgenisGroup(allUsersGroup);
+			usersGroupAuthority.setGroup(allUsersGroup);
 			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityName);
 			return usersGroupAuthority;
 		});
 
 		// persist entities
-		dataService.add(MOLGENIS_USER, Stream.of(userAdmin, anonymousUser));
+		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
 		dataService.add(USER_AUTHORITY, Stream.of(anonymousAuthority, anonymousHomeAuthority));
-		dataService.add(MOLGENIS_GROUP, allUsersGroup);
+		dataService.add(GROUP, allUsersGroup);
 		dataService.add(GROUP_AUTHORITY,
 				Stream.concat(Stream.of(usersGroupHomeAuthority, usersGroupUserAccountAuthority),
 						entityGroupAuthorities));

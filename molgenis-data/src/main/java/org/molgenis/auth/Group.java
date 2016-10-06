@@ -4,23 +4,23 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.auth.MolgenisGroupMetaData.*;
+import static org.molgenis.auth.GroupMetaData.*;
 
-public class MolgenisGroup extends StaticEntity
+public class Group extends StaticEntity
 {
-	public MolgenisGroup(Entity entity)
+	public Group(Entity entity)
 	{
 		super(entity);
 		setDefaultValues();
 	}
 
-	public MolgenisGroup(EntityMetaData entityMeta)
+	public Group(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setDefaultValues();
 	}
 
-	public MolgenisGroup(String id, EntityMetaData entityMeta)
+	public Group(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);

@@ -53,12 +53,12 @@ public class PermissionManagerController extends MolgenisPluginController
 	public String init(Model model)
 	{
 		model.addAttribute("users", Lists.newArrayList(
-				Iterables.filter(pluginPermissionManagerService.getUsers(), new Predicate<MolgenisUser>()
+				Iterables.filter(pluginPermissionManagerService.getUsers(), new Predicate<User>()
 				{
 					@Override
-					public boolean apply(MolgenisUser molgenisUser)
+					public boolean apply(User user)
 					{
-						Boolean superuser = molgenisUser.isSuperuser();
+						Boolean superuser = user.isSuperuser();
 						return superuser == null || !superuser;
 					}
 				})));

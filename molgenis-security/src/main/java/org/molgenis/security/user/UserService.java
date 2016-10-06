@@ -1,11 +1,11 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.User;
 
 import java.util.List;
 
-public interface MolgenisUserService
+public interface UserService
 {
 	/**
 	 * Returns e-mail addresses of super users
@@ -17,7 +17,7 @@ public interface MolgenisUserService
 	/**
 	 * Returns the given user
 	 */
-	MolgenisUser getUser(String username);
+	User getUser(String username);
 
 	/**
 	 * Find a user by it's email.
@@ -25,7 +25,7 @@ public interface MolgenisUserService
 	 * @param email
 	 * @return the user or null if not found
 	 */
-	MolgenisUser getUserByEmail(String email);
+	User getUserByEmail(String email);
 
 	/**
 	 * Returns the groups that the given user belongs to
@@ -33,12 +33,12 @@ public interface MolgenisUserService
 	 * @param username
 	 * @return
 	 */
-	Iterable<MolgenisGroup> getUserGroups(String username);
+	Iterable<Group> getUserGroups(String username);
 
 	/**
 	 * Update user
 	 *
 	 * @param user
 	 */
-	void update(MolgenisUser user);
+	void update(User user);
 }

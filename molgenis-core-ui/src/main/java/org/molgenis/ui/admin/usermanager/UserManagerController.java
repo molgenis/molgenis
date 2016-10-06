@@ -32,8 +32,8 @@ public class UserManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		model.addAttribute("users", this.pluginUserManagerService.getAllMolgenisUsers());
-		model.addAttribute("groups", this.pluginUserManagerService.getAllMolgenisGroups());
+		model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
+		model.addAttribute("groups", this.pluginUserManagerService.getAllGroups());
 
 		if (!model.containsAttribute("viewState")) model.addAttribute("viewState", "users");
 

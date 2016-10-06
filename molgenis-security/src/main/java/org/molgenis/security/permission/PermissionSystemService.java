@@ -1,8 +1,8 @@
 package org.molgenis.security.permission;
 
 import com.google.common.collect.Lists;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 @Component
@@ -45,9 +45,9 @@ public class PermissionSystemService
 		if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) && !auth.getAuthorities()
 				.contains(new SimpleGrantedAuthority("ROLE_SYSTEM")))
 		{
-			MolgenisUser user = dataService.findOne(MOLGENIS_USER,
-					new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, SecurityUtils.getUsername(auth)),
-					MolgenisUser.class);
+			User user = dataService.findOne(USER,
+					new QueryImpl<User>().eq(UserMetaData.USERNAME, SecurityUtils.getUsername(auth)),
+					User.class);
 
 			if (user != null)
 			{
@@ -63,7 +63,7 @@ public class PermissionSystemService
 									.toUpperCase();
 							roles.add(new SimpleGrantedAuthority(role));
 							UserAuthority userAuthority = userAuthorityFactory.create();
-							userAuthority.setMolgenisUser(user);
+							userAuthority.setUser(user);
 							userAuthority.setRole(role);
 
 							if (permission == Permission.WRITEMETA)

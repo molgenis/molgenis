@@ -19,20 +19,20 @@ public class GroupAuthorityMetaData extends SystemEntityMetaData
 	private static final String SIMPLE_NAME = "GroupAuthority";
 	public static final String GROUP_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String MOLGENIS_GROUP = "molgenisGroup";
+	public static final String GROUP = "Group";
 	public static final String ID = "id";
 
 	private final SecurityPackage securityPackage;
-	private final MolgenisGroupMetaData molgenisGroupMetaData;
+	private final GroupMetaData groupMetaData;
 	private final AuthorityMetaData authorityMetaData;
 
 	@Autowired
-	GroupAuthorityMetaData(SecurityPackage securityPackage, MolgenisGroupMetaData molgenisGroupMetaData,
+	GroupAuthorityMetaData(SecurityPackage securityPackage, GroupMetaData groupMetaData,
 			AuthorityMetaData authorityMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
-		this.molgenisGroupMetaData = requireNonNull(molgenisGroupMetaData);
+		this.groupMetaData = requireNonNull(groupMetaData);
 		this.authorityMetaData = requireNonNull(authorityMetaData);
 	}
 
@@ -44,7 +44,7 @@ public class GroupAuthorityMetaData extends SystemEntityMetaData
 
 		setExtends(authorityMetaData);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
+		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
 	}
 

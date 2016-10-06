@@ -1,6 +1,6 @@
 package org.molgenis.ui.jobs;
 
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -65,7 +65,7 @@ public class JobsController extends MolgenisPluginController
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -7);
 		Date weekAgo = cal.getTime();
-		MolgenisUser currentUser = userAccountService.getCurrentUser();
+		User currentUser = userAccountService.getCurrentUser();
 
 		dataService.getMeta().getEntityMetaDatas()
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))

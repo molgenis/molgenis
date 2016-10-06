@@ -1,10 +1,10 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.user.MolgenisUserServiceImplTest.Config;
+import org.molgenis.security.user.UserServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +19,11 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
-public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTests
+public class UserServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	private static Authentication AUTHENTICATION_PREVIOUS;
 
@@ -31,9 +31,9 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	static class Config
 	{
 		@Bean
-		public MolgenisUserServiceImpl molgenisUserServiceImpl()
+		public UserServiceImpl molgenisUserServiceImpl()
 		{
-			return new MolgenisUserServiceImpl(dataService());
+			return new UserServiceImpl(dataService());
 		}
 
 		@Bean
@@ -44,7 +44,7 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	}
 
 	@Autowired
-	private MolgenisUserServiceImpl molgenisUserServiceImpl;
+	private UserServiceImpl molgenisUserServiceImpl;
 
 	@Autowired
 	private DataService dataService;
@@ -52,7 +52,7 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisUserServiceImpl()
 	{
-		new MolgenisUserServiceImpl(null);
+		new UserServiceImpl(null);
 	}
 
 	@BeforeClass
@@ -76,15 +76,15 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	{
 		String username = "username";
 
-		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn("1");
-		when(existingMolgenisUser.getUsername()).thenReturn(username);
-		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		User existingUser = mock(User.class);
+		when(existingUser.getId()).thenReturn("1");
+		when(existingUser.getUsername()).thenReturn(username);
+		when(existingUser.getPassword()).thenReturn("encrypted-password");
 
 		when(dataService
-				.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, username),
-						MolgenisUser.class)).thenReturn(existingMolgenisUser);
+				.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
+						User.class)).thenReturn(existingUser);
 
-		assertEquals(molgenisUserServiceImpl.getUser(username), existingMolgenisUser);
+		assertEquals(molgenisUserServiceImpl.getUser(username), existingUser);
 	}
 }

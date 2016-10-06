@@ -1,8 +1,8 @@
 package org.molgenis.ui.admin.permission;
 
 import org.molgenis.auth.GroupAuthorityFactory;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -86,8 +86,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	private MockMvc mockMvc;
-	private MolgenisUser user1, user2;
-	private MolgenisGroup group1, group2;
+	private User user1, user2;
+	private Group group1, group2;
 
 	@BeforeMethod
 	public void setUp()
@@ -96,12 +96,12 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 				.setMessageConverters(gsonHttpMessageConverter).build();
 
 		reset(permissionManagerService);
-		user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
+		user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
 		when(user1.isSuperuser()).thenReturn(true);
-		user2 = when(mock(MolgenisUser.class).getId()).thenReturn("2").getMock();
+		user2 = when(mock(User.class).getId()).thenReturn("2").getMock();
 		when(user2.isSuperuser()).thenReturn(false);
-		when(permissionManagerService.getUsers()).thenReturn(Arrays.<MolgenisUser>asList(user1, user2));
-		when(permissionManagerService.getGroups()).thenReturn(Arrays.<MolgenisGroup>asList(group1, group2));
+		when(permissionManagerService.getUsers()).thenReturn(Arrays.<User>asList(user1, user2));
+		when(permissionManagerService.getGroups()).thenReturn(Arrays.<Group>asList(group1, group2));
 
 	}
 

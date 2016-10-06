@@ -27,9 +27,9 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
 
@@ -76,8 +76,8 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 	private GroupAuthority groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority;
 	private UserAuthority userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority;
-	private MolgenisUser user1, user2, user3;
-	private MolgenisGroup group1;
+	private User user1, user2, user3;
+	private Group group1;
 	private MolgenisPlugin plugin1, plugin2, plugin3;
 
 	@BeforeMethod
@@ -87,76 +87,76 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 		String group1Id = "1";
 		String user1Id = "1", user2Id = "2", user3Id = "3";
-		user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
-		user2 = when(mock(MolgenisUser.class).getId()).thenReturn("2").getMock();
-		user3 = when(mock(MolgenisUser.class).getId()).thenReturn("3").getMock();
-		when(dataService.findAll(MOLGENIS_USER, MolgenisUser.class)).thenReturn(Stream.of(user1, user2, user3));
+		user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
+		user2 = when(mock(User.class).getId()).thenReturn("2").getMock();
+		user3 = when(mock(User.class).getId()).thenReturn("3").getMock();
+		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1, user2, user3));
 
-		group1 = when(mock(MolgenisGroup.class).getId()).thenReturn(group1Id).getMock();
+		group1 = when(mock(Group.class).getId()).thenReturn(group1Id).getMock();
 		when(group1.getName()).thenReturn("group1");
 
-		MolgenisGroupMember molgenisGroupMember1 = mock(MolgenisGroupMember.class);
-		when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(group1);
+		GroupMember groupMember1 = mock(GroupMember.class);
+		when(groupMember1.getGroup()).thenReturn(group1);
 
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user2),
-				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember1));
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user2),
+				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
-				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember1));
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 
 		groupPlugin1Authority = mock(GroupAuthority.class);
 		when(groupPlugin1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin1");
-		when(groupPlugin1Authority.getMolgenisGroup()).thenReturn(group1);
+		when(groupPlugin1Authority.getGroup()).thenReturn(group1);
 		groupPlugin2Authority = mock(GroupAuthority.class);
 		when(groupPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
-		when(groupPlugin2Authority.getMolgenisGroup()).thenReturn(group1);
+		when(groupPlugin2Authority.getGroup()).thenReturn(group1);
 		groupEntity1Authority = mock(GroupAuthority.class);
 		when(groupEntity1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity1");
-		when(groupEntity1Authority.getMolgenisGroup()).thenReturn(group1);
+		when(groupEntity1Authority.getGroup()).thenReturn(group1);
 		groupEntity2Authority = mock(GroupAuthority.class);
 		when(groupEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
-		when(groupEntity2Authority.getMolgenisGroup()).thenReturn(group1);
+		when(groupEntity2Authority.getGroup()).thenReturn(group1);
 
 		userPlugin2Authority = mock(UserAuthority.class);
 		when(userPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
-		when(userPlugin2Authority.getMolgenisUser()).thenReturn(user1);
+		when(userPlugin2Authority.getUser()).thenReturn(user1);
 		userPlugin3Authority = mock(UserAuthority.class);
 		when(userPlugin3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin3");
-		when(userPlugin3Authority.getMolgenisUser()).thenReturn(user1);
+		when(userPlugin3Authority.getUser()).thenReturn(user1);
 		userEntity2Authority = mock(UserAuthority.class);
 		when(userEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
-		when(userEntity2Authority.getMolgenisUser()).thenReturn(user1);
+		when(userEntity2Authority.getUser()).thenReturn(user1);
 		userEntity3Authority = mock(UserAuthority.class);
 		when(userEntity3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity3");
-		when(userEntity3Authority.getMolgenisUser()).thenReturn(user1);
+		when(userEntity3Authority.getUser()).thenReturn(user1);
 
-		when(dataService.findAll(MOLGENIS_GROUP, MolgenisGroup.class)).thenReturn(Stream.of(group1));
+		when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group1));
 
-		when(dataService.findAll(MOLGENIS_USER, MolgenisUser.class)).thenReturn(Stream.of(user1));
+		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1));
 
-		when(dataService.findOneById(MOLGENIS_GROUP, group1Id, MolgenisGroup.class)).thenReturn(group1);
-		when(dataService.findOneById(MOLGENIS_USER, user1Id, MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOneById(MOLGENIS_USER, user2Id, MolgenisUser.class)).thenReturn(user2);
-		when(dataService.findOneById(MOLGENIS_USER, user3Id, MolgenisUser.class)).thenReturn(user3);
+		when(dataService.findOneById(GROUP, group1Id, Group.class)).thenReturn(group1);
+		when(dataService.findOneById(USER, user1Id, User.class)).thenReturn(user1);
+		when(dataService.findOneById(USER, user2Id, User.class)).thenReturn(user2);
+		when(dataService.findOneById(USER, user3Id, User.class)).thenReturn(user3);
 
 		when(dataService.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>()
-				.in(GroupAuthorityMetaData.MOLGENIS_GROUP, Arrays.<Entity>asList(group1)), GroupAuthority.class))
+				.in(GroupAuthorityMetaData.GROUP, Arrays.<Entity>asList(group1)), GroupAuthority.class))
 				.thenReturn(Stream.of(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority,
 						groupEntity2Authority));
 
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().in(UserAuthorityMetaData.MOLGENIS_USER, Arrays.<Entity>asList(user1)),
+				new QueryImpl<UserAuthority>().in(UserAuthorityMetaData.USER, Arrays.<Entity>asList(user1)),
 				UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
 		when(dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, user1),
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user1),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 		when(dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, user2),
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user2),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
@@ -181,7 +181,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getUsers()
 	{
-		when(dataService.findAll(MOLGENIS_USER, MolgenisUser.class)).thenReturn(Stream.of(user1, user2, user3));
+		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1, user2, user3));
 		assertEquals(pluginPermissionManagerService.getUsers(), Arrays.asList(user1, user2, user3));
 	}
 
@@ -214,7 +214,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getGroupPluginPermissions()
 	{
-		MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn("1").getMock();
+		Group group1 = when(mock(Group.class).getId()).thenReturn("1").getMock();
 		when(group1.getName()).thenReturn("group1");
 
 		Permissions permissions = pluginPermissionManagerService.getGroupPluginPermissions("1");

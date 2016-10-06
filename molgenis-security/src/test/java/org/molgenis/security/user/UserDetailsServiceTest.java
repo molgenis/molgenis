@@ -22,29 +22,29 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class MolgenisUserDetailsServiceTest
+public class UserDetailsServiceTest
 {
-	private MolgenisUserDetailsService userDetailsService;
+	private UserDetailsService userDetailsService;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		DataService dataService = mock(DataService.class);
-		MolgenisUser adminUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.TRUE).getMock();
+		User adminUser = when(mock(User.class).isSuperuser()).thenReturn(Boolean.TRUE).getMock();
 		when(adminUser.getUsername()).thenReturn("admin");
 		when(adminUser.getPassword()).thenReturn("password");
-		MolgenisUser userUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
+		User userUser = when(mock(User.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
 		when(userUser.getUsername()).thenReturn("user");
 		when(userUser.getPassword()).thenReturn("password");
-		Query<MolgenisUser> qAdmin = new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, "admin");
-		when(dataService.findOne(MOLGENIS_USER, qAdmin, MolgenisUser.class)).thenReturn(adminUser);
-		Query<MolgenisUser> qUser = new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, "user");
-		when(dataService.findOne(MOLGENIS_USER, qUser, MolgenisUser.class)).thenReturn(userUser);
+		Query<User> qAdmin = new QueryImpl<User>().eq(UserMetaData.USERNAME, "admin");
+		when(dataService.findOne(USER, qAdmin, User.class)).thenReturn(adminUser);
+		Query<User> qUser = new QueryImpl<User>().eq(UserMetaData.USERNAME, "user");
+		when(dataService.findOne(USER, qUser, User.class)).thenReturn(userUser);
 		GrantedAuthoritiesMapper authoritiesMapper = new GrantedAuthoritiesMapper()
 		{
 			@Override
@@ -55,7 +55,7 @@ public class MolgenisUserDetailsServiceTest
 			}
 		};
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, userUser), UserAuthority.class))
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, userUser), UserAuthority.class))
 				.thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -65,7 +65,7 @@ public class MolgenisUserDetailsServiceTest
 					}
 				});
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, adminUser), UserAuthority.class))
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, adminUser), UserAuthority.class))
 				.thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -74,33 +74,33 @@ public class MolgenisUserDetailsServiceTest
 						return Stream.empty();
 					}
 				});
-		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, userUser),
-				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, userUser),
+				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
 		{
 			@Override
-			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.empty();
 			}
 		});
-		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, adminUser),
-				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, adminUser),
+				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
 		{
 			@Override
-			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.empty();
 			}
 		});
-		userDetailsService = new MolgenisUserDetailsService(dataService, authoritiesMapper);
+		userDetailsService = new UserDetailsService(dataService, authoritiesMapper);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisUserDetailsService()
 	{
-		new MolgenisUserDetailsService(null, null);
+		new UserDetailsService(null, null);
 	}
 
 	@Test

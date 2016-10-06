@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Locale;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 
 @Service
@@ -68,6 +68,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public boolean isDatabasePopulated()
 	{
-		return dataService.count(MOLGENIS_USER) > 0;
+		return dataService.count(USER) > 0;
 	}
 }

@@ -1,7 +1,7 @@
 package org.molgenis.security.account;
 
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.settings.AppSettings;
@@ -57,17 +57,17 @@ public class AccountController
 	private final CaptchaService captchaService;
 	private final RedirectStrategy redirectStrategy;
 	private final AppSettings appSettings;
-	private final MolgenisUserFactory molgenisUserFactory;
+	private final UserFactory userFactory;
 
 	@Autowired
 	public AccountController(AccountService accountService, CaptchaService captchaService,
-			RedirectStrategy redirectStrategy, AppSettings appSettings, MolgenisUserFactory molgenisUserFactory)
+			RedirectStrategy redirectStrategy, AppSettings appSettings, UserFactory userFactory)
 	{
 		this.accountService = requireNonNull(accountService);
 		this.captchaService = requireNonNull(captchaService);
 		this.redirectStrategy = requireNonNull(redirectStrategy);
 		this.appSettings = requireNonNull(appSettings);
-		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
+		this.userFactory = requireNonNull(userFactory);
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
@@ -137,7 +137,7 @@ public class AccountController
 			{
 				throw new CaptchaException("invalid captcha answer");
 			}
-			MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
+			User user = toUser(registerRequest);
 			String activationUri = null;
 			if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
 			{
@@ -150,7 +150,7 @@ public class AccountController
 				if (scheme == null) scheme = request.getScheme();
 				activationUri = scheme + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
 			}
-			accountService.createUser(molgenisUser, activationUri);
+			accountService.createUser(user, activationUri);
 
 			String successMessage = appSettings
 					.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
@@ -243,9 +243,9 @@ public class AccountController
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
-	private MolgenisUser toMolgenisUser(RegisterRequest request)
+	private User toUser(RegisterRequest request)
 	{
-		MolgenisUser user = molgenisUserFactory.create();
+		User user = userFactory.create();
 		user.setUsername(request.getUsername());
 		user.setPassword(request.getPassword());
 		user.setEmail(request.getEmail());

@@ -1,8 +1,8 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
@@ -15,7 +15,7 @@ import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +50,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	private MappingProjectRepositoryImpl mappingProjectRepositoryImpl;
 
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
+	private UserFactory userFactory;
 
 	@Autowired
 	private DataService dataService;
@@ -62,7 +62,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	private IdGenerator idGenerator;
 
 	@Autowired
-	private MolgenisUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private MappingProjectMetaData mappingProjectMeta;
@@ -70,7 +70,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private MappingTargetMetaData mappingTargetMeta;
 
-	private MolgenisUser owner;
+	private User owner;
 
 	private MappingTarget mappingTarget1;
 
@@ -85,7 +85,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		owner = molgenisUserFactory.create();
+		owner = userFactory.create();
 		owner.setUsername("flup");
 		owner.setPassword("geheim");
 		owner.setId("12345");
@@ -219,9 +219,9 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public MolgenisUserService molgenisUserService()
+		public UserService molgenisUserService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 
 		@Bean

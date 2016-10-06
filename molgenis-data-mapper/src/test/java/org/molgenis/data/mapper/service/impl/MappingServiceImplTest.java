@@ -5,8 +5,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -84,7 +84,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private MappingService mappingService;
 
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
+	private UserFactory userFactory;
 
 	@Autowired
 	private EntityMetaDataFactory entityMetaFactory;
@@ -103,7 +103,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private MetaDataService metaDataService;
 
-	private MolgenisUser user;
+	private User user;
 	private EntityMetaData hopMetaData;
 	private EntityMetaData geneMetaData;
 	private Package package_;
@@ -126,7 +126,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		reset(geneRepo);
 		reset(exonRepo);
 
-		user = molgenisUserFactory.create();
+		user = userFactory.create();
 		user.setUsername(USERNAME);
 
 		package_ = packageFactory.create("package");

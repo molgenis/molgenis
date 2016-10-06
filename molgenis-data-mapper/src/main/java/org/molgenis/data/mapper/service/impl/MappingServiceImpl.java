@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -67,7 +67,7 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
-	public MappingProject addMappingProject(String projectName, MolgenisUser owner, String target)
+	public MappingProject addMappingProject(String projectName, User owner, String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
 		mappingProject.addTarget(dataService.getEntityMetaData(target));
