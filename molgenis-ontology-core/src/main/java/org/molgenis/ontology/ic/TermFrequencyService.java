@@ -4,7 +4,7 @@ public interface TermFrequencyService
 {
 	/**
 	 * Get the inverse document frequency of the given term
-	 * 
+	 *
 	 * @param term
 	 * @return
 	 */
@@ -12,7 +12,7 @@ public interface TermFrequencyService
 
 	/**
 	 * Get the occurrence of the given term
-	 * 
+	 *
 	 * @param term
 	 * @return
 	 */

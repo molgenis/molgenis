@@ -1,17 +1,8 @@
 package org.molgenis.ontology.core.service.impl;
 
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.molgenis.ontology.utils.Stemmer.splitAndStem;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.ontology.core.model.ChildrenRetrievalParam;
 import org.molgenis.ontology.core.model.Ontology;
@@ -25,9 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.molgenis.ontology.utils.Stemmer.splitAndStem;
 
 public class OntologyServiceImpl implements OntologyService
 {
@@ -96,7 +95,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.isEmpty())
 		{
-			return Lists.<OntologyTermImpl> newArrayList();
+			return Lists.<OntologyTermImpl>newArrayList();
 		}
 		Set<String> stemmedTerms = terms.stream().map(Stemmer::stem).collect(toSet());
 		List<OntologyTermImpl> collect = ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize).stream()
@@ -109,7 +108,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.isEmpty())
 		{
-			return Lists.<OntologyTermImpl> newArrayList();
+			return Lists.<OntologyTermImpl>newArrayList();
 		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}
@@ -120,7 +119,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.isEmpty())
 		{
-			return Lists.<OntologyTermImpl> newArrayList();
+			return Lists.<OntologyTermImpl>newArrayList();
 		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize, ontologyTermDomains);
 	}
@@ -199,8 +198,9 @@ public class OntologyServiceImpl implements OntologyService
 			return false;
 		}
 
-		return ontologyTermImpl1.getNodePaths().stream().anyMatch(targetNodePath -> ontologyTermImpl2.getNodePaths()
-				.stream().anyMatch(sourceNodePath -> targetNodePath.contains(sourceNodePath)));
+		return ontologyTermImpl1.getNodePaths().stream().anyMatch(
+				targetNodePath -> ontologyTermImpl2.getNodePaths().stream()
+						.anyMatch(sourceNodePath -> targetNodePath.contains(sourceNodePath)));
 	}
 
 	@Override

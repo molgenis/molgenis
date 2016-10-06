@@ -1,11 +1,11 @@
 package org.molgenis.data.mapper.algorithmgenerator.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.List;
+import java.util.Map;
 
 public interface AlgorithmGeneratorService
 {

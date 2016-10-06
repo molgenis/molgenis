@@ -1,11 +1,11 @@
 package org.molgenis.ontology.core.model;
 
+import java.util.List;
+
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.List;
 
 public interface OntologyTerm
 {

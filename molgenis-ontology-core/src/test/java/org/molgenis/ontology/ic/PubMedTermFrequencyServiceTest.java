@@ -1,8 +1,8 @@
 package org.molgenis.ontology.ic;
 
-import static org.testng.Assert.assertEquals;
-
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class PubMedTermFrequencyServiceTest
 {
@@ -17,7 +17,8 @@ public class PubMedTermFrequencyServiceTest
 		assertEquals(
 				termFrequencyService.parseResponse("<eSearchResult><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
 				null);
-		assertEquals(termFrequencyService.parseResponse(
-				"<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"), null);
+		assertEquals(termFrequencyService
+						.parseResponse("<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
+				null);
 	}
 }

@@ -1,5 +1,26 @@
 package org.molgenis.ontology.core.repository;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Lists;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.meta.*;
+import org.molgenis.ontology.core.model.OntologyTermAnnotation;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.SemanticType;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import static com.google.common.collect.Iterators.filter;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.emptyList;
@@ -8,57 +29,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.molgenis.data.QueryRule.Operator.AND;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.data.QueryRule.Operator.OR;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.OntologyEntity;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotation;
-import org.molgenis.ontology.core.meta.OntologyTermEntity;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermNodePath;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermSynonym;
-import org.molgenis.ontology.core.meta.SemanticTypeEntity;
-import org.molgenis.ontology.core.meta.SemanticTypeMetaData;
-import org.molgenis.ontology.core.model.OntologyTermAnnotation;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
-import org.molgenis.ontology.core.model.SemanticType;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import static org.molgenis.data.QueryRule.Operator.*;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
 
 /**
  * Maps {@link OntologyTermMetaData} {@link Entity} <-> {@link OntologyTermImpl}
@@ -124,12 +96,9 @@ public class OntologyTermRepository
 	/**
 	 * Finds exact {@link OntologyTermImpl}s within {@link OntologyEntity}s.
 	 *
-	 * @param ontologyIds
-	 *            IDs of the {@link OntologyEntity}s to search in
-	 * @param terms
-	 *            {@link List} of search terms. the {@link OntologyTermImpl} must match at least one of these terms
-	 * @param pageSize
-	 *            max number of results
+	 * @param ontologyIds IDs of the {@link OntologyEntity}s to search in
+	 * @param terms       {@link List} of search terms. the {@link OntologyTermImpl} must match at least one of these terms
+	 * @param pageSize    max number of results
 	 * @return {@link List} of {@link OntologyTermImpl}s
 	 */
 	public List<OntologyTermImpl> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
@@ -159,12 +128,9 @@ public class OntologyTermRepository
 	/**
 	 * Finds {@link OntologyTermImpl}s within {@link OntologyEntity}s.
 	 *
-	 * @param ontologyIds
-	 *            IDs of the {@link OntologyEntity}s to search in
-	 * @param terms
-	 *            {@link List} of search terms. the {@link OntologyTermImpl} must match at least one of these terms
-	 * @param pageSize
-	 *            max number of results
+	 * @param ontologyIds IDs of the {@link OntologyEntity}s to search in
+	 * @param terms       {@link List} of search terms. the {@link OntologyTermImpl} must match at least one of these terms
+	 * @param pageSize    max number of results
 	 * @return {@link List} of {@link OntologyTermImpl}s
 	 */
 	public List<OntologyTermImpl> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
@@ -183,8 +149,8 @@ public class OntologyTermRepository
 
 		List<OntologyTermImpl> ontologyTerms = dataService
 				.findAll(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>(rules).pageSize(pageSize),
-						OntologyTermEntity.class)
-				.map(OntologyTermRepository::toOntologyTerm).collect(Collectors.toList());
+						OntologyTermEntity.class).map(OntologyTermRepository::toOntologyTerm)
+				.collect(Collectors.toList());
 
 		return ontologyTerms;
 	}
@@ -237,14 +203,14 @@ public class OntologyTermRepository
 	/**
 	 * Retrieves an {@link OntologyTermImpl} for one or more IRIs
 	 *
-	 * @param iris
-	 *            Array of {@link OntologyTermImpl} IRIs
+	 * @param iris Array of {@link OntologyTermImpl} IRIs
 	 * @return combined {@link OntologyTermImpl} for the iris.
 	 */
 	public OntologyTermImpl getOntologyTerm(String iri)
 	{
-		OntologyTermEntity ontologyTermEntity = dataService.findOne(ONTOLOGY_TERM,
-				new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, iri), OntologyTermEntity.class);
+		OntologyTermEntity ontologyTermEntity = dataService
+				.findOne(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, iri),
+						OntologyTermEntity.class);
 
 		return toOntologyTerm(ontologyTermEntity);
 	}
@@ -254,8 +220,9 @@ public class OntologyTermRepository
 		List<OntologyTermImpl> ontologyTermImpls = Lists.newArrayList();
 		for (String iri : iris)
 		{
-			OntologyTermEntity ontologyTermEntity = dataService.findOne(ONTOLOGY_TERM,
-					new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, iri), OntologyTermEntity.class);
+			OntologyTermEntity ontologyTermEntity = dataService
+					.findOne(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, iri),
+							OntologyTermEntity.class);
 
 			if (nonNull(ontologyTermEntity))
 			{
@@ -271,17 +238,16 @@ public class OntologyTermRepository
 	 *
 	 * @param ontologyTermImpl1
 	 * @param ontologyTermImpl2
-	 *
 	 * @return the distance between two ontology terms
 	 */
 	public Integer getOntologyTermDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2)
 	{
 		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty()) return 0;
 
-		OptionalInt min = ontologyTermImpl1.getNodePaths().stream()
-				.flatMap(nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
-						.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2)))
-				.mapToInt(Integer::valueOf).min();
+		OptionalInt min = ontologyTermImpl1.getNodePaths().stream().flatMap(
+				nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
+						.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2))).mapToInt(Integer::valueOf)
+				.min();
 
 		return min.isPresent() ? min.getAsInt() : 0;
 	}
@@ -291,7 +257,6 @@ public class OntologyTermRepository
 	 *
 	 * @param ontologyTermImpl1
 	 * @param ontologyTermImpl2
-	 *
 	 * @return the distance between two ontology terms
 	 */
 	public double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTermImpl1,
@@ -301,10 +266,10 @@ public class OntologyTermRepository
 
 		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty()) return 0;
 
-		OptionalDouble max = ontologyTermImpl1.getNodePaths().stream()
-				.flatMap(nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
-						.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2)))
-				.mapToDouble(Double::valueOf).max();
+		OptionalDouble max = ontologyTermImpl1.getNodePaths().stream().flatMap(
+				nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
+						.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2))).mapToDouble(Double::valueOf)
+				.max();
 
 		return max.isPresent() ? max.getAsDouble() : 0;
 	}
@@ -363,21 +328,19 @@ public class OntologyTermRepository
 			if (nodePaths.size() > 0)
 			{
 				// TODO: my teammates will take look
-				List<String> nodePathEntityIdentifiers = nodePaths.stream()
-						.map(nodePath -> dataService.findOne(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH,
-								new QueryImpl<OntologyTermNodePath>().eq(OntologyTermNodePathMetaData.NODE_PATH,
-										nodePath),
-								OntologyTermNodePath.class))
-						.filter(Objects::nonNull).map(Entity::getIdValue).map(Object::toString).collect(toList());
+				List<String> nodePathEntityIdentifiers = nodePaths.stream().map(nodePath -> dataService
+						.findOne(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH,
+								new QueryImpl<OntologyTermNodePath>()
+										.eq(OntologyTermNodePathMetaData.NODE_PATH, nodePath),
+								OntologyTermNodePath.class)).filter(Objects::nonNull).map(Entity::getIdValue)
+						.map(Object::toString).collect(toList());
 
 				if (nodePathEntityIdentifiers.size() > 0)
 				{
-					List<OntologyTermImpl> ontologyTerms = dataService
-							.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
-									new QueryImpl<OntologyTermEntity>().in(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-											nodePathEntityIdentifiers),
-									OntologyTermEntity.class)
-							.map(OntologyTermRepository::toOntologyTerm).collect(toList());
+					List<OntologyTermImpl> ontologyTerms = dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
+							new QueryImpl<OntologyTermEntity>()
+									.in(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, nodePathEntityIdentifiers),
+							OntologyTermEntity.class).map(OntologyTermRepository::toOntologyTerm).collect(toList());
 
 					nodePaths = ontologyTerms.stream().flatMap(ot -> ot.getNodePaths().stream())
 							.collect(Collectors.toList());
@@ -393,7 +356,7 @@ public class OntologyTermRepository
 
 	/**
 	 * Get the {@link OntologyTermImpl} children at the specified level
-	 * 
+	 *
 	 * @param ontologyTermImpl
 	 * @param maxLevel
 	 * @return
@@ -413,7 +376,7 @@ public class OntologyTermRepository
 	/**
 	 * Retrieve all {@link OntologyTermImpl} children that satisfy the children predicate containing the instruction to
 	 * stop retrieving children at the given max level
-	 * 
+	 *
 	 * @param ontologyTermImpl
 	 * @param ontologyTermChildrenPredicate
 	 * @return
@@ -453,8 +416,8 @@ public class OntologyTermRepository
 					String nodePath = entrySet.getValue().iterator().next();
 					Iterable<OntologyTermImpl> childOntologyTermStream = childOntologyTermStream(ontologyTermImpl,
 							ontologyEntity, nodePath, ontologyTermChildrenPredicate);
-					iterable = iterable == null ? childOntologyTermStream
-							: Iterables.concat(iterable, childOntologyTermStream);
+					iterable = iterable == null ? childOntologyTermStream : Iterables
+							.concat(iterable, childOntologyTermStream);
 				}
 			}
 		}
@@ -484,8 +447,7 @@ public class OntologyTermRepository
 					private OntologyTermNodePath prevEntity = null;
 					private final Iterator<OntologyTermNodePath> ontologyTermNodePathIterator = dataService
 							.findAll(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, ontologyTermNodePathQuery,
-									OntologyTermNodePath.class)
-							.iterator();
+									OntologyTermNodePath.class).iterator();
 
 					public boolean hasNext()
 					{
@@ -503,8 +465,9 @@ public class OntologyTermRepository
 						return prevEntity;
 					}
 				};
-				return filter(ontologyTermIterator, entity -> !entity.getNodePath().equals(parentNodePath)
-						&& entity.getNodePath().startsWith(parentNodePath));
+				return filter(ontologyTermIterator,
+						entity -> !entity.getNodePath().equals(parentNodePath) && entity.getNodePath()
+								.startsWith(parentNodePath));
 			}
 		};
 
@@ -515,7 +478,7 @@ public class OntologyTermRepository
 
 		Query<OntologyTermEntity> ontologyTermQuery = new QueryImpl<OntologyTermEntity>(
 				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, IN, ontologyTermNodePathEntities)).and()
-						.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
+				.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 
 		return new Iterable<OntologyTermImpl>()
 		{
@@ -532,9 +495,9 @@ public class OntologyTermRepository
 	public List<SemanticType> getAllSemanticType()
 	{
 		return dataService.findAll(SemanticTypeMetaData.SEMANTIC_TYPE, SemanticTypeEntity.class)
-				.map(entity -> SemanticType.create(entity.getIdentifier(), entity.getSemanticTypeName(),
-						entity.getSemanticTypeGroup(), entity.isGlobalKeyConcept()))
-				.collect(Collectors.toList());
+				.map(entity -> SemanticType
+						.create(entity.getIdentifier(), entity.getSemanticTypeName(), entity.getSemanticTypeGroup(),
+								entity.isGlobalKeyConcept())).collect(Collectors.toList());
 	}
 
 	public boolean related(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2, int stopLevel)
@@ -560,7 +523,7 @@ public class OntologyTermRepository
 
 	/**
 	 * If any of the nodePaths of both of {@link OntologyTermImpl}s are within (less and equal) the max distance.
-	 * 
+	 *
 	 * @param ontologyTermImpl1
 	 * @param ontologyTermImpl2
 	 * @param maxDistance
@@ -573,8 +536,8 @@ public class OntologyTermRepository
 
 		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty()) return false;
 
-		boolean anyMatch = ontologyTermImpl1.getNodePaths().stream()
-				.anyMatch(nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
+		boolean anyMatch = ontologyTermImpl1.getNodePaths().stream().anyMatch(
+				nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
 						.anyMatch(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2) <= maxDistance));
 
 		return anyMatch;
@@ -634,9 +597,9 @@ public class OntologyTermRepository
 		if (ontologyTermSemanticTypeEntities != null)
 		{
 			semanticTypes.addAll(stream(ontologyTermSemanticTypeEntities.spliterator(), false)
-					.map(semanticType -> SemanticType.create(semanticType.getIdentifier(),
-							semanticType.getSemanticTypeName(), semanticType.getSemanticTypeGroup(),
-							semanticType.isGlobalKeyConcept()))
+					.map(semanticType -> SemanticType
+							.create(semanticType.getIdentifier(), semanticType.getSemanticTypeName(),
+									semanticType.getSemanticTypeGroup(), semanticType.isGlobalKeyConcept()))
 					.collect(Collectors.toList()));
 		}
 

@@ -1,19 +1,5 @@
 package org.molgenis.ontology.core.repository;
 
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.SIMPLE_NAME;
-import static org.testng.Assert.assertEquals;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
@@ -27,6 +13,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = OntologyRepositoryTest.Config.class)
 public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
@@ -65,9 +61,9 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testGetOntology()
 	{
 
-		when(dataService.findOne(ONTOLOGY,
-				new QueryImpl<OntologyEntity>().eq(ONTOLOGY_IRI, "http://www.ontology.com/test"), OntologyEntity.class))
-						.thenReturn(ontologyEntity);
+		when(dataService
+				.findOne(ONTOLOGY, new QueryImpl<OntologyEntity>().eq(ONTOLOGY_IRI, "http://www.ontology.com/test"),
+						OntologyEntity.class)).thenReturn(ontologyEntity);
 		assertEquals(ontologyRepository.getOntology("http://www.ontology.com/test"),
 				Ontology.create("1", "http://www.ontology.com/test", "testOntology"));
 	}

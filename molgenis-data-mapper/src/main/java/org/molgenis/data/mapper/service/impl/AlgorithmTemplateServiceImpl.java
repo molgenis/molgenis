@@ -1,14 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
@@ -18,6 +9,15 @@ import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
 
 @Service
 public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
@@ -35,8 +35,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 			Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrMatches)
 	{
 		// get all algorithm templates
-		Stream<Script> jsScripts = dataService.findAll(SCRIPT,
-				new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class);
+		Stream<Script> jsScripts = dataService
+				.findAll(SCRIPT, new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
 		return jsScripts.flatMap(script -> toAlgorithmTemplate(script, attrMatches));

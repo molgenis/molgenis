@@ -1,14 +1,5 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -24,6 +15,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = NumericAlgorithmGeneratorTest.Config.class)
 public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
@@ -77,12 +75,13 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generate()
 	{
-		String generate = numericAlgorithmGenerator.generate(targetAttribute, asList(sourceAttribute),
-				targetEntityMetaData, sourceEntityMetaData);
+		String generate = numericAlgorithmGenerator
+				.generate(targetAttribute, asList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData);
 		assertEquals(generate, "$('sourceHeight').unit('cm').toUnit('m').value();");
 
-		String generateAverageValue = numericAlgorithmGenerator.generate(targetAttribute,
-				asList(sourceAttribute, sourceAttribute1), targetEntityMetaData, sourceEntityMetaData);
+		String generateAverageValue = numericAlgorithmGenerator
+				.generate(targetAttribute, asList(sourceAttribute, sourceAttribute1), targetEntityMetaData,
+						sourceEntityMetaData);
 		String expected = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('sourceHeight').isNull().value()){\n\tSUM.plus($('sourceHeight').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(!$('sourceHeight1').isNull().value()){\n\tSUM.plus($('sourceHeight1').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;\n}";
 
 		assertEquals(generateAverageValue, expected);
@@ -91,8 +90,9 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateUnitConversionAlgorithm()
 	{
-		String generateUnitConversionAlgorithm = numericAlgorithmGenerator.generateUnitConversionAlgorithm(
-				targetAttribute, targetEntityMetaData, sourceAttribute, sourceEntityMetaData);
+		String generateUnitConversionAlgorithm = numericAlgorithmGenerator
+				.generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
+						sourceEntityMetaData);
 		assertEquals(generateUnitConversionAlgorithm, "$('sourceHeight').unit('cm').toUnit('m').value();");
 	}
 

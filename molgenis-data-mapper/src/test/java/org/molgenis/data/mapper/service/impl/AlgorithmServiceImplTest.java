@@ -1,31 +1,8 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.LONG;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Sets;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
@@ -64,9 +41,25 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Sets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = AlgorithmServiceImplTest.Config.class)
 public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
@@ -280,8 +273,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		// ref entities
 		EntityMetaData refEntityMeta = entityMetaFactory.create(refEntityName);
 		refEntityMeta.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
-		refEntityMeta.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName).setDataType(STRING),
-				ROLE_LABEL);
+		refEntityMeta
+				.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName).setDataType(STRING), ROLE_LABEL);
 
 		Entity refEntity0 = new DynamicEntity(refEntityMeta);
 		refEntity0.set(refEntityIdAttrName, refEntityId0);
@@ -316,10 +309,12 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		// source Entity
 		EntityMetaData entityMetaDataSource = entityMetaFactory.create(sourceEntityName);
+		entityMetaDataSource
+				.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true),
+						ROLE_ID);
 		entityMetaDataSource.addAttribute(
-				attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true), ROLE_ID);
-		entityMetaDataSource.addAttribute(attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF)
-				.setNillable(false).setRefEntity(refEntityMeta));
+				attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF).setNillable(false)
+						.setRefEntity(refEntityMeta));
 		Entity source = new DynamicEntity(entityMetaDataSource);
 		source.set(sourceEntityAttrName, Arrays.asList(refEntity0, refEntity1));
 
@@ -351,10 +346,12 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		// source Entity
 		EntityMetaData entityMetaDataSource = entityMetaFactory.create(sourceEntityName);
+		entityMetaDataSource
+				.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true),
+						ROLE_ID);
 		entityMetaDataSource.addAttribute(
-				attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true), ROLE_ID);
-		entityMetaDataSource.addAttribute(attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF)
-				.setNillable(true).setRefEntity(refEntityMeta));
+				attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF).setNillable(true)
+						.setRefEntity(refEntityMeta));
 
 		Entity source = new DynamicEntity(entityMetaDataSource);
 		source.set(sourceEntityAttrName, null);
@@ -396,8 +393,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		LinkedHashMultimap<Relation, OntologyTermImpl> ontologyTermTags = LinkedHashMultimap.create();
 
-		when(semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
-				ontologyTermTags.values(), null)).thenReturn(matches);
+		when(semanticSearchService
+				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values(),
+						null)).thenReturn(matches);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
 				.thenReturn(ontologyTermTags);
@@ -475,14 +473,15 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> mappings = ImmutableMap.of(sourceAttribute1,
-				ExplainedMatchCandidate.create(sourceAttribute1), sourceAttribute2,
-				ExplainedMatchCandidate.create(sourceAttribute2));
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> mappings = ImmutableMap
+				.of(sourceAttribute1, ExplainedMatchCandidate.create(sourceAttribute1), sourceAttribute2,
+						ExplainedMatchCandidate.create(sourceAttribute2));
 
 		LinkedHashMultimap<Relation, OntologyTermImpl> ontologyTermTags = LinkedHashMultimap.create();
 
-		when(semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
-				ontologyTermTags.values(), null)).thenReturn(mappings);
+		when(semanticSearchService
+				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values(),
+						null)).thenReturn(mappings);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
 				.thenReturn(ontologyTermTags);
@@ -494,8 +493,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan(
-	{ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
 	public static class Config
 	{
 		@Bean

@@ -1,14 +1,12 @@
 package org.molgenis.ontology.core.model;
 
-import static java.util.Collections.emptyList;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTermImpl.class)
