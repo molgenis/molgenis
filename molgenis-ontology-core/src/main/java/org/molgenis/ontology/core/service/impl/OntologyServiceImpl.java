@@ -85,13 +85,13 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public List<OntologyTerm> getAllOntologyTerms(String ontologyIri)
+	public List<OntologyTerm> getAllOntologyTerms(String ontologyId)
 	{
-		return ontologyTermRepository.getAllOntologyTerms(ontologyIri);
+		return ontologyTermRepository.getAllOntologyTerms(ontologyId);
 	}
 
 	@Override
-	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
+	public List<OntologyTerm> findExactOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
 		if (null == terms || terms.isEmpty())
 		{
@@ -133,7 +133,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public Iterable<OntologyTerm> getParents(OntologyTerm ontologyTerm, int maxLevel)
 	{
-		return getParents(ontologyTerm, maxLevel);
+		return ontologyTermRepository.getParents(ontologyTerm, maxLevel);
 	}
 
 	@Override

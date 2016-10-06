@@ -26,19 +26,19 @@ public interface OntologyService
 	/**
 	 * Finds ontology terms that are exact matches to a certain search string.
 	 *
-	 * @param ontologies {@link OntologyEntity}s to search in
-	 * @param search     search term
-	 * @param pageSize   number of results to return.
+	 * @param ontologyIds IDs of ontologies to search in
+	 * @param terms       search terms
+	 * @param pageSize    number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
-	List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
+	List<OntologyTerm> findExactOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
 
 	/**
 	 * Finds ontology terms that match a certain search string.
 	 *
-	 * @param ontologies {@link OntologyEntity}s to search in
-	 * @param search     search term
-	 * @param pageSize   number of results to return.
+	 * @param ontologyIds IDs of ontologies to search in
+	 * @param terms       search terms
+	 * @param pageSize    number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
@@ -46,11 +46,11 @@ public interface OntologyService
 	/**
 	 * Finds all {@link OntologyTerm}s in the give ontologyTerm scope
 	 *
-	 * @param ontologyIds
-	 * @param terms
-	 * @param pageSize
-	 * @param ontologyTermDomains
-	 * @return
+	 * @param ontologyIds IDs of ontologies to search in
+	 * @param terms       search terms
+	 * @param pageSize    number of results to return
+	 * @param ontologyTermDomains scope of {@link OntologyTerm}s to search in
+	 * @return List of {@link OntologyTerm}s
 	 */
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize,
 			List<OntologyTerm> ontologyTermDomains);
@@ -58,35 +58,34 @@ public interface OntologyService
 	/**
 	 * Retrieve all ontology terms from the specified ontology
 	 *
-	 * @param ontologyIri
+	 * @param ontologyId ID of the ontology to get all terms for
 	 * @return all the {@link OntologyTerm}
 	 */
-	List<OntologyTerm> getAllOntologyTerms(String ontologyIri);
+	List<OntologyTerm> getAllOntologyTerms(String ontologyId);
 
 	// voor de tag service
 
 	/**
-	 * Retrieves a specific OntologyTerm
+	 * Retrieves an OntologyTerm based on its IRI.
 	 *
-	 * @param ontology the IRI of the {@link OntologyEntity} to search in
-	 * @param IRI      comma separated list of IRIs to look for
-	 * @return Combined {@link OntologyTerm} for all IRI's listed
+	 * @param iri the IRI of the ontology term to retrieve
+	 * @return {@link OntologyTerm} with the specified IRI
 	 */
 	OntologyTerm getOntologyTerm(String iri);
 
 	/**
 	 * Retrieve a list of {@link OntologyTerm}s based on the given iris
 	 *
-	 * @param iris
-	 * @return
+	 * @param iris {@link List} of IRIs to look for
+	 * @return List of {@link OntologyTerm}s found
 	 */
 	List<OntologyTerm> getOntologyTerms(List<String> iris);
 
 	/**
-	 * Retrieves all parents
+	 * Retrieves all parents of an ontology term
 	 *
-	 * @param ontologyTerm
-	 * @return
+	 * @param ontologyTerm the ontologyterm for which the parents are retrieved
+	 * @return Iterable with the parent {@link OntologyTerm}s.
 	 */
 	Iterable<OntologyTerm> getAllParents(OntologyTerm ontologyTerm);
 
@@ -174,7 +173,7 @@ public interface OntologyService
 	List<String> getAllOntologiesIds();
 
 	/**
-	 * Get all {@link SemanticTypey}s
+	 * Get all {@link SemanticType}s
 	 *
 	 * @return a list of {@link SemanticType}s
 	 */

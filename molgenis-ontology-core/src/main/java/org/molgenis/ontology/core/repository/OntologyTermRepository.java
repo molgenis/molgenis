@@ -24,6 +24,7 @@ import java.util.stream.StreamSupport;
 import static com.google.common.collect.Iterators.filter;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -201,10 +202,10 @@ public class OntologyTermRepository
 	}
 
 	/**
-	 * Retrieves an {@link OntologyTerm} for one or more IRIs
+	 * Retrieves an {@link OntologyTerm} for an IRI
 	 *
-	 * @param iris Array of {@link OntologyTerm} IRIs
-	 * @return combined {@link OntologyTerm} for the iris.
+	 * @param iri The IRI
+	 * @return {@link OntologyTerm} for the iri
 	 */
 	public OntologyTerm getOntologyTerm(String iri)
 	{
@@ -236,28 +237,26 @@ public class OntologyTermRepository
 	 * Calculate the distance between any two ontology terms in the ontology tree structure by calculating the
 	 * difference in nodePaths.
 	 *
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTerm1 the first {@link OntologyTerm}
+	 * @param ontologyTerm2 the second {@link OntologyTerm}
 	 * @return the distance between two ontology terms
 	 */
 	public Integer getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
 	{
 		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return 0;
 
-		OptionalInt min = ontologyTerm1.getNodePaths().stream().flatMap(
+		return ontologyTerm1.getNodePaths().stream().flatMap(
 				nodePath1 -> ontologyTerm2.getNodePaths().stream()
-						.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2))).mapToInt(Integer::valueOf)
-				.min();
-
-		return min.isPresent() ? min.getAsInt() : 0;
+						.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2)))
+				.min(naturalOrder()).orElse(0);
 	}
 
 	/**
-	 * Calculate the semantic relatedness between any two ontology terms in the ontology tree
+	 * Calculate the semantic relatedness between any two ontology terms in the same ontology tree
 	 *
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
-	 * @return the distance between two ontology terms
+	 * @param ontologyTerm1 the first ontology term
+	 * @param ontologyTerm2 the second ontology term
+	 * @return the distance between two ontology terms, 1 if they're equal, 0 if they're unrelated
 	 */
 	public double getOntologyTermSemanticRelatedness(OntologyTerm ontologyTerm1,
 			OntologyTerm ontologyTerm2)
@@ -266,21 +265,19 @@ public class OntologyTermRepository
 
 		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return 0;
 
-		OptionalDouble max = ontologyTerm1.getNodePaths().stream().flatMap(
+		return ontologyTerm1.getNodePaths().stream().flatMap(
 				nodePath1 -> ontologyTerm2.getNodePaths().stream()
-						.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2))).mapToDouble(Double::valueOf)
-				.max();
-
-		return max.isPresent() ? max.getAsDouble() : 0;
+						.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2)))
+				.max(naturalOrder()).orElse(0.0);
 	}
 
 	/**
 	 * Calculate the distance between nodePaths, e.g. 0[0].1[1].2[2], 0[0].2[1].2[2]. The distance is the non-overlap
 	 * part of the strings
 	 *
-	 * @param nodePath1
-	 * @param nodePath2
-	 * @return distance
+	 * @param nodePath1 the first node path to compare
+	 * @param nodePath2 the second node path to compare
+	 * @return distance the distance between the two node paths.
 	 */
 	public int calculateNodePathDistance(String nodePath1, String nodePath2)
 	{
@@ -357,7 +354,7 @@ public class OntologyTermRepository
 	/**
 	 * Get the {@link OntologyTerm} children at the specified level
 	 *
-	 * @param ontologyTerm
+	 * @param ontologyTerm 
 	 * @param maxLevel
 	 * @return
 	 */

@@ -106,7 +106,7 @@ public class UnitResolverImpl implements UnitResolver
 			{
 				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
 				List<OntologyTerm> ontologyTerms = ontologyService
-						.findExcatOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
+						.findExactOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
 				if (ontologyTerms != null && !ontologyTerms.isEmpty())
 				{
 					if (ontologyTerms.size() == 1)
