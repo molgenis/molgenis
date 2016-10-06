@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -1063,6 +1062,7 @@ public class RestController
 		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
+		restService.updateMappedByEntities(entity, existing);
 	}
 
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
@@ -1072,6 +1072,8 @@ public class RestController
 		Entity entity = this.restService.toEntity(meta, entityMap);
 
 		dataService.add(entityName, entity);
+		restService.updateMappedByEntities(entity);
+
 		Object id = entity.getIdValue();
 		if (id != null)
 		{
@@ -1327,8 +1329,8 @@ public class RestController
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return attributes != null && attributes.length > 0 ? Sets
-				.newHashSet(Iterables.transform(Arrays.asList(attributes), new Function<String, String>()
+		return attributes != null && attributes.length > 0 ? Sets.newHashSet(
+				Iterables.transform(Arrays.asList(attributes), new com.google.common.base.Function<String, String>()
 				{
 					@Override
 					public String apply(String attribute)

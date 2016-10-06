@@ -283,6 +283,8 @@ class RestControllerV2
 
 			entities.forEach(entity ->
 			{
+				restService.updateMappedByEntities(entity);
+
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
@@ -384,6 +386,8 @@ class RestControllerV2
 
 			// update all entities
 			this.dataService.update(entityName, entities);
+			entities.forEach(entity -> restService
+					.updateMappedByEntities(entity, dataService.findOneById(entityName, entity.getIdValue())));
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		catch (Exception e)
