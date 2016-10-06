@@ -1,18 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -42,8 +31,18 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = AlgorithmGeneratorServiceImplTest.Config.class)
 public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTest
@@ -94,14 +93,11 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceEntityMetaData.addAttribute(heightSourceAttribute);
 		sourceEntityMetaData.addAttribute(weightSourceAttribute);
 
-		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> sourceAttributes = ImmutableMap.of(
-				heightSourceAttribute,
-				ExplainedMatchCandidate.create(heightSourceAttribute,
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> sourceAttributes = ImmutableMap
+				.of(heightSourceAttribute, ExplainedMatchCandidate.create(heightSourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
-				weightSourceAttribute,
-				ExplainedMatchCandidate.create(heightSourceAttribute,
-						Collections.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)),
-						true));
+						weightSourceAttribute, ExplainedMatchCandidate.create(heightSourceAttribute, Collections
+								.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)), true));
 
 		Script script = mock(Script.class);
 		ScriptParameter heightParameter = mock(ScriptParameter.class);
@@ -114,8 +110,8 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		when(dataService.findAll(SCRIPT, new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class))
 				.thenReturn(Stream.of(script));
 
-		GeneratedAlgorithm generate = algorithmGeneratorService.generate(targetBMIAttribute, sourceAttributes,
-				targetEntityMetaData, sourceEntityMetaData);
+		GeneratedAlgorithm generate = algorithmGeneratorService
+				.generate(targetBMIAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
 
 		assertEquals(generate.getAlgorithm(), "$('sourceWeight').div($('sourceHeight').div(100.0).pow(2)).value()");
 		assertEquals(generate.getAlgorithmState(), AttributeMapping.AlgorithmState.GENERATED_HIGH);
@@ -136,8 +132,9 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 
-		String actualAlgorithm = algorithmGeneratorService.generate(targetAttribute,
-				Lists.newArrayList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData);
+		String actualAlgorithm = algorithmGeneratorService
+				.generate(targetAttribute, Lists.newArrayList(sourceAttribute), targetEntityMetaData,
+						sourceEntityMetaData);
 
 		String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
 

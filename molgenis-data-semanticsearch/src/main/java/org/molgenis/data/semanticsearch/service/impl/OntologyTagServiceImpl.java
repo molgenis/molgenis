@@ -16,10 +16,10 @@ import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.ontology.core.model.CombinedOntologyTermImpl;
+import org.molgenis.ontology.core.model.CombinedOntologyTerm;
 import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -75,14 +75,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	@Override
 	public void removeAttributeTag(EntityMetaData entityMetaData,
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> removeTag)
+			SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> removeTag)
 	{
 		AttributeMetaData attributeMetaData = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> tag = asTag(attributeMetaData, tagEntity);
 			if (!removeTag.equals(tag))
 			{
 				tags.add(tagEntity);
@@ -94,10 +94,10 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	@Override
 	@RunAsSystem
-	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
+	public Multimap<Relation, OntologyTagObject> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		Multimap<Relation, OntologyTerm> tags = create();
+		Multimap<Relation, OntologyTagObject> tags = create();
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		if (entity == null)
 		{
@@ -106,14 +106,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> tag = asTag(attributeMetaData, tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
 	}
 
 	@Override
-	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package package_)
+	public Iterable<SemanticTag<Package, OntologyTagObject, Ontology>> getTagsForPackage(Package package_)
 	{
 		Entity packageEntity = dataService.findOneById(PACKAGE, package_.getIdValue());
 
@@ -122,7 +122,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			throw new UnknownEntityException("Unknown package [" + package_.getName() + "]");
 		}
 
-		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
+		List<SemanticTag<Package, OntologyTagObject, Ontology>> tags = Lists.newArrayList();
 		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
 		{
 			tags.add(asTag(package_, tagEntity));
@@ -133,7 +133,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	@Override
 	public void addAttributeTag(EntityMetaData entityMetaData,
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag)
+			SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> tag)
 	{
 		Entity entity = findAttributeEntity(entityMetaData.getName(), tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
@@ -153,8 +153,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		boolean added = false;
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
 		Tag tag = new Tag(tagMetaData);
-		Stream<OntologyTermImpl> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
-		OntologyTerm combinedOntologyTerm = CombinedOntologyTermImpl.and(terms.toArray(OntologyTermImpl[]::new));
+		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
+		OntologyTagObject combinedOntologyTerm = CombinedOntologyTerm.and(terms.toArray(OntologyTerm[]::new));
 		Relation relation = Relation.forIRI(relationIRI);
 		tag.setIdentifier(idGenerator.generateId());
 		tag.setCodeSystem(null);
@@ -180,7 +180,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		return added ? OntologyTag.create(combinedOntologyTerm, relation) : null;
 	}
 
-	public Entity getTagEntity(SemanticTag<?, OntologyTerm, Ontology> tag)
+	public Entity getTagEntity(SemanticTag<?, OntologyTagObject, Ontology> tag)
 	{
 		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(),
 				tag.getCodeSystem().getIRI());
@@ -202,29 +202,29 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
-	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<AttributeMetaData, OntologyTerm> tags)
+	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<AttributeMetaData, OntologyTagObject> tags)
 	{
 		Map<String, OntologyTag> result = new LinkedHashMap<>();
-		for (Entry<AttributeMetaData, OntologyTerm> tag : tags.entrySet())
+		for (Entry<AttributeMetaData, OntologyTagObject> tag : tags.entrySet())
 		{
 
-			OntologyTerm ontologyTerm = tag.getValue();
+			OntologyTagObject ontologyTagObject = tag.getValue();
 			OntologyTag ontologyTag = addAttributeTag(entity, tag.getKey().getName(),
-					Relation.isAssociatedWith.getIRI(), Collections.singletonList(ontologyTerm.getIRI()));
+					Relation.isAssociatedWith.getIRI(), Collections.singletonList(ontologyTagObject.getIRI()));
 			result.put(tag.getKey().getName(), ontologyTag);
 		}
 		return result;
 	}
 
 	@Override
-	public void addEntityTag(SemanticTag<EntityMetaData, OntologyTerm, Ontology> tag)
+	public void addEntityTag(SemanticTag<EntityMetaData, OntologyTagObject, Ontology> tag)
 	{
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void removeEntityTag(SemanticTag<EntityMetaData, OntologyTerm, Ontology> tag)
+	public void removeEntityTag(SemanticTag<EntityMetaData, OntologyTagObject, Ontology> tag)
 	{
 		// TODO Auto-generated method stub
 
@@ -278,19 +278,18 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		return result.isPresent() ? result.get() : null;
 	}
 
-	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,
+	private <SubjectType> SemanticTag<SubjectType, OntologyTagObject, Ontology> asTag(SubjectType subjectType,
 			Entity tagEntity)
 	{
 		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
 		Relation relation = asRelation(tagEntity);
 		Ontology ontology = asOntology(tagEntity);
-		OntologyTerm ontologyTerm = asOntologyTerm(tagEntity);
-		if (relation == null || ontologyTerm == null)
+		OntologyTagObject ontologyTagObject = asOntologyTagTerm(tagEntity);
+		if (relation == null || ontologyTagObject == null)
 		{
 			return null;
 		}
-		return new SemanticTag<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
-				ontology);
+		return new SemanticTag<>(identifier, subjectType, relation, ontologyTagObject, ontology);
 	}
 
 	private static Relation asRelation(Entity tagEntity)
@@ -303,7 +302,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		return Relation.forIRI(relationIRI);
 	}
 
-	private OntologyTerm asOntologyTerm(Entity tagEntity)
+	private OntologyTagObject asOntologyTagTerm(Entity tagEntity)
 	{
 		String objectIRI = tagEntity.getString(TagMetaData.OBJECT_IRI);
 		String objectLabel = tagEntity.getString(TagMetaData.LABEL);
@@ -313,7 +312,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			return null;
 		}
 
-		return CombinedOntologyTermImpl.create(objectIRI, objectLabel);
+		return CombinedOntologyTerm.create(objectIRI, objectLabel);
 	}
 
 	private Ontology asOntology(Entity tagEntity)

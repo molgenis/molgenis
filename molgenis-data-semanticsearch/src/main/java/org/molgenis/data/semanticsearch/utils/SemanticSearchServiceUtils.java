@@ -3,7 +3,7 @@ package org.molgenis.data.semanticsearch.utils;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.utils.Stemmer;
 
 import java.util.HashSet;
@@ -68,7 +68,7 @@ public class SemanticSearchServiceUtils
 		return queryTerms;
 	}
 
-	public static Set<String> collectLowerCaseTerms(OntologyTermImpl ontologyTerm)
+	public static Set<String> collectLowerCaseTerms(OntologyTerm ontologyTerm)
 	{
 		Set<String> allTerms = Sets.newLinkedHashSet();
 		allTerms.addAll(ontologyTerm.getSynonyms().stream().map(StringUtils::lowerCase).collect(Collectors.toList()));
@@ -76,7 +76,7 @@ public class SemanticSearchServiceUtils
 		return allTerms;
 	}
 
-	public static Set<String> getLowerCaseTerms(OntologyTermImpl ontologyTerm)
+	public static Set<String> getLowerCaseTerms(OntologyTerm ontologyTerm)
 	{
 		Set<String> allTerms = Sets.newLinkedHashSet();
 		allTerms.addAll(ontologyTerm.getSynonyms().stream().map(StringUtils::lowerCase).collect(Collectors.toList()));

@@ -4,25 +4,23 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
 
 public class OntologyTermQueryExpansion
 {
-	private final List<OntologyTermImpl> ontologyTerms;
+	private final List<OntologyTerm> ontologyTerms;
 	private final OntologyService ontologyService;
-	private Multimap<OntologyTermImpl, OntologyTermImpl> queryExpansionRelation;
+	private Multimap<OntologyTerm, OntologyTerm> queryExpansionRelation;
 
-	public OntologyTermQueryExpansion(List<OntologyTermImpl> ontologyTerms, OntologyService ontologyService)
+	public OntologyTermQueryExpansion(List<OntologyTerm> ontologyTerms, OntologyService ontologyService)
 	{
 		this.ontologyTerms = requireNonNull(ontologyTerms);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -30,25 +28,20 @@ public class OntologyTermQueryExpansion
 		populate();
 	}
 
-	public List<OntologyTermImpl> getOntologyTerms()
+	public List<OntologyTerm> getOntologyTerms()
 	{
 		return Lists.newArrayList(queryExpansionRelation.values());
 	}
 
 	public OntologyTermQueryExpansionSolution getQueryExpansionSolution(TagGroup tagGroup)
 	{
-		Map<OntologyTermImpl, OntologyTermImpl> matchedOntologyTerms = new LinkedHashMap<>();
+		Map<OntologyTerm, OntologyTerm> matchedOntologyTerms = new LinkedHashMap<>();
 
-		for (OntologyTermImpl sourceOntologyTerm : tagGroup.getOntologyTerms())
+		for (OntologyTerm sourceOntologyTerm : tagGroup.getOntologyTerms())
 		{
-			for (Entry<OntologyTermImpl, Collection<OntologyTermImpl>> entry : queryExpansionRelation.asMap()
-					.entrySet())
-			{
-				if (entry.getValue().contains(sourceOntologyTerm))
-				{
-					matchedOntologyTerms.put(entry.getKey(), sourceOntologyTerm);
-				}
-			}
+			queryExpansionRelation.asMap().entrySet().stream()
+					.filter(entry -> entry.getValue().contains(sourceOntologyTerm))
+					.forEach(entry -> matchedOntologyTerms.put(entry.getKey(), sourceOntologyTerm));
 		}
 
 		// If all the root ontology terms get matched, then the quality is high
@@ -59,7 +52,7 @@ public class OntologyTermQueryExpansion
 
 	private void populate()
 	{
-		for (OntologyTermImpl atomicOntologyTerm : ontologyTerms)
+		for (OntologyTerm atomicOntologyTerm : ontologyTerms)
 		{
 			queryExpansionRelation.put(atomicOntologyTerm, atomicOntologyTerm);
 			queryExpansionRelation.putAll(atomicOntologyTerm,

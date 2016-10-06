@@ -1,28 +1,5 @@
 package org.molgenis.ontology.core.repository;
 
-import static com.google.common.collect.ImmutableSet.of;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.QueryRule.Operator.AND;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.data.QueryRule.Operator.OR;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
@@ -33,13 +10,8 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.OntologyEntity;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermEntity;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermSynonym;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.meta.*;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,6 +20,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableSet.of;
+import static java.util.Arrays.asList;
+import static java.util.Collections.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.QueryRule.Operator.*;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = OntologyTermRepositoryTest.Config.class)
 public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
@@ -140,27 +126,31 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(ontologyTermEntity2.getOntologyTermNodePaths()).thenReturn(emptyList());
 		when(ontologyTermEntity2.getOntologyTermDynamicAnnotations()).thenReturn(emptyList());
 
-		List<QueryRule> rules = Arrays.asList(new QueryRule(ONTOLOGY, Operator.IN, Arrays.asList("1", "2")),
-				new QueryRule(Operator.AND), new QueryRule(Arrays.asList(
-						new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "weight"))));
+		List<QueryRule> rules = Arrays
+				.asList(new QueryRule(ONTOLOGY, Operator.IN, Arrays.asList("1", "2")), new QueryRule(Operator.AND),
+						new QueryRule(Arrays.asList(
+								new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH,
+										"weight"))));
 
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>(rules).pageSize(100),
 				OntologyTermEntity.class)).thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
-		List<OntologyTermImpl> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
-				of("weight"), 100);
+		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
+				.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
 
 		assertEquals(exactOntologyTerms, singletonList(
-				OntologyTermImpl.create("12", "http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
+				OntologyTerm.create("12", "http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
 	}
 
 	@Test
 	public void testFindOntologyTerms()
 	{
-		QueryRule innerQueryRule = new QueryRule(asList(
-				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "term1"), new QueryRule(OR),
-				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "term2"), new QueryRule(OR),
-				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "term3")));
+		QueryRule innerQueryRule = new QueryRule(
+				asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "term1"),
+						new QueryRule(OR),
+						new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "term2"),
+						new QueryRule(OR),
+						new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "term3")));
 
 		List<QueryRule> rules = asList(new QueryRule(ONTOLOGY, IN, asList("1", "2")), new QueryRule(AND),
 				innerQueryRule);
@@ -168,11 +158,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(eq(ONTOLOGY_TERM), argumentCaptor.capture(), eq(OntologyTermEntity.class)))
 				.thenReturn(Stream.of(ontologyTermEntity));
 
-		List<OntologyTermImpl> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
-				of("term1", "term2", "term3"), 100);
+		List<OntologyTerm> terms = ontologyTermRepository
+				.findOntologyTerms(asList("1", "2"), of("term1", "term2", "term3"), 100);
 
-		assertEquals(terms, singletonList(OntologyTermImpl.create("12", "http://www.test.nl/iri", "Ontology term",
-				singletonList("Ontology term synonym"))));
+		assertEquals(terms, singletonList(OntologyTerm
+				.create("12", "http://www.test.nl/iri", "Ontology term", singletonList("Ontology term synonym"))));
 
 		assertEquals(argumentCaptor.getValue().toString(),
 				new QueryImpl<OntologyTermEntity>(rules).pageSize(100).toString());
@@ -206,10 +196,10 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, singletonList(nodePathEntity_3));
 		ontologyTerm_3.set(ONTOLOGY_TERM_SYNONYM, emptyList());
 
-		when(dataService.findAll(ONTOLOGY_TERM,
-				new QueryImpl<>(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						QueryRule.Operator.FUZZY_MATCH, "\"0[0].1[1]\"")).and().eq(ONTOLOGY, ontologyEntity)))
-								.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
+		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
+				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, QueryRule.Operator.FUZZY_MATCH,
+						"\"0[0].1[1]\"")).and().eq(ONTOLOGY, ontologyEntity)))
+				.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
 
 		// assertEquals(childOntologyTermsByNodePath.size(), 2);
 		// assertEquals(childOntologyTermsByNodePath.get(0),
@@ -246,14 +236,13 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 
 		List<String> iris = Arrays.asList("http://www.test.nl/iri");
 
-		List<OntologyTermImpl> ontologyTerm = ontologyTermRepository.getOntologyTerms(iris);
-		assertEquals(ontologyTerm, Arrays.asList(OntologyTermImpl.create("12", "http://www.test.nl/iri",
-				"Ontology term", singletonList("Ontology term synonym"))));
+		List<OntologyTerm> ontologyTerm = ontologyTermRepository.getOntologyTerms(iris);
+		assertEquals(ontologyTerm, Arrays.asList(OntologyTerm
+				.create("12", "http://www.test.nl/iri", "Ontology term", singletonList("Ontology term synonym"))));
 	}
 
 	@Configuration
-	@ComponentScan(
-	{ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model" })
+	@ComponentScan({ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model" })
 	public static class Config
 	{
 		@Autowired

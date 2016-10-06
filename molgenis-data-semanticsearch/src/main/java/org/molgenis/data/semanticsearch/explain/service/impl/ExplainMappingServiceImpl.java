@@ -1,25 +1,6 @@
 package org.molgenis.data.semanticsearch.explain.service.impl;
 
-import static java.util.Comparator.naturalOrder;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.getLowerCaseTerms;
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitIntoUniqueTerms;
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitRemoveStopWords;
-import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.stringMatching;
-import static org.molgenis.ontology.utils.Stemmer.splitAndStem;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -33,14 +14,24 @@ import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.utils.Stemmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.base.Joiner;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.naturalOrder;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.*;
+import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.stringMatching;
+import static org.molgenis.ontology.utils.Stemmer.splitAndStem;
 
 public class ExplainMappingServiceImpl implements ExplainMappingService
 {
@@ -72,26 +63,21 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 
 		Set<String> matchedSourceWords = splitRemoveStopWords(matchedResult);
 
-		List<OntologyTermImpl> ontologyTermScope = ontologyTermQueryExpansions.stream()
+		List<OntologyTerm> ontologyTermScope = ontologyTermQueryExpansions.stream()
 				.map(OntologyTermQueryExpansion::getOntologyTerms).flatMap(List::stream).collect(toList());
 
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("OntologyTerms {}", ontologyTermScope);
-		}
+		LOG.debug("OntologyTerms {}", ontologyTermScope);
 
-		List<OntologyTermImpl> relevantOntologyTerms = ontologyService.findOntologyTerms(
-				ontologyService.getAllOntologiesIds(), matchedSourceWords, ontologyTermScope.size(), ontologyTermScope);
+		List<OntologyTerm> relevantOntologyTerms = ontologyService
+				.findOntologyTerms(ontologyService.getAllOntologiesIds(), matchedSourceWords, ontologyTermScope.size(),
+						ontologyTermScope);
 
-		List<TagGroup> tagGroups = tagGroupGenerator.applyTagMatchingCriterion(relevantOntologyTerms,
-				matchedSourceWords, STRICT_MATCHING_CRITERION);
+		List<TagGroup> tagGroups = tagGroupGenerator
+				.applyTagMatchingCriterion(relevantOntologyTerms, matchedSourceWords, STRICT_MATCHING_CRITERION);
 
 		List<TagGroup> matchedSourceTagGroups = tagGroupGenerator.combineTagGroups(matchedSourceWords, tagGroups);
 
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Candidates: {}", matchedSourceTagGroups);
-		}
+		LOG.debug("Candidates: {}", matchedSourceTagGroups);
 
 		OntologyTermQueryExpansionSolution queryExpansionSolution;
 		if (matchedSourceTagGroups.isEmpty())
@@ -120,7 +106,7 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 	/**
 	 * This functions computes the similarity score for the matched candidate using either ontologyterms and the target
 	 * label. Whichever gives higher similarity score gets selected as the final explanation
-	 * 
+	 *
 	 * @param queryExpansionSolution
 	 * @param targetQueryTerm
 	 * @param match
@@ -132,25 +118,26 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 		// Explain the match using ontology terms
 		List<ExplainedQueryString> explainedUsingOntologyTerms = new ArrayList<>();
 
-		for (Entry<OntologyTermImpl, OntologyTermImpl> entry : queryExpansionSolution.getMatchOntologyTerms()
+		for (Entry<OntologyTerm, OntologyTerm> entry : queryExpansionSolution.getMatchOntologyTerms()
 				.entrySet())
 		{
-			OntologyTermImpl targetOntologyTerm = entry.getKey();
-			OntologyTermImpl sourceOntologyTerm = entry.getValue();
+			OntologyTerm targetOntologyTerm = entry.getKey();
+			OntologyTerm sourceOntologyTerm = entry.getValue();
 
 			String bestMatchingSynonym = findBestMatchingSynonym(match, sourceOntologyTerm);
 			String joinedMatchedWords = termJoiner.join(findMatchedWords(match, bestMatchingSynonym));
 			float score = (float) (Math.round(stringMatching(joinedMatchedWords, match) * 10) / 10f);
-			explainedUsingOntologyTerms.add(ExplainedQueryString.create(joinedMatchedWords, bestMatchingSynonym,
-					targetOntologyTerm.getLabel(), score));
+			explainedUsingOntologyTerms.add(ExplainedQueryString
+					.create(joinedMatchedWords, bestMatchingSynonym, targetOntologyTerm.getLabel(), score));
 		}
 
 		// Explain the match using the target label
 		List<ExplainedQueryString> explainedUsingTargetLabel = new ArrayList<>();
 
 		float score = (float) (Math.round(stringMatching(targetQueryTerm, match) * 10) / 10f);
-		explainedUsingTargetLabel.add(ExplainedQueryString.create(
-				termJoiner.join(findMatchedWords(targetQueryTerm, match)), targetQueryTerm, StringUtils.EMPTY, score));
+		explainedUsingTargetLabel.add(ExplainedQueryString
+				.create(termJoiner.join(findMatchedWords(targetQueryTerm, match)), targetQueryTerm, StringUtils.EMPTY,
+						score));
 
 		// Choose to be explained whether by ontology terms or target label depending one which one produces a higher
 		// similarity score
@@ -159,15 +146,16 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 		Hit<ExplainedMatchCandidate<String>> explainedCandidateUsingTargetLabel = createExplainedCandidate(match,
 				explainedUsingTargetLabel, false);
 
-		return explainedCandidateUsingOntologyTerms.getScore() >= explainedCandidateUsingTargetLabel.getScore()
-				? explainedCandidateUsingOntologyTerms : explainedCandidateUsingTargetLabel;
+		return explainedCandidateUsingOntologyTerms.getScore() >= explainedCandidateUsingTargetLabel
+				.getScore() ? explainedCandidateUsingOntologyTerms : explainedCandidateUsingTargetLabel;
 	}
 
 	private Hit<ExplainedMatchCandidate<String>> createExplainedCandidate(String match,
 			List<ExplainedQueryString> explainedUsingOntologyTerms, boolean isHighQuality)
 	{
-		String combinedQuery = termJoiner.join(splitIntoUniqueTerms(explainedUsingOntologyTerms.stream()
-				.map(ExplainedQueryString::getQueryString).collect(Collectors.joining(" "))));
+		String combinedQuery = termJoiner.join(splitIntoUniqueTerms(
+				explainedUsingOntologyTerms.stream().map(ExplainedQueryString::getQueryString)
+						.collect(Collectors.joining(" "))));
 
 		float score = (float) (Math.round(stringMatching(combinedQuery, match) * 10) / 10f);
 
@@ -176,7 +164,7 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 
 	/**
 	 * find matched words between two {@link String}s
-	 * 
+	 *
 	 * @param string1
 	 * @param string2
 	 * @return
@@ -197,13 +185,13 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 	}
 
 	/**
-	 * Get a list of matched Synonym from {@link OntologyTermImpl}s for the given target query
-	 * 
+	 * Get a list of matched Synonym from {@link OntologyTerm}s for the given target query
+	 *
 	 * @param ontologyTerms
 	 * @param targetQueryTerm
 	 * @return
 	 */
-	private String findBestMatchingSynonym(String attributeLabel, OntologyTermImpl ontologyTerm)
+	private String findBestMatchingSynonym(String attributeLabel, OntologyTerm ontologyTerm)
 	{
 		Hit<String> hit = getLowerCaseTerms(ontologyTerm).stream()
 				.map(synonym -> Hit.create(synonym, (float) stringMatching(attributeLabel, synonym)))

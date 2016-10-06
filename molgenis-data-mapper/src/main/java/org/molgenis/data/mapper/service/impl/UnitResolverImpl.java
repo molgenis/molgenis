@@ -1,18 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.mapper.service.UnitResolver;
@@ -21,13 +9,23 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Sets;
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 public class UnitResolverImpl implements UnitResolver
 {
@@ -68,7 +66,7 @@ public class UnitResolverImpl implements UnitResolver
 			if (isUnitEmpty(unit))
 			{
 				// Option 2: Search unit ontology for a match
-				OntologyTermImpl unitOntologyTerm = resolveUnitOntologyTerm(
+				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(
 						tokens.stream().map(this::convertNumberToOntologyTermStyle).collect(Collectors.toSet()));
 
 				if (unitOntologyTerm != null)
@@ -98,17 +96,17 @@ public class UnitResolverImpl implements UnitResolver
 		return unit;
 	}
 
-	private OntologyTermImpl resolveUnitOntologyTerm(Set<String> tokens)
+	private OntologyTerm resolveUnitOntologyTerm(Set<String> tokens)
 	{
-		OntologyTermImpl unitOntologyTerm;
+		OntologyTerm unitOntologyTerm;
 		Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
 		if (unitOntology != null)
 		{
 			if (!tokens.isEmpty())
 			{
 				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
-				List<OntologyTermImpl> ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyIds, tokens,
-						Integer.MAX_VALUE);
+				List<OntologyTerm> ontologyTerms = ontologyService
+						.findExactOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
 				if (ontologyTerms != null && !ontologyTerms.isEmpty())
 				{
 					if (ontologyTerms.size() == 1)
@@ -161,10 +159,9 @@ public class UnitResolverImpl implements UnitResolver
 		if (terms != null && terms.length > 0)
 		{
 			Sets.newHashSet(terms).stream().filter(StringUtils::isNotBlank).map(StringUtils::lowerCase)
-					.map(this::replaceIllegalChars)
-					.forEach(term -> tokens
-							.addAll(Sets.newHashSet(term.split("\\s+")).stream().filter(this::notPureNumberExpression)
-									.map(UnitHelper::numberToSuperscript).collect(Collectors.toSet())));
+					.map(this::replaceIllegalChars).forEach(term -> tokens
+					.addAll(Sets.newHashSet(term.split("\\s+")).stream().filter(this::notPureNumberExpression)
+							.map(UnitHelper::numberToSuperscript).collect(Collectors.toSet())));
 
 			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		}

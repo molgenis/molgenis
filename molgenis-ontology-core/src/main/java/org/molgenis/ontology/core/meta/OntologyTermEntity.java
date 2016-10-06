@@ -1,17 +1,10 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SEMANTIC_TYPE;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
 
 public class OntologyTermEntity extends StaticEntity
 {

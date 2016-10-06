@@ -3,7 +3,6 @@ package org.molgenis.data.mapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -13,11 +12,12 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -144,7 +144,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.ontology.core.meta" })
 	public static class Config
 	{
 		@Autowired

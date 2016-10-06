@@ -1,18 +1,5 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
-import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
@@ -31,6 +18,18 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
 public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 {
@@ -59,8 +58,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			{
 				if (generator.isSuitable(targetAttribute, sourceAttributes))
 				{
-					return generator.generate(targetAttribute, sourceAttributes, targetEntityMetaData,
-							sourceEntityMetaData);
+					return generator
+							.generate(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
 				}
 			}
 			return generateMixedTypes(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
@@ -106,8 +105,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			if (algorithmTemplate != null)
 			{
 				algorithm = algorithmTemplate.render();
-				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
-						sourceEntityMetaData);
+				mappedSourceAttributes = AlgorithmGeneratorHelper
+						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
 				algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityMetaData,
 						mappedSourceAttributes, sourceEntityMetaData);
 				algorithmState = GENERATED_HIGH;
@@ -119,8 +118,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 				AttributeMetaData sourceAttribute = firstEntry.getKey();
 				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);
-				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
-						sourceEntityMetaData);
+				mappedSourceAttributes = AlgorithmGeneratorHelper
+						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
 				algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 			}
 		}
@@ -143,8 +142,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			if (StringUtils.isNotBlank(convertUnit))
 			{
 				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
-				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit
-						: attrMagamSyntax + "." + convertUnit;
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ?
+						attrMagamSyntax + convertUnit : attrMagamSyntax + "." + convertUnit;
 				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
 			}
 		}

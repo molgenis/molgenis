@@ -1,5 +1,9 @@
 package org.molgenis.ontology.ic;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -9,10 +13,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PubMedTermFrequencyService
 {
@@ -45,8 +45,8 @@ public class PubMedTermFrequencyService
 				{
 					if (occurrence != 0)
 					{
-						double frequency = Math.pow(Math.log10((double) occurrence / TOTAL_NUMBER_PUBLICATION) * 1.5,
-								2);
+						double frequency = Math
+								.pow(Math.log10((double) occurrence / TOTAL_NUMBER_PUBLICATION) * 1.5, 2);
 						return new PubMedTFEntity(occurrence, frequency);
 					}
 				}

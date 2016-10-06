@@ -1,13 +1,12 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
-
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.ontology.core.meta.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
 public class SemanticTypeMetaData extends SystemEntityMetaData

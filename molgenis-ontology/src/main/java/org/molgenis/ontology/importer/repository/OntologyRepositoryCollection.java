@@ -1,21 +1,9 @@
 package org.molgenis.ontology.importer.repository;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeTraverser;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -25,20 +13,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
-import org.molgenis.ontology.core.meta.OntologyEntity;
-import org.molgenis.ontology.core.meta.OntologyFactory;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotation;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationFactory;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermEntity;
-import org.molgenis.ontology.core.meta.OntologyTermFactory;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermNodePath;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathFactory;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermSynonym;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.utils.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
@@ -46,10 +21,21 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.TreeTraverser;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
 
 /**
  * RepositoryCollection for the import of an owl file.
@@ -97,8 +83,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates a new {@link OntologyRepositoryCollection} for an ontology file
 	 *
-	 * @param file
-	 *            the ontology file
+	 * @param file the ontology file
 	 */
 	public OntologyRepositoryCollection(File file)
 	{
@@ -108,13 +93,13 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		String name = file.getName();
 		if (name.endsWith(GenericImporterExtensions.OBO_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OBO_ZIP.toString())).replace('.',
-					'_');
+			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OBO_ZIP.toString()))
+					.replace('.', '_');
 		}
 		else if (name.endsWith(GenericImporterExtensions.OWL_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OWL_ZIP.toString())).replace('.',
-					'_');
+			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OWL_ZIP.toString()))
+					.replace('.', '_');
 		}
 		else
 		{
@@ -131,9 +116,10 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		ontologyTermRepository = new InMemoryRepository(ontologyTermFactory.getEntityMetaData());
 		annotationRepository = new InMemoryRepository(ontologyTermDynamicAnnotationFactory.getEntityMetaData());
 		synonymRepository = new InMemoryRepository(ontologyTermSynonymFactory.getEntityMetaData());
-		repositories = ImmutableMap.of(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, annotationRepository, ONTOLOGY_TERM_SYNONYM,
-				synonymRepository, ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository,
-				ONTOLOGY_TERM, ontologyTermRepository);
+		repositories = ImmutableMap
+				.of(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, annotationRepository, ONTOLOGY_TERM_SYNONYM, synonymRepository,
+						ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository, ONTOLOGY_TERM,
+						ontologyTermRepository);
 
 		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		try
@@ -212,8 +198,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates an {@link OntologyTermMetaData} {@link Entity} and adds it in the {@link #ontologyTermRepository}
 	 *
-	 * @param ontologyTermClass
-	 *            the OWLClass to create an entity for
+	 * @param ontologyTermClass the OWLClass to create an entity for
 	 * @return the created ontology term {@link Entity}
 	 */
 	private Entity createOntologyTerm(OWLClass ontologyTermClass)
@@ -235,8 +220,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates {@link OntologyTermSynonymMetaData} {@link Entity}s for an ontology term
 	 *
-	 * @param ontologyTerm
-	 *            {@link OWLClass} for the ontology term
+	 * @param ontologyTerm {@link OWLClass} for the ontology term
 	 * @return {@link List} of created synonym {@link Entity}s
 	 */
 	private List<OntologyTermSynonym> createSynonyms(OWLClass ontologyTerm)
@@ -247,8 +231,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates an {@link OntologyTermSynonymMetaData} {@link Entity} and adds it to the {@link #synonymRepository}.
 	 *
-	 * @param synonym
-	 *            String of the synonym to create an {@link Entity} for
+	 * @param synonym String of the synonym to create an {@link Entity} for
 	 * @return the created {@link Entity}
 	 */
 	private OntologyTermSynonym createSynonym(String synonym)
@@ -263,8 +246,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates {@link OntologyTermDynamicAnnotationMetaData} {@link Entity}s for the databaseIds of an ontology term.
 	 *
-	 * @param term
-	 *            the term to create annotation entities for
+	 * @param term the term to create annotation entities for
 	 * @return List of created {@link Entity}s.
 	 */
 	private List<OntologyTermDynamicAnnotation> createDynamicAnnotations(OWLClass term)
@@ -275,8 +257,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates an {@link OntologyTermDynamicAnnotationMetaData} {@link Entity} for a key:value label.
 	 *
-	 * @param label
-	 *            the key:value label
+	 * @param label the key:value label
 	 * @return the {@link Entity}
 	 */
 	private OntologyTermDynamicAnnotation createDynamicAnnotation(String label)
@@ -294,10 +275,8 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Constructs the node path string for a child node
 	 *
-	 * @param parentNodePath
-	 *            node path string of the node's parent
-	 * @param currentPosition
-	 *            position of the node in the parent's child list
+	 * @param parentNodePath  node path string of the node's parent
+	 * @param currentPosition position of the node in the parent's child list
 	 * @return node path string
 	 */
 	private String constructNodePath(String parentNodePath, int currentPosition)
@@ -312,10 +291,8 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates a {@link OntologyTermNodePathMetaData} {@link Entity} and stores it in the {@link #nodePathRepository}.
 	 *
-	 * @param container
-	 *            {@link OWLClassContainer} for the path to the ontology term
-	 * @param ontologyTermNodePathText
-	 *            the node path
+	 * @param container                {@link OWLClassContainer} for the path to the ontology term
+	 * @param ontologyTermNodePathText the node path
 	 * @return the created {@link Entity}
 	 */
 	private OntologyTermNodePath createNodePathEntity(OWLClassContainer container, String ontologyTermNodePathText)
