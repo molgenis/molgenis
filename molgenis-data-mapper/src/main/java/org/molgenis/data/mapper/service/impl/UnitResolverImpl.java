@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -169,7 +172,7 @@ public class UnitResolverImpl implements UnitResolver
 
 	boolean isUnitEmpty(Unit<? extends Quantity> unit)
 	{
-		return isEmpty(unit.toString());
+		return Objects.isNull(unit) || isEmpty(unit.toString());
 	}
 
 	boolean notPureNumberExpression(String str)
