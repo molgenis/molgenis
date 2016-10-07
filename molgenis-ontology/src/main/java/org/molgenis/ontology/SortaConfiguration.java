@@ -2,6 +2,7 @@ package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
+import org.molgenis.ontology.core.meta.TermFrequencyFactory;
 import org.molgenis.ontology.ic.OntologyTermFrequencyServiceImpl;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.roc.InformationContentService;
@@ -19,6 +20,9 @@ public class SortaConfiguration
 	private DataService dataService;
 
 	@Autowired
+	private TermFrequencyFactory termFrequencyFactory;
+
+	@Autowired
 	private OntologyTermHitMetaData ontologyTermHitMetaData;
 
 	@Autowired
@@ -27,7 +31,7 @@ public class SortaConfiguration
 	@Bean
 	public TermFrequencyService termFrequencyService()
 	{
-		return new OntologyTermFrequencyServiceImpl(dataService);
+		return new OntologyTermFrequencyServiceImpl(dataService, termFrequencyFactory);
 	}
 
 	@Bean

@@ -6,11 +6,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeTraverser;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.ontology.core.meta.*;
@@ -78,7 +78,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 
 	private OntologyLoader loader;
 	private Multimap<String, OntologyTermNodePath> nodePathsPerOntologyTerm = ArrayListMultimap.create();
-	private Ontology ontologyEntity;
+	private OntologyEntity ontologyEntity;
 
 	/**
 	 * Creates a new {@link OntologyRepositoryCollection} for an ontology file
@@ -205,7 +205,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		String ontologyTermIRI = ontologyTermClass.getIRI().toString();
 		String ontologyTermName = loader.getLabel(ontologyTermClass);
-		OntologyTerm ontologyTerm = ontologyTermFactory.create();
+		OntologyTermEntity ontologyTerm = ontologyTermFactory.create();
 		ontologyTerm.setId(idGenerator.generateId());
 		ontologyTerm.setOntologyTermIri(ontologyTermIRI);
 		ontologyTerm.setOntologyTermName(ontologyTermName);

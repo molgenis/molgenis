@@ -7,7 +7,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -90,13 +90,13 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
 		sourceEntityMeta.addAttribute(sourceAttr0);
 		sourceEntityMeta.addAttribute(sourceAttr1);
-		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
-		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();
+		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("b", param0Name, "tag1", 1.0f);
+		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("b", param1Name, "tag2", 0.5f);
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrResults = Maps.newHashMap();
 		attrResults.put(sourceAttr0,
-				ExplainedAttributeMetaData.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
+				ExplainedMatchCandidate.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
 		attrResults.put(sourceAttr1,
-				ExplainedAttributeMetaData.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
+				ExplainedMatchCandidate.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 

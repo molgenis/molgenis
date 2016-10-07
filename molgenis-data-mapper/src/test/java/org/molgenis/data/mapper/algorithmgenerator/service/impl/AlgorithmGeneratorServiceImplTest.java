@@ -14,7 +14,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
@@ -93,12 +93,11 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceEntityMetaData.addAttribute(heightSourceAttribute);
 		sourceEntityMetaData.addAttribute(weightSourceAttribute);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
-				ExplainedAttributeMetaData.create(heightSourceAttribute,
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> sourceAttributes = ImmutableMap
+				.of(heightSourceAttribute, ExplainedMatchCandidate.create(heightSourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
-				weightSourceAttribute, ExplainedAttributeMetaData.create(heightSourceAttribute,
-						Collections.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)),
-						true));
+						weightSourceAttribute, ExplainedMatchCandidate.create(heightSourceAttribute, Collections
+								.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)), true));
 
 		Script script = mock(Script.class);
 		ScriptParameter heightParameter = mock(ScriptParameter.class);

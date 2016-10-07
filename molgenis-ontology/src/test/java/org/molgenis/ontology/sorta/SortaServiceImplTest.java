@@ -66,7 +66,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 	public void beforeClass()
 	{
 		// Mock ontology entity
-		Ontology ontology = ontologyFactory.create();
+		OntologyEntity ontology = ontologyFactory.create();
 		ontology.setOntologyIri(ONTOLOGY_IRI);
 
 		// define dataService actions for test one
@@ -93,7 +93,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		OntologyTermSynonym ontologyTermSynonym0 = ontologyTermSynonymFactory.create();
 		ontologyTermSynonym0.setOntologyTermSynonym("hearing impairment");
 
-		OntologyTerm ontologyTerm0 = ontologyTermFactory.create();
+		OntologyTermEntity ontologyTerm0 = ontologyTermFactory.create();
 		ontologyTerm0.setId("1");
 		ontologyTerm0.setOntology(ontology);
 		ontologyTerm0.setOntologyTermName("hearing impairment");
@@ -105,7 +105,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		OntologyTermSynonym ontologyTermSynonym1 = ontologyTermSynonymFactory.create();
 		ontologyTermSynonym1.setOntologyTermSynonym("mixed hearing impairment");
 
-		OntologyTerm ontologyTerm1 = ontologyTermFactory.create();
+		OntologyTermEntity ontologyTerm1 = ontologyTermFactory.create();
 		ontologyTerm1.setId("2");
 		ontologyTerm1.setOntology(ontology);
 		ontologyTerm1.setOntologyTermName("mixed hearing impairment");
@@ -154,13 +154,13 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		ontologyTermDynamicAnnotation_3_1.setLabel("OMIM:123456");
 
 		// Mock ontologyTerm entity based on the previous entities defined
-		OntologyTerm ontologyTermEntity_3 = ontologyTermFactory.create();
+		OntologyTermEntity ontologyTermEntity_3 = ontologyTermFactory.create();
 		ontologyTermEntity_3.setId("3");
 		ontologyTermEntity_3.setOntology(ontology);
 		ontologyTermEntity_3.setOntologyTermName("ot_3");
 		ontologyTermEntity_3.setOntologyTermIri(ONTOLOGY_IRI + '3');
-		ontologyTermEntity_3.setOntologyTermSynonyms(
-				singletonList(ontologyTermSynonym2)); // self reference intended? Arrays.asList(ontologyTermEntity_3)
+		ontologyTermEntity_3.setOntologyTermSynonyms(singletonList(ontologyTermSynonym2)); // self reference intended?
+		// Arrays.asList(ontologyTermEntity_3)
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 				singletonList(ontologyTermDynamicAnnotation_3_1));
 
@@ -208,7 +208,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		ontologyTermSynonym_4_3.setOntologyTermSynonym("Exophthalmos");
 
 		// Mock ontologyTerm entity based on the previous entities defined
-		OntologyTerm ontologyTermEntity_4 = ontologyTermFactory.create();
+		OntologyTermEntity ontologyTermEntity_4 = ontologyTermFactory.create();
 		ontologyTermEntity_4.setId("4");
 		ontologyTermEntity_4.setOntology(ontology);
 		ontologyTermEntity_4.setOntologyTermName("protruding eye");

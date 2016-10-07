@@ -17,15 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class UnitResolverImpl implements UnitResolver
 {
@@ -104,9 +106,9 @@ public class UnitResolverImpl implements UnitResolver
 		{
 			if (!tokens.isEmpty())
 			{
-				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
+				List<String> ontologyIds = singletonList(unitOntology.getId());
 				List<OntologyTerm> ontologyTerms = ontologyService
-						.findExcatOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
+						.findExactOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
 				if (ontologyTerms != null && !ontologyTerms.isEmpty())
 				{
 					if (ontologyTerms.size() == 1)
@@ -170,7 +172,7 @@ public class UnitResolverImpl implements UnitResolver
 
 	boolean isUnitEmpty(Unit<? extends Quantity> unit)
 	{
-		return unit == null || (unit != null && StringUtils.isBlank(unit.toString()));
+		return Objects.isNull(unit) || isEmpty(unit.toString());
 	}
 
 	boolean notPureNumberExpression(String str)

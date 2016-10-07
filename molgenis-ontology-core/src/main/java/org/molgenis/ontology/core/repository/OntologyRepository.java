@@ -3,15 +3,18 @@ package org.molgenis.ontology.core.repository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.meta.OntologyEntity;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
 
 /**
- * Maps OntologyMetaData {@link Entity} <-> {@link Ontology}
+ * Maps OntologyMetaData {@link Entity} <-> {@link OntologyEntity}
  */
 public class OntologyRepository
 {
@@ -19,11 +22,12 @@ public class OntologyRepository
 	private DataService dataService;
 
 	/**
-	 * Retrieves all {@link Ontology}s.
+	 * Retrieves all {@link OntologyEntity}s.
 	 */
 	public Stream<Ontology> getOntologies()
 	{
-		return dataService.findAll(ONTOLOGY).map(OntologyRepository::toOntology);
+		Stream<OntologyEntity> findAll = dataService.findAll(ONTOLOGY, OntologyEntity.class);
+		return findAll.map(OntologyRepository::toOntology);
 	}
 
 	/**
@@ -34,16 +38,13 @@ public class OntologyRepository
 	 */
 	public Ontology getOntology(String IRI)
 	{
-		return toOntology(dataService.findOne(ONTOLOGY, QueryImpl.EQ(ONTOLOGY_IRI, IRI)));
+		OntologyEntity findOne = dataService
+				.findOne(ONTOLOGY, new QueryImpl<OntologyEntity>().eq(ONTOLOGY_IRI, IRI), OntologyEntity.class);
+		return Objects.nonNull(findOne) ? toOntology(findOne) : null;
 	}
 
-	private static Ontology toOntology(Entity entity)
+	public static Ontology toOntology(OntologyEntity ontologyEntity)
 	{
-		if (entity == null)
-		{
-			return null;
-		}
-		return Ontology.create(entity.getString(ID), entity.getString(ONTOLOGY_IRI), entity.getString(ONTOLOGY_NAME));
+		return Ontology.create(ontologyEntity.getId(), ontologyEntity.getIRI(), ontologyEntity.getOntologyName());
 	}
-
 }

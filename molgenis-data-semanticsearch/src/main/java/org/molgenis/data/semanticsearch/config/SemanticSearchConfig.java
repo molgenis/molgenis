@@ -1,23 +1,15 @@
 package org.molgenis.data.semanticsearch.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
-import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServiceImpl;
-import org.molgenis.data.semanticsearch.explain.service.ExplainServiceHelper;
+import org.molgenis.data.semanticsearch.explain.service.ExplainMappingService;
+import org.molgenis.data.semanticsearch.explain.service.impl.ExplainMappingServiceImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagServiceImpl;
-import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceHelper;
-import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.*;
+import org.molgenis.data.semanticsearch.service.impl.*;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +23,6 @@ public class SemanticSearchConfig
 	DataService dataService;
 
 	@Autowired
-	MetaDataService metaDataService;
-
-	@Autowired
 	OntologyService ontologyService;
 
 	@Autowired
@@ -43,19 +32,10 @@ public class SemanticSearchConfig
 	TermFrequencyService termFrequencyService;
 
 	@Autowired
-	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
 	TagMetaData tagMetaData;
 
 	@Autowired
 	TagFactory tagFactory;
-
-	@Bean
-	public SemanticSearchServiceHelper semanticSearchServiceHelper()
-	{
-		return new SemanticSearchServiceHelper(dataService, ontologyService, termFrequencyService);
-	}
 
 	@Bean
 	public OntologyTagService ontologyTagService()
@@ -66,8 +46,8 @@ public class SemanticSearchConfig
 	@Bean
 	public SemanticSearchService semanticSearchService()
 	{
-		return new SemanticSearchServiceImpl(dataService, ontologyService, metaDataService,
-				semanticSearchServiceHelper(), elasticSearchExplainService());
+		return new SemanticSearchServiceImpl(dataService, ontologyService, tagGroupGenerator(), queryExpansionService(),
+				explainMappingService());
 	}
 
 	@Bean
@@ -77,21 +57,26 @@ public class SemanticSearchConfig
 	}
 
 	@Bean
-	public ExplainServiceHelper explainServiceHelper()
+	public QueryExpansionService queryExpansionService()
 	{
-		return new ExplainServiceHelper();
+		return new QueryExpansionServiceImpl(ontologyService, termFrequencyService);
+	}
+
+	@Bean
+	public TagGroupGenerator tagGroupGenerator()
+	{
+		return new TagGroupGeneratorImpl(ontologyService);
+	}
+
+	@Bean
+	public ExplainMappingService explainMappingService()
+	{
+		return new ExplainMappingServiceImpl(ontologyService, tagGroupGenerator());
 	}
 
 	@Bean
 	TagRepository tagRepository()
 	{
 		return new TagRepository(dataService, idGenerator, tagFactory);
-	}
-
-	@Bean
-	ElasticSearchExplainService elasticSearchExplainService()
-	{
-		return new ElasticSearchExplainServiceImpl(embeddedElasticSearchServiceFactory.getClient(),
-				explainServiceHelper());
 	}
 }

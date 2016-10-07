@@ -6,19 +6,19 @@ import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
 
-public class Ontology extends StaticEntity
+public class OntologyEntity extends StaticEntity
 {
-	public Ontology(Entity entity)
+	public OntologyEntity(Entity entity)
 	{
 		super(entity);
 	}
 
-	public Ontology(EntityMetaData entityMeta)
+	public OntologyEntity(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public Ontology(String id, EntityMetaData entityMeta)
+	public OntologyEntity(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);
@@ -52,5 +52,10 @@ public class Ontology extends StaticEntity
 	public void setOntologyName(String ontologyName)
 	{
 		set(ONTOLOGY_NAME, ontologyName);
+	}
+
+	public String getIRI()
+	{
+		return getOntologyIri();
 	}
 }

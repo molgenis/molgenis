@@ -16,7 +16,7 @@ import org.molgenis.data.mapper.utils.AlgorithmGeneratorHelper;
 import org.molgenis.data.mapper.utils.MagmaUnitConverter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.quantity.Quantity;
@@ -91,8 +91,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 
 	@Override
 	public GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes, EntityMetaData targetEntityMetaData,
-			EntityMetaData sourceEntityMetaData)
+			Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> sourceAttributes,
+			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = StringUtils.EMPTY;
 		AlgorithmState algorithmState = null;
@@ -113,8 +113,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			}
 			else
 			{
-				Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = sourceAttributes.entrySet().stream()
-						.findFirst().get();
+				Entry<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> firstEntry = sourceAttributes
+						.entrySet().stream().findFirst().get();
 				AttributeMetaData sourceAttribute = firstEntry.getKey();
 				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);

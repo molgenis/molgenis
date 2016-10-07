@@ -202,7 +202,7 @@
             var counter = 0;
             $.each(explainedAttributes, function (index, explainedAttribute) {
 
-                var attribute = explainedAttribute.attributeMetaData;
+                var attribute = explainedAttribute.match;
                 var explainedQueryStrings = explainedAttribute.explainedQueryStrings;
 
                 var row = $('<tr />').attr({

@@ -13,9 +13,9 @@ public abstract class ExplainedQueryString
 
 	public abstract String getTagName();
 
-	public abstract double getScore();
+	public abstract float getScore();
 
-	public static ExplainedQueryString create(String matchedWords, String queryString, String tagName, double score)
+	public static ExplainedQueryString create(String matchedWords, String queryString, String tagName, float score)
 	{
 		return new AutoValue_ExplainedQueryString(matchedWords, queryString, tagName, score);
 	}

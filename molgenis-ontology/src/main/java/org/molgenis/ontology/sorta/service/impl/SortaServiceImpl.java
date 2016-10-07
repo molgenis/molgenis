@@ -54,8 +54,7 @@ public class SortaServiceImpl implements SortaService
 
 	@Autowired
 	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService,
-			OntologyTermHitMetaData ontologyTermHitMetaData,
-			OntologyTermSynonymFactory ontologyTermSynonymFactory)
+			OntologyTermHitMetaData ontologyTermHitMetaData, OntologyTermSynonymFactory ontologyTermSynonymFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.informationContentService = requireNonNull(informationContentService);

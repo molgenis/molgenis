@@ -14,12 +14,12 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.RhinoConfig;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeArray;
@@ -77,10 +77,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
+		Multimap<Relation, OntologyTagObject> tagsForAttribute = ontologyTagService
 				.getTagsForAttribute(targetEntityMetaData, targetAttribute);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
 						null);
 		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService

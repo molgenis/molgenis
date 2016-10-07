@@ -11,7 +11,6 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -23,14 +22,15 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -387,11 +387,11 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> matches = ImmutableMap.of(sourceAttribute,
-				ExplainedAttributeMetaData.create(sourceAttribute,
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> matches = ImmutableMap.of(sourceAttribute,
+				ExplainedMatchCandidate.create(sourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
-		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+		LinkedHashMultimap<Relation, OntologyTagObject> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values(),
@@ -473,11 +473,11 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> mappings = ImmutableMap
-				.of(sourceAttribute1, ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
-						ExplainedAttributeMetaData.create(sourceAttribute2));
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> mappings = ImmutableMap
+				.of(sourceAttribute1, ExplainedMatchCandidate.create(sourceAttribute1), sourceAttribute2,
+						ExplainedMatchCandidate.create(sourceAttribute2));
 
-		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+		LinkedHashMultimap<Relation, OntologyTagObject> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values(),

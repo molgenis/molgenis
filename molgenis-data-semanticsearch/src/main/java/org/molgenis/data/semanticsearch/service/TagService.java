@@ -7,14 +7,14 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.meta.OntologyEntity;
+import org.molgenis.ontology.core.meta.OntologyTermEntity;
 
 /**
  * Service that administrates tags on attributes, entities and packages of a particular code system.
  *
- * @param <ObjectType>     the type of the tag object, for instance {@link OntologyTerm}
- * @param <CodeSystemType> the type of the code system, for instance {@link Ontology}
+ * @param <ObjectType>     the type of the tag object, for instance {@link OntologyTermEntity}
+ * @param <CodeSystemType> the type of the code system, for instance {@link OntologyEntity}
  */
 public interface TagService<ObjectType, CodeSystemType>
 {

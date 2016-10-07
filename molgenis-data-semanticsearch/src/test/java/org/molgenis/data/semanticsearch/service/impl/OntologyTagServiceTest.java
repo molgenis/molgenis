@@ -6,14 +6,16 @@ import com.google.common.collect.Multimap;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
+import org.molgenis.ontology.core.model.CombinedOntologyTerm;
 import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -31,6 +33,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
@@ -78,11 +81,10 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 			.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
 
 	private static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = OntologyTerm
-			.create("http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.");
+			.create("0987", "http://edamontology.org/data_0987", "Chromosome name");
 
 	private static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = OntologyTerm
-			.create("http://edamontology.org/data_0919", "Gene annotation (chromosome)",
-					"This includes basic information. e.g. chromosome number...");
+			.create("data_0919", "http://edamontology.org/data_0919", "Gene annotation (chromosome)");
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -127,18 +129,21 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		Ontology edamOntology = Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
 		OntologyTerm chromosomeName = OntologyTerm
-				.create("http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.");
+				.create("0987", "http://edamontology.org/data_0987", "Chromosome name");
 		OntologyTerm geneAnnotation = OntologyTerm
-				.create("http://edamontology.org/data_0919", "Gene annotation (chromosome)",
-						"This includes basic information. e.g. chromosome number...");
+				.create("data_0919", "http://edamontology.org/data_0919", "Gene annotation (chromosome)");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(edamOntology);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(chromosomeName);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0919")).thenReturn(geneAnnotation);
 
-		Multimap<Relation, OntologyTerm> expected = LinkedHashMultimap.create();
-		expected.put(instanceOf, chromosomeName);
-		expected.put(instanceOf, geneAnnotation);
+		OntologyTagObject expectedCombinedChromesomeName = CombinedOntologyTerm
+				.create("http://edamontology.org/data_0987", "Chromosome name");
+		OntologyTagObject expectedCombinedGeneAnnotation = CombinedOntologyTerm
+				.create("http://edamontology.org/data_0919", "Gene annotation (chromosome)");
+		Multimap<Relation, OntologyTagObject> expected = LinkedHashMultimap.create();
+		expected.put(instanceOf, expectedCombinedChromesomeName);
+		expected.put(instanceOf, expectedCombinedGeneAnnotation);
 
 		assertEquals(ontologyTagService.getTagsForAttribute(emd, attributeMetaData), expected);
 	}
@@ -154,7 +159,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		expected.set(TagMetaData.RELATION_LABEL, "instanceOf");
 		expected.set(TagMetaData.CODE_SYSTEM, "http://edamontology.org");
 
-		OntologyTerm coreData = mock(OntologyTerm.class);
+		OntologyTagObject coreData = mock(OntologyTagObject.class);
 
 		when(coreData.getIRI()).thenReturn("http://edamontology.org/data_3031");
 		when(coreData.getLabel()).thenReturn("Core data");
@@ -163,8 +168,8 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		when(edamOntology.getIRI()).thenReturn("http://edamontology.org");
 
-		SemanticTag<Object, OntologyTerm, Ontology> tag = new SemanticTag<>("1233", null, Relation.instanceOf, coreData,
-				edamOntology);
+		SemanticTag<Object, OntologyTagObject, Ontology> tag = new SemanticTag<>("1233", null, Relation.instanceOf,
+				coreData, edamOntology);
 		when(tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 				"http://edamontology.org")).thenReturn(expected);
 
@@ -185,7 +190,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		AttributeMetaData attributeEntity = attrFactory.create();
 		attributeEntity.setTags(singletonList(geneAnnotationTagEntity));
 		attributeEntity.setName("Chr");
-		SemanticTag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new SemanticTag<>("1233",
+		SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> chromosomeTag = new SemanticTag<>("1233",
 				attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		EntityMetaData entityMetaDataEntity = entityMetaFactory.create();
@@ -215,7 +220,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		entityMetaDataEntity.setOwnAttributes(singleton(attributeEntity));
 		when(dataService.findOneById(ENTITY_META_DATA, "org.molgenis.SNP")).thenReturn(entityMetaDataEntity);
 
-		SemanticTag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new SemanticTag<>("4321",
+		SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> geneAnnotationTag = new SemanticTag<>("4321",
 				attributeMetaData, instanceOf, GENE_ANNOTATION_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		ontologyTagService.removeAttributeTag(emd, geneAnnotationTag);
@@ -239,8 +244,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		assertEquals(ontologyTagService.getTagsForPackage(p), singletonList(
 				new SemanticTag<>("1234", p, Relation.forIRI("http://molgenis.org/biobankconnect/instanceOf"),
-						OntologyTerm.create("http://edamontology.org/data_0987", "Chromosome name",
-								"Name of a chromosome."),
+						CombinedOntologyTerm.create("http://edamontology.org/data_0987", "Chromosome name"),
 						Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
 	}
 
@@ -270,7 +274,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	public void testTagAttributesInEntity()
 	{
 		Map<String, OntologyTag> attributeTagMap = Maps.newHashMap();
-		Map<AttributeMetaData, OntologyTerm> tags = Maps.newHashMap();
+		Map<AttributeMetaData, OntologyTagObject> tags = Maps.newHashMap();
 
 		EntityMetaData emd = entityMetaFactory.create().setName("org.molgenis.SNP");
 		AttributeMetaData attributeMetaData = attrFactory.create().setName("Chr");
@@ -282,7 +286,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		AttributeMetaData attributeEntity = attrFactory.create();
 		attributeEntity.setTags(singletonList(geneAnnotationTagEntity));
 		attributeEntity.setName("Chr");
-		SemanticTag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new SemanticTag<>("1233",
+		SemanticTag<AttributeMetaData, OntologyTagObject, Ontology> chromosomeTag = new SemanticTag<>("1233",
 				attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		EntityMetaData entityMetaDataEntity = entityMetaFactory.create();

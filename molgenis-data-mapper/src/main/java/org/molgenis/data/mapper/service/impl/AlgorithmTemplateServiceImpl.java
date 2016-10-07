@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.Script;
@@ -31,7 +31,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	@Override
-	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
+	public Stream<AlgorithmTemplate> find(
+			Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrMatches)
 	{
 		// get all algorithm templates
 		Stream<Script> jsScripts = dataService
@@ -42,7 +43,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
+			Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrMatches)
 	{
 		// find attribute for each parameter
 		boolean paramMatch = true;
@@ -68,12 +69,11 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private AttributeMetaData mapParamToAttribute(ScriptParameter param,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
+			Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrMatches)
 	{
-
 		return attrMatches.entrySet().stream().filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
 				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
-						.allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
+						.allMatch(explain -> explain.getQueryString().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);
 	}
 }
