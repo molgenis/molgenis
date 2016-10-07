@@ -146,6 +146,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(entityMeta.getAttribute("name")).thenReturn(attrName);
 		when(entityMeta.getAttribute("enum")).thenReturn(attrEnum);
 		when(entityMeta.getAttribute("int")).thenReturn(attrInt);
+		when(entityMeta.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityMeta.getIdAttribute()).thenReturn(attrId);
 		when(entityMeta.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		when(entityMeta.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
