@@ -1,18 +1,15 @@
 package org.molgenis.ontology.core.meta;
 
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
-
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.ontology.core.model.OntologyPackage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static org.molgenis.ontology.core.meta.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
 public class OntologyTermMetaData extends SystemEntityMetaData

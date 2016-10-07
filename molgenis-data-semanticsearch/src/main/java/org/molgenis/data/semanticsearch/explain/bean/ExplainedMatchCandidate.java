@@ -12,7 +12,7 @@ public abstract class ExplainedMatchCandidate<T>
 {
 	public static <T> ExplainedMatchCandidate<T> create(T match)
 	{
-		return new AutoValue_ExplainedMatchCandidate<T>(match, Collections.emptyList(), false);
+		return new AutoValue_ExplainedMatchCandidate<>(match, Collections.emptyList(), false);
 	}
 
 	public static <T> ExplainedMatchCandidate<T> create(T match, List<ExplainedQueryString> explainedQueryStrings,

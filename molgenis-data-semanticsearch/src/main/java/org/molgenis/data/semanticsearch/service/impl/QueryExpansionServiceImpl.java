@@ -17,7 +17,7 @@ import org.molgenis.data.semanticsearch.service.QueryExpansionService;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.utils.Stemmer;
@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -43,6 +44,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
 import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
+import static org.molgenis.data.QueryRule.Operator.SHOULD;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.getLowerCaseTerms;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitRemoveStopWords;
 import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
@@ -62,11 +64,11 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	private final static String ESCAPED_CARET_CHARACTER = "\\^";
 	private Joiner termJoiner = Joiner.on(' ');
 
-	private LoadingCache<OntologyTermImpl, List<String>> cachedOntologyTermQuery = CacheBuilder.newBuilder()
+	private LoadingCache<OntologyTerm, List<String>> cachedOntologyTermQuery = CacheBuilder.newBuilder()
 			.maximumSize(1000).expireAfterWrite(1, TimeUnit.HOURS)
-			.build(new CacheLoader<OntologyTermImpl, List<String>>()
+			.build(new CacheLoader<OntologyTerm, List<String>>()
 			{
-				public List<String> load(OntologyTermImpl ontologyTerm)
+				public List<String> load(OntologyTerm ontologyTerm)
 				{
 					return getExpandedQueriesFromOntologyTerm(ontologyTerm);
 				}
@@ -114,7 +116,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		tagGroups.forEach(hit -> groupWithSameSynonym.put(hit.getMatchedWords(), hit));
 		for (String synonym : groupWithSameSynonym.keySet())
 		{
-			List<TagGroup> ontologyTermGroup = Lists.newArrayList(groupWithSameSynonym.get(synonym));
+			List<TagGroup> ontologyTermGroup = newArrayList(groupWithSameSynonym.get(synonym));
 
 			QueryRule queryRuleForOntologyTerms = createQueryRuleForOntologyTerms(ontologyTermGroup);
 
@@ -149,17 +151,17 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 			float score = ontologyTermHits.get(0).getScore();
 
 			// Put ontologyTerms with the same synonym in a map
-			Multimap<OntologyTermImpl, OntologyTermImpl> atomicOntologyTermGroups = groupAtomicOntologyTermsBySynonym(
+			Multimap<OntologyTerm, OntologyTerm> atomicOntologyTermGroups = groupAtomicOntologyTermsBySynonym(
 					ontologyTermHits);
 
-			Set<OntologyTermImpl> ontologyTermGroupKeys = atomicOntologyTermGroups.keySet();
+			Set<OntologyTerm> ontologyTermGroupKeys = atomicOntologyTermGroups.keySet();
 
 			if (ontologyTermGroupKeys.size() > 1)
 			{
-				Map<OntologyTermImpl, Float> ontologyTermGroupWeight = normalizeBoostValueForOntologyTermGroup(
+				Map<OntologyTerm, Float> ontologyTermGroupWeight = normalizeBoostValueForOntologyTermGroup(
 						atomicOntologyTermGroups);
 
-				Function<OntologyTermImpl, QueryRule> ontologyTermGroupToQueryRule = groupKey ->
+				Function<OntologyTerm, QueryRule> ontologyTermGroupToQueryRule = groupKey ->
 				{
 
 					List<String> queryTermsFromSameGroup = atomicOntologyTermGroups.get(groupKey).stream()
@@ -174,7 +176,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 			}
 			else
 			{
-				OntologyTermImpl firstOntologyTermGroupKey = Iterables.get(ontologyTermGroupKeys, 0);
+				OntologyTerm firstOntologyTermGroupKey = Iterables.get(ontologyTermGroupKeys, 0);
 
 				List<String> queryTerms = atomicOntologyTermGroups.get(firstOntologyTermGroupKey).stream()
 						.flatMap(ot -> getCachedQueriesForOntologyTerm(ot).stream()).collect(toList());
@@ -193,7 +195,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	 * @param queryExpansionParam
 	 * @return a list of cached queries
 	 */
-	List<String> getCachedQueriesForOntologyTerm(OntologyTermImpl ontologyTerm)
+	List<String> getCachedQueriesForOntologyTerm(OntologyTerm ontologyTerm)
 	{
 		try
 		{
@@ -214,12 +216,12 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	 * @param ontologyTerm
 	 * @return
 	 */
-	List<String> getExpandedQueriesFromOntologyTerm(OntologyTermImpl ontologyTerm)
+	List<String> getExpandedQueriesFromOntologyTerm(OntologyTerm ontologyTerm)
 	{
 		List<String> queryTerms = getLowerCaseTerms(ontologyTerm).stream().map(this::parseQueryString)
 				.collect(toList());
 
-		Function<OntologyTermImpl, Stream<String>> mapChildOntologyTermToQueries = relatedOntologyTerm -> getLowerCaseTerms(
+		Function<OntologyTerm, Stream<String>> mapChildOntologyTermToQueries = relatedOntologyTerm -> getLowerCaseTerms(
 				relatedOntologyTerm).stream().map(query -> parseBoostQueryString(query,
 				Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, relatedOntologyTerm))));
 
@@ -236,14 +238,14 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		return queryTerms;
 	}
 
-	private Map<OntologyTermImpl, Float> normalizeBoostValueForOntologyTermGroup(
-			Multimap<OntologyTermImpl, OntologyTermImpl> ontologyTermGroups)
+	private Map<OntologyTerm, Float> normalizeBoostValueForOntologyTermGroup(
+			Multimap<OntologyTerm, OntologyTerm> ontologyTermGroups)
 	{
-		Function<OntologyTermImpl, Double> groupKeyToGroupWeight = key -> ontologyTermGroups.get(key).stream()
+		Function<OntologyTerm, Double> groupKeyToGroupWeight = key -> ontologyTermGroups.get(key).stream()
 				.map(SemanticSearchServiceUtils::getLowerCaseTerms).map(this::getBestInverseDocumentFrequency)
 				.mapToDouble(tf -> (double) tf).max().orElse(1.0d);
 
-		Map<OntologyTermImpl, Double> ontologyTermGroupWeight = ontologyTermGroups.keySet().stream()
+		Map<OntologyTerm, Double> ontologyTermGroupWeight = ontologyTermGroups.keySet().stream()
 				.collect(Collectors.toMap(key -> key, groupKeyToGroupWeight));
 
 		double maxIdfValue = ontologyTermGroupWeight.values().stream().mapToDouble(Double::doubleValue).max()
@@ -253,17 +255,17 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 				.collect(toMap(Entry::getKey, e -> new Float(e.getValue() / maxIdfValue)));
 	}
 
-	private Multimap<OntologyTermImpl, OntologyTermImpl> groupAtomicOntologyTermsBySynonym(
+	private Multimap<OntologyTerm, OntologyTerm> groupAtomicOntologyTermsBySynonym(
 			List<TagGroup> ontologyTermHits)
 	{
-		Multimap<OntologyTermImpl, OntologyTermImpl> multiMap = LinkedHashMultimap.create();
+		Multimap<OntologyTerm, OntologyTerm> multiMap = LinkedHashMultimap.create();
 		ontologyTermHits.get(0).getOntologyTerms().forEach(ot -> multiMap.put(ot, ot));
 
 		ontologyTermHits.stream().skip(1).flatMap(hit -> hit.getOntologyTerms().stream())
 				.filter(ot -> !multiMap.containsKey(ot)).forEach(atomicOntologyTerm ->
 		{
 
-			OntologyTermImpl ontologyTermInTheMap = multiMap.keySet().stream()
+			OntologyTerm ontologyTermInTheMap = multiMap.keySet().stream()
 					.filter(ot -> hasSameSynonyms(ot, atomicOntologyTerm)).findFirst().orElse(null);
 
 			if (ontologyTermInTheMap != null)
@@ -275,7 +277,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		return multiMap;
 	}
 
-	private boolean hasSameSynonyms(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2)
+	private boolean hasSameSynonyms(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
 	{
 		List<String> stemmedSynonymsOfOt1 = getLowerCaseTerms(ontologyTerm1).stream().map(Stemmer::cleanStemPhrase)
 				.collect(toList());
@@ -292,7 +294,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	 */
 	QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms, Float boostValue)
 	{
-		List<QueryRule> rules = new ArrayList<QueryRule>();
+		List<QueryRule> rules = newArrayList();
 		newLinkedHashSet(queryTerms).stream().filter(StringUtils::isNotEmpty)
 				.map(string -> QueryParser.escape(string).replace(ESCAPED_CARET_CHARACTER, CARET_CHARACTER))
 				.forEach(query ->
@@ -305,7 +307,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		if (rules.size() > 0)
 		{
 			finalDisMaxQuery = new QueryRule(rules);
-			finalDisMaxQuery.setOperator(Operator.DIS_MAX);
+			finalDisMaxQuery.setOperator(DIS_MAX);
 		}
 
 		if (finalDisMaxQuery != null && boostValue != null && boostValue.intValue() != 0)
@@ -321,8 +323,8 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		QueryRule shouldQueryRule = null;
 		if (queryRules.size() > 0)
 		{
-			shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
-			shouldQueryRule.setOperator(Operator.SHOULD);
+			shouldQueryRule = new QueryRule(newArrayList());
+			shouldQueryRule.setOperator(SHOULD);
 			shouldQueryRule.getNestedRules().addAll(queryRules);
 		}
 

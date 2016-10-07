@@ -22,14 +22,14 @@ import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTagObject;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -46,10 +46,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	private static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
 
-	// We only explain the top 10 suggested attributes because beyond that the attributes are not high quliaty anymore
+	// We only explain the top 10 suggested attributes because beyond that the attributes are not high quality anymore
 	private static final int MAX_NUMBER_EXPLAINED_ATTRIBUTES = 10;
 
-	@Autowired
 	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
 			TagGroupGenerator tagGroupGenerator, QueryExpansionService queryExpansionService,
 			ExplainMappingService explainMappingService)
@@ -114,7 +113,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	@Override
 	public Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
-			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms)
+			Collection<OntologyTagObject> ontologyTagTermsFromTags, Set<String> searchTerms)
 	{
 		Set<String> queryTerms = createLexicalSearchQueryTerms(targetAttribute, searchTerms);
 
@@ -123,11 +122,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		if (null != searchTerms && !searchTerms.isEmpty())
 		{
 			String queryString = StringUtils.join(searchTerms, " ");
-			tagGroups = tagGroupGenerator.generateTagGroups(queryString, ontologyService.getAllOntologiesIds());
+			tagGroups = tagGroupGenerator.generateTagGroups(queryString, ontologyService.getAllOntologyIds());
 		}
-		else if (isNull(ontologyTermsFromTags) || ontologyTermsFromTags.isEmpty())
+		else if (isNull(ontologyTagTermsFromTags) || ontologyTagTermsFromTags.isEmpty())
 		{
-			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+			List<String> allOntologiesIds = ontologyService.getAllOntologyIds();
 			Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
 			if (unitOntology != null)
 			{
@@ -138,7 +137,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 		else
 		{
-			tagGroups = ontologyTermsFromTags.stream().map(ot -> TagGroup
+			tagGroups = ontologyTagTermsFromTags.stream().map(ot -> TagGroup
 					.create(ontologyService.getOntologyTerms(ot.getAtomicIRIs()), ot.getLabel(), 1.0f))
 					.collect(toList());
 		}
@@ -151,11 +150,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * user defined searchTerms. If the user defined searchTerms exist, the targetAttribute information will not be
 	 * used.
 	 *
-	 * @param targetAttribute
-	 * @param searchTerms
-	 * @return list of queryTerms
+	 * @param targetAttribute the target {@link AttributeMetaData}
+	 * @param searchTerms Set of search terms
+	 * @return Set of queryTerms
 	 */
-	public Set<String> createLexicalSearchQueryTerms(AttributeMetaData targetAttribute, Set<String> searchTerms)
+	private Set<String> createLexicalSearchQueryTerms(AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
 		Set<String> queryTerms = new HashSet<>();
 
@@ -181,17 +180,16 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
+	public Map<AttributeMetaData, Hit<OntologyTagObject>> findTags(String entity, List<String> ontologyIds)
 	{
-		Map<AttributeMetaData, Hit<OntologyTerm>> result = new LinkedHashMap<AttributeMetaData, Hit<OntologyTerm>>();
+		Map<AttributeMetaData, Hit<OntologyTagObject>> result = new LinkedHashMap<>();
 		EntityMetaData emd = dataService.getEntityMetaData(entity);
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
 			List<TagGroup> generateTagGroups = tagGroupGenerator.generateTagGroups(amd.getLabel(), ontologyIds);
-			Hit<OntologyTerm> tag = generateTagGroups.stream()
-					.map(tagGroup -> Hit.create(tagGroup.getCombinedOntologyTerm(), tagGroup.getScore())).findFirst()
-					.orElse(null);
-
+			Hit<OntologyTagObject> tag = generateTagGroups.stream()
+					.map(tagGroup -> Hit.<OntologyTagObject>create(tagGroup.getCombinedOntologyTerm(),
+							tagGroup.getScore())).findFirst().orElse(null);
 			if (tag != null)
 			{
 				result.put(amd, tag);
@@ -203,12 +201,12 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_META_DATA,
-				new QueryImpl<Entity>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName()));
+				new QueryImpl<>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName()));
 
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
 
-		List<String> attributeIdentifiers = new ArrayList<String>();
+		List<String> attributeIdentifiers = newArrayList();
 
 		recursivelyCollectAttributeIdentifiers(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES),
 				attributeIdentifiers);

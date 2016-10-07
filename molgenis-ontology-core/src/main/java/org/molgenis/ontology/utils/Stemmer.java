@@ -1,18 +1,17 @@
 package org.molgenis.ontology.utils;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-import org.tartarus.snowball.ext.PorterStemmer;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 
 public class Stemmer
 {
@@ -22,7 +21,7 @@ public class Stemmer
 
 	/**
 	 * Remove illegal characters from the string and stem each single word
-	 * 
+	 *
 	 * @param phrase
 	 * @return a string that consists of stemmed words
 	 */
@@ -48,8 +47,9 @@ public class Stemmer
 
 	public static Set<String> splitAndStem(String phrase)
 	{
-		return Sets.newLinkedHashSet(stream(SPLITTER.split(phrase.toLowerCase()).spliterator(), false)
-				.map(Stemmer::stem).filter(StringUtils::isNotBlank).distinct().collect(toList()));
+		return Sets.newLinkedHashSet(
+				stream(SPLITTER.split(phrase.toLowerCase()).spliterator(), false).map(Stemmer::stem)
+						.filter(StringUtils::isNotBlank).distinct().collect(toList()));
 	}
 
 	public static String replaceIllegalCharacter(String string)

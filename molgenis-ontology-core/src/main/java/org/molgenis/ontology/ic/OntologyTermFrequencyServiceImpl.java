@@ -1,10 +1,5 @@
 package org.molgenis.ontology.ic;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -16,6 +11,11 @@ import org.molgenis.ontology.core.meta.TermFrequencyMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 {
@@ -85,7 +85,8 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 		List<Entity> entitiesToAdd = new ArrayList<Entity>();
 		// Create new term frequency records
-		dataService.findAll(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM).forEach(entity -> {
+		dataService.findAll(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM).forEach(entity ->
+		{
 
 			String ontologyTermSynonym = entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
 

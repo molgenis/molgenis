@@ -577,8 +577,8 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		double threshold = sortaJobExecution.getThreshold();
 		QueryRule validatedRule = new QueryRule(MatchingTaskContentMetaData.VALIDATED, EQUALS, isMatched);
-		QueryRule thresholdRule = new QueryRule(MatchingTaskContentMetaData.SCORE,
-				isMatched ? GREATER_EQUAL : LESS, threshold);
+		QueryRule thresholdRule = new QueryRule(MatchingTaskContentMetaData.SCORE, isMatched ? GREATER_EQUAL : LESS,
+				threshold);
 		QueryRule combinedRule = new QueryRule(
 				asList(validatedRule, new QueryRule(isMatched ? OR : AND), thresholdRule));
 

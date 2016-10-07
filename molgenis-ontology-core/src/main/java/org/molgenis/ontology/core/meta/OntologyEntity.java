@@ -1,12 +1,10 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
 
 public class OntologyEntity extends StaticEntity
 {
