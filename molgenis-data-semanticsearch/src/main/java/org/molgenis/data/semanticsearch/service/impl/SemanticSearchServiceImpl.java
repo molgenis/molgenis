@@ -151,7 +151,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * used.
 	 *
 	 * @param targetAttribute the target {@link AttributeMetaData}
-	 * @param searchTerms Set of search terms
+	 * @param searchTerms     Set of search terms
 	 * @return Set of queryTerms
 	 */
 	private Set<String> createLexicalSearchQueryTerms(AttributeMetaData targetAttribute, Set<String> searchTerms)

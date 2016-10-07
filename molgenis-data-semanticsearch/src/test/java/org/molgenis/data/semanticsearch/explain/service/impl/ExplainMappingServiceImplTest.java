@@ -1,7 +1,6 @@
 package org.molgenis.data.semanticsearch.explain.service.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -25,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -53,8 +53,8 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		String heightCandidate = "Height in cm";
 		String weightCandidate = "Weight in kg";
 
-		Set<String> heightCandidateWords = Sets.newHashSet("height", "cm");
-		Set<String> weightCandidateWords = Sets.newHashSet("weight", "kg");
+		Set<String> heightCandidateWords = newHashSet("height", "cm");
+		Set<String> weightCandidateWords = newHashSet("weight", "kg");
 
 		OntologyTerm heightOntologyTerm = OntologyTerm.create("1", "iri1", "Height", asList("Height", "Body Length"));
 		OntologyTerm weightOntologyTerm = OntologyTerm.create("2", "iri2", "Weight", singletonList("Weight"));
@@ -73,13 +73,14 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		//TODO: Add a test that actually uses a match to a child ontology term
 		when(ontologyService.getChildren(heightOntologyTerm, DEFAULT_EXPANSION_LEVEL))
 				.thenReturn(Collections.emptyList());
+
 		when(ontologyService.getChildren(weightOntologyTerm, DEFAULT_EXPANSION_LEVEL))
 				.thenReturn(Collections.emptyList());
 
 		when(ontologyService.findOntologyTerms(singletonList("1"), heightCandidateWords, 2,
-				asList(heightOntologyTerm, weightOntologyTerm))).thenReturn(singletonList(heightOntologyTerm));
+				newHashSet(heightOntologyTerm, weightOntologyTerm))).thenReturn(singletonList(heightOntologyTerm));
 		when(ontologyService.findOntologyTerms(singletonList("1"), weightCandidateWords, 2,
-				asList(heightOntologyTerm, weightOntologyTerm))).thenReturn(singletonList(weightOntologyTerm));
+				newHashSet(heightOntologyTerm, weightOntologyTerm))).thenReturn(singletonList(weightOntologyTerm));
 
 		when(tagGroupGenerator.applyTagMatchingCriterion(singletonList(heightOntologyTerm), heightCandidateWords,
 				STRICT_MATCHING_CRITERION)).thenReturn(singletonList(heightTagGroup));
@@ -92,16 +93,16 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 				.thenReturn(singletonList(weightTagGroup));
 
 		// Test one
-		ExplainedMatchCandidate<String> actualExplainMappingHeight = explainMappingService.explainMapping(searchParam,
-				heightCandidate);
+		ExplainedMatchCandidate<String> actualExplainMappingHeight = explainMappingService
+				.explainMapping(searchParam, heightCandidate);
 		ExplainedMatchCandidate<String> expectedExplainMappingHeight = ExplainedMatchCandidate.create(heightCandidate,
 				singletonList(ExplainedQueryString.create("height", "height", "Height", 82.4f)), false);
 
 		assertEquals(expectedExplainMappingHeight, actualExplainMappingHeight);
 
 		// Test two
-		ExplainedMatchCandidate<String> actualExplainMappingWeight = explainMappingService.explainMapping(searchParam,
-				weightCandidate);
+		ExplainedMatchCandidate<String> actualExplainMappingWeight = explainMappingService
+				.explainMapping(searchParam, weightCandidate);
 		ExplainedMatchCandidate<String> expectedExplainMappingWeight = ExplainedMatchCandidate.create(weightCandidate,
 				singletonList(ExplainedQueryString.create("weight", "weight", "Weight", 82.4f)), false);
 
@@ -123,8 +124,8 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		Hit<ExplainedMatchCandidate<String>> computeScoreForMatchedSource = ((ExplainMappingServiceImpl) explainMappingService)
 				.computeScoreForMatchedSource(queryExpansionSolution, target, source);
 
-		ExplainedQueryString explanation1 = ExplainedQueryString.create("high blood pressure", "high blood pressure",
-				"hypertension", 100.0f);
+		ExplainedQueryString explanation1 = ExplainedQueryString
+				.create("high blood pressure", "high blood pressure", "hypertension", 100.0f);
 
 		Hit<ExplainedMatchCandidate<String>> expected = Hit
 				.create(ExplainedMatchCandidate.create(source, Lists.newArrayList(explanation1), true), 100.0f);
@@ -149,8 +150,8 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		Hit<ExplainedMatchCandidate<String>> computeScoreForMatchedSource = ((ExplainMappingServiceImpl) explainMappingService)
 				.computeScoreForMatchedSource(queryExpansionSolution1, target, source);
 
-		ExplainedQueryString explanation1 = ExplainedQueryString.create("high blood pressure", "high blood pressure",
-				"hypertension", 77.6f);
+		ExplainedQueryString explanation1 = ExplainedQueryString
+				.create("high blood pressure", "high blood pressure", "hypertension", 77.6f);
 
 		ExplainedQueryString explanation2 = ExplainedQueryString.create("drugs", "drugs", "medication", 28.6f);
 

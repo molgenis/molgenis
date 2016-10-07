@@ -15,6 +15,8 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
 
 /**
+ * The assumption here is that the target data schema is always more general the the indidvual source datasets.
+ * Therefore we only expanq queries with child {@link OntologyTerm}s.
  * Expands {@link OntologyTerm}s mapping each of the matched terms to its children up to the DEFAULT_EXPANSION_LEVEL.
  */
 public class OntologyTermQueryExpansion
@@ -45,12 +47,12 @@ public class OntologyTermQueryExpansion
 
 		for (OntologyTerm sourceOntologyTerm : tagGroup.getOntologyTerms())
 		{
-			children.asMap().entrySet().stream()
-					.filter(entry -> entry.getValue().contains(sourceOntologyTerm))
+			children.asMap().entrySet().stream().filter(entry -> entry.getValue().contains(sourceOntologyTerm))
 					.forEach(entry -> matchedOntologyTerms.put(entry.getKey(), sourceOntologyTerm));
 		}
 
-		// If all the root ontology terms get matched, then the quality is high
+		// If for each of the root ontology terms, the term itself or one of its children get matched,
+		// then the quality is high
 		boolean highQuality = matchedOntologyTerms.size() == children.asMap().keySet().size();
 
 		return OntologyTermQueryExpansionSolution.create(matchedOntologyTerms, highQuality);

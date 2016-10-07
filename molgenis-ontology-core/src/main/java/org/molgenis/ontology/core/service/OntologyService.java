@@ -43,16 +43,16 @@ public interface OntologyService
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
 
 	/**
-	 * Finds all {@link OntologyTerm}s in the give ontologyTerm scope
+	 * Finds ontology terms within scope that match with at least one search term.
 	 *
-	 * @param ontologyIds IDs of ontologies to search in
-	 * @param terms       search terms
-	 * @param pageSize    number of results to return
-	 * @param ontologyTermDomains scope of {@link OntologyTerm}s to search in
-	 * @return List of {@link OntologyTerm}s
+	 * @param ontologyIds         IDs of ontologies that the scope {@link OntologyTerm}s can be found in
+	 * @param terms               search terms, stemmed or unstemmed
+	 * @param pageSize            number of results to return
+	 * @param ontologyTermDomains scope of {@link OntologyTerm}s to search in, these are the only valid results
+	 * @return ordered {@link List} of relevant {@link OntologyTerm}s
 	 */
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize,
-			List<OntologyTerm> ontologyTermDomains);
+			Set<OntologyTerm> ontologyTermDomains);
 
 	/**
 	 * Retrieve all ontology terms from the specified ontology
@@ -93,7 +93,7 @@ public interface OntologyService
 	 * parents should be retrieved.
 	 *
 	 * @param ontologyTerm the {@link OntologyTerm} whose parents are retrieved
-	 * @param maxLevel maximum level
+	 * @param maxLevel     maximum level
 	 * @return Iterable that iterates through the parent {@link OntologyTerm}s
 	 */
 	Iterable<OntologyTerm> getParents(OntologyTerm ontologyTerm, int maxLevel);
@@ -111,7 +111,7 @@ public interface OntologyService
 	 * children should be retrieved.
 	 *
 	 * @param ontologyTerm the parent {@link OntologyTerm}
-	 * @param maxLevel max level to expand
+	 * @param maxLevel     max level to expand
 	 * @return Iterable that iterates through the child {@link OntologyTerm}s
 	 */
 	Iterable<OntologyTerm> getChildren(OntologyTerm ontologyTerm, int maxLevel);
@@ -141,7 +141,7 @@ public interface OntologyService
 	 *
 	 * @param ontologyTerm1 first {@link OntologyTerm}
 	 * @param ontologyTerm2 second {@link OntologyTerm}
-	 * @param stopLevel level on which to stop
+	 * @param stopLevel     level on which to stop
 	 * @return boolean indicated if the ontology terms are related through a parent/child relationship
 	 */
 	boolean related(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2, int stopLevel);
@@ -160,7 +160,7 @@ public interface OntologyService
 	 *
 	 * @param ontologyTerm1 first {@link OntologyTerm}
 	 * @param ontologyTerm2 second {@link OntologyTerm}
-	 * @param maxDistance maximum distance
+	 * @param maxDistance   maximum distance
 	 * @return boolean indicating if the ontology terms are within maximum distance
 	 */
 	boolean areWithinDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2, int maxDistance);

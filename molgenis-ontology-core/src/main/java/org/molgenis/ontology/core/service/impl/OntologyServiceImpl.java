@@ -110,7 +110,7 @@ public class OntologyServiceImpl implements OntologyService
 
 	@Override
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize,
-			List<OntologyTerm> ontologyTermDomains)
+			Set<OntologyTerm> ontologyTermDomains)
 	{
 		if (null == terms || terms.isEmpty())
 		{
@@ -166,8 +166,7 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public Double getOntologyTermSemanticRelatedness(OntologyTerm ontologyTerm1,
-			OntologyTerm ontologyTerm2)
+	public Double getOntologyTermSemanticRelatedness(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
 	{
 		return ontologyTermRepository.getOntologyTermSemanticRelatedness(ontologyTerm1, ontologyTerm2);
 	}
@@ -179,8 +178,7 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public boolean areWithinDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2,
-			int maxDistance)
+	public boolean areWithinDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2, int maxDistance)
 	{
 		return ontologyTermRepository.areWithinDistance(ontologyTerm1, ontologyTerm2, maxDistance);
 	}
@@ -193,9 +191,8 @@ public class OntologyServiceImpl implements OntologyService
 			return false;
 		}
 
-		return ontologyTerm1.getNodePaths().stream().anyMatch(
-				targetNodePath -> ontologyTerm2.getNodePaths().stream()
-						.anyMatch(targetNodePath::contains));
+		return ontologyTerm1.getNodePaths().stream()
+				.anyMatch(targetNodePath -> ontologyTerm2.getNodePaths().stream().anyMatch(targetNodePath::contains));
 	}
 
 	@Override

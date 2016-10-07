@@ -157,7 +157,7 @@ public class OntologyTermRepository
 	}
 
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize,
-			List<OntologyTerm> ontologyTermScope)
+			Set<OntologyTerm> ontologyTermScope)
 	{
 		Fetch fetch = new Fetch();
 		ontologyTermMetaData.getAtomicAttributes().forEach(attribute -> fetch.field(attribute.getName()));
@@ -172,15 +172,14 @@ public class OntologyTermRepository
 		}
 		rules = Arrays.asList(new QueryRule(ONTOLOGY, IN, ontologyIds), new QueryRule(AND), new QueryRule(rules));
 
-		List<String> filteredOntologyTermIris = ontologyTermScope.stream().map(OntologyTerm::getIRI)
-				.collect(toList());
+		List<String> filteredOntologyTermIris = ontologyTermScope.stream().map(OntologyTerm::getIRI).collect(toList());
 
 		rules = Arrays.asList(new QueryRule(ONTOLOGY_TERM_IRI, IN, filteredOntologyTermIris), new QueryRule(AND),
 				new QueryRule(rules));
 
-		return dataService.findAll(ONTOLOGY_TERM,
-				new QueryImpl<OntologyTermEntity>(rules).pageSize(pageSize).fetch(fetch), OntologyTermEntity.class)
-				.map(OntologyTermRepository::toOntologyTerm).collect(toList());
+		return dataService
+				.findAll(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>(rules).pageSize(pageSize).fetch(fetch),
+						OntologyTermEntity.class).map(OntologyTermRepository::toOntologyTerm).collect(toList());
 	}
 
 	public List<OntologyTerm> getAllOntologyTerms(String ontologyId)
@@ -244,10 +243,8 @@ public class OntologyTermRepository
 	{
 		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return 0;
 
-		return ontologyTerm1.getNodePaths().stream().flatMap(
-				nodePath1 -> ontologyTerm2.getNodePaths().stream()
-						.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2)))
-				.min(naturalOrder()).orElse(0);
+		return ontologyTerm1.getNodePaths().stream().flatMap(nodePath1 -> ontologyTerm2.getNodePaths().stream()
+				.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2))).min(naturalOrder()).orElse(0);
 	}
 
 	/**
@@ -257,17 +254,14 @@ public class OntologyTermRepository
 	 * @param ontologyTerm2 the second ontology term
 	 * @return the distance between two ontology terms, 1 if they're equal, 0 if they're unrelated
 	 */
-	public double getOntologyTermSemanticRelatedness(OntologyTerm ontologyTerm1,
-			OntologyTerm ontologyTerm2)
+	public double getOntologyTermSemanticRelatedness(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
 	{
 		if (ontologyTerm1.getIRI().equals(ontologyTerm2.getIRI())) return 1;
 
 		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return 0;
 
-		return ontologyTerm1.getNodePaths().stream().flatMap(
-				nodePath1 -> ontologyTerm2.getNodePaths().stream()
-						.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2)))
-				.max(naturalOrder()).orElse(0.0);
+		return ontologyTerm1.getNodePaths().stream().flatMap(nodePath1 -> ontologyTerm2.getNodePaths().stream()
+				.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2))).max(naturalOrder()).orElse(0.0);
 	}
 
 	/**
@@ -352,7 +346,7 @@ public class OntologyTermRepository
 	/**
 	 * Get the {@link OntologyTerm} children at the specified level
 	 *
-	 * @param ontologyTerm 
+	 * @param ontologyTerm
 	 * @param maxLevel
 	 * @return
 	 */
@@ -367,7 +361,7 @@ public class OntologyTermRepository
 	 * Retrieve all {@link OntologyTerm} children that satisfy the children predicate containing the instruction to
 	 * stop retrieving children at the given max level
 	 *
-	 * @param ontologyTermIRI IRI of the {@link OntologyTerm}
+	 * @param ontologyTermIRI               IRI of the {@link OntologyTerm}
 	 * @param ontologyTermChildrenPredicate
 	 * @return
 	 */
@@ -502,16 +496,14 @@ public class OntologyTermRepository
 	 * @param maxDistance
 	 * @return
 	 */
-	public boolean areWithinDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2,
-			int maxDistance)
+	public boolean areWithinDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2, int maxDistance)
 	{
 		if (ontologyTerm1.getIRI().equals(ontologyTerm2.getIRI())) return true;
 
 		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return false;
 
-		return ontologyTerm1.getNodePaths().stream().anyMatch(
-				nodePath1 -> ontologyTerm2.getNodePaths().stream()
-						.anyMatch(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2) <= maxDistance));
+		return ontologyTerm1.getNodePaths().stream().anyMatch(nodePath1 -> ontologyTerm2.getNodePaths().stream()
+				.anyMatch(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2) <= maxDistance));
 	}
 
 	private String getParentNodePath(String currentNodePath)

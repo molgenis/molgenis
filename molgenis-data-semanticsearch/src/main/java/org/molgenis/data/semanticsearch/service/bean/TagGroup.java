@@ -18,12 +18,12 @@ public abstract class TagGroup implements Comparable<TagGroup>
 {
 	public static TagGroup create(OntologyTerm ontologyTerm, String matchedWords, float score)
 	{
-		return new AutoValue_TagGroup(singletonList(ontologyTerm), matchedWords, Math.round(score * 100000));
+		return new AutoValue_TagGroup(singletonList(ontologyTerm), matchedWords, score);
 	}
 
 	public static TagGroup create(List<OntologyTerm> ontologyTerms, String matchedWords, float score)
 	{
-		return new AutoValue_TagGroup(ontologyTerms, matchedWords, Math.round(score * 100000));
+		return new AutoValue_TagGroup(ontologyTerms, matchedWords, score);
 	}
 
 	/**
@@ -36,12 +36,7 @@ public abstract class TagGroup implements Comparable<TagGroup>
 	 */
 	public abstract String getMatchedWords();
 
-	public abstract int getScoreInt();
-
-	public float getScore()
-	{
-		return getScoreInt() / 100000.0f;
-	}
+	public abstract float getScore();
 
 	public CombinedOntologyTerm getCombinedOntologyTerm()
 	{
