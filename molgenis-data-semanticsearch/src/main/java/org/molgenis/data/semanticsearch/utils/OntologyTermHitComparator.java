@@ -1,16 +1,17 @@
 package org.molgenis.data.semanticsearch.utils;
 
-import org.molgenis.data.semanticsearch.service.bean.TagGroup;
+import org.molgenis.data.semanticsearch.explain.bean.OntologyTermHit;
 import org.molgenis.ontology.utils.Stemmer;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class TagGroupComparator implements Comparator<TagGroup>
+import static java.util.stream.Collectors.toList;
+
+public class OntologyTermHitComparator implements Comparator<OntologyTermHit>
 {
 	@Override
-	public int compare(TagGroup o2, TagGroup o1)
+	public int compare(OntologyTermHit o2, OntologyTermHit o1)
 	{
 		String synonym1 = o1.getMatchedWords();
 		String synonym2 = o2.getMatchedWords();
@@ -53,10 +54,8 @@ public class TagGroupComparator implements Comparator<TagGroup>
 				// the order of these two elements need to be re-sorted based on the synonym information content
 				if (!isOntologyTermNameMatched(o1) && !isOntologyTermNameMatched(o2))
 				{
-					List<String> synonyms1 = o1.getOntologyTerms().stream().flatMap(ot -> ot.getSynonyms().stream())
-							.distinct().collect(Collectors.toList());
-					List<String> synonyms2 = o2.getOntologyTerms().stream().flatMap(ot -> ot.getSynonyms().stream())
-							.distinct().collect(Collectors.toList());
+					List<String> synonyms1 = o1.getOntologyTerm().getSynonyms().stream().collect(toList());
+					List<String> synonyms2 = o2.getOntologyTerm().getSynonyms().stream().collect(toList());
 
 					int informationContent1 = calculateInformationContent(synonym1, synonyms1);
 					int informationContent2 = calculateInformationContent(synonym2, synonyms2);
@@ -81,14 +80,13 @@ public class TagGroupComparator implements Comparator<TagGroup>
 				.equalsIgnoreCase(Stemmer.cleanStemPhrase(synonym2));
 	}
 
-	boolean isOntologyTermNameMatched(TagGroup hit)
+	boolean isOntologyTermNameMatched(OntologyTermHit hit)
 	{
-		return hit.getCombinedOntologyTerm().getLabel().equalsIgnoreCase(hit.getMatchedWords());
+		return hit.getOntologyTerm().getLabel().equalsIgnoreCase(hit.getMatchedWords());
 	}
 
-	boolean isSemanticTypesEmpty(TagGroup hit)
+	boolean isSemanticTypesEmpty(OntologyTermHit hit)
 	{
-		return hit.getOntologyTerms().stream().flatMap(ot -> ot.getSemanticTypes().stream()).distinct()
-				.collect(Collectors.toList()).isEmpty();
+		return hit.getOntologyTerm().getSemanticTypes().isEmpty();
 	}
 }

@@ -1,10 +1,7 @@
 package org.molgenis.data.semanticsearch.explain.service.impl;
 
 import com.google.common.base.Joiner;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.semanticsearch.explain.bean.OntologyTermQueryExpansion;
-import org.molgenis.data.semanticsearch.explain.bean.OntologyTermQueryExpansionSolution;
+import org.molgenis.data.semanticsearch.explain.bean.*;
 import org.molgenis.data.semanticsearch.explain.criteria.MatchingCriterion;
 import org.molgenis.data.semanticsearch.explain.criteria.impl.StrictMatchingCriterion;
 import org.molgenis.data.semanticsearch.explain.service.ExplainMappingService;
@@ -82,7 +79,7 @@ public class ExplainMappingServiceImpl implements ExplainMappingService
 		// Now filter out the OntologyTerms that strictly match the source words and create a single tag group for each
 		// of the terms
 		//TODO change it to a List<Hit<OntologyTerm>> but with matched words!
-		List<TagGroup> tagGroups = tagGroupGenerator
+		List<OntologyTermHit> tagGroups = tagGroupGenerator
 				.applyTagMatchingCriterion(relevantOntologyTerms, matchedSourceWords, STRICT_MATCHING_CRITERION);
 
 		// create a list of combinations of the ontology terms we found, all with the same, highest, score

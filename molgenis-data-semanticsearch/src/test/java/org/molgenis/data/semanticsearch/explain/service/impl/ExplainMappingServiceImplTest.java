@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.bean.OntologyTermHit;
 import org.molgenis.data.semanticsearch.explain.bean.OntologyTermQueryExpansionSolution;
 import org.molgenis.data.semanticsearch.explain.service.ExplainMappingService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -59,10 +60,13 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		OntologyTerm heightOntologyTerm = OntologyTerm.create("1", "iri1", "Height", asList("Height", "Body Length"));
 		OntologyTerm weightOntologyTerm = OntologyTerm.create("2", "iri2", "Weight", singletonList("Weight"));
 
+		OntologyTermHit heightOntologyTermHit = OntologyTermHit.create(heightOntologyTerm, "Height", 0.8f);
+		OntologyTermHit weightOntologyTermHit = OntologyTermHit.create(weightOntologyTerm, "Weight", 0.8f);
+
+		TagGroup heightTagGroup = TagGroup.create(heightOntologyTerm, "Height", 0.8f);
+		TagGroup weightTagGroup = TagGroup.create(weightOntologyTerm, "Weight", 0.8f);
 		TagGroup targetTagGroup = TagGroup
 				.create(asList(heightOntologyTerm, weightOntologyTerm), "Height Weight", 1.0f);
-		TagGroup heightTagGroup = TagGroup.create(singletonList(heightOntologyTerm), "Height", 0.8f);
-		TagGroup weightTagGroup = TagGroup.create(singletonList(weightOntologyTerm), "Weight", 0.8f);
 
 		SearchParam searchParam = SearchParam.create(singleton("Body Mass Index"), singletonList(targetTagGroup));
 
@@ -83,13 +87,13 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 				newHashSet(heightOntologyTerm, weightOntologyTerm))).thenReturn(singletonList(weightOntologyTerm));
 
 		when(tagGroupGenerator.applyTagMatchingCriterion(singletonList(heightOntologyTerm), heightCandidateWords,
-				STRICT_MATCHING_CRITERION)).thenReturn(singletonList(heightTagGroup));
+				STRICT_MATCHING_CRITERION)).thenReturn(singletonList(heightOntologyTermHit));
 		when(tagGroupGenerator.applyTagMatchingCriterion(singletonList(weightOntologyTerm), weightCandidateWords,
-				STRICT_MATCHING_CRITERION)).thenReturn(singletonList(weightTagGroup));
+				STRICT_MATCHING_CRITERION)).thenReturn(singletonList(weightOntologyTermHit));
 
-		when(tagGroupGenerator.combineTagGroups(heightCandidateWords, singletonList(heightTagGroup)))
+		when(tagGroupGenerator.combineTagGroups(heightCandidateWords, singletonList(heightOntologyTermHit)))
 				.thenReturn(singletonList(heightTagGroup));
-		when(tagGroupGenerator.combineTagGroups(weightCandidateWords, singletonList(weightTagGroup)))
+		when(tagGroupGenerator.combineTagGroups(weightCandidateWords, singletonList(weightOntologyTermHit)))
 				.thenReturn(singletonList(weightTagGroup));
 
 		// Test one

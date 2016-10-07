@@ -7,12 +7,13 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
+import org.molgenis.data.semanticsearch.explain.bean.OntologyTermHit;
 import org.molgenis.data.semanticsearch.explain.criteria.MatchingCriterion;
 import org.molgenis.data.semanticsearch.explain.criteria.impl.StrictMatchingCriterion;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
-import org.molgenis.data.semanticsearch.utils.TagGroupComparator;
+import org.molgenis.data.semanticsearch.utils.OntologyTermHitComparator;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.model.SemanticType;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -79,9 +80,9 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 		List<OntologyTerm> relevantOntologyTerms = ontologyService
 				.findOntologyTerms(ontologyIds, queryWords, MAX_NUM_TAGS);
 
-		List<TagGroup> candidateTagGroups = applyTagMatchingCriterion(relevantOntologyTerms, queryWords,
-				STRICT_MATCHING_CRITERION).stream().filter(tagGroup -> tagGroupKeyConcept(globalKeyConcepts, tagGroup))
-				.collect(toList());
+		List<OntologyTermHit> candidateTagGroups = applyTagMatchingCriterion(relevantOntologyTerms, queryWords,
+				STRICT_MATCHING_CRITERION).stream()
+				.filter(ontologyTermHit -> containsKeyConcepts(globalKeyConcepts, ontologyTermHit)).collect(toList());
 
 		if (LOG.isDebugEnabled())
 		{
@@ -102,17 +103,17 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 	 * Finds the best combinations of @{link OntologyTerm}s based on the given search terms
 	 *
 	 * @param queryWords
-	 * @param relevantOntologyTerms
+	 * @param ontologyTermHits
 	 * @return
 	 */
 	@Override
-	public List<TagGroup> combineTagGroups(Set<String> queryWords, List<TagGroup> relevantTagGroups)
+	public List<TagGroup> combineTagGroups(Set<String> queryWords, List<OntologyTermHit> ontologyTermHits)
 	{
-		relevantTagGroups.sort(new TagGroupComparator());
+		ontologyTermHits.sort(new OntologyTermHitComparator());
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Hits: {}", relevantTagGroups);
+			LOG.debug("Hits: {}", ontologyTermHits);
 		}
 
 		List<TagGroup> combinedTagGroups = new ArrayList<>();
@@ -121,14 +122,14 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 		// 2. Loop through the list of candidates and collect all the possible candidates (all best combinations of
 		// ontology terms)
 		// 3. Compute a list of possible ontology terms.
-		for (TagGroup targetGroup : Lists.newArrayList(relevantTagGroups))
+		for (OntologyTermHit ontologyTermHit : Lists.newArrayList(ontologyTermHits))
 		{
-			Multimap<String, TagGroup> ontologyTermGroups = LinkedHashMultimap.create();
-			ontologyTermGroups.put(targetGroup.getMatchedWords(), targetGroup);
+			Multimap<String, OntologyTermHit> ontologyTermGroups = LinkedHashMultimap.create();
+			ontologyTermGroups.put(ontologyTermHit.getMatchedWords(), ontologyTermHit);
 
-			for (TagGroup tagGroup : relevantTagGroups)
+			for (OntologyTermHit tagGroup : ontologyTermHits)
 			{
-				if (targetGroup.equals(tagGroup)) continue;
+				if (ontologyTermHit.equals(tagGroup)) continue;
 
 				if (ontologyTermGroups.containsKey(tagGroup.getMatchedWords()))
 				{
@@ -159,7 +160,7 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 
 			combinedTagGroups.addAll(newTagGroups);
 
-			relevantTagGroups.removeAll(ontologyTermGroups.values());
+			ontologyTermHits.removeAll(ontologyTermGroups.values());
 		}
 
 		if (combinedTagGroups.size() > 0)
@@ -180,29 +181,27 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 	}
 
 	@Override
-	public List<TagGroup> applyTagMatchingCriterion(List<OntologyTerm> relevantOntologyTerms,
+	public List<OntologyTermHit> applyTagMatchingCriterion(List<OntologyTerm> relevantOntologyTerms,
 			Set<String> queryWords, MatchingCriterion matchingCriterion)
 	{
 		if (relevantOntologyTerms.size() > 0)
 		{
 			Set<String> stemmedSearchTerms = queryWords.stream().map(Stemmer::stem).collect(toSet());
 
-			List<TagGroup> orderedIndividualOntologyTermHits = relevantOntologyTerms.stream()
+			List<OntologyTermHit> orderedIndividualOntologyTermHits = relevantOntologyTerms.stream()
 					.filter(ontologyTerm -> matchingCriterion.apply(stemmedSearchTerms, ontologyTerm))
 					.map(ontologyTerm -> createTagGroup(stemmedSearchTerms, ontologyTerm))
-					.sorted(new TagGroupComparator()).collect(toList());
+					.sorted(new OntologyTermHitComparator()).collect(toList());
 
 			// Remove the low ranking ontologyterms that are the parents of the high ranking ontologyterms
-			List<TagGroup> copyOfOntologyTermHits = Lists.newArrayList(orderedIndividualOntologyTermHits);
+			List<OntologyTermHit> copyOfOntologyTermHits = Lists.newArrayList(orderedIndividualOntologyTermHits);
 			for (int i = orderedIndividualOntologyTermHits.size() - 1; i > 1; i--)
 			{
-				OntologyTerm lowRankingOntologyTerm = orderedIndividualOntologyTermHits.get(i).getOntologyTerms()
-						.get(0);
+				OntologyTerm lowRankingOntologyTerm = orderedIndividualOntologyTermHits.get(i).getOntologyTerm();
 
 				for (int j = i - 1; j > 0; j--)
 				{
-					OntologyTerm highRankingOntologyTerm = orderedIndividualOntologyTermHits.get(j)
-							.getOntologyTerms().get(0);
+					OntologyTerm highRankingOntologyTerm = orderedIndividualOntologyTermHits.get(j).getOntologyTerm();
 
 					if (ontologyService.isDescendant(highRankingOntologyTerm, lowRankingOntologyTerm))
 					{
@@ -216,21 +215,21 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 		return emptyList();
 	}
 
-	private TagGroup createTagGroup(Set<String> stemmedSearchTerms, OntologyTerm ontologyTerm)
+	private OntologyTermHit createTagGroup(Set<String> stemmedSearchTerms, OntologyTerm ontologyTerm)
 	{
 		Hit<String> bestMatchingSynonym = bestMatchingSynonym(ontologyTerm, stemmedSearchTerms);
-		return TagGroup
+		return OntologyTermHit
 				.create(ontologyTerm, cleanStemPhrase(bestMatchingSynonym.getResult()), bestMatchingSynonym.getScore());
 	}
 
-	List<List<OntologyTerm>> createTagGroups(Multimap<String, TagGroup> candidates)
+	List<List<OntologyTerm>> createTagGroups(Multimap<String, OntologyTermHit> candidates)
 	{
 		List<List<OntologyTerm>> ontologyTermGroups = new ArrayList<>();
 
-		for (Collection<TagGroup> values : candidates.asMap().values())
+		for (Collection<OntologyTermHit> values : candidates.asMap().values())
 		{
-			List<OntologyTerm> atomicOntologyTermGroup = values.stream()
-					.flatMap(tagGroup -> tagGroup.getOntologyTerms().stream()).collect(toList());
+			List<OntologyTerm> atomicOntologyTermGroup = values.stream().map(OntologyTermHit::getOntologyTerm)
+					.collect(toList());
 
 			if (ontologyTermGroups.isEmpty())
 			{
@@ -297,10 +296,9 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 		return Math.round(score * 100000) / 100000.0f;
 	}
 
-	private boolean tagGroupKeyConcept(List<SemanticType> keyConcepts, TagGroup tagGroup)
+	private boolean containsKeyConcepts(List<SemanticType> keyConcepts, OntologyTermHit ontologyTermHit)
 	{
 		if (keyConcepts.isEmpty()) return true;
-		return tagGroup.getOntologyTerms().stream().flatMap(ot -> ot.getSemanticTypes().stream())
-				.allMatch(keyConcepts::contains);
+		return ontologyTermHit.getOntologyTerm().getSemanticTypes().stream().allMatch(keyConcepts::contains);
 	}
 }

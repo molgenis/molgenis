@@ -5,13 +5,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.elasticsearch.common.base.Joiner;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.semanticsearch.service.QueryExpansionService;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
@@ -42,9 +40,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
-import static org.molgenis.data.QueryRule.Operator.SHOULD;
+import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.getLowerCaseTerms;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitRemoveStopWords;
 import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
@@ -65,8 +61,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	private Joiner termJoiner = Joiner.on(' ');
 
 	private LoadingCache<OntologyTerm, List<String>> cachedOntologyTermQuery = CacheBuilder.newBuilder()
-			.maximumSize(1000).expireAfterWrite(1, TimeUnit.HOURS)
-			.build(new CacheLoader<OntologyTerm, List<String>>()
+			.maximumSize(1000).expireAfterWrite(1, TimeUnit.HOURS).build(new CacheLoader<OntologyTerm, List<String>>()
 			{
 				public List<String> load(OntologyTerm ontologyTerm)
 				{
@@ -84,8 +79,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	/**
 	 * Create a disMaxJunc query rule based on the given search terms as well as the tag groups
 	 *
-	 * @param tagGroups
-	 * @param lexicalQueries
+	 * @param searchParam
 	 * @return disMaxJunc queryRule
 	 */
 	public QueryRule expand(SearchParam searchParam)
@@ -192,7 +186,6 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	 * Gets the cached list of queries from the {@link LoadingCache}
 	 *
 	 * @param ontologyTerm
-	 * @param queryExpansionParam
 	 * @return a list of cached queries
 	 */
 	List<String> getCachedQueriesForOntologyTerm(OntologyTerm ontologyTerm)
@@ -255,8 +248,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 				.collect(toMap(Entry::getKey, e -> new Float(e.getValue() / maxIdfValue)));
 	}
 
-	private Multimap<OntologyTerm, OntologyTerm> groupAtomicOntologyTermsBySynonym(
-			List<TagGroup> ontologyTermHits)
+	private Multimap<OntologyTerm, OntologyTerm> groupAtomicOntologyTermsBySynonym(List<TagGroup> ontologyTermHits)
 	{
 		Multimap<OntologyTerm, OntologyTerm> multiMap = LinkedHashMultimap.create();
 		ontologyTermHits.get(0).getOntologyTerms().forEach(ot -> multiMap.put(ot, ot));
