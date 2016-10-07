@@ -21,7 +21,7 @@ import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
@@ -106,7 +106,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + userAccountControllerId.toUpperCase());
 
 		// allow all users to read meta data entities
-		List<String> entityNames = asList(ENTITY_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, I18N_STRING);
+		List<String> entityNames = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, I18N_STRING);
 		Stream<GroupAuthority> entityGroupAuthorities = entityNames.stream().map(entityName ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();

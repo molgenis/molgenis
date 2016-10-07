@@ -91,15 +91,15 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).fetch(getEntityTypeFetch())
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).fetch(getEntityTypeFetch())
 				.findAll().map(EntityType::getName)::iterator;
 	}
 
 	@Override
 	public Repository<Entity> getRepository(String name)
 	{
-		EntityType entityType = dataService.query(ENTITY_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).and()
-				.eq(FULL_NAME, name).and().eq(ABSTRACT, false).fetch(getEntityTypeFetch()).findOne();
+		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).and()
+				.eq(FULL_NAME, name).and().eq(IS_ABSTRACT, false).fetch(getEntityTypeFetch()).findOne();
 		return getRepository(entityType);
 	}
 
@@ -114,7 +114,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).and().eq(ABSTRACT, false)
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).and().eq(IS_ABSTRACT, false)
 				.fetch(getEntityTypeFetch()).findAll().map(this::getRepository).iterator();
 	}
 
@@ -189,7 +189,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		if (entityType.isAbstract())
 		{
 			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
+			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
 					.forEach(childEntityType -> addAttributeRec(childEntityType, attr, checkAttrExists));
 		}
 		else
@@ -224,7 +224,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		if (entityType.isAbstract())
 		{
 			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
+			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
 					.forEach(childEntityType -> updateAttributeRec(childEntityType, attr, updatedAttr));
 		}
 		else
@@ -439,7 +439,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		if (entityType.isAbstract())
 		{
 			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
+			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
 					.forEach(childEntityType -> deleteAttributeRec(childEntityType, attr));
 		}
 		else

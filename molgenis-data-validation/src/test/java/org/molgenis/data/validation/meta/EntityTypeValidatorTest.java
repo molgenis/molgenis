@@ -21,7 +21,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 public class EntityTypeValidatorTest
 {
@@ -60,7 +60,7 @@ public class EntityTypeValidatorTest
 
 		//noinspection unchecked
 		entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.ListIterator;
 
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 @Component
@@ -61,7 +61,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			});
 
 			// Search in entities
-			dataService.findAll(ENTITY_META_DATA, q).forEach(EntityType ->
+			dataService.findAll(ENTITY_TYPE_META_DATA, q).forEach(EntityType ->
 			{
 				Package p = getRootPackage(EntityType);
 				if (p != null)

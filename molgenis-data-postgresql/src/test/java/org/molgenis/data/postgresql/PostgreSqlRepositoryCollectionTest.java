@@ -19,7 +19,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.testng.Assert.assertEquals;
@@ -371,7 +371,7 @@ public class PostgreSqlRepositoryCollectionTest
 
 		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
@@ -546,7 +546,7 @@ public class PostgreSqlRepositoryCollectionTest
 
 		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
@@ -711,7 +711,7 @@ public class PostgreSqlRepositoryCollectionTest
 
 		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked

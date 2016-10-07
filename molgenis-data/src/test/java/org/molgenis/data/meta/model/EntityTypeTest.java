@@ -272,7 +272,7 @@ public class EntityTypeTest
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ID_ATTRIBUTE)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.LABEL_ATTRIBUTE)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.LOOKUP_ATTRIBUTES)).thenReturn(mrefAttr);
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ABSTRACT)).thenReturn(boolAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.IS_ABSTRACT)).thenReturn(boolAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.EXTENDS)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);

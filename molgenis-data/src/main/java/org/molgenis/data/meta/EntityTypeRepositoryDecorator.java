@@ -373,10 +373,10 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 			{
 				repoCollection.addAttribute(existingEntityType, addedAttrEntity);
 
-				if (entityType.getName().equals(ENTITY_META_DATA))
+				if (entityType.getName().equals(ENTITY_TYPE_META_DATA))
 				{
 					// update system entity meta data
-					systemEntityTypeRegistry.getSystemEntityType(ENTITY_META_DATA).addAttribute(addedAttrEntity);
+					systemEntityTypeRegistry.getSystemEntityType(ENTITY_TYPE_META_DATA).addAttribute(addedAttrEntity);
 				}
 			});
 		}
@@ -395,10 +395,10 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 			{
 				repoCollection.deleteAttribute(existingEntityType, currentAttrMap.get(deletedAttrName));
 
-				if (entityType.getName().equals(ENTITY_META_DATA))
+				if (entityType.getName().equals(ENTITY_TYPE_META_DATA))
 				{
 					// update system entity meta data
-					systemEntityTypeRegistry.getSystemEntityType(ENTITY_META_DATA)
+					systemEntityTypeRegistry.getSystemEntityType(ENTITY_TYPE_META_DATA)
 							.removeAttribute(currentAttrMap.get(deletedAttrName));
 				}
 			});

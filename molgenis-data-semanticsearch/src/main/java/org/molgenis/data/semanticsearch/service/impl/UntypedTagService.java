@@ -26,7 +26,7 @@ import java.util.Optional;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
@@ -47,7 +47,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findAttributeEntity(EntityType entityType, String attributeName)
 	{
-		Entity entityTypeEntity = dataService.findOneById(ENTITY_META_DATA, entityType.getName());
+		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getName());
 		Optional<Entity> result = stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
@@ -55,7 +55,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findEntity(EntityType emd)
 	{
-		return dataService.findOneById(ENTITY_META_DATA, emd.getName());
+		return dataService.findOneById(ENTITY_TYPE_META_DATA, emd.getName());
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		builder.addAll(entity.getEntities(EntityTypeMetadata.TAGS));
 		builder.add(getTagEntity(tag));
 		entity.set(EntityTypeMetadata.TAGS, builder.build());
-		dataService.update(ENTITY_META_DATA, entity);
+		dataService.update(ENTITY_TYPE_META_DATA, entity);
 	}
 
 	public Entity getTagEntity(SemanticTag<?, LabeledResource, LabeledResource> tag)

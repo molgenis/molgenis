@@ -55,7 +55,7 @@ import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -234,15 +234,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testLanguageService()
 	{
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getAttribute("label-en").getName(),
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getAttribute("label-en").getName(),
 				"label-en");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("en").getName(),
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("en").getName(),
 				"simpleName");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("pt").getName(),
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("pt").getName(),
 				"simpleName");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("nl").getName(),
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("nl").getName(),
 				"simpleName");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute().getName(), "simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(), "simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
@@ -250,15 +250,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		// NL
 		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("nl"));
-		assertNotNull(dataService.getEntityType(ENTITY_META_DATA).getAttribute("label-nl"));
-		assertNotNull(dataService.getEntityType(ENTITY_META_DATA).getAttribute("description-nl"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("label-nl"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("description-nl"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("label-nl"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("description-nl"));
 
 		// EN
 		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("en"));
-		assertNotNull(dataService.getEntityType(ENTITY_META_DATA).getAttribute("label-en"));
-		assertNotNull(dataService.getEntityType(ENTITY_META_DATA).getAttribute("description-en"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("label-en"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("description-en"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("label-en"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("description-en"));
 

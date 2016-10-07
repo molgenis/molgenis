@@ -19,7 +19,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 public class DependencyResolver
@@ -105,12 +105,12 @@ public class DependencyResolver
 			{
 				// accept the cyclic dependency between entity meta <--> attribute meta which is dealt with during
 				// bootstrapping, see SystemEntityTypePersister.
-				if (dependenciesByName.containsKey(ENTITY_META_DATA) && dependenciesByName
+				if (dependenciesByName.containsKey(ENTITY_TYPE_META_DATA) && dependenciesByName
 						.containsKey(ATTRIBUTE_META_DATA))
 				{
-					ready.add(ENTITY_META_DATA);
+					ready.add(ENTITY_TYPE_META_DATA);
 					ready.add(ATTRIBUTE_META_DATA);
-					resolved.add(metaDataByName.get(ENTITY_META_DATA));
+					resolved.add(metaDataByName.get(ENTITY_TYPE_META_DATA));
 					resolved.add(metaDataByName.get(ATTRIBUTE_META_DATA));
 				}
 				else

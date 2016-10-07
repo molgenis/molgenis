@@ -24,7 +24,7 @@ import static org.molgenis.data.meta.MetaValidationUtils.validateName;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
@@ -233,7 +233,7 @@ public class EntityTypeValidator
 	{
 		// validate entity name (e.g. illegal characters, length)
 		String name = entityType.getName();
-		if (!name.equals(ATTRIBUTE_META_DATA) && !name.equals(ENTITY_META_DATA) && !name.equals(PACKAGE))
+		if (!name.equals(ATTRIBUTE_META_DATA) && !name.equals(ENTITY_TYPE_META_DATA) && !name.equals(PACKAGE))
 		{
 			try
 			{
@@ -275,7 +275,7 @@ public class EntityTypeValidator
 	 */
 	private EntityType getAttributeOwner(Attribute attr)
 	{
-		EntityType entityType = dataService.query(ENTITY_META_DATA, EntityType.class).eq(ATTRIBUTES, attr).findOne();
+		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(ATTRIBUTES, attr).findOne();
 		if (entityType == null)
 		{
 			Attribute parentAttr = dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(PARTS, attr).findOne();

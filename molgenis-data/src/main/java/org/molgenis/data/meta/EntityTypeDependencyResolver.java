@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 /**
  * Sort {@link EntityType} collection based on their dependencies.
@@ -114,7 +114,7 @@ public class EntityTypeDependencyResolver
 							// TODO remove workaround after http://www.molgenis.org/ticket/4479 is finished
 							// workaround for the cyclic dependency between entity meta <--> attribute meta
 							if (entityType.getName().equals(ATTRIBUTE_META_DATA) && refEntity.getName()
-									.equals(ENTITY_META_DATA))
+									.equals(ENTITY_TYPE_META_DATA))
 							{
 								return Stream.empty();
 							}

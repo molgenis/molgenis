@@ -25,7 +25,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.testng.Assert.assertEquals;
@@ -85,11 +85,11 @@ public class SystemEntityTypePersisterTest
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
 		when(systemEntityTypeRegistry.hasSystemEntityType("refEntity")).thenReturn(true);
 
-		when(dataService.findAll(ENTITY_META_DATA, EntityType.class))
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
 				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
 		systemEntityTypePersister.removeNonExistingSystemEntities();
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(ENTITY_META_DATA), captor.capture());
+		verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), Arrays.asList(removedMeta, refRemovedMeta));
 	}
 
@@ -99,7 +99,7 @@ public class SystemEntityTypePersisterTest
 		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
-		when(dataService.findAll(ENTITY_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
@@ -129,7 +129,7 @@ public class SystemEntityTypePersisterTest
 		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
-		when(dataService.findAll(ENTITY_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);

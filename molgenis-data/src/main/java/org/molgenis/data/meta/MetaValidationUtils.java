@@ -11,7 +11,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
@@ -120,7 +120,7 @@ public class MetaValidationUtils
 	{
 		try
 		{
-			if (!entityType.getName().equals(ATTRIBUTE_META_DATA) && !entityType.getName().equals(ENTITY_META_DATA)
+			if (!entityType.getName().equals(ATTRIBUTE_META_DATA) && !entityType.getName().equals(ENTITY_TYPE_META_DATA)
 					&& !entityType.getName().equals(PACKAGE))
 			{
 				validateName(entityType.getSimpleName());

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 public class SemanticSearchServiceHelper
 {
@@ -226,7 +226,7 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
-		Entity EntityTypeEntity = dataService.findOne(ENTITY_META_DATA,
+		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
 				new QueryImpl<Entity>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityType.getName()));
 
 		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(

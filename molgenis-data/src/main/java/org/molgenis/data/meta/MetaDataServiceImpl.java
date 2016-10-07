@@ -107,8 +107,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return dataService.query(ENTITY_META_DATA, EntityType.class).eq(FULL_NAME, entityName).and()
-					.eq(ABSTRACT, false).findOne() != null;
+			return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(FULL_NAME, entityName).and()
+					.eq(IS_ABSTRACT, false).findOne() != null;
 		}
 	}
 
@@ -152,7 +152,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityType(String entityName)
 	{
-		dataService.deleteById(ENTITY_META_DATA, entityName);
+		dataService.deleteById(ENTITY_TYPE_META_DATA, entityName);
 
 		LOG.info("Removed entity [{}]", entityName);
 	}
@@ -173,11 +173,11 @@ public class MetaDataServiceImpl implements MetaDataService
 				.map(EntityTypeWithoutMappedByAttributes::new).collect(toList());
 		if (!mappedByEntityTypes.isEmpty())
 		{
-			dataService.update(ENTITY_META_DATA, mappedByEntityTypes.stream());
+			dataService.update(ENTITY_TYPE_META_DATA, mappedByEntityTypes.stream());
 		}
 
 		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_META_DATA, resolvedEntityTypes.stream().map(EntityType::getName));
+		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getName));
 
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getName).collect(joining(",")));
 	}
@@ -208,7 +208,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.add(ATTRIBUTE_META_DATA, attrs);
 
 		// create entity
-		dataService.add(ENTITY_META_DATA, entityType);
+		dataService.add(ENTITY_TYPE_META_DATA, entityType);
 	}
 
 	@Transactional
@@ -247,7 +247,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void updateEntityType(EntityType entityType)
 	{
-		EntityType existingEntityType = dataService.query(ENTITY_META_DATA, EntityType.class)
+		EntityType existingEntityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
 				.eq(FULL_NAME, entityType.getName()).fetch(getEntityTypeFetch()).findOne();
 		if (existingEntityType == null)
 		{
@@ -261,7 +261,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void upsertEntityType(EntityType entityType)
 	{
-		EntityType existingEntityType = dataService.query(ENTITY_META_DATA, EntityType.class)
+		EntityType existingEntityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
 				.eq(FULL_NAME, entityType.getName()).fetch(getEntityTypeFetch()).findOne();
 		if (existingEntityType != null)
 		{
@@ -285,7 +285,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_META_DATA, entityTypes.stream().map(EntityType::getName), EntityType.class)
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), EntityType.class)
 				.collect(toMap(EntityType::getName, Function.identity()));
 
 		// 1st pass: create entities and attributes except for mappedBy attributes
@@ -344,7 +344,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_META_DATA, entityTypes.stream().map(EntityType::getName), EntityType.class)
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), EntityType.class)
 				.collect(toMap(EntityType::getName, Function.identity()));
 
 		// 1st pass: create entities and attributes except for mappedBy attributes
@@ -403,7 +403,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (!EntityUtils.equals(entityType, existingEntityType))
 		{
 			// note: leave it up to the data service to decided what to do with attributes removed from entity meta data
-			dataService.update(ENTITY_META_DATA, entityType);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
 		}
 	}
 
@@ -441,7 +441,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		else
 		{
 			return dataService
-					.findOneById(ENTITY_META_DATA, fullyQualifiedEntityName, getEntityTypeFetch(), EntityType.class);
+					.findOneById(ENTITY_TYPE_META_DATA, fullyQualifiedEntityName, getEntityTypeFetch(), EntityType.class);
 		}
 	}
 
@@ -493,7 +493,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public Stream<EntityType> getEntityTypes()
 	{
 		List<EntityType> entityTypeList = newArrayList();
-		dataService.getRepository(ENTITY_META_DATA, EntityType.class)
+		dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
 				.forEachBatched(getEntityTypeFetch(), entityTypeList::addAll, 1000);
 		return entityTypeList.stream();
 	}
@@ -501,7 +501,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Stream<Repository<Entity>> getRepositories()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityType.class).eq(ABSTRACT, false).fetch(getEntityTypeFetch())
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(IS_ABSTRACT, false).fetch(getEntityTypeFetch())
 				.findAll().map(this::getRepository);
 	}
 
@@ -592,7 +592,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		switch (entityType.getName())
 		{
-			case ENTITY_META_DATA:
+			case ENTITY_TYPE_META_DATA:
 			case ATTRIBUTE_META_DATA:
 			case TAG:
 			case PACKAGE:

@@ -14,8 +14,8 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class EntityTypeMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME_ = "entities";
-	public static final String ENTITY_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
+	private static final String SIMPLE_NAME_ = "EntityType";
+	public static final String ENTITY_TYPE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
 	public static final String FULL_NAME = "fullName";
 	public static final String SIMPLE_NAME = "simpleName";
@@ -26,7 +26,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String ID_ATTRIBUTE = "idAttribute";
 	public static final String LABEL_ATTRIBUTE = "labelAttribute";
 	public static final String LOOKUP_ATTRIBUTES = "lookupAttributes";
-	public static final String ABSTRACT = "abstract";
+	public static final String IS_ABSTRACT = "isAbstract";
 	public static final String EXTENDS = "extends";
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
@@ -56,7 +56,7 @@ public class EntityTypeMetadata extends SystemEntityType
 				.setLabel("ID attribute");
 		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setLabel("Lookup attributes");
-		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
+		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
 				.setReadOnly(true)
 				.setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3

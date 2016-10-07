@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.elasticsearch.common.collect.ImmutableSet.of;
 import static org.molgenis.data.mapper.controller.TagWizardController.URI;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 @Controller
 @RequestMapping(URI)
@@ -81,7 +81,7 @@ public class TagWizardController extends MolgenisPluginController
 	@RequestMapping
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
-		List<String> entityNames = dataService.findAll(ENTITY_META_DATA)
+		List<String> entityNames = dataService.findAll(ENTITY_TYPE_META_DATA)
 				.map(e -> e.getString(EntityTypeMetadata.FULL_NAME)).collect(toList());
 
 		if (StringUtils.isEmpty(target))

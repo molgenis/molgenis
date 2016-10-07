@@ -456,13 +456,13 @@ public class EntityType extends StaticEntity
 	 */
 	public boolean isAbstract()
 	{
-		Boolean abstract_ = getBoolean(ABSTRACT);
+		Boolean abstract_ = getBoolean(IS_ABSTRACT);
 		return abstract_ != null ? abstract_ : false;
 	}
 
 	public EntityType setAbstract(boolean abstract_)
 	{
-		set(ABSTRACT, abstract_);
+		set(IS_ABSTRACT, abstract_);
 		return this;
 	}
 

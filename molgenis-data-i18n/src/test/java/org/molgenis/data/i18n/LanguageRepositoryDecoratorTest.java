@@ -31,7 +31,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { LanguageRepositoryDecoratorTest.Config.class })
@@ -73,7 +73,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		MockitoAnnotations.initMocks(this);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		when(dataService.getEntityType(ENTITY_META_DATA)).thenReturn(entityTypeMeta);
+		when(dataService.getEntityType(ENTITY_TYPE_META_DATA)).thenReturn(entityTypeMeta);
 		when(dataService.getEntityType(ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
 		when(dataService.getEntityType(I18N_STRING)).thenReturn(i18nStringMetaData);
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, languageService);

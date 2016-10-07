@@ -13,7 +13,7 @@ import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
 public class EntityTypeDependencyResolverTest
@@ -87,7 +87,7 @@ public class EntityTypeDependencyResolverTest
 	@Test
 	public void resolveDependenciesEntityAttributeWorkaround()
 	{
-		EntityType entitiesMeta = when(mock(EntityType.class).getName()).thenReturn(ENTITY_META_DATA).getMock();
+		EntityType entitiesMeta = when(mock(EntityType.class).getName()).thenReturn(ENTITY_TYPE_META_DATA).getMock();
 		EntityType attrsMeta = when(mock(EntityType.class).getName()).thenReturn(ATTRIBUTE_META_DATA).getMock();
 
 		Attribute entitiesAttr = when(mock(Attribute.class).getName()).thenReturn("attrs").getMock();

@@ -33,7 +33,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -165,7 +165,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		EntityType sourceEntityType = entityTypeFactory.create().setName("sourceEntityType");
 		Entity EntityTypeEntity = mock(Entity.class);
 
-		when(dataService.findOne(ENTITY_META_DATA,
+		when(dataService.findOne(ENTITY_TYPE_META_DATA,
 				new QueryImpl<>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityType.getName())))
 				.thenReturn(EntityTypeEntity);
 

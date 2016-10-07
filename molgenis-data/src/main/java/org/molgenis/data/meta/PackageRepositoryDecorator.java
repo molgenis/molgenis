@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class PackageRepositoryDecorator implements Repository<Package>
@@ -275,7 +275,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 
 	private Repository<EntityType> getEntityRepository()
 	{
-		return dataService.getRepository(ENTITY_META_DATA, EntityType.class);
+		return dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
 	}
 
 	private class PackageTreeTraverser extends TreeTraverser<Package>

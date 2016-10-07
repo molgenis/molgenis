@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
@@ -242,11 +242,11 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	 */
 	private void updateEntityTypeEntityWithNewAttributeEntity(String entity, String attribute, Entity attributeEntity)
 	{
-		Entity entityEntity = dataService.findOneById(ENTITY_META_DATA, entity);
+		Entity entityEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entity);
 		Iterable<Entity> attributes = entityEntity.getEntities(ATTRIBUTES);
 		entityEntity.set(ATTRIBUTES, Iterables.transform(attributes,
 				att -> att.getString(AttributeMetadata.NAME).equals(attribute) ? attributeEntity : att));
-		dataService.update(ENTITY_META_DATA, entityEntity);
+		dataService.update(ENTITY_TYPE_META_DATA, entityEntity);
 	}
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
@@ -258,7 +258,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@RunAsSystem
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
-		Entity entityTypeEntity = dataService.findOneById(ENTITY_META_DATA, entityName);
+		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityName);
 		Optional<Entity> result = stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
 

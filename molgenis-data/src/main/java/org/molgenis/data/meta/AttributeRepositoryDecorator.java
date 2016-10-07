@@ -23,7 +23,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
@@ -496,7 +496,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
 		}
-		EntityType entityType = dataService.query(ENTITY_META_DATA, EntityType.class).eq(ATTRIBUTES, attr).findOne();
+		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(ATTRIBUTES, attr).findOne();
 		if (entityType != null)
 		{
 			throw new MolgenisDataException(
@@ -536,7 +536,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	private Stream<EntityType> getEntitiesRec(List<Attribute> attrs)
 	{
 		// find entities referencing attributes
-		Query<EntityType> entityQ = dataService.query(ENTITY_META_DATA, EntityType.class);
+		Query<EntityType> entityQ = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class);
 		Stream<EntityType> entities;
 		if (attrs.size() == 1)
 		{

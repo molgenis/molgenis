@@ -46,7 +46,7 @@ import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
@@ -177,7 +177,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry,
 					dataService, permissionService);
 		}
-		else if (repo.getName().equals(ENTITY_META_DATA))
+		else if (repo.getName().equals(ENTITY_TYPE_META_DATA))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
 					(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
