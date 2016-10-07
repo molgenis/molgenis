@@ -145,7 +145,7 @@ public class PostgreSqlRepositoryCollectionTest
 		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate).execute(captor.capture());
-		assertEquals(captor.getValue(), "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_key\" IS_UNIQUE (\"attr\")");
+		assertEquals(captor.getValue(), "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_key\" UNIQUE (\"attr\")");
 	}
 
 	@Test

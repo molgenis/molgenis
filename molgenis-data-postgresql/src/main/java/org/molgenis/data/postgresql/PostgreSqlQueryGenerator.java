@@ -72,7 +72,7 @@ class PostgreSqlQueryGenerator
 
 	private static String getSqlUniqueKey(EntityType entityType, Attribute attr)
 	{
-		return "CONSTRAINT " + getUniqueKeyName(entityType, attr) + " IS_UNIQUE (" + getColumnName(attr) + ')';
+		return "CONSTRAINT " + getUniqueKeyName(entityType, attr) + " UNIQUE (" + getColumnName(attr) + ')';
 	}
 
 	private static String getSqlCheckConstraint(EntityType entityType, Attribute attr)
@@ -269,17 +269,17 @@ class PostgreSqlQueryGenerator
 		switch (attrType)
 		{
 			case ONE_TO_MANY:
-				sql.append(", IS_UNIQUE (").append(getColumnName(idAttr)).append(')');
+				sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(')');
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
-				sql.append(", IS_UNIQUE (").append(getColumnName(idAttr)).append(',').append(getColumnName(attr))
+				sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(',').append(getColumnName(attr))
 						.append(')');
 				break;
 			default:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 		}
-		sql.append(", IS_UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
+		sql.append(", UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
 				.append(getColumnName(idAttr)).append(')');
 
 		sql.append(')');
