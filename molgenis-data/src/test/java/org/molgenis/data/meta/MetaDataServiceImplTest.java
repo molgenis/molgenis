@@ -5,9 +5,7 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetadata;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.testng.annotations.BeforeMethod;
@@ -212,7 +210,7 @@ public class MetaDataServiceImplTest
 		Query<EntityType> entityQ2 = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
-		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
+		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.and()).thenReturn(entityQ2);
 		when(entityQ2.eq(IS_ABSTRACT, false)).thenReturn(entityQ2);
 		when(entityQ2.findOne()).thenReturn(entityType);
@@ -231,7 +229,7 @@ public class MetaDataServiceImplTest
 		Query<EntityType> entityQ2 = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
-		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
+		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.and()).thenReturn(entityQ2);
 		when(entityQ2.eq(IS_ABSTRACT, false)).thenReturn(entityQ2);
 		when(entityQ2.findOne()).thenReturn(null);
@@ -719,7 +717,7 @@ public class MetaDataServiceImplTest
 		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
-		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
+		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.fetch(any())).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(existingEntityType);
 
@@ -746,7 +744,7 @@ public class MetaDataServiceImplTest
 		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
 
-		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
+		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.fetch(any())).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
