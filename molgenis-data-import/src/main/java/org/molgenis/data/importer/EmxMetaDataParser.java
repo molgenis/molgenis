@@ -37,7 +37,7 @@ import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
@@ -54,21 +54,20 @@ import static org.molgenis.util.DependencyResolver.resolve;
  */
 public class EmxMetaDataParser implements MetaDataParser
 {
-	// Column names in the attributes sheet
-	private static final String ENTITY = "entity";
-	private static final String ID_ATTRIBUTE = "idAttribute";
-	private static final String LOOKUP_ATTRIBUTE = "lookupAttribute";
-	private static final String LABEL_ATTRIBUTE = "labelAttribute";
-	private static final String PART_OF_ATTRIBUTE = "partOfAttribute";
-	private static final String AGGREGATABLE = "aggregateable";
-
-	// Table names in the source
+	// Table names in the emx file
 	static final String EMX_PACKAGES = "packages";
 	static final String EMX_ENTITIES = "entities";
 	static final String EMX_ATTRIBUTES = "attributes";
 	static final String EMX_TAGS = "tags";
 	static final String EMX_LANGUAGES = "languages";
 	static final String EMX_I18NSTRINGS = "i18nstrings";
+
+	// Column names in the package sheet
+	private static final String EMX_PACKAGE_NAME = "name";
+	private static final String EMX_PACKAGE_DESCRIPTION = "description";
+	private static final String EMX_PACKAGE_PARENT = "parent";
+	private static final String EMX_PACKAGE_TAGS = "tags";
+	private static final String EMX_PACKAGE_LABEL = "label";
 
 	// Column names in the entities sheet
 	private static final String EMX_ENTITIES_NAME = "name";
@@ -79,6 +78,34 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ENTITIES_EXTENDS = "extends";
 	private static final String EMX_ENTITIES_BACKEND = "backend";
 	private static final String EMX_ENTITIES_TAGS = "tags";
+
+	// Column names in the attributes sheet
+	private static final String EMX_ATTRIBUTES_NAME = "name";
+	private static final String EMX_ATTRIBUTES_ENTITY = "entity";
+	private static final String EMX_ATTRIBUTES_REF_ENTITY = "refEntity";
+	private static final String EMX_ATTRIBUTES_ID_ATTRIBUTE = "idAttribute";
+	private static final String EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE = "lookupAttribute";
+	private static final String EMX_ATTRIBUTES_LABEL_ATTRIBUTE = "labelAttribute";
+	private static final String EMX_ATTRIBUTES_PART_OF_ATTRIBUTE = "partOfAttribute";
+	private static final String EMX_ATTRIBUTES_AGGREGATEABLE = "aggregateable";
+	private static final String EMX_ATTRIBUTES_DATA_TYPE = "dataType";
+	private static final String EMX_ATTRIBUTES_EXPRESSION = "expression";
+	private static final String EMX_ATTRIBUTES_NILLABLE = "nillable";
+	private static final String EMX_ATTRIBUTES_VISIBLE = "visible";
+	private static final String EMX_ATTRIBUTES_LABEL = "label";
+	private static final String EMX_ATTRIBUTES_DESCRIPTION = "description";
+	private static final String EMX_ATTRIBUTES_ENUM_OPTIONS = "enumOptions";
+	private static final String EMX_ATTRIBUTES_RANGE_MIN = "rangeMin";
+	private static final String EMX_ATTRIBUTES_RANGE_MAX = "rangeMax";
+	private static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
+	private static final String EMX_ATTRIBUTES_UNIQUE = "unique";
+	private static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
+	private static final String EMX_ATTRIBUTES_DEFAULT_VALUE = "defaultValue";
+
+	// NOT YET SUPPORTED
+	// private static final String EMX_ATTRIBUTES_MAPPED_BY = "mappedBy";
+	// private static final String EMX_ATTRIBUTES_AUTO = "auto";
+	// private static final String EMX_ATTRIBUTES_VISIBLE_EXPRESSION = "visibleExpression";
 
 	// Column names in the tag sheet
 	static final String EMX_TAG_IDENTIFIER = "identifier";
@@ -95,13 +122,6 @@ public class EmxMetaDataParser implements MetaDataParser
 	// Column names in the i18nstring sheet
 	private static final String EMX_I18N_STRING_MSGID = "msgid";
 	private static final String EMX_I18N_STRING_DESCRIPTION = "description";
-
-	// Column names in the package sheet
-	private static final String EMX_PACKAGE_NAME = "name";
-	private static final String EMX_PACKAGE_DESCRIPTION = "description";
-	private static final String EMX_PACKAGE_PARENT = "parent";
-	private static final String EMX_PACKAGE_TAGS = "tags";
-	private static final String EMX_PACKAGE_LABEL = "label";
 
 	private static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP = newHashMap();
 
@@ -122,13 +142,13 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ENTITIES_TAGS.toLowerCase());
 
 	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays
-			.asList(AGGREGATABLE, DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(),
-					ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(), ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(),
-					LABEL_ATTRIBUTE.toLowerCase(), LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(),
-					PART_OF_ATTRIBUTE.toLowerCase(), RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(),
-					READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(), UNIQUE.toLowerCase(),
-					TAGS.toLowerCase(), EXPRESSION.toLowerCase(), VALIDATION_EXPRESSION.toLowerCase(),
-					DEFAULT_VALUE.toLowerCase());
+			.asList(EMX_ATTRIBUTES_AGGREGATEABLE, EMX_ATTRIBUTES_DATA_TYPE, EMX_ATTRIBUTES_DESCRIPTION,
+					EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES_ENUM_OPTIONS, EMX_ATTRIBUTES_ID_ATTRIBUTE,
+					EMX_ATTRIBUTES_LABEL, EMX_ATTRIBUTES_LABEL_ATTRIBUTE, EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE,
+					EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE, EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
+					EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN, EMX_ATTRIBUTES_READ_ONLY,
+					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE, EMX_ATTRIBUTES_EXPRESSION,
+					EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE);
 
 	private static final String AUTO = "auto";
 
@@ -586,7 +606,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		for (Entity pack : packageRepo)
 		{
-			String name = pack.getString(NAME);
+			String name = pack.getString(PackageMetaData.SIMPLE_NAME);
 			String parentName = pack.getString(PackageMetaData.PARENT);
 
 			if (parentName == null)
@@ -611,7 +631,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				Entity parent = resolvedByName.get(pack.getString(PackageMetaData.PARENT));
 				if (parent != null)
 				{
-					String name = pack.getString(NAME);
+					String name = pack.getString(PackageMetaData.SIMPLE_NAME);
 					ready.add(pack);
 					resolvedByName.put(name, pack);
 				}
@@ -637,9 +657,9 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		for (Attribute attr : attributesRepo.getEntityType().getAtomicAttributes())
 		{
-			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()) && !((isI18n(attr.getName()) && (
-					attr.getName().toLowerCase().startsWith(LABEL) || attr.getName().toLowerCase()
-							.startsWith(DESCRIPTION)))))
+			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName()) && !((isI18n(attr.getName()) && (
+					attr.getName().startsWith(EMX_ATTRIBUTES_LABEL) || attr.getName()
+							.startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
@@ -653,11 +673,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			rowIndex++;
 
-			String attributeName = attributeEntity.getString(NAME);
+			String attributeName = attributeEntity.getString(EMX_ATTRIBUTES_NAME);
 			if (attributeName == null)
 				throw new IllegalArgumentException(format("attributes.name is missing on line [%d]", rowIndex));
 
-			String entityName = attributeEntity.getString(ENTITY);
+			String entityName = attributeEntity.getString(EMX_ATTRIBUTES_ENTITY);
 			if (entityName == null) throw new IllegalArgumentException(
 					format("attributes.entity is missing for attribute named: %s on line [%d]", attributeName,
 							rowIndex));
@@ -680,7 +700,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			rowIndex++;
 
-			String emxEntityName = emxAttrEntity.getString(ENTITY);
+			String emxEntityName = emxAttrEntity.getString(EMX_ATTRIBUTES_ENTITY);
 			Map<String, EmxAttribute> entityMap = attributesMap.get(emxEntityName);
 
 			// If an entity is defined in the attribute sheet only,
@@ -692,12 +712,12 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (dataService != null) md.setBackend(dataService.getMeta().getDefaultBackend().getName());
 			}
 
-			String emxName = emxAttrEntity.getString(NAME);
+			String emxName = emxAttrEntity.getString(EMX_ATTRIBUTES_NAME);
 			EmxAttribute emxAttr = entityMap.get(emxName);
 			Attribute attr = emxAttr.getAttr();
 
-			String emxDataType = emxAttrEntity.getString(DATA_TYPE);
-			String emxRefEntity = emxAttrEntity.getString(REF_ENTITY);
+			String emxDataType = emxAttrEntity.getString(EMX_ATTRIBUTES_DATA_TYPE);
+			String emxRefEntity = emxAttrEntity.getString(EMX_ATTRIBUTES_REF_ENTITY);
 
 			if (emxDataType != null)
 			{
@@ -715,20 +735,23 @@ public class EmxMetaDataParser implements MetaDataParser
 				attr.setDataType(STRING);
 			}
 
-			String emxAttrNillable = emxAttrEntity.getString(NILLABLE);
-			String emxIdAttrValue = emxAttrEntity.getString(ID_ATTRIBUTE);
-			String emxAttrVisible = emxAttrEntity.getString(VISIBLE);
-			String emxAggregatable = emxAttrEntity.getString(AGGREGATABLE);
-			String emxIsLookupAttr = emxAttrEntity.getString(LOOKUP_ATTRIBUTE);
-			String emxIsLabelAttr = emxAttrEntity.getString(LABEL_ATTRIBUTE);
-			String emxReadOnly = emxAttrEntity.getString(READ_ONLY);
-			String emxUnique = emxAttrEntity.getString(UNIQUE);
-			String expression = emxAttrEntity.getString(EXPRESSION);
-			List<String> tagIds = DataConverter.toList(emxAttrEntity.get(TAGS));
-			String validationExpression = emxAttrEntity.getString(VALIDATION_EXPRESSION);
-			String defaultValue = emxAttrEntity.getString(DEFAULT_VALUE);
+			String emxAttrNillable = emxAttrEntity.getString(EMX_ATTRIBUTES_NILLABLE);
+			String emxIdAttrValue = emxAttrEntity.getString(EMX_ATTRIBUTES_ID_ATTRIBUTE);
+			String emxAttrVisible = emxAttrEntity.getString(EMX_ATTRIBUTES_VISIBLE);
+			String emxAggregatable = emxAttrEntity.getString(EMX_ATTRIBUTES_AGGREGATEABLE);
+			String emxIsLookupAttr = emxAttrEntity.getString(EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE);
+			String emxIsLabelAttr = emxAttrEntity.getString(EMX_ATTRIBUTES_LABEL_ATTRIBUTE);
+			String emxReadOnly = emxAttrEntity.getString(EMX_ATTRIBUTES_READ_ONLY);
+			String emxUnique = emxAttrEntity.getString(EMX_ATTRIBUTES_UNIQUE);
+			String expression = emxAttrEntity.getString(EMX_ATTRIBUTES_EXPRESSION);
+			String validationExpression = emxAttrEntity.getString(EMX_ATTRIBUTES_VALIDATION_EXPRESSION);
+			String defaultValue = emxAttrEntity.getString(EMX_ATTRIBUTES_DEFAULT_VALUE);
 
-			if (emxAttrNillable != null) attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, NILLABLE));
+			// Get the tags from somewhere?
+			List<String> tagIds = DataConverter.toList(emxAttrEntity.get(EMX_ENTITIES_TAGS));
+
+			if (emxAttrNillable != null)
+				attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
 			if (emxIdAttrValue != null)
 			{
 				if (!emxIdAttrValue.equalsIgnoreCase("true") && !emxIdAttrValue.equalsIgnoreCase("false")
@@ -748,7 +771,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 
 				attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
-				if (!attr.isAuto()) emxAttr.setIdAttr(parseBoolean(emxIdAttrValue, rowIndex, ID_ATTRIBUTE));
+				if (!attr.isAuto())
+					emxAttr.setIdAttr(parseBoolean(emxIdAttrValue, rowIndex, EMX_ATTRIBUTES_ID_ATTRIBUTE));
 				else emxAttr.setIdAttr(true); // If it is auto, set idAttr to true
 			}
 
@@ -762,22 +786,23 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				if (emxAttrVisible.equalsIgnoreCase("true") || emxAttrVisible.equalsIgnoreCase("false"))
 				{
-					attr.setVisible(parseBoolean(emxAttrVisible, rowIndex, VISIBLE));
+					attr.setVisible(parseBoolean(emxAttrVisible, rowIndex, EMX_ATTRIBUTES_VISIBLE));
 				}
 				else
 				{
 					attr.setVisibleExpression(emxAttrVisible);
 				}
 			}
-			if (emxAggregatable != null) attr.setAggregatable(parseBoolean(emxAggregatable, rowIndex, AGGREGATABLE));
-			if (emxReadOnly != null) attr.setReadOnly(parseBoolean(emxReadOnly, rowIndex, READ_ONLY));
-			if (emxUnique != null) attr.setUnique(parseBoolean(emxUnique, rowIndex, UNIQUE));
+			if (emxAggregatable != null)
+				attr.setAggregatable(parseBoolean(emxAggregatable, rowIndex, EMX_ATTRIBUTES_AGGREGATEABLE));
+			if (emxReadOnly != null) attr.setReadOnly(parseBoolean(emxReadOnly, rowIndex, EMX_ATTRIBUTES_READ_ONLY));
+			if (emxUnique != null) attr.setUnique(parseBoolean(emxUnique, rowIndex, EMX_ATTRIBUTES_UNIQUE));
 			if (expression != null) attr.setExpression(expression);
 			if (validationExpression != null) attr.setValidationExpression(validationExpression);
 			if (defaultValue != null) attr.setDefaultValue(defaultValue);
 			if (emxIsLookupAttr != null)
 			{
-				boolean isLookAttr = parseBoolean(emxIsLookupAttr, rowIndex, LOOKUP_ATTRIBUTE);
+				boolean isLookAttr = parseBoolean(emxIsLookupAttr, rowIndex, EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE);
 				if (isLookAttr && isReferenceType(attr))
 				{
 					throw new IllegalArgumentException(
@@ -790,7 +815,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (emxIsLabelAttr != null)
 			{
-				boolean isLabelAttr = parseBoolean(emxIsLabelAttr, rowIndex, LABEL_ATTRIBUTE);
+				boolean isLabelAttr = parseBoolean(emxIsLabelAttr, rowIndex, EMX_ATTRIBUTES_LABEL_ATTRIBUTE);
 				if (isLabelAttr && isReferenceType(attr))
 				{
 					throw new IllegalArgumentException(
@@ -801,13 +826,13 @@ public class EmxMetaDataParser implements MetaDataParser
 				emxAttr.setLabelAttr(isLabelAttr);
 			}
 
-			attr.setLabel(emxAttrEntity.getString(LABEL));
+			attr.setLabel(emxAttrEntity.getString(EMX_ATTRIBUTES_LABEL));
 
 			for (String attrName : emxAttrEntity.getAttributeNames())
 			{
 				if (isI18n(attrName))
 				{
-					if (attrName.startsWith(LABEL))
+					if (attrName.startsWith(EMX_ATTRIBUTES_LABEL))
 					{
 						String label = emxAttrEntity.getString(attrName);
 						if (label != null)
@@ -816,7 +841,7 @@ public class EmxMetaDataParser implements MetaDataParser
 							attr.setLabel(languageCode, label);
 						}
 					}
-					else if (attrName.startsWith(DESCRIPTION))
+					else if (attrName.startsWith(EMX_ATTRIBUTES_DESCRIPTION))
 					{
 						String description = emxAttrEntity.getString(attrName);
 						if (description != null)
@@ -828,11 +853,11 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 			}
 
-			attr.setDescription(emxAttrEntity.getString(DESCRIPTION));
+			attr.setDescription(emxAttrEntity.getString(EMX_ATTRIBUTES_DESCRIPTION));
 
 			if (attr.getDataType() == ENUM)
 			{
-				List<String> enumOptions = DataConverter.toList(emxAttrEntity.get(ENUM_OPTIONS));
+				List<String> enumOptions = DataConverter.toList(emxAttrEntity.get(EMX_ATTRIBUTES_ENUM_OPTIONS));
 				if (enumOptions == null || enumOptions.isEmpty())
 				{
 					throw new IllegalArgumentException(
@@ -859,7 +884,7 @@ public class EmxMetaDataParser implements MetaDataParser
 								rowIndex, emxEntityName, emxName, attr.getDataType().toString()));
 			}
 
-			String emxRangeMin = emxAttrEntity.getString(RANGE_MIN);
+			String emxRangeMin = emxAttrEntity.getString(EMX_ATTRIBUTES_RANGE_MIN);
 			Long rangeMin;
 			if (emxRangeMin != null)
 			{
@@ -879,7 +904,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				rangeMin = null;
 			}
 
-			String emxRangeMax = emxAttrEntity.getString(RANGE_MAX);
+			String emxRangeMax = emxAttrEntity.getString(EMX_ATTRIBUTES_RANGE_MAX);
 			Long rangeMax;
 			if (emxRangeMax != null)
 			{
@@ -929,14 +954,14 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			rowIndex++;
 
-			String entityName = attributeEntity.getString(ENTITY);
+			String entityName = attributeEntity.getString(EMX_ATTRIBUTES_ENTITY);
 			Map<String, EmxAttribute> entityMap = attributesMap.get(entityName);
 
-			String attributeName = attributeEntity.getString(NAME);
+			String attributeName = attributeEntity.getString(EMX_ATTRIBUTES_NAME);
 			Attribute attribute = entityMap.get(attributeName).getAttr();
 
 			// bootstrap attribute parent-children relations for compound attributes
-			String partOfAttribute = attributeEntity.getString(PART_OF_ATTRIBUTE);
+			String partOfAttribute = attributeEntity.getString(EMX_ATTRIBUTES_PART_OF_ATTRIBUTE);
 			if (partOfAttribute != null && !partOfAttribute.isEmpty())
 			{
 				Attribute compoundAttribute = entityMap.get(partOfAttribute).getAttr();
@@ -1008,9 +1033,9 @@ public class EmxMetaDataParser implements MetaDataParser
 		int rowIndex = 1;
 		for (Entity attribute : attributeRepo)
 		{
-			final String entityName = attribute.getString(ENTITY);
-			final String attributeName = attribute.getString(NAME);
-			final String refEntityName = (String) attribute.get(REF_ENTITY);
+			final String entityName = attribute.getString(EMX_ATTRIBUTES_ENTITY);
+			final String attributeName = attribute.getString(EMX_ATTRIBUTES_NAME);
+			final String refEntityName = (String) attribute.get(EMX_ATTRIBUTES_REF_ENTITY);
 			EntityType EntityType = intermediateResults.getEntityType(entityName);
 			Attribute Attribute = EntityType.getAttribute(attributeName);
 

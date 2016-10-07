@@ -25,6 +25,7 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String NAME = "name";
 	public static final String DATA_TYPE = "dataType";
 	public static final String REF_ENTITY = "refEntity";
+
 	/**
 	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
 	 */
