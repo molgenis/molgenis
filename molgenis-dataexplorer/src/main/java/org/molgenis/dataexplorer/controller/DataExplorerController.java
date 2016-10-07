@@ -47,6 +47,7 @@ import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaDa
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -381,8 +382,11 @@ public class DataExplorerController extends MolgenisPluginController
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
-		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(entityId));
-		model.addAttribute("EntityType", dataService.getEntityType(entityName));
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(entityId, entityType.getIdAttribute());
+
+		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(id));
+		model.addAttribute("entityType", entityType);
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}
