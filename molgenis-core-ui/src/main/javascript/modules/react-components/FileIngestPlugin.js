@@ -19,7 +19,7 @@ class FileIngestPlugin extends Component {
             <legend>Automatic imports</legend>
             <div className='ingest-table'>
                 <Table entity='sys_FileIngest'
-                       attrs={{name: null, url: null, entityMetaData: null, cronexpression: null, active: null}}
+                       attrs={{name: null, url: null, entityType: null, cronexpression: null, active: null}}
                        defaultSelectFirstRow={true}
                        selectedRow={this.state.selectedFileIngest}
                        onRowClick={this.onFileIngestSelect}

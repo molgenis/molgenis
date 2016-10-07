@@ -23,7 +23,7 @@ public class FileIngestMetaData extends SystemEntityType
 	public static final String DESCRIPTION = "description";
 	public static final String URL = "url";
 	public static final String LOADER = "loader";
-	public static final String ENTITY_META_DATA = "EntityType";
+	public static final String ENTITY_META_DATA = "entityType";
 	public static final String CRONEXPRESSION = "cronexpression";
 	public static final String ACTIVE = "active";
 	public static final String FAILURE_EMAIL = "failureEmail";
