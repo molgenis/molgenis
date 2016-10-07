@@ -104,13 +104,8 @@
             <tr>
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
-<<<<<<< HEAD
-                <#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
-                    <#assign refEntityType = attributeMapping.targetAttributeMetaData.refEntity>
-=======
                 <#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical" && (categories)?has_content>
-                    <#assign refEntityMetaData = attributeMapping.targetAttribute.refEntity>
->>>>>>> 080e6d36d2fbf11f433e559ebb12c4cdcd01bea2
+                    <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
                     <#list categories as category>
                         <#list refEntityType.attributes as attribute>
                             <#assign attributeName = attribute.name>

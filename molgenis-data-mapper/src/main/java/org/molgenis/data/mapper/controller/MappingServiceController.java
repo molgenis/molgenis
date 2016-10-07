@@ -101,7 +101,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String viewMappingProjects(Model model)
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
-		model.addAttribute("EntityTypes", getWritableEntityTypes());
+		model.addAttribute("entityTypes", getWritableEntityTypes());
 		model.addAttribute("user", getCurrentUsername());
 		model.addAttribute("admin", currentUserIsSu());
 		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
@@ -409,7 +409,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
-		model.addAttribute("EntityTypes", getNewSources(project.getMappingTarget(target)));
+		model.addAttribute("entityTypes", getNewSources(project.getMappingTarget(target)));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
 

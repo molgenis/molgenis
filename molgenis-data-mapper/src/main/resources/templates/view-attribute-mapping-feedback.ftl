@@ -74,6 +74,8 @@
                                     <#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
                                 </#list>
                             </td>
+                        <#elseif feedbackRow.value?is_boolean> <!-- its a boolean -->
+                            <td>${feedbackRow.value?c}</td>
                         <#else> <!-- its string or int value -->
                             <td>${feedbackRow.value?html}</td>
                         </#if>
