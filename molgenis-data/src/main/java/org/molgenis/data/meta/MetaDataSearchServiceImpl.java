@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 @Component
 public class MetaDataSearchServiceImpl implements MetaDataSearchService
@@ -49,10 +49,10 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		{
 			// Search in packages
 			Query<Entity> q = new QueryImpl<>().search(searchTerm);
-			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.GROUP_MEMBER, q))
+			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetadata.GROUP_MEMBER, q))
 			dataService.findAll(PACKAGE, q).forEach(packageEntity ->
 			{
-				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
+				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetadata.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
 				{
 					String matchDesc = "Matched: package '" + p.getName() + "'";
@@ -98,7 +98,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		Entity packageEntity = EntityType.getEntity(EntityTypeMetadata.PACKAGE);
 		if (packageEntity != null)
 		{
-			String packageName = packageEntity.getString(PackageMetaData.FULL_NAME);
+			String packageName = packageEntity.getString(PackageMetadata.FULL_NAME);
 			if (packageName != null)
 			{
 				Package p = metaDataService.getPackage(packageName);

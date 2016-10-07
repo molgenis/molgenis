@@ -5,7 +5,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -204,7 +204,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 
 	private void validateAddAllowed(Package package_)
 	{
-		Entity existingEntity = findOneById(package_.getIdValue(), new Fetch().field(PackageMetaData.FULL_NAME));
+		Entity existingEntity = findOneById(package_.getIdValue(), new Fetch().field(PackageMetadata.FULL_NAME));
 		if (existingEntity != null)
 		{
 			throw new MolgenisDataException(format("Adding existing package [%s] is not allowed",
@@ -283,7 +283,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		@Override
 		public Iterable<Package> children(@Nonnull Package packageEntity)
 		{
-			return () -> query().eq(PackageMetaData.PARENT, packageEntity).findAll().iterator();
+			return () -> query().eq(PackageMetadata.PARENT, packageEntity).findAll().iterator();
 		}
 	}
 }

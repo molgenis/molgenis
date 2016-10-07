@@ -128,7 +128,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	static
 	{
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_ENTITIES, ENTITY_TYPE_META_DATA);
-		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_PACKAGES, PackageMetaData.PACKAGE);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_PACKAGES, PackageMetadata.PACKAGE);
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_TAGS, TAG);
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_ATTRIBUTES, ATTRIBUTE_META_DATA);
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_LANGUAGES, LANGUAGE);
@@ -606,8 +606,8 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		for (Entity pack : packageRepo)
 		{
-			String name = pack.getString(PackageMetaData.SIMPLE_NAME);
-			String parentName = pack.getString(PackageMetaData.PARENT);
+			String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+			String parentName = pack.getString(PackageMetadata.PARENT);
 
 			if (parentName == null)
 			{
@@ -628,10 +628,10 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			for (Entity pack : unresolved)
 			{
-				Entity parent = resolvedByName.get(pack.getString(PackageMetaData.PARENT));
+				Entity parent = resolvedByName.get(pack.getString(PackageMetadata.PARENT));
 				if (parent != null)
 				{
-					String name = pack.getString(PackageMetaData.SIMPLE_NAME);
+					String name = pack.getString(PackageMetadata.SIMPLE_NAME);
 					ready.add(pack);
 					resolvedByName.put(name, pack);
 				}

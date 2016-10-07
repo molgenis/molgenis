@@ -19,7 +19,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
@@ -32,7 +32,7 @@ public class SystemEntityTypePersister
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private TagMetaData tagMeta;
 	private AttributeMetadata attributeMetadata;
-	private PackageMetaData packageMeta;
+	private PackageMetadata packageMeta;
 	private EntityTypeMetadata entityTypeMeta;
 
 	@Autowired
@@ -106,7 +106,7 @@ public class SystemEntityTypePersister
 	}
 
 	@Autowired
-	public void PackageMetaData(PackageMetaData packageMeta)
+	public void PackageMetaData(PackageMetadata packageMeta)
 	{
 		this.packageMeta = requireNonNull(packageMeta);
 	}

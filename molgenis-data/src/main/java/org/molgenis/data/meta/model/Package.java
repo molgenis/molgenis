@@ -76,12 +76,12 @@ public class Package extends StaticEntity
 	 */
 	public String getSimpleName()
 	{
-		return getString(PackageMetaData.SIMPLE_NAME);
+		return getString(PackageMetadata.SIMPLE_NAME);
 	}
 
 	public Package setSimpleName(String simpleName)
 	{
-		set(PackageMetaData.SIMPLE_NAME, simpleName);
+		set(PackageMetadata.SIMPLE_NAME, simpleName);
 		updateFullName();
 		return this;
 	}
@@ -93,12 +93,12 @@ public class Package extends StaticEntity
 	 */
 	public Package getParent()
 	{
-		return getEntity(PackageMetaData.PARENT, Package.class);
+		return getEntity(PackageMetadata.PARENT, Package.class);
 	}
 
 	public Package setParent(Package parentPackage)
 	{
-		set(PackageMetaData.PARENT, parentPackage);
+		set(PackageMetadata.PARENT, parentPackage);
 		updateFullName();
 		return this;
 	}
@@ -110,12 +110,12 @@ public class Package extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(PackageMetaData.FULL_NAME);
+		return getString(PackageMetadata.FULL_NAME);
 	}
 
 	public Package setName(String fullName)
 	{
-		set(PackageMetaData.FULL_NAME, fullName);
+		set(PackageMetadata.FULL_NAME, fullName);
 		return this;
 	}
 
@@ -126,12 +126,12 @@ public class Package extends StaticEntity
 	 */
 	public String getLabel()
 	{
-		return getString(PackageMetaData.LABEL);
+		return getString(PackageMetadata.LABEL);
 	}
 
 	public Package setLabel(String label)
 	{
-		set(PackageMetaData.LABEL, label);
+		set(PackageMetadata.LABEL, label);
 		return this;
 	}
 
@@ -142,12 +142,12 @@ public class Package extends StaticEntity
 	 */
 	public String getDescription()
 	{
-		return getString(PackageMetaData.DESCRIPTION);
+		return getString(PackageMetadata.DESCRIPTION);
 	}
 
 	public Package setDescription(String description)
 	{
-		set(PackageMetaData.DESCRIPTION, description);
+		set(PackageMetadata.DESCRIPTION, description);
 		return this;
 	}
 
@@ -158,7 +158,7 @@ public class Package extends StaticEntity
 	 */
 	public Iterable<Tag> getTags()
 	{
-		return getEntities(PackageMetaData.TAGS, Tag.class);
+		return getEntities(PackageMetadata.TAGS, Tag.class);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class Package extends StaticEntity
 	 */
 	public Package setTags(Iterable<Tag> tags)
 	{
-		set(PackageMetaData.TAGS, tags);
+		set(PackageMetadata.TAGS, tags);
 		return this;
 	}
 
@@ -180,7 +180,7 @@ public class Package extends StaticEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		set(PackageMetaData.TAGS, concat(getTags(), singletonList(tag)));
+		set(PackageMetadata.TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -192,7 +192,7 @@ public class Package extends StaticEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		set(PackageMetaData.TAGS, tag);
+		set(PackageMetadata.TAGS, tag);
 	}
 
 	/**
@@ -218,8 +218,8 @@ public class Package extends StaticEntity
 	{
 		// TODO use one-to-many relationship for Package.parent
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<Package> query = dataService.query(PackageMetaData.PACKAGE, Package.class)
-				.eq(PackageMetaData.PARENT, this);
+		Query<Package> query = dataService.query(PackageMetadata.PACKAGE, Package.class)
+				.eq(PackageMetadata.PARENT, this);
 		return () -> query.findAll().iterator();
 	}
 
@@ -253,7 +253,7 @@ public class Package extends StaticEntity
 			{
 				fullName = simpleName;
 			}
-			set(PackageMetaData.FULL_NAME, fullName);
+			set(PackageMetadata.FULL_NAME, fullName);
 		}
 	}
 

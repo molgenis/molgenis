@@ -29,8 +29,8 @@ import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.molgenis.data.meta.model.PackageMetaData.PARENT;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
 /**

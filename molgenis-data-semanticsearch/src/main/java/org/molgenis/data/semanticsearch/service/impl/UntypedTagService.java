@@ -27,7 +27,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 /**
  * Service to tag metadata with simple String terms.
@@ -161,7 +161,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService
-				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
+				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetadata.FULL_NAME, p.getName()));
 
 		if (packageEntity == null)
 		{
@@ -169,7 +169,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		}
 
 		List<SemanticTag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();
-		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
+		for (Entity tagEntity : packageEntity.getEntities(PackageMetadata.TAGS))
 		{
 			tags.add(SemanticTag.asTag(p, tagEntity));
 		}

@@ -32,7 +32,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String BACKEND = "backend";
 
 	private AttributeMetadata attributeMetadata;
-	private PackageMetaData packageMetaData;
+	private PackageMetadata packageMetadata;
 	private TagMetaData tagMetaData;
 
 	EntityTypeMetadata()
@@ -48,7 +48,7 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
 		// TODO discuss whether package should be nillable
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData).setLabel("Package").setReadOnly(true);
+		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setNillable(false).setLabel("Attributes");
@@ -74,9 +74,9 @@ public class EntityTypeMetadata extends SystemEntityType
 	}
 
 	@Autowired
-	public void setPackageMetaData(PackageMetaData packageMetaData)
+	public void setPackageMetadata(PackageMetadata packageMetadata)
 	{
-		this.packageMetaData = requireNonNull(packageMetaData);
+		this.packageMetadata = requireNonNull(packageMetadata);
 	}
 
 	@Autowired

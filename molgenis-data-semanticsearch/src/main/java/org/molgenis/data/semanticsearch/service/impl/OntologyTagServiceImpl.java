@@ -34,7 +34,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
 /**
@@ -119,7 +119,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
-		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
+		for (Entity tagEntity : packageEntity.getEntities(PackageMetadata.TAGS))
 		{
 			tags.add(asTag(package_, tagEntity));
 		}

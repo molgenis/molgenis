@@ -12,9 +12,9 @@ import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class PackageMetaData extends SystemEntityType
+public class PackageMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME_ = "packages";
+	private static final String SIMPLE_NAME_ = "Package";
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
 	public static final String FULL_NAME = "fullName";
@@ -26,7 +26,7 @@ public class PackageMetaData extends SystemEntityType
 
 	private TagMetaData tagMetaData;
 
-	public PackageMetaData()
+	public PackageMetadata()
 	{
 		super(SIMPLE_NAME_, PACKAGE_META);
 	}
