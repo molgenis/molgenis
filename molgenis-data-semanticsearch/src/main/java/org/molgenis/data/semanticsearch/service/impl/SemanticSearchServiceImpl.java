@@ -83,7 +83,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				.createDisMaxQueryRuleForAttribute(queryTerms, ontologyTerms);
 
 		List<QueryRule> finalQueryRules = Lists
-				.newArrayList(new QueryRule(AttributeMetadata.IDENTIFIER, Operator.IN, attributeIdentifiers));
+				.newArrayList(new QueryRule(AttributeMetadata.ID, Operator.IN, attributeIdentifiers));
 
 		if (disMaxQueryRule.getNestedRules().size() > 0)
 		{
@@ -228,7 +228,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public Set<ExplainedQueryString> convertAttributeEntityToExplainedAttribute(Entity attributeEntity,
 			EntityType sourceEntityType, Map<String, String> collectExpanedQueryMap, List<QueryRule> finalQueryRules)
 	{
-		String attributeId = attributeEntity.getString(AttributeMetadata.IDENTIFIER);
+		String attributeId = attributeEntity.getString(AttributeMetadata.ID);
 		String attributeName = attributeEntity.getString(AttributeMetadata.NAME);
 		Attribute attribute = sourceEntityType.getAttribute(attributeName);
 		if (attribute == null)

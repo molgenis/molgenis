@@ -107,12 +107,12 @@ public class Attribute extends StaticEntity
 
 	public String getIdentifier()
 	{
-		return getString(IDENTIFIER);
+		return getString(ID);
 	}
 
 	public Attribute setIdentifier(String identifier)
 	{
-		set(IDENTIFIER, identifier);
+		set(ID, identifier);
 		return this;
 	}
 
@@ -213,7 +213,7 @@ public class Attribute extends StaticEntity
 	{
 		invalidateCachedDataType();
 
-		set(DATA_TYPE, AttributeType.getValueString(dataType));
+		set(TYPE, AttributeType.getValueString(dataType));
 		return this;
 	}
 
@@ -301,12 +301,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isNillable()
 	{
-		return requireNonNull(getBoolean(NILLABLE));
+		return requireNonNull(getBoolean(IS_NULLABLE));
 	}
 
 	public Attribute setNillable(boolean nillable)
 	{
-		set(NILLABLE, nillable);
+		set(IS_NULLABLE, nillable);
 		return this;
 	}
 
@@ -317,12 +317,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isAuto()
 	{
-		return requireNonNull(getBoolean(AUTO));
+		return requireNonNull(getBoolean(IS_AUTO));
 	}
 
 	public Attribute setAuto(boolean auto)
 	{
-		set(AUTO, auto);
+		set(IS_AUTO, auto);
 		return this;
 	}
 
@@ -333,12 +333,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isVisible()
 	{
-		return requireNonNull(getBoolean(VISIBLE));
+		return requireNonNull(getBoolean(IS_VISIBLE));
 	}
 
 	public Attribute setVisible(boolean visible)
 	{
-		set(VISIBLE, visible);
+		set(IS_VISIBLE, visible);
 		return this;
 	}
 
@@ -350,12 +350,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isAggregatable()
 	{
-		return requireNonNull(getBoolean(AGGREGATABLE));
+		return requireNonNull(getBoolean(IS_AGGREGATABLE));
 	}
 
 	public Attribute setAggregatable(boolean isAggregatable)
 	{
-		set(AGGREGATABLE, isAggregatable);
+		set(IS_AGGREGATABLE, isAggregatable);
 		return this;
 	}
 
@@ -410,12 +410,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isReadOnly()
 	{
-		return requireNonNull(getBoolean(READ_ONLY));
+		return requireNonNull(getBoolean(IS_READ_ONLY));
 	}
 
 	public Attribute setReadOnly(boolean readOnly)
 	{
-		set(READ_ONLY, readOnly);
+		set(IS_READ_ONLY, readOnly);
 		return this;
 	}
 
@@ -426,12 +426,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isUnique()
 	{
-		return requireNonNull(getBoolean(UNIQUE));
+		return requireNonNull(getBoolean(IS_UNIQUE));
 	}
 
 	public Attribute setUnique(boolean unique)
 	{
-		set(UNIQUE, unique);
+		set(IS_UNIQUE, unique);
 		return this;
 	}
 
@@ -583,7 +583,7 @@ public class Attribute extends StaticEntity
 	{
 		if (cachedDataType == null)
 		{
-			String dataTypeStr = getString(DATA_TYPE);
+			String dataTypeStr = getString(TYPE);
 			cachedDataType = dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
 		}
 		return cachedDataType;

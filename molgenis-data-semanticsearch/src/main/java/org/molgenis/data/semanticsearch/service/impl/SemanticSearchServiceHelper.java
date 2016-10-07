@@ -245,9 +245,9 @@ public class SemanticSearchServiceHelper
 	{
 		for (Entity attributeEntity : attributeEntities)
 		{
-			if (!attributeEntity.getString(AttributeMetadata.DATA_TYPE).equals(MolgenisFieldTypes.COMPOUND.toString()))
+			if (!attributeEntity.getString(AttributeMetadata.TYPE).equals(MolgenisFieldTypes.COMPOUND.toString()))
 			{
-				attributeIdentifiers.add(attributeEntity.getString(AttributeMetadata.IDENTIFIER));
+				attributeIdentifiers.add(attributeEntity.getString(AttributeMetadata.ID));
 			}
 			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetadata.PARTS);
 

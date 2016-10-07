@@ -95,9 +95,9 @@ public class IndexMetadataCUDOperationsPlatformIT
 		// Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
 		EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
-		q2.eq(AttributeMetadata.IDENTIFIER, toUpdateAttributeId);
+		q2.eq(AttributeMetadata.ID, toUpdateAttributeId);
 		q2.and();
-		q2.eq(AttributeMetadata.DATA_TYPE, MolgenisFieldTypes.STRING);
+		q2.eq(AttributeMetadata.TYPE, MolgenisFieldTypes.STRING);
 		assertEquals(searchService.count(q2, emdActual), 1);
 
 		// Reset context
@@ -136,7 +136,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
 		EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
-		q2.eq(AttributeMetadata.IDENTIFIER, toRemoveAttribute.getIdValue());
+		q2.eq(AttributeMetadata.ID, toRemoveAttribute.getIdValue());
 		assertEquals(searchService.count(q2, emdActual), 0);
 
 		// Reset context

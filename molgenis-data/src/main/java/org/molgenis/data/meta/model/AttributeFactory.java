@@ -43,7 +43,7 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	public Attribute create(String entityId)
 	{
 		Attribute attribute = create();
-		attribute.set(AttributeMetadata.IDENTIFIER, entityId);
+		attribute.set(AttributeMetadata.ID, entityId);
 		return attribute;
 	}
 

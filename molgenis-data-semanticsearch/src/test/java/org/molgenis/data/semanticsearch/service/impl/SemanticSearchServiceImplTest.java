@@ -229,7 +229,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(entity1.getString(AttributeMetadata.DESCRIPTION)).thenReturn("this is a height measurement in m!");
 
 		List<QueryRule> disMaxQueryRules = Lists
-				.newArrayList(new QueryRule(AttributeMetadata.IDENTIFIER, QueryRule.Operator.IN, attributeIdentifiers),
+				.newArrayList(new QueryRule(AttributeMetadata.ID, QueryRule.Operator.IN, attributeIdentifiers),
 						new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
 		Attribute attributeHeight = attrMetaDataFactory.create().setName("height_0");

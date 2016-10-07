@@ -40,9 +40,9 @@ public abstract class ExplainedAttribute
 		map.put(AttributeMetadata.NAME, attribute.getName());
 		map.put(AttributeMetadata.LABEL, attribute.getLabel());
 		map.put(AttributeMetadata.DESCRIPTION, attribute.getDescription());
-		map.put(AttributeMetadata.DATA_TYPE, attribute.getDataType().toString());
-		map.put(AttributeMetadata.NILLABLE, attribute.isNillable());
-		map.put(AttributeMetadata.UNIQUE, attribute.isUnique());
+		map.put(AttributeMetadata.TYPE, attribute.getDataType().toString());
+		map.put(AttributeMetadata.IS_NULLABLE, attribute.isNillable());
+		map.put(AttributeMetadata.IS_UNIQUE, attribute.isUnique());
 		if (attribute.getRefEntity() != null)
 		{
 			map.put(AttributeMetadata.REF_ENTITY, attribute.getRefEntity().getName());
