@@ -1,36 +1,13 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Map;
-
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageFactory;
-import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.meta.model.TagFactory;
-import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
@@ -50,9 +27,19 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
@@ -90,14 +77,14 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 	private final Relation instanceOf = Relation.valueOf("instanceOf");
 
-	private static final Ontology EDAM_ONTOLOGY = Ontology.create("EDAM", "http://edamontology.org",
-			"The EDAM ontology.");
+	private static final Ontology EDAM_ONTOLOGY = Ontology
+			.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
 
-	private static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = OntologyTerm.create("0987",
-			"http://edamontology.org/data_0987", "Chromosome name");
+	private static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = OntologyTerm
+			.create("0987", "http://edamontology.org/data_0987", "Chromosome name");
 
-	private static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = OntologyTerm.create("data_0919",
-			"http://edamontology.org/data_0919", "Gene annotation (chromosome)");
+	private static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = OntologyTerm
+			.create("data_0919", "http://edamontology.org/data_0919", "Gene annotation (chromosome)");
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -141,10 +128,10 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(ENTITY_META_DATA, "org.molgenis.SNP")).thenReturn(entityMetaDataEntity);
 
 		Ontology edamOntology = Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
-		OntologyTerm chromosomeName = OntologyTerm.create("0987", "http://edamontology.org/data_0987",
-				"Chromosome name");
-		OntologyTerm geneAnnotation = OntologyTerm.create("data_0919", "http://edamontology.org/data_0919",
-				"Gene annotation (chromosome)");
+		OntologyTerm chromosomeName = OntologyTerm
+				.create("0987", "http://edamontology.org/data_0987", "Chromosome name");
+		OntologyTerm geneAnnotation = OntologyTerm
+				.create("data_0919", "http://edamontology.org/data_0919", "Gene annotation (chromosome)");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(edamOntology);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(chromosomeName);
@@ -181,8 +168,8 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		when(edamOntology.getIRI()).thenReturn("http://edamontology.org");
 
-		SemanticTag<Object, OntologyTagObject, Ontology> tag = new SemanticTag<>("1233", null, Relation.instanceOf, coreData,
-				edamOntology);
+		SemanticTag<Object, OntologyTagObject, Ontology> tag = new SemanticTag<>("1233", null, Relation.instanceOf,
+				coreData, edamOntology);
 		when(tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 				"http://edamontology.org")).thenReturn(expected);
 
@@ -255,11 +242,10 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		when(dataService.findOneById(PACKAGE, "test")).thenReturn(pack);
 
-		assertEquals(ontologyTagService.getTagsForPackage(p),
-				singletonList(
-						new SemanticTag<>("1234", p, Relation.forIRI("http://molgenis.org/biobankconnect/instanceOf"),
-								CombinedOntologyTerm.create("http://edamontology.org/data_0987", "Chromosome name"),
-								Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
+		assertEquals(ontologyTagService.getTagsForPackage(p), singletonList(
+				new SemanticTag<>("1234", p, Relation.forIRI("http://molgenis.org/biobankconnect/instanceOf"),
+						CombinedOntologyTerm.create("http://edamontology.org/data_0987", "Chromosome name"),
+						Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
 	}
 
 	@Test

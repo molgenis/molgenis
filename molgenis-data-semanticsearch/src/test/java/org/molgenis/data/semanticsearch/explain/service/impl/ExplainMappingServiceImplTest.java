@@ -5,7 +5,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.bean.OntologyTermHit;
-import org.molgenis.data.semanticsearch.explain.bean.OntologyTermQueryExpansionSolution;
+import org.molgenis.data.semanticsearch.explain.bean.QueryExpansionSolution;
 import org.molgenis.data.semanticsearch.explain.service.ExplainMappingService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
@@ -21,14 +21,11 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -122,8 +119,8 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		OntologyTerm hypertension = OntologyTerm
 				.create("1", "iri1", "hypertension", singletonList("high blood pressure"));
 
-		OntologyTermQueryExpansionSolution queryExpansionSolution = OntologyTermQueryExpansionSolution
-				.create(ImmutableMap.of(hypertension, hypertension), true);
+		QueryExpansionSolution queryExpansionSolution = QueryExpansionSolution
+				.create(ImmutableMap.of(hypertension, hypertension), 1.0f, true);
 
 		Hit<ExplainedMatchCandidate<String>> computeScoreForMatchedSource = ((ExplainMappingServiceImpl) explainMappingService)
 				.computeScoreForMatchedSource(queryExpansionSolution, target, source);
@@ -147,9 +144,9 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 				.create("1", "iri1", "hypertension", singletonList("high blood pressure"));
 		OntologyTerm medicationOntologyTerm = OntologyTerm.create("2", "iri2", "medication", singletonList("drugs"));
 
-		OntologyTermQueryExpansionSolution queryExpansionSolution1 = OntologyTermQueryExpansionSolution
-				.create(ImmutableMap.of(hypertensionOntologyTerm, hypertensionOntologyTerm, medicationOntologyTerm,
-						medicationOntologyTerm), true);
+		QueryExpansionSolution queryExpansionSolution1 = QueryExpansionSolution.create(ImmutableMap
+						.of(hypertensionOntologyTerm, hypertensionOntologyTerm, medicationOntologyTerm, medicationOntologyTerm),
+				1.0f, true);
 
 		Hit<ExplainedMatchCandidate<String>> computeScoreForMatchedSource = ((ExplainMappingServiceImpl) explainMappingService)
 				.computeScoreForMatchedSource(queryExpansionSolution1, target, source);
@@ -165,6 +162,55 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 				.create(ExplainedMatchCandidate.create(source, explanations, true), 88.9f);
 
 		assertEquals(expected, computeScoreForMatchedSource);
+	}
+
+	@Test
+	public void testGetQueryExpansionSolution()
+	{
+		OntologyTerm hypertensionOt = OntologyTerm.create("2", "iri2", "hypertension");
+
+		OntologyTerm systolicHypertensionOt = OntologyTerm.create("3", "iri3", "systolic high blood pressure");
+
+		OntologyTerm medicationot = OntologyTerm.create("4", "iri4", "medication");
+
+		when(ontologyService.getChildren(hypertensionOt, DEFAULT_EXPANSION_LEVEL))
+				.thenReturn(singleton(systolicHypertensionOt));
+
+		when(ontologyService.getChildren(medicationot, DEFAULT_EXPANSION_LEVEL)).thenReturn(emptyList());
+
+		TagGroup targetTagGroup1 = TagGroup
+				.create(Arrays.asList(hypertensionOt, medicationot), "medication for hypertension", 1.0f);
+
+		TagGroup sourceTagGroup1 = TagGroup
+				.create(Arrays.asList(systolicHypertensionOt, medicationot), "medication for systolic blood pressure",
+						1.0f);
+
+		TagGroup sourceTagGroup2 = TagGroup
+				.create(Arrays.asList(systolicHypertensionOt), "systolic blood pressure", 0.65f);
+
+		//Test one
+		Map<OntologyTerm, OntologyTerm> matchedOntologyTerms_1 = new LinkedHashMap<>();
+		matchedOntologyTerms_1.put(hypertensionOt, systolicHypertensionOt);
+		matchedOntologyTerms_1.put(medicationot, medicationot);
+
+		QueryExpansionSolution actual_1 = ((ExplainMappingServiceImpl) explainMappingService)
+				.getQueryExpansionSolution(targetTagGroup1, sourceTagGroup1);
+		QueryExpansionSolution expected_1 = QueryExpansionSolution.create(matchedOntologyTerms_1, 1.0f, true);
+
+		assertEquals(expected_1, actual_1);
+
+		//Test two
+		QueryExpansionSolution actual_2 = ((ExplainMappingServiceImpl) explainMappingService)
+				.getQueryExpansionSolution(targetTagGroup1, sourceTagGroup2);
+		QueryExpansionSolution expected_2 = QueryExpansionSolution
+				.create(ImmutableMap.of(hypertensionOt, systolicHypertensionOt), 0.5f, false);
+
+		assertEquals(expected_1, actual_1);
+
+		//Test three
+		List<QueryExpansionSolution> queryExpansionSolutions = Arrays.asList(expected_2, expected_1);
+		Collections.sort(queryExpansionSolutions);
+		assertEquals(queryExpansionSolutions.get(0), expected_1);
 	}
 
 	@Configuration
