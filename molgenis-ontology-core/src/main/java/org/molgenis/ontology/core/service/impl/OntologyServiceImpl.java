@@ -4,9 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.ontology.core.model.OntologyTermChildrenCacheKey;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermChildrenCacheKey;
 import org.molgenis.ontology.core.model.SemanticType;
 import org.molgenis.ontology.core.repository.OntologyRepository;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -60,9 +59,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<String> getAllOntologyIds()
 	{
-		final List<String> allOntologiesIds = newArrayList();
-		ontologyRepository.getOntologies().forEach(e -> allOntologiesIds.add(e.getId()));
-		return allOntologiesIds;
+		return ontologyRepository.getOntologies().map(Ontology::getId).collect(toList());
 	}
 
 	@Override

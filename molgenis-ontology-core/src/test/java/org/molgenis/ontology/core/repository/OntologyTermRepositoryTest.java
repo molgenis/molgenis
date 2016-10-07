@@ -136,7 +136,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 				OntologyTermEntity.class)).thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
 		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
-				.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
+				.findExactOntologyTerms(asList("1", "2"), of("weight"), 100);
 
 		assertEquals(exactOntologyTerms, singletonList(
 				OntologyTerm.create("12", "http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
