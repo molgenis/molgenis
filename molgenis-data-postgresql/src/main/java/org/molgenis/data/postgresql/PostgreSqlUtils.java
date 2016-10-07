@@ -1,6 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -31,7 +31,7 @@ class PostgreSqlUtils
 	static Object getPostgreSqlValue(Entity entity, AttributeMetaData attr)
 	{
 		String attrName = attr.getName();
-		MolgenisFieldTypes.AttributeType attrType = attr.getDataType();
+		AttributeType attrType = attr.getDataType();
 
 		switch (attrType)
 		{
@@ -91,7 +91,7 @@ class PostgreSqlUtils
 		while (true)
 		{
 			String attrName = attr.getName();
-			MolgenisFieldTypes.AttributeType attrType = attr.getDataType();
+			AttributeType attrType = attr.getDataType();
 
 			switch (attrType)
 			{

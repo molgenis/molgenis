@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 
 @Component
 public class DataExplorerSettings extends DefaultSettingsEntity

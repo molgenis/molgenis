@@ -32,7 +32,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
 import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.*;
 import static org.testng.Assert.assertEquals;

@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -24,7 +24,7 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
+import static org.molgenis.AttributeType.MREF;
 
 public class AnnotatorUtils
 {
@@ -105,7 +105,7 @@ public class AnnotatorUtils
 	{
 		AttributeMetaData compound;
 		compound = attributeMetaDataFactory.create().setName(compoundName).setLabel(annotator.getFullName())
-				.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
+				.setDataType(AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
 		AttributeMetaData finalCompound = compound;
 		attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
 				.forEachOrdered(finalCompound::addAttributePart);

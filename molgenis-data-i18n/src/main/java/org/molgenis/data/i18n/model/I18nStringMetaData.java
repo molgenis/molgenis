@@ -3,7 +3,7 @@ package org.molgenis.data.i18n.model;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;

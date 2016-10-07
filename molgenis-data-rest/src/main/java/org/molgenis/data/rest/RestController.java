@@ -7,8 +7,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.*;
@@ -21,7 +20,6 @@ import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
@@ -62,7 +60,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -1359,11 +1357,5 @@ public class RestController
 			return expandMap;
 		}
 		return null;
-	}
-
-	private static Object convert(AttributeMetaData attr, Object value)
-	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
-		return fieldType.convert(value);
 	}
 }

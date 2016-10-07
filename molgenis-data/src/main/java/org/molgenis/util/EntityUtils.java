@@ -19,7 +19,7 @@ import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 

@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;

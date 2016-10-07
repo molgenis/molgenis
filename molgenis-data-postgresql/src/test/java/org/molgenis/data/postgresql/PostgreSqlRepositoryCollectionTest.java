@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
 import static org.testng.Assert.assertEquals;

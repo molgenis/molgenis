@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.AttributeType.CATEGORICAL;
+import static org.molgenis.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 

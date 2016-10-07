@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions

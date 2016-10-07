@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class RepositoryValidationDecoratorTest

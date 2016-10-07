@@ -6,8 +6,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
@@ -18,7 +17,6 @@ import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -478,7 +476,6 @@ public class ImportWriter
 		}
 		String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
 		AttributeType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
-		FieldType idFieldType = MolgenisFieldTypes.getType(AttributeType.getValueString(dataType));
 		HugeSet<Object> existingIds = new HugeSet<>();
 		HugeSet<Object> ids = new HugeSet<>();
 		try
@@ -561,7 +558,7 @@ public class ImportWriter
 					{
 						E entity = it.next();
 						count++;
-						Object id = idFieldType.convert(entity.get(idAttributeName));
+						Object id = entity.get(idAttributeName);
 						if (!existingIds.contains(id))
 						{
 							newEntities.add(entity);
@@ -591,7 +588,7 @@ public class ImportWriter
 					{
 						E entity = it.next();
 						count++;
-						Object id = idFieldType.convert(entity.get(idAttributeName));
+						Object id = entity.get(idAttributeName);
 						if (existingIds.contains(id))
 						{
 							existingEntitiesRowIndex.add(count);
@@ -629,7 +626,7 @@ public class ImportWriter
 					for (Entity entity : entities)
 					{
 						count++;
-						Object id = idFieldType.convert(entity.get(idAttributeName));
+						Object id = entity.get(idAttributeName);
 						if (!existingIds.contains(id))
 						{
 							if (++errorCount == 6)

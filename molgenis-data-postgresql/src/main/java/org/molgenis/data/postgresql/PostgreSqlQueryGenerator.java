@@ -1,7 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -19,8 +19,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
+import static org.molgenis.AttributeType.BOOL;
+import static org.molgenis.AttributeType.ENUM;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
 

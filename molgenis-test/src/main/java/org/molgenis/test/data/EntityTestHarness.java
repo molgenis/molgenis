@@ -1,6 +1,6 @@
 package org.molgenis.test.data;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 

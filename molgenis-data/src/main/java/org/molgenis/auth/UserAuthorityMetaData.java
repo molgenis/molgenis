@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;

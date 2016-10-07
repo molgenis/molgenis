@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import com.google.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.support.StaticEntity;
@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;

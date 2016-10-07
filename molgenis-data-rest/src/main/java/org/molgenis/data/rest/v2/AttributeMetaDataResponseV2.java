@@ -4,7 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
@@ -17,9 +17,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
-import static org.molgenis.MolgenisFieldTypes.getType;
+import static org.molgenis.AttributeType.COMPOUND;
 
 class AttributeMetaDataResponseV2
 {
@@ -65,7 +63,7 @@ class AttributeMetaDataResponseV2
 		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
 		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		this.enumOptions = attr.getDataType() == AttributeType.ENUM ? attr.getEnumOptions() : null;
-		this.maxLength = getType(getValueString(attr.getDataType())).getMaxLength();
+		this.maxLength = attr.getDataType().getMaxLength();
 		this.expression = attr.getExpression();
 
 		EntityMetaData refEntity = attr.getRefEntity();

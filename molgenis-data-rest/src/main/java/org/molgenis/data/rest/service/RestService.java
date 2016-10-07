@@ -1,7 +1,7 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;

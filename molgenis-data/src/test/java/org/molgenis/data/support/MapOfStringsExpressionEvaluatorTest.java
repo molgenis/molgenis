@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.*;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
@@ -182,7 +182,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
 		when(amd.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		when(amd.getDataType()).thenReturn(MolgenisFieldTypes.AttributeType.XREF);
+		when(amd.getDataType()).thenReturn(AttributeType.XREF);
 		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(amd, emd);
 		Entity expected = new DynamicEntity(refEmd);
 		expected.set("Chromosome", "12");

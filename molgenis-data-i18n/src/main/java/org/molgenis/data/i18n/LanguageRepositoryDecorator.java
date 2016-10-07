@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;

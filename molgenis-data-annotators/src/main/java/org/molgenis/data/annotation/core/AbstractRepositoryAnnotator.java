@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -30,13 +30,13 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			{
 				// allow type string when required attribute is text (for backward compatibility)
 				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
-						.equals(MolgenisFieldTypes.AttributeType.STRING) && annotatorAttribute.getDataType()
-						.equals(MolgenisFieldTypes.AttributeType.TEXT)))
+						.equals(AttributeType.STRING) && annotatorAttribute.getDataType()
+						.equals(AttributeType.TEXT)))
 				{
 					return "a required attribute has the wrong datatype";
 				}
 			}
-			if (annotatorAttribute.getDataType().equals(MolgenisFieldTypes.AttributeType.XREF))
+			if (annotatorAttribute.getDataType().equals(AttributeType.XREF))
 			{
 				EntityMetaData refEntity = repoMetaData.getAttribute(annotatorAttribute.getName()).getRefEntity();
 				for (AttributeMetaData refAttribute : annotatorAttribute.getRefEntity().getAtomicAttributes())

@@ -9,8 +9,8 @@ import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE_TIME;
+import static org.molgenis.AttributeType.DATE;
+import static org.molgenis.AttributeType.DATE_TIME;
 import static org.testng.Assert.assertEquals;
 
 public class DataConverterTest

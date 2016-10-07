@@ -1,6 +1,6 @@
 package org.molgenis.data.rsql;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.util.MolgenisDateFormat;

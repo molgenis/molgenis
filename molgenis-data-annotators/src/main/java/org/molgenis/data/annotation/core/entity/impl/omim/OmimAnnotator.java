@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration

@@ -3,10 +3,10 @@ package org.molgenis.data.idcard.settings;
 import org.molgenis.data.idcard.indexer.IdCardIndexerController;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
-import org.molgenis.fieldtypes.StringField;
+import org.molgenis.util.RegexUtils;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 
 @Component
 public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements IdCardIndexerSettings
@@ -74,7 +74,7 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 					.setDefaultValue(DEFAULT_BIOBANK_INDEXING_FREQUENCY).setNillable(false)
 					.setVisibleExpression("$('" + BIOBANK_INDEXING_ENABLED + "').eq(true).value()")
 					.setValidationExpression(
-							"$('" + BIOBANK_INDEXING_FREQUENCY + "').matches(" + StringField.CRON_REGEX + ").value()");
+							"$('" + BIOBANK_INDEXING_FREQUENCY + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 			addAttribute(NOTIFICATION_EMAIL).setDataType(EMAIL).setLabel("Notification email")
 					.setDescription("email address used for index failure notifications")
 					.setDefaultValue(DEFAULT_NOTIFICATION_EMAIL);

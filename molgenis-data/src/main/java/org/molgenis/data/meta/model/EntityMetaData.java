@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;

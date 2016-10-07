@@ -70,7 +70,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;

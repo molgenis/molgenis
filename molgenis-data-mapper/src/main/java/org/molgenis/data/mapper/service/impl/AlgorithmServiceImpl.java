@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.service.impl;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;

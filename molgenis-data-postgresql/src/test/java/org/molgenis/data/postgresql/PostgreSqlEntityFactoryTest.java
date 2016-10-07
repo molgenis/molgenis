@@ -12,8 +12,8 @@ import java.sql.ResultSet;
 
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.XREF;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlEntityFactoryTest

@@ -1,6 +1,6 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -19,7 +19,7 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;

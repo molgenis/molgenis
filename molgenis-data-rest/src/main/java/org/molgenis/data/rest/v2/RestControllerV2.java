@@ -1,6 +1,6 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaValidationUtils;

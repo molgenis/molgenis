@@ -14,8 +14,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.XREF;
 import static org.testng.Assert.assertEquals;
 
 public class DependencyResolverTest

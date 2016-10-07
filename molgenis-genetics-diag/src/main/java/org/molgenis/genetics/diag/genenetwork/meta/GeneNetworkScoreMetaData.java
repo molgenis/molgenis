@@ -3,7 +3,7 @@ package org.molgenis.genetics.diag.genenetwork.meta;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.molgenis.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 
 @Component

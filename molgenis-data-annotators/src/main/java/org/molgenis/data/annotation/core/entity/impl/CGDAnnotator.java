@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.*;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.GeneralizedInheritance.*;
 import static org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings.Meta.CGD_LOCATION;

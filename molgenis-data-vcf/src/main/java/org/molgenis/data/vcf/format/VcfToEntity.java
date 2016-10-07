@@ -2,7 +2,7 @@ package org.molgenis.data.vcf.format;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaValidationUtils;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;

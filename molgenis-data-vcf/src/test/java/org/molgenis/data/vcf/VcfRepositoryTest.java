@@ -1,7 +1,7 @@
 package org.molgenis.data.vcf;
 
 import org.apache.commons.io.FileUtils;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { VcfRepositoryTest.Config.class })

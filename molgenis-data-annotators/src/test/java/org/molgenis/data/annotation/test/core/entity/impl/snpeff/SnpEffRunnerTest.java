@@ -37,7 +37,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;

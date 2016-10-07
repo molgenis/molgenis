@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 
 /**
  * Repository implementation for csv files.

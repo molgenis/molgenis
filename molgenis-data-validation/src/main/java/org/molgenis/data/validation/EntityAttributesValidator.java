@@ -2,12 +2,11 @@ package org.molgenis.data.validation;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.impl.EmailValidator;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.fieldtypes.FieldType;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -19,8 +18,6 @@ import java.util.Set;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
-import static org.molgenis.MolgenisFieldTypes.getType;
 
 /**
  * Attribute data type validator.
@@ -78,16 +75,16 @@ public class EntityAttributesValidator
 					violation = checkEnum(entity, attr, meta);
 					break;
 				case HTML:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.HTML);
+					violation = checkText(entity, attr, meta, AttributeType.HTML);
 					break;
 				case SCRIPT:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.SCRIPT);
+					violation = checkText(entity, attr, meta, AttributeType.SCRIPT);
 					break;
 				case TEXT:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.TEXT);
+					violation = checkText(entity, attr, meta, AttributeType.TEXT);
 					break;
 				case STRING:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.STRING);
+					violation = checkText(entity, attr, meta, AttributeType.STRING);
 					break;
 				case CATEGORICAL:
 				case FILE:
@@ -216,7 +213,7 @@ public class EntityAttributesValidator
 			return createConstraintViolation(entity, attribute, meta, "Not a valid e-mail address.");
 		}
 
-		if (email.length() > MolgenisFieldTypes.EMAIL.getMaxLength())
+		if (email.length() > AttributeType.EMAIL.getMaxLength())
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
@@ -293,7 +290,7 @@ public class EntityAttributesValidator
 			return createConstraintViolation(entity, attribute, meta, "Not a valid hyperlink.");
 		}
 
-		if (link.length() > MolgenisFieldTypes.HYPERLINK.getMaxLength())
+		if (link.length() > AttributeType.HYPERLINK.getMaxLength())
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
@@ -354,7 +351,7 @@ public class EntityAttributesValidator
 	}
 
 	private ConstraintViolation checkText(Entity entity, AttributeMetaData attribute, EntityMetaData meta,
-			FieldType fieldType)
+			AttributeType attrType)
 	{
 		String text = entity.getString(attribute.getName());
 		if (text == null)
@@ -362,7 +359,7 @@ public class EntityAttributesValidator
 			return null;
 		}
 
-		if (text.length() > fieldType.getMaxLength())
+		if (text.length() > attrType.getMaxLength())
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
@@ -406,7 +403,7 @@ public class EntityAttributesValidator
 			message += format("Value must be between %d and %d", range.getMin(), range.getMax());
 		}
 
-		Long maxLength = getType(getValueString(attribute.getDataType())).getMaxLength();
+		Long maxLength = attribute.getDataType().getMaxLength();
 		if (maxLength != null)
 		{
 			message += format("Value must be less than or equal to %d characters", maxLength);

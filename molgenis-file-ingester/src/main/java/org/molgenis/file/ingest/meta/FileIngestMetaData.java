@@ -3,11 +3,11 @@ package org.molgenis.file.ingest.meta;
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.fieldtypes.StringField;
+import org.molgenis.util.RegexUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -50,7 +50,7 @@ public class FileIngestMetaData extends SystemEntityMetaData
 		addAttribute(ENTITY_META_DATA).setDataType(XREF).setRefEntity(entityMetaDataMetaData)
 				.setLabel("Target EntityMetaData").setNillable(false);
 		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
-				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");
+				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
 		addAttribute(FAILURE_EMAIL).setDataType(EMAIL).setLabel("Failure email")
 				.setDescription("Leave blank if you don't want to receive emails if the jobs failed.")
