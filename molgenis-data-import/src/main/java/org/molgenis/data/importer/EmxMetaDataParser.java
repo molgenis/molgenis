@@ -60,6 +60,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String LOOKUP_ATTRIBUTE = "lookupAttribute";
 	private static final String LABEL_ATTRIBUTE = "labelAttribute";
 	private static final String PART_OF_ATTRIBUTE = "partOfAttribute";
+	private static final String AGGREGATABLE = "aggregateable";
 
 	// Table names in the source
 	static final String EMX_PACKAGES = "packages";
@@ -121,7 +122,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ENTITIES_TAGS.toLowerCase());
 
 	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays
-			.asList(AGGREGATABLE.toLowerCase(), DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(),
+			.asList(AGGREGATABLE, DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(),
 					ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(), ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(),
 					LABEL_ATTRIBUTE.toLowerCase(), LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(),
 					PART_OF_ATTRIBUTE.toLowerCase(), RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(),
