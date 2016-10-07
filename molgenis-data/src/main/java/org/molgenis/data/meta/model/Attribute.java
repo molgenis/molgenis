@@ -240,12 +240,12 @@ public class Attribute extends StaticEntity
 	 */
 	public EntityType getRefEntity()
 	{
-		return getEntity(REF_ENTITY, EntityType.class);
+		return getEntity(REF_ENTITY_TYPE, EntityType.class);
 	}
 
 	public Attribute setRefEntity(EntityType refEntity)
 	{
-		set(REF_ENTITY, refEntity);
+		set(REF_ENTITY_TYPE, refEntity);
 		return this;
 	}
 

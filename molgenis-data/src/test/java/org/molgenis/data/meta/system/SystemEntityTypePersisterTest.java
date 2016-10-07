@@ -24,7 +24,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -97,7 +97,7 @@ public class SystemEntityTypePersisterTest
 	public void persistSystemPackageChange()
 	{
 		Attribute attr = mock(Attribute.class);
-		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
+		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
@@ -127,7 +127,7 @@ public class SystemEntityTypePersisterTest
 	public void persistSystemPackageNoChange()
 	{
 		Attribute attr = mock(Attribute.class);
-		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
+		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());

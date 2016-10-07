@@ -25,7 +25,7 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String TYPE = "type";
-	public static final String REF_ENTITY = "refEntity";
+	public static final String REF_ENTITY_TYPE = "refEntityType";
 
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
@@ -70,7 +70,7 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
-		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
+		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
@@ -128,7 +128,7 @@ public class AttributeMetadata extends SystemEntityType
 		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
 				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
 
-		return "$('" + REF_ENTITY + "').isNull().and($('" + TYPE + "').matches(" + regex + ").not()).or(" + "$('"
-				+ REF_ENTITY + "').isNull().not().and($('" + TYPE + "').matches(" + regex + "))).value()";
+		return "$('" + REF_ENTITY_TYPE + "').isNull().and($('" + TYPE + "').matches(" + regex + ").not()).or(" + "$('"
+				+ REF_ENTITY_TYPE + "').isNull().not().and($('" + TYPE + "').matches(" + regex + "))).value()";
 	}
 }

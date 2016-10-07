@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -49,7 +49,7 @@ public class SystemEntityTypePersister
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
 		// see the note in AttributeMetadata and the exception in DependencyResolver
-		attributeMetadata.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
+		attributeMetadata.getAttribute(REF_ENTITY_TYPE).setDataType(STRING).setRefEntity(null);
 
 		// create meta entity tables
 		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityType
@@ -73,7 +73,7 @@ public class SystemEntityTypePersister
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
 		// see the note in AttributeMetadata and the exception in DependencyResolver
-		attributeMetadata.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta);
+		attributeMetadata.getAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta);
 
 		// add default meta entities
 		ApplicationContext ctx = event.getApplicationContext();
