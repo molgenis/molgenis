@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -43,6 +44,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
 import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
+import static org.molgenis.data.QueryRule.Operator.SHOULD;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.getLowerCaseTerms;
 import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitRemoveStopWords;
 import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
@@ -114,7 +116,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		tagGroups.forEach(hit -> groupWithSameSynonym.put(hit.getMatchedWords(), hit));
 		for (String synonym : groupWithSameSynonym.keySet())
 		{
-			List<TagGroup> ontologyTermGroup = Lists.newArrayList(groupWithSameSynonym.get(synonym));
+			List<TagGroup> ontologyTermGroup = newArrayList(groupWithSameSynonym.get(synonym));
 
 			QueryRule queryRuleForOntologyTerms = createQueryRuleForOntologyTerms(ontologyTermGroup);
 
@@ -292,7 +294,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	 */
 	QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms, Float boostValue)
 	{
-		List<QueryRule> rules = new ArrayList<QueryRule>();
+		List<QueryRule> rules = newArrayList();
 		newLinkedHashSet(queryTerms).stream().filter(StringUtils::isNotEmpty)
 				.map(string -> QueryParser.escape(string).replace(ESCAPED_CARET_CHARACTER, CARET_CHARACTER))
 				.forEach(query ->
@@ -305,7 +307,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		if (rules.size() > 0)
 		{
 			finalDisMaxQuery = new QueryRule(rules);
-			finalDisMaxQuery.setOperator(Operator.DIS_MAX);
+			finalDisMaxQuery.setOperator(DIS_MAX);
 		}
 
 		if (finalDisMaxQuery != null && boostValue != null && boostValue.intValue() != 0)
@@ -321,8 +323,8 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		QueryRule shouldQueryRule = null;
 		if (queryRules.size() > 0)
 		{
-			shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
-			shouldQueryRule.setOperator(Operator.SHOULD);
+			shouldQueryRule = new QueryRule(newArrayList());
+			shouldQueryRule.setOperator(SHOULD);
 			shouldQueryRule.getNestedRules().addAll(queryRules);
 		}
 
