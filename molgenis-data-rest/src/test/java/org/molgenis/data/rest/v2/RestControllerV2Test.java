@@ -157,7 +157,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_VALUE_NAME)).addAttribute(
 						attributeFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
-								.setRefEntity(selfRefEntityType));
+								.setRefEntity(refRefEntityType));
 		// required
 		String attrIdName = "id";
 		attrBoolName = "bool";

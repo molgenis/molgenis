@@ -56,6 +56,7 @@ import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -156,6 +157,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		runAsSystem(() ->
 		{
+			addDefaultLanguages();
 			metaDataService.addEntityType(refEntityTypeDynamic);
 			metaDataService.addEntityType(entityTypeDynamic);
 			metaDataService.addEntityType(selfXrefEntityType);
@@ -177,9 +179,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_ENTITIES"));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES"));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA.toUpperCase()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA.toUpperCase()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE.toUpperCase()));
 		authorities.addAll(makeAuthorities(refEntityTypeStatic.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(entityTypeStatic.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(entityTypeDynamic.getName(), true, true, true));
