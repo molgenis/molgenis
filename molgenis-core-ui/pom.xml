@@ -42,7 +42,7 @@
                             <goal>npm</goal>
                         </goals>
                     </execution>
-                    <execution>
+                 <!--   <execution>
                         <id>update package.json version</id>
                         <goals>
                             <goal>gulp</goal>
@@ -50,7 +50,7 @@
                         <configuration>
                             <arguments>update-version</arguments>
                         </configuration>
-                    </execution>
+                    </execution> -->
                     <execution>
                         <id>npm test</id>
                         <goals>
