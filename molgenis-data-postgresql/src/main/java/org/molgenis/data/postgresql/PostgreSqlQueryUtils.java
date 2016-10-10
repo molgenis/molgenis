@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
@@ -62,14 +63,7 @@ class PostgreSqlQueryUtils
 	 */
 	static String getJunctionTableName(EntityType entityType, Attribute attr)
 	{
-		if (attr.isMappedBy())
-		{
-			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '"';
-		}
-		else
-		{
-			return '"' + entityType.getName() + '_' + attr.getName() + '"';
-		}
+		return '"' + entityType.getName() + '_' + attr.getName() + '"';
 	}
 
 	/**
@@ -82,15 +76,7 @@ class PostgreSqlQueryUtils
 	 */
 	static String getJunctionTableIndexName(EntityType entityType, Attribute attr, Attribute idxAttr)
 	{
-		if (attr.isMappedBy())
-		{
-			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '_' + idxAttr.getName()
-					+ "_idx\"";
-		}
-		else
-		{
-			return '"' + entityType.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
-		}
+		return '"' + entityType.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
 	}
 
 	/**
@@ -115,8 +101,8 @@ class PostgreSqlQueryUtils
 		// return all attributes referencing multiple entities except for one-to-many attributes that are mapped by
 		// another attribute
 		return getPersistedAttributes(entityType)
-				.filter(attr -> isMultipleReferenceType(attr) || (attr.isInversedBy() && isMultipleReferenceType(
-						attr.getInversedBy())));
+				.filter(attr -> isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr
+						.isMappedBy()));
 	}
 
 	/**
@@ -128,7 +114,8 @@ class PostgreSqlQueryUtils
 	static Stream<Attribute> getTableAttributes(EntityType entityType)
 	{
 		return getPersistedAttributes(entityType)
-				.filter(attr -> !isMultipleReferenceType(attr) && !attr.isInversedBy());
+				.filter(attr -> !isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr
+						.isMappedBy()));
 	}
 
 	/**

@@ -616,7 +616,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
 		postgreSqlRepoCollection.addAttribute(entityType, attr);
-		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
+		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -679,9 +679,9 @@ public class PostgreSqlRepositoryCollectionTest
 		when(refAttr.getInversedBy()).thenReturn(attr);
 		when(refAttr.isInversedBy()).thenReturn(true);
 
-		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
-		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test

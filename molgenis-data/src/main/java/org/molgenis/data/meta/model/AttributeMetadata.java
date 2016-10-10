@@ -21,12 +21,21 @@ public class AttributeMetadata extends SystemEntityType
 	private static final String SIMPLE_NAME = "Attribute";
 	public static final String ATTRIBUTE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	// Columns witin the Attribute repository
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String TYPE = "type";
 	public static final String REF_ENTITY_TYPE = "refEntityType";
-
+	/**
+	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
+	 */
+	public static final String MAPPED_BY = "mappedBy";
+	/**
+	 * For attributes with data type ONE_TO_MANY defines how to sort the entity collection.
+	 * Syntax: attribute_name,[ASC | DESC] [;attribute_name,[ASC | DESC]]*
+	 * - If ASC or DESC is not specified, ASC (ascending order) is assumed.
+	 * - If the ordering element is not specified, ordering by the id attribute of the associated entity is assumed.
+	 */
+	public static final String ORDER_BY = "orderBy";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 
@@ -46,11 +55,6 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String VISIBLE_EXPRESSION = "visibleExpression";
 	public static final String VALIDATION_EXPRESSION = "validationExpression";
 	public static final String DEFAULT_VALUE = "defaultValue";
-
-	/**
-	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
-	 */
-	public static final String MAPPED_BY = "mappedBy";
 
 	private TagMetaData tagMetaData;
 	private EntityTypeMetadata entityTypeMeta;
@@ -75,6 +79,9 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
 				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
+		addAttribute(ORDER_BY).setLabel("Order by").setDescription(
+				"Order expression that defines entity collection order of a onetomany attribute (e.g. \"attr0\", \"attr0,ASC\", \"attr0,DESC\" or \"attr0,ASC;attr1,DESC\"")
+				.setValidationExpression(getOrderByValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(IS_NULLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
@@ -114,6 +121,13 @@ public class AttributeMetadata extends SystemEntityType
 		return "$('" + MAPPED_BY + "').isNull().and($('" + TYPE + "').eq('" + getValueString(ONE_TO_MANY)
 				+ "').not()).or(" + "$('" + MAPPED_BY + "').isNull().not().and($('" + TYPE + "').eq('" + getValueString(
 				ONE_TO_MANY) + "'))).value()";
+	}
+
+	private static String getOrderByValidationExpression()
+	{
+		String regex = "/^\\w+(,(ASC|DESC))?(;\\w+(,(ASC|DESC))?)*$/";
+		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').matches(" + regex + ").and($('" + TYPE
+				+ "').eq('" + getValueString(ONE_TO_MANY) + "'))).value()";
 	}
 
 	private static String getEnumOptionsValidationExpression()

@@ -42,7 +42,13 @@ public class CommandLineAnnotatorConfig
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
-		systemEntityMetaMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+
+		systemEntityMetaMap.values().stream()
+				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_META_DATA)
+						|| systemEntityMeta.getName().equals(ATTRIBUTE_META_DATA)
+						|| systemEntityMeta.getName().equals(PACKAGE) || systemEntityMeta.getName()
+						.equals(TAG))
+				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
 	}
 
 	@Value("${vcf-validator-location:@null}")

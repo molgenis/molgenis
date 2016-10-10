@@ -91,6 +91,12 @@ public class IndexAction extends StaticEntity
 		return this;
 	}
 
+	/**
+	 * Returns whether two index actions are equal ignoring the auto id
+	 *
+	 * @param o other
+	 * @return {@code true} if this object is the same as the o argument; {@code false} otherwise.
+	 */
 	@Override
 	public boolean equals(Object o)
 	{
@@ -99,7 +105,6 @@ public class IndexAction extends StaticEntity
 
 		IndexAction that = (IndexAction) o;
 
-		if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
 		if (getEntityId() != null ? !getEntityId().equals(that.getEntityId()) : that.getEntityId() != null)
 			return false;
 		return getEntityFullName() != null ? getEntityFullName().equals(that.getEntityFullName()) :
@@ -107,11 +112,15 @@ public class IndexAction extends StaticEntity
 
 	}
 
+	/**
+	 * Returns a hash code value for this index action ignoring the auto id
+	 *
+	 * @return a hash code value for this object.
+	 */
 	@Override
 	public int hashCode()
 	{
-		int result = getId() != null ? getId().hashCode() : 0;
-		result = 31 * result + (getEntityId() != null ? getEntityId().hashCode() : 0);
+		int result = getEntityId() != null ? getEntityId().hashCode() : 0;
 		result = 31 * result + (getEntityFullName() != null ? getEntityFullName().hashCode() : 0);
 		return result;
 	}

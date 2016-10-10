@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
- * AuthorMetaData1 and BookMetaData1 define two entities with a OneToMany relation of which no side is required.
+ * AuthorMetaData1 and BookMetaData1 define two entities with a OneToMany relation with a nullable XREF.
  */
 @Component
 public class BookMetaData1 extends SystemEntityType

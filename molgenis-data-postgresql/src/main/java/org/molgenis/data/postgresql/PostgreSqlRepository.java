@@ -44,6 +44,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
@@ -350,7 +351,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		LOG.debug("Select ID values for a batch of MREF attributes...");
 		for (Attribute mrefAttr : entityType.getAtomicAttributes())
 		{
-			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr))
+			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr) && !(mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy()))
 			{
 				EntityType refEntityType = mrefAttr.getRefEntity();
 				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityType, idAttributeDataType, mrefAttr,

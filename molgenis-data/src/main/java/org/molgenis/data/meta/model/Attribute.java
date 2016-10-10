@@ -77,6 +77,7 @@ public class Attribute extends StaticEntity
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
 		attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
+		attrMetaCopy.setOrderBy(attrMeta.getOrderBy());
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -266,6 +267,19 @@ public class Attribute extends StaticEntity
 	public boolean isMappedBy()
 	{
 		return getMappedBy() != null;
+	}
+
+	public Sort getOrderBy()
+	{
+		String orderByStr = getString(ORDER_BY);
+		return orderByStr != null ? Sort.parse(orderByStr) : null;
+	}
+
+	public AttributeMetaData setOrderBy(Sort sort)
+	{
+		String orderByStr = sort != null ? sort.toSortString() : null;
+		set(ORDER_BY, orderByStr);
+		return this;
 	}
 
 	/**

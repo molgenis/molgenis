@@ -42,27 +42,13 @@ class PostgreSqlQueryGenerator
 
 	private static String getSqlForeignKey(EntityType entityType, Attribute attr)
 	{
-		Attribute foreignKeyAttr;
-		if (attr.isMappedBy())
-		{
-			foreignKeyAttr = attr.getRefEntity().getIdAttribute();
-		}
-		else
-		{
-			foreignKeyAttr = attr;
-		}
 		StringBuilder strBuilder = new StringBuilder("CONSTRAINT ").append(getForeignKeyName(entityType, attr))
-				.append(" FOREIGN KEY (").append(getColumnName(foreignKeyAttr)).append(") REFERENCES ")
+				.append(" FOREIGN KEY (").append(getColumnName(attr)).append(") REFERENCES ")
 				.append(getTableName(attr.getRefEntity())).append('(')
 				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
 
-		if (attr.isInversedBy() || attr.isMappedBy())
-		{
-			strBuilder.append(" ON DELETE CASCADE");
-		}
-
 		// for self-referencing data or inversed attributes defer checking constraints until the end of the transaction
-		if (attr.getRefEntity().getName().equals(entityType.getName()) || attr.isInversedBy())
+		if (attr.getRefEntity().getName().equals(entityType.getName()))
 		{
 			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
@@ -90,16 +76,7 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateForeignKey(EntityType entityType, Attribute attr)
 	{
-		String tableName;
-		if (attr.isMappedBy())
-		{
-			tableName = getJunctionTableName(entityType, attr);
-		}
-		else
-		{
-			tableName = getTableName(entityType);
-		}
-		return "ALTER TABLE " + tableName + " ADD " + getSqlForeignKey(entityType, attr);
+		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlForeignKey(entityType, attr);
 	}
 
 	static String getSqlDropForeignKey(EntityType entityType, Attribute attr)
@@ -155,33 +132,14 @@ class PostgreSqlQueryGenerator
 	 *
 	 * @param entityType entity meta data
 	 * @param attr       attribute
-	 * @return SQL string or <code>null</code> if no table changes are required
+	 * @return SQL string
 	 */
 	static String getSqlAddColumn(EntityType entityType, Attribute attr)
 	{
 		StringBuilder sql = new StringBuilder("ALTER TABLE ");
 
-		EntityType tableEntityType;
-		String columnSql;
-		boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
-		if (bidirectionalOneToMany)
-		{
-			tableEntityType = attr.getRefEntity();
-			if (tableEntityType.getBackend().equals(POSTGRESQL))
-			{
-				columnSql = getSqlOrderColumn(attr);
-			}
-			else
-			{
-				return null;
-			}
-		}
-		else
-		{
-			tableEntityType = entityType;
-			columnSql = getSqlColumn(entityType, attr);
-		}
-		sql.append(getTableName(tableEntityType)).append(" ADD ").append(columnSql);
+		String columnSql = getSqlColumn(entityType, attr);
+		sql.append(getTableName(entityType)).append(" ADD ").append(columnSql);
 
 		List<String> sqlTableConstraints = getSqlTableConstraints(entityType, attr);
 		if (!sqlTableConstraints.isEmpty())
@@ -226,30 +184,19 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)
 	{
-		if (attr.isMappedBy())
-		{
-			entityType = attr.getRefEntity();
-			attr = attr.getMappedBy();
-		}
-
 		Attribute idAttr = entityType.getIdAttribute();
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityType, attr))
 				.append(" (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
 				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
 				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
-				.append(" NOT NULL");
+				.append(" NOT NULL").append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
+				.append(getTableName(entityType)).append('(').append(getColumnName(idAttr))
+				.append(") ON DELETE CASCADE");
 
-		if (!attr.isInversedBy())
+		// for self-referencing data defer checking constraints until the end of the transaction
+		if (attr.getRefEntity().getName().equals(entityType.getName()))
 		{
-			sql.append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
-					.append(getTableName(entityType)).append('(').append(getColumnName(idAttr))
-					.append(") ON DELETE CASCADE");
-
-			// for self-referencing data defer checking constraints until the end of the transaction
-			if (attr.getRefEntity().getName().equals(entityType.getName()))
-			{
-				sql.append(" DEFERRABLE INITIALLY DEFERRED");
-			}
+			sql.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
 
 		if (isPersistedInPostgreSql(attr.getRefEntity()))
@@ -265,12 +212,9 @@ class PostgreSqlQueryGenerator
 			}
 		}
 
-		AttributeType attrType = attr.isInversedBy() ? attr.getInversedBy().getDataType() : attr.getDataType();
+		AttributeType attrType = attr.getDataType();
 		switch (attrType)
 		{
-			case ONE_TO_MANY:
-				sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(')');
-				break;
 			case CATEGORICAL_MREF:
 			case MREF:
 				sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(',').append(getColumnName(attr))
@@ -289,7 +233,7 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateJunctionTableIndex(EntityType entityType, Attribute attr)
 	{
-		Attribute idAttr = attr.isMappedBy() ? attr.getRefEntity().getIdAttribute() : entityType.getIdAttribute();
+		Attribute idAttr = entityType.getIdAttribute();
 		String junctionTableName = getJunctionTableName(entityType, attr);
 		String junctionTableIndexName = getJunctionTableIndexName(entityType, attr, idAttr);
 		String idxColumnName = getColumnName(idAttr);
@@ -308,18 +252,7 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlDropColumn(EntityType entityType, Attribute attr)
 	{
-		String tableName, columnName;
-		if (attr.getDataType() == ONE_TO_MANY && attr.getMappedBy() != null)
-		{
-			tableName = getTableName(attr.getRefEntity());
-			columnName = getSequenceColumnName(attr);
-		}
-		else
-		{
-			tableName = getTableName(entityType);
-			columnName = getColumnName(attr);
-		}
-		return "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
+		return "ALTER TABLE " + getTableName(entityType) + " DROP COLUMN " + getColumnName(attr);
 	}
 
 	static String getSqlInsert(EntityType entityType)
@@ -342,29 +275,9 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlInsertJunction(EntityType entityType, Attribute attr)
 	{
-		Attribute junctionAttr1;
-		if (attr.isMappedBy())
-		{
-			junctionAttr1 = attr.getRefEntity().getIdAttribute();
-		}
-		else
-		{
-			junctionAttr1 = entityType.getIdAttribute();
-		}
-
-		Attribute junctionAttr2;
-		if (attr.isMappedBy())
-		{
-			junctionAttr2 = attr.getMappedBy();
-		}
-		else
-		{
-			junctionAttr2 = attr;
-		}
-
 		String junctionTableName = getJunctionTableName(entityType, attr);
 		return "INSERT INTO " + junctionTableName + " (" + getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME) + ','
-				+ getColumnName(junctionAttr1) + ',' + getColumnName(junctionAttr2) + ") VALUES (?,?,?)";
+				+ getColumnName(entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
 	}
 
 	static String getSqlDeleteAll(EntityType entityType)
@@ -382,24 +295,23 @@ class PostgreSqlQueryGenerator
 		return "DELETE FROM " + tableName + " WHERE " + getColumnName(attr) + " = ?";
 	}
 
-	private static boolean isJunctionTableAttribute(Attribute attr)
+	/**
+	 * Returns whether this attribute is stored in the entity table or another table such as a junction table or
+	 * referenced entity table.
+	 *
+	 * @param attr attribute
+	 * @return whether this attribute is stored in another table than the entity table
+	 */
+	private static boolean isPersistedInOtherTable(AttributeMetaData attr)
 	{
-		return isMultipleReferenceType(attr) || (attr.isInversedBy() && isMultipleReferenceType(attr.getInversedBy()));
+		boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
+		return isMultipleReferenceType(attr) || bidirectionalOneToMany;
 	}
 
 	static String getSqlJunctionTableSelect(EntityType entityType, Attribute attr, int numOfIds)
 	{
-		String idColName, refIdColName;
-		if (attr.isMappedBy())
-		{
-			idColName = getColumnName(attr.getMappedBy());
-			refIdColName = getColumnName(attr.getRefEntity().getIdAttribute());
-		}
-		else
-		{
-			idColName = getColumnName(entityType.getIdAttribute());
-			refIdColName = getColumnName(attr);
-		}
+		String idColName = getColumnName(entityType.getIdAttribute());
+		String refIdColName = getColumnName(attr);
 
 		return "SELECT " + idColName + ", \"" + JUNCTION_TABLE_ORDER_ATTR_NAME + "\"," + refIdColName + " FROM "
 				+ getJunctionTableName(entityType, attr) + " WHERE " + idColName + " in (" + range(0, numOfIds)
@@ -447,7 +359,7 @@ class PostgreSqlQueryGenerator
 						throw new UnknownAttributeException(
 								format("Unknown attribute [%s] in entity [%s]", attrName, entityType.getName()));
 					}
-					if (isJunctionTableAttribute(attr))
+					if (isPersistedInOtherTable(attr))
 					{
 						return true;
 					}
@@ -478,39 +390,37 @@ class PostgreSqlQueryGenerator
 					select.append(", ");
 				}
 
-				if (isJunctionTableAttribute(attr))
+				if (isPersistedInOtherTable(attr))
 				{
-					if (includeMrefs)
+					if (includeMrefs || (attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 					{
-						// TODO retrieve mref values in separate queries to allow specifying limit and offset after nested MOLGENIS queries are implemented as sub-queries instead of query rules
-						String mrefSelect;
-						if (attr.isMappedBy())
+						if (attr.getDataType() == ONE_TO_MANY && attr.isMappedBy())
 						{
-							mrefSelect = MessageFormat
-									.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{4}::TEXT]) "
-													+ "FROM {2} AS {0} WHERE this.{3} = {0}.{5}) AS {0}", getColumnName(attr),
-											getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-											getJunctionTableName(entityType, attr), getColumnName(idAttribute),
-											getColumnName(attr.getRefEntity().getIdAttribute()),
-											getColumnName(attr.getMappedBy()));
-						}
-						else if (attr.isInversedBy() && isSingleReferenceType(attr))
-						{
-							mrefSelect = MessageFormat
-									.format("(SELECT {0}.{0} FROM {1} AS {0} WHERE this.{2} = {0}.{2}) AS {0}",
-											getColumnName(attr), getJunctionTableName(entityType, attr),
-											getColumnName(entityType.getIdAttribute()));
+							Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
+							String mrefSelect = "(SELECT array_agg(" + getColumnName(refIdAttr);
+
+							Sort orderBy = attr.getOrderBy();
+							if (orderBy == null)
+							{
+								orderBy = new Sort(refIdAttr.getName());
+							}
+
+							mrefSelect += ' ' + getSqlSort(attr.getRefEntity(), new QueryImpl<>().sort(orderBy)) + ") FROM "
+									+ getTableName(attr.getRefEntity()) + " WHERE this." + getColumnName(idAttribute)
+									+ " = " + getTableName(attr.getRefEntity()) + '.' + getColumnName(
+									attr.getMappedBy()) + ") AS " + getColumnName(attr);
+							select.append(mrefSelect);
 						}
 						else
 						{
-
-							mrefSelect = MessageFormat
+							// TODO retrieve mref values in separate queries to allow specifying limit and offset after nested MOLGENIS queries are implemented as sub-queries instead of query rules
+							String mrefSelect = MessageFormat
 									.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
 													+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
 											getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
 											getJunctionTableName(entityType, attr), getColumnName(idAttribute));
+							select.append(mrefSelect);
 						}
-						select.append(mrefSelect);
 					}
 					else
 					{
@@ -610,23 +520,7 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static String getSqlOrderColumn(Attribute attr)
-	{
-		return getSequenceColumnName(attr) + " SERIAL";
-	}
-
-	/**
-	 * Returns the name of the sequence column of the many to one attribute.
-	 *
-	 * @param attr many to one attribute
-	 * @return sequence column name
-	 */
-	static String getSequenceColumnName(Attribute attr)
-	{
-		return getColumnName(attr.getMappedBy().getName() + "_order");
-	}
-
-	private static String getSqlColumn(EntityType entityType, Attribute attr)
+	private static String getSqlColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		StringBuilder sqlBuilder = new StringBuilder(getColumnName(attr)).append(' ');
 
@@ -729,7 +623,7 @@ class PostgreSqlQueryGenerator
 				{
 					throw new MolgenisDataException(format("Unknown attribute [%s]", r.getField()));
 				}
-				if (isJunctionTableAttribute(attr))
+				if (isPersistedInOtherTable(attr))
 				{
 					mrefFilterIndex++;
 				}
@@ -752,7 +646,7 @@ class PostgreSqlQueryGenerator
 					break;
 				case LIKE:
 					String columnName;
-					if (isJunctionTableAttribute(attr))
+					if (isPersistedInOtherTable(attr))
 					{
 						columnName = getFilterColumnName(attr, mrefFilterIndex);
 					}
@@ -800,7 +694,7 @@ class PostgreSqlQueryGenerator
 						parameters.add(postgreSqlId);
 					}
 
-					if (isJunctionTableAttribute(attr))
+					if (isPersistedInOtherTable(attr))
 					{
 						result.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -830,7 +724,7 @@ class PostgreSqlQueryGenerator
 					parameters.add(rangeValues.next()); // to
 
 					StringBuilder column = new StringBuilder();
-					if (isJunctionTableAttribute(attr))
+					if (isPersistedInOtherTable(attr))
 					{
 						column.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -843,7 +737,7 @@ class PostgreSqlQueryGenerator
 					result.append(predicate);
 					break;
 				case EQUALS:
-					if (isJunctionTableAttribute(attr))
+					if (isPersistedInOtherTable(attr))
 					{
 						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -897,7 +791,7 @@ class PostgreSqlQueryGenerator
 				case GREATER_EQUAL:
 				case LESS:
 				case LESS_EQUAL:
-					if (isJunctionTableAttribute(attr))
+					if (isPersistedInOtherTable(attr))
 					{
 						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -960,7 +854,7 @@ class PostgreSqlQueryGenerator
 			for (Sort.Order o : q.getSort())
 			{
 				Attribute attr = entityType.getAttribute(o.getAttr());
-				if (isJunctionTableAttribute(attr))
+				if (isPersistedInOtherTable(attr))
 				{
 					sortSql.append(", ").append(getColumnName(attr));
 				}
@@ -988,8 +882,8 @@ class PostgreSqlQueryGenerator
 
 	private static <E extends Entity> String getSqlFrom(EntityType entityType, Query<E> q)
 	{
-		List<Attribute> mrefAttrsInQuery = getJunctionTableQueryAttrs(entityType, q);
-		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityType)).append(" AS this");
+		List<Attribute> mrefAttrsInQuery = getJoinQueryAttrs(entityMeta, q);
+		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityMeta)).append(" AS this");
 
 		Attribute idAttribute = entityType.getIdAttribute();
 
@@ -997,10 +891,11 @@ class PostgreSqlQueryGenerator
 		{
 			// extra join so we can filter on the mrefs
 			Attribute mrefAttr = mrefAttrsInQuery.get(i);
-			if (mrefAttr.isMappedBy())
+
+			if (mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy())
 			{
 				// query table of referenced entity
-				from.append(" LEFT JOIN ").append(getJunctionTableName(entityType, mrefAttr)).append(" AS ")
+				from.append(" LEFT JOIN ").append(getTableName(mrefAttr.getRefEntity())).append(" AS ")
 						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
 						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
 						.append('.').append(getColumnName(mrefAttr.getMappedBy())).append(')');
@@ -1018,7 +913,7 @@ class PostgreSqlQueryGenerator
 		return from.toString();
 	}
 
-	static String getColumnName(Attribute attr)
+	private static String getColumnName(Attribute attr)
 	{
 		return getColumnName(attr.getName());
 	}
@@ -1058,30 +953,30 @@ class PostgreSqlQueryGenerator
 		return '"' + entityType.getName() + '_' + attr.getName() + '_' + constraintPostfix + '"';
 	}
 
-	private static <E extends Entity> List<Attribute> getJunctionTableQueryAttrs(EntityType entityType, Query<E> q)
+	private static <E extends Entity> List<Attribute> getJoinQueryAttrs(EntityType entityType, Query<E> q)
 	{
-		List<Attribute> junctionTableQueryAttrs = Lists.newArrayList();
-		getJunctionTableQueryAttrsRec(entityType, q.getRules(), junctionTableQueryAttrs);
-		return junctionTableQueryAttrs;
+		List<Attribute> joinAttrs = Lists.newArrayList();
+		getJoinQueryAttrsRec(entityType, q.getRules(), joinAttrs);
+		return joinAttrs;
 	}
 
-	private static void getJunctionTableQueryAttrsRec(EntityType entityType, List<QueryRule> rules,
-			List<Attribute> junctionTableQueryAttrs)
+	private static void getJoinQueryAttrsRec(EntityType entityType, List<QueryRule> rules,
+			List<Attribute> joinAttrs)
 	{
 		for (QueryRule rule : rules)
 		{
 			if (rule.getField() != null)
 			{
 				Attribute attr = entityType.getAttribute(rule.getField());
-				if (attr != null && isJunctionTableAttribute(attr))
+				if (attr != null && isPersistedInOtherTable(attr))
 				{
-					junctionTableQueryAttrs.add(attr);
+					joinAttrs.add(attr);
 				}
 			}
 
 			if (rule.getNestedRules() != null && !rule.getNestedRules().isEmpty())
 			{
-				getJunctionTableQueryAttrsRec(entityType, rule.getNestedRules(), junctionTableQueryAttrs);
+				getJoinQueryAttrsRec(entityType, rule.getNestedRules(), joinAttrs);
 			}
 		}
 	}
