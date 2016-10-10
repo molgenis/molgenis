@@ -22,7 +22,6 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
-import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
 /**
@@ -302,7 +301,7 @@ class PostgreSqlQueryGenerator
 	 * @param attr attribute
 	 * @return whether this attribute is stored in another table than the entity table
 	 */
-	private static boolean isPersistedInOtherTable(AttributeMetaData attr)
+	private static boolean isPersistedInOtherTable(Attribute attr)
 	{
 		boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
 		return isMultipleReferenceType(attr) || bidirectionalOneToMany;
@@ -405,10 +404,11 @@ class PostgreSqlQueryGenerator
 								orderBy = new Sort(refIdAttr.getName());
 							}
 
-							mrefSelect += ' ' + getSqlSort(attr.getRefEntity(), new QueryImpl<>().sort(orderBy)) + ") FROM "
-									+ getTableName(attr.getRefEntity()) + " WHERE this." + getColumnName(idAttribute)
-									+ " = " + getTableName(attr.getRefEntity()) + '.' + getColumnName(
-									attr.getMappedBy()) + ") AS " + getColumnName(attr);
+							mrefSelect +=
+									' ' + getSqlSort(attr.getRefEntity(), new QueryImpl<>().sort(orderBy)) + ") FROM "
+											+ getTableName(attr.getRefEntity()) + " WHERE this." + getColumnName(
+											idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
+											+ getColumnName(attr.getMappedBy()) + ") AS " + getColumnName(attr);
 							select.append(mrefSelect);
 						}
 						else
@@ -520,7 +520,7 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static String getSqlColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlColumn(EntityType entityType, Attribute attr)
 	{
 		StringBuilder sqlBuilder = new StringBuilder(getColumnName(attr)).append(' ');
 
@@ -882,8 +882,8 @@ class PostgreSqlQueryGenerator
 
 	private static <E extends Entity> String getSqlFrom(EntityType entityType, Query<E> q)
 	{
-		List<Attribute> mrefAttrsInQuery = getJoinQueryAttrs(entityMeta, q);
-		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityMeta)).append(" AS this");
+		List<Attribute> mrefAttrsInQuery = getJoinQueryAttrs(entityType, q);
+		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityType)).append(" AS this");
 
 		Attribute idAttribute = entityType.getIdAttribute();
 
@@ -960,8 +960,7 @@ class PostgreSqlQueryGenerator
 		return joinAttrs;
 	}
 
-	private static void getJoinQueryAttrsRec(EntityType entityType, List<QueryRule> rules,
-			List<Attribute> joinAttrs)
+	private static void getJoinQueryAttrsRec(EntityType entityType, List<QueryRule> rules, List<Attribute> joinAttrs)
 	{
 		for (QueryRule rule : rules)
 		{

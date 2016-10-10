@@ -1,8 +1,6 @@
 package org.molgenis.test.data.staticentity.bidirectional.authorbook3;
 
 import org.molgenis.data.Sort;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;

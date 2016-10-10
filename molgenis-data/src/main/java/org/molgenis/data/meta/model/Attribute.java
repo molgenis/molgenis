@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.List;
@@ -275,7 +276,7 @@ public class Attribute extends StaticEntity
 		return orderByStr != null ? Sort.parse(orderByStr) : null;
 	}
 
-	public AttributeMetaData setOrderBy(Sort sort)
+	public Attribute setOrderBy(Sort sort)
 	{
 		String orderByStr = sort != null ? sort.toSortString() : null;
 		set(ORDER_BY, orderByStr);

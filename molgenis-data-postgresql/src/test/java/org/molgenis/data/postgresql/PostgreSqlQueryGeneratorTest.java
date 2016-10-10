@@ -366,7 +366,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute("refIdAttr")).thenReturn(refIdAttr);
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("refAttr").getMock();
 		when(refAttr.getDataType()).thenReturn(XREF);
 
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();

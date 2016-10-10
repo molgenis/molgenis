@@ -362,7 +362,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	public void testUpdateParentOrderAscending()
 	{
 		List<Entity> persons = importPersons(ASCENDING_ORDER);
-		String personName = persons.get(0).getEntityMetaData().getName();
+		String personName = persons.get(0).getEntityType().getName();
 
 		Entity person1 = dataService.findOneById(personName, PERSON_1);
 		Entity person2 = dataService.findOneById(personName, PERSON_2);
@@ -387,7 +387,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	public void testUpdateParentOrderDescending()
 	{
 		List<Entity> persons = importPersons(DESCENDING_ORDER);
-		String personName = persons.get(0).getEntityMetaData().getName();
+		String personName = persons.get(0).getEntityType().getName();
 
 		Entity person1 = dataService.findOneById(personName, PERSON_1);
 		Entity person2 = dataService.findOneById(personName, PERSON_2);

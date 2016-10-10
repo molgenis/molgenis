@@ -24,6 +24,11 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
+
 /**
  * Commandline-specific annotator configuration.
  */
@@ -44,11 +49,11 @@ public class CommandLineAnnotatorConfig
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
 
 		systemEntityMetaMap.values().stream()
-				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_META_DATA)
+				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_TYPE_META_DATA)
 						|| systemEntityMeta.getName().equals(ATTRIBUTE_META_DATA)
 						|| systemEntityMeta.getName().equals(PACKAGE) || systemEntityMeta.getName()
 						.equals(TAG))
-				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
 	}
 
 	@Value("${vcf-validator-location:@null}")

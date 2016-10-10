@@ -88,9 +88,7 @@ public class SystemEntityTypePersisterTest
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
 				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
 		systemEntityTypePersister.removeNonExistingSystemEntities();
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), captor.capture());
-		assertEquals(captor.getValue().collect(toList()), Arrays.asList(removedMeta, refRemovedMeta));
+		verify(metaDataService).deleteEntityType(newArrayList(refRemovedMeta, removedMeta));
 	}
 
 	@Test

@@ -139,15 +139,15 @@ public class RestServiceTest
 	@Test
 	public void updateMappedByEntitiesEntity() {
 		String refEntityName = "refEntityName";
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 
 		String mappedByAttrName = "mappedByAttr";
-		AttributeMetaData mappedByAttr = mock(AttributeMetaData.class);
+		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn(mappedByAttrName);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		EntityType entityMeta = mock(EntityType.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
@@ -161,7 +161,7 @@ public class RestServiceTest
 
 		Entity entity = mock(Entity.class);
 		when(entity.getEntities(oneToManyAttrName)).thenReturn(newArrayList(refEntity0, refEntity1));
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entity.getEntityType()).thenReturn(entityMeta);
 		restService.updateMappedByEntities(entity);
 
 		//noinspection unchecked
@@ -177,15 +177,15 @@ public class RestServiceTest
 	@Test
 	public void updateMappedByEntitiesEntityEntity() {
 		String refEntityName = "refEntityName";
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 
 		String mappedByAttrName = "mappedByAttr";
-		AttributeMetaData mappedByAttr = mock(AttributeMetaData.class);
+		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn(mappedByAttrName);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		EntityType entityMeta = mock(EntityType.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
@@ -200,11 +200,11 @@ public class RestServiceTest
 
 		Entity entity = mock(Entity.class);
 		when(entity.getEntities(oneToManyAttrName)).thenReturn(newArrayList(refEntity0, refEntity1));
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entity.getEntityType()).thenReturn(entityMeta);
 
 		Entity existingEntity = mock(Entity.class);
 		when(existingEntity.getEntities(oneToManyAttrName)).thenReturn(newArrayList(refEntity1, refEntity2));
-		when(existingEntity.getEntityMetaData()).thenReturn(entityMeta);
+		when(existingEntity.getEntityType()).thenReturn(entityMeta);
 
 		restService.updateMappedByEntities(entity, existingEntity);
 

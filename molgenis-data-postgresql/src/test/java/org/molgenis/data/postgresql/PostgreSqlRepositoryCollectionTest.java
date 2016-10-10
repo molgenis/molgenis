@@ -679,7 +679,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(refAttr.getInversedBy()).thenReturn(attr);
 		when(refAttr.isInversedBy()).thenReturn(true);
 
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
 		verifyZeroInteractions(jdbcTemplate);
 	}

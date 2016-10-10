@@ -484,11 +484,11 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	 * @param orderBy orderBy of attribute
 	 * @throws MolgenisDataException if orderBy contains attribute names that do not exist in the referenced entity.
 	 */
-	private void validateOrderBy(AttributeMetaData attr, Sort orderBy)
+	private void validateOrderBy(Attribute attr, Sort orderBy)
 	{
 		if (orderBy != null)
 		{
-			EntityMetaData refEntity = attr.getRefEntity();
+			EntityType refEntity = attr.getRefEntity();
 			if (refEntity != null)
 			{
 				for (Sort.Order orderClause : orderBy)
@@ -498,7 +498,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 					{
 						throw new MolgenisDataException(
 								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getName(), refAttrName, getEntityMetaData().getName(), attr.getName(),
+										refEntity.getName(), refAttrName, getEntityType().getName(), attr.getName(),
 										orderBy.toSortString()));
 					}
 				}

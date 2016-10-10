@@ -479,7 +479,7 @@ public class RestService
 	 */
 	public void updateMappedByEntities(@Nonnull Entity entity, @Nullable Entity existingEntity)
 	{
-		entity.getEntityMetaData().getMappedByAttributes().forEach(mappedByAttr ->
+		entity.getEntityType().getMappedByAttributes().forEach(mappedByAttr ->
 		{
 			AttributeType type = mappedByAttr.getDataType();
 			switch (type)
@@ -503,7 +503,7 @@ public class RestService
 	 * @param attr           bidirectional one-to-many attribute
 	 */
 	private void updateMappedByEntitiesOneToMany(@Nonnull Entity entity, @Nullable Entity existingEntity,
-			@Nonnull AttributeMetaData attr)
+			@Nonnull Attribute attr)
 	{
 		if (attr.getDataType() != ONE_TO_MANY || !attr.isMappedBy())
 		{
@@ -513,7 +513,7 @@ public class RestService
 		}
 
 		// update ref entities of created/updated entity
-		AttributeMetaData refAttr = attr.getMappedBy();
+		Attribute refAttr = attr.getMappedBy();
 		Stream<Entity> stream = stream(entity.getEntities(attr.getName()).spliterator(), false);
 		if (existingEntity != null)
 		{
@@ -529,7 +529,7 @@ public class RestService
 				throw new MolgenisDataException(
 						format("Updating [%s] with id [%s] not allowed: [%s] is already referred to by another [%s]",
 								attr.getRefEntity().getName(), refEntity.getIdValue().toString(), refAttr.getName(),
-								entity.getEntityMetaData().getName()));
+								entity.getEntityType().getName()));
 			}
 
 			refEntity.set(refAttr.getName(), entity);

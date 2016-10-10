@@ -184,7 +184,7 @@ public class PostgreSqlEntityFactory
 			String[] postgreSqlMrefIds = (String[]) arrayValue.getArray();
 			if (postgreSqlMrefIds.length > 0 && postgreSqlMrefIds[0] != null)
 			{
-				Attribute idAttr = entityMeta.getIdAttribute();
+				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[postgreSqlMrefIds.length];
 				for (int i = 0; i < postgreSqlMrefIds.length; ++i)
 				{

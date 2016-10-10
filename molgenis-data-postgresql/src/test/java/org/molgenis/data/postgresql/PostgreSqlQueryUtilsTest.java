@@ -78,7 +78,7 @@ public class PostgreSqlQueryUtilsTest
 		when(entityType.getAtomicAttributes())
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
 		List<Attribute> junctionTableAttrs = newArrayList(mrefAttr);
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableAttributes(entityMeta).collect(toList()), junctionTableAttrs);
+		assertEquals(PostgreSqlQueryUtils.getJunctionTableAttributes(entityType).collect(toList()), junctionTableAttrs);
 	}
 
 	@Test
@@ -103,7 +103,7 @@ public class PostgreSqlQueryUtilsTest
 		when(entityType.getAtomicAttributes())
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
 		List<Attribute> junctionTableAttrs = newArrayList(stringAttr, xrefAttr, xrefAttrInversedBy);
-		assertEquals(PostgreSqlQueryUtils.getTableAttributes(entityMeta).collect(toList()), junctionTableAttrs);
+		assertEquals(PostgreSqlQueryUtils.getTableAttributes(entityType).collect(toList()), junctionTableAttrs);
 	}
 
 	@Test

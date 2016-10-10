@@ -658,7 +658,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String addColumnSql = getSqlAddColumn(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			LOG.debug("Creating column for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", addColumnSql);
