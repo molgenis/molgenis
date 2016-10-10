@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.web;
 
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
 
@@ -16,6 +16,6 @@ public interface AnnotationService
 
 	List<RepositoryAnnotator> getAllAnnotators();
 
-	List<RepositoryAnnotator> getAnnotatorsByMetaData(EntityMetaData metaData);
+	List<RepositoryAnnotator> getAnnotatorsByMetaData(EntityType metaData);
 
 }

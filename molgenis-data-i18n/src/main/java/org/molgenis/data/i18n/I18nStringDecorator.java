@@ -2,7 +2,7 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -62,10 +62,9 @@ public class I18nStringDecorator implements Repository<Entity>
 		return decorated.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decorated.getEntityMetaData();
+		return decorated.getEntityType();
 	}
 
 	@Override

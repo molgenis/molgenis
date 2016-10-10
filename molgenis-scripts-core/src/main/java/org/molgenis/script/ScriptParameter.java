@@ -1,7 +1,7 @@
 package org.molgenis.script;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.script.ScriptParameterMetaData.NAME;
@@ -13,14 +13,14 @@ public class ScriptParameter extends StaticEntity
 		super(entity);
 	}
 
-	public ScriptParameter(EntityMetaData entityMeta)
+	public ScriptParameter(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public ScriptParameter(String name, EntityMetaData entityMeta)
+	public ScriptParameter(String name, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setName(name);
 	}
 

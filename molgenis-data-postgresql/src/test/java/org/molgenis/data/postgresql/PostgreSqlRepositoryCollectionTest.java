@@ -6,7 +6,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testng.annotations.BeforeMethod;
@@ -19,8 +19,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.testng.Assert.assertEquals;
 
@@ -45,28 +45,28 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test
 	public void updateAttribute()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getLabel()).thenReturn("label");
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getLabel()).thenReturn("updated label");
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void updateAttributeNillableToNotNillable()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(true);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isNillable()).thenReturn(false);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate).execute(captor.capture());
 		assertEquals(captor.getValue(), "ALTER TABLE \"entity\" ALTER COLUMN \"attr\" SET NOT NULL");
@@ -75,14 +75,14 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test
 	public void updateAttributeNotNillableToNillable()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isNillable()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate).execute(captor.capture());
 		assertEquals(captor.getValue(), "ALTER TABLE \"entity\" ALTER COLUMN \"attr\" DROP NOT NULL");
@@ -91,28 +91,28 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void updateAttributeNotNillableToNillableIdAttr()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		when(entityMeta.getIdAttribute()).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getIdAttribute()).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isNillable()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Test
 	public void updateAttributeUniqueToNotUnique()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isUnique()).thenReturn(true);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isUnique()).thenReturn(false);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate).execute(captor.capture());
 		assertEquals(captor.getValue(), "ALTER TABLE \"entity\" DROP CONSTRAINT \"entity_attr_key\"");
@@ -121,28 +121,28 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void updateAttributeUniqueToNotUniqueIdAttr()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(attr);
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getIdAttribute()).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isUnique()).thenReturn(true);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isUnique()).thenReturn(false);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Test
 	public void updateAttributeNotUniqueToUnique()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isUnique()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isUnique()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate).execute(captor.capture());
 		assertEquals(captor.getValue(), "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_key\" UNIQUE (\"attr\")");
@@ -151,14 +151,14 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test
 	public void updateAttributeDataTypeToDataType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(STRING);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(INT);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate).execute(captor.capture());
 		assertEquals(captor.getValue(),
@@ -168,14 +168,14 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test
 	public void updateAttributeSingleRefDataTypeToDataType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(XREF);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(STRING);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(2)).execute(captor.capture());
 		assertEquals(captor.getAllValues(), newArrayList("ALTER TABLE \"entity\" DROP CONSTRAINT \"entity_attr_fkey\"",
@@ -185,28 +185,28 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test
 	public void updateAttributeSingleRefDataTypeToSingleRefDataType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(XREF);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(CATEGORICAL);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void updateAttributeMultiRefDataTypeToMultiRefDataType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(MREF);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(CATEGORICAL_MREF);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
@@ -215,17 +215,17 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType refEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(STRING);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(XREF);
-		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		when(updatedAttr.getRefEntity()).thenReturn(refEntityType);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(2)).execute(captor.capture());
 		assertEquals(captor.getAllValues(), newArrayList(
@@ -236,24 +236,24 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void updateAttributeDataTypeToDataTypeIdAttr()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(attr);
+		when(entityType.getIdAttribute()).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(STRING);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(updatedAttr.getDataType()).thenReturn(INT);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Test
 	public void updateAttributeWithExpressionBefore()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getExpression()).thenReturn("expression");
 		when(attr.getDataType()).thenReturn(STRING);
 		when(attr.isNillable()).thenReturn(false);
@@ -261,127 +261,127 @@ public class PostgreSqlRepositoryCollectionTest
 		when(updatedAttr.getExpression()).thenReturn(null);
 		when(updatedAttr.getDataType()).thenReturn(STRING);
 		when(updatedAttr.isNillable()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" ADD \"attr\" character varying(255)");
 	}
 
 	@Test
 	public void updateAttributeWithExpressionAfter()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getDataType()).thenReturn(STRING);
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getExpression()).thenReturn(null);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getExpression()).thenReturn("expression");
 		when(updatedAttr.isNillable()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
 	}
 
 	@Test
 	public void updateAttributeWithExpressionBeforeAfter()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getExpression()).thenReturn("expression");
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getExpression()).thenReturn("expression");
 		when(updatedAttr.isNillable()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void updateAttributeCompoundBefore()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(COMPOUND);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(STRING);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL");
 	}
 
 	@Test
 	public void updateAttributeCompoundAfter()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(STRING);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(COMPOUND);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
 	}
 
 	@Test
 	public void updateAttributeCompoundBeforeAfter()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(COMPOUND);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(COMPOUND);
 		when(updatedAttr.isNillable()).thenReturn(true);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void updateAttributeAbstractEntity()
 	{
-		EntityMetaData abstractEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("root").getMock();
-		when(abstractEntityMeta.isAbstract()).thenReturn(true);
+		EntityType abstractEntityType = when(mock(EntityType.class).getName()).thenReturn("root").getMock();
+		when(abstractEntityType.isAbstract()).thenReturn(true);
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(abstractEntityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(abstractEntityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(true);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isNillable()).thenReturn(false);
 
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn("entity0").getMock();
-		when(entityMeta0.getExtends()).thenReturn(abstractEntityMeta);
-		when(entityMeta0.isAbstract()).thenReturn(true);
-		EntityMetaData entityMeta0a = when(mock(EntityMetaData.class).getName()).thenReturn("entity0a").getMock();
-		when(entityMeta0a.getExtends()).thenReturn(entityMeta0);
-		when(entityMeta0a.isAbstract()).thenReturn(false);
-		EntityMetaData entityMeta0b = when(mock(EntityMetaData.class).getName()).thenReturn("entity0b").getMock();
-		when(entityMeta0b.getExtends()).thenReturn(entityMeta0);
-		when(entityMeta0b.isAbstract()).thenReturn(false);
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("entity1").getMock();
-		when(entityMeta1.getExtends()).thenReturn(abstractEntityMeta);
-		when(entityMeta1.isAbstract()).thenReturn(false);
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn("entity0").getMock();
+		when(entityType0.getExtends()).thenReturn(abstractEntityType);
+		when(entityType0.isAbstract()).thenReturn(true);
+		EntityType entityType0a = when(mock(EntityType.class).getName()).thenReturn("entity0a").getMock();
+		when(entityType0a.getExtends()).thenReturn(entityType0);
+		when(entityType0a.isAbstract()).thenReturn(false);
+		EntityType entityType0b = when(mock(EntityType.class).getName()).thenReturn("entity0b").getMock();
+		when(entityType0b.getExtends()).thenReturn(entityType0);
+		when(entityType0b.isAbstract()).thenReturn(false);
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn("entity1").getMock();
+		when(entityType1.getExtends()).thenReturn(abstractEntityType);
+		when(entityType1.isAbstract()).thenReturn(false);
 
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		Query<EntityType> entityQ = mock(Query.class);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ1 = mock(Query.class);
-		when(entityQ.eq(EXTENDS, abstractEntityMeta)).thenReturn(entityQ0);
-		when(entityQ.eq(EXTENDS, entityMeta0)).thenReturn(entityQ1);
-		when(entityQ0.findAll()).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		when(entityQ1.findAll()).thenReturn(Stream.of(entityMeta0a, entityMeta0b));
+		Query<EntityType> entityQ1 = mock(Query.class);
+		when(entityQ.eq(EXTENDS, abstractEntityType)).thenReturn(entityQ0);
+		when(entityQ.eq(EXTENDS, entityType0)).thenReturn(entityQ1);
+		when(entityQ0.findAll()).thenReturn(Stream.of(entityType0, entityType1));
+		when(entityQ1.findAll()).thenReturn(Stream.of(entityType0a, entityType0b));
 
-		postgreSqlRepoCollection.updateAttribute(abstractEntityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(abstractEntityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(3)).execute(captor.capture());
 		assertEquals(captor.getAllValues(), newArrayList("ALTER TABLE \"entity0a\" ALTER COLUMN \"attr\" SET NOT NULL",
@@ -392,12 +392,12 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test(expectedExceptions = UnknownAttributeException.class)
 	public void updateAttributeDoesNotExist()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.isNillable()).thenReturn(true);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(updatedAttr.isNillable()).thenReturn(false);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Test
@@ -405,27 +405,27 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		Attribute refIdAttr0 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr0").getMock();
 		when(refIdAttr0.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity0").getMock();
-		when(refEntityMeta0.getIdAttribute()).thenReturn(refIdAttr0);
+		EntityType refEntityType0 = when(mock(EntityType.class).getName()).thenReturn("refEntity0").getMock();
+		when(refEntityType0.getIdAttribute()).thenReturn(refIdAttr0);
 
 		Attribute refIdAttr1 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr1").getMock();
 		when(refIdAttr1.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity1").getMock();
-		when(refEntityMeta1.getIdAttribute()).thenReturn(refIdAttr1);
+		EntityType refEntityType1 = when(mock(EntityType.class).getName()).thenReturn("refEntity1").getMock();
+		when(refEntityType1.getIdAttribute()).thenReturn(refIdAttr1);
 
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(XREF);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta0);
+		when(attr.getRefEntity()).thenReturn(refEntityType0);
 
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(XREF);
-		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta1);
+		when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(2)).execute(captor.capture());
 		assertEquals(captor.getAllValues(), newArrayList("ALTER TABLE \"entity\" DROP CONSTRAINT \"entity_attr_fkey\"",
@@ -437,27 +437,27 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		Attribute refIdAttr0 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr0").getMock();
 		when(refIdAttr0.getDataType()).thenReturn(INT);
-		EntityMetaData refEntityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity0").getMock();
-		when(refEntityMeta0.getIdAttribute()).thenReturn(refIdAttr0);
+		EntityType refEntityType0 = when(mock(EntityType.class).getName()).thenReturn("refEntity0").getMock();
+		when(refEntityType0.getIdAttribute()).thenReturn(refIdAttr0);
 
 		Attribute refIdAttr1 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr1").getMock();
 		when(refIdAttr1.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity1").getMock();
-		when(refEntityMeta1.getIdAttribute()).thenReturn(refIdAttr1);
+		EntityType refEntityType1 = when(mock(EntityType.class).getName()).thenReturn("refEntity1").getMock();
+		when(refEntityType1.getIdAttribute()).thenReturn(refIdAttr1);
 
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(XREF);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta0);
+		when(attr.getRefEntity()).thenReturn(refEntityType0);
 
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(XREF);
-		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta1);
+		when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(3)).execute(captor.capture());
 		assertEquals(captor.getAllValues(), newArrayList("ALTER TABLE \"entity\" DROP CONSTRAINT \"entity_attr_fkey\"",
@@ -470,54 +470,54 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		Attribute refIdAttr0 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr0").getMock();
 		when(refIdAttr0.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity0").getMock();
-		when(refEntityMeta0.getIdAttribute()).thenReturn(refIdAttr0);
+		EntityType refEntityType0 = when(mock(EntityType.class).getName()).thenReturn("refEntity0").getMock();
+		when(refEntityType0.getIdAttribute()).thenReturn(refIdAttr0);
 
 		Attribute refIdAttr1 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr1").getMock();
 		when(refIdAttr1.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity1").getMock();
-		when(refEntityMeta1.getIdAttribute()).thenReturn(refIdAttr1);
+		EntityType refEntityType1 = when(mock(EntityType.class).getName()).thenReturn("refEntity1").getMock();
+		when(refEntityType1.getIdAttribute()).thenReturn(refIdAttr1);
 
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(MREF);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta0);
+		when(attr.getRefEntity()).thenReturn(refEntityType0);
 
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(MREF);
-		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta1);
+		when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Test
 	public void addAttribute()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
-		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL");
 	}
 
 	@Test
 	public void addAttributeUnique()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(attr.isUnique()).thenReturn(true);
-		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
 		verify(jdbcTemplate).execute(
 				"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity_attr_key\" UNIQUE (\"attr\")");
 	}
@@ -526,40 +526,40 @@ public class PostgreSqlRepositoryCollectionTest
 	public void addAttributeAbstractEntity()
 	{
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		EntityMetaData abstractEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("root").getMock();
-		when(abstractEntityMeta.isAbstract()).thenReturn(true);
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn("entity0").getMock();
-		when(entityMeta0.getExtends()).thenReturn(abstractEntityMeta);
-		when(entityMeta0.isAbstract()).thenReturn(true);
-		EntityMetaData entityMeta0a = when(mock(EntityMetaData.class).getName()).thenReturn("entity0a").getMock();
-		when(entityMeta0a.getExtends()).thenReturn(entityMeta0);
-		when(entityMeta0a.isAbstract()).thenReturn(false);
-		when(entityMeta0a.getIdAttribute()).thenReturn(idAttr);
-		EntityMetaData entityMeta0b = when(mock(EntityMetaData.class).getName()).thenReturn("entity0b").getMock();
-		when(entityMeta0b.getExtends()).thenReturn(entityMeta0);
-		when(entityMeta0b.isAbstract()).thenReturn(false);
-		when(entityMeta0b.getIdAttribute()).thenReturn(idAttr);
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("entity1").getMock();
-		when(entityMeta1.getExtends()).thenReturn(abstractEntityMeta);
-		when(entityMeta1.isAbstract()).thenReturn(false);
-		when(entityMeta1.getIdAttribute()).thenReturn(idAttr);
+		EntityType abstractEntityType = when(mock(EntityType.class).getName()).thenReturn("root").getMock();
+		when(abstractEntityType.isAbstract()).thenReturn(true);
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn("entity0").getMock();
+		when(entityType0.getExtends()).thenReturn(abstractEntityType);
+		when(entityType0.isAbstract()).thenReturn(true);
+		EntityType entityType0a = when(mock(EntityType.class).getName()).thenReturn("entity0a").getMock();
+		when(entityType0a.getExtends()).thenReturn(entityType0);
+		when(entityType0a.isAbstract()).thenReturn(false);
+		when(entityType0a.getIdAttribute()).thenReturn(idAttr);
+		EntityType entityType0b = when(mock(EntityType.class).getName()).thenReturn("entity0b").getMock();
+		when(entityType0b.getExtends()).thenReturn(entityType0);
+		when(entityType0b.isAbstract()).thenReturn(false);
+		when(entityType0b.getIdAttribute()).thenReturn(idAttr);
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn("entity1").getMock();
+		when(entityType1.getExtends()).thenReturn(abstractEntityType);
+		when(entityType1.isAbstract()).thenReturn(false);
+		when(entityType1.getIdAttribute()).thenReturn(idAttr);
 
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		Query<EntityType> entityQ = mock(Query.class);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ1 = mock(Query.class);
-		when(entityQ.eq(EXTENDS, abstractEntityMeta)).thenReturn(entityQ0);
-		when(entityQ.eq(EXTENDS, entityMeta0)).thenReturn(entityQ1);
-		when(entityQ0.findAll()).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		when(entityQ1.findAll()).thenReturn(Stream.of(entityMeta0a, entityMeta0b));
+		Query<EntityType> entityQ1 = mock(Query.class);
+		when(entityQ.eq(EXTENDS, abstractEntityType)).thenReturn(entityQ0);
+		when(entityQ.eq(EXTENDS, entityType0)).thenReturn(entityQ1);
+		when(entityQ0.findAll()).thenReturn(Stream.of(entityType0, entityType1));
+		when(entityQ1.findAll()).thenReturn(Stream.of(entityType0a, entityType0b));
 
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 
-		postgreSqlRepoCollection.addAttribute(abstractEntityMeta, attr);
+		postgreSqlRepoCollection.addAttribute(abstractEntityType, attr);
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(3)).execute(captor.capture());
 		assertEquals(captor.getAllValues(),
@@ -571,35 +571,35 @@ public class PostgreSqlRepositoryCollectionTest
 	@Test
 	public void addAttributeCompound()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(COMPOUND);
-		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void addAttributeWithExpression()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getExpression()).thenReturn("expression");
 		when(attr.getDataType()).thenReturn(STRING);
-		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void addAttributeOneToManyMappedBy()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getBackend()).thenReturn(POSTGRESQL);
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getBackend()).thenReturn(POSTGRESQL);
+		EntityType refEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityType.getBackend()).thenReturn(POSTGRESQL);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("refAttr").getMock();
@@ -609,24 +609,24 @@ public class PostgreSqlRepositoryCollectionTest
 		when(refAttr.getInversedBy()).thenReturn(attr);
 
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
 		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(attr.isMappedBy()).thenReturn(true);
 
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
-		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
-		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
+		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void addAttributeAlreadyExists()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
 	}
 
 	@Test
@@ -635,17 +635,17 @@ public class PostgreSqlRepositoryCollectionTest
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getDataType()).thenReturn(STRING);
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
 	}
 
 	@Test
 	public void deleteAttributeMref()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
 
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
@@ -653,16 +653,16 @@ public class PostgreSqlRepositoryCollectionTest
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
 		verify(jdbcTemplate).execute("DROP TABLE \"entity_attr\"");
 	}
 
 	@Test
 	public void deleteAttributeOneToManyMappedBy()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
 
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
@@ -675,53 +675,53 @@ public class PostgreSqlRepositoryCollectionTest
 		when(attr.isMappedBy()).thenReturn(true);
 
 		when(refAttr.getDataType()).thenReturn(XREF);
-		when(refAttr.getRefEntity()).thenReturn(entityMeta);
+		when(refAttr.getRefEntity()).thenReturn(entityType);
 		when(refAttr.getInversedBy()).thenReturn(attr);
 		when(refAttr.isInversedBy()).thenReturn(true);
 
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
-		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
+		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
 	public void deleteAttributeAbstractEntity()
 	{
-		EntityMetaData abstractEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("root").getMock();
-		when(abstractEntityMeta.isAbstract()).thenReturn(true);
+		EntityType abstractEntityType = when(mock(EntityType.class).getName()).thenReturn("root").getMock();
+		when(abstractEntityType.isAbstract()).thenReturn(true);
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getDataType()).thenReturn(STRING);
-		when(abstractEntityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(abstractEntityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(true);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.isNillable()).thenReturn(false);
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn("entity0").getMock();
-		when(entityMeta0.getExtends()).thenReturn(abstractEntityMeta);
-		when(entityMeta0.isAbstract()).thenReturn(true);
-		EntityMetaData entityMeta0a = when(mock(EntityMetaData.class).getName()).thenReturn("entity0a").getMock();
-		when(entityMeta0a.getExtends()).thenReturn(entityMeta0);
-		when(entityMeta0a.isAbstract()).thenReturn(false);
-		EntityMetaData entityMeta0b = when(mock(EntityMetaData.class).getName()).thenReturn("entity0b").getMock();
-		when(entityMeta0b.getExtends()).thenReturn(entityMeta0);
-		when(entityMeta0b.isAbstract()).thenReturn(false);
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("entity1").getMock();
-		when(entityMeta1.getExtends()).thenReturn(abstractEntityMeta);
-		when(entityMeta1.isAbstract()).thenReturn(false);
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn("entity0").getMock();
+		when(entityType0.getExtends()).thenReturn(abstractEntityType);
+		when(entityType0.isAbstract()).thenReturn(true);
+		EntityType entityType0a = when(mock(EntityType.class).getName()).thenReturn("entity0a").getMock();
+		when(entityType0a.getExtends()).thenReturn(entityType0);
+		when(entityType0a.isAbstract()).thenReturn(false);
+		EntityType entityType0b = when(mock(EntityType.class).getName()).thenReturn("entity0b").getMock();
+		when(entityType0b.getExtends()).thenReturn(entityType0);
+		when(entityType0b.isAbstract()).thenReturn(false);
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn("entity1").getMock();
+		when(entityType1.getExtends()).thenReturn(abstractEntityType);
+		when(entityType1.isAbstract()).thenReturn(false);
 
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		Query<EntityType> entityQ = mock(Query.class);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ1 = mock(Query.class);
-		when(entityQ.eq(EXTENDS, abstractEntityMeta)).thenReturn(entityQ0);
-		when(entityQ.eq(EXTENDS, entityMeta0)).thenReturn(entityQ1);
-		when(entityQ0.findAll()).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		when(entityQ1.findAll()).thenReturn(Stream.of(entityMeta0a, entityMeta0b));
+		Query<EntityType> entityQ1 = mock(Query.class);
+		when(entityQ.eq(EXTENDS, abstractEntityType)).thenReturn(entityQ0);
+		when(entityQ.eq(EXTENDS, entityType0)).thenReturn(entityQ1);
+		when(entityQ0.findAll()).thenReturn(Stream.of(entityType0, entityType1));
+		when(entityQ1.findAll()).thenReturn(Stream.of(entityType0a, entityType0b));
 
-		postgreSqlRepoCollection.deleteAttribute(abstractEntityMeta, attr);
+		postgreSqlRepoCollection.deleteAttribute(abstractEntityType, attr);
 
 		ArgumentCaptor<String> captor = forClass(String.class);
 		verify(jdbcTemplate, times(3)).execute(captor.capture());
@@ -735,9 +735,9 @@ public class PostgreSqlRepositoryCollectionTest
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getExpression()).thenReturn("expression");
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
@@ -745,7 +745,7 @@ public class PostgreSqlRepositoryCollectionTest
 	public void deleteAttributeUnknownAttribute()
 	{
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
 	}
 }

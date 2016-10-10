@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.impl.CaddAnnotator;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.util.ResourceUtils;
@@ -30,7 +30,7 @@ public class AnnotatorUpdateIT extends AbstractTestNGSpringContextTests
 	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -59,8 +59,7 @@ public class AnnotatorUpdateIT extends AbstractTestNGSpringContextTests
 		System.getProperty("/");
 
 		File vcf = ResourceUtils.getFile(getClass(), "/annotatorUpdateIT.vcf");
-
-		try (VcfRepository repo = new VcfRepository(vcf, "vcf", vcfAttributes, entityMetaDataFactory,
+		try (VcfRepository repo = new VcfRepository(vcf, "vcf", vcfAttributes, entityTypeFactory,
 				attributeFactory))
 		{
 			try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(

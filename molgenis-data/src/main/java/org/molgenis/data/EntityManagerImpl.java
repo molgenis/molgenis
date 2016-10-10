@@ -4,7 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.*;
 import org.molgenis.util.BatchingIterable;
@@ -23,8 +23,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.
@@ -48,27 +48,27 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public Entity create(EntityMetaData entityMeta, CreationMode creationMode)
+	public Entity create(EntityType entityType, CreationMode creationMode)
 	{
-		return create(entityMeta, null, creationMode);
+		return create(entityType, null, creationMode);
 	}
 
 	@Override
-	public Entity createFetch(EntityMetaData entityMeta, Fetch fetch)
+	public Entity createFetch(EntityType entityType, Fetch fetch)
 	{
-		return create(entityMeta, fetch, NO_POPULATE);
+		return create(entityType, fetch, NO_POPULATE);
 	}
 
-	private Entity create(EntityMetaData entityMeta, Fetch fetch, CreationMode creationMode)
+	private Entity create(EntityType entityType, Fetch fetch, CreationMode creationMode)
 	{
-		Entity entity = new DynamicEntity(entityMeta);
+		Entity entity = new DynamicEntity(entityType);
 		if (fetch != null)
 		{
 			// create partial entity that loads attribute values not contained in the fetch on demand.
 			entity = new PartialEntity(entity, fetch, this);
 		}
 
-		if (entityMeta.hasAttributeWithExpression())
+		if (entityType.hasAttributeWithExpression())
 		{
 			// create entity that computed values based on expressions defined in meta data
 			entity = new EntityWithComputedAttributes(entity);
@@ -79,7 +79,7 @@ public class EntityManagerImpl implements EntityManager
 			entityPopulator.populate(entity);
 		}
 
-		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
 		if (entityFactory != null)
 		{
 			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
@@ -89,11 +89,11 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public Entity getReference(EntityMetaData entityMeta, Object id)
+	public Entity getReference(EntityType entityType, Object id)
 	{
-		Entity lazyEntity = new LazyEntity(entityMeta, dataService, id);
+		Entity lazyEntity = new LazyEntity(entityType, dataService, id);
 
-		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
 		if (entityFactory != null)
 		{
 			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
@@ -104,12 +104,12 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public Iterable<Entity> getReferences(EntityMetaData entityMeta, Iterable<?> ids)
+	public Iterable<Entity> getReferences(EntityType entityType, Iterable<?> ids)
 	{
-		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
 		return () -> stream(ids.spliterator(), false).map(id ->
 		{
-			Entity lazyEntity = getReference(entityMeta, id);
+			Entity lazyEntity = getReference(entityType, id);
 			if (entityFactory != null)
 			{
 				// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
@@ -120,19 +120,19 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public Entity resolveReferences(EntityMetaData entityMeta, Entity entity, Fetch fetch)
+	public Entity resolveReferences(EntityType entityType, Entity entity, Fetch fetch)
 	{
-		Iterable<Entity> entities = resolveReferences(entityMeta, singletonList(entity), fetch);
+		Iterable<Entity> entities = resolveReferences(entityType, singletonList(entity), fetch);
 		return entities.iterator().next();
 	}
 
-	private Iterable<Entity> resolveReferences(EntityMetaData entityMeta, Iterable<Entity> entities, Fetch fetch)
+	private Iterable<Entity> resolveReferences(EntityType entityType, Iterable<Entity> entities, Fetch fetch)
 	{
 		// resolve lazy entity collections without references
 		if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
 		{
 			// TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
-			return () -> dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities).stream(), fetch)
+			return () -> dataService.findAll(entityType.getName(), new EntityIdIterable(entities).stream(), fetch)
 					.iterator();
 		}
 
@@ -141,8 +141,7 @@ public class EntityManagerImpl implements EntityManager
 		{
 			return entities;
 		}
-
-		List<Attribute> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
+		List<Attribute> resolvableAttrs = getResolvableAttrs(entityType, fetch);
 
 		// entity has no references, nothing to resolve
 		if (resolvableAttrs.isEmpty())
@@ -180,13 +179,13 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public Stream<Entity> resolveReferences(EntityMetaData entityMeta, Stream<Entity> entities, Fetch fetch)
+	public Stream<Entity> resolveReferences(EntityType entityType, Stream<Entity> entities, Fetch fetch)
 	{
 		// resolve lazy entity collections without references
 		if (entities instanceof EntityStream && ((EntityStream) entities).isLazy())
 		{
 			// TODO remove cast after updating DataService/Repository interfaces to return EntityStream
-			return dataService.findAll(entityMeta.getName(), entities.map(Entity::getIdValue), fetch);
+			return dataService.findAll(entityType.getName(), entities.map(Entity::getIdValue), fetch);
 		}
 
 		// no fetch exists that described what to resolve
@@ -194,8 +193,7 @@ public class EntityManagerImpl implements EntityManager
 		{
 			return entities;
 		}
-
-		List<Attribute> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
+		List<Attribute> resolvableAttrs = getResolvableAttrs(entityType, fetch);
 
 		// entity has no references, nothing to resolve
 		if (resolvableAttrs.isEmpty())
@@ -361,15 +359,15 @@ public class EntityManagerImpl implements EntityManager
 	/**
 	 * Return all resolvable attributes: non-computed reference attributes defined in fetch
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @param fetch      entity fetch
 	 * @return resolved attributes
 	 */
-	private static List<Attribute> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
+	private static List<Attribute> getResolvableAttrs(EntityType entityType, Fetch fetch)
 	{
-		return stream(entityMeta.getAtomicAttributes().spliterator(), false)
-				.filter(EntityMetaDataUtils::isReferenceType).filter(attr -> attr.getExpression() == null)
-				.filter(attr -> fetch.hasField(attr.getName())).collect(Collectors.toList());
+		return stream(entityType.getAtomicAttributes().spliterator(), false).filter(EntityTypeUtils::isReferenceType)
+				.filter(attr -> attr.getExpression() == null).filter(attr -> fetch.hasField(attr.getName()))
+				.collect(Collectors.toList());
 	}
 
 	private static class EntityIdIterable implements Iterable<Object>

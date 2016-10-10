@@ -1,7 +1,7 @@
 package org.molgenis.data.i18n.model;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /**
@@ -17,22 +17,22 @@ public class Language extends StaticEntity
 	/**
 	 * Constructs a language with the given meta data
 	 *
-	 * @param entityMeta language meta data
+	 * @param entityType language meta data
 	 */
-	public Language(EntityMetaData entityMeta)
+	public Language(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
 	/**
 	 * Constructs a language with the given type code and meta data
 	 *
 	 * @param code       language code
-	 * @param entityMeta language meta data
+	 * @param entityType language meta data
 	 */
-	public Language(String code, EntityMetaData entityMeta)
+	public Language(String code, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setCode(code);
 	}
 

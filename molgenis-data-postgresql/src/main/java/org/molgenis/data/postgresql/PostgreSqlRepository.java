@@ -13,7 +13,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
@@ -44,14 +44,15 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -87,7 +88,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	private final DataSource dataSource;
 	private final PlatformTransactionManager transactionManager;
 
-	private EntityMetaData metaData;
+	private EntityType entityType;
 
 	public PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
 			DataSource dataSource, PlatformTransactionManager transactionManager)
@@ -98,9 +99,9 @@ public class PostgreSqlRepository extends AbstractRepository
 		this.transactionManager = requireNonNull(transactionManager);
 	}
 
-	void setMetaData(EntityMetaData metaData)
+	void setEntityType(EntityType entityType)
 	{
-		this.metaData = metaData;
+		this.entityType = entityType;
 	}
 
 	@Override
@@ -128,17 +129,16 @@ public class PostgreSqlRepository extends AbstractRepository
 		return QUERY_OPERATORS;
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return metaData;
+		return entityType;
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
 		List<Object> parameters = Lists.newArrayList();
-		String sql = getSqlCount(metaData, q, parameters);
+		String sql = getSqlCount(entityType, q, parameters);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -178,7 +178,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			return null;
 		}
-		return findOne(new QueryImpl<>().eq(metaData.getIdAttribute().getName(), id));
+		return findOne(new QueryImpl<>().eq(entityType.getIdAttribute().getName(), id));
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			return null;
 		}
-		return findOne(new QueryImpl<>().eq(metaData.getIdAttribute().getName(), id).fetch(fetch));
+		return findOne(new QueryImpl<>().eq(entityType.getIdAttribute().getName(), id).fetch(fetch));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
@@ -232,7 +232,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	{
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch ->
 		{
-			String sql = getSqlDelete(metaData);
+			String sql = getSqlDelete(entityType);
 			if (LOG.isDebugEnabled())
 			{
 				LOG.debug("Deleting {} [{}] entities", idsBatch.size(), getName());
@@ -262,7 +262,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void deleteAll()
 	{
-		String deleteAllSql = getSqlDeleteAll(metaData);
+		String deleteAllSql = getSqlDeleteAll(entityType);
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleting all [{}] entities", getName());
@@ -304,18 +304,18 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			query.fetch(fetch);
 		}
-		final EntityMetaData entityMeta = metaData;
-		final String allRowsSelect = getSqlSelect(entityMeta, query, emptyList(), false);
+		final EntityType entityType = this.entityType;
+		final String allRowsSelect = getSqlSelect(entityType, query, emptyList(), false);
 		LOG.debug("Fetching [{}] data...", getName());
 		LOG.trace("SQL: {}", allRowsSelect);
-		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityMeta, fetch);
+		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
 		template.query(allRowsSelect,
-				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityMeta, rowMapper,
+				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
 						resultSet));
 		LOG.debug("Streamed entire repository in batches of size {} in {}.", batchSize, stopwatch);
 	}
 
-	private Object processResultSet(Consumer<List<Entity>> consumer, int batchSize, EntityMetaData entityMeta,
+	private Object processResultSet(Consumer<List<Entity>> consumer, int batchSize, EntityType entityType,
 			RowMapper<Entity> rowMapper, ResultSet resultSet) throws SQLException
 	{
 		int rowNum = 0;
@@ -326,13 +326,13 @@ public class PostgreSqlRepository extends AbstractRepository
 			batch.put(entity.getIdValue(), entity);
 			if (rowNum % batchSize == 0)
 			{
-				handleBatch(consumer, entityMeta, batch);
+				handleBatch(consumer, entityType, batch);
 				batch = newHashMap();
 			}
 		}
 		if (!batch.isEmpty())
 		{
-			handleBatch(consumer, entityMeta, batch);
+			handleBatch(consumer, entityType, batch);
 		}
 		return null;
 	}
@@ -342,24 +342,24 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * entities. Then feeds the entities to the {@link Consumer}
 	 *
 	 * @param consumer   {@link Consumer} to feed the batch to after setting the MREF ID values
-	 * @param entityMeta EntityMetaData for the {@link Entity}s in the batch
+	 * @param entityType EntityType for the {@link Entity}s in the batch
 	 * @param batch      {@link Map} mapping entity ID to entity for all {@link Entity}s in the batch
 	 */
-	private void handleBatch(Consumer<List<Entity>> consumer, EntityMetaData entityMeta, Map<Object, Entity> batch)
+	private void handleBatch(Consumer<List<Entity>> consumer, EntityType entityType, Map<Object, Entity> batch)
 	{
-		AttributeType idAttributeDataType = entityMeta.getIdAttribute().getDataType();
+		AttributeType idAttributeDataType = entityType.getIdAttribute().getDataType();
 		LOG.debug("Select ID values for a batch of MREF attributes...");
-		for (Attribute mrefAttr : entityMeta.getAtomicAttributes())
+		for (Attribute mrefAttr : entityType.getAtomicAttributes())
 		{
-			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr))
+			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr) && !(mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy()))
 			{
-				EntityMetaData refEntityMeta = mrefAttr.getRefEntity();
-				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityMeta, idAttributeDataType, mrefAttr,
-						batch.keySet(), refEntityMeta.getIdAttribute().getDataType());
+				EntityType refEntityType = mrefAttr.getRefEntity();
+				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityType, idAttributeDataType, mrefAttr,
+						batch.keySet(), refEntityType.getIdAttribute().getDataType());
 				for (Map.Entry entry : batch.entrySet())
 				{
 					batch.get(entry.getKey()).set(mrefAttr.getName(), postgreSqlEntityFactory
-							.getReferences(refEntityMeta, newArrayList(mrefIDs.get(entry.getKey()))));
+							.getReferences(refEntityType, newArrayList(mrefIDs.get(entry.getKey()))));
 				}
 			}
 		}
@@ -370,20 +370,20 @@ public class PostgreSqlRepository extends AbstractRepository
 	/**
 	 * Selects MREF IDs for an MREF attribute from the junction table, in the order of the MREF attribute value.
 	 *
-	 * @param entityMeta          EntityMetaData for the entities
+	 * @param entityType          EntityType for the entities
 	 * @param idAttributeDataType {@link AttributeType} of the ID attribute of the entity
 	 * @param mrefAttr            Attribute of the MREF attribute to select the values for
 	 * @param ids                 {@link Set} of {@link Object}s containing the values for the ID attribute of the entity
 	 * @param refIdDataType       {@link AttributeType} of the ID attribute of the refEntity of the attribute
 	 * @return Multimap mapping entity ID to a list containing the MREF IDs for the values in the attribute
 	 */
-	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityMetaData entityMeta,
-			AttributeType idAttributeDataType, Attribute mrefAttr, Set<Object> ids, AttributeType refIdDataType)
+	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityType entityType, AttributeType idAttributeDataType,
+			Attribute mrefAttr, Set<Object> ids, AttributeType refIdDataType)
 	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled()) stopwatch = createStarted();
 
-		String junctionTableSelect = getSqlJunctionTableSelect(entityMeta, mrefAttr, ids.size());
+		String junctionTableSelect = getSqlJunctionTableSelect(entityType, mrefAttr, ids.size());
 		LOG.trace("SQL: {}", junctionTableSelect);
 
 		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
@@ -405,9 +405,9 @@ public class PostgreSqlRepository extends AbstractRepository
 			{
 				List<Object> parameters = new ArrayList<>();
 
-				String sql = getSqlSelect(getEntityMetaData(), batchQuery, parameters, true);
+				String sql = getSqlSelect(getEntityType(), batchQuery, parameters, true);
 				RowMapper<Entity> entityMapper = postgreSqlEntityFactory
-						.createRowMapper(getEntityMetaData(), batchQuery.getFetch());
+						.createRowMapper(getEntityType(), batchQuery.getFetch());
 				LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
 				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				Stopwatch sw = createStarted();
@@ -423,10 +423,10 @@ public class PostgreSqlRepository extends AbstractRepository
 	{
 		AtomicInteger count = new AtomicInteger();
 
-		final Attribute idAttr = metaData.getIdAttribute();
-		final List<Attribute> tableAttrs = getTableAttributes(metaData).collect(toList());
-		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(metaData).collect(toList());
-		final String insertSql = getSqlInsert(metaData);
+		final Attribute idAttr = entityType.getIdAttribute();
+		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).collect(toList());
+		final String insertSql = getSqlInsert(entityType);
 
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
 		{
@@ -517,10 +517,10 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private void updateBatching(Iterator<? extends Entity> entities)
 	{
-		final Attribute idAttr = metaData.getIdAttribute();
-		final List<Attribute> tableAttrs = getTableAttributes(metaData).collect(toList());
-		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(metaData).collect(toList());
-		final String updateSql = getSqlUpdate(metaData);
+		final Attribute idAttr = entityType.getIdAttribute();
+		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).collect(toList());
+		final String updateSql = getSqlUpdate(entityType);
 
 		// update values in entity table
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
@@ -610,11 +610,11 @@ public class PostgreSqlRepository extends AbstractRepository
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", metaData.getName(), attr.getName())));
+					format("Entity [%s] attribute [%s] value cannot be null", entityType.getName(), attr.getName())));
 		}
 
-		final Attribute idAttr = metaData.getIdAttribute();
-		String insertMrefSql = getSqlInsertJunction(metaData, attr);
+		final Attribute idAttr = entityType.getIdAttribute();
+		String insertMrefSql = getSqlInsertJunction(entityType, attr);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -642,7 +642,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				{
 					idValue0 = mref.get(idAttr.getName());
 					Entity mrefEntity = (Entity) mref.get(attr.getName());
-					idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityMetaData().getIdAttribute());
+					idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute());
 				}
 				preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
 				preparedStatement.setObject(2, idValue0);
@@ -659,8 +659,8 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private void removeMrefs(final List<Object> ids, final Attribute attr)
 	{
-		final Attribute idAttr = attr.isMappedBy() ? attr.getMappedBy() : metaData.getIdAttribute();
-		String deleteMrefSql = getSqlDelete(getJunctionTableName(metaData, attr), idAttr);
+		final Attribute idAttr = attr.isMappedBy() ? attr.getMappedBy() : entityType.getIdAttribute();
+		String deleteMrefSql = getSqlDelete(getJunctionTableName(entityType, attr), idAttr);
 
 		if (LOG.isDebugEnabled())
 		{

@@ -8,14 +8,14 @@ import java.util.Arrays;
 public class HrefTest
 {
 	@Test
-	public static void testEntityMetaData()
+	public static void testEntityType()
 	{
 		Assert.assertEquals(Href.concatMetaEntityHref("http://molgenis.org/api/v1", "org_test_TypeTest"),
 				"http://molgenis.org/api/v1/org_test_TypeTest/meta");
 	}
 
 	@Test
-	public static void testEntityMetaDataV2()
+	public static void testEntityTypeV2()
 	{
 		Assert.assertEquals(Href.concatMetaEntityHrefV2("http://molgenis.org/api/v2", "org_test_TypeTest"),
 				"http://molgenis.org/api/v2/org_test_TypeTest");

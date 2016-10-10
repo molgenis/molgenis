@@ -143,7 +143,7 @@
         </table>
 
     </div>
-<#if entityMetaDatas?has_content && hasWritePermission>
+<#if entityTypes?has_content && hasWritePermission>
     <div class="col-md-2">
         <a id="add-new-attr-mapping-btn" href="#" class="btn btn-primary btn-xs" data-toggle="modal"
            data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>
@@ -176,8 +176,8 @@
                         <label>Select a new source to map against the target attribute</label>
                         <select name="source" id="source-entity-select" class="form-control" required="required"
                                 placeholder="Select source entity">
-                        <#list entityMetaDatas as entityMetaData>
-                            <option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+                        <#list entityTypes as entityType>
+                            <option value="${entityType.name?html}">${entityType.name?html}</option>
                         </#list>
                         </select>
                     </div>

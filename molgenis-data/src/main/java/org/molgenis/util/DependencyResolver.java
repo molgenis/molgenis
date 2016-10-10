@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,8 +19,8 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 public class DependencyResolver
 {
@@ -38,10 +38,10 @@ public class DependencyResolver
 		Map<String, Repository<Entity>> repoByName = new HashMap<>();
 		for (Repository<Entity> repo : repos)
 		{
-			repoByName.put(repo.getEntityMetaData().getName(), repo);
+			repoByName.put(repo.getEntityType().getName(), repo);
 		}
 
-		return resolve(repoByName.values().stream().map(repo -> repo.getEntityMetaData()).collect(Collectors.toSet()))
+		return resolve(repoByName.values().stream().map(repo -> repo.getEntityType()).collect(Collectors.toSet()))
 				.stream().map(emd -> repoByName.get(emd.getName())).collect(Collectors.toList());
 	}
 
@@ -50,18 +50,18 @@ public class DependencyResolver
 	 *
 	 * @param coll
 	 * @return
-	 * @deprecated use {@link org.molgenis.data.meta.EntityMetaDataDependencyResolver} instead which is based on {@link GenericDependencyResolver}.
+	 * @deprecated use {@link org.molgenis.data.meta.EntityTypeDependencyResolver} instead which is based on {@link GenericDependencyResolver}.
 	 */
 	@Deprecated
-	public static List<EntityMetaData> resolve(Set<EntityMetaData> coll)
+	public static List<EntityType> resolve(Set<EntityType> coll)
 	{
-		// EntityMetaData by entityname
-		Map<String, EntityMetaData> metaDataByName = newHashMap();
+		// EntityType by entityname
+		Map<String, EntityType> metaDataByName = newHashMap();
 
-		// All dependencies of EntityMetaData
+		// All dependencies of EntityType
 		Map<String, Set<String>> dependenciesByName = newHashMap();
 
-		for (EntityMetaData meta : coll)
+		for (EntityType meta : coll)
 		{
 			metaDataByName.put(meta.getName(), meta);
 
@@ -83,7 +83,7 @@ public class DependencyResolver
 			}
 		}
 
-		List<EntityMetaData> resolved = Lists.newArrayList();
+		List<EntityType> resolved = Lists.newArrayList();
 
 		while (!dependenciesByName.isEmpty())
 		{
@@ -104,13 +104,13 @@ public class DependencyResolver
 			if (ready.isEmpty())
 			{
 				// accept the cyclic dependency between entity meta <--> attribute meta which is dealt with during
-				// bootstrapping, see SystemEntityMetaDataPersister.
-				if (dependenciesByName.containsKey(ENTITY_META_DATA) && dependenciesByName
+				// bootstrapping, see SystemEntityTypePersister.
+				if (dependenciesByName.containsKey(ENTITY_TYPE_META_DATA) && dependenciesByName
 						.containsKey(ATTRIBUTE_META_DATA))
 				{
-					ready.add(ENTITY_META_DATA);
+					ready.add(ENTITY_TYPE_META_DATA);
 					ready.add(ATTRIBUTE_META_DATA);
-					resolved.add(metaDataByName.get(ENTITY_META_DATA));
+					resolved.add(metaDataByName.get(ENTITY_TYPE_META_DATA));
 					resolved.add(metaDataByName.get(ATTRIBUTE_META_DATA));
 				}
 				else
@@ -139,7 +139,7 @@ public class DependencyResolver
 		return resolved;
 	}
 
-	public static boolean hasSelfReferences(EntityMetaData emd)
+	public static boolean hasSelfReferences(EntityType emd)
 	{
 		for (Attribute attr : emd.getAtomicAttributes())
 		{
@@ -161,7 +161,7 @@ public class DependencyResolver
 	 * @param emd
 	 * @return
 	 */
-	public Iterable<Entity> resolveSelfReferences(Iterable<Entity> entities, EntityMetaData emd)
+	public Iterable<Entity> resolveSelfReferences(Iterable<Entity> entities, EntityType emd)
 	{
 		List<Attribute> selfRefAttributes = Lists.newArrayList();
 		for (Attribute attr : emd.getAtomicAttributes())

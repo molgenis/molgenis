@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.core.convert.ConversionFailedException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -17,31 +17,31 @@ import static org.testng.Assert.fail;
 public class StringExpressionEvaluatorTest
 {
 	private Entity entity;
-	private EntityMetaData emd;
+	private EntityType entityType;
 
 	@BeforeTest
 	public void createEntity()
 	{
-		emd = when(mock(EntityMetaData.class).getName()).thenReturn("Source").getMock();
+		entityType = when(mock(EntityType.class).getName()).thenReturn("Source").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("Identifier").getMock();
+
 		when(idAttr.getDataType()).thenReturn(INT);
 		Attribute intAttr = when(mock(Attribute.class).getName()).thenReturn("Int").getMock();
 		when(intAttr.getDataType()).thenReturn(INT);
 		Attribute stringAttr = when(mock(Attribute.class).getName()).thenReturn("String").getMock();
 		when(stringAttr.getDataType()).thenReturn(STRING);
-		Attribute nonNumericStringAttr = when(mock(Attribute.class).getName())
-				.thenReturn("NonNumericString").getMock();
+		Attribute nonNumericStringAttr = when(mock(Attribute.class).getName()).thenReturn("NonNumericString").getMock();
 		when(nonNumericStringAttr.getDataType()).thenReturn(STRING);
 		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("Long").getMock();
 		when(longAttr.getDataType()).thenReturn(LONG);
-		when(emd.getIdAttribute()).thenReturn(idAttr);
-		when(emd.getAttribute("Identifier")).thenReturn(idAttr);
-		when(emd.getAttribute("Int")).thenReturn(intAttr);
-		when(emd.getAttribute("String")).thenReturn(stringAttr);
-		when(emd.getAttribute("NonNumericString")).thenReturn(nonNumericStringAttr);
-		when(emd.getAttribute("Long")).thenReturn(longAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("Identifier")).thenReturn(idAttr);
+		when(entityType.getAttribute("Int")).thenReturn(intAttr);
+		when(entityType.getAttribute("String")).thenReturn(stringAttr);
+		when(entityType.getAttribute("NonNumericString")).thenReturn(nonNumericStringAttr);
+		when(entityType.getAttribute("Long")).thenReturn(longAttr);
 
-		entity = new DynamicEntity(emd);
+		entity = new DynamicEntity(entityType);
 		entity.set("Int", 1);
 		entity.set("String", "12");
 		entity.set("Long", 10L);
@@ -55,7 +55,7 @@ public class StringExpressionEvaluatorTest
 		when(amd.getDataType()).thenReturn(STRING);
 		try
 		{
-			new StringExpressionEvaluator(amd, emd);
+			new StringExpressionEvaluator(amd, entityType);
 			fail("Expected NPE");
 		}
 		catch (NullPointerException expected)
@@ -73,7 +73,7 @@ public class StringExpressionEvaluatorTest
 		when(amd.getExpression()).thenReturn("{}");
 		try
 		{
-			new StringExpressionEvaluator(amd, emd);
+			new StringExpressionEvaluator(amd, entityType);
 			fail("expected illegal state exception");
 		}
 		catch (JsonSyntaxException expected)
@@ -90,7 +90,7 @@ public class StringExpressionEvaluatorTest
 		when(amd.getExpression()).thenReturn("bogus");
 		try
 		{
-			new StringExpressionEvaluator(amd, emd);
+			new StringExpressionEvaluator(amd, entityType);
 			fail("expected illegal argument exception");
 		}
 		catch (IllegalArgumentException expected)
@@ -107,7 +107,7 @@ public class StringExpressionEvaluatorTest
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getExpression()).thenReturn("Int");
-		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), "1");
+		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), "1");
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class StringExpressionEvaluatorTest
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("Int");
-		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 1L);
+		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 1L);
 	}
 
 	@Test
@@ -125,7 +125,7 @@ public class StringExpressionEvaluatorTest
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(INT);
 		when(amd.getExpression()).thenReturn("Long");
-		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 10);
+		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 10);
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class StringExpressionEvaluatorTest
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("String");
-		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 12L);
+		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class StringExpressionEvaluatorTest
 		when(amd.getExpression()).thenReturn("NonNumericString");
 		try
 		{
-			assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 12L);
+			assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
 			fail("Expected ConversionFailedException.");
 		}
 		catch (ConversionFailedException expected)

@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.web.meta;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATORS;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.TARGET_NAME;
@@ -14,15 +14,15 @@ public class AnnotationJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public AnnotationJobExecution(EntityMetaData entityMeta)
+	public AnnotationJobExecution(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
-	public AnnotationJobExecution(String identifier, EntityMetaData entityMeta)
+	public AnnotationJobExecution(String identifier, EntityType entityType)
 	{
-		super(identifier, entityMeta);
+		super(identifier, entityType);
 		setDefaultValues();
 	}
 

@@ -41,13 +41,13 @@ class PostgreSqlUtils
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
 				return xrefEntity != null ? getPostgreSqlValue(xrefEntity,
-						xrefEntity.getEntityMetaData().getIdAttribute()) : null;
+						xrefEntity.getEntityType().getIdAttribute()) : null;
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
 				Iterable<Entity> entities = entity.getEntities(attrName);
 				return stream(entities.spliterator(), false).map(mrefEntity -> getPostgreSqlValue(mrefEntity,
-						mrefEntity.getEntityMetaData().getIdAttribute())).collect(toList());
+						mrefEntity.getEntityType().getIdAttribute())).collect(toList());
 			case DATE:
 				Date date = entity.getUtilDate(attrName);
 				return date != null ? new java.sql.Date(date.getTime()) : null;
@@ -67,7 +67,7 @@ class PostgreSqlUtils
 			case FILE:
 				FileMeta fileEntity = entity.getEntity(attrName, FileMeta.class);
 				return fileEntity != null ? getPostgreSqlValue(fileEntity,
-						fileEntity.getEntityMetaData().getIdAttribute()) : null;
+						fileEntity.getEntityType().getIdAttribute()) : null;
 			case INT:
 				return entity.getInt(attrName);
 			case LONG:

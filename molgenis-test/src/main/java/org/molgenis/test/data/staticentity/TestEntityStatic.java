@@ -1,7 +1,7 @@
 package org.molgenis.test.data.staticentity;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.test.data.EntityTestHarness.ATTR_ID;
@@ -13,14 +13,14 @@ public class TestEntityStatic extends StaticEntity
 		super(entity);
 	}
 
-	public TestEntityStatic(EntityMetaData entityMeta)
+	public TestEntityStatic(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public TestEntityStatic(String id, EntityMetaData entityMeta)
+	public TestEntityStatic(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

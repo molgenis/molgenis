@@ -1,7 +1,7 @@
 package org.molgenis.data.system.core;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.*;
@@ -13,14 +13,14 @@ public class FreemarkerTemplate extends StaticEntity
 		super(entity);
 	}
 
-	public FreemarkerTemplate(EntityMetaData entityMeta)
+	public FreemarkerTemplate(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public FreemarkerTemplate(String id, EntityMetaData entityMeta)
+	public FreemarkerTemplate(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

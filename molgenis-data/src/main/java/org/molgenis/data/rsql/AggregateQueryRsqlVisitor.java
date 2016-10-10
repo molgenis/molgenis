@@ -4,7 +4,7 @@ import cz.jirutka.rsql.parser.ast.*;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
 
 import java.util.Iterator;
@@ -19,12 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<AggregateQuery>
 {
-	private final EntityMetaData entityMetaData;
+	private final EntityType entityType;
 	private final AggregateQueryImpl aggsQ;
 
-	public AggregateQueryRsqlVisitor(EntityMetaData entityMetaData, Query<Entity> query)
+	public AggregateQueryRsqlVisitor(EntityType entityType, Query<Entity> query)
 	{
-		this.entityMetaData = checkNotNull(entityMetaData);
+		this.entityType = checkNotNull(entityType);
 		this.aggsQ = new AggregateQueryImpl().query(query);
 	}
 
@@ -88,16 +88,16 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 		String attrName = args.iterator().next();
 
 		String[] attrTokens = attrName.split("\\.");
-		Attribute attr = entityMetaData.getAttribute(attrTokens[0]);
+		Attribute attr = entityType.getAttribute(attrTokens[0]);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
 		}
-		EntityMetaData entityMetaDataAtDepth = entityMetaData;
+		EntityType entityTypeAtDepth;
 		for (int i = 1; i < attrTokens.length; ++i)
 		{
-			entityMetaDataAtDepth = attr.getRefEntity();
-			attr = entityMetaDataAtDepth.getAttribute(attrTokens[i]);
+			entityTypeAtDepth = attr.getRefEntity();
+			attr = entityTypeAtDepth.getAttribute(attrTokens[i]);
 			if (attr == null)
 			{
 				throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");

@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
@@ -63,20 +63,20 @@ public class MolgenisResourceBundleControlTest
 	@Test
 	public void newBundle() throws IllegalAccessException, InstantiationException, IOException
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityType entityType = mock(EntityType.class);
 		Attribute msgAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Attribute nlAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Attribute enAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-		when(entityMeta.getAttribute(I18nStringMetaData.MSGID)).thenReturn(msgAttr);
-		when(entityMeta.getAttribute("nl")).thenReturn(nlAttr);
-		when(entityMeta.getAttribute("en")).thenReturn(enAttr);
+		when(entityType.getAttribute(I18nStringMetaData.MSGID)).thenReturn(msgAttr);
+		when(entityType.getAttribute("nl")).thenReturn(nlAttr);
+		when(entityType.getAttribute("en")).thenReturn(enAttr);
 
-		Entity entity = new DynamicEntity(entityMeta);
+		Entity entity = new DynamicEntity(entityType);
 		entity.set(I18nStringMetaData.MSGID, "test");
 		entity.set("en", "testen");
 		entity.set("nl", "testnl");
 
-		Entity entity1 = new DynamicEntity(entityMeta);
+		Entity entity1 = new DynamicEntity(entityType);
 		entity1.set(I18nStringMetaData.MSGID, "testmissingnl");
 		entity1.set("en", "testen");
 

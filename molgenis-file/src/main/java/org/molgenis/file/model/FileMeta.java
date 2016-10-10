@@ -1,7 +1,7 @@
 package org.molgenis.file.model;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.owned.OwnedEntity;
 
 import static org.molgenis.file.model.FileMetaMetaData.*;
@@ -13,14 +13,14 @@ public class FileMeta extends OwnedEntity
 		super(entity);
 	}
 
-	public FileMeta(EntityMetaData entityMeta)
+	public FileMeta(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public FileMeta(String id, EntityMetaData entityMeta)
+	public FileMeta(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

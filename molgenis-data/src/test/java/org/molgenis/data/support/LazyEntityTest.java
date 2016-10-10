@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,8 +20,9 @@ public class LazyEntityTest
 	private static final String ENTITY_NAME = "entity";
 	private static final String ID_ATTR_NAME = "id";
 
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 	private Attribute idAttr;
+
 	private DataService dataService;
 	private Object id;
 	private LazyEntity lazyEntity;
@@ -30,16 +31,16 @@ public class LazyEntityTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
+		entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn(ENTITY_NAME);
 		idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		dataService = mock(DataService.class);
 		entity = mock(Entity.class);
 		when(dataService.findOneById(ENTITY_NAME, id)).thenReturn(entity);
 		id = Integer.valueOf(1);
-		lazyEntity = new LazyEntity(entityMeta, dataService, id);
+		lazyEntity = new LazyEntity(entityType, dataService, id);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -68,10 +69,10 @@ public class LazyEntityTest
 	@Test
 	public void getAttributeNames()
 	{
-		Entity entity = new DynamicEntity(entityMeta);
+		Entity entity = new DynamicEntity(entityType);
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
+		when(entityType.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
 		assertEquals(Lists.newArrayList(entity.getAttributeNames()), Arrays.asList("attr0", "attr1"));
 	}
 
@@ -112,7 +113,8 @@ public class LazyEntityTest
 	public void getEntitiesString()
 	{
 		String attrName = "attr";
-		@SuppressWarnings("unchecked") Iterable<Entity> entities = mock(Iterable.class);
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
 		when(entity.getEntities(attrName)).thenReturn(entities);
 		assertEquals(entities, lazyEntity.getEntities(attrName));
 		assertEquals(entities, lazyEntity.getEntities(attrName));
@@ -123,7 +125,8 @@ public class LazyEntityTest
 	public void getEntitiesStringClassE()
 	{
 		String attrName = "attr";
-		@SuppressWarnings("unchecked") Iterable<Entity> entities = mock(Iterable.class);
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
 		when(entity.getEntities(attrName, Entity.class)).thenReturn(entities);
 		assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
 		assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
@@ -153,9 +156,9 @@ public class LazyEntityTest
 	}
 
 	@Test
-	public void getEntityMetaData()
+	public void getEntityType()
 	{
-		assertEquals(entityMeta, lazyEntity.getEntityMetaData());
+		assertEquals(entityType, lazyEntity.getEntityType());
 	}
 
 	@Test
@@ -194,7 +197,7 @@ public class LazyEntityTest
 	@Test
 	public void getLabelValueLabelAttrIsIdAttr()
 	{
-		when(entityMeta.getLabelAttribute()).thenReturn(idAttr);
+		when(entityType.getLabelAttribute()).thenReturn(idAttr);
 		assertEquals(id.toString(), lazyEntity.getLabelValue().toString());
 		verifyNoMoreInteractions(dataService);
 	}
@@ -226,7 +229,7 @@ public class LazyEntityTest
 	{
 		String strId = "1";
 		when(dataService.findOneById(ENTITY_NAME, strId)).thenReturn(entity);
-		lazyEntity = new LazyEntity(entityMeta, dataService, strId);
+		lazyEntity = new LazyEntity(entityType, dataService, strId);
 		assertEquals(strId, lazyEntity.getString(ID_ATTR_NAME));
 	}
 

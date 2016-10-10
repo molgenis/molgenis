@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.util;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -50,16 +50,16 @@ public class ElasticsearchEntityUtilsTest
 	}
 
 	@Test
-	public void toElasticsearchIdEntityEntityMetaData()
+	public void toElasticsearchIdEntityEntityType()
 	{
 		String id = "id0";
 		String idAttributeName = "id";
 		Entity entity = mock(Entity.class);
 		when(entity.get(idAttributeName)).thenReturn(id);
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		EntityType entityType = mock(EntityType.class);
 		Attribute idAttribute = mock(Attribute.class);
 		when(idAttribute.getName()).thenReturn(idAttributeName);
-		when(entityMetaData.getIdAttribute()).thenReturn(idAttribute);
-		assertEquals(id, ElasticsearchEntityUtils.toElasticsearchId(entity, entityMetaData));
+		when(entityType.getIdAttribute()).thenReturn(idAttribute);
+		assertEquals(id, ElasticsearchEntityUtils.toElasticsearchId(entity, entityType));
 	}
 }

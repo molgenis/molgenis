@@ -5,8 +5,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
@@ -46,7 +46,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	private ScriptParameterFactory scriptParameterFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
@@ -85,7 +85,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
-		EntityMetaData sourceEntityMeta = entityMetaFactory.create("source");
+		EntityType sourceEntityMeta = entityTypeFactory.create("source");
 		Attribute sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
 		Attribute sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
 		sourceEntityMeta.addAttribute(sourceAttr0);
@@ -93,10 +93,8 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
 		Map<Attribute, ExplainedAttribute> attrResults = Maps.newHashMap();
-		attrResults.put(sourceAttr0,
-				ExplainedAttribute.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
-		attrResults.put(sourceAttr1,
-				ExplainedAttribute.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
+		attrResults.put(sourceAttr0, ExplainedAttribute.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
+		attrResults.put(sourceAttr1, ExplainedAttribute.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 

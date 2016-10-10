@@ -3,7 +3,7 @@ package org.molgenis.bootstrap;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.importer.ImportServiceRegistrar;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrar;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.script.ScriptRunnerRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +24,18 @@ public class RegistryBootstrapper
 	private static final Logger LOG = LoggerFactory.getLogger(RegistryBootstrapper.class);
 
 	private final RepositoryCollectionBootstrapper repoCollectionBootstrapper;
-	private final SystemEntityMetaDataRegistrar systemEntityMetaRegistrar;
+	private final SystemEntityTypeRegistrar systemEntityTypeRegistrar;
 	private final EntityFactoryRegistrar entityFactoryRegistrar;
 	private final ImportServiceRegistrar importServiceRegistrar;
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 
 	@Autowired
 	public RegistryBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
-			SystemEntityMetaDataRegistrar systemEntityMetaRegistrar, EntityFactoryRegistrar entityFactoryRegistrar,
+			SystemEntityTypeRegistrar systemEntityTypeRegistrar, EntityFactoryRegistrar entityFactoryRegistrar,
 			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar)
 	{
 		this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
-		this.systemEntityMetaRegistrar = requireNonNull(systemEntityMetaRegistrar);
+		this.systemEntityTypeRegistrar = requireNonNull(systemEntityTypeRegistrar);
 		this.entityFactoryRegistrar = requireNonNull(entityFactoryRegistrar);
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
@@ -48,7 +48,7 @@ public class RegistryBootstrapper
 		LOG.trace("Registered repository collections");
 
 		LOG.trace("Registering system entity meta data ...");
-		systemEntityMetaRegistrar.register(event);
+		systemEntityTypeRegistrar.register(event);
 		LOG.trace("Registered system entity meta data");
 
 		LOG.trace("Registering entity factories ...");

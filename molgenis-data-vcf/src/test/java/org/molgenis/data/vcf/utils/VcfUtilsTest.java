@@ -3,8 +3,8 @@ package org.molgenis.data.vcf.utils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 
@@ -29,7 +29,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 {
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	AttributeFactory attributeFactory;
@@ -37,9 +37,9 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	private EntityMetaData annotatedEntityMetadata;
-	public EntityMetaData metaDataCanAnnotate;
-	public EntityMetaData metaDataCantAnnotate;
+	private EntityType annotatedEntityType;
+	public EntityType metaDataCanAnnotate;
+	public EntityType metaDataCantAnnotate;
 
 	public Attribute attributeChrom;
 	public Attribute attributePos;
@@ -59,9 +59,9 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		annotatedEntityMetadata = entityMetaDataFactory.create().setName("test");
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
-		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+		annotatedEntityType = entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 		attributePos = attributeFactory.create().setName(POS).setDataType(LONG);
@@ -105,17 +105,17 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		INFO.addAttributePart(GTC);
 		metaDataCanAnnotate.addAttribute(INFO);
 
-		annotatedEntityMetadata.addAttribute(attributeChrom, ROLE_ID);
-		annotatedEntityMetadata.addAttribute(attributePos);
-		annotatedEntityMetadata.addAttribute(attributeRef);
-		annotatedEntityMetadata.addAttribute(attributeAlt);
+		annotatedEntityType.addAttribute(attributeChrom, ROLE_ID);
+		annotatedEntityType.addAttribute(attributePos);
+		annotatedEntityType.addAttribute(attributeRef);
+		annotatedEntityType.addAttribute(attributeAlt);
 
-		annotatedEntityMetadata.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING))
+		annotatedEntityType.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
+		annotatedEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
+		annotatedEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING))
 				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
 		INFO.addAttributePart(attributeFactory.create().setName("ANNO").setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(INFO);
+		annotatedEntityType.addAttribute(INFO);
 
 		entity1.set(VcfAttributes.CHROM, "1");
 		entity1.set(VcfAttributes.POS, 10050000);

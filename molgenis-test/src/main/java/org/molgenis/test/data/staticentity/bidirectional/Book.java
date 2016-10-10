@@ -1,7 +1,7 @@
 package org.molgenis.test.data.staticentity.bidirectional;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 
@@ -12,14 +12,14 @@ public class Book extends StaticEntity
 		super(entity);
 	}
 
-	public Book(EntityMetaData entityMeta)
+	public Book(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public Book(String name, EntityMetaData entityMeta)
+	public Book(String name, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(name);
 	}
 

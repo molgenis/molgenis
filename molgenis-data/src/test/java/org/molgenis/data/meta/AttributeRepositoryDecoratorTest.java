@@ -4,8 +4,8 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -30,8 +30,8 @@ import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
@@ -45,7 +45,7 @@ public class AttributeRepositoryDecoratorTest
 	private AttributeRepositoryDecorator repo;
 	private Repository<Attribute> decoratedRepo;
 	private DataService dataService;
-	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private MolgenisPermissionService permissionService;
 
 	@BeforeMethod
@@ -53,9 +53,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		decoratedRepo = mock(Repository.class);
 		dataService = mock(DataService.class);
-		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
+		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
 		permissionService = mock(MolgenisPermissionService.class);
-		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityMetaRegistry, dataService,
+		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityTypeRegistry, dataService,
 				permissionService);
 	}
 
@@ -91,11 +91,11 @@ public class AttributeRepositoryDecoratorTest
 	}
 
 	@Test
-	public void getEntityMetaData() throws Exception
+	public void getEntityType() throws Exception
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
-		assertEquals(repo.getEntityMetaData(), entityMeta);
+		EntityType entityType = mock(EntityType.class);
+		when(decoratedRepo.getEntityType()).thenReturn(entityType);
+		assertEquals(repo.getEntityType(), entityType);
 	}
 
 	@Test
@@ -127,18 +127,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -148,8 +148,8 @@ public class AttributeRepositoryDecoratorTest
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		when(decoratedRepo.spliterator()).thenReturn(asList(attr0, attr1).spliterator());
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, COUNT)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, COUNT)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(), 1L);
 	}
 
@@ -191,18 +191,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -214,8 +214,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> q = new QueryImpl<>();
 		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, COUNT)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, COUNT)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(q), 1L);
 		assertEquals(queryCaptor.getValue().getOffset(), 0);
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
@@ -252,18 +252,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -275,8 +275,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> q = new QueryImpl<>();
 		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(q).collect(toList()), singletonList(attr1));
 		assertEquals(queryCaptor.getValue().getOffset(), 0);
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
@@ -290,18 +290,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -315,8 +315,8 @@ public class AttributeRepositoryDecoratorTest
 		when(q.getPageSize()).thenReturn(1);
 		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(q).collect(toList()), emptyList());
 		assertEquals(queryCaptor.getValue().getOffset(), 0);
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
@@ -352,18 +352,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -373,8 +373,8 @@ public class AttributeRepositoryDecoratorTest
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		when(decoratedRepo.spliterator()).thenReturn(asList(attr0, attr1).spliterator());
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(true);
 		assertEquals(newArrayList(repo.iterator()), singletonList(attr1));
 	}
 
@@ -435,19 +435,19 @@ public class AttributeRepositoryDecoratorTest
 		setUserAuthentication();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta);
-		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Query<Attribute> q = new QueryImpl<>();
 		when(decoratedRepo.findOne(q)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOne(q), attr0);
 	}
 
@@ -457,19 +457,19 @@ public class AttributeRepositoryDecoratorTest
 		setUserAuthentication();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta);
-		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Query<Attribute> q = new QueryImpl<>();
 		when(decoratedRepo.findOne(q)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOne(q));
 	}
 
@@ -501,19 +501,19 @@ public class AttributeRepositoryDecoratorTest
 		setUserAuthentication();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta);
-		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
 		when(decoratedRepo.findOneById(id)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOneById(id), attr0);
 	}
 
@@ -524,18 +524,17 @@ public class AttributeRepositoryDecoratorTest
 		String attr0Name = "entity0attrCompoundattr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attrCompoundName = "entity0attrCompound";
-		Attribute attrCompound = when(mock(Attribute.class).getName()).thenReturn(attrCompoundName)
-				.getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		Attribute attrCompound = when(mock(Attribute.class).getName()).thenReturn(attrCompoundName).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta0.findAll()).thenReturn(Stream.empty()); // attribute is part of compound, not of entity
 		when(qEntityMeta.eq(ATTRIBUTES, attrCompound)).thenReturn(qEntityMeta1);
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -546,7 +545,7 @@ public class AttributeRepositoryDecoratorTest
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
 		when(decoratedRepo.findOneById(id)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOneById(id), attr0);
 	}
 
@@ -556,19 +555,19 @@ public class AttributeRepositoryDecoratorTest
 		setUserAuthentication();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta);
-		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
 		when(decoratedRepo.findOneById(id)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOneById(id));
 	}
 
@@ -600,12 +599,12 @@ public class AttributeRepositoryDecoratorTest
 		setUserAuthentication();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta);
-		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
@@ -613,7 +612,7 @@ public class AttributeRepositoryDecoratorTest
 		Object id = mock(Object.class);
 		Fetch fetch = mock(Fetch.class);
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOneById(id, fetch), attr0);
 	}
 
@@ -623,12 +622,12 @@ public class AttributeRepositoryDecoratorTest
 		setUserAuthentication();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta);
-		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
@@ -636,7 +635,7 @@ public class AttributeRepositoryDecoratorTest
 		Object id = mock(Object.class);
 		Fetch fetch = mock(Fetch.class);
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(attr0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOneById(id, fetch));
 	}
 
@@ -671,18 +670,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -693,8 +692,8 @@ public class AttributeRepositoryDecoratorTest
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Stream<Object> ids = Stream.of(mock(Object.class), mock(Object.class));
 		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(attr0, attr1));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(ids).collect(toList()), singletonList(attr1));
 	}
 
@@ -730,18 +729,18 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> qEntityMeta = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta0 = mock(Query.class);
-		Query<EntityMetaData> qEntityMeta1 = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> qEntityMeta = mock(Query.class);
+		Query<EntityType> qEntityMeta0 = mock(Query.class);
+		Query<EntityType> qEntityMeta1 = mock(Query.class);
 		when(qEntityMeta.eq(ATTRIBUTES, attr0)).thenReturn(qEntityMeta0);
 		when(qEntityMeta.eq(ATTRIBUTES, attr1)).thenReturn(qEntityMeta1);
-		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityMeta0));
-		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(qEntityMeta);
+		when(qEntityMeta0.findAll()).thenReturn(Stream.of(entityType0));
+		when(qEntityMeta1.findAll()).thenReturn(Stream.of(entityType1));
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
@@ -753,8 +752,8 @@ public class AttributeRepositoryDecoratorTest
 		Stream<Object> ids = Stream.of(mock(Object.class), mock(Object.class));
 		Fetch fetch = mock(Fetch.class);
 		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(attr0, attr1));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(ids, fetch).collect(toList()), singletonList(attr1));
 	}
 
@@ -793,13 +792,12 @@ public class AttributeRepositoryDecoratorTest
 	public void addMappedByValidEntity()
 	{
 		String entityName = "entityName";
-		EntityMetaData refEntity = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		String attrName = "attrName";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
-		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName)
-				.getMock();
+		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
 		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
@@ -811,13 +809,12 @@ public class AttributeRepositoryDecoratorTest
 	public void addMappedByInvalidEntity()
 	{
 		String entityName = "entityName";
-		EntityMetaData refEntity = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		String attrName = "attrName";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
-		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName)
-				.getMock();
+		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
 		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
@@ -829,13 +826,12 @@ public class AttributeRepositoryDecoratorTest
 	public void addMappedByInvalidDataType()
 	{
 		String entityName = "entityName";
-		EntityMetaData refEntity = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		String attrName = "attrName";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
-		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName)
-				.getMock();
+		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
 		when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
@@ -850,13 +846,13 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
+		when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
+		Query<EntityType> entityQ = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
 		//noinspection unchecked
 		Query<Attribute> attrQ = mock(Query.class);
@@ -876,7 +872,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(true);
+		when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(true);
 		repo.delete(attr);
 	}
 
@@ -887,13 +883,13 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
+		when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
+		Query<EntityType> entityQ = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
-		EntityMetaData ownerEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("ownerEntity").getMock();
-		when(entityQ.findOne()).thenReturn(ownerEntityMeta);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		EntityType ownerEntityType = when(mock(EntityType.class).getName()).thenReturn("ownerEntity").getMock();
+		when(entityQ.findOne()).thenReturn(ownerEntityType);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		repo.delete(attr);
 	}
 
@@ -904,13 +900,13 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
+		when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
+		Query<EntityType> entityQ = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
 		Attribute ownerAttr = when(mock(Attribute.class).getName()).thenReturn("ownerAttr").getMock();
 		//noinspection unchecked

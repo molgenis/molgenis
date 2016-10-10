@@ -10,8 +10,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
@@ -38,7 +38,7 @@ import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 public class VcfUtils
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attributeFactory;
@@ -149,15 +149,15 @@ public class VcfUtils
 		{
 			final PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
 
-			EntityMetaData resultEMD;
-			EntityMetaData effectsEMD;
+			EntityType resultEMD;
+			EntityType effectsEMD;
 
-			private void createResultEntityMetaData(Entity effect, EntityMetaData variantEMD)
+			private void createResultEntityType(Entity effect, EntityType variantEMD)
 			{
 				if (resultEMD == null || effectsEMD == null)
 				{
-					effectsEMD = effect.getEntityMetaData();
-					resultEMD = entityMetaDataFactory.create(variantEMD);
+					effectsEMD = effect.getEntityType();
+					resultEMD = entityTypeFactory.create(variantEMD);
 					resultEMD.addAttribute(attributeFactory.create().setName(VcfWriterUtils.EFFECT)
 							.setDataType(MolgenisFieldTypes.AttributeType.MREF).setRefEntity(effectsEMD));
 				}
@@ -171,7 +171,7 @@ public class VcfUtils
 
 			private Entity createEntityStructure(Entity variant, List<Entity> effectsForVariant)
 			{
-				createResultEntityMetaData(effectsForVariant.get(0), variant.getEntityMetaData());
+				createResultEntityType(effectsForVariant.get(0), variant.getEntityType());
 				Entity newVariant = new DynamicEntity(resultEMD);
 				newVariant.set(variant);
 
@@ -227,16 +227,16 @@ public class VcfUtils
 		};
 	}
 
-	public List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+	public List<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
 			Stream<Entity> inputStream)
 	{
-		return createEntityStructureForVcf(entityMetaData, attributeName, inputStream, Collections.emptyList());
+		return createEntityStructureForVcf(entityType, attributeName, inputStream, Collections.emptyList());
 	}
 
-	private List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+	private List<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
 			Stream<Entity> inputStream, List<Attribute> annotatorAttributes)
 	{
-		Attribute attributeToParse = entityMetaData.getAttribute(attributeName);
+		Attribute attributeToParse = entityType.getAttribute(attributeName);
 		String description = attributeToParse.getDescription();
 		if (description.indexOf(':') == -1)
 		{
@@ -249,13 +249,13 @@ public class VcfUtils
 		String value = step1[1].replaceAll("^\\s'|'$", "");
 
 		Map<Integer, Attribute> metadataMap = parseDescription(value, annotatorAttributes);
-		EntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap, entityName);
+		EntityType xrefMetaData = getXrefEntityType(metadataMap, entityName);
 
 		List<Entity> results = new ArrayList<>();
 		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
 		{
-			EntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
-			Entity originalEntity = new DynamicEntity(newEntityMetadata);
+			EntityType newEntityType = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
+			Entity originalEntity = new DynamicEntity(newEntityType);
 			originalEntity.set(inputEntity);
 
 			results.addAll(parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
@@ -264,21 +264,20 @@ public class VcfUtils
 		return results;
 	}
 
-	private EntityMetaData getXrefEntityMetaData(Map<Integer, Attribute> metadataMap, String entityName)
+	private EntityType getXrefEntityType(Map<Integer, Attribute> metadataMap, String entityName)
 	{
-		EntityMetaData xrefMetaData = entityMetaDataFactory.create().setName(entityName);
-		xrefMetaData
-				.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
-						EntityMetaData.AttributeRole.ROLE_ID);
+		EntityType xrefMetaData = entityTypeFactory.create().setName(entityName);
+		xrefMetaData.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
+				EntityType.AttributeRole.ROLE_ID);
 		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData.addAttribute(
 				attributeFactory.create().setName(VARIANT).setDataType(MolgenisFieldTypes.AttributeType.XREF));
 		return xrefMetaData;
 	}
 
-	private static EntityMetaData removeRefFieldFromInfoMetadata(Attribute attributeToParse, Entity inputEntity)
+	private static EntityType removeRefFieldFromInfoMetadata(Attribute attributeToParse, Entity inputEntity)
 	{
-		EntityMetaData newMeta = inputEntity.getEntityMetaData();
+		EntityType newMeta = inputEntity.getEntityType();
 		Attribute newInfoMetadata = newMeta.getAttribute(VcfAttributes.INFO);
 		newInfoMetadata.setAttributeParts(
 				StreamSupport.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
@@ -289,8 +288,7 @@ public class VcfUtils
 		return newMeta;
 	}
 
-	private Map<Integer, Attribute> parseDescription(String description,
-			List<Attribute> annotatorAttributes)
+	private Map<Integer, Attribute> parseDescription(String description, List<Attribute> annotatorAttributes)
 	{
 		String value = description.replaceAll("^\\s'|'$", "");
 
@@ -302,16 +300,15 @@ public class VcfUtils
 			String attribute = attributeStrings[i];
 			MolgenisFieldTypes.AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap
 					.get(attribute).getDataType() : MolgenisFieldTypes.AttributeType.STRING;
-			Attribute attr = attributeFactory.create()
-					.setName(StringUtils.deleteWhitespace(attribute)).setDataType(type)
-					.setLabel(attribute);
+			Attribute attr = attributeFactory.create().setName(StringUtils.deleteWhitespace(attribute))
+					.setDataType(type).setLabel(attribute);
 			attributeMap.put(i, attr);
 		}
 		return attributeMap;
 	}
 
-	private static List<Entity> parseValue(EntityMetaData metadata, Map<Integer, Attribute> attributesMap,
-			String value, Entity originalEntity)
+	private static List<Entity> parseValue(EntityType metadata, Map<Integer, Attribute> attributesMap, String value,
+			Entity originalEntity)
 	{
 		List<Entity> result = new ArrayList<>();
 		String[] valuesPerEntity = value.split(",");

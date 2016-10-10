@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,7 +14,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 {
 	private final static String REPOSITORY_NAME = "repo";
 	private RepositoryCollection decoratedRepositoryCollection;
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 	private IndexActionRegisterService indexActionRegisterService;
 	private IndexActionRepositoryCollectionDecorator indexActionRepositoryCollectionDecorator;
 
@@ -25,47 +25,47 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		decoratedRepositoryCollection = mock(RepositoryCollection.class);
 		Repository<Entity> repository = (Repository<Entity>) mock(Repository.class);
 		when(decoratedRepositoryCollection.getRepository(REPOSITORY_NAME)).thenReturn(repository);
-		entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("repo");
-		when(repository.getEntityMetaData()).thenReturn(entityMeta);
+		entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("repo");
+		when(repository.getEntityType()).thenReturn(entityType);
 		indexActionRegisterService = mock(IndexActionRegisterService.class);
 		indexActionRepositoryCollectionDecorator = new IndexActionRepositoryCollectionDecorator(
 				decoratedRepositoryCollection, indexActionRegisterService);
 	}
 
 	@Test
-	public void deleteEntityMeta()
+	public void deleteEntityType()
 	{
-		indexActionRepositoryCollectionDecorator.deleteRepository(entityMeta);
-		verify(decoratedRepositoryCollection, times(1)).deleteRepository(entityMeta);
+		indexActionRepositoryCollectionDecorator.deleteRepository(entityType);
+		verify(decoratedRepositoryCollection, times(1)).deleteRepository(entityType);
 		verify(indexActionRegisterService).register("repo", null);
 	}
 
 	@Test
 	public void addAttribute()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
-		indexActionRepositoryCollectionDecorator.addAttribute(entityMeta, attribute);
-		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityMeta, attribute);
+		indexActionRepositoryCollectionDecorator.addAttribute(entityType, attribute);
+		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityType, attribute);
 		verify(indexActionRegisterService).register("repo", null);
 	}
 
 	@Test
 	public void deleteAttribute()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
-		indexActionRepositoryCollectionDecorator.deleteAttribute(entityMeta, attribute);
-		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityMeta, attribute);
+		indexActionRepositoryCollectionDecorator.deleteAttribute(entityType, attribute);
+		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityType, attribute);
 		verify(indexActionRegisterService).register("repo", null);
 	}
 
 	@Test
-	public void addEntityMeta()
+	public void addEntityType()
 	{
-		indexActionRepositoryCollectionDecorator.createRepository(entityMeta);
-		verify(decoratedRepositoryCollection, times(1)).createRepository(entityMeta);
+		indexActionRepositoryCollectionDecorator.createRepository(entityType);
+		verify(decoratedRepositoryCollection, times(1)).createRepository(entityType);
 		verify(indexActionRegisterService).register("repo", null);
 	}
 }

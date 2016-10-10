@@ -2,7 +2,7 @@ package org.molgenis.data.listeners;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -62,10 +62,9 @@ public class EntityListenerRepositoryDecorator implements Repository<Entity>
 		return decoratedRepository.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepository.getEntityMetaData();
+		return decoratedRepository.getEntityType();
 	}
 
 	@Override

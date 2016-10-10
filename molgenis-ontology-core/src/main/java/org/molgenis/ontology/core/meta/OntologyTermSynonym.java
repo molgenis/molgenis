@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ID;
@@ -14,14 +14,14 @@ public class OntologyTermSynonym extends StaticEntity
 		super(entity);
 	}
 
-	public OntologyTermSynonym(EntityMetaData entityMeta)
+	public OntologyTermSynonym(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public OntologyTermSynonym(String id, EntityMetaData entityMeta)
+	public OntologyTermSynonym(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

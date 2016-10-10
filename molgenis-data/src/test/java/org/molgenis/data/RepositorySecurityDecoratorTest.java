@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +21,7 @@ import static org.testng.Assert.assertEquals;
 public class RepositorySecurityDecoratorTest
 {
 	private String entityName;
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 	private Repository<Entity> decoratedRepository;
 	private AppSettings appSettings;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
@@ -30,11 +30,11 @@ public class RepositorySecurityDecoratorTest
 	public void setUp()
 	{
 		entityName = "entity";
-		entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn(entityName);
+		entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn(entityName);
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getName()).thenReturn(entityName);
-		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		appSettings = mock(AppSettings.class);
 		repositorySecurityDecorator = new RepositorySecurityDecorator(decoratedRepository, appSettings);
 	}

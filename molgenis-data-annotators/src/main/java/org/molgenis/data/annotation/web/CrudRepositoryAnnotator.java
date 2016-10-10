@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.exception.UiAnnotationException;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
@@ -30,8 +30,7 @@ public class CrudRepositoryAnnotator
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-
-	private EntityMetaData targetMetaData;
+	private EntityType targetMetaData;
 	private AttributeFactory attributeFactory;
 
 	@Autowired
@@ -65,20 +64,20 @@ public class CrudRepositoryAnnotator
 		}
 		try
 		{
-			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
+			EntityType entityType = dataService.getMeta().getEntityType(repository.getName());
 
 			if (annotator instanceof RefEntityAnnotator)
 			{
-				targetMetaData = ((RefEntityAnnotator) annotator).getTargetEntityMetaData(entityMetaData);
+				targetMetaData = ((RefEntityAnnotator) annotator).getTargetEntityType(entityType);
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
-					RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityMeta(AnnotatorUtils
-							.addAnnotatorMetaDataToRepositories(externalRepository.getEntityMetaData(),
-									attributeFactory, annotator)));
+					RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityType(AnnotatorUtils
+							.addAnnotatorMetaDataToRepositories(externalRepository.getEntityType(), attributeFactory,
+									annotator)));
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
 				}
@@ -90,8 +89,8 @@ public class CrudRepositoryAnnotator
 			}
 			else
 			{
-				RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityMeta(AnnotatorUtils
-						.addAnnotatorMetaDataToRepositories(entityMetaData, attributeFactory, annotator)));
+				RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityType(
+						AnnotatorUtils.addAnnotatorMetaDataToRepositories(entityType, attributeFactory, annotator)));
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
@@ -108,7 +107,7 @@ public class CrudRepositoryAnnotator
 		}
 	}
 
-	private void deleteResultEntity(RepositoryAnnotator annotator, EntityMetaData targetMetaData)
+	private void deleteResultEntity(RepositoryAnnotator annotator, EntityType targetMetaData)
 	{
 		try
 		{
@@ -117,7 +116,7 @@ public class CrudRepositoryAnnotator
 				RunAsSystemProxy.runAsSystem(() ->
 				{
 					dataService.deleteAll(targetMetaData.getName());
-					dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
+					dataService.getMeta().deleteEntityType(targetMetaData.getName());
 				});
 			}
 		}
@@ -139,8 +138,7 @@ public class CrudRepositoryAnnotator
 		String entityName;
 		if (annotator instanceof RefEntityAnnotator)
 		{
-			entityName = ((RefEntityAnnotator) annotator).getTargetEntityMetaData(repository.getEntityMetaData())
-					.getName();
+			entityName = ((RefEntityAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getName();
 		}
 		else
 		{

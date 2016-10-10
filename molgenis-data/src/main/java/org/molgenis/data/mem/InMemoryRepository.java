@@ -3,7 +3,7 @@ package org.molgenis.data.mem;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
 import java.io.IOException;
@@ -21,12 +21,12 @@ import static com.google.common.collect.Iterables.partition;
  */
 public class InMemoryRepository implements Repository<Entity>
 {
-	private final EntityMetaData metadata;
+	private final EntityType metadata;
 	private final Map<Object, Entity> entities = new LinkedHashMap<Object, Entity>();
 
-	public InMemoryRepository(EntityMetaData entityMetaData)
+	public InMemoryRepository(EntityType entityType)
 	{
-		this.metadata = entityMetaData;
+		this.metadata = entityType;
 	}
 
 	@Override
@@ -35,8 +35,7 @@ public class InMemoryRepository implements Repository<Entity>
 		return metadata.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
 		return metadata;
 	}

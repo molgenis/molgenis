@@ -3,7 +3,7 @@ package org.molgenis.data.index;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -22,7 +22,7 @@ public class IndexActionRepositoryDecoratorTest
 	private Repository<Entity> decoratedRepo;
 	private IndexActionRegisterService indexActionRegisterService;
 	private IndexActionRepositoryDecorator indexActionRepositoryDecorator;
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -31,8 +31,8 @@ public class IndexActionRepositoryDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getName()).thenReturn("entity");
 		when(decoratedRepo.getCapabilities()).thenReturn(singleton(MANAGABLE));
-		entityMeta = mock(EntityMetaData.class);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
+		entityType = mock(EntityType.class);
+		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		indexActionRegisterService = mock(IndexActionRegisterService.class);
 		indexActionRepositoryDecorator = new IndexActionRepositoryDecorator(decoratedRepo, indexActionRegisterService);
 	}
@@ -301,25 +301,25 @@ public class IndexActionRepositoryDecoratorTest
 
 	private void initEntityMeta()
 	{
-		when(entityMeta.getMappedByAttributes()).thenReturn(Stream.empty());
-		when(entityMeta.getInversedByAttributes()).thenReturn(Stream.empty());
+		when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
+		when(entityType.getInversedByAttributes()).thenReturn(Stream.empty());
 	}
 
 	private void initEntityMetaBidi()
 	{
-		EntityMetaData mappedByEntity = mock(EntityMetaData.class);
+		EntityType mappedByEntity = mock(EntityType.class);
 		when(mappedByEntity.getName()).thenReturn("mappedByEntity");
 		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn("mappedByAttr");
 		when(mappedByAttr.getRefEntity()).thenReturn(mappedByEntity);
 
-		EntityMetaData inversedByEntity = mock(EntityMetaData.class);
+		EntityType inversedByEntity = mock(EntityType.class);
 		when(inversedByEntity.getName()).thenReturn("inversedByEntity");
 		Attribute inversedByAttr = mock(Attribute.class);
 		when(inversedByAttr.getName()).thenReturn("inversedByAttr");
 		when(inversedByAttr.getRefEntity()).thenReturn(inversedByEntity);
 
-		when(entityMeta.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttr));
-		when(entityMeta.getInversedByAttributes()).thenReturn(Stream.of(inversedByAttr));
+		when(entityType.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttr));
+		when(entityType.getInversedByAttributes()).thenReturn(Stream.of(inversedByAttr));
 	}
 }

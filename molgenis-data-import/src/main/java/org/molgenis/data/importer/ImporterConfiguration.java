@@ -45,7 +45,7 @@ public class ImporterConfiguration
 	private AttributeFactory attrMetaFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private TagFactory tagFactory;
@@ -75,7 +75,7 @@ public class ImporterConfiguration
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityMetaDataFactory, tagFactory,
+		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
 				languageFactory, i18nStringFactory);
 	}
 }

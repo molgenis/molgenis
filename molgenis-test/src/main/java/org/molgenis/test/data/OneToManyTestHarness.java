@@ -1,8 +1,9 @@
 package org.molgenis.test.data;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonFactory1;
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.person2.PersonFactory2;
@@ -27,6 +28,14 @@ import org.molgenis.test.data.staticentity.bidirectional.authorbook4.AuthorFacto
 import org.molgenis.test.data.staticentity.bidirectional.authorbook4.AuthorMetaData4;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook4.BookFactory4;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook4.BookMetaData4;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonFactory1;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.person2.PersonFactory2;
+import org.molgenis.test.data.staticentity.bidirectional.person2.PersonMetaData2;
+import org.molgenis.test.data.staticentity.bidirectional.person3.PersonFactory3;
+import org.molgenis.test.data.staticentity.bidirectional.person3.PersonMetaData3;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonFactory4;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +43,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Generates entities to use in tests with a OneToMany relation in the form of Authors and Books, or Persons with self reference.
@@ -111,8 +121,12 @@ public class OneToManyTestHarness
 	public static final String ATTR_PARENT = "parent";
 	public static final String ATTR_CHILDREN = "children";
 
-	public enum TestCaseType{
-		BOTH_NULLABLE, XREF_REQUIRED, ONE_TO_MANY_REQUIRED, BOTH_REQUIRED;
+	public enum TestCaseType
+	{
+		XREF_NULLABLE,   // case 1
+		XREF_REQUIRED,   // case 2
+		ASCENDING_ORDER, // case 3
+		DESCENDING_ORDER // case 4
 	}
 
 	@PostConstruct
@@ -124,50 +138,48 @@ public class OneToManyTestHarness
 	 * Creates Author and Book entity test sets for a specific use case. Entities are always linked as follows (when
 	 * imported): author1 -> book1, author2 -> book2, author3 -> book3, and vice versa.
 	 * <p>
-	 * Case 1: Author.books = nillable, Book.author = nillable | no ordering
-	 * Case 2: Author.books = nillable, Book.author = required | no ordering
-	 * Case 3: Author.books = required, Book.author = nillable | no ordering
-	 * Case 4: Author.books = required, Book.author = required | no ordering
-	 * Case 5: Author.books = nillable, Book.author = nillable | ascending order
-	 * Case 6: Author.books = nillable, Book.author = nillable | descending order
+	 * Case 1: Book.author = nullable | no ordering
+	 * Case 2: Book.author = required | no ordering
+	 * Case 3: Book.author = nullable | ascending order
+	 * Case 4: Book.author = nullable | descending order
 	 */
 	public AuthorsAndBooks createAuthorAndBookEntities(TestCaseType testCase)
 	{
 		switch (testCase)
 		{
-			case BOTH_NULLABLE:
-				return createTestEntitiesSetAuthorField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
+			case XREF_NULLABLE:
+				return createTestEntitiesSetBooksField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
 			case XREF_REQUIRED:
 				return createTestEntitiesSetBooksField(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
-			case ONE_TO_MANY_REQUIRED:
-				return createTestEntitiesSetAuthorField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
-			case BOTH_REQUIRED:
-				return createTestEntitiesSetAuthorField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
+			case ASCENDING_ORDER:
+				return createTestEntitiesSetBooksField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
+			case DESCENDING_ORDER:
+				return createTestEntitiesSetBooksField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
 		}
 	}
 
 	/**
-	 * Creates Person entity test sets for a specific use case. Entities are always linked as folows (when imported):
+	 * Creates Person entity test sets for a specific use case. Entities are always linked as follows (when imported):
 	 * person1 -> person2, person2 -> person3, person3 -> person1
 	 * <p>
-	 * Case 1: Person.parent = nillable, Person.children = nillable
-	 * Case 2: Person.parent = nillable, Person.children = required
-	 * Case 3: Person.parent = required, Person.children = nillable
-	 * Case 4: Person.parent = required, Person.children = required
+	 * Case 1: Person.children = nullable | no ordering
+	 * Case 2: Person.children = required | no ordering
+	 * Case 3: Person.children = nullable | ascending order
+	 * Case 4: Person.children = nullable | descending order
 	 */
 	public List<Entity> createPersonEntities(TestCaseType testCase)
 	{
 		switch (testCase)
 		{
-			case BOTH_NULLABLE:
+			case XREF_NULLABLE:
 				return createPersonEntities(personFactory1);
 			case XREF_REQUIRED:
 				return createPersonEntities(personFactory2);
-			case ONE_TO_MANY_REQUIRED:
+			case ASCENDING_ORDER:
 				return createPersonEntities(personFactory3);
-			case BOTH_REQUIRED:
+			case DESCENDING_ORDER:
 				return createPersonEntities(personFactory4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
@@ -175,24 +187,10 @@ public class OneToManyTestHarness
 	}
 
 	/**
-	 * Create Author and Book test entities and set the Author.books fields.
-	 */
-	private AuthorsAndBooks createTestEntitiesSetAuthorField(AbstractSystemEntityFactory authorFactory,
-			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
-	{
-		List<Entity> authors = createAuthorEntities(authorFactory);
-		List<Entity> books = createBookEntities(bookFactory);
-		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData, bookMetaData);
-	}
-
-	/**
 	 * Create Author and Book test entities and set the Books.author fields.
 	 */
 	private AuthorsAndBooks createTestEntitiesSetBooksField(AbstractSystemEntityFactory authorFactory,
-			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
+			AbstractSystemEntityFactory bookFactory, EntityType authorMetaData, EntityType bookMetaData)
 	{
 		List<Entity> authors = createAuthorEntities(authorFactory);
 		List<Entity> books = createBookEntities(bookFactory);
@@ -254,9 +252,9 @@ public class OneToManyTestHarness
 		person3.set(PersonMetaData1.ID, PERSON_3);
 		person3.set(PersonMetaData1.LABEL, "Klaas");
 
-		person1.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2));
-		person2.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person3));
-		person3.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person1));
+		person1.set(PersonMetaData1.ATTR_PARENT, person3);
+		person2.set(PersonMetaData1.ATTR_PARENT, person1);
+		person3.set(PersonMetaData1.ATTR_PARENT, person2);
 
 		return newArrayList(person1, person2, person3);
 	}
@@ -264,20 +262,20 @@ public class OneToManyTestHarness
 	/**
 	 * Simple container for Author and Book entities so they can be requested as one.
 	 */
-	public class AuthorsAndBooks
+	public static class AuthorsAndBooks
 	{
-		List<Entity> books;
-		List<Entity> authors;
-		EntityMetaData bookMetaData;
-		EntityMetaData authorMetaData;
+		private final List<Entity> books;
+		private final List<Entity> authors;
+		private final EntityType bookMetaData;
+		private final EntityType authorMetaData;
 
-		AuthorsAndBooks(List<Entity> authors, List<Entity> books, EntityMetaData authorMetaData,
-				EntityMetaData bookMetaData)
+		AuthorsAndBooks(@NonNull List<Entity> authors, @NonNull List<Entity> books,
+				@NonNull EntityType authorMetaData, @NonNull EntityType bookMetaData)
 		{
-			this.authors = authors;
-			this.books = books;
-			this.authorMetaData = authorMetaData;
-			this.bookMetaData = bookMetaData;
+			this.authors = requireNonNull(authors);
+			this.books = requireNonNull(books);
+			this.authorMetaData = requireNonNull(authorMetaData);
+			this.bookMetaData = requireNonNull(bookMetaData);
 		}
 
 		public List<Entity> getBooks()
@@ -290,12 +288,12 @@ public class OneToManyTestHarness
 			return authors;
 		}
 
-		public EntityMetaData getBookMetaData()
+		public EntityType getBookMetaData()
 		{
 			return bookMetaData;
 		}
 
-		public EntityMetaData getAuthorMetaData()
+		public EntityType getAuthorMetaData()
 		{
 			return authorMetaData;
 		}

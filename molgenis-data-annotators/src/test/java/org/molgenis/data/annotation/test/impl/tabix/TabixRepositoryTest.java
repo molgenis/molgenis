@@ -4,8 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepository;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -29,25 +29,25 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { TabixVcfRepositoryTest.Config.class })
+@ContextConfiguration(classes = { TabixRepositoryTest.Config.class })
 public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
 	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private VcfAttributes vcfAttributes;
 
 	private TabixRepository tabixRepository;
-	private EntityMetaData repoMetaData;
+	private EntityType repoMetaData;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		repoMetaData = entityMetaDataFactory.create().setName("CaddTest");
+		repoMetaData = entityTypeFactory.create().setName("CaddTest");
 		repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
@@ -60,9 +60,9 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testGetEntityMetaData()
+	public void testGetEntityType()
 	{
-		assertEquals(tabixRepository.getEntityMetaData(), repoMetaData);
+		assertEquals(tabixRepository.getEntityType(), repoMetaData);
 	}
 
 	@Test

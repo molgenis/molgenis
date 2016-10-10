@@ -5,11 +5,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionCapability;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
@@ -41,31 +40,31 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public void deleteRepository(EntityMetaData entityMeta)
+	public void deleteRepository(EntityType entityType)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), null);
-		this.decorated.deleteRepository(entityMeta);
+		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.decorated.deleteRepository(entityType);
 	}
 
 	@Override
-	public void addAttribute(EntityMetaData entityMeta, Attribute attribute)
+	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), null);
-		this.decorated.addAttribute(entityMeta, attribute);
+		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.decorated.addAttribute(entityType, attribute);
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMetaData, Attribute attr, Attribute updatedAttr)
+	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		this.indexActionRegisterService.register(entityMetaData.getName(), null);
-		this.decorated.updateAttribute(entityMetaData, attr, updatedAttr);
+		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.decorated.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Override
-	public void deleteAttribute(EntityMetaData entityMeta, Attribute attr)
+	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), null);
-		this.decorated.deleteAttribute(entityMeta, attr);
+		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.decorated.deleteAttribute(entityType, attr);
 	}
 
 	@Override
@@ -75,10 +74,10 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), null);
-		return this.decorated.createRepository(entityMeta);
+		this.indexActionRegisterService.register(entityType.getName(), null);
+		return this.decorated.createRepository(entityType);
 	}
 
 	@Override
@@ -94,15 +93,15 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public Repository<Entity> getRepository(EntityMetaData entityMeta)
+	public Repository<Entity> getRepository(EntityType entityType)
 	{
-		return decorated.getRepository(entityMeta);
+		return decorated.getRepository(entityType);
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return decorated.hasRepository(entityMeta);
+		return decorated.hasRepository(entityType);
 	}
 
 	@Override

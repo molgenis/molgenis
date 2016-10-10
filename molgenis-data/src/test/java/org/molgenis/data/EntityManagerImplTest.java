@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
@@ -43,18 +43,18 @@ public class EntityManagerImplTest
 	public void getReference()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getLabelAttribute()).thenReturn(lblAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getLabelAttribute()).thenReturn(lblAttr);
 
 		String label = "label";
 		Integer id = Integer.valueOf(0);
 		Entity entity = when(mock(Entity.class).getLabelValue()).thenReturn(label).getMock();
 		when(dataService.findOneById(entityName, id)).thenReturn(entity);
 
-		Entity entityReference = entityManagerImpl.getReference(entityMeta, id);
+		Entity entityReference = entityManagerImpl.getReference(entityType, id);
 		assertEquals(entityReference.getIdValue(), id);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(label, entityReference.getLabelValue());
@@ -65,11 +65,11 @@ public class EntityManagerImplTest
 	public void getReferences()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getLabelAttribute()).thenReturn(lblAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getLabelAttribute()).thenReturn(lblAttr);
 
 		String label0 = "label0";
 		Integer id0 = Integer.valueOf(0);
@@ -81,7 +81,7 @@ public class EntityManagerImplTest
 		Entity entity1 = when(mock(Entity.class).getLabelValue()).thenReturn(label1).getMock();
 		when(dataService.findOneById(entityName, id1)).thenReturn(entity1);
 
-		Iterable<Entity> entityReferences = entityManagerImpl.getReferences(entityMeta, Arrays.asList(id0, id1));
+		Iterable<Entity> entityReferences = entityManagerImpl.getReferences(entityType, Arrays.asList(id0, id1));
 		Iterator<Entity> it = entityReferences.iterator();
 		assertTrue(it.hasNext());
 
@@ -104,30 +104,30 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesNoFetch()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 
-		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
-		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called
+		Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
+		Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 
 		Fetch fetch = null;
-		assertEquals(entities, entityManagerImpl.resolveReferences(entityMeta, entities, fetch));
+		assertEquals(entities, entityManagerImpl.resolveReferences(entityType, entities, fetch));
 	}
 
 	@Test
 	public void resolveReferencesStreamNoFetch()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("labelAttr").getMock();
 		when(labelAttr.getDataType()).thenReturn(STRING);
-		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singletonList(labelAttr));
+		when(entityType.getLabelAttribute()).thenReturn(labelAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(labelAttr));
 
-		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
-		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called
+		Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
+		Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
 
 		Fetch fetch = null;
-		Stream<Entity> entities = entityManagerImpl.resolveReferences(entityMeta, Stream.of(entity0, entity1), fetch);
+		Stream<Entity> entities = entityManagerImpl.resolveReferences(entityType, Stream.of(entity0, entity1), fetch);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

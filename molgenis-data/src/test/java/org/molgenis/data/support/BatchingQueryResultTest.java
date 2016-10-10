@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -42,8 +42,8 @@ public class BatchingQueryResultTest
 			assertEquals(q.getPageSize(), batchSize);
 
 			if (++batchCount == 3) return Lists.newArrayList();
-			return Arrays.asList(new DynamicEntity(mock(EntityMetaData.class)),
-					new DynamicEntity(mock(EntityMetaData.class)));
+			return Arrays.asList(new DynamicEntity(mock(EntityType.class)),
+					new DynamicEntity(mock(EntityType.class)));
 		}
 	}
 }

@@ -1,21 +1,21 @@
 package org.molgenis.test.data.staticentity.bidirectional.authorbook2;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
- * AuthorMetaData2 and BookMetaData2 define two entities with a OneToMany relation of which the Xref part (Book.author) is required.
+ * AuthorMetaData2 and BookMetaData2 define two entities with a OneToMany relation with a required XREF.
  */
 @Component
-public class BookMetaData2 extends SystemEntityMetaData
+public class BookMetaData2 extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Book2";
 	public static final String MY_REF_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

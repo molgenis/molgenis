@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 /**
  * This entity is used to keep track of the status of the execution of a reindex job.
@@ -14,15 +14,15 @@ public class IndexJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public IndexJobExecution(EntityMetaData entityMeta)
+	public IndexJobExecution(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
-	public IndexJobExecution(String identifier, EntityMetaData entityMeta)
+	public IndexJobExecution(String identifier, EntityType entityType)
 	{
-		super(identifier, entityMeta);
+		super(identifier, entityType);
 		setDefaultValues();
 	}
 

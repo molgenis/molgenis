@@ -3,7 +3,7 @@ package org.molgenis.data.cache.utils;
 import com.google.common.cache.Cache;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -56,23 +56,23 @@ public class CombinedEntityCache
 	/**
 	 * Retrieves an entity from the cache if present.
 	 *
-	 * @param entityMetaData EntityMetaData of the entity to retrieve
+	 * @param entityType EntityType of the entity to retrieve
 	 * @param id             id value of the entity to retrieve
 	 * @return Optional {@link Entity} with the result from the cache,
 	 * or null if no record of the entity is present in the cache
 	 */
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
-	public Optional<Entity> getIfPresent(EntityMetaData entityMetaData, Object id)
+	public Optional<Entity> getIfPresent(EntityType entityType, Object id)
 	{
 		Optional<Map<String, Object>> optionalDehydratedEntity = cache
-				.getIfPresent(EntityKey.create(entityMetaData, id));
+				.getIfPresent(EntityKey.create(entityType, id));
 		if (optionalDehydratedEntity == null)
 		{
 			// no information present in cache
 			return null;
 		}
 		return optionalDehydratedEntity
-				.map(dehydratedEntity -> entityHydration.hydrate(dehydratedEntity, entityMetaData));
+				.map(dehydratedEntity -> entityHydration.hydrate(dehydratedEntity, entityType));
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class CombinedEntityCache
 	 */
 	public void put(Entity entity)
 	{
-		String entityName = entity.getEntityMetaData().getName();
+		String entityName = entity.getEntityType().getName();
 		cache.put(EntityKey.create(entityName, entity.getIdValue()), Optional.of(entityHydration.dehydrate(entity)));
 	}
 

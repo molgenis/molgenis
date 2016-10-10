@@ -8,8 +8,8 @@ import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffRepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffRunner;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class SnpEffAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -67,7 +67,7 @@ public class SnpEffAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCanAnnotate()
 	{
-		EntityMetaData sourceEMD = entityMetaDataFactory.create().setName("source");
+		EntityType sourceEMD = entityTypeFactory.create().setName("source");
 		when(dataService.hasRepository("source_EFFECTS")).thenReturn(true);
 		assertEquals(annotator.canAnnotate(sourceEMD), "already annotated with SnpEff");
 	}

@@ -4,15 +4,15 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -37,7 +37,7 @@ import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 @Component
 public class SnpEffRunner
 {
-	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attributeFactory;
 	private final VcfAttributes vcfAttributes;
 
@@ -61,7 +61,7 @@ public class SnpEffRunner
 
 	@Autowired
 	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator,
-			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityMetaDataFactory entityMetaDataFactory,
+			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory)
 	{
 		this.jarRunner = jarRunner;
@@ -69,7 +69,7 @@ public class SnpEffRunner
 		this.idGenerator = idGenerator;
 		this.vcfAttributes = vcfAttributes;
 		this.effectsMetaData = effectsMetaData;
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
 		this.attributeFactory = attributeFactory;
 	}
 
@@ -95,7 +95,7 @@ public class SnpEffRunner
 
 			// get meta data by peeking at the first entity (work-around for issue #4701)
 			PeekingIterator<Entity> peekingSourceIterator = Iterators.peekingIterator(source);
-			EntityMetaData sourceEMD = peekingSourceIterator.peek().getEntityMetaData();
+			EntityType sourceEMD = peekingSourceIterator.peek().getEntityType();
 
 			List<String> params = Arrays
 					.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
@@ -103,7 +103,7 @@ public class SnpEffRunner
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
 			VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(), vcfAttributes,
-					entityMetaDataFactory, attributeFactory);
+					entityTypeFactory, attributeFactory);
 
 			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
@@ -133,16 +133,16 @@ public class SnpEffRunner
 							if (snpEffEntity != null)
 							{
 								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
-										getTargetEntityMetaData(sourceEMD)));
+										getTargetEntityType(sourceEMD)));
 							}
 							else
 							{
-								effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityMetaData(sourceEMD)));
+								effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityType(sourceEMD)));
 							}
 						}
 						else
 						{
-							effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityMetaData(sourceEMD)));
+							effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityType(sourceEMD)));
 						}
 					}
 					return effects.removeFirst();
@@ -184,7 +184,7 @@ public class SnpEffRunner
 		return null;
 	}
 
-	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityMetaData effectsEMD)
+	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityType effectsEMD)
 	{
 		Entity effect = new DynamicEntity(effectsEMD);
 		effect.set(ID, idGenerator.generateId());
@@ -194,8 +194,7 @@ public class SnpEffRunner
 	}
 
 	// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
-	private List<Entity> getSnpEffectsFromSnpEffEntity(Entity sourceEntity, Entity snpEffEntity,
-			EntityMetaData effectsEMD)
+	private List<Entity> getSnpEffectsFromSnpEffEntity(Entity sourceEntity, Entity snpEffEntity, EntityType effectsEMD)
 	{
 		String[] annotations = snpEffEntity.getString(SnpEffRunner.ANN).split(Pattern.quote(","), -1);
 
@@ -324,25 +323,25 @@ public class SnpEffRunner
 	}
 
 	/**
-	 * @param sourceEMD The entityMetaData for the entity that is being annotated by snpEff
-	 * @return emd Returns the EntityMetaData for the effect entity
+	 * @param sourceEntityType The entity type for the entity that is being annotated by snpEff
+	 * @return entityType Returns the EntityType for the effect entity
 	 */
-	public EntityMetaData getTargetEntityMetaData(EntityMetaData sourceEMD)
+	public EntityType getTargetEntityType(EntityType sourceEntityType)
 	{
-		EntityMetaData emd = entityMetaDataFactory.create()
-				.setSimpleName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX).setPackage(sourceEMD.getPackage());
-		emd.setBackend(sourceEMD.getBackend());
-		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true)
-				.setVisible(false);
-		emd.addAttribute(id);
-		emd.setIdAttribute(id);
+		EntityType entityType = entityTypeFactory.create()
+				.setSimpleName(sourceEntityType.getSimpleName() + ENTITY_NAME_SUFFIX)
+				.setPackage(sourceEntityType.getPackage());
+		entityType.setBackend(sourceEntityType.getBackend());
+		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false);
+		entityType.addAttribute(id);
+		entityType.setIdAttribute(id);
 		for (Attribute attr : effectsMetaData.getOrderedAttributes())
 		{
-			emd.addAttribute(attr);
+			entityType.addAttribute(attr);
 		}
-		emd.addAttribute(
+		entityType.addAttribute(
 				attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
-						.setRefEntity(sourceEMD));
-		return emd;
+						.setRefEntity(sourceEntityType));
+		return entityType;
 	}
 }

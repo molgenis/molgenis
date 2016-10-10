@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.controller.MappingServiceController;
@@ -11,7 +12,6 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,36 +54,36 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	{
 		String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
 
-		EntityMetaData targetEntityMetaData;
+		EntityType targetEntityType;
 		try
 		{
-			targetEntityMetaData = dataService
-					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA));
+			targetEntityType = dataService
+					.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
 		}
 		catch (UnknownEntityException uee)
 		{
 			LOG.error(uee.getMessage());
-			targetEntityMetaData = null;
+			targetEntityType = null;
 		}
 
-		EntityMetaData sourceEntityMetaData;
+		EntityType sourceEntityType;
 		try
 		{
-			sourceEntityMetaData = dataService
-					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA));
+			sourceEntityType = dataService
+					.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
 		}
 		catch (UnknownEntityException uee)
 		{
 			LOG.error(uee.getMessage());
-			sourceEntityMetaData = null;
+			sourceEntityType = null;
 		}
 
 		List<Entity> attributeMappingEntities = Lists.<Entity>newArrayList(
 				entityMappingEntity.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
 		List<AttributeMapping> attributeMappings = attributeMappingRepository
-				.getAttributeMappings(attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData);
+				.getAttributeMappings(attributeMappingEntities, sourceEntityType, targetEntityType);
 
-		return new EntityMapping(identifier, sourceEntityMetaData, targetEntityMetaData, attributeMappings);
+		return new EntityMapping(identifier, sourceEntityType, targetEntityType, attributeMappings);
 	}
 
 	@Override
@@ -114,9 +114,9 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	{
 		Entity entityMappingEntity = new DynamicEntity(entityMappingMetaData);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
-		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, entityMapping.getName());
-		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA,
-				entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
+		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, entityMapping.getName());
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE,
+				entityMapping.getTargetEntityType() != null ? entityMapping.getTargetEntityType()
 						.getName() : null);
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;

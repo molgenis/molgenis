@@ -248,7 +248,7 @@ stop("Error deleting entity")
 #    list
 #
 #####################################################################
-molgenis.getEntityMetaData <- local(function(entity) {
+molgenis.getEntityType <- local(function(entity) {
 url <- paste0(molgenis.api.url, entity, "/meta?expand=attributes")
 responseJson <- getURL(url, httpheader = list("x-molgenis-token" = molgenis.token))
 response <- fromJSON(responseJson)

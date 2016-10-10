@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -35,7 +35,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 
 	@Override
 	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+			EntityType targetEntityType, EntityType sourceEntityType)
 	{
 		// if the target attribute and all the source attributes contain frequency related categories
 		StringBuilder stringBuilder = new StringBuilder();
@@ -50,8 +50,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 			for (Attribute sourceAttribute : sourceAttributes)
 			{
 				stringBuilder.append(oneToOneCategoryAlgorithmGenerator
-						.generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
-								sourceEntityMetaData));
+						.generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType, sourceEntityType));
 			}
 		}
 

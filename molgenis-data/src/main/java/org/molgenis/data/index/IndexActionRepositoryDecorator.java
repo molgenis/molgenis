@@ -119,13 +119,13 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	private void registerRefEntityIndexActions()
 	{
 		// bidirectional attribute: register indexing actions for other side
-		getEntityMetaData().getMappedByAttributes().forEach(mappedByAttr ->
+		getEntityType().getMappedByAttributes().forEach(mappedByAttr ->
 		{
 			String refEntityName = mappedByAttr.getRefEntity().getName();
 			indexActionRegisterService.register(refEntityName, null);
 		});
 
-		getEntityMetaData().getInversedByAttributes().forEach(inversedByAttr ->
+		getEntityType().getInversedByAttributes().forEach(inversedByAttr ->
 		{
 			String refEntityName = inversedByAttr.getRefEntity().getName();
 			indexActionRegisterService.register(refEntityName, null);
@@ -140,14 +140,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	private void registerRefEntityIndexActions(Entity entity)
 	{
 		// bidirectional attribute: register indexing actions for other side
-		getEntityMetaData().getMappedByAttributes().forEach(mappedByAttr ->
+		getEntityType().getMappedByAttributes().forEach(mappedByAttr ->
 		{
 			String refEntityName = mappedByAttr.getRefEntity().getName();
 			entity.getEntities(mappedByAttr.getName()).forEach(
 					refEntity -> indexActionRegisterService.register(refEntityName, refEntity.getIdValue().toString()));
 		});
 
-		getEntityMetaData().getInversedByAttributes().forEach(inversedByAttr ->
+		getEntityType().getInversedByAttributes().forEach(inversedByAttr ->
 		{
 			Entity refEntity = entity.getEntity(inversedByAttr.getName());
 			if (refEntity != null)

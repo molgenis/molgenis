@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.effects;
 
-import org.molgenis.data.annotation.web.meta.AnnotatorEntityMetaData;
+import org.molgenis.data.annotation.web.meta.AnnotatorEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
@@ -13,7 +13,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 
 @Component
-public class EffectsMetaData implements AnnotatorEntityMetaData
+public class EffectsMetaData implements AnnotatorEntityType
 {
 	@Autowired
 	AttributeFactory attributeFactory;

@@ -71,7 +71,7 @@ public class GavinAnnotator implements AnnotatorConfig
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attributeFactory;
@@ -92,8 +92,8 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxMetaDataParser(packageFactory, attributeFactory, entityMetaDataFactory),
-						entityMetaDataFactory, attributeFactory);
+						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory),
+						entityTypeFactory, attributeFactory);
 			}
 		};
 
@@ -138,13 +138,13 @@ public class GavinAnnotator implements AnnotatorConfig
 			public List<Attribute> getRequiredAttributes()
 			{
 				List<Attribute> requiredAttributes = new ArrayList<>();
-				EntityMetaData entityMetaData = entityMetaDataFactory.create().setName(VARIANT);
+				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
 				List<Attribute> refAttributesList = Arrays
 						.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
 								ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
-				entityMetaData.addAttributes(refAttributesList);
+				entityType.addAttributes(refAttributesList);
 				Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF)
-						.setRefEntity(entityMetaData).setDescription(
+						.setRefEntity(entityType).setDescription(
 								"This annotator needs a references to an entity containing: " + StreamSupport
 										.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
 										.collect(Collectors.joining(", ")));

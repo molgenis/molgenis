@@ -22,7 +22,7 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +41,7 @@ import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.General
 import static org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 /**
- * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entityMetaData that has a attribute named 'GENE'
+ * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an EntityType that has a attribute named 'GENE'
  * that must be the HGNC gene dataType.
  * <p>
  * It reads this info from a tab separated CGD file. The location of this file is defined by a RuntimeProperty named
@@ -71,7 +71,7 @@ public class CGDAnnotator implements AnnotatorConfig
 	private Resources resources;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attributeFactory;
@@ -158,15 +158,8 @@ public class CGDAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new RepositoryFactory()
-				{
-					@Override
-					public Repository<Entity> createRepository(File file) throws IOException
-					{
-						return new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(),
-								entityMetaDataFactory, attributeFactory, SEPARATOR);
-					}
-				};
+				return file -> new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(),
+						entityTypeFactory, attributeFactory, SEPARATOR);
 			}
 		};
 

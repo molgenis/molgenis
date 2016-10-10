@@ -2,7 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class ConstraintViolation
 	private Object invalidValue;
 	private Entity entity;
 	private Attribute violatedAttribute;
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 	private String importInfo;
 	private Long rownr;
 
@@ -37,13 +37,13 @@ public class ConstraintViolation
 	}
 
 	public ConstraintViolation(String message, Object invalidValue, Entity entity, Attribute violatedAttribute,
-			EntityMetaData entityMetaData, Long rownr)
+			EntityType entityType, Long rownr)
 	{
 		this.message = message;
 		this.invalidValue = invalidValue;
 		this.entity = entity;
 		this.violatedAttribute = violatedAttribute;
-		this.entityMetaData = entityMetaData;
+		this.entityType = entityType;
 		this.rownr = rownr;
 	}
 
@@ -83,9 +83,9 @@ public class ConstraintViolation
 		return violatedAttribute;
 	}
 
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return entityMetaData;
+		return entityType;
 	}
 
 	public Long getRownr()
@@ -114,7 +114,7 @@ public class ConstraintViolation
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((entity == null) ? 0 : entity.hashCode());
-		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
+		result = prime * result + ((entityType == null) ? 0 : entityType.hashCode());
 		result = prime * result + ((importInfo == null) ? 0 : importInfo.hashCode());
 		result = prime * result + ((invalidValue == null) ? 0 : invalidValue.hashCode());
 		result = prime * result + ((message == null) ? 0 : message.hashCode());
@@ -135,11 +135,11 @@ public class ConstraintViolation
 			if (other.entity != null) return false;
 		}
 		else if (!entity.equals(other.entity)) return false;
-		if (entityMetaData == null)
+		if (entityType == null)
 		{
-			if (other.entityMetaData != null) return false;
+			if (other.entityType != null) return false;
 		}
-		else if (!entityMetaData.equals(other.entityMetaData)) return false;
+		else if (!entityType.equals(other.entityType)) return false;
 		if (importInfo == null)
 		{
 			if (other.importInfo != null) return false;
@@ -172,7 +172,7 @@ public class ConstraintViolation
 	public String toString()
 	{
 		return "ConstraintViolation [message=" + message + ", invalidValue=" + invalidValue + ", entity=" + entity
-				+ ", violatedAttribute=" + violatedAttribute + ", entityMetaData=" + entityMetaData + ", importInfo="
+				+ ", violatedAttribute=" + violatedAttribute + ", entityType=" + entityType + ", importInfo="
 				+ importInfo + ", rownr=" + rownr + "]";
 	}
 

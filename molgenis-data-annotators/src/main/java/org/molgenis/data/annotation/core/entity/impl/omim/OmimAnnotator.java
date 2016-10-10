@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.core.entity.impl.omim;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
@@ -18,14 +17,12 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +57,7 @@ public class OmimAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attributeFactory;
@@ -72,8 +69,8 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	public Attribute getPhenotypeAttr()
 	{
-		return attributeFactory.create().setName(OMIM_DISORDER).setDataType(TEXT)
-				.setDescription("OMIM phenotype").setLabel("OMIM_Disorders");
+		return attributeFactory.create().setName(OMIM_DISORDER).setDataType(TEXT).setDescription("OMIM phenotype")
+				.setLabel("OMIM_Disorders");
 	}
 
 	public Attribute getMimNumberAttr()
@@ -130,7 +127,7 @@ public class OmimAnnotator implements AnnotatorConfig
 						outputAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
-				new OmimResultFilter(entityMetaDataFactory, attributeFactory, this), dataService, resources,
+				new OmimResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings));
 
 		annotator.init(entityAnnotator);
@@ -144,14 +141,7 @@ public class OmimAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new RepositoryFactory()
-				{
-					@Override
-					public Repository<Entity> createRepository(File file) throws IOException
-					{
-						return new OmimRepository(file, entityMetaDataFactory, attributeFactory);
-					}
-				};
+				return file -> new OmimRepository(file, entityTypeFactory, attributeFactory);
 			}
 		};
 

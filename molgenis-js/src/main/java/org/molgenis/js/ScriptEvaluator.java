@@ -3,7 +3,7 @@ package org.molgenis.js;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.mozilla.javascript.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,14 @@ public class ScriptEvaluator
 	 *
 	 * @param source         {@link String} containing the script to evaluate
 	 * @param entity         the {@link Entity} to evaluate the script on
-	 * @param entityMetaData {@link EntityMetaData} for the entity
+	 * @param entityType {@link EntityType} for the entity
 	 * @return result of the evaluation, or a {@link RuntimeException} if one was thrown
 	 * @throws EcmaError if there's a syntax error in the script
 	 */
-	public static Object eval(final String source, final Entity entity, final EntityMetaData entityMetaData)
+	public static Object eval(final String source, final Entity entity, final EntityType entityType)
 	{
 		Object result = Iterables
-				.get(eval(Collections.singletonList(source), Collections.singleton(entity), entityMetaData), 0);
+				.get(eval(Collections.singletonList(source), Collections.singleton(entity), entityType), 0);
 		if (result instanceof RuntimeException)
 		{
 			throw (RuntimeException) result;
@@ -44,9 +44,9 @@ public class ScriptEvaluator
 	}
 
 	public static List<Object> eval(final String source, final Iterable<Entity> entities,
-			final EntityMetaData entityMetaData)
+			final EntityType entityType)
 	{
-		List<Object> results = eval(Arrays.asList(source), entities, entityMetaData);
+		List<Object> results = eval(Arrays.asList(source), entities, entityType);
 
 		if (results.get(0) instanceof RuntimeException)
 		{
@@ -56,9 +56,9 @@ public class ScriptEvaluator
 	}
 
 	public static List<Object> eval(final List<String> sources, final Entity entity,
-			final EntityMetaData entityMetaData)
+			final EntityType entityType)
 	{
-		List<Object> results = eval(sources, Collections.singleton(entity), entityMetaData);
+		List<Object> results = eval(sources, Collections.singleton(entity), entityType);
 
 		if (results.get(0) instanceof RuntimeException)
 		{
@@ -72,14 +72,14 @@ public class ScriptEvaluator
 	 *
 	 * @param sources        the source of the script to run
 	 * @param entities       {@link Iterable} of {@link Entity}s to evaluate it for
-	 * @param entityMetaData
+	 * @param entityType
 	 * @return {@link List} of {@link Object} that contain the results of the evaluation, or the
 	 * {@link RuntimeException} if one was thrown
 	 * @throws EcmaError if there's a syntax error in the script
 	 */
 	@SuppressWarnings("unchecked")
 	protected static List<Object> eval(final List<String> sources, final Iterable<Entity> entities,
-			final EntityMetaData entityMetaData)
+			final EntityType entityType)
 	{
 		if (JS_SCRIPT == null)
 		{
@@ -109,7 +109,7 @@ public class ScriptEvaluator
 				{
 					try
 					{
-						Scriptable scriptableEntity = mapEntity(entity, entityMetaData, cx, scriptableObject);
+						Scriptable scriptableEntity = mapEntity(entity, entityType, cx, scriptableObject);
 
 						for (String source : sources)
 						{
@@ -140,12 +140,12 @@ public class ScriptEvaluator
 				return result;
 			}
 
-			protected Scriptable mapEntity(final Entity entity, final EntityMetaData entityMetaData, Context cx,
+			protected Scriptable mapEntity(final Entity entity, final EntityType EntityType, Context cx,
 					ScriptableObject scriptableObject)
 			{
 				Scriptable scriptableEntity = cx.newObject(scriptableObject);
 				scriptableEntity.setPrototype(scriptableObject);
-				entityMetaData.getAtomicAttributes().forEach(attr ->
+				EntityType.getAtomicAttributes().forEach(attr ->
 				{
 					scriptableEntity.put(attr.getName(), scriptableEntity,
 							javaToJS(entity.get(attr.getName()), cx, scriptableObject));

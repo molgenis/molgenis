@@ -2,10 +2,7 @@ package org.molgenis.data.annotation.core.query;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -29,7 +26,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -38,7 +35,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	public void createQueryEntity()
 	{
 		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true);
-		EntityMetaData emd = entityMetaDataFactory.create().setName("testEntity");
+		EntityType emd = entityTypeFactory.create().setName("testEntity");
 		emd.addAttributes(Arrays.asList(idAttr, vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute()));
 		emd.setIdAttribute(idAttr);
 		Entity entity = new DynamicEntity(emd);

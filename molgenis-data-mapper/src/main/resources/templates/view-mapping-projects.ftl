@@ -14,7 +14,7 @@
         <p>Create and view mapping projects. <#if importerUri??>Upload additional target entities and mapped sources <a
                 href="${importerUri?html}">here</a>.</#if></p>
 
-    <#if entityMetaDatas?has_content>
+    <#if entityTypes?has_content>
         <div class="btn-group" role="group">
             <button type="button" id="add-mapping-project-btn" class="btn btn-primary" data-toggle="modal"
                     data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add
@@ -132,8 +132,8 @@
                         <label>Select the Target entity</label>
                         <select name="target-entity" id="target-entity-select" class="form-control" required="required"
                                 placeholder="Select a target entity">
-                            <#list entityMetaDatas as entityMetaData>
-                                <option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+                            <#list entityTypes as entityType>
+                                <option value="${entityType.name?html}">${entityType.name?html}</option>
                             </#list>
                         </select>
                     </div>

@@ -8,8 +8,8 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	private DataService dataServiceMock;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeFactory attrMetaFactory;
 
@@ -49,19 +49,19 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	public void getDataMatrix()
 	{
 		String entityName = "entity";
-		List<Entity> entities = new ArrayList<Entity>();
+		List<Entity> entities = new ArrayList<>();
 
 		Attribute patientAttr = attrMetaFactory.create().setName("patient");
 		Attribute probeAttr = attrMetaFactory.create().setName("probe").setDataType(DECIMAL);
-		EntityMetaData entityMetaData = entityMetaFactory.create();
-		entityMetaData.addAttributes(newArrayList(patientAttr, probeAttr));
+		EntityType entityType = entityTypeFactory.create();
+		entityType.addAttributes(newArrayList(patientAttr, probeAttr));
 
-		Entity e1 = new DynamicEntity(entityMetaData);
+		Entity e1 = new DynamicEntity(entityType);
 		e1.set("patient", "patient1");
 		e1.set("probe", 1.5);
 		entities.add(e1);
 
-		Entity e2 = new DynamicEntity(entityMetaData);
+		Entity e2 = new DynamicEntity(entityType);
 		e2.set("patient", "patient2");
 		e2.set("probe", 1.6);
 		entities.add(e2);

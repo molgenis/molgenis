@@ -3,7 +3,7 @@ package org.molgenis.data.validation;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
@@ -21,7 +21,7 @@ import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.support.EntityMetaDataUtils.*;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 public class RepositoryValidationDecorator implements Repository<Entity>
 {
@@ -96,10 +96,9 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		return decoratedRepository.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepository.getEntityMetaData();
+		return decoratedRepository.getEntityType();
 	}
 
 	@Override
@@ -280,7 +279,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT))
 		{
 			List<Attribute> requiredValueAttrs = StreamSupport
-					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
 			validationResource.setRequiredValueAttrs(requiredValueAttrs);
@@ -294,15 +293,15 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs
-			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+			refAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
 		}
 		else
 		{
 			// validate cross-repository collection reference constraints. the decorated repository takes care of
 			// validating other reference constraints
-			String backend = dataService.getMeta().getBackend(getEntityMetaData()).getName();
-			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+			String backend = dataService.getMeta().getBackend(getEntityType()).getName();
+			refAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
 							attr)).collect(toList());
 		}
@@ -313,8 +312,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
 			refAttrs.forEach(refAttr ->
 			{
-				EntityMetaData refEntityMeta = refAttr.getRefEntity();
-				String refEntityName = refEntityMeta.getName();
+				EntityType refEntityType = refAttr.getRefEntity();
+				String refEntityName = refEntityType.getName();
 				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
 				if (refEntityIds == null)
 				{
@@ -322,7 +321,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 					refEntitiesIds.put(refEntityName, refEntityIds);
 
 					Query<Entity> q = new QueryImpl<>()
-							.fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+							.fetch(new Fetch().field(refEntityType.getIdAttribute().getName()));
 					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext(); )
 					{
 						refEntityIds.add(it.next().getIdValue());
@@ -334,13 +333,13 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		}
 
 		validationResource.setSelfReferencing(refAttrs.stream()
-				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
+				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityType().getName())));
 		validationResource.setRefAttrs(refAttrs);
 	}
 
 	private boolean isDifferentBackend(String backend, Attribute attr)
 	{
-		EntityMetaData refEntity = attr.getRefEntity();
+		EntityType refEntity = attr.getRefEntity();
 		String refEntityBackend = dataService.getMeta().getBackend(refEntity).getName();
 		return !backend.equals(refEntityBackend);
 	}
@@ -351,7 +350,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			// get unique attributes
 			List<Attribute> uniqueAttrs = StreamSupport
-					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
 			// get existing values for each attributes
@@ -393,9 +392,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
-		String idAttrName = getEntityMetaData().getIdAttribute().getName();
-		List<Attribute> readonlyAttrs = StreamSupport
-				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+		String idAttrName = getEntityType().getIdAttribute().getName();
+		List<Attribute> readonlyAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.getName().equals(idAttrName))
 				.collect(toList());
 
@@ -414,14 +412,14 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 
 				// FIXME remove hack (see https://github.com/molgenis/molgenis/issues/4308)
 				// Do not validate if Questionnaire status is not SUBMITTED
-				if (EntityUtils.doesExtend(getEntityMetaData(), "Questionnaire") && !"SUBMITTED"
+				if (EntityUtils.doesExtend(getEntityType(), "Questionnaire") && !"SUBMITTED"
 						.equals(entity.getString("status")))
 				{
 					isValid = true;
 				}
 				// Do not validate if visibleExpression resolves to false
 				else if (nonNillableAttr.getVisibleExpression() != null && !expressionValidator
-						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity, getEntityMetaData()))
+						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity, getEntityType()))
 				{
 
 					isValid = true;
@@ -443,7 +441,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private void validateEntityValueTypes(Entity entity, ValidationResource validationResource)
 	{
 		// entity attributes validation
-		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityMetaData());
+		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
 			attrViolations.forEach(attrViolation ->
@@ -515,8 +513,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			{
 				if (!refEntityIds.contains(refEntity.getIdValue()))
 				{
-					boolean selfReference = entity.getEntityMetaData().getName()
-							.equals(refAttr.getRefEntity().getName());
+					boolean selfReference = entity.getEntityType().getName().equals(refAttr.getRefEntity().getName());
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",

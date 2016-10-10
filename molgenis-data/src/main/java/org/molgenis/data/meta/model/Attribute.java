@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.List;
@@ -20,9 +21,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
@@ -39,11 +40,11 @@ public class Attribute extends StaticEntity
 	/**
 	 * Creates a new attribute. Normally called by its {@link AttributeFactory entity factory}.
 	 *
-	 * @param entityMeta attribute meta data
+	 * @param entityType attribute meta data
 	 */
-	public Attribute(EntityMetaData entityMeta)
+	public Attribute(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
@@ -51,18 +52,18 @@ public class Attribute extends StaticEntity
 	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeFactory entity factory}.
 	 *
 	 * @param attrId     attribute identifier (not the attribute name)
-	 * @param entityMeta attribute meta data
+	 * @param entityType attribute meta data
 	 */
-	public Attribute(String attrId, EntityMetaData entityMeta)
+	public Attribute(String attrId, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 		setIdentifier(attrId);
 	}
 
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
-	 * {@link #Attribute(EntityMetaData)}). Creates a copy of attribute with a shallow copy of referenced
+	 * {@link #Attribute(EntityType)}). Creates a copy of attribute with a shallow copy of referenced
 	 * entity and tags.
 	 *
 	 * @param attrMeta     attribute
@@ -71,12 +72,13 @@ public class Attribute extends StaticEntity
 	 */
 	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode)
 	{
-		Attribute attrMetaCopy = new Attribute(attrMeta.getEntityMetaData()); // do not deep-copy
+		Attribute attrMetaCopy = new Attribute(attrMeta.getEntityType()); // do not deep-copy
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
 		attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
+		attrMetaCopy.setOrderBy(attrMeta.getOrderBy());
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -107,12 +109,12 @@ public class Attribute extends StaticEntity
 
 	public String getIdentifier()
 	{
-		return getString(IDENTIFIER);
+		return getString(ID);
 	}
 
 	public Attribute setIdentifier(String identifier)
 	{
-		set(IDENTIFIER, identifier);
+		set(ID, identifier);
 		return this;
 	}
 
@@ -213,7 +215,7 @@ public class Attribute extends StaticEntity
 	{
 		invalidateCachedDataType();
 
-		set(DATA_TYPE, AttributeType.getValueString(dataType));
+		set(TYPE, AttributeType.getValueString(dataType));
 		return this;
 	}
 
@@ -238,14 +240,14 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return referenced entity
 	 */
-	public EntityMetaData getRefEntity()
+	public EntityType getRefEntity()
 	{
-		return getEntity(REF_ENTITY, EntityMetaData.class);
+		return getEntity(REF_ENTITY_TYPE, EntityType.class);
 	}
 
-	public Attribute setRefEntity(EntityMetaData refEntity)
+	public Attribute setRefEntity(EntityType refEntity)
 	{
-		set(REF_ENTITY, refEntity);
+		set(REF_ENTITY_TYPE, refEntity);
 		return this;
 	}
 
@@ -266,6 +268,19 @@ public class Attribute extends StaticEntity
 	public boolean isMappedBy()
 	{
 		return getMappedBy() != null;
+	}
+
+	public Sort getOrderBy()
+	{
+		String orderByStr = getString(ORDER_BY);
+		return orderByStr != null ? Sort.parse(orderByStr) : null;
+	}
+
+	public Attribute setOrderBy(Sort sort)
+	{
+		String orderByStr = sort != null ? sort.toSortString() : null;
+		set(ORDER_BY, orderByStr);
+		return this;
 	}
 
 	/**
@@ -301,12 +316,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isNillable()
 	{
-		return requireNonNull(getBoolean(NILLABLE));
+		return requireNonNull(getBoolean(IS_NULLABLE));
 	}
 
 	public Attribute setNillable(boolean nillable)
 	{
-		set(NILLABLE, nillable);
+		set(IS_NULLABLE, nillable);
 		return this;
 	}
 
@@ -317,12 +332,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isAuto()
 	{
-		return requireNonNull(getBoolean(AUTO));
+		return requireNonNull(getBoolean(IS_AUTO));
 	}
 
 	public Attribute setAuto(boolean auto)
 	{
-		set(AUTO, auto);
+		set(IS_AUTO, auto);
 		return this;
 	}
 
@@ -333,12 +348,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isVisible()
 	{
-		return requireNonNull(getBoolean(VISIBLE));
+		return requireNonNull(getBoolean(IS_VISIBLE));
 	}
 
 	public Attribute setVisible(boolean visible)
 	{
-		set(VISIBLE, visible);
+		set(IS_VISIBLE, visible);
 		return this;
 	}
 
@@ -350,12 +365,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isAggregatable()
 	{
-		return requireNonNull(getBoolean(AGGREGATABLE));
+		return requireNonNull(getBoolean(IS_AGGREGATABLE));
 	}
 
 	public Attribute setAggregatable(boolean isAggregatable)
 	{
-		set(AGGREGATABLE, isAggregatable);
+		set(IS_AGGREGATABLE, isAggregatable);
 		return this;
 	}
 
@@ -410,12 +425,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isReadOnly()
 	{
-		return requireNonNull(getBoolean(READ_ONLY));
+		return requireNonNull(getBoolean(IS_READ_ONLY));
 	}
 
 	public Attribute setReadOnly(boolean readOnly)
 	{
-		set(READ_ONLY, readOnly);
+		set(IS_READ_ONLY, readOnly);
 		return this;
 	}
 
@@ -426,12 +441,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isUnique()
 	{
-		return requireNonNull(getBoolean(UNIQUE));
+		return requireNonNull(getBoolean(IS_UNIQUE));
 	}
 
 	public Attribute setUnique(boolean unique)
 	{
-		set(UNIQUE, unique);
+		set(IS_UNIQUE, unique);
 		return this;
 	}
 
@@ -583,7 +598,7 @@ public class Attribute extends StaticEntity
 	{
 		if (cachedDataType == null)
 		{
-			String dataTypeStr = getString(DATA_TYPE);
+			String dataTypeStr = getString(TYPE);
 			cachedDataType = dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
 		}
 		return cachedDataType;
@@ -610,8 +625,7 @@ public class Attribute extends StaticEntity
 		// FIXME besides checking mappedBy attr name also check attr.getRefEntity().getName
 		if (isReferenceType(this))
 		{
-			return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
-					.filter(Attribute::isMappedBy)
+			return stream(getRefEntity().getAtomicAttributes().spliterator(), false).filter(Attribute::isMappedBy)
 					.filter(attr -> getName().equals(attr.getMappedBy().getName())).findFirst().orElse(null);
 		}
 		else

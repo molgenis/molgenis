@@ -7,8 +7,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -34,7 +34,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public static final String NAME = "CSV";
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 	private AttributeFactory attrMetaFactory;
 	private List<String> entityNames;
 	private List<String> entityNamesLowerCase;
@@ -73,7 +73,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new CsvRepository(file, entityMetaFactory, attrMetaFactory, name, cellProcessors);
+		return new CsvRepository(file, entityTypeFactory, attrMetaFactory, name, cellProcessors);
 	}
 
 	private void loadEntityNames()
@@ -156,15 +156,15 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityMeta.getName());
+		return hasRepository(entityType.getName());
 	}
 
 	@Autowired
-	public void setEntityMetaDataFactory(EntityMetaDataFactory entityMetaFactory)
+	public void setEntityTypeFactory(EntityTypeFactory entityTypeFactory)
 	{
-		this.entityMetaFactory = entityMetaFactory;
+		this.entityTypeFactory = entityTypeFactory;
 	}
 
 	@Autowired

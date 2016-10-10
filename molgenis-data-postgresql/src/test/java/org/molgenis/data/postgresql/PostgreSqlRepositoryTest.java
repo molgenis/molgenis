@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -44,7 +44,7 @@ public class PostgreSqlRepositoryTest
 	public void countQueryOneToManyEquals() throws Exception
 	{
 		String oneToManyAttrName = "oneToManyAttr";
-		EntityMetaData entityMeta = createEntityMetaOneToMany(oneToManyAttrName);
+		EntityType entityType = createEntityMetaOneToMany(oneToManyAttrName);
 
 		//noinspection unchecked
 		Query<Entity> query = mock(Query.class);
@@ -52,10 +52,10 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
+		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
 		long count = 123L;
 		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
-		postgreSqlRepo.setMetaData(entityMeta);
+		postgreSqlRepo.setEntityType(entityType);
 		assertEquals(postgreSqlRepo.count(query), count);
 	}
 
@@ -63,7 +63,7 @@ public class PostgreSqlRepositoryTest
 	public void findAllQueryOneToManyEquals() throws Exception
 	{
 		String oneToManyAttrName = "oneToManyAttr";
-		EntityMetaData entityMeta = createEntityMetaOneToMany(oneToManyAttrName);
+		EntityType entityType = createEntityMetaOneToMany(oneToManyAttrName);
 
 		//noinspection unchecked
 		Query<Entity> query = mock(Query.class);
@@ -71,17 +71,17 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(DISTINCT ARRAY[\"oneToManyAttr\".\"order\"::TEXT,\"oneToManyAttr\".\"refEntityId\"::TEXT]) FROM \"RefEntity_xrefAttr\" AS \"oneToManyAttr\" WHERE this.\"entityId\" = \"oneToManyAttr\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"RefEntity\" WHERE this.\"entityId\" = \"RefEntity\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
 		//noinspection unchecked
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
-		when(postgreSqlEntityFactory.createRowMapper(entityMeta, null)).thenReturn(rowMapper);
+		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
 		Entity entity0 = mock(Entity.class);
 		when(jdbcTemplate.query(sql, new Object[] { queryValue }, rowMapper)).thenReturn(singletonList(entity0));
-		postgreSqlRepo.setMetaData(entityMeta);
+		postgreSqlRepo.setEntityType(entityType);
 		assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
 	}
 
-	private static EntityMetaData createEntityMetaOneToMany(String oneToManyAttrName)
+	private static EntityType createEntityMetaOneToMany(String oneToManyAttrName)
 	{
 		String refIdAttrName = "refEntityId";
 		Attribute refIdAttr = mock(Attribute.class);
@@ -93,10 +93,12 @@ public class PostgreSqlRepositoryTest
 		when(xrefAttr.getName()).thenReturn(xrefAttrName);
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityType refEntityMeta = mock(EntityType.class);
 		String refEntityName = "RefEntity";
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityMeta.getAttribute(refIdAttrName)).thenReturn(refIdAttr);
+		when(refEntityMeta.getAttribute(xrefAttrName)).thenReturn(xrefAttr);
 
 		String idAttrName = "entityId";
 		Attribute idAttr = mock(Attribute.class);
@@ -110,12 +112,13 @@ public class PostgreSqlRepositoryTest
 		when(oneToManyAttr.isMappedBy()).thenReturn(true);
 		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityType entityType = mock(EntityType.class);
 		String entityName = "Entity";
-		when(entityMeta.getName()).thenReturn(entityName);
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAttribute(oneToManyAttrName)).thenReturn(oneToManyAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
-		return entityMeta;
+		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute(idAttrName)).thenReturn(idAttr);
+		when(entityType.getAttribute(oneToManyAttrName)).thenReturn(oneToManyAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
+		return entityType;
 	}
 }

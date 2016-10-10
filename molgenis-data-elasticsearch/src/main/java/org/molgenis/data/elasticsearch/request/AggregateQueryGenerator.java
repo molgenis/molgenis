@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static java.lang.Integer.MAX_VALUE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 public class AggregateQueryGenerator
 {

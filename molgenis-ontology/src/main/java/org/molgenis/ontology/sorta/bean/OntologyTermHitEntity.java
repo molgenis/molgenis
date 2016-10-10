@@ -1,16 +1,16 @@
 package org.molgenis.ontology.sorta.bean;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 
 public class OntologyTermHitEntity extends DynamicEntity
 {
 	private static final long serialVersionUID = 428705681838535084L;
 
-	public OntologyTermHitEntity(Entity entity, EntityMetaData entityMetaData)
+	public OntologyTermHitEntity(Entity entity, EntityType entityType)
 	{
-		super(entityMetaData);
+		super(entityType);
 		set(entity);
 	}
 

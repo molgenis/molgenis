@@ -7,7 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.datastructures.Location;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.*;
@@ -56,8 +56,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 	private final boolean mergeMultilineResourceResults;
 	private final VcfAttributes vcfAttributes;
 
-	public MultiAllelicResultFilter(List<Attribute> alleleSpecificAttributes,
-			boolean mergeMultilineResourceResults, VcfAttributes vcfAttributes)
+	public MultiAllelicResultFilter(List<Attribute> alleleSpecificAttributes, boolean mergeMultilineResourceResults,
+			VcfAttributes vcfAttributes)
 	{
 		this.attributes = alleleSpecificAttributes;
 		this.mergeMultilineResourceResults = mergeMultilineResourceResults;
@@ -138,9 +138,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 			// also compile a list of original source alleles and their values for use in 'update mode'
 			if (updateMode && sourceEntity.get(attribute.getName()) != null)
 			{
-				Attribute sourceAttr = sourceEntity.getEntityMetaData()
-						.getAttribute(attribute.getName());
-				if (EntityMetaDataUtils.isTextType(sourceAttr) || EntityMetaDataUtils.isStringType(sourceAttr))
+				Attribute sourceAttr = sourceEntity.getEntityType().getAttribute(attribute.getName());
+				if (EntityTypeUtils.isTextType(sourceAttr) || EntityTypeUtils.isStringType(sourceAttr))
 				{
 					String[] sourceValues = sourceEntity.getString(attribute.getName()).split(",", -1);
 					for (int i = 0; i < sourceAlts.length; i++)

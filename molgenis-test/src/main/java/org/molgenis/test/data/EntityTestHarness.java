@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 
 @Component
 public class EntityTestHarness
@@ -52,7 +52,7 @@ public class EntityTestHarness
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attributeFactory;
@@ -74,39 +74,39 @@ public class EntityTestHarness
 	{
 	}
 
-	public EntityMetaData createStaticRefTestEntityMetaData()
+	public EntityType createStaticRefTestEntityType()
 	{
 		return staticTestRefEntityStaticMetaData;
 	}
 
-	public EntityMetaData createStaticTestEntityMetaData()
+	public EntityType createStaticTestEntityType()
 	{
 		return staticTestEntityStaticMetaData;
 	}
 
-	public EntityMetaData createDynamicRefEntityMetaData()
+	public EntityType createDynamicRefEntityType()
 	{
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
+		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_REF_STRING, STRING), ROLE_LABEL);
 	}
 
-	public EntityMetaData createDynamicTestEntityMetaData()
+	public EntityType createDynamicTestEntityType()
 	{
-		EntityMetaData refEntityMetaData = createDynamicRefEntityMetaData();
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic").setBackend("PostgreSQL")
+		EntityType refEntityType = createDynamicRefEntityType();
+		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))
-				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityMetaData))
-				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityMetaData))
+				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityType))
+				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_DATE, DATE)).addAttribute(createAttribute(ATTR_DATETIME, DATE_TIME))
 				.addAttribute(createAttribute(ATTR_EMAIL, EMAIL)).addAttribute(createAttribute(ATTR_DECIMAL, DECIMAL))
 				.addAttribute(createAttribute(ATTR_HTML, HTML)).addAttribute(createAttribute(ATTR_HYPERLINK, HYPERLINK))
 				.addAttribute(createAttribute(ATTR_LONG, LONG)).addAttribute(createAttribute(ATTR_INT, INT))
 				.addAttribute(createAttribute(ATTR_SCRIPT, SCRIPT))
-				.addAttribute(createAttribute(ATTR_XREF, XREF).setRefEntity(refEntityMetaData))
-				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityMetaData))
+				.addAttribute(createAttribute(ATTR_XREF, XREF).setRefEntity(refEntityType))
+				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_COMPUTED_INT, INT).setExpression(ATTR_INT));
 	}
 
@@ -115,32 +115,32 @@ public class EntityTestHarness
 		return attributeFactory.create().setName(name).setDataType(dataType);
 	}
 
-	public List<Entity> createTestRefEntities(EntityMetaData refEntityMetaData, int numberOfEntities)
+	public List<Entity> createTestRefEntities(EntityType refEntityType, int numberOfEntities)
 	{
-		return IntStream.range(0, numberOfEntities).mapToObj(i -> createRefEntity(refEntityMetaData, i))
+		return IntStream.range(0, numberOfEntities).mapToObj(i -> createRefEntity(refEntityType, i))
 				.collect(toList());
 	}
 
-	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities,
+	public Stream<Entity> createTestEntities(EntityType entityType, int numberOfEntities,
 			List<Entity> refEntities)
 	{
 		return IntStream.range(0, numberOfEntities)
-				.mapToObj(i -> createEntity(entityMetaData, i, refEntities.get(i % refEntities.size())));
+				.mapToObj(i -> createEntity(entityType, i, refEntities.get(i % refEntities.size())));
 	}
 
-	private Entity createRefEntity(EntityMetaData refEntityMetaData, int id)
+	private Entity createRefEntity(EntityType refEntityType, int id)
 	{
-		Entity refEntity = new DynamicEntity(refEntityMetaData);
+		Entity refEntity = new DynamicEntity(refEntityType);
 		refEntity.set(ATTR_REF_ID, "" + id);
 		refEntity.set(ATTR_REF_STRING, "refstring" + id);
 		return refEntity;
 	}
 
-	private Entity createEntity(EntityMetaData entityMetaData, int id, Entity refEntity)
+	private Entity createEntity(EntityType entityType, int id, Entity refEntity)
 	{
 		if (date == null || dateTime == null) generateDateAndDateTime();
 
-		Entity entity = new DynamicEntity(entityMetaData);
+		Entity entity = new DynamicEntity(entityType);
 		entity.set(ATTR_ID, "" + id);
 		entity.set(ATTR_STRING, "string1");
 		entity.set(ATTR_BOOL, id % 2 == 0);

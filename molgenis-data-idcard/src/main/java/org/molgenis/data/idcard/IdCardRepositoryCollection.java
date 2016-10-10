@@ -2,7 +2,7 @@ package org.molgenis.data.idcard;
 
 import com.google.common.collect.Maps;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,9 +47,9 @@ public class IdCardRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		String entityName = entityMeta.getName();
+		String entityName = entityType.getName();
 		if (!entityName.equals(ID_CARD_BIOBANK))
 		{
 			throw new MolgenisDataException("Not a valid backend for entity [" + entityName + "]");
@@ -80,9 +80,9 @@ public class IdCardRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	public Repository<Entity> getRepository(EntityType entityType)
 	{
-		return getRepository(entityMetaData.getName());
+		return getRepository(entityType.getName());
 	}
 
 	@Override
@@ -98,14 +98,14 @@ public class IdCardRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public void deleteRepository(EntityMetaData entityMeta)
+	public void deleteRepository(EntityType entityType)
 	{
-		repositories.remove(entityMeta.getName());
+		repositories.remove(entityType.getName());
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityMeta.getName());
+		return hasRepository(entityType.getName());
 	}
 }

@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -24,8 +24,8 @@ import static org.testng.Assert.assertTrue;
 public class EntityAttributesValidatorTest
 {
 	private EntityAttributesValidator entityAttributesValidator;
-	private EntityMetaData intRangeMinMeta;
-	private EntityMetaData intRangeMaxMeta;
+	private EntityType intRangeMinMeta;
+	private EntityType intRangeMaxMeta;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -34,22 +34,20 @@ public class EntityAttributesValidatorTest
 
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		Attribute intRangeMinAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin")
-				.getMock();
+		Attribute intRangeMinAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
 		when(intRangeMinAttr.getDataType()).thenReturn(INT);
 		when(intRangeMinAttr.getRange()).thenReturn(new Range(1l, null));
-		Attribute intRangeMaxAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin")
-				.getMock();
+		Attribute intRangeMaxAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
 		when(intRangeMaxAttr.getDataType()).thenReturn(INT);
 		when(intRangeMaxAttr.getRange()).thenReturn(new Range(null, 1l));
 
-		intRangeMinMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		intRangeMinMeta = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(intRangeMinMeta.getIdAttribute()).thenReturn(idAttr);
 		when(intRangeMinMeta.getAttribute("id")).thenReturn(idAttr);
 		when(intRangeMinMeta.getAttribute("intrangemin")).thenReturn(intRangeMinAttr);
 		when(intRangeMinMeta.getAtomicAttributes()).thenReturn(asList(idAttr, intRangeMinAttr));
 
-		intRangeMaxMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		intRangeMaxMeta = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(intRangeMaxMeta.getIdAttribute()).thenReturn(idAttr);
 		when(intRangeMaxMeta.getAttribute("id")).thenReturn(idAttr);
 		when(intRangeMaxMeta.getAttribute("intrangemin")).thenReturn(intRangeMaxAttr);
@@ -108,10 +106,10 @@ public class EntityAttributesValidatorTest
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn("refEntity");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(refIdAttr));
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refIdAttr));
 
 		String idAttrName = "id";
 		String xrefAttrName = "xref";
@@ -119,21 +117,21 @@ public class EntityAttributesValidatorTest
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute xrefAttr = when(mock(Attribute.class).getName()).thenReturn(xrefAttrName).getMock();
 		when(xrefAttr.getDataType()).thenReturn(attrType);
-		when(xrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(xrefAttr.getRefEntity()).thenReturn(refEntityType);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(asList(idAttr, xrefAttr));
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(idAttr, xrefAttr));
 
-		Entity refEntity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refEntityMeta).getMock();
+		Entity refEntity0 = when(mock(Entity.class).getEntityType()).thenReturn(refEntityType).getMock();
 		when(refEntity0.getIdValue()).thenReturn("refId0");
 
-		Entity entity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(entityMeta).getMock();
+		Entity entity0 = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(xrefAttrName)).thenReturn(refEntity0);
 
-		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityMetaData());
+		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityType());
 		assertEquals(constraints.size(), 0);
 	}
 
@@ -143,19 +141,18 @@ public class EntityAttributesValidatorTest
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn("refEntity");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(refIdAttr));
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refIdAttr));
 
-		Attribute otherRefIdAttr = when(mock(Attribute.class).getName()).thenReturn("otherRefId")
-				.getMock();
+		Attribute otherRefIdAttr = when(mock(Attribute.class).getName()).thenReturn("otherRefId").getMock();
 		when(otherRefIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData otherRefEntityMeta = mock(EntityMetaData.class);
-		when(otherRefEntityMeta.getName()).thenReturn("otherRefEntity");
-		when(otherRefEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(otherRefEntityMeta.getAtomicAttributes()).thenReturn(asList(otherRefIdAttr));
+		EntityType otherRefEntityType = mock(EntityType.class);
+		when(otherRefEntityType.getName()).thenReturn("otherRefEntity");
+		when(otherRefEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(otherRefEntityType.getAtomicAttributes()).thenReturn(asList(otherRefIdAttr));
 
 		String idAttrName = "id";
 		String xrefAttrName = "xref";
@@ -163,23 +160,22 @@ public class EntityAttributesValidatorTest
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute xrefAttr = when(mock(Attribute.class).getName()).thenReturn(xrefAttrName).getMock();
 		when(xrefAttr.getDataType()).thenReturn(attrType);
-		when(xrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(xrefAttr.getRefEntity()).thenReturn(refEntityType);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(asList(idAttr, xrefAttr));
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(idAttr, xrefAttr));
 
-		Entity refEntity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(otherRefEntityMeta)
-				.getMock(); // wrong
+		Entity refEntity0 = when(mock(Entity.class).getEntityType()).thenReturn(otherRefEntityType).getMock(); // wrong
 		// intRangeMinMeta
 		when(refEntity0.getIdValue()).thenReturn("otherRefId0");
 
-		Entity entity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(entityMeta).getMock();
+		Entity entity0 = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(xrefAttrName)).thenReturn(refEntity0);
 
-		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityMetaData());
+		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityType());
 		assertEquals(constraints.size(), 1);
 	}
 
@@ -195,10 +191,10 @@ public class EntityAttributesValidatorTest
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn("refEntity");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(refIdAttr));
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refIdAttr));
 
 		String idAttrName = "id";
 		String mrefAttrName = "mref";
@@ -206,24 +202,24 @@ public class EntityAttributesValidatorTest
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = when(mock(Attribute.class).getName()).thenReturn(mrefAttrName).getMock();
 		when(mrefAttr.getDataType()).thenReturn(attrType);
-		when(mrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(mrefAttr.getRefEntity()).thenReturn(refEntityType);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
 
-		Entity refEntity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refEntityMeta).getMock();
+		Entity refEntity0 = when(mock(Entity.class).getEntityType()).thenReturn(refEntityType).getMock();
 		when(refEntity0.getIdValue()).thenReturn("refId0");
 
-		Entity refEntity1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refEntityMeta).getMock();
+		Entity refEntity1 = when(mock(Entity.class).getEntityType()).thenReturn(refEntityType).getMock();
 		when(refEntity1.getIdValue()).thenReturn("refId1");
 
-		Entity entity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(entityMeta).getMock();
+		Entity entity0 = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntities(mrefAttrName)).thenReturn(asList(refEntity0, refEntity1));
 
-		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityMetaData());
+		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityType());
 		assertEquals(constraints.size(), 0);
 	}
 
@@ -233,10 +229,10 @@ public class EntityAttributesValidatorTest
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn("refEntity");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(refIdAttr));
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refIdAttr));
 
 		String idAttrName = "id";
 		String mrefAttrName = "mref";
@@ -244,33 +240,32 @@ public class EntityAttributesValidatorTest
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = when(mock(Attribute.class).getName()).thenReturn(mrefAttrName).getMock();
 		when(mrefAttr.getDataType()).thenReturn(attrType);
-		when(mrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(mrefAttr.getRefEntity()).thenReturn(refEntityType);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
 
-		Attribute otherRefIdAttr = when(mock(Attribute.class).getName()).thenReturn("otherRefId")
-				.getMock();
+		Attribute otherRefIdAttr = when(mock(Attribute.class).getName()).thenReturn("otherRefId").getMock();
 		when(otherRefIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData otherRefEntityMeta = mock(EntityMetaData.class);
-		when(otherRefEntityMeta.getName()).thenReturn("otherRefEntity");
-		when(otherRefEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(otherRefEntityMeta.getAtomicAttributes()).thenReturn(asList(otherRefIdAttr));
+		EntityType otherRefEntityType = mock(EntityType.class);
+		when(otherRefEntityType.getName()).thenReturn("otherRefEntity");
+		when(otherRefEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(otherRefEntityType.getAtomicAttributes()).thenReturn(asList(otherRefIdAttr));
 
-		Entity refEntity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(otherRefEntityMeta).getMock();
+		Entity refEntity0 = when(mock(Entity.class).getEntityType()).thenReturn(otherRefEntityType).getMock();
 		when(refEntity0.getIdValue()).thenReturn("refId0");
 
-		Entity refEntity1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(otherRefEntityMeta).getMock();
+		Entity refEntity1 = when(mock(Entity.class).getEntityType()).thenReturn(otherRefEntityType).getMock();
 		when(refEntity1.getIdValue()).thenReturn("refId1");
 
-		Entity entity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(entityMeta).getMock();
+		Entity entity0 = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntities(mrefAttrName)).thenReturn(asList(refEntity0, refEntity1));
 
-		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityMetaData());
+		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityType());
 		assertEquals(constraints.size(), 1);
 	}
 
@@ -280,10 +275,10 @@ public class EntityAttributesValidatorTest
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn("refEntity");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(refIdAttr));
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refIdAttr));
 
 		String idAttrName = "id";
 		String mrefAttrName = "mref";
@@ -291,24 +286,24 @@ public class EntityAttributesValidatorTest
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = when(mock(Attribute.class).getName()).thenReturn(mrefAttrName).getMock();
 		when(mrefAttr.getDataType()).thenReturn(attrType);
-		when(mrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(mrefAttr.getRefEntity()).thenReturn(refEntityType);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(idAttr, mrefAttr));
 
-		Entity refEntity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refEntityMeta).getMock();
+		Entity refEntity0 = when(mock(Entity.class).getEntityType()).thenReturn(refEntityType).getMock();
 		when(refEntity0.getIdValue()).thenReturn("refId0");
 
-		Entity refEntity1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refEntityMeta).getMock();
+		Entity refEntity1 = when(mock(Entity.class).getEntityType()).thenReturn(refEntityType).getMock();
 		when(refEntity1.getIdValue()).thenReturn("refId1");
 
-		Entity entity0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(entityMeta).getMock();
+		Entity entity0 = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntities(mrefAttrName)).thenReturn(asList(refEntity0, null, refEntity1));
 
-		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityMetaData());
+		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityType());
 		assertEquals(constraints.size(), 1);
 	}
 }

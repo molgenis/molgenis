@@ -1,7 +1,7 @@
 <#-- modal header -->
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h4 class="modal-title">DataSet: ${entityMetadata.getLabel()?html}</h4>
+    <h4 class="modal-title">DataSet: ${entityType.getLabel()?html}</h4>
 </div>
 
 <#-- modal body -->
@@ -12,7 +12,7 @@
         <table class="table">
             <tbody>
             <tr>
-            <#list entity.getEntityMetaData().getAtomicAttributes() as atomicAttribute>
+            <#list entity.getEntityType().getAtomicAttributes() as atomicAttribute>
                 <#assign key = atomicAttribute.getName()>
 
                 <#if counter == 3>

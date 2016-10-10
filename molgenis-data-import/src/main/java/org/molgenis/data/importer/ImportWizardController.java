@@ -402,7 +402,7 @@ public class ImportWizardController extends AbstractWizardController
 
 	private ResponseEntity<String> createCreatedResponseEntity(ImportRun importRun) throws URISyntaxException
 	{
-		String href = Href.concatEntityHref("/api/v2", importRun.getEntityMetaData().getName(), importRun.getIdValue());
+		String href = Href.concatEntityHref("/api/v2", importRun.getEntityType().getName(), importRun.getIdValue());
 		return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
 	}
 

@@ -1,7 +1,7 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.Date;
@@ -15,14 +15,14 @@ public class Token extends StaticEntity
 		super(entity);
 	}
 
-	public Token(EntityMetaData entityMeta)
+	public Token(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public Token(String id, EntityMetaData entityMeta)
+	public Token(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -21,7 +21,7 @@ import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
@@ -306,7 +306,7 @@ public class VcfWriterUtils
 		boolean hasInfoFields = false;
 
 		for (Attribute attribute : StreamSupport
-				.stream(vcfEntity.getEntityMetaData().getAllAttributes().spliterator(), false)
+				.stream(vcfEntity.getEntityType().getAllAttributes().spliterator(), false)
 				.filter(attr -> !(VCF_ATTRIBUTE_NAMES.contains(attr.getName()) || attr.getName().equals(INFO)))
 				.collect(Collectors.toList()))
 		{
@@ -332,7 +332,7 @@ public class VcfWriterUtils
 	private static String parseRefAttributesToDataString(Entity vcfEntity, List<Attribute> annotatorAttributes,
 			List<String> attributesToInclude)
 	{
-		Iterable<Attribute> attributes = vcfEntity.getEntityMetaData().getAllAttributes();
+		Iterable<Attribute> attributes = vcfEntity.getEntityType().getAllAttributes();
 		StringBuilder refEntityInfoFields = new StringBuilder();
 		for (Attribute attribute : attributes)
 		{
@@ -393,7 +393,7 @@ public class VcfWriterUtils
 		boolean secondValuePresent = false;
 		for (Entity refEntity : refEntities)
 		{
-			Iterable<Attribute> refAttributes = refEntity.getEntityMetaData().getAttributes();
+			Iterable<Attribute> refAttributes = refEntity.getEntityType().getAttributes();
 			if (!secondValuePresent)
 			{
 				refEntityInfoFields.append(attribute.getName());
@@ -457,7 +457,7 @@ public class VcfWriterUtils
 	private static void writeSampleData(BufferedWriter writer, Entity sample) throws IOException
 	{
 		StringBuilder sampleColumn = new StringBuilder();
-		if (sample.getEntityMetaData().getAttribute(FORMAT_GT) != null)
+		if (sample.getEntityType().getAttribute(FORMAT_GT) != null)
 		{
 			String sampleAttrValue = sample.getString(FORMAT_GT);
 			if (sampleAttrValue != null)
@@ -470,16 +470,15 @@ public class VcfWriterUtils
 			}
 
 		}
-
-		EntityMetaData entityMetadata = sample.getEntityMetaData();
-		for (Attribute sampleAttribute : entityMetadata.getAttributes())
+		EntityType entityType = sample.getEntityType();
+		for (Attribute sampleAttribute : entityType.getAttributes())
 		{
 			String sampleAttributeName = sampleAttribute.getName();
 			if (!sampleAttributeName.equals(FORMAT_GT) && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME))
 			{
 				// skip the field that were generated for the use of the entity within molgenis
-				if (!sampleAttribute.equals(entityMetadata.getIdAttribute()) && !sampleAttribute
-						.equals(entityMetadata.getLabelAttribute()))
+				if (!sampleAttribute.equals(entityType.getIdAttribute()) && !sampleAttribute
+						.equals(entityType.getLabelAttribute()))
 				{
 					if (sampleColumn.length() != 0) sampleColumn.append(":");
 					Object sampleAttrValue = sample.get(sampleAttributeName);
@@ -501,19 +500,19 @@ public class VcfWriterUtils
 	{
 		StringBuilder formatColumn = new StringBuilder();
 		// write GT first if available
-		if (sample.getEntityMetaData().getAttribute(FORMAT_GT) != null)
+		if (sample.getEntityType().getAttribute(FORMAT_GT) != null)
 		{
 			formatColumn.append(FORMAT_GT);
 		}
-		EntityMetaData entityMetadata = sample.getEntityMetaData();
-		for (Attribute sampleAttribute : entityMetadata.getAttributes())
+		EntityType entityType = sample.getEntityType();
+		for (Attribute sampleAttribute : entityType.getAttributes())
 		{
 			String sampleAttributeName = sampleAttribute.getName();
 			if (!sampleAttributeName.equals(FORMAT_GT) && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME))
 			{
 				// skip the field that were generated for the use of the entity within molgenis
-				if (!sampleAttribute.equals(entityMetadata.getIdAttribute()) && !sampleAttribute
-						.equals(entityMetadata.getLabelAttribute()))
+				if (!sampleAttribute.equals(entityType.getIdAttribute()) && !sampleAttribute
+						.equals(entityType.getLabelAttribute()))
 				{
 					if (formatColumn.length() != 0) formatColumn.append(':');
 					formatColumn.append(sampleAttributeName);

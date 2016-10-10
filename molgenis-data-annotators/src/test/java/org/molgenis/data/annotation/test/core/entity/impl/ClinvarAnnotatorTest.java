@@ -10,8 +10,8 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.settings.ClinvarAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertTrue;
 
@@ -48,7 +48,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -65,13 +65,13 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateIterable()
 	{
-		EntityMetaData sourceMeta = entityMetaDataFactory.create().setName("clinvar");
+		EntityType sourceMeta = entityTypeFactory.create().setName("clinvar");
 		sourceMeta.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		sourceMeta.addAttribute(vcfAttributes.getPosAttribute());
 		sourceMeta.addAttribute(vcfAttributes.getRefAttribute());
 		sourceMeta.addAttribute(vcfAttributes.getAltAttribute());
 
-		EntityMetaData annotatedSourceMeta = sourceMeta;
+		EntityType annotatedSourceMeta = sourceMeta;
 		annotatedSourceMeta.addAttribute(attributeFactory.create().setName(ClinvarAnnotator.CLINVAR_CLNSIG));
 		annotatedSourceMeta.addAttribute(attributeFactory.create().setName(ClinvarAnnotator.CLINVAR_CLNALLE));
 

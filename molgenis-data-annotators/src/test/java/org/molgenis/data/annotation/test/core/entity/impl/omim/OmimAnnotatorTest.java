@@ -11,8 +11,8 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -53,7 +53,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -85,28 +85,26 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	{
 		List<Entity> entitiesToAnnotate = newArrayList();
 
-		EntityMetaData inputEntityMetaData = entityMetaDataFactory.create().setName("Test");
-		inputEntityMetaData.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
-		inputEntityMetaData.addAttributes(
-				Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
-						omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(),
-						omimAnnotator.getTypeAttr()));
+		EntityType inputEntityType = entityTypeFactory.create().setName("Test");
+		inputEntityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
+		inputEntityType.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
+				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
 
-		Entity inputEntity = new DynamicEntity(inputEntityMetaData);
+		Entity inputEntity = new DynamicEntity(inputEntityType);
 		inputEntity.set(GENE_NAME, "CYP17A1");
 
 		entitiesToAnnotate.add(inputEntity);
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
-		EntityMetaData expectedEntityMetaData = entityMetaDataFactory.create().setName("Test");
-		expectedEntityMetaData.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
-		expectedEntityMetaData.addAttribute(omimAnnotator.getPhenotypeAttr());
-		expectedEntityMetaData.addAttribute(omimAnnotator.getMimNumberAttr());
-		expectedEntityMetaData.addAttribute(omimAnnotator.getOmimLocationAttr());
-		expectedEntityMetaData.addAttribute(omimAnnotator.getEntryAttr());
-		expectedEntityMetaData.addAttribute(omimAnnotator.getTypeAttr());
+		EntityType expectedEntityType = entityTypeFactory.create().setName("Test");
+		expectedEntityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
+		expectedEntityType.addAttribute(omimAnnotator.getPhenotypeAttr());
+		expectedEntityType.addAttribute(omimAnnotator.getMimNumberAttr());
+		expectedEntityType.addAttribute(omimAnnotator.getOmimLocationAttr());
+		expectedEntityType.addAttribute(omimAnnotator.getEntryAttr());
+		expectedEntityType.addAttribute(omimAnnotator.getTypeAttr());
 
-		Entity expectedEntity = new DynamicEntity(expectedEntityMetaData);
+		Entity expectedEntity = new DynamicEntity(expectedEntityType);
 		expectedEntity.set(GENE_NAME, "CYP17A1");
 		expectedEntity.set(OMIM_DISORDER, join(newArrayList("17,20-lyase deficiency, isolated"), ","));
 		expectedEntity.set(OMIM_CAUSAL_IDENTIFIER, join(newArrayList("609300"), ","));

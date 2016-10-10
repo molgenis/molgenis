@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -55,7 +55,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attributeFactory;
@@ -71,8 +71,8 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		Attribute outputAttribute = attributeFactory.create().setName(THOUSAND_GENOME_AF)
-				.setDataType(STRING).setDescription(
+		Attribute outputAttribute = attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING)
+				.setDescription(
 						"The allele frequency for variants seen in the population used for the thousand genomes project")
 				.setLabel(THOUSAND_GENOME_AF_LABEL);
 
@@ -92,8 +92,8 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(Collections.singletonList(
-				attributeFactory.create().setName(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME)
-						.setDataType(DECIMAL)), vcfAttributes);
+				attributeFactory.create().setName(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME).setDataType(DECIMAL)),
+				vcfAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) ->
@@ -106,11 +106,11 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		})
 		{
 			@Override
-			protected Object getResourceAttributeValue(Attribute attr, Entity entityMetaData)
+			protected Object getResourceAttributeValue(Attribute attr, Entity entityType)
 			{
 				String attrName = THOUSAND_GENOME_AF
 						.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
-				return entityMetaData.get(attrName);
+				return entityType.get(attrName);
 			}
 		};
 
@@ -129,7 +129,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes,
-						entityMetaDataFactory, attributeFactory);
+						entityTypeFactory, attributeFactory);
 			}
 		};
 	}

@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepository
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -60,7 +60,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -76,13 +76,12 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = new ArrayList<>();
 
-		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING)
-				.setDescription(
-						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
+		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING).setDescription(
+				"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
 				.setLabel(CLINVAR_CLNSIG_LABEL);
 
-		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE)
-				.setDataType(STRING).setDescription("Value representing the clinical significanct according to ClinVar")
+		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
+				.setDescription("Value representing the clinical significanct according to ClinVar")
 				.setLabel(CLINVAR_CLNALLE_LABEL);
 
 		attributes.add(clinvar_clnsig);
@@ -142,7 +141,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityTypeFactory,
 						attributeFactory);
 			}
 		};

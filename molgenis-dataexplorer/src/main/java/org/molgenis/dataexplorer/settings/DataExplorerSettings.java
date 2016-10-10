@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	}
 
 	@Component
-	private static class Meta extends DefaultSettingsEntityMetaData
+	private static class Meta extends DefaultSettingsEntityType
 	{
 		public static final String GENERAL = "general_";
 		public static final String GENERAL_SEARCHBOX = "searchbox";

@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
@@ -13,14 +13,14 @@ public class OntologyTerm extends StaticEntity
 		super(entity);
 	}
 
-	public OntologyTerm(EntityMetaData entityMeta)
+	public OntologyTerm(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public OntologyTerm(String id, EntityMetaData entityMeta)
+	public OntologyTerm(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

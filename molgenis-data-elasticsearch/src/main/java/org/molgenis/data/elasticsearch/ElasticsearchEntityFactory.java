@@ -8,7 +8,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,7 +62,7 @@ public class ElasticsearchEntityFactory
 
 	private void createRec(Entity entity, XContentGenerator generator, int depth, int maxDepth) throws IOException
 	{
-		for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			generator.writeFieldName(attr.getName());
 			createRec(entity, attr, generator, depth, maxDepth);
@@ -177,7 +177,7 @@ public class ElasticsearchEntityFactory
 					}
 					else
 					{
-						Attribute xrefIdAttr = xrefEntity.getEntityMetaData().getIdAttribute();
+						Attribute xrefIdAttr = xrefEntity.getEntityType().getIdAttribute();
 						createRec(xrefEntity, xrefIdAttr, generator, depth + 1, maxDepth);
 					}
 				}
@@ -205,7 +205,7 @@ public class ElasticsearchEntityFactory
 						}
 						else
 						{
-							Attribute mrefIdAttr = mrefEntity.getEntityMetaData().getIdAttribute();
+							Attribute mrefIdAttr = mrefEntity.getEntityType().getIdAttribute();
 							createRec(mrefEntity, mrefIdAttr, generator, depth + 1, maxDepth);
 						}
 					}
@@ -224,8 +224,8 @@ public class ElasticsearchEntityFactory
 		}
 	}
 
-	Entity getReference(EntityMetaData entityMeta, Object idObject)
+	Entity getReference(EntityType entityType, Object idObject)
 	{
-		return entityManager.getReference(entityMeta, idObject);
+		return entityManager.getReference(entityType, idObject);
 	}
 }

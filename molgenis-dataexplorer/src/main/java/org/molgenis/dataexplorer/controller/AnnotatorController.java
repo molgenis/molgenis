@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -95,7 +95,7 @@ public class AnnotatorController
 		Repository<Entity> repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
-			scheduleAnnotatorRun(repository.getEntityMetaData().getName(), annotatorNames);
+			scheduleAnnotatorRun(repository.getEntityType().getName(), annotatorNames);
 		}
 		return entityName;
 	}
@@ -124,14 +124,14 @@ public class AnnotatorController
 
 		if (dataSetName != null)
 		{
-			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetName);
+			EntityType entityType = dataService.getEntityType(dataSetName);
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
 				List<Attribute> outputAttrs = annotator.getOutputAttributes();
 				outputAttrs = getAtomicAttributesFromList(outputAttrs);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
-				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
+				map.put("canAnnotate", annotator.canAnnotate(entityType));
 				map.put("inputAttributes", createAttrsResponse(annotator.getRequiredAttributes()));
 				map.put("inputAttributeTypes", toMap(annotator.getRequiredAttributes()));
 				map.put("outputAttributes", createAttrsResponse(outputAttrs));

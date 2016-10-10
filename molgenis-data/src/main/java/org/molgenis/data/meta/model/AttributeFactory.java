@@ -20,7 +20,8 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	private AttributeMetadata attributeMetadata;
 
 	@Autowired
-	public AttributeFactory(EntityPopulator entityPopulator) {
+	public AttributeFactory(EntityPopulator entityPopulator)
+	{
 		this.entityPopulator = requireNonNull(entityPopulator);
 	}
 
@@ -33,17 +34,17 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	@Override
 	public Attribute create()
 	{
-		Attribute attrMeta = new Attribute(attributeMetadata);
-		entityPopulator.populate(attrMeta);
-		return attrMeta;
+		Attribute attribute = new Attribute(attributeMetadata);
+		entityPopulator.populate(attribute);
+		return attribute;
 	}
 
 	@Override
 	public Attribute create(String entityId)
 	{
-		Attribute attrMeta = create();
-		attrMeta.set(AttributeMetadata.IDENTIFIER, entityId);
-		return attrMeta;
+		Attribute attribute = create();
+		attribute.set(AttributeMetadata.ID, entityId);
+		return attribute;
 	}
 
 	@Override

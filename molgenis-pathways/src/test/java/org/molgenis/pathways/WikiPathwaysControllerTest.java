@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.pathways.model.Impact;
@@ -74,12 +74,12 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	private WikiPathwaysService serviceMock;
 	@Autowired
 	private DataService dataService;
-	private EntityMetaData vcf;
+	private EntityType vcf;
 
 	@BeforeTest
 	public void init()
 	{
-		vcf = mock(EntityMetaData.class);
+		vcf = mock(EntityType.class);
 		when(vcf.getName()).thenReturn("VCF");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
@@ -120,18 +120,18 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	public void testInit() throws RemoteException
 	{
 		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
-		EntityMetaData nonVcf = when(mock(EntityMetaData.class).getName()).thenReturn("NonVCF").getMock();
+		EntityType nonVcf = when(mock(EntityType.class).getName()).thenReturn("NonVCF").getMock();
 		Attribute idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn("id");
 		when(nonVcf.getIdAttribute()).thenReturn(idAttr);
 		when(nonVcf.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 
-		when(dataService.getEntityMetaData("NonVCF")).thenReturn(nonVcf);
-		when(dataService.getEntityMetaData("VCF")).thenReturn(vcf);
+		when(dataService.getEntityType("NonVCF")).thenReturn(nonVcf);
+		when(dataService.getEntityType("VCF")).thenReturn(vcf);
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		assertEquals(controller.init(model), "view-pathways");
-		assertEquals(model.get("entitiesMeta"), ImmutableList.<EntityMetaData>of(vcf));
+		assertEquals(model.get("entitiesMeta"), ImmutableList.<EntityType>of(vcf));
 	}
 
 	@Test

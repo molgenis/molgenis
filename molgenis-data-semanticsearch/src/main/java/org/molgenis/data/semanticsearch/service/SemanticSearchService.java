@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.service;
 
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -16,13 +16,13 @@ public interface SemanticSearchService
 	/**
 	 * Find all relevant source attributes with an explanation based on ontology terms and search terms
 	 *
-	 * @param sourceEntityMetaData
+	 * @param sourceEntityType
 	 * @param queryTerms
 	 * @param ontologyTerms
 	 * @return Attribute of resembling attributes, sorted by relevance
 	 */
-	Map<Attribute, ExplainedAttribute> findAttributes(EntityMetaData sourceEntityMetaData,
-			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms);
+	Map<Attribute, ExplainedAttribute> findAttributes(EntityType sourceEntityType, Set<String> queryTerms,
+			Collection<OntologyTerm> ontologyTerms);
 
 	/**
 	 * A decision tree for getting the relevant attributes
@@ -32,14 +32,13 @@ public interface SemanticSearchService
 	 *
 	 * @return Attribute of resembling attributes, sorted by relevance
 	 */
-	Map<Attribute, ExplainedAttribute> decisionTreeToFindRelevantAttributes(
-			EntityMetaData sourceEntityMetaData, Attribute targetAttribute,
-			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
+	Map<Attribute, ExplainedAttribute> decisionTreeToFindRelevantAttributes(EntityType sourceEntityType,
+			Attribute targetAttribute, Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
 
 	/**
 	 * Finds {@link OntologyTerm}s that can be used to tag an attribute.
 	 *
-	 * @param entity     name of the entity
+	 * @param entity      name of the entity
 	 * @param ontologyIDs IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link Map} of {@link Hit}s for {@link OntologyTerm} results
 	 */

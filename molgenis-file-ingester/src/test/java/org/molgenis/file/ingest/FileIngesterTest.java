@@ -4,7 +4,7 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
@@ -65,9 +65,9 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		importServiceMock = mock(ImportService.class);
 		progress = mock(Progress.class);
 
-		EntityMetaData entityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("target").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("target").getMock();
 		FileIngest fileIngest = fileIngestFactory.create();
-		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityMetaData);
+		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityType);
 		fileIngest.set(FileIngestMetaData.URL, url);
 		fileIngest.set(FileIngestMetaData.LOADER, "CSV");
 	}

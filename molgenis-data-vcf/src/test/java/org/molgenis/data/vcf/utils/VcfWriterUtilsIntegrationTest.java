@@ -6,8 +6,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -41,7 +41,7 @@ import static org.testng.Assert.assertTrue;
 public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	AttributeFactory attributeFactory;
@@ -66,13 +66,13 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	private static Attribute PUTATIVE_IMPACT_ATTR;
 	private static Attribute EFFECT_ATTR;
 	private static Attribute GENES_ATTR;
-	private EntityMetaData annotatedEntityMetadata;
-	public EntityMetaData metaDataCanAnnotate;
-	public EntityMetaData metaDataCantAnnotate;
-	public EntityMetaData geneMeta;
-	EntityMetaData effectMeta;
-	EntityMetaData vcfMeta;
-	EntityMetaData sampleEntityMeta;
+	private EntityType annotatedEntityType;
+	public EntityType metaDataCanAnnotate;
+	public EntityType metaDataCantAnnotate;
+	public EntityType geneMeta;
+	EntityType effectMeta;
+	EntityType vcfMeta;
+	EntityType sampleEntityType;
 	public Attribute attributeChrom;
 	public Attribute attributePos;
 	public Attribute attributeRef;
@@ -88,14 +88,14 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		annotatedEntityMetadata = entityMetaDataFactory.create().setName("test");
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
-		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
-		geneMeta = entityMetaDataFactory.create().setName(GENES);
+		annotatedEntityType = entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
+		geneMeta = entityTypeFactory.create().setName(GENES);
 
-		effectMeta = entityMetaDataFactory.create().setName(EFFECT);
-		vcfMeta = entityMetaDataFactory.create().setName("vcfMeta");
-		sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
+		effectMeta = entityTypeFactory.create().setName(EFFECT);
+		vcfMeta = entityTypeFactory.create().setName("vcfMeta");
+		sampleEntityType = entityTypeFactory.create().setName("vcfSampleEntity");
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 		attributePos = attributeFactory.create().setName(POS).setDataType(INT);
 		attributeRef = attributeFactory.create().setName(REF).setDataType(STRING);
@@ -133,18 +133,18 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		INFO_ATTR.addAttributePart(GTC_ATTR);
 		metaDataCanAnnotate.addAttribute(INFO_ATTR);
 
-		annotatedEntityMetadata.addAttribute(attributeChrom);
-		annotatedEntityMetadata.setIdAttribute(attributeChrom);
-		annotatedEntityMetadata.addAttribute(attributePos);
-		annotatedEntityMetadata.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(attributeRef);
-		annotatedEntityMetadata.addAttribute(attributeAlt);
+		annotatedEntityType.addAttribute(attributeChrom);
+		annotatedEntityType.setIdAttribute(attributeChrom);
+		annotatedEntityType.addAttribute(attributePos);
+		annotatedEntityType.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
+		annotatedEntityType.addAttribute(attributeRef);
+		annotatedEntityType.addAttribute(attributeAlt);
 
-		annotatedEntityMetadata.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING))
+		annotatedEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
+		annotatedEntityType.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING))
 				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'");
 		INFO_ATTR.addAttributePart(attributeFactory.create().setName("ANNO").setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(INFO_ATTR);
+		annotatedEntityType.addAttribute(INFO_ATTR);
 
 		entity1.set(CHROM, "1");
 		entity1.set(POS, 10050000);
@@ -184,12 +184,12 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		geneMeta.setIdAttribute(geneId);
 		geneMeta.addAttribute(
 				attributeFactory.create().setName("Gene").setDataType(STRING).setDescription("HGNC symbol"));
-		Attribute id = attributeFactory.create().setName("id").setDataType(STRING)
-				.setDescription("effect identifier").setVisible(false);
+		Attribute id = attributeFactory.create().setName("id").setDataType(STRING).setDescription("effect identifier")
+				.setVisible(false);
 		effectMeta.addAttribute(id);
 		effectMeta.setIdAttribute(id);
-		effectMeta.addAttribute(attributeFactory.create().setName(ALT).setDataType(STRING)
-				.setDescription("Alternative allele"));
+		effectMeta.addAttribute(
+				attributeFactory.create().setName(ALT).setDataType(STRING).setDescription("Alternative allele"));
 		effectMeta.addAttribute(attributeFactory.create().setName("ALT_GENE").setDataType(STRING)
 				.setDescription("Alternative allele and gene"));
 		effectMeta.addAttribute(attributeFactory.create().setName("GENE").setDataType(STRING)
@@ -209,11 +209,11 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		String sampleIdAttrName = VcfRepository.NAME;
 
 		Attribute sampleId = attributeFactory.create().setName(sampleIdAttrName);
-		sampleEntityMeta.addAttribute(sampleId);
-		sampleEntityMeta.setIdAttribute(sampleId);
-		sampleEntityMeta.addAttribute(attributeFactory.create().setName(formatDpAttrName));
-		sampleEntityMeta.addAttribute(attributeFactory.create().setName(formatEcAttrName));
-		sampleEntityMeta.addAttribute(attributeFactory.create().setName(formatGtAttrName));
+		sampleEntityType.addAttribute(sampleId);
+		sampleEntityType.setIdAttribute(sampleId);
+		sampleEntityType.addAttribute(attributeFactory.create().setName(formatDpAttrName));
+		sampleEntityType.addAttribute(attributeFactory.create().setName(formatEcAttrName));
+		sampleEntityType.addAttribute(attributeFactory.create().setName(formatGtAttrName));
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/3643
@@ -227,36 +227,36 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		String idAttrName = "idAttr";
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		EntityMetaData sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
+		EntityType sampleEntityType = entityTypeFactory.create().setName("vcfSampleEntity");
 		Attribute sampleId = attributeFactory.create().setName(sampleIdAttrName);
-		sampleEntityMeta.addAttribute(sampleId);
-		sampleEntityMeta.setIdAttribute(sampleId);
-		sampleEntityMeta.addAttribute(attributeFactory.create().setName(formatDpAttrName));
-		sampleEntityMeta.addAttribute(attributeFactory.create().setName(formatEcAttrName));
-		sampleEntityMeta.addAttribute(attributeFactory.create().setName(formatGtAttrName));
+		sampleEntityType.addAttribute(sampleId);
+		sampleEntityType.setIdAttribute(sampleId);
+		sampleEntityType.addAttribute(attributeFactory.create().setName(formatDpAttrName));
+		sampleEntityType.addAttribute(attributeFactory.create().setName(formatEcAttrName));
+		sampleEntityType.addAttribute(attributeFactory.create().setName(formatGtAttrName));
 
-		EntityMetaData entityMeta = entityMetaDataFactory.create().setName("vcfEntity");
+		EntityType entityType = entityTypeFactory.create().setName("vcfEntity");
 		Attribute id = attributeFactory.create().setName(idAttrName);
-		entityMeta.addAttribute(id);
-		entityMeta.setIdAttribute(id);
-		entityMeta.addAttribute(vcfAttributes.getChromAttribute());
-		entityMeta.addAttribute(vcfAttributes.getPosAttribute());
-		entityMeta.addAttribute(vcfAttributes.getIdAttribute());
-		entityMeta.addAttribute(vcfAttributes.getRefAttribute());
-		entityMeta.addAttribute(vcfAttributes.getAltAttribute());
-		entityMeta.addAttribute(vcfAttributes.getQualAttribute());
-		entityMeta.addAttribute(vcfAttributes.getFilterAttribute());
-		entityMeta.addAttribute(attributeFactory.create().setName(INFO).setDataType(COMPOUND));
-		entityMeta.addAttribute(
-				attributeFactory.create().setName(SAMPLES).setDataType(MREF).setRefEntity(sampleEntityMeta));
+		entityType.addAttribute(id);
+		entityType.setIdAttribute(id);
+		entityType.addAttribute(vcfAttributes.getChromAttribute());
+		entityType.addAttribute(vcfAttributes.getPosAttribute());
+		entityType.addAttribute(vcfAttributes.getIdAttribute());
+		entityType.addAttribute(vcfAttributes.getRefAttribute());
+		entityType.addAttribute(vcfAttributes.getAltAttribute());
+		entityType.addAttribute(vcfAttributes.getQualAttribute());
+		entityType.addAttribute(vcfAttributes.getFilterAttribute());
+		entityType.addAttribute(attributeFactory.create().setName(INFO).setDataType(COMPOUND));
+		entityType.addAttribute(
+				attributeFactory.create().setName(SAMPLES).setDataType(MREF).setRefEntity(sampleEntityType));
 
-		Entity sampleEntity = new DynamicEntity(sampleEntityMeta);
+		Entity sampleEntity = new DynamicEntity(sampleEntityType);
 		sampleEntity.set(sampleIdAttrName, "0");
 		sampleEntity.set(formatDpAttrName, "5");
 		sampleEntity.set(formatEcAttrName, "5");
 		sampleEntity.set(formatGtAttrName, "1/1");
 
-		Entity vcfEntity = new DynamicEntity(entityMeta);
+		Entity vcfEntity = new DynamicEntity(entityType);
 		vcfEntity.set(idAttrName, "0");
 		vcfEntity.set(CHROM, "1");
 		vcfEntity.set(POS, 565286);
@@ -331,7 +331,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 
 			for (Entity entity : entities)
 			{
-				Entity mapEntity = new DynamicEntity(annotatedEntityMetadata);
+				Entity mapEntity = new DynamicEntity(annotatedEntityType);
 				mapEntity.set(entity);
 				writeToVcf(mapEntity, new ArrayList<>(), new ArrayList<>(), outputVCFWriter);
 				outputVCFWriter.newLine();
@@ -366,17 +366,16 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		vcfMeta.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING));
 		vcfMeta.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		vcfMeta.addAttribute(INFO_ATTR);
-		vcfMeta.addAttribute(
-				attributeFactory.create().setName(EFFECT).setDataType(MREF).setRefEntity(effectMeta));
+		vcfMeta.addAttribute(attributeFactory.create().setName(EFFECT).setDataType(MREF).setRefEntity(effectMeta));
 		vcfMeta.addAttribute(attributeFactory.create().setName(GENES).setDataType(MREF).setRefEntity(geneMeta));
 		vcfMeta.addAttribute(
-				attributeFactory.create().setName(SAMPLES).setDataType(MREF).setRefEntity(sampleEntityMeta));
+				attributeFactory.create().setName(SAMPLES).setDataType(MREF).setRefEntity(sampleEntityType));
 
-		Entity sampleEntity1 = new DynamicEntity(sampleEntityMeta);
+		Entity sampleEntity1 = new DynamicEntity(sampleEntityType);
 		sampleEntity1.set(VcfRepository.NAME, "0");
 		sampleEntity1.set(FORMAT_GT, "0/1");
 
-		Entity sampleEntity2 = new DynamicEntity(sampleEntityMeta);
+		Entity sampleEntity2 = new DynamicEntity(sampleEntityType);
 		sampleEntity2.set(VcfRepository.NAME, "0");
 		sampleEntity2.set(FORMAT_GT, "1/0");
 

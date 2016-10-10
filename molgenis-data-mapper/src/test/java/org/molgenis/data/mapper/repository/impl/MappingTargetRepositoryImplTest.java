@@ -5,7 +5,6 @@ import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
@@ -13,8 +12,9 @@ import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -47,7 +47,7 @@ import static org.testng.Assert.assertTrue;
 public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
@@ -74,7 +74,7 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 
 	private List<Entity> mappingTargetEntities;
 
-	private EntityMetaData targetEntityMetaData;
+	private EntityType targetEntityType;
 
 	private List<Entity> entityMappingEntities;
 
@@ -89,19 +89,18 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		MockitoAnnotations.initMocks(this);
 
 		// POJOs
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		targetEntityMetaData = entityMetaFactory.create("target");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		targetEntityType = entityTypeFactory.create("target");
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
-		targetEntityMetaData.addAttribute(targetAttribute);
-		entityMappings = asList(
-				new EntityMapping("entityMappingID", sourceEntityMetaData, targetEntityMetaData, emptyList()));
-		mappingTargets = asList(new MappingTarget("mappingTargetID", targetEntityMetaData, entityMappings));
+		targetEntityType.addAttribute(targetAttribute);
+		entityMappings = asList(new EntityMapping("entityMappingID", sourceEntityType, targetEntityType, emptyList()));
+		mappingTargets = asList(new MappingTarget("mappingTargetID", targetEntityType, entityMappings));
 
 		// Entities
 		Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, "entityMappingID");
-		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, "source");
-		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "target");
+		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, "source");
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE, "target");
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, emptyList());
 		Entity mappingTargetEntity = new DynamicEntity(mappingTargetMeta);
 		mappingTargetEntity.set(IDENTIFIER, "mappingTargetID");
@@ -116,7 +115,7 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testToMappingTargets()
 	{
-		when(dataService.getEntityMetaData("target")).thenReturn(targetEntityMetaData);
+		when(dataService.getEntityType("target")).thenReturn(targetEntityType);
 		when(entityMappingRepository.toEntityMappings(entityMappingEntities)).thenReturn(entityMappings);
 		when(dataService.hasRepository("target")).thenReturn(true);
 

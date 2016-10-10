@@ -11,8 +11,8 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
@@ -73,7 +73,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.Sort.Direction.DESC;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.ontology.controller.SortaServiceController.URI;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.*;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
@@ -102,7 +102,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
 	private final OntologyTermMetaData ontologyTermMetaData;
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
@@ -119,7 +119,7 @@ public class SortaServiceController extends MolgenisPluginController
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
-			SortaJobExecutionFactory sortaJobExecutionFactory, EntityMetaDataFactory entityMetaFactory,
+			SortaJobExecutionFactory sortaJobExecutionFactory, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attrMetaFactory)
 	{
 		super(URI);
@@ -139,7 +139,7 @@ public class SortaServiceController extends MolgenisPluginController
 		this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
 		this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
 		this.sortaJobExecutionFactory = requireNonNull(sortaJobExecutionFactory);
-		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
@@ -274,7 +274,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		try
 		{
-			dataService.getMeta().deleteEntityMeta(entityName);
+			dataService.getMeta().deleteEntityType(entityName);
 			LOG.info("Deleted repository {}", entityName);
 		}
 		catch (Exception ex)
@@ -451,7 +451,7 @@ public class SortaServiceController extends MolgenisPluginController
 			response.addHeader("Content-Disposition", "attachment; filename=" + generateCsvFileName("match-result"));
 			List<String> columnHeaders = new ArrayList<String>();
 
-			EntityMetaData sourceMetaData = dataService.getEntityMetaData(sortaJobExecution.getSourceEntityName());
+			EntityType sourceMetaData = dataService.getEntityType(sortaJobExecution.getSourceEntityName());
 			for (Attribute attribute : sourceMetaData.getAttributes())
 			{
 				if (!attribute.getName().equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER))
@@ -478,7 +478,7 @@ public class SortaServiceController extends MolgenisPluginController
 		File uploadFile = fileStore.store(inputStream, sessionId + "_input.csv");
 		String inputRepositoryName = idGenerator.generateId();
 		SortaCsvRepository inputRepository = new SortaCsvRepository(inputRepositoryName, jobName + " input", uploadFile,
-				entityMetaFactory, attrMetaFactory);
+				entityTypeFactory, attrMetaFactory);
 
 		if (!validateFileHeader(inputRepository))
 		{
@@ -542,7 +542,7 @@ public class SortaServiceController extends MolgenisPluginController
 		RunAsSystemProxy.runAsSystem(() ->
 		{
 			createInputRepository(inputData);
-			createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityMetaData());
+			createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityType());
 			dataService.add(SORTA_JOB_EXECUTION, sortaJobExecution);
 		});
 
@@ -552,22 +552,22 @@ public class SortaServiceController extends MolgenisPluginController
 		return sortaJobExecution;
 	}
 
-	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
+	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityType sourceMetaData)
 	{
-		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS);
-		resultEntityMetaData.setName(resultEntityName);
-		resultEntityMetaData.setAbstract(false);
-		resultEntityMetaData.addAttribute(
+		EntityType resultEntityType = EntityType.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS);
+		resultEntityType.setName(resultEntityName);
+		resultEntityType.setAbstract(false);
+		resultEntityType.addAttribute(
 				attrMetaFactory.create().setName(INPUT_TERM).setDataType(XREF).setRefEntity(sourceMetaData)
 						.setDescription("Reference to the input term").setNillable(false));
-		resultEntityMetaData.setLabel(jobName + " output");
-		dataService.getMeta().addEntityMeta(resultEntityMetaData);
+		resultEntityType.setLabel(jobName + " output");
+		dataService.getMeta().addEntityType(resultEntityType);
 	}
 
 	private void createInputRepository(Repository<Entity> inputRepository)
 	{
 		// Add the original input dataset to database
-		dataService.getMeta().addEntityMeta(inputRepository.getEntityMetaData());
+		dataService.getMeta().addEntityType(inputRepository.getEntityType());
 
 		Repository<Entity> target = dataService.getRepository(inputRepository.getName());
 		inputRepository.forEachBatched(entities -> target.add(entities.stream()), BATCH_SIZE);
@@ -577,8 +577,8 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		double threshold = sortaJobExecution.getThreshold();
 		QueryRule validatedRule = new QueryRule(MatchingTaskContentMetaData.VALIDATED, EQUALS, isMatched);
-		QueryRule thresholdRule = new QueryRule(MatchingTaskContentMetaData.SCORE,
-				isMatched ? GREATER_EQUAL : LESS, threshold);
+		QueryRule thresholdRule = new QueryRule(MatchingTaskContentMetaData.SCORE, isMatched ? GREATER_EQUAL : LESS,
+				threshold);
 		QueryRule combinedRule = new QueryRule(
 				asList(validatedRule, new QueryRule(isMatched ? OR : AND), thresholdRule));
 
@@ -593,7 +593,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private boolean validateFileHeader(Repository<Entity> repository)
 	{
-		boolean containsName = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
+		boolean containsName = StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
 				.map(Attribute::getName)
 				.anyMatch(name -> name.equalsIgnoreCase(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
 		return containsName;
@@ -601,7 +601,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private boolean validateEmptyFileHeader(Repository<Entity> repository)
 	{
-		boolean evaluation = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
+		boolean evaluation = StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
 				.map(Attribute::getName).anyMatch(StringUtils::isNotBlank);
 		return evaluation;
 	}

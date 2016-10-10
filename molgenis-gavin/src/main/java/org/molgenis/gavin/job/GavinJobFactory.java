@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
@@ -45,7 +45,7 @@ public class GavinJobFactory
 	private VcfAttributes vcfAttributes;
 	private VcfUtils vcfUtils;
 	private AttributeFactory attributeFactory;
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	public GavinJobFactory(CrudRepositoryAnnotator crudRepositoryAnnotator, DataService dataService,
@@ -53,7 +53,7 @@ public class GavinJobFactory
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
 			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
 			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, VcfUtils vcfUtils,
-			AttributeFactory attributeFactory, EntityMetaDataFactory entityMetaDataFactory)
+			AttributeFactory attributeFactory, EntityTypeFactory entityTypeFactory)
 	{
 		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
 		this.dataService = requireNonNull(dataService);
@@ -70,13 +70,13 @@ public class GavinJobFactory
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 		this.vcfUtils = requireNonNull(vcfUtils);
 		this.attributeFactory = requireNonNull(attributeFactory);
-		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution gavinJobExecution)
 	{
-		dataService.add(gavinJobExecution.getEntityMetaData().getName(), gavinJobExecution);
+		dataService.add(gavinJobExecution.getEntityType().getName(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
@@ -85,7 +85,7 @@ public class GavinJobFactory
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory,
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityTypeFactory,
 				attributeFactory);
 	}
 

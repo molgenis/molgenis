@@ -37,18 +37,17 @@ public class EntityPopulator
 	public void populate(Entity entity)
 	{
 		// auto date
-		generateAutoDateOrDateTime(singletonList(entity), entity.getEntityMetaData().getAttributes());
+		generateAutoDateOrDateTime(singletonList(entity), entity.getEntityType().getAttributes());
 
 		// auto id
-		Attribute idAttr = entity.getEntityMetaData().getIdAttribute();
+		Attribute idAttr = entity.getEntityType().getIdAttribute();
 		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null && (idAttr.getDataType() == STRING))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
 	}
 
-	private static void generateAutoDateOrDateTime(Iterable<? extends Entity> entities,
-			Iterable<Attribute> attrs)
+	private static void generateAutoDateOrDateTime(Iterable<? extends Entity> entities, Iterable<Attribute> attrs)
 	{
 		// get auto date and datetime attributes
 		Iterable<Attribute> autoAttrs = stream(attrs.spliterator(), false).filter(attr ->

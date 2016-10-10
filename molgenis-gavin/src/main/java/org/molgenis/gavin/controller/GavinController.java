@@ -112,7 +112,7 @@ public class GavinController extends MolgenisPluginController
 
 		executorService.submit(gavinJob);
 
-		return "/api/v2/" + gavinJobExecution.getEntityMetaData().getName() + "/" + gavinJobIdentifier;
+		return "/api/v2/" + gavinJobExecution.getEntityType().getName() + "/" + gavinJobIdentifier;
 	}
 
 	/**

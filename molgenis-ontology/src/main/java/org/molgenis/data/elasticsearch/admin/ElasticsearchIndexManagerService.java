@@ -1,6 +1,6 @@
 package org.molgenis.data.elasticsearch.admin;
 
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public interface ElasticsearchIndexManagerService
 	 *
 	 * @return
 	 */
-	List<EntityMetaData> getIndexedEntities();
+	List<EntityType> getIndexedEntities();
 
 	/**
 	 * Rebuilds the index for the given entity type

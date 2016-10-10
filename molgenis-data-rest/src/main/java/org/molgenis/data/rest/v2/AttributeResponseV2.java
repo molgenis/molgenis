@@ -10,9 +10,9 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.Href;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.List;
@@ -49,14 +49,13 @@ class AttributeResponseV2
 
 	/**
 	 * @param entityParentName
-	 * @param entityMeta
+	 * @param entityType
 	 * @param attr
 	 * @param fetch             set of lowercase attribute names to include in response
 	 * @param permissionService
 	 */
-	public AttributeResponseV2(final String entityParentName, EntityMetaData entityMeta, Attribute attr,
-			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -69,10 +68,10 @@ class AttributeResponseV2
 		this.maxLength = getType(getValueString(attr.getDataType())).getMaxLength();
 		this.expression = attr.getExpression();
 
-		EntityMetaData refEntity = attr.getRefEntity();
+		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService,
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
 					languageService);
 		}
 		else
@@ -89,8 +88,8 @@ class AttributeResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
+			this.attributes = Lists
+					.newArrayList(Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
 					{
 						@Override
 						public AttributeResponseV2 apply(Attribute attr)
@@ -107,7 +106,7 @@ class AttributeResponseV2
 									subAttrFetch = fetch.getFetch(attr);
 								}
 							}
-							else if (EntityMetaDataUtils.isReferenceType(attr))
+							else if (EntityTypeUtils.isReferenceType(attr))
 							{
 								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
 										languageService.getCurrentUserLanguageCode());
@@ -116,7 +115,7 @@ class AttributeResponseV2
 							{
 								subAttrFetch = null;
 							}
-							return new AttributeResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
+							return new AttributeResponseV2(entityParentName, entityType, attr, subAttrFetch,
 									permissionService, dataService, languageService);
 						}
 					}));
@@ -130,9 +129,9 @@ class AttributeResponseV2
 		this.nillable = attr.isNillable();
 		this.readOnly = attr.isReadOnly();
 		this.defaultValue = attr.getDefaultValue();
-		this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
+		this.labelAttribute = attr.equals(entityType.getLabelAttribute());
 		this.unique = attr.isUnique();
-		this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
+		this.lookupAttribute = entityType.getLookupAttribute(attr.getName()) != null;
 		this.isAggregatable = attr.isAggregatable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();

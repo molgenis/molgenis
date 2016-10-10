@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {
@@ -20,8 +20,8 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 	private final AttributeResponseV2 xAttr;
 	private final AttributeResponseV2 yAttr;
 
-	public EntityAggregatesResponse(AggregateResult aggs, AttributeResponseV2 xAttr,
-			AttributeResponseV2 yAttr, String href)
+	public EntityAggregatesResponse(AggregateResult aggs, AttributeResponseV2 xAttr, AttributeResponseV2 yAttr,
+			String href)
 	{
 		super(href);
 		this.aggs = checkNotNull(AggregateResultResponse.toResponse(aggs));
@@ -100,7 +100,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 				{
 					Map<String, Object> valueMap = new HashMap<String, Object>();
 					Entity entity = (Entity) xLabel;
-					for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
+					for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 					{
 						if (!isReferenceType(attr))
 						{

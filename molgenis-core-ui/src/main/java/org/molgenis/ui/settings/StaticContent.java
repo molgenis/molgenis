@@ -1,7 +1,7 @@
 package org.molgenis.ui.settings;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.ui.settings.StaticContentMeta.CONTENT;
@@ -14,14 +14,14 @@ public class StaticContent extends StaticEntity
 		super(entity);
 	}
 
-	public StaticContent(EntityMetaData entityMeta)
+	public StaticContent(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public StaticContent(String key, EntityMetaData entityMeta)
+	public StaticContent(String key, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setKey(key);
 	}
 

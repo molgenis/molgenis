@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -17,12 +17,12 @@ public interface Entity extends Serializable
 	 *
 	 * @return entity meta data, never null
 	 */
-	EntityMetaData getEntityMetaData();
+	EntityType getEntityType();
 
 	/**
 	 * Get all attribute names
 	 * <p>
-	 * TODO remove, use getEntityMetaData to retrieve entity meta data
+	 * TODO remove, use getEntityType to retrieve entity meta data
 	 */
 	Iterable<String> getAttributeNames();
 

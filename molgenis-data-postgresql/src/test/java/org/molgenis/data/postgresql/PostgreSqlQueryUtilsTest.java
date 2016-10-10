@@ -2,7 +2,7 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -23,22 +23,9 @@ public class PostgreSqlQueryUtilsTest
 	@Test
 	public void getJunctionTableName() throws Exception
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityMeta, attr), "\"entity_attr\"");
-	}
-
-	@Test
-	public void getJunctionTableNameMappedBy() throws Exception
-	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		when(attr.isMappedBy()).thenReturn(true);
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("refAttr").getMock();
-		when(attr.getMappedBy()).thenReturn(refAttr);
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityMeta, attr), "\"refEntity_refAttr\"");
+		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityType, attr), "\"entity_attr\"");
 	}
 
 	@DataProvider(name = "getPersistedAttributesProvider")
@@ -64,15 +51,15 @@ public class PostgreSqlQueryUtilsTest
 	@Test(dataProvider = "getPersistedAttributesProvider")
 	public void getPersistedAttributes(Attribute attr, List<Attribute> persistedAttrs)
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getAtomicAttributes()).thenReturn(singletonList(attr));
-		assertEquals(PostgreSqlQueryUtils.getPersistedAttributes(entityMeta).collect(toList()), persistedAttrs);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
+		assertEquals(PostgreSqlQueryUtils.getPersistedAttributes(entityType).collect(toList()), persistedAttrs);
 	}
 
 	@Test
 	public void getJunctionTableAttributes() throws Exception
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute stringAttr = mock(Attribute.class);
 		when(stringAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = mock(Attribute.class);
@@ -88,16 +75,16 @@ public class PostgreSqlQueryUtilsTest
 		Attribute refAttr = mock(Attribute.class);
 		when(refAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(xrefAttrInversedBy.getInversedBy()).thenReturn(refAttr);
-		when(entityMeta.getAtomicAttributes())
+		when(entityType.getAtomicAttributes())
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
-		List<Attribute> junctionTableAttrs = newArrayList(mrefAttr, xrefAttrInversedBy);
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableAttributes(entityMeta).collect(toList()), junctionTableAttrs);
+		List<Attribute> junctionTableAttrs = newArrayList(mrefAttr);
+		assertEquals(PostgreSqlQueryUtils.getJunctionTableAttributes(entityType).collect(toList()), junctionTableAttrs);
 	}
 
 	@Test
 	public void getTableAttributes() throws Exception
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute stringAttr = mock(Attribute.class);
 		when(stringAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = mock(Attribute.class);
@@ -113,19 +100,19 @@ public class PostgreSqlQueryUtilsTest
 		Attribute refAttr = mock(Attribute.class);
 		when(refAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(xrefAttrInversedBy.getInversedBy()).thenReturn(refAttr);
-		when(entityMeta.getAtomicAttributes())
+		when(entityType.getAtomicAttributes())
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
-		List<Attribute> junctionTableAttrs = newArrayList(stringAttr, xrefAttr);
-		assertEquals(PostgreSqlQueryUtils.getTableAttributes(entityMeta).collect(toList()), junctionTableAttrs);
+		List<Attribute> junctionTableAttrs = newArrayList(stringAttr, xrefAttr, xrefAttrInversedBy);
+		assertEquals(PostgreSqlQueryUtils.getTableAttributes(entityType).collect(toList()), junctionTableAttrs);
 	}
 
 	@Test
 	public void getJunctionTableIndexName() throws Exception
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		Attribute idxAttr = when(mock(Attribute.class).getName()).thenReturn("idxAttr").getMock();
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableIndexName(entityMeta, attr, idxAttr),
+		assertEquals(PostgreSqlQueryUtils.getJunctionTableIndexName(entityType, attr, idxAttr),
 				"\"entity_attr_idxAttr_idx\"");
 	}
 }

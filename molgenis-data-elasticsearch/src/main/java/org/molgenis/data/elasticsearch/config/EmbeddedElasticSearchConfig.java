@@ -39,15 +39,6 @@ public class EmbeddedElasticSearchConfig
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
-	//	@Autowired
-	//	private MolgenisTransactionManager molgenisTransactionManager;
-	//
-	//	@Autowired
-	//	private IndexJobExecutionFactory indexJobExecutionFactory;
-
-	//	@Autowired
-	//	private IndexActionRegisterService indexActionRegisterService;
-
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
 	{

@@ -4,7 +4,7 @@ import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
-import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;
+import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 
 	private final MolgenisUpgradeBootstrapper upgradeBootstrapper;
 	private final RegistryBootstrapper registryBootstrapper;
-	private final SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper;
+	private final SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 	private final RepositoryPopulator repositoryPopulator;
 	private final FileIngesterJobRegistrar fileIngesterJobRegistrar;
 	private final JobBootstrapper jobBootstrapper;
@@ -39,14 +39,14 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			RegistryBootstrapper registryBootstrapper,
-			SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper, RepositoryPopulator repositoryPopulator,
+			SystemEntityTypeBootstrapper systemEntityTypeBootstrapper, RepositoryPopulator repositoryPopulator,
 			FileIngesterJobRegistrar fileIngesterJobRegistrar, JobBootstrapper jobBootstrapper,
 			IdCardBootstrapper idCardBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
 			IndexBootstrapper indexBootstrapper)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
-		this.systemEntityMetaDataBootstrapper = requireNonNull(systemEntityMetaDataBootstrapper);
+		this.systemEntityTypeBootstrapper = requireNonNull(systemEntityTypeBootstrapper);
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
 		this.fileIngesterJobRegistrar = requireNonNull(fileIngesterJobRegistrar);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
@@ -72,7 +72,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.debug("Bootstrapped registries");
 
 		LOG.trace("Bootstrapping system entity meta data ...");
-		systemEntityMetaDataBootstrapper.bootstrap(event);
+		systemEntityTypeBootstrapper.bootstrap(event);
 		LOG.debug("Bootstrapped system entity meta data");
 
 		LOG.trace("Populating repositories ...");

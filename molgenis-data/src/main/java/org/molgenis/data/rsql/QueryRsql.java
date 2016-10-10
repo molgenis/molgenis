@@ -3,7 +3,7 @@ package org.molgenis.data.rsql;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 /**
  * Create MOLGENIS Query from RSQL node based on entity meta data.
@@ -19,9 +19,9 @@ public class QueryRsql
 		this.rootNode = rootNode;
 	}
 
-	public Query<Entity> createQuery(EntityMetaData entityMetaData)
+	public Query<Entity> createQuery(EntityType entityType)
 	{
-		MolgenisRSQLVisitor rsqlVisitor = new MolgenisRSQLVisitor(entityMetaData);
+		MolgenisRSQLVisitor rsqlVisitor = new MolgenisRSQLVisitor(entityType);
 		return rootNode.accept(rsqlVisitor);
 	}
 }

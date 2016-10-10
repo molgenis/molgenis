@@ -8,7 +8,7 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.data.support.QueryImpl;
@@ -46,9 +46,9 @@ public class DataExplorerDownloadHandler
 		ExcelSheetWriter excelSheetWriter = null;
 		try
 		{
-			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+			EntityType entityType = dataService.getEntityType(entityName);
 			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
-			Iterable<Attribute> attributes = filter(entityMetaData.getAtomicAttributes(),
+			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 
 			switch (dataRequest.getColNames())
@@ -107,9 +107,9 @@ public class DataExplorerDownloadHandler
 
 		try
 		{
-			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+			EntityType entityType = dataService.getEntityType(entityName);
 			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
-			Iterable<Attribute> attributes = filter(entityMetaData.getAtomicAttributes(),
+			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 
 			switch (dataRequest.getColNames())

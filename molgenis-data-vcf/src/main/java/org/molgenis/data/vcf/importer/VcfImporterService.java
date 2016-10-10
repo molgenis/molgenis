@@ -6,7 +6,7 @@ import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -54,7 +54,7 @@ public class VcfImporterService implements ImportService
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
-		List<EntityMetaData> addedEntities = Lists.newArrayList();
+		List<EntityType> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
 
 		Iterator<String> it = source.getEntityNames().iterator();
@@ -85,7 +85,7 @@ public class VcfImporterService implements ImportService
 		if (it.hasNext())
 		{
 			String entityName = it.next();
-			EntityMetaData emd = source.getRepository(entityName).getEntityMetaData();
+			EntityType emd = source.getRepository(entityName).getEntityType();
 
 			// Vcf entity
 			boolean entityExists = dataService.hasRepository(entityName);
@@ -134,7 +134,7 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityMetaData> addedEntities)
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities)
 			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
@@ -146,29 +146,29 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-		entityMetaData.setBackend(metaDataService.getDefaultBackend().getName());
+		EntityType entityType = inRepository.getEntityType();
+		entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
-		Attribute sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
+		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
-			EntityMetaData samplesEntityMetaData = sampleAttribute.getRefEntity();
-			samplesEntityMetaData.setBackend(metaDataService.getDefaultBackend().getName());
-			sampleRepository = dataService.getMeta().createRepository(samplesEntityMetaData);
+			EntityType samplesEntityType = sampleAttribute.getRefEntity();
+			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
+			sampleRepository = dataService.getMeta().createRepository(samplesEntityType);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(samplesEntityMetaData.getName()));
+					Collections.singletonList(samplesEntityType.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int sampleEntityCount = 0;
 		List<Entity> sampleEntities = new ArrayList<>();
-		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityMetaData))
+		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityType))
 		{
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(entityMetaData.getName()));
+					Collections.singletonList(entityType.getName()));
 
-			addedEntities.add(entityMetaData);
+			addedEntities.add(entityType);
 
 			if (sampleRepository != null)
 			{

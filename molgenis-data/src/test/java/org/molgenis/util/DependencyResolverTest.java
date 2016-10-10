@@ -2,7 +2,7 @@ package org.molgenis.util;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
 
@@ -24,38 +24,37 @@ public class DependencyResolverTest
 	@Test
 	public void resolveOneToMany()
 	{
-		EntityMetaData oneToManyEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		EntityMetaData xrefEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity")
-				.getMock();
+		EntityType oneToManyEntityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType xrefEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
 
 		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getName()).thenReturn("oneToManyAttr");
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(oneToManyAttr.getRefEntity()).thenReturn(xrefEntityMeta);
-
+		when(oneToManyAttr.getRefEntity()).thenReturn(xrefEntityType);
 
 		Attribute xrefAttr = mock(Attribute.class);
 		when(xrefAttr.getName()).thenReturn("xrefAttr");
 		when(xrefAttr.getDataType()).thenReturn(XREF);
-		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityMeta);
+		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityType);
 		when(xrefAttr.getInversedBy()).thenReturn(oneToManyAttr);
 
 		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
-		when(oneToManyEntityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
-		when(xrefEntityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
-		assertEquals(DependencyResolver.resolve(newLinkedHashSet(newArrayList(xrefEntityMeta, oneToManyEntityMeta))),
-				newArrayList(oneToManyEntityMeta, xrefEntityMeta));
+		when(oneToManyEntityType.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		when(xrefEntityType.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
+		assertEquals(DependencyResolver.resolve(newLinkedHashSet(newArrayList(xrefEntityType, oneToManyEntityType))),
+				newArrayList(oneToManyEntityType, xrefEntityType));
 	}
 
 	@Test
 	public void resolve()
 	{
-		EntityMetaData e1 = when(mock(EntityMetaData.class).getName()).thenReturn("e1").getMock();
-		EntityMetaData e2 = when(mock(EntityMetaData.class).getName()).thenReturn("e2").getMock();
-		EntityMetaData e3 = when(mock(EntityMetaData.class).getName()).thenReturn("e3").getMock();
-		EntityMetaData e4 = when(mock(EntityMetaData.class).getName()).thenReturn("e4").getMock();
-		EntityMetaData e5 = when(mock(EntityMetaData.class).getName()).thenReturn("e5").getMock();
+		EntityType e1 = when(mock(EntityType.class).getName()).thenReturn("e1").getMock();
+		EntityType e2 = when(mock(EntityType.class).getName()).thenReturn("e2").getMock();
+		EntityType e3 = when(mock(EntityType.class).getName()).thenReturn("e3").getMock();
+		EntityType e4 = when(mock(EntityType.class).getName()).thenReturn("e4").getMock();
+		EntityType e5 = when(mock(EntityType.class).getName()).thenReturn("e5").getMock();
+
 		when(e1.toString()).thenReturn("e1");
 		when(e2.toString()).thenReturn("e2");
 		when(e3.toString()).thenReturn("e3");
@@ -86,39 +85,40 @@ public class DependencyResolverTest
 		when(e4.getAtomicAttributes()).thenReturn(asList(e4RefAttr));
 		when(e5.getAtomicAttributes()).thenReturn(asList(e3RefAttr, e3SelfRefAttr));
 
-		List<EntityMetaData> resolved = DependencyResolver.resolve(newHashSet(e1, e2, e3, e4, e5));
+		List<EntityType> resolved = DependencyResolver.resolve(newHashSet(e1, e2, e3, e4, e5));
 		assertEquals(resolved, asList(e2, e4, e3, e5, e1));
 	}
 
 	@Test
 	public void resolveSelfReferences()
 	{
-		EntityMetaData emd = when(mock(EntityMetaData.class).getName()).thenReturn("Person").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("Person").getMock();
 		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
+
 		when(nameAttr.getDataType()).thenReturn(STRING);
 		Attribute fatherAttr = when(mock(Attribute.class).getName()).thenReturn("father").getMock();
 		when(fatherAttr.getDataType()).thenReturn(XREF);
-		when(fatherAttr.getRefEntity()).thenReturn(emd);
+		when(fatherAttr.getRefEntity()).thenReturn(entityType);
 		when(fatherAttr.isNillable()).thenReturn(true);
 		Attribute motherAttr = when(mock(Attribute.class).getName()).thenReturn("mother").getMock();
-		when(emd.getIdAttribute()).thenReturn(nameAttr);
+		when(entityType.getIdAttribute()).thenReturn(nameAttr);
 		when(motherAttr.getDataType()).thenReturn(XREF);
 		when(motherAttr.isNillable()).thenReturn(true);
-		when(motherAttr.getRefEntity()).thenReturn(emd);
-		when(emd.getAtomicAttributes()).thenReturn(asList(nameAttr, fatherAttr, motherAttr));
-		when(emd.getAttribute("name")).thenReturn(nameAttr);
-		when(emd.getAttribute("father")).thenReturn(fatherAttr);
-		when(emd.getAttribute("mother")).thenReturn(motherAttr);
+		when(motherAttr.getRefEntity()).thenReturn(entityType);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(nameAttr, fatherAttr, motherAttr));
+		when(entityType.getAttribute("name")).thenReturn(nameAttr);
+		when(entityType.getAttribute("father")).thenReturn(fatherAttr);
+		when(entityType.getAttribute("mother")).thenReturn(motherAttr);
 
-		Entity piet = new DynamicEntity(emd);
+		Entity piet = new DynamicEntity(entityType);
 		piet.set("name", "Piet");
-		Entity klaas = new DynamicEntity(emd);
+		Entity klaas = new DynamicEntity(entityType);
 		klaas.set("name", "Klaas");
-		Entity jan = new DynamicEntity(emd);
+		Entity jan = new DynamicEntity(entityType);
 		jan.set("name", "Jan");
-		Entity katrijn = new DynamicEntity(emd);
+		Entity katrijn = new DynamicEntity(entityType);
 		katrijn.set("name", "Katrijn");
-		Entity marie = new DynamicEntity(emd);
+		Entity marie = new DynamicEntity(entityType);
 		marie.set("name", "Marie");
 
 		klaas.set("father", piet);
@@ -132,7 +132,7 @@ public class DependencyResolverTest
 
 		Iterable<Entity> entities = asList(piet, klaas, jan, katrijn, marie);
 
-		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, emd);
+		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, entityType);
 		assertEquals(newArrayList(sorted), asList(marie, piet, jan, katrijn, klaas));
 	}
 }

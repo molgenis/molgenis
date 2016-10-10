@@ -7,7 +7,7 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -88,8 +88,8 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	public Entity get(Repository<Entity> repository, Object id)
 	{
 		LoadingCache<Object, Optional<Map<String, Object>>> cache = getEntityCache(repository);
-		EntityMetaData entityMetaData = repository.getEntityMetaData();
-		return cache.getUnchecked(id).map(e -> entityHydration.hydrate(e, entityMetaData)).orElse(null);
+		EntityType entityType = repository.getEntityType();
+		return cache.getUnchecked(id).map(e -> entityHydration.hydrate(e, entityType)).orElse(null);
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 		try
 		{
 			return getEntityCache(repository).getAll(ids).values().stream().filter(Optional::isPresent)
-					.map(Optional::get).map(e -> entityHydration.hydrate(e, repository.getEntityMetaData()))
+					.map(Optional::get).map(e -> entityHydration.hydrate(e, repository.getEntityType()))
 					.collect(Collectors.toList());
 		}
 		catch (ExecutionException exception)
