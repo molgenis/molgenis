@@ -62,7 +62,7 @@ public class DirectoryController extends MolgenisPluginController
 		List<Collection> collections = singletonList(collection);
 
 		Query query = createQuery(collections, filter);
-		
+
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 
@@ -71,5 +71,4 @@ public class DirectoryController extends MolgenisPluginController
 
 		return restTemplate.postForLocation(BBMRI_API, entity);
 	}
-
 }
