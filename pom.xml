@@ -726,5 +726,6 @@
         <module>molgenis-data-platform</module>
         <module>molgenis-annotators-cmd</module>
         <module>molgenis-apps</module>
+        <module>molgenis-bbmri-directory</module>
     </modules>
 </project>
