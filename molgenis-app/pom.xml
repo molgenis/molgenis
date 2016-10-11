@@ -270,5 +270,10 @@
             <artifactId>molgenis-apps</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-bbmri-directory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
