@@ -12,12 +12,4 @@
     </div>
 </div>
 
-<script>
-    $(function(){
-        $('#negotiate-btn').on('click', function () {
-            $.get(molgenis.getContextUrl() + '/query');
-        })
-    })
-</script>
-
 <@footer />
