@@ -584,9 +584,6 @@ public class EntityType extends StaticEntity
 				{
 					case ROLE_ID:
 						attr.setIdAttribute(true);
-						attr.setReadOnly(true);
-						attr.setUnique(true);
-						attr.setNillable(false);
 						break;
 					case ROLE_LABEL:
 						attr.setLabelAttribute(true);

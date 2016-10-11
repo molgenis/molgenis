@@ -155,6 +155,12 @@ public class Attribute extends StaticEntity
 	public Attribute setIdAttribute(Boolean isIdAttr)
 	{
 		set(IS_ID_ATTRIBUTE, isIdAttr);
+		if (isIdAttr != null && isIdAttr)
+		{
+			setReadOnly(true);
+			setUnique(true);
+			setNillable(false);
+		}
 		return this;
 	}
 
@@ -564,8 +570,17 @@ public class Attribute extends StaticEntity
 
 	public Attribute setParent(Attribute parentAttr)
 	{
+		Attribute currentParent = getParent();
+		if (currentParent != null)
+		{
+			currentParent.removeAttributePart(this);
+		}
 		set(PARENT, parentAttr);
-		parentAttr.addAttributePart(this);
+
+		if (parentAttr != null)
+		{
+			parentAttr.addAttributePart(this);
+		}
 		return this;
 	}
 
@@ -582,10 +597,17 @@ public class Attribute extends StaticEntity
 				.findFirst().orElse(null);
 	}
 
-	private void addAttributePart(Attribute attrPart)
+	void addAttributePart(Attribute attrPart)
 	{
 		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
 		set(CHILDREN, concat(attrParts, singletonList(attrPart)));
+	}
+
+	void removeAttributePart(Attribute attrPart)
+	{
+		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
+		set(CHILDREN, stream(attrParts.spliterator(), false).filter(attr -> !attr.getName().equals(attrPart.getName()))
+				.collect(toList()));
 	}
 
 	/**
