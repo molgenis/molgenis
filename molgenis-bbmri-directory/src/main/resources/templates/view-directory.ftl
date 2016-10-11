@@ -15,13 +15,7 @@
 <script>
     $(function(){
         $('#negotiate-btn').on('click', function () {
-            $.ajax({
-                'type': 'GET',
-                'url': molgenis.getContextUrl() + '/query',
-                'success': function (data) {
-                   alert('success!')
-                }
-            });
+            $.get(molgenis.getContextUrl() + '/query');
         })
     })
 </script>

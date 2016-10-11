@@ -8,14 +8,14 @@ import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
@@ -32,7 +32,7 @@ public class DirectoryController extends MolgenisPluginController
 	public static final String ID = "bbmridirectory";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String VIEW_DIRECTORY = "view-directory";
-	public static final String BBMRI_API = "192.168.1.188/bbmri/api/directory/create_query";
+	public static final String BBMRI_API = "https://bbmri-demo.mitro.dkfz.de/hackathon/api/directory/create_query";
 
 	public DirectoryController()
 	{
@@ -49,8 +49,7 @@ public class DirectoryController extends MolgenisPluginController
 	}
 
 	@RequestMapping("/query")
-	@ResponseBody
-	public void postQuery() throws Exception
+	public java.net.URI postQuery() throws Exception
 	{
 		LOG.info("Query received, sending request");
 
@@ -64,15 +63,14 @@ public class DirectoryController extends MolgenisPluginController
 
 		Query query = createQuery(collections, filter);
 
-		System.out.println("gson = " + gson.toJson(query));
-		
 		// post query to 192.168.1.188/bbmri/api/directory/create_query
 		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
 
-		Map<String, Object> callback = restTemplate
-				.postForObject(BBMRI_API, query, Map.class);
+		headers.set("Authorization", "Basic bW9sZ2VuaXM6Z29nb2dv");
+		HttpEntity entity = new HttpEntity(query, headers);
 
-		System.out.println("callback = " + callback);
+		return restTemplate.postForLocation(BBMRI_API, entity);
 	}
 
 }
