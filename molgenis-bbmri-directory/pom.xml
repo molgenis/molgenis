@@ -11,5 +11,16 @@
 
     <artifactId>molgenis-bbmri-directory</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-core-ui</artifactId>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
 </project>
