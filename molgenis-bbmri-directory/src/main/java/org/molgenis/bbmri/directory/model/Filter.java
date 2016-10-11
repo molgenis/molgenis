@@ -13,5 +13,4 @@ public abstract class Filter
 	{
 		return new AutoValue_Filter(humanReadable);
 	}
-	// TODO get structured data from jonathan
 }

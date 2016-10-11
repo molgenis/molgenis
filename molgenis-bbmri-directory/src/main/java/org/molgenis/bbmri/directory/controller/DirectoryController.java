@@ -62,8 +62,7 @@ public class DirectoryController extends MolgenisPluginController
 		List<Collection> collections = singletonList(collection);
 
 		Query query = createQuery(collections, filter);
-
-		// post query to 192.168.1.188/bbmri/api/directory/create_query
+		
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 
