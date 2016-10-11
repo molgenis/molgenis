@@ -53,7 +53,7 @@ public class DirectoryController extends MolgenisPluginController
 	@RequestMapping("/query")
 	public java.net.URI postQuery() throws Exception
 	{
-		LOG.info("Query received, sending request");
+		LOG.debug("Query received, sending request");
 
 		// TODO create structured data
 
@@ -71,8 +71,7 @@ public class DirectoryController extends MolgenisPluginController
 		headers.set("Authorization", "Basic bW9sZ2VuaXM6Z29nb2dv");
 		HttpEntity entity = new HttpEntity(query, headers);
 
-		LOG.info("settings.getString(DirectorySettings.NEGOTIATOR_URL): [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-
+		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
 		return restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity);
 	}
 }
