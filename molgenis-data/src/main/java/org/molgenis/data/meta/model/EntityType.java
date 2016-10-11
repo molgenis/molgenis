@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.model;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
@@ -12,12 +12,11 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
@@ -33,8 +32,8 @@ import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
  */
 public class EntityType extends StaticEntity
 {
-	private transient Map<String, Attribute> cachedAttrs;
-	private transient List<Attribute> cachedOwnAtomicAttrs;
+//	private transient Map<String, Attribute> cachedAttrs;
+//	private transient List<Attribute> cachedOwnAtomicAttrs;
 	private transient Boolean cachedHasAttrWithExpession;
 
 	public EntityType(Entity entity)
@@ -106,26 +105,10 @@ public class EntityType extends StaticEntity
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
 			entityTypeCopy.setOwnAttributes(ownAttrMap.values());
-
-			// Own id attribute (use attribute reference from attributes map)
-			Attribute ownIdAttribute = entityType.getOwnIdAttribute();
-			entityTypeCopy.setIdAttribute(ownIdAttribute != null ? ownAttrMap.get(ownIdAttribute.getName()) : null);
-
-			// Own label attribute (use attribute reference from attributes map)
-			Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-			entityTypeCopy.setLabelAttribute(ownLabelAttr != null ? ownAttrMap.get(ownLabelAttr.getName()) : null);
-
-			// Own lookup attrs (use attribute reference from attributes map)
-			Iterable<Attribute> ownLookupAttrs = entityType.getOwnLookupAttributes();
-			entityTypeCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false)
-					.map(ownLookupAttr -> ownAttrMap.get(ownLookupAttr.getName())).collect(toList()));
 		}
 		else
 		{
 			entityTypeCopy.setOwnAttributes(newArrayList(entityType.getOwnAttributes()));
-			entityTypeCopy.setIdAttribute(entityType.getOwnIdAttribute());
-			entityTypeCopy.setLabelAttribute(entityType.getOwnLabelAttribute());
-			entityTypeCopy.setLookupAttributes(newArrayList(entityType.getOwnLookupAttributes()));
 		}
 
 		entityTypeCopy.setAbstract(entityType.isAbstract());
@@ -329,25 +312,17 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return id attribute
 	 */
+	// FIXME cache id attribute
 	public Attribute getOwnIdAttribute()
 	{
-		return getEntity(ID_ATTRIBUTE, Attribute.class);
-	}
-
-	public EntityType setIdAttribute(Attribute idAttr)
-	{
-		set(ID_ATTRIBUTE, idAttr);
-		if (idAttr != null)
+		for (Attribute ownAttr : getOwnAllAttributes())
 		{
-			idAttr.setReadOnly(true);
-			idAttr.setUnique(true);
-			idAttr.setNillable(false);
+			if (ownAttr.isIdAttribute())
+			{
+				return ownAttr;
+			}
 		}
-		if (getLabelAttribute() == null)
-		{
-			setLabelAttribute(idAttr);
-		}
-		return this;
+		return null;
 	}
 
 	/**
@@ -388,20 +363,30 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return label attribute
 	 */
+	// FIXME cache own label attribute
 	public Attribute getOwnLabelAttribute()
 	{
-		return getEntity(LABEL_ATTRIBUTE, Attribute.class);
+		for (Attribute ownAttr : getOwnAllAttributes())
+		{
+			if (ownAttr.isLabelAttribute())
+			{
+				return ownAttr;
+			}
+		}
+		return null;
 	}
 
 	public Attribute getOwnLabelAttribute(String languageCode)
 	{
-		return getEntity(getI18nAttributeName(LABEL_ATTRIBUTE, languageCode), Attribute.class);
-	}
-
-	public EntityType setLabelAttribute(Attribute labelAttr)
-	{
-		set(LABEL_ATTRIBUTE, labelAttr);
-		return this;
+		Attribute labelAttr = getOwnLabelAttribute();
+		if (labelAttr != null)
+		{
+			return getEntity(getI18nAttributeName(labelAttr.getName(), languageCode), Attribute.class);
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -439,13 +424,13 @@ public class EntityType extends StaticEntity
 	 */
 	public Iterable<Attribute> getOwnLookupAttributes()
 	{
-		return getEntities(LOOKUP_ATTRIBUTES, Attribute.class);
-	}
-
-	public EntityType setLookupAttributes(Iterable<Attribute> lookupAttrs)
-	{
-		set(LOOKUP_ATTRIBUTES, lookupAttrs);
-		return this;
+		List<Attribute> ownLookupAttrs = stream(getOwnAllAttributes().spliterator(), false)
+				.filter(attr -> attr.getLookupAttributeIndex() != null).collect(toCollection(ArrayList::new));
+		if (ownLookupAttrs.size() > 1)
+		{
+			sort(ownLookupAttrs, (o1, o2) -> o1.getLookupAttributeIndex() < o2.getLookupAttributeIndex() ? -1 : 1);
+		}
+		return ownLookupAttrs;
 	}
 
 	/**
@@ -489,51 +474,14 @@ public class EntityType extends StaticEntity
 	 */
 	public Iterable<Attribute> getOwnAttributes()
 	{
-		return getEntities(ATTRIBUTES, Attribute.class);
-	}
-
-	/**
-	 * Returns a list of {@link Attribute} which is ordered in case of compound attributes.
-	 * Order: 1. attributeParts 2. parentAttribute
-	 * <p>
-	 * When adding attributes through the {@link org.molgenis.data.DataService}, adding a compound attribute is immediately
-	 * persisted to the attributes_parts linking table. This will fail if the corresponding attributeParts have not yet been
-	 * added to the database.
-	 * <p>
-	 * By adding attributeParts before the parent compound attribute, import errors are prevented
-	 *
-	 * @return A {@link List} of {@link Attribute} containing all own attributes, with compound attributes being placed after
-	 * their respective attribute parts
-	 */
-	public LinkedHashSet<Attribute> getCompoundOrderedAttributes()
-	{
-		LinkedHashSet<Attribute> attributes = newLinkedHashSet();
-		getEntities(ATTRIBUTES, Attribute.class).forEach(attribute ->
-		{
-			if (attribute.getDataType() == COMPOUND)
-			{
-				attribute.getAttributeParts()
-						.forEach(attributePart -> resolvePossibleNestedCompounds(attributePart, attributes));
-			}
-			attributes.add(attribute);
-		});
-		return attributes;
-	}
-
-	private void resolvePossibleNestedCompounds(Attribute attribute, LinkedHashSet<Attribute> attributes)
-	{
-		if (attribute.getDataType() == COMPOUND)
-		{
-			attribute.getAttributeParts()
-					.forEach(attributePart -> resolvePossibleNestedCompounds(attributePart, attributes));
-		}
-		attributes.add(attribute);
-		return;
+		return stream(getOwnAllAttributes().spliterator(), false).filter(attr -> attr.getParent() == null)
+				.collect(toList());
 	}
 
 	public EntityType setOwnAttributes(Iterable<Attribute> attrs)
 	{
 		set(ATTRIBUTES, attrs);
+//		invalidateCachedAttrs();
 		return this;
 	}
 
@@ -570,13 +518,8 @@ public class EntityType extends StaticEntity
 	 */
 	public Iterable<Attribute> getAtomicAttributes()
 	{
-		Iterable<Attribute> atomicAttrs = getCachedOwnAtomicAttrs();
-		EntityType extends_ = getExtends();
-		if (extends_ != null)
-		{
-			atomicAttrs = Iterables.concat(extends_.getAtomicAttributes(), atomicAttrs);
-		}
-		return atomicAttrs;
+		return stream(getAllAttributes().spliterator(), false).filter(attr -> attr.getDataType() != COMPOUND)
+				.collect(toList());
 	}
 
 	public Iterable<Attribute> getAllAttributes()
@@ -592,9 +535,7 @@ public class EntityType extends StaticEntity
 
 	public Iterable<Attribute> getOwnAllAttributes()
 	{
-		List<Attribute> allAttrs = new ArrayList<>();
-		getOwnAllAttributesRec(getOwnAttributes(), allAttrs);
-		return allAttrs;
+		return getEntities(ATTRIBUTES, Attribute.class);
 	}
 
 	/**
@@ -604,7 +545,8 @@ public class EntityType extends StaticEntity
 	 */
 	public Attribute getAttribute(String attrName)
 	{
-		Attribute attr = getCachedAttrs().get(attrName);
+		Attribute attr = stream(getEntities(ATTRIBUTES, Attribute.class).spliterator(), false).filter(anAttr -> anAttr.getName().equals(attrName)).findFirst().orElse(null);
+//		Attribute attr = getCachedAttrs().get(attrName);
 		if (attr == null)
 		{
 			// look up attribute in parent entity
@@ -619,8 +561,8 @@ public class EntityType extends StaticEntity
 
 	public EntityType addAttribute(Attribute attr, AttributeRole... attrTypes)
 	{
-		invalidateCachedAttrs();
-
+//		invalidateCachedAttrs();
+		attr.setEntity(this);
 		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		setAttributeRoles(attr, attrTypes);
@@ -641,13 +583,16 @@ public class EntityType extends StaticEntity
 				switch (attrType)
 				{
 					case ROLE_ID:
-						setIdAttribute(attr);
+						attr.setIdAttribute(true);
+						attr.setReadOnly(true);
+						attr.setUnique(true);
+						attr.setNillable(false);
 						break;
 					case ROLE_LABEL:
-						setLabelAttribute(attr);
+						attr.setLabelAttribute(true);
 						break;
 					case ROLE_LOOKUP:
-						addLookupAttribute(attr);
+						attr.setLookupAttributeIndex(0); // FIXME assign unique lookup attribute index
 						break;
 					default:
 						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
@@ -684,15 +629,6 @@ public class EntityType extends StaticEntity
 		List<Attribute> filteredAttrs = stream(existingAttrs.spliterator(), false)
 				.filter(existingAttr -> !existingAttr.getName().equals(attr.getName())).collect(toList());
 		set(ATTRIBUTES, filteredAttrs);
-	}
-
-	public void addLookupAttribute(Attribute lookupAttr)
-	{
-		Iterable<Attribute> lookupAttrs = getEntities(LOOKUP_ATTRIBUTES, Attribute.class);
-		if (!Iterables.contains(lookupAttrs, lookupAttr))
-		{
-			set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
-		}
 	}
 
 	/**
@@ -750,7 +686,7 @@ public class EntityType extends StaticEntity
 	 */
 	public Iterable<Attribute> getOwnAtomicAttributes()
 	{
-		List<Attribute> atomicAttrs = new ArrayList<>();
+		List<Attribute> atomicAttrs = newArrayList();
 		getOwnAtomicAttributesRec(getOwnAttributes(), atomicAttrs);
 		return atomicAttrs;
 	}
@@ -792,14 +728,14 @@ public class EntityType extends StaticEntity
 		switch (attributeName)
 		{
 			case ATTRIBUTES:
-				invalidateCachedAttrs();
+//				invalidateCachedAttrs();
 				break;
 			default:
 				break;
 		}
 	}
 
-	private void getOwnAtomicAttributesRec(Iterable<Attribute> attrs, List<Attribute> atomicAttrs)
+	private static void getOwnAtomicAttributesRec(Iterable<Attribute> attrs, List<Attribute> atomicAttrs)
 	{
 		for (Attribute attr : attrs)
 		{
@@ -814,7 +750,7 @@ public class EntityType extends StaticEntity
 		}
 	}
 
-	private void getOwnAllAttributesRec(Iterable<Attribute> attrs, List<Attribute> allAttrs)
+	private static void getOwnAllAttributesRec(Iterable<Attribute> attrs, List<Attribute> allAttrs)
 	{
 		for (Attribute attr : attrs)
 		{
@@ -850,60 +786,61 @@ public class EntityType extends StaticEntity
 		setAbstract(false);
 	}
 
-	private Map<String, Attribute> getCachedAttrs()
-	{
-		if (cachedAttrs == null)
-		{
-			cachedAttrs = Maps.newHashMap();
-			Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
-			fillCachedAttrsRec(attrs);
-		}
-		return cachedAttrs;
-	}
+//	private Map<String, Attribute> getCachedAttrs()
+//	{
+//		if (cachedAttrs == null)
+//		{
+//			cachedAttrs = Maps.newHashMap();
+//			Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
+//			fillCachedAttrsRec(attrs);
+//		}
+//		return cachedAttrs;
+//	}
+//
+//	private void fillCachedAttrsRec(Iterable<Attribute> attrs)
+//	{
+//		for (Attribute attr : attrs)
+//		{
+//			cachedAttrs.put(attr.getName(), attr);
+//			if (attr.getDataType() == COMPOUND)
+//			{
+//				fillCachedAttrsRec(attr.getAttributeParts());
+//			}
+//		}
+//	}
 
-	private void fillCachedAttrsRec(Iterable<Attribute> attrs)
-	{
-		for (Attribute attr : attrs)
-		{
-			cachedAttrs.put(attr.getName(), attr);
-			if (attr.getDataType() == COMPOUND)
-			{
-				fillCachedAttrsRec(attr.getAttributeParts());
-			}
-		}
-	}
-
-	private List<Attribute> getCachedOwnAtomicAttrs()
-	{
-		if (cachedOwnAtomicAttrs == null)
-		{
-			cachedOwnAtomicAttrs = new ArrayList<>();
-			fillCachedAtomicAttrsRec(getOwnAttributes());
-		}
-		return cachedOwnAtomicAttrs;
-	}
-
-	private void fillCachedAtomicAttrsRec(Iterable<Attribute> attrs)
-	{
-		for (Attribute attr : attrs)
-		{
-			if (attr.getDataType() == COMPOUND)
-			{
-				fillCachedAtomicAttrsRec(attr.getAttributeParts());
-			}
-			else
-			{
-				cachedOwnAtomicAttrs.add(attr);
-			}
-		}
-	}
-
-	private void invalidateCachedAttrs()
-	{
-		cachedAttrs = null;
-		cachedOwnAtomicAttrs = null;
-		cachedHasAttrWithExpession = null;
-	}
+	// FIXME enable caching
+//	private List<Attribute> getCachedOwnAtomicAttrs()
+//	{
+//		if (cachedOwnAtomicAttrs == null)
+//		{
+//			cachedOwnAtomicAttrs = newArrayList();
+//			fillCachedAtomicAttrsRec(getOwnAttributes());
+//		}
+//		return cachedOwnAtomicAttrs;
+//	}
+//
+//	private void fillCachedAtomicAttrsRec(Iterable<Attribute> attrs)
+//	{
+//		for (Attribute attr : attrs)
+//		{
+//			if (attr.getDataType() == COMPOUND)
+//			{
+//				fillCachedAtomicAttrsRec(attr.getAttributeParts());
+//			}
+//			else
+//			{
+//				cachedOwnAtomicAttrs.add(attr);
+//			}
+//		}
+//	}
+//
+//	private void invalidateCachedAttrs()
+//	{
+//		cachedAttrs = null;
+//		cachedOwnAtomicAttrs = null;
+//		cachedHasAttrWithExpession = null;
+//	}
 
 	public enum AttributeRole
 	{

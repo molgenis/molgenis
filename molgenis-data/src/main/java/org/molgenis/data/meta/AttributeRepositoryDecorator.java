@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
+import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
@@ -544,7 +544,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 					format("Deleting attribute [%s] is not allowed, since it is referenced by entity [%s]",
 							attr.getName(), entityType.getName()));
 		}
-		Attribute attrMeta = dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(PARTS, attr).findOne();
+		Attribute attrMeta = dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(CHILDREN, attr).findOne();
 		if (attrMeta != null)
 		{
 			throw new MolgenisDataException(
@@ -593,11 +593,11 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		List<Attribute> parentAttrs;
 		if (attrs.size() == 1)
 		{
-			parentAttrs = attrQ.eq(PARTS, attrs.iterator().next()).findAll().collect(toList());
+			parentAttrs = attrQ.eq(CHILDREN, attrs.iterator().next()).findAll().collect(toList());
 		}
 		else
 		{
-			parentAttrs = attrQ.in(PARTS, attrs).findAll().collect(toList());
+			parentAttrs = attrQ.in(CHILDREN, attrs).findAll().collect(toList());
 		}
 
 		// recurse for parent attributes

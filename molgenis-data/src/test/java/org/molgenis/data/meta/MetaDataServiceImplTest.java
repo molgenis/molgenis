@@ -5,7 +5,9 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.testng.annotations.BeforeMethod;
@@ -489,16 +491,16 @@ public class MetaDataServiceImplTest
 		InOrder inOrder = inOrder(dataService);
 
 		//noinspection unchecked
+		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
 		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(AttributeMetadata.ATTRIBUTE_META_DATA), attrsCaptor1.capture());
 		assertEquals(attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
-		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
 
 		//noinspection unchecked
+		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType0);
 		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(AttributeMetadata.ATTRIBUTE_META_DATA), attrsCaptor0.capture());
 		assertEquals(attrsCaptor0.getValue().collect(toList()), newArrayList(entity0Attr0, entity0Attr1));
-		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType0);
 
 		verifyNoMoreInteractions(dataService);
 	}
@@ -541,29 +543,28 @@ public class MetaDataServiceImplTest
 
 		InOrder inOrder = inOrder(dataService);
 
+		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
 		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(AttributeMetadata.ATTRIBUTE_META_DATA), attrsCaptor1.capture());
 		assertEquals(attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
-		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
-
-		//noinspection unchecked
-		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
-		inOrder.verify(dataService).add(eq(AttributeMetadata.ATTRIBUTE_META_DATA), attrsCaptor0.capture());
-		assertEquals(attrsCaptor0.getValue().collect(toList()), singletonList(entity0Attr1));
 
 		ArgumentCaptor<EntityType> entityCaptor0 = ArgumentCaptor.forClass(EntityType.class);
 		inOrder.verify(dataService).add(eq(ENTITY_TYPE_META_DATA), entityCaptor0.capture());
 		assertEquals(newArrayList(entityCaptor0.getValue().getOwnAllAttributes()), singletonList(entity0Attr1));
 
 		//noinspection unchecked
-		ArgumentCaptor<Stream<Entity>> attrsCaptor0b = ArgumentCaptor.forClass((Class) Stream.class);
-		inOrder.verify(dataService).add(eq(AttributeMetadata.ATTRIBUTE_META_DATA), attrsCaptor0b.capture());
-		assertEquals(attrsCaptor0b.getValue().collect(toList()), singletonList(entity0Attr0));
+		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
+		inOrder.verify(dataService, times(2)).add(eq(AttributeMetadata.ATTRIBUTE_META_DATA), attrsCaptor0.capture());
+		List<Stream<Entity>> allValues = attrsCaptor0.getAllValues();
+		assertEquals(allValues.get(0).collect(toList()), singletonList(entity0Attr1));
 
 		ArgumentCaptor<EntityType> entityCaptor0b = ArgumentCaptor.forClass(EntityType.class);
 		inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor0b.capture());
 		assertEquals(entityCaptor0b.getValue(), entityType0);
+
+		//noinspection unchecked
+		assertEquals(allValues.get(1).collect(toList()), singletonList(entity0Attr0));
 
 		verifyNoMoreInteractions(dataService);
 	}
@@ -1075,9 +1076,9 @@ public class MetaDataServiceImplTest
 	@DataProvider(name = "isMetaEntityTypeProvider")
 	public static Iterator<Object[]> isMetaEntityTypeProvider()
 	{
-		return newArrayList(new Object[] { ENTITY_TYPE_META_DATA, true }, new Object[] { AttributeMetadata.ATTRIBUTE_META_DATA, true },
-				new Object[] { TAG, true }, new Object[] { PACKAGE, true }, new Object[] { "noMeta", false })
-				.iterator();
+		return newArrayList(new Object[] { ENTITY_TYPE_META_DATA, true },
+				new Object[] { AttributeMetadata.ATTRIBUTE_META_DATA, true }, new Object[] { TAG, true },
+				new Object[] { PACKAGE, true }, new Object[] { "noMeta", false }).iterator();
 	}
 
 	@Test(dataProvider = "isMetaEntityTypeProvider")

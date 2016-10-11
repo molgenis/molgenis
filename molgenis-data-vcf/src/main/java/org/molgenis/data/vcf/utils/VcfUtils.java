@@ -279,10 +279,11 @@ public class VcfUtils
 	{
 		EntityType newMeta = inputEntity.getEntityType();
 		Attribute newInfoMetadata = newMeta.getAttribute(VcfAttributes.INFO);
-		newInfoMetadata.setAttributeParts(
-				StreamSupport.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
-						.filter(attr -> !attr.getName().equals(attributeToParse.getName()))
-						.collect(Collectors.toList()));
+		// FIXME update compounds
+//		newInfoMetadata.setAttributeParts(
+//				StreamSupport.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
+//						.filter(attr -> !attr.getName().equals(attributeToParse.getName()))
+//						.collect(Collectors.toList()));
 		newMeta.removeAttribute(newMeta.getAttribute(VcfAttributes.INFO));
 		newMeta.addAttribute(newInfoMetadata);
 		return newMeta;

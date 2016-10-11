@@ -29,7 +29,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
+import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.Permission.COUNT;
@@ -142,8 +142,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -206,8 +206,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -267,8 +267,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -305,8 +305,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -367,8 +367,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -442,7 +442,7 @@ public class AttributeRepositoryDecoratorTest
 		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Query<Attribute> q = new QueryImpl<>();
@@ -464,7 +464,7 @@ public class AttributeRepositoryDecoratorTest
 		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Query<Attribute> q = new QueryImpl<>();
@@ -508,7 +508,7 @@ public class AttributeRepositoryDecoratorTest
 		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
@@ -538,8 +538,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attrCompound)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attrCompound)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.of(attrCompound));
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -562,7 +562,7 @@ public class AttributeRepositoryDecoratorTest
 		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
@@ -606,7 +606,7 @@ public class AttributeRepositoryDecoratorTest
 		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
@@ -629,7 +629,7 @@ public class AttributeRepositoryDecoratorTest
 		when(qEntityMeta.findAll()).thenReturn(Stream.of(entityType0));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(qEntityMeta);
 		Query<Attribute> qAttr = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr);
 		when(qAttr.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
 		Object id = mock(Object.class);
@@ -685,8 +685,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -744,8 +744,8 @@ public class AttributeRepositoryDecoratorTest
 		Query<Attribute> qAttr = mock(Query.class);
 		Query<Attribute> qAttr0 = mock(Query.class);
 		Query<Attribute> qAttr1 = mock(Query.class);
-		when(qAttr.eq(PARTS, attr0)).thenReturn(qAttr0);
-		when(qAttr.eq(PARTS, attr1)).thenReturn(qAttr1);
+		when(qAttr.eq(CHILDREN, attr0)).thenReturn(qAttr0);
+		when(qAttr.eq(CHILDREN, attr1)).thenReturn(qAttr1);
 		when(qAttr0.findAll()).thenReturn(Stream.empty());
 		when(qAttr1.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(qAttr);
@@ -857,7 +857,7 @@ public class AttributeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<Attribute> attrQ = mock(Query.class);
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
-		when(attrQ.eq(PARTS, attr)).thenReturn(attrQ);
+		when(attrQ.eq(CHILDREN, attr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
 
 		repo.delete(attr);
@@ -912,7 +912,7 @@ public class AttributeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<Attribute> attrQ = mock(Query.class);
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
-		when(attrQ.eq(PARTS, attr)).thenReturn(attrQ);
+		when(attrQ.eq(CHILDREN, attr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(ownerAttr);
 
 		repo.delete(attr);

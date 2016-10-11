@@ -203,12 +203,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addEntityType(EntityType entityType)
 	{
+		// create entity
+		dataService.add(ENTITY_TYPE_META_DATA, entityType);
+
 		// create attributes
 		Stream<Attribute> attrs = stream(entityType.getOwnAllAttributes().spliterator(), false);
 		dataService.add(ATTRIBUTE_META_DATA, attrs);
-
-		// create entity
-		dataService.add(ENTITY_TYPE_META_DATA, entityType);
 	}
 
 	@Transactional
@@ -872,12 +872,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setIdAttribute(Attribute idAttr)
-		{
-			return entityType.setIdAttribute(idAttr);
-		}
-
-		@Override
 		public Attribute getLabelAttribute()
 		{
 			return entityType.getLabelAttribute();
@@ -902,12 +896,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setLabelAttribute(Attribute labelAttr)
-		{
-			return entityType.setLabelAttribute(labelAttr);
-		}
-
-		@Override
 		public Attribute getLookupAttribute(String lookupAttrName)
 		{
 			return entityType.getLookupAttribute(lookupAttrName);
@@ -923,12 +911,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		public Iterable<Attribute> getOwnLookupAttributes()
 		{
 			return entityType.getOwnLookupAttributes();
-		}
-
-		@Override
-		public EntityType setLookupAttributes(Iterable<Attribute> lookupAttrs)
-		{
-			return entityType.setLookupAttributes(lookupAttrs);
 		}
 
 		@Override
@@ -970,12 +952,6 @@ public class MetaDataServiceImpl implements MetaDataService
 					return !attr.isMappedBy();
 				}
 			}).iterator();
-		}
-
-		@Override
-		public LinkedHashSet<Attribute> getCompoundOrderedAttributes()
-		{
-			return entityType.getCompoundOrderedAttributes();
 		}
 
 		@Override
@@ -1052,12 +1028,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		public void removeAttribute(Attribute attr)
 		{
 			entityType.removeAttribute(attr);
-		}
-
-		@Override
-		public void addLookupAttribute(Attribute lookupAttr)
-		{
-			entityType.addLookupAttribute(lookupAttr);
 		}
 
 		@Override

@@ -104,9 +104,8 @@ public class AnnotatorUtils
 		Attribute compound;
 		compound = attributeFactory.create().setName(compoundName).setLabel(annotator.getFullName())
 				.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
-		Attribute finalCompound = compound;
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
-				.forEachOrdered(finalCompound::addAttributePart);
+				.forEachOrdered(part -> part.setParent(compound));
 		entityType.addAttribute(compound);
 	}
 
@@ -212,7 +211,7 @@ public class AnnotatorUtils
 		{
 			for (Attribute atomicAttribute : attribute.getAttributeParts())
 			{
-				infoAttribute.addAttributePart(atomicAttribute);
+				atomicAttribute.setParent(infoAttribute);
 			}
 		}
 	}

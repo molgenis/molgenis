@@ -982,7 +982,7 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ rowIndex);
 				}
 
-				compoundAttribute.addAttributePart(attribute);
+				attribute.setParent(compoundAttribute);
 			}
 			else
 			{

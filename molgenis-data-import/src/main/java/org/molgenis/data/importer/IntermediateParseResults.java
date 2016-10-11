@@ -116,9 +116,9 @@ public final class IntermediateParseResults
 			entityType.addAttribute(attr);
 
 			// set attribute roles
-			if (emxAttr.isIdAttr()) entityType.setIdAttribute(attr);
-			if (emxAttr.isLabelAttr()) entityType.setLabelAttribute(attr);
-			if (emxAttr.isLookupAttr()) entityType.addLookupAttribute(attr);
+			if (emxAttr.isIdAttr()) attr.setIdAttribute(true);
+			if (emxAttr.isLabelAttr()) attr.setLabelAttribute(true);
+			if (emxAttr.isLookupAttr()) attr.setLookupAttributeIndex(0); // FIXME assign unique index
 		}
 	}
 

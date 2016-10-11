@@ -2,8 +2,10 @@ package org.molgenis.data.meta.system;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -15,9 +17,6 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -30,59 +29,21 @@ public class SystemEntityTypePersister
 {
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private TagMetaData tagMeta;
-	private AttributeMetadata attributeMetadata;
-	private PackageMetadata packageMeta;
-	private EntityTypeMetadata entityTypeMeta;
+	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	@Autowired
-	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry)
+	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
+			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
+		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
 
 	public void persist(ContextRefreshedEvent event)
 	{
-		RepositoryCollection repositoryCollection = dataService.getMeta().getDefaultBackend();
-
-		// workaround for a cyclic dependency entity meta <--> attribute meta:
-		// first create attribute meta and entity meta table, then change data type.
-		// see the note in AttributeMetadata and the exception in DependencyResolver
-		attributeMetadata.getAttribute(REF_ENTITY_TYPE).setDataType(STRING).setRefEntity(null);
-
-		// create meta entity tables
-		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityType
-		if (!repositoryCollection.hasRepository(tagMeta))
-		{
-			repositoryCollection.createRepository(tagMeta);
-		}
-		if (!repositoryCollection.hasRepository(attributeMetadata))
-		{
-			repositoryCollection.createRepository(attributeMetadata);
-		}
-		if (!repositoryCollection.hasRepository(packageMeta))
-		{
-			repositoryCollection.createRepository(packageMeta);
-		}
-		if (!repositoryCollection.hasRepository(entityTypeMeta))
-		{
-			repositoryCollection.createRepository(entityTypeMeta);
-		}
-
-		// workaround for a cyclic dependency entity meta <--> attribute meta:
-		// first create attribute meta and entity meta table, then change data type.
-		// see the note in AttributeMetadata and the exception in DependencyResolver
-		attributeMetadata.getAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta);
-
-		// add default meta entities
-		ApplicationContext ctx = event.getApplicationContext();
-		Map<String, Package> packageMap = ctx.getBeansOfType(Package.class);
-		List<Package> packagesToAdd = packageMap.values().stream().filter(this::isNotPersisted).collect(toList());
-		if (!packagesToAdd.isEmpty())
-		{
-			persist(packagesToAdd);
-		}
+		// persist entity meta data meta data
+		persistMetadataMetadata(event.getApplicationContext());
 
 		// persist entity meta data
 		List<EntityType> metaEntityMetaSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
@@ -92,29 +53,32 @@ public class SystemEntityTypePersister
 		removeNonExistingSystemEntities();
 	}
 
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void TagMetaData(TagMetaData tagMeta)
+	private void persistMetadataMetadata(ApplicationContext ctx)
 	{
-		this.tagMeta = requireNonNull(tagMeta);
-	}
+		MetaDataService metadataService = dataService.getMeta();
 
-	@Autowired
-	public void setAttributeMetadata(AttributeMetadata attributeMetadata)
-	{
-		this.attributeMetadata = requireNonNull(attributeMetadata);
-	}
+		RepositoryCollection metadataRepoCollection = dataService.getMeta().getDefaultBackend();
 
-	@Autowired
-	public void PackageMetaData(PackageMetadata packageMeta)
-	{
-		this.packageMeta = requireNonNull(packageMeta);
-	}
+		// collect meta entity meta
+		List<EntityType> metaEntityTypeList = systemEntityTypeRegistry.getSystemEntityTypes()
+				.filter(metadataService::isMetaEntityType).collect(toList());
+		List<EntityType> resolvedEntityTypeList = entityTypeDependencyResolver.resolve(metaEntityTypeList);
 
-	@Autowired
-	public void setEntityTypeMetaData(EntityTypeMetadata entityTypeMeta)
-	{
-		this.entityTypeMeta = requireNonNull(entityTypeMeta);
+		resolvedEntityTypeList.forEach(metaEntityType ->
+		{
+			if (!metadataRepoCollection.hasRepository(metaEntityType))
+			{
+				metadataRepoCollection.createRepository(metaEntityType);
+			}
+		});
+
+		// collect meta entities
+		Map<String, Package> packageMap = ctx.getBeansOfType(Package.class);
+		List<Package> packagesToAdd = packageMap.values().stream().filter(this::isNotPersisted).collect(toList());
+		if (!packagesToAdd.isEmpty())
+		{
+			persist(packagesToAdd);
+		}
 	}
 
 	private boolean isNotPersisted(Package package_)
