@@ -13,7 +13,10 @@ public class DirectorySettings extends DefaultSettingsEntity
 {
 
 	private static final long serialVersionUID = 1L;
-
+	public static final String NEGOTIATOR_URL = "negotiator-url";
+	public static final String USERNAME = "username";
+	public static final String PASSWORD = "password";
+	private static final String NEGOTIATOR_URL_DEFALUT = "https://bbmri-demo.mitro.dkfz.de/hackathon/api/directory/create_query";
 	private static final String ID = DirectoryController.ID;
 
 	public DirectorySettings()
@@ -35,9 +38,9 @@ public class DirectorySettings extends DefaultSettingsEntity
 			super.init();
 			setLabel("Directory settings");
 			setDescription("Settings for the Directory HACK POC");
-			addAttribute("negotiator-url").setLabel("Negotiator endpoint url").setDefaultValue("https://bbmri-demo.mitro.dkfz.de/hackathon/api/directory/create_query");
-			addAttribute("username").setLabel("Username");
-			addAttribute("password").setLabel("Password");
+			addAttribute(NEGOTIATOR_URL).setLabel("Negotiator endpoint url").setDefaultValue(NEGOTIATOR_URL_DEFALUT);
+			addAttribute(USERNAME).setLabel("Username");
+			addAttribute(PASSWORD).setLabel("Password");
 		}
 	}
 }

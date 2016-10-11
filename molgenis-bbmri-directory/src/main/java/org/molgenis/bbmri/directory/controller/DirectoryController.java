@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.molgenis.bbmri.directory.model.Collection;
 import org.molgenis.bbmri.directory.model.Filter;
 import org.molgenis.bbmri.directory.model.Query;
+import org.molgenis.bbmri.directory.settings.DirectorySettings;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,6 @@ public class DirectoryController extends MolgenisPluginController
 	public static final String ID = "bbmridirectory";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String VIEW_DIRECTORY = "view-directory";
-	public static final String BBMRI_API = "https://bbmri-demo.mitro.dkfz.de/hackathon/api/directory/create_query";
-
 	public DirectoryController()
 	{
 		super(URI);
@@ -41,6 +40,9 @@ public class DirectoryController extends MolgenisPluginController
 
 	@Autowired
 	Gson gson;
+
+	@Autowired
+	DirectorySettings settings;
 
 	@RequestMapping
 	public String init(Model model)
@@ -69,6 +71,8 @@ public class DirectoryController extends MolgenisPluginController
 		headers.set("Authorization", "Basic bW9sZ2VuaXM6Z29nb2dv");
 		HttpEntity entity = new HttpEntity(query, headers);
 
-		return restTemplate.postForLocation(BBMRI_API, entity);
+		LOG.info("settings.getString(DirectorySettings.NEGOTIATOR_URL): [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
+
+		return restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity);
 	}
 }
