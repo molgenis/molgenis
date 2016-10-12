@@ -3,7 +3,7 @@ package org.molgenis.data.rest;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.molgenis.MolgenisFieldTypes.getType;
 
 public class AttributeResponse
 {
@@ -96,7 +94,7 @@ public class AttributeResponse
 
 		if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase()))
 		{
-			this.maxLength = getType(AttributeType.getValueString(attr.getDataType())).getMaxLength();
+			this.maxLength = attr.getDataType().getMaxLength();
 		}
 		else this.maxLength = null;
 

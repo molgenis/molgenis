@@ -1,6 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.DataProvider;
@@ -15,7 +15,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlQueryUtilsTest
@@ -32,7 +32,7 @@ public class PostgreSqlQueryUtilsTest
 	public static Iterator<Object[]> getPersistedAttributesProvider()
 	{
 		List<Object[]> dataList = newArrayList();
-		for (MolgenisFieldTypes.AttributeType attrType : MolgenisFieldTypes.AttributeType.values())
+		for (AttributeType attrType : AttributeType.values())
 		{
 			Attribute attr = mock(Attribute.class);
 			when(attr.getDataType()).thenReturn(attrType);

@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 public enum AttributeType
 {
 	BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL(255L), ENUM(255L), FILE, HTML(
-		65535L), HYPERLINK(255L), INT, LONG, MREF, SCRIPT(65535L), STRING(255L), TEXT(65535L), XREF;
+		65535L), HYPERLINK(255L), INT, LONG, MREF, ONE_TO_MANY, SCRIPT(65535L), STRING(255L), TEXT(65535L), XREF;
 
 	private static final Map<String, AttributeType> strValMap;
 

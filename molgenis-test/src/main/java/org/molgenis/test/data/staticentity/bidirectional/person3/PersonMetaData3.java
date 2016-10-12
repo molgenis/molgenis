@@ -6,8 +6,8 @@ import org.molgenis.data.meta.model.Attribute;
 
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.ONE_TO_MANY;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;

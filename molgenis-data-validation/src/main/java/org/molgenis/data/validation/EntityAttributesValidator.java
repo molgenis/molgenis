@@ -2,13 +2,11 @@ package org.molgenis.data.validation;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.impl.EmailValidator;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.*;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.fieldtypes.FieldType;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -20,8 +18,7 @@ import java.util.Set;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
-import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.AttributeType.*;
 
 /**
  * Attribute data type validator.
@@ -169,7 +166,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
+	private static Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
 	{
 		List<String> validationExpressions = new ArrayList<>();
 		List<Attribute> expressionAttributes = new ArrayList<>();
@@ -219,7 +216,7 @@ public class EntityAttributesValidator
 			return createConstraintViolation(entity, attribute, entityType, "Not a valid e-mail address.");
 		}
 
-		if (email.length() > MolgenisFieldTypes.EMAIL.getMaxLength())
+		if (email.length() > EMAIL.getMaxLength())
 		{
 			return createConstraintViolation(entity, attribute, entityType);
 		}
@@ -227,7 +224,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkBoolean(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation checkBoolean(Entity entity, Attribute attribute, EntityType entityType)
 	{
 		try
 		{
@@ -240,7 +237,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkDateTime(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation checkDateTime(Entity entity, Attribute attribute, EntityType entityType)
 	{
 		try
 		{
@@ -253,7 +250,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkDate(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation checkDate(Entity entity, Attribute attribute, EntityType entityType)
 	{
 		try
 		{
@@ -266,7 +263,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkDecimal(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation checkDecimal(Entity entity, Attribute attribute, EntityType entityType)
 	{
 		try
 		{
@@ -296,7 +293,7 @@ public class EntityAttributesValidator
 			return createConstraintViolation(entity, attribute, entityType, "Not a valid hyperlink.");
 		}
 
-		if (link.length() > MolgenisFieldTypes.HYPERLINK.getMaxLength())
+		if (link.length() > HYPERLINK.getMaxLength())
 		{
 			return createConstraintViolation(entity, attribute, entityType);
 		}
@@ -304,7 +301,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkInt(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation checkInt(Entity entity, Attribute attribute, EntityType entityType)
 	{
 		try
 		{
@@ -317,7 +314,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkLong(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation checkLong(Entity entity, Attribute attribute, EntityType entityType)
 	{
 		try
 		{
@@ -330,7 +327,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkRange(Entity entity, Attribute attr, EntityType entityType)
+	private static ConstraintViolation checkRange(Entity entity, Attribute attr, EntityType entityType)
 	{
 		Range range = attr.getRange();
 		Long value;
@@ -356,7 +353,8 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkText(Entity entity, Attribute attribute, EntityType meta, FieldType fieldType)
+	private static ConstraintViolation checkText(Entity entity, Attribute attribute, EntityType meta,
+			AttributeType fieldType)
 	{
 		String text = entity.getString(attribute.getName());
 		if (text == null)
@@ -395,7 +393,8 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation createConstraintViolation(Entity entity, Attribute attribute, EntityType entityType)
+	private static ConstraintViolation createConstraintViolation(Entity entity, Attribute attribute,
+			EntityType entityType)
 	{
 		String message = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
 				attribute.getDataType().toString().toLowerCase(), entity.get(attribute.getName()), attribute.getLabel(),
@@ -407,7 +406,7 @@ public class EntityAttributesValidator
 			message += format("Value must be between %d and %d", range.getMin(), range.getMax());
 		}
 
-		Long maxLength = getType(getValueString(attribute.getDataType())).getMaxLength();
+		Long maxLength = attribute.getDataType().getMaxLength();
 		if (maxLength != null)
 		{
 			message += format("Value must be less than or equal to %d characters", maxLength);

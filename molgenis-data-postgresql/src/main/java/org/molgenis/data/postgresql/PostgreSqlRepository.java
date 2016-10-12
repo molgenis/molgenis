@@ -5,8 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -19,7 +18,6 @@ import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
@@ -44,8 +42,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
+import static org.molgenis.AttributeType.ONE_TO_MANY;
+import static org.molgenis.AttributeType.getValueString;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
@@ -351,7 +349,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		LOG.debug("Select ID values for a batch of MREF attributes...");
 		for (Attribute mrefAttr : entityType.getAtomicAttributes())
 		{
-			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr) && !(mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy()))
+			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr) && !(
+					mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy()))
 			{
 				EntityType refEntityType = mrefAttr.getRefEntity();
 				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityType, idAttributeDataType, mrefAttr,
@@ -387,9 +386,43 @@ public class PostgreSqlRepository extends AbstractRepository
 		LOG.trace("SQL: {}", junctionTableSelect);
 
 		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
-		jdbcTemplate.query(junctionTableSelect, (RowCallbackHandler) row -> mrefIDs
-						.put(convert(idAttributeDataType, row.getObject(1)), convert(refIdDataType, row.getObject(3))),
-				ids.toArray());
+		jdbcTemplate.query(junctionTableSelect, row ->
+		{
+			Object id;
+			switch(idAttributeDataType) {
+				case EMAIL:
+				case HYPERLINK:
+				case STRING:
+					id = row.getString(1);
+					break;
+				case INT:
+					id = row.getInt(1);
+					break;
+				case LONG:
+					id = row.getLong(1);
+					break;
+				default:
+					throw new RuntimeException(format("Unexpected id attribute type [%s]", idAttributeDataType));
+			}
+
+			Object refId;
+			switch(refIdDataType) {
+				case EMAIL:
+				case HYPERLINK:
+				case STRING:
+					refId = row.getString(3);
+					break;
+				case INT:
+					refId = row.getInt(3);
+					break;
+				case LONG:
+					refId = row.getLong(3);
+					break;
+				default:
+					throw new RuntimeException(format("Unexpected id attribute type [%s]", refIdDataType));
+			}
+			mrefIDs.put(id, refId);
+		}, ids.toArray());
 
 		if (LOG.isTraceEnabled()) LOG.trace("Selected {} ID values for MREF attribute {} in {}",
 				mrefIDs.values().stream().collect(counting()), mrefAttr.getName(), stopwatch);
@@ -684,12 +717,5 @@ public class PostgreSqlRepository extends AbstractRepository
 				return ids.size();
 			}
 		});
-	}
-
-	@Deprecated
-	private static Object convert(AttributeType attrType, Object value)
-	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attrType));
-		return fieldType.convert(value);
 	}
 }

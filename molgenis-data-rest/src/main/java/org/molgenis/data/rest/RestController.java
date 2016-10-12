@@ -6,8 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
@@ -20,7 +19,6 @@ import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
@@ -63,7 +61,7 @@ import java.util.regex.Pattern;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.RANGE;
@@ -1118,8 +1116,8 @@ public class RestController
 			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
 				entityHasAttributeMap.put("href", attrHref);
-				@SuppressWarnings("unchecked")
-				Iterable<Attribute> attributeParts = (Iterable<Attribute>) entity.get(refAttributeName);
+				@SuppressWarnings("unchecked") Iterable<Attribute> attributeParts = (Iterable<Attribute>) entity
+						.get(refAttributeName);
 				for (Attribute attribute : attributeParts)
 				{
 					String attrName = attribute.getName();
@@ -1368,11 +1366,5 @@ public class RestController
 			return expandMap;
 		}
 		return null;
-	}
-
-	private static Object convert(Attribute attr, Object value)
-	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
-		return fieldType.convert(value);
 	}
 }
