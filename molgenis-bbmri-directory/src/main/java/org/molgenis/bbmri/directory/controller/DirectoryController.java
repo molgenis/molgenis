@@ -27,7 +27,7 @@ import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(URI + "/**")
 public class DirectoryController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DirectoryController.class);
@@ -53,7 +53,7 @@ public class DirectoryController extends MolgenisPluginController
 	@Autowired
 	DirectorySettings settings;
 
-	@RequestMapping
+	@RequestMapping()
 	public String init(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("username", getCurrentUsername());
@@ -76,10 +76,8 @@ public class DirectoryController extends MolgenisPluginController
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-
-		String testUri = "https://www.google.com?q=" + query.getURL();
-		return testUri;
-		// return restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity);
+		return restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
+				.toASCIIString();
 	}
 
 	/**
