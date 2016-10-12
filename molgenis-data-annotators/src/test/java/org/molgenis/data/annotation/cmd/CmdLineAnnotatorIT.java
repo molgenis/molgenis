@@ -59,7 +59,8 @@ public class CmdLineAnnotatorIT
 		String outputFile = "target/out-" + name + "-" + inputFileName;
 		String expectedOutputFile = resourceDir + "/" + expectedOutputFileName;
 
-		List<String> args = new ArrayList<>(Arrays.asList(name, resourceLocation, inputFile, outputFile));
+		List<String> args = new ArrayList<>(Arrays.asList("-a", name, "-s", resourceLocation, "-i", inputFile, "-o",
+				outputFile));
 		args.addAll(attributesToInclude);
 		CmdLineAnnotator.main(args.toArray(new String[args.size()]));
 
