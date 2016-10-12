@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
@@ -68,21 +68,21 @@ public class DynamicEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return stream(entityMeta.getAtomicAttributes().spliterator(), false).map(AttributeMetaData::getName)::iterator;
+		return stream(entityMeta.getAtomicAttributes().spliterator(), false).map(Attribute::getName)::iterator;
 	}
 
 	@Override
 	public Object getIdValue()
 	{
 		// abstract entities might not have an id attribute
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
+		Attribute idAttr = entityMeta.getIdAttribute();
 		return idAttr != null ? get(idAttr.getName()) : null;
 	}
 
 	@Override
 	public void setIdValue(Object id)
 	{
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
+		Attribute idAttr = entityMeta.getIdAttribute();
 		if (idAttr == null)
 		{
 			throw new IllegalArgumentException(
@@ -95,7 +95,7 @@ public class DynamicEntity implements Entity
 	public Object getLabelValue()
 	{
 		// abstract entities might not have an label attribute
-		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
+		Attribute labelAttr = entityMeta.getLabelAttribute();
 		return labelAttr != null ? get(labelAttr.getName()) : null;
 	}
 
@@ -211,7 +211,7 @@ public class DynamicEntity implements Entity
 			return;
 		}
 
-		AttributeMetaData attr = entityMeta.getAttribute(attrName);
+		Attribute attr = entityMeta.getAttribute(attrName);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));

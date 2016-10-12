@@ -13,7 +13,7 @@ import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
@@ -250,8 +250,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void cleanUpLanguages()
 	{
-		List<AttributeMetaData> languageAttrs = new ArrayList<>();
-		for (AttributeMetaData attr : attributeMetaDataMetaData.getAttributes())
+		List<Attribute> languageAttrs = new ArrayList<>();
+		for (Attribute attr : attributeMetaDataMetaData.getAttributes())
 		{
 			if (I18nUtils.isI18n(attr.getName()))
 			{
@@ -261,7 +261,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		languageAttrs.forEach(attributeMetaDataMetaData::removeAttribute);
 
 		languageAttrs.clear();
-		for (AttributeMetaData attr : entityMetaDataMetaData.getAttributes())
+		for (Attribute attr : entityMetaDataMetaData.getAttributes())
 		{
 			if (I18nUtils.isI18n(attr.getName()))
 			{

@@ -26,33 +26,33 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
  */
-public class AttributeMetaData extends StaticEntity
+public class Attribute extends StaticEntity
 {
 	private transient AttributeType cachedDataType;
 
-	public AttributeMetaData(Entity entity)
+	public Attribute(Entity entity)
 	{
 		super(entity);
 	}
 
 	/**
-	 * Creates a new attribute. Normally called by its {@link AttributeMetaDataFactory entity factory}.
+	 * Creates a new attribute. Normally called by its {@link AttributeFactory entity factory}.
 	 *
 	 * @param entityMeta attribute meta data
 	 */
-	public AttributeMetaData(EntityMetaData entityMeta)
+	public Attribute(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setDefaultValues();
 	}
 
 	/**
-	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeMetaDataFactory entity factory}.
+	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeFactory entity factory}.
 	 *
 	 * @param attrId     attribute identifier (not the attribute name)
 	 * @param entityMeta attribute meta data
 	 */
-	public AttributeMetaData(String attrId, EntityMetaData entityMeta)
+	public Attribute(String attrId, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setDefaultValues();
@@ -61,16 +61,16 @@ public class AttributeMetaData extends StaticEntity
 
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
-	 * {@link #AttributeMetaData(EntityMetaData)}). Creates a copy of attribute with a shallow copy of referenced
+	 * {@link #Attribute(EntityMetaData)}). Creates a copy of attribute with a shallow copy of referenced
 	 * entity and tags.
 	 *
 	 * @param attrMeta     attribute
 	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attribute parts
 	 * @return deep copy of attribute
 	 */
-	public static AttributeMetaData newInstance(AttributeMetaData attrMeta, AttributeCopyMode attrCopyMode)
+	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode)
 	{
-		AttributeMetaData attrMetaCopy = new AttributeMetaData(attrMeta.getEntityMetaData()); // do not deep-copy
+		Attribute attrMetaCopy = new Attribute(attrMeta.getEntityMetaData()); // do not deep-copy
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
@@ -89,7 +89,7 @@ public class AttributeMetaData extends StaticEntity
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
 			attrMetaCopy.setAttributeParts(stream(attrMeta.getAttributeParts().spliterator(), false)
-					.map(attr -> AttributeMetaData.newInstance(attr, attrCopyMode))
+					.map(attr -> Attribute.newInstance(attr, attrCopyMode))
 					.map(attrCopy -> attrCopy.setIdentifier(null)).collect(toList()));
 		}
 		else
@@ -108,7 +108,7 @@ public class AttributeMetaData extends StaticEntity
 		return getString(IDENTIFIER);
 	}
 
-	public AttributeMetaData setIdentifier(String identifier)
+	public Attribute setIdentifier(String identifier)
 	{
 		set(IDENTIFIER, identifier);
 		return this;
@@ -124,7 +124,7 @@ public class AttributeMetaData extends StaticEntity
 		return getString(NAME);
 	}
 
-	public AttributeMetaData setName(String name)
+	public Attribute setName(String name)
 	{
 		set(NAME, name);
 		return this;
@@ -152,13 +152,13 @@ public class AttributeMetaData extends StaticEntity
 		return i18nString != null ? i18nString : getLabel();
 	}
 
-	public AttributeMetaData setLabel(String label)
+	public Attribute setLabel(String label)
 	{
 		set(LABEL, label);
 		return this;
 	}
 
-	public AttributeMetaData setLabel(String languageCode, String label)
+	public Attribute setLabel(String languageCode, String label)
 	{
 		set(getI18nAttributeName(LABEL, languageCode), label);
 		return this;
@@ -185,13 +185,13 @@ public class AttributeMetaData extends StaticEntity
 		return i18nDescription != null ? i18nDescription : getDescription();
 	}
 
-	public AttributeMetaData setDescription(String description)
+	public Attribute setDescription(String description)
 	{
 		set(DESCRIPTION, description);
 		return this;
 	}
 
-	public AttributeMetaData setDescription(String languageCode, String description)
+	public Attribute setDescription(String languageCode, String description)
 	{
 		set(getI18nAttributeName(DESCRIPTION, languageCode), description);
 		return this;
@@ -207,7 +207,7 @@ public class AttributeMetaData extends StaticEntity
 		return getCachedDataType();
 	}
 
-	public AttributeMetaData setDataType(AttributeType dataType)
+	public Attribute setDataType(AttributeType dataType)
 	{
 		invalidateCachedDataType();
 
@@ -220,12 +220,12 @@ public class AttributeMetaData extends StaticEntity
 	 *
 	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
 	 */
-	public Iterable<AttributeMetaData> getAttributeParts()
+	public Iterable<Attribute> getAttributeParts()
 	{
-		return getEntities(PARTS, AttributeMetaData.class);
+		return getEntities(PARTS, Attribute.class);
 	}
 
-	public AttributeMetaData setAttributeParts(Iterable<AttributeMetaData> parts)
+	public Attribute setAttributeParts(Iterable<Attribute> parts)
 	{
 		set(PARTS, parts);
 		return this;
@@ -241,7 +241,7 @@ public class AttributeMetaData extends StaticEntity
 		return getEntity(REF_ENTITY, EntityMetaData.class);
 	}
 
-	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
+	public Attribute setRefEntity(EntityMetaData refEntity)
 	{
 		set(REF_ENTITY, refEntity);
 		return this;
@@ -257,7 +257,7 @@ public class AttributeMetaData extends StaticEntity
 		return getString(EXPRESSION);
 	}
 
-	public AttributeMetaData setExpression(String expression)
+	public Attribute setExpression(String expression)
 	{
 		set(EXPRESSION, expression);
 		return this;
@@ -283,7 +283,7 @@ public class AttributeMetaData extends StaticEntity
 		return requireNonNull(getBoolean(NILLABLE));
 	}
 
-	public AttributeMetaData setNillable(boolean nillable)
+	public Attribute setNillable(boolean nillable)
 	{
 		set(NILLABLE, nillable);
 		return this;
@@ -299,7 +299,7 @@ public class AttributeMetaData extends StaticEntity
 		return requireNonNull(getBoolean(AUTO));
 	}
 
-	public AttributeMetaData setAuto(boolean auto)
+	public Attribute setAuto(boolean auto)
 	{
 		set(AUTO, auto);
 		return this;
@@ -315,7 +315,7 @@ public class AttributeMetaData extends StaticEntity
 		return requireNonNull(getBoolean(VISIBLE));
 	}
 
-	public AttributeMetaData setVisible(boolean visible)
+	public Attribute setVisible(boolean visible)
 	{
 		set(VISIBLE, visible);
 		return this;
@@ -332,7 +332,7 @@ public class AttributeMetaData extends StaticEntity
 		return requireNonNull(getBoolean(AGGREGATEABLE));
 	}
 
-	public AttributeMetaData setAggregatable(boolean aggregatable)
+	public Attribute setAggregatable(boolean aggregatable)
 	{
 		set(AGGREGATEABLE, aggregatable);
 		return this;
@@ -349,12 +349,12 @@ public class AttributeMetaData extends StaticEntity
 		return enumOptionsStr != null ? asList(enumOptionsStr.split(",")) : emptyList();
 	}
 
-	public AttributeMetaData setEnumOptions(Class<? extends Enum<?>> e)
+	public Attribute setEnumOptions(Class<? extends Enum<?>> e)
 	{
 		return setEnumOptions(stream(e.getEnumConstants()).map(Enum::name).collect(toList()));
 	}
 
-	public AttributeMetaData setEnumOptions(List<String> enumOptions)
+	public Attribute setEnumOptions(List<String> enumOptions)
 	{
 		set(ENUM_OPTIONS, toEnumOptionsString(enumOptions));
 		return this;
@@ -365,7 +365,7 @@ public class AttributeMetaData extends StaticEntity
 		return getLong(RANGE_MIN);
 	}
 
-	public AttributeMetaData setRangeMin(Long rangeMin)
+	public Attribute setRangeMin(Long rangeMin)
 	{
 		set(RANGE_MIN, rangeMin);
 		return this;
@@ -376,7 +376,7 @@ public class AttributeMetaData extends StaticEntity
 		return getLong(RANGE_MAX);
 	}
 
-	public AttributeMetaData setRangeMax(Long rangeMax)
+	public Attribute setRangeMax(Long rangeMax)
 	{
 		set(RANGE_MAX, rangeMax);
 		return this;
@@ -392,7 +392,7 @@ public class AttributeMetaData extends StaticEntity
 		return requireNonNull(getBoolean(READ_ONLY));
 	}
 
-	public AttributeMetaData setReadOnly(boolean readOnly)
+	public Attribute setReadOnly(boolean readOnly)
 	{
 		set(READ_ONLY, readOnly);
 		return this;
@@ -408,7 +408,7 @@ public class AttributeMetaData extends StaticEntity
 		return requireNonNull(getBoolean(UNIQUE));
 	}
 
-	public AttributeMetaData setUnique(boolean unique)
+	public Attribute setUnique(boolean unique)
 	{
 		set(UNIQUE, unique);
 		return this;
@@ -424,7 +424,7 @@ public class AttributeMetaData extends StaticEntity
 		return getString(VISIBLE_EXPRESSION);
 	}
 
-	public AttributeMetaData setVisibleExpression(String visibleExpression)
+	public Attribute setVisibleExpression(String visibleExpression)
 	{
 		set(VISIBLE_EXPRESSION, visibleExpression);
 		return this;
@@ -438,7 +438,7 @@ public class AttributeMetaData extends StaticEntity
 		return getString(VALIDATION_EXPRESSION);
 	}
 
-	public AttributeMetaData setValidationExpression(String validationExpression)
+	public Attribute setValidationExpression(String validationExpression)
 	{
 		set(VALIDATION_EXPRESSION, validationExpression);
 		return this;
@@ -454,7 +454,7 @@ public class AttributeMetaData extends StaticEntity
 		return getString(DEFAULT_VALUE);
 	}
 
-	public AttributeMetaData setDefaultValue(String defaultValue)
+	public Attribute setDefaultValue(String defaultValue)
 	{
 		set(DEFAULT_VALUE, defaultValue);
 		return this;
@@ -472,7 +472,7 @@ public class AttributeMetaData extends StaticEntity
 		return rangeMin != null || rangeMax != null ? new Range(rangeMin, rangeMax) : null;
 	}
 
-	public AttributeMetaData setRange(Range range)
+	public Attribute setRange(Range range)
 	{
 		set(RANGE_MIN, range.getMin());
 		set(RANGE_MAX, range.getMax());
@@ -485,16 +485,16 @@ public class AttributeMetaData extends StaticEntity
 	 * @param attrName attribute name (case insensitive)
 	 * @return attribute or null
 	 */
-	public AttributeMetaData getAttributePart(String attrName)
+	public Attribute getAttributePart(String attrName)
 	{
-		Iterable<AttributeMetaData> attrParts = getEntities(PARTS, AttributeMetaData.class);
+		Iterable<Attribute> attrParts = getEntities(PARTS, Attribute.class);
 		return stream(attrParts.spliterator(), false).filter(attrPart -> attrPart.getName().equals(attrName))
 				.findFirst().orElse(null);
 	}
 
-	public void addAttributePart(AttributeMetaData attrPart)
+	public void addAttributePart(Attribute attrPart)
 	{
-		Iterable<AttributeMetaData> attrParts = getEntities(PARTS, AttributeMetaData.class);
+		Iterable<Attribute> attrParts = getEntities(PARTS, Attribute.class);
 		set(PARTS, concat(attrParts, singletonList(attrPart)));
 	}
 
@@ -514,7 +514,7 @@ public class AttributeMetaData extends StaticEntity
 	 * @param tags attribute tags
 	 * @return this entity
 	 */
-	public AttributeMetaData setTags(Iterable<Tag> tags)
+	public Attribute setTags(Iterable<Tag> tags)
 	{
 		set(TAGS, tags);
 		return this;
@@ -576,6 +576,6 @@ public class AttributeMetaData extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "AttributeMetaData{" + "name=" + getName() + '}';
+		return "Attribute{" + "name=" + getName() + '}';
 	}
 }

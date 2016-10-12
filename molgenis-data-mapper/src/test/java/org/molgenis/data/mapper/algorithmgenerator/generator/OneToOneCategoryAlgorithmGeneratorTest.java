@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -30,13 +30,13 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private AbstractCategoryAlgorithmGenerator categoryAlgorithmGenerator;
 
-	private AttributeMetaData targetAttributeMetaData;
+	private Attribute targetAttribute;
 
-	private AttributeMetaData sourceAttributeMetaData;
+	private Attribute sourceAttribute;
 
 	private EntityMetaData targetEntityMetaData;
 
@@ -59,15 +59,15 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				of("code", 4, "label", "Never + fewer than once a week"));
 		Entity targetEntity5 = new DynamicEntity(targetRefEntityMeta, of("code", 9, "label", "missing"));
 
-		targetAttributeMetaData = attrMetaFactory.create().setName("Current Consumption Frequency of Potatoes")
+		targetAttribute = attrMetaFactory.create().setName("Current Consumption Frequency of Potatoes")
 				.setDataType(CATEGORICAL);
-		targetAttributeMetaData.setRefEntity(targetRefEntityMeta);
+		targetAttribute.setRefEntity(targetRefEntityMeta);
 
 		Mockito.when(dataService.findAll(targetRefEntityMeta.getName()))
 				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceRefEntityMetaData = createCategoricalRefEntityMetaData("LifeLines_POTATO_REF");
 		Entity sourceEntity1 = new DynamicEntity(targetRefEntityMeta, of("code", 1, "label", "Not this month"));
@@ -79,31 +79,31 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Entity sourceEntity7 = new DynamicEntity(targetRefEntityMeta, of("code", 7, "label", "6-7 days per week"));
 		Entity sourceEntity8 = new DynamicEntity(targetRefEntityMeta, of("code", 8, "label", "9 days per week"));
 
-		sourceAttributeMetaData = attrMetaFactory.create().setName("MESHED_POTATO").setDataType(CATEGORICAL);
-		sourceAttributeMetaData.setLabel(
+		sourceAttribute = attrMetaFactory.create().setName("MESHED_POTATO").setDataType(CATEGORICAL);
+		sourceAttribute.setLabel(
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
-		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
+		sourceAttribute.setRefEntity(sourceRefEntityMetaData);
 
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(
 				Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
 						sourceEntity7, sourceEntity8));
 
 		sourceEntityMetaData = entityMetaFactory.create("source");
-		sourceEntityMetaData.addAttributes(Lists.newArrayList(sourceAttributeMetaData));
+		sourceEntityMetaData.addAttributes(Lists.newArrayList(sourceAttribute));
 	}
 
 	@Test
 	public void testIsSuitable()
 	{
 		Assert.assertTrue(
-				categoryAlgorithmGenerator.isSuitable(targetAttributeMetaData, singletonList(sourceAttributeMetaData)));
+				categoryAlgorithmGenerator.isSuitable(targetAttribute, singletonList(sourceAttribute)));
 	}
 
 	@Test
 	public void testGenerate()
 	{
 		String generatedAlgorithm = categoryAlgorithmGenerator
-				.generate(targetAttributeMetaData, singletonList(sourceAttributeMetaData), targetEntityMetaData,
+				.generate(targetAttribute, singletonList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);
 		String expectedAlgorithm = "$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
@@ -121,8 +121,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Entity targetEntity3 = new DynamicEntity(targetRefEntityMeta, of("code", 9, "label", "Missing"));
 		Mockito.when(dataService.findAll(targetRefEntityMeta.getName()))
 				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3));
-		targetAttributeMetaData = attrMetaFactory.create().setName("History of Hypertension").setDataType(CATEGORICAL);
-		targetAttributeMetaData.setRefEntity(targetRefEntityMeta);
+		targetAttribute = attrMetaFactory.create().setName("History of Hypertension").setDataType(CATEGORICAL);
+		targetAttribute.setRefEntity(targetRefEntityMeta);
 
 		EntityMetaData sourceRefEntityMetaData = createCategoricalRefEntityMetaData("High_blood_pressure_ref");
 		Entity sourceEntity1 = new DynamicEntity(targetRefEntityMeta, of("code", 1, "label", "yes"));
@@ -131,11 +131,11 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
 				.thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3));
 
-		sourceAttributeMetaData = attrMetaFactory.create().setName("High_blood_pressure").setDataType(CATEGORICAL);
-		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
+		sourceAttribute = attrMetaFactory.create().setName("High_blood_pressure").setDataType(CATEGORICAL);
+		sourceAttribute.setRefEntity(sourceRefEntityMetaData);
 
 		String generatedAlgorithm = categoryAlgorithmGenerator
-				.generate(targetAttributeMetaData, singletonList(sourceAttributeMetaData), targetEntityMetaData,
+				.generate(targetAttribute, singletonList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);
 
 		String expectedAlgorithm = "$('High_blood_pressure').map({\"1\":\"1\",\"2\":\"0\",\"3\":\"9\"}, null, null).value();";
@@ -146,10 +146,10 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 	private EntityMetaData createCategoricalRefEntityMetaData(String entityName)
 	{
 		EntityMetaData targetRefEntityMetaData = entityMetaFactory.create(entityName);
-		AttributeMetaData targetCodeAttributeMetaData = attrMetaFactory.create().setName("code").setDataType(INT);
-		AttributeMetaData targetLabelAttributeMetaData = attrMetaFactory.create().setName("label");
-		targetRefEntityMetaData.addAttribute(targetCodeAttributeMetaData, ROLE_ID);
-		targetRefEntityMetaData.addAttribute(targetLabelAttributeMetaData, ROLE_LABEL);
+		Attribute targetCodeAttribute = attrMetaFactory.create().setName("code").setDataType(INT);
+		Attribute targetLabelAttribute = attrMetaFactory.create().setName("label");
+		targetRefEntityMetaData.addAttribute(targetCodeAttribute, ROLE_ID);
+		targetRefEntityMetaData.addAttribute(targetLabelAttribute, ROLE_LABEL);
 		return targetRefEntityMetaData;
 	}
 }

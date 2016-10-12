@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -43,7 +43,7 @@ public class IndexedRepositoryDecoratorTest
 		repositoryEntityMetaData = mock(EntityMetaData.class);
 		when(repositoryEntityMetaData.getName()).thenReturn(entityName);
 		idAttrName = "id";
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 
 		when(idAttr.getExpression()).thenReturn(null);
 		when(repositoryEntityMetaData.getIdAttribute()).thenReturn(idAttr);
@@ -102,9 +102,9 @@ public class IndexedRepositoryDecoratorTest
 	public void aggregate()
 	{
 		when(indexedRepositoryDecorator.getName()).thenReturn("entity");
-		AttributeMetaData xAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xAttr").getMock();
-		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
-		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
+		Attribute xAttr = when(mock(Attribute.class).getName()).thenReturn("xAttr").getMock();
+		Attribute yAttr = when(mock(Attribute.class).getName()).thenReturn("yAttr").getMock();
+		Attribute distinctAttr = when(mock(Attribute.class).getName()).thenReturn("distinctAttr")
 				.getMock();
 
 		@SuppressWarnings("unchecked")
@@ -355,11 +355,11 @@ public class IndexedRepositoryDecoratorTest
 		when(qRule2.getNestedRules()).thenReturn(Collections.emptyList());
 		when(q.getRules()).thenReturn(newArrayList(qRule1, qRule2));
 
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(repositoryEntityMetaData.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.hasExpression()).thenReturn(true);
 
-		AttributeMetaData attr2 = mock(AttributeMetaData.class);
+		Attribute attr2 = mock(Attribute.class);
 		when(repositoryEntityMetaData.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.hasExpression()).thenReturn(true);
 
@@ -376,11 +376,11 @@ public class IndexedRepositoryDecoratorTest
 		Sort sort = mock(Sort.class);
 		when(q.getSort()).thenReturn(sort);
 
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(repositoryEntityMetaData.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.hasExpression()).thenReturn(true);
 
-		AttributeMetaData attr2 = mock(AttributeMetaData.class);
+		Attribute attr2 = mock(Attribute.class);
 		when(repositoryEntityMetaData.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.hasExpression()).thenReturn(true);
 

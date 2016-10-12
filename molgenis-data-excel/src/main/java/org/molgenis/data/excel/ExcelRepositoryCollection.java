@@ -8,8 +8,8 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
@@ -37,7 +37,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private final Workbook workbook;
 
 	private EntityMetaDataFactory entityMetaFactory;
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
 	{
@@ -118,7 +118,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
 	}
 
-	public ExcelSheetWriter createWritable(String entityName, List<AttributeMetaData> attributes,
+	public ExcelSheetWriter createWritable(String entityName, List<Attribute> attributes,
 			AttributeWriteMode attributeWriteMode)
 	{
 		Sheet sheet = workbook.createSheet(entityName);
@@ -127,7 +127,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream().<AttributeMetaData>map(
+		List<Attribute> attributes = attributeNames != null ? attributeNames.stream().<Attribute>map(
 				attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
@@ -191,7 +191,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Autowired
-	public void setAttributeMetaDataFactory(AttributeMetaDataFactory attrMetaFactory)
+	public void setAttributeMetaDataFactory(AttributeFactory attrMetaFactory)
 	{
 		this.attrMetaFactory = attrMetaFactory;
 	}

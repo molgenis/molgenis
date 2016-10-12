@@ -2,7 +2,7 @@ package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Maps;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -62,23 +62,23 @@ public class SystemEntityMetaDataRegistry
 		return getSystemAttributeMetaData(attrIdentifier) != null;
 	}
 
-	public AttributeMetaData getSystemAttributeMetaData(String attrIdentifier)
+	public Attribute getSystemAttributeMetaData(String attrIdentifier)
 	{
 		return getSystemEntityMetaDatas()
 				.map(systemEntityMetaData -> getSystemAttributeMetaData(systemEntityMetaData, attrIdentifier))
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
+	private static Attribute getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
 			String attrIdentifier)
 	{
 		return getSystemAttributeMetaDataRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs,
+	private static Attribute getSystemAttributeMetaDataRec(Iterable<Attribute> attrs,
 			String attrIdentifier)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			if (attr.getIdentifier() != null && attr.getIdentifier().equals(attrIdentifier))
 			{

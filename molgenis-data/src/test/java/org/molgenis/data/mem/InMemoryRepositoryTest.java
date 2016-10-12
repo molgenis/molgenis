@@ -3,7 +3,7 @@ package org.molgenis.data.mem;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -31,8 +31,8 @@ public class InMemoryRepositoryTest
 	{
 		entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
+		Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		when(entityMeta.getAttribute("label")).thenReturn(labelAttr);
 		inMemoryRepository = new InMemoryRepository(entityMeta);
@@ -104,7 +104,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
@@ -126,7 +126,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
@@ -146,7 +146,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
@@ -172,7 +172,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
@@ -199,7 +199,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
@@ -224,7 +224,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
@@ -275,7 +275,7 @@ public class InMemoryRepositoryTest
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try

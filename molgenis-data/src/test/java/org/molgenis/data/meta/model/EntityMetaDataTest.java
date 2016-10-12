@@ -20,50 +20,50 @@ import static org.testng.Assert.*;
 public class EntityMetaDataTest
 {
 	private EntityMetaData entityMetaData;
-	private AttributeMetaData randomAttribute;
-	private AttributeMetaData compoundAttribute;
-	private AttributeMetaData attributePart;
+	private Attribute randomAttribute;
+	private Attribute compoundAttribute;
+	private Attribute attributePart;
 
 	private EntityMetaData nestedEntityMetaData;
-	private AttributeMetaData nestedCompoundParent;
-	private AttributeMetaData nestedCompoundPart;
-	private AttributeMetaData nestedAttributePart;
+	private Attribute nestedCompoundParent;
+	private Attribute nestedCompoundPart;
+	private Attribute nestedAttributePart;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		// Setup for single level compound
-		randomAttribute = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		randomAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(randomAttribute.getName()).thenReturn("randomAttribute");
 
-		attributePart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		attributePart = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(attributePart.getName()).thenReturn("attributePart");
-		Iterable<AttributeMetaData> attributeParts = newArrayList(attributePart);
+		Iterable<Attribute> attributeParts = newArrayList(attributePart);
 
-		compoundAttribute = when(mock(AttributeMetaData.class).getDataType()).thenReturn(COMPOUND).getMock();
+		compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(compoundAttribute.getName()).thenReturn("compoundAttribute");
 		when(compoundAttribute.getAttributeParts()).thenReturn(attributeParts);
 
-		Iterable<AttributeMetaData> mockedAttributes = newArrayList(compoundAttribute, randomAttribute);
+		Iterable<Attribute> mockedAttributes = newArrayList(compoundAttribute, randomAttribute);
 
-		Entity entity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
+		Entity entity = when(mock(Entity.class).getEntities(ATTRIBUTES, Attribute.class))
 				.thenReturn(mockedAttributes).getMock();
 		entityMetaData = new EntityMetaData(entity);
 
 		// Setup for nested compound test
-		nestedAttributePart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
-		Iterable<AttributeMetaData> nestedCompoundAttributeParts = newArrayList(nestedAttributePart);
+		nestedAttributePart = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Iterable<Attribute> nestedCompoundAttributeParts = newArrayList(nestedAttributePart);
 
-		nestedCompoundPart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(COMPOUND).getMock();
+		nestedCompoundPart = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(nestedCompoundPart.getAttributeParts()).thenReturn(nestedCompoundAttributeParts);
-		Iterable<AttributeMetaData> nestedAttributeParts = newArrayList(nestedCompoundPart, attributePart);
+		Iterable<Attribute> nestedAttributeParts = newArrayList(nestedCompoundPart, attributePart);
 
-		nestedCompoundParent = when(mock(AttributeMetaData.class).getDataType()).thenReturn(COMPOUND).getMock();
+		nestedCompoundParent = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(nestedCompoundParent.getAttributeParts()).thenReturn(nestedAttributeParts);
 
-		Iterable<AttributeMetaData> mockedNestedAttributes = newArrayList(nestedCompoundParent, randomAttribute);
+		Iterable<Attribute> mockedNestedAttributes = newArrayList(nestedCompoundParent, randomAttribute);
 
-		Entity nestedEntity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
+		Entity nestedEntity = when(mock(Entity.class).getEntities(ATTRIBUTES, Attribute.class))
 				.thenReturn(mockedNestedAttributes).getMock();
 		nestedEntityMetaData = new EntityMetaData(nestedEntity);
 	}
@@ -149,27 +149,27 @@ public class EntityMetaDataTest
 	@Test
 	public void getCompoundOrderedAttributesCorrectOrderTest()
 	{
-		LinkedHashSet<AttributeMetaData> expectedAttributes = newLinkedHashSet();
+		LinkedHashSet<Attribute> expectedAttributes = newLinkedHashSet();
 		expectedAttributes.add(attributePart);
 		expectedAttributes.add(compoundAttribute);
 		expectedAttributes.add(randomAttribute);
 
-		LinkedHashSet<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
+		LinkedHashSet<Attribute> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
 		assertEquals(actualAttributes, expectedAttributes);
 	}
 
 	@Test
 	public void getCompoundOrderedAttributesIncorrectOrderTest()
 	{
-		LinkedHashSet<AttributeMetaData> expectedAttributes = newLinkedHashSet();
+		LinkedHashSet<Attribute> expectedAttributes = newLinkedHashSet();
 		expectedAttributes.add(compoundAttribute);
 		expectedAttributes.add(randomAttribute);
 		expectedAttributes.add(attributePart);
 
-		LinkedHashSet<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
+		LinkedHashSet<Attribute> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
 
-		Iterator<AttributeMetaData> expectedAttributesIterator = expectedAttributes.iterator();
-		Iterator<AttributeMetaData> actualAttributesIterator = actualAttributes.iterator();
+		Iterator<Attribute> expectedAttributesIterator = expectedAttributes.iterator();
+		Iterator<Attribute> actualAttributesIterator = actualAttributes.iterator();
 		while (expectedAttributesIterator.hasNext() && actualAttributesIterator.hasNext())
 		{
 			assertNotEquals(actualAttributesIterator.next(), expectedAttributesIterator.next());
@@ -179,14 +179,14 @@ public class EntityMetaDataTest
 	@Test
 	public void getCompoundOrderedAttributesWithNestedCompoundsTest()
 	{
-		LinkedHashSet<AttributeMetaData> expectedAttributes = newLinkedHashSet();
+		LinkedHashSet<Attribute> expectedAttributes = newLinkedHashSet();
 		expectedAttributes.add(nestedAttributePart);
 		expectedAttributes.add(nestedCompoundPart);
 		expectedAttributes.add(attributePart);
 		expectedAttributes.add(nestedCompoundParent);
 		expectedAttributes.add(randomAttribute);
 
-		LinkedHashSet<AttributeMetaData> actualAttributes = nestedEntityMetaData.getCompoundOrderedAttributes();
+		LinkedHashSet<Attribute> actualAttributes = nestedEntityMetaData.getCompoundOrderedAttributes();
 		assertEquals(actualAttributes, expectedAttributes);
 	}
 
@@ -200,9 +200,9 @@ public class EntityMetaDataTest
 
 		EntityMetaData extendsEntityMeta = mock(EntityMetaData.class);
 
-		AttributeMetaData attrId = mock(AttributeMetaData.class);
-		AttributeMetaData attrLabel = mock(AttributeMetaData.class);
-		AttributeMetaData attrCompound = mock(AttributeMetaData.class);
+		Attribute attrId = mock(Attribute.class);
+		Attribute attrLabel = mock(Attribute.class);
+		Attribute attrCompound = mock(Attribute.class);
 
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
@@ -233,7 +233,7 @@ public class EntityMetaDataTest
 		assertEquals(entityMetaCopy.getLabel(), "label");
 		assertEquals(entityMetaCopy.getDescription(), "description");
 
-		List<AttributeMetaData> ownAttrsCopy = newArrayList(entityMeta.getOwnAttributes());
+		List<Attribute> ownAttrsCopy = newArrayList(entityMeta.getOwnAttributes());
 		assertEquals(ownAttrsCopy.size(), 3);
 		assertSame(ownAttrsCopy.get(0), attrId);
 		assertSame(ownAttrsCopy.get(1), attrLabel);
@@ -241,7 +241,7 @@ public class EntityMetaDataTest
 		assertSame(entityMetaCopy.getIdAttribute(), attrId);
 		assertSame(entityMetaCopy.getLabelAttribute(), attrLabel);
 
-		List<AttributeMetaData> ownLookAttrsCopy = newArrayList(entityMetaCopy.getOwnLookupAttributes());
+		List<Attribute> ownLookAttrsCopy = newArrayList(entityMetaCopy.getOwnLookupAttributes());
 		assertEquals(ownLookAttrsCopy.size(), 2);
 		assertSame(ownLookAttrsCopy.get(0), attrId);
 		assertSame(ownLookAttrsCopy.get(1), attrLabel);
@@ -259,10 +259,10 @@ public class EntityMetaDataTest
 	private static EntityMetaData createEntityMetaMeta()
 	{
 		EntityMetaData entityMetaMeta = mock(EntityMetaData.class);
-		AttributeMetaData strAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
-		AttributeMetaData boolAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(BOOL).getMock();
-		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(XREF).getMock();
-		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(MREF).getMock();
+		Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+		Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
+		Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.FULL_NAME)).thenReturn(strAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.SIMPLE_NAME)).thenReturn(strAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.PACKAGE)).thenReturn(xrefAttr);

@@ -41,7 +41,7 @@ import static org.testng.Assert.assertTrue;
 public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private EntityMetaDataFactory entityMetaFactory;
@@ -93,10 +93,10 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCreateTargetAttributeQueryTerms()
 	{
-		AttributeMetaData targetAttribute_1 = attrMetaFactory.create().setName("targetAttribute 1");
+		Attribute targetAttribute_1 = attrMetaFactory.create().setName("targetAttribute 1");
 		targetAttribute_1.setDescription("Height");
 
-		AttributeMetaData targetAttribute_2 = attrMetaFactory.create().setName("targetAttribute 2");
+		Attribute targetAttribute_2 = attrMetaFactory.create().setName("targetAttribute 2");
 		targetAttribute_2.setLabel("Height");
 
 		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.create();
@@ -169,10 +169,10 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 				new QueryImpl<>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
 				.thenReturn(entityMetaDataEntity);
 
-		AttributeMetaData attributeEntity1 = attrMetaFactory.create();
+		Attribute attributeEntity1 = attrMetaFactory.create();
 		attributeEntity1.setIdentifier("1");
 		attributeEntity1.setDataType(STRING);
-		AttributeMetaData attributeEntity2 = attrMetaFactory.create();
+		Attribute attributeEntity2 = attrMetaFactory.create();
 		attributeEntity2.setIdentifier("2");
 		attributeEntity2.setDataType(STRING);
 		when(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))

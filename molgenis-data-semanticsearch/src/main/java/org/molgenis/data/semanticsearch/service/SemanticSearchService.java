@@ -1,8 +1,8 @@
 package org.molgenis.data.semanticsearch.service;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
@@ -19,9 +19,9 @@ public interface SemanticSearchService
 	 * @param sourceEntityMetaData
 	 * @param queryTerms
 	 * @param ontologyTerms
-	 * @return AttributeMetaData of resembling attributes, sorted by relevance
+	 * @return Attribute of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, ExplainedAttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
+	Map<Attribute, ExplainedAttribute> findAttributes(EntityMetaData sourceEntityMetaData,
 			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms);
 
 	/**
@@ -30,10 +30,10 @@ public interface SemanticSearchService
 	 * 1. First find attributes based on searchTerms. 2. Second find attributes based on ontology terms from tags 3.
 	 * Third find attributes based on target attribute label.
 	 *
-	 * @return AttributeMetaData of resembling attributes, sorted by relevance
+	 * @return Attribute of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, ExplainedAttributeMetaData> decisionTreeToFindRelevantAttributes(
-			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
+	Map<Attribute, ExplainedAttribute> decisionTreeToFindRelevantAttributes(
+			EntityMetaData sourceEntityMetaData, Attribute targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
 
 	/**
@@ -43,14 +43,14 @@ public interface SemanticSearchService
 	 * @param ontologyIDs IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link Map} of {@link Hit}s for {@link OntologyTerm} results
 	 */
-	Map<AttributeMetaData, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIDs);
+	Map<Attribute, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIDs);
 
 	/**
 	 * Finds {@link OntologyTerm}s for an attribute.
 	 *
-	 * @param attribute   AttributeMetaData to tag
+	 * @param attribute   Attribute to tag
 	 * @param ontologyIds IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link List} of {@link Hit}s for {@link OntologyTerm}s found, most relevant first
 	 */
-	Hit<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds);
+	Hit<OntologyTerm> findTags(Attribute attribute, List<String> ontologyIds);
 }

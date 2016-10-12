@@ -73,14 +73,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	@Override
 	public void removeAttributeTag(EntityMetaData entityMetaData,
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> removeTag)
+			SemanticTag<Attribute, OntologyTerm, Ontology> removeTag)
 	{
-		AttributeMetaData attributeMetaData = removeTag.getSubject();
-		Entity attributeEntity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
+		Attribute attribute = removeTag.getSubject();
+		Entity attributeEntity = findAttributeEntity(entityMetaData.getName(), attribute.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
 			if (!removeTag.equals(tag))
 			{
 				tags.add(tagEntity);
@@ -93,18 +93,18 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@Override
 	@RunAsSystem
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
-			AttributeMetaData attributeMetaData)
+			Attribute attribute)
 	{
 		Multimap<Relation, OntologyTerm> tags = create();
-		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
+		Entity entity = findAttributeEntity(entityMetaData.getName(), attribute.getName());
 		if (entity == null)
 		{
-			LOG.warn("Cannot find attribute {}.{}", entityMetaData.getName(), attributeMetaData.getName());
+			LOG.warn("Cannot find attribute {}.{}", entityMetaData.getName(), attribute.getName());
 			return tags;
 		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
@@ -131,7 +131,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	@Override
 	public void addAttributeTag(EntityMetaData entityMetaData,
-			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag)
+			SemanticTag<Attribute, OntologyTerm, Ontology> tag)
 	{
 		Entity entity = findAttributeEntity(entityMetaData.getName(), tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
@@ -188,22 +188,22 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void removeAllTagsFromEntity(String entityName)
 	{
 		EntityMetaData entityMetadata = dataService.getEntityMetaData(entityName);
-		Iterable<AttributeMetaData> attributeMetaDatas = entityMetadata.getAtomicAttributes();
+		Iterable<Attribute> attributeMetaDatas = entityMetadata.getAtomicAttributes();
 
-		for (AttributeMetaData attributeMetaData : attributeMetaDatas)
+		for (Attribute attribute : attributeMetaDatas)
 		{
-			Entity attributeEntity = findAttributeEntity(entityName, attributeMetaData.getName());
+			Entity attributeEntity = findAttributeEntity(entityName, attribute.getName());
 			attributeEntity.set(AttributeMetaDataMetaData.TAGS, emptyList());
 			dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
-			updateEntityMetaDataEntityWithNewAttributeEntity(entityName, attributeMetaData.getName(), attributeEntity);
+			updateEntityMetaDataEntityWithNewAttributeEntity(entityName, attribute.getName(), attributeEntity);
 		}
 	}
 
 	@Override
-	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<AttributeMetaData, OntologyTerm> tags)
+	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<Attribute, OntologyTerm> tags)
 	{
 		Map<String, OntologyTag> result = new LinkedHashMap<>();
-		for (Entry<AttributeMetaData, OntologyTerm> tag : tags.entrySet())
+		for (Entry<Attribute, OntologyTerm> tag : tags.entrySet())
 		{
 
 			OntologyTerm ontologyTerm = tag.getValue();

@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -47,7 +47,7 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -68,29 +68,29 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	public void annotateTestMatch()
 	{
 		EntityMetaData emdIn = entityMetaDataFactory.create().setName("Test");
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(GENE.getAttributeName()));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
+		emdIn.addAttribute(attributeFactory.create().setName(GENE.getAttributeName()));
+		emdIn.addAttribute(attributeFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		emdIn.addAttribute(
-				attributeMetaDataFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
+				attributeFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
+		emdIn.addAttribute(attributeFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
 				.setLabel(CONDITION_LABEL));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
+		emdIn.addAttribute(attributeFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
 				.setLabel(INHERITANCE_LABEL));
 		emdIn.addAttribute(
-				attributeMetaDataFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName()).setDataType(TEXT)
+				attributeFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName()).setDataType(TEXT)
 						.setLabel(GENERALIZED_INHERITANCE_LABEL));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
+		emdIn.addAttribute(attributeFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
 				.setLabel(AGE_GROUP_LABEL));
 		emdIn.addAttribute(
-				attributeMetaDataFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName()).setDataType(TEXT));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName())
+				attributeFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName()).setDataType(TEXT));
+		emdIn.addAttribute(attributeFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName())
 				.setDataType(TEXT));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(INTERVENTION_CATEGORIES.getAttributeName())
+		emdIn.addAttribute(attributeFactory.create().setName(INTERVENTION_CATEGORIES.getAttributeName())
 				.setDataType(TEXT));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(COMMENTS.getAttributeName()).setDataType(TEXT));
+		emdIn.addAttribute(attributeFactory.create().setName(COMMENTS.getAttributeName()).setDataType(TEXT));
 		emdIn.addAttribute(
-				attributeMetaDataFactory.create().setName(INTERVENTION_RATIONALE.getAttributeName()).setDataType(TEXT));
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(REFERENCES.getAttributeName()).setDataType(TEXT));
+				attributeFactory.create().setName(INTERVENTION_RATIONALE.getAttributeName()).setDataType(TEXT));
+		emdIn.addAttribute(attributeFactory.create().setName(REFERENCES.getAttributeName()).setDataType(TEXT));
 
 		Entity inputEntity = new DynamicEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "LEPR");
@@ -122,7 +122,7 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	public void annotateTestNoMatch()
 	{
 		EntityMetaData emdIn = entityMetaDataFactory.create().setName("Test");
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(GENE.getAttributeName()));
+		emdIn.addAttribute(attributeFactory.create().setName(GENE.getAttributeName()));
 
 		Entity inputEntity = new DynamicEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "BOGUS");

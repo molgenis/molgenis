@@ -10,17 +10,17 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 
 /**
- * {@link AttributeMetaData Attribute meta data} factory. This factory does not extend from
+ * {@link Attribute Attribute meta data} factory. This factory does not extend from
  * {@link AbstractSystemEntityFactory} to prevent a circular bean dependency.
  */
 @Component
-public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData, String>
+public class AttributeFactory implements EntityFactory<Attribute, String>
 {
 	private final EntityPopulator entityPopulator;
 	private AttributeMetaDataMetaData attrMetaMeta;
 
 	@Autowired
-	public AttributeMetaDataFactory(EntityPopulator entityPopulator) {
+	public AttributeFactory(EntityPopulator entityPopulator) {
 		this.entityPopulator = requireNonNull(entityPopulator);
 	}
 
@@ -31,25 +31,25 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 	}
 
 	@Override
-	public AttributeMetaData create()
+	public Attribute create()
 	{
-		AttributeMetaData attrMeta = new AttributeMetaData(attrMetaMeta);
+		Attribute attrMeta = new Attribute(attrMetaMeta);
 		entityPopulator.populate(attrMeta);
 		return attrMeta;
 	}
 
 	@Override
-	public AttributeMetaData create(String entityId)
+	public Attribute create(String entityId)
 	{
-		AttributeMetaData attrMeta = create();
+		Attribute attrMeta = create();
 		attrMeta.set(AttributeMetaDataMetaData.IDENTIFIER, entityId);
 		return attrMeta;
 	}
 
 	@Override
-	public AttributeMetaData create(Entity entity)
+	public Attribute create(Entity entity)
 	{
-		return new AttributeMetaData(entity);
+		return new Attribute(entity);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

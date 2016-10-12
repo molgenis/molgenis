@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.core.resources.impl.tabix;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -21,21 +21,21 @@ public class TabixVcfRepositoryFactory implements RepositoryFactory
 
 	private VcfAttributes vcfAttributes;
 	private EntityMetaDataFactory entityMetaDataFactory;
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	public TabixVcfRepositoryFactory(String name, VcfAttributes vcfAttributes, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory)
 	{
 		this.name = requireNonNull(name);
 		this.entityMetaDataFactory = requireNonNull(entityMetaFactory);
-		this.attributeMetaDataFactory = requireNonNull(attrMetaFactory);
+		this.attributeFactory = requireNonNull(attrMetaFactory);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 	}
 
 	@Override
 	public Repository<Entity> createRepository(File file) throws IOException
 	{
-		return new TabixVcfRepository(file, name, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+		return new TabixVcfRepository(file, name, vcfAttributes, entityMetaDataFactory, attributeFactory);
 	}
 
 }

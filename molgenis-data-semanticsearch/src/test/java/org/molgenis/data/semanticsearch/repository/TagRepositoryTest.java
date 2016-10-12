@@ -3,7 +3,7 @@ package org.molgenis.data.semanticsearch.repository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.semantic.Relation;
@@ -115,9 +115,9 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		AttributeMetaData attributeMetaData()
+		Attribute attribute()
 		{
-			return mock(AttributeMetaData.class);
+			return mock(Attribute.class);
 		}
 	}
 }

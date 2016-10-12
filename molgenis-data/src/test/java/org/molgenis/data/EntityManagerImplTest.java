@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
@@ -42,8 +42,8 @@ public class EntityManagerImplTest
 	{
 		String entityName = "entity";
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		AttributeMetaData lblAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
+		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		when(entityMeta.getLabelAttribute()).thenReturn(lblAttr);
 
@@ -64,8 +64,8 @@ public class EntityManagerImplTest
 	{
 		String entityName = "entity";
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		AttributeMetaData lblAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
+		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		when(entityMeta.getLabelAttribute()).thenReturn(lblAttr);
 
@@ -116,7 +116,7 @@ public class EntityManagerImplTest
 	public void resolveReferencesStreamNoFetch()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
+		Attribute labelAttr = mock(Attribute.class);
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
 		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
 		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called

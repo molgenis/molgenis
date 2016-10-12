@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.core.entity;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.Collection;
 
@@ -13,8 +13,8 @@ import java.util.Collection;
 public interface EntityProcessor
 {
 	/**
-	 * @return {@link Collection} of atomic {@link AttributeMetaData} that must be present in the annotated
+	 * @return {@link Collection} of atomic {@link Attribute} that must be present in the annotated
 	 * {@link Entity}.
 	 */
-	Collection<AttributeMetaData> getRequiredAttributes();
+	Collection<Attribute> getRequiredAttributes();
 }

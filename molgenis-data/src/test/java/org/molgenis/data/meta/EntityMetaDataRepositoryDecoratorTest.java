@@ -5,7 +5,7 @@ import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
@@ -628,12 +628,12 @@ public class EntityMetaDataRepositoryDecoratorTest
 	private void deleteSuOrSystem()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getAttributeParts()).thenReturn(emptyList());
-		AttributeMetaData attrCompound = mock(AttributeMetaData.class);
-		AttributeMetaData attr1a = mock(AttributeMetaData.class);
+		Attribute attrCompound = mock(Attribute.class);
+		Attribute attr1a = mock(Attribute.class);
 		when(attr1a.getAttributeParts()).thenReturn(emptyList());
-		AttributeMetaData attr1b = mock(AttributeMetaData.class);
+		Attribute attr1b = mock(Attribute.class);
 		when(attr1b.getAttributeParts()).thenReturn(emptyList());
 		when(attrCompound.getAttributeParts()).thenReturn(newArrayList(attr1a, attr1b));
 		when(entityMeta.getOwnAttributes()).thenReturn(newArrayList(attr0, attrCompound));
@@ -676,7 +676,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
 		//noinspection unchecked
-		ArgumentCaptor<Stream<AttributeMetaData>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), newArrayList(attr0, attrCompound, attr1a, attr1b));
 	}
@@ -695,7 +695,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		setSystemAuthentication();
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		when(entityMeta.isAbstract()).thenReturn(true);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getAttributeParts()).thenReturn(emptyList());
 		when(entityMeta.getOwnAttributes()).thenReturn(singletonList(attr0));
 
@@ -737,7 +737,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
 		//noinspection unchecked
-		ArgumentCaptor<Stream<AttributeMetaData>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
 	}
@@ -749,7 +749,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		String entityName = "entity";
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
 		when(entityMeta.isAbstract()).thenReturn(true);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getAttributeParts()).thenReturn(emptyList());
 		when(entityMeta.getOwnAttributes()).thenReturn(singletonList(attr0));
 		when(systemEntityMetaRegistry.hasSystemEntityMetaData(entityName)).thenReturn(true);
@@ -792,7 +792,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
 		//noinspection unchecked
-		ArgumentCaptor<Stream<AttributeMetaData>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
 	}

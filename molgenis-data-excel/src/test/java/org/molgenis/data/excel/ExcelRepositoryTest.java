@@ -7,8 +7,8 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -30,7 +30,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private ExcelRepository excelSheetReader;
 
@@ -91,7 +91,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getAttribute()
 	{
-		AttributeMetaData attr = excelSheetReader.getEntityMetaData().getAttribute("col1");
+		Attribute attr = excelSheetReader.getEntityMetaData().getAttribute("col1");
 		assertNotNull(attr);
 		assertEquals(attr.getDataType(), AttributeType.STRING);
 		assertEquals(attr.getName(), "col1");
@@ -100,7 +100,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getAttributes()
 	{
-		Iterator<AttributeMetaData> it = excelSheetReader.getEntityMetaData().getAttributes().iterator();
+		Iterator<Attribute> it = excelSheetReader.getEntityMetaData().getAttributes().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "col1");
 		assertTrue(it.hasNext());
@@ -175,7 +175,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void attributesAndIterator() throws IOException
 	{
-		Iterator<AttributeMetaData> headerIt = excelSheetReader.getEntityMetaData().getAttributes().iterator();
+		Iterator<Attribute> headerIt = excelSheetReader.getEntityMetaData().getAttributes().iterator();
 		assertTrue(headerIt.hasNext());
 		assertEquals(headerIt.next().getName(), "col1");
 		assertTrue(headerIt.hasNext());

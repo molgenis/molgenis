@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffRepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffRunner;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -34,7 +34,7 @@ public class SnpEffAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;

@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.entity.QueryCreator;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.core.resources.Resources;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 
@@ -36,14 +36,14 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 		Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity, updateMode);
 		if (filteredResult.isPresent())
 		{
-			for (AttributeMetaData attr : getInfo().getOutputAttributes())
+			for (Attribute attr : getInfo().getOutputAttributes())
 			{
 				entity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
 			}
 		}
 		else
 		{
-			for (AttributeMetaData attr : getInfo().getOutputAttributes())
+			for (Attribute attr : getInfo().getOutputAttributes())
 			{
 				if (!updateMode || entity.get(attr.getName()) == null)
 				{
@@ -60,15 +60,15 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	 * @param entity the current entity
 	 * @return the value of the attribute to copy from the resource entity
 	 */
-	protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
+	protected Object getResourceAttributeValue(Attribute attr, Entity entity)
 	{
 		return entity.get(attr.getName());
 	}
 
 	@Override
-	public List<AttributeMetaData> getRequiredAttributes()
+	public List<Attribute> getRequiredAttributes()
 	{
-		List<AttributeMetaData> sourceMetaData = super.getRequiredAttributes();
+		List<Attribute> sourceMetaData = super.getRequiredAttributes();
 		sourceMetaData.addAll(resultFilter.getRequiredAttributes());
 		return sourceMetaData;
 	}

@@ -3,7 +3,7 @@ package org.molgenis.data.rsql;
 import cz.jirutka.rsql.parser.ast.*;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 
@@ -76,7 +76,7 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 		return aggsQ;
 	}
 
-	private AttributeMetaData getAttribute(ComparisonNode node)
+	private Attribute getAttribute(ComparisonNode node)
 	{
 		List<String> args = node.getArguments();
 		if (args.size() != 1)
@@ -88,7 +88,7 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 		String attrName = args.iterator().next();
 
 		String[] attrTokens = attrName.split("\\.");
-		AttributeMetaData attr = entityMetaData.getAttribute(attrTokens[0]);
+		Attribute attr = entityMetaData.getAttribute(attrTokens[0]);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
