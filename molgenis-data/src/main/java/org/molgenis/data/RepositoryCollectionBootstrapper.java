@@ -36,7 +36,7 @@ public class RepositoryCollectionBootstrapper
 		Map<String, RepositoryCollection> repoCollectionMap = ctx.getBeansOfType(RepositoryCollection.class);
 		repoCollectionMap.values().forEach(this::register);
 
-		// set EntityTypeMetadata enum options
+		// set EntityTypeMetadata backend enum options
 		List<String> repoNames = repoCollectionMap.values().stream().map(RepositoryCollection::getName).collect(toList());
 		repoNames.sort(naturalOrder());
 		entityTypeMetadata.setBackendEnumOptions(repoNames);
