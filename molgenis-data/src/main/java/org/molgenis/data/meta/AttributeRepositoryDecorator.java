@@ -20,14 +20,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
 
@@ -537,76 +532,12 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
 		}
-		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(ATTRIBUTES, attr).findOne();
-		if (entityType != null)
-		{
-			throw new MolgenisDataException(
-					format("Deleting attribute [%s] is not allowed, since it is referenced by entity [%s]",
-							attr.getName(), entityType.getName()));
-		}
-		Attribute attrMeta = dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(CHILDREN, attr).findOne();
-		if (attrMeta != null)
-		{
-			throw new MolgenisDataException(
-					format("Deleting attribute [%s] is not allowed, since it is referenced by attribute [%s]",
-							attr.getName(), attrMeta.getName()));
-		}
 	}
 
-	private void updateEntities(Attribute attr, Attribute updatedAttr)
+	private void updateEntity(Attribute attr, Attribute updatedAttr)
 	{
-		getEntities(updatedAttr).forEach((EntityType) -> updateEntity(EntityType, attr, updatedAttr));
-	}
-
-	private void updateEntity(EntityType entityType, Attribute attr, Attribute updatedAttr)
-	{
+		EntityType entityType = attr.getEntityType();
 		dataService.getMeta().getBackend(entityType.getBackend()).updateAttribute(entityType, attr, updatedAttr);
-	}
-
-	/**
-	 * Returns all entities that reference this attribute directly or via a compound attribute
-	 *
-	 * @param attr attribute
-	 * @return entities referencing this attribute
-	 */
-	private Stream<EntityType> getEntities(Attribute attr)
-	{
-		return getEntitiesRec(Collections.singletonList(attr));
-	}
-
-	private Stream<EntityType> getEntitiesRec(List<Attribute> attrs)
-	{
-		// find entities referencing attributes
-		Query<EntityType> entityQ = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class);
-		Stream<EntityType> entities;
-		if (attrs.size() == 1)
-		{
-			entities = entityQ.eq(ATTRIBUTES, attrs.iterator().next()).findAll();
-		}
-		else
-		{
-			entities = entityQ.in(ATTRIBUTES, attrs).findAll();
-		}
-
-		// find attributes referencing attributes
-		Query<Attribute> attrQ = dataService.query(ATTRIBUTE_META_DATA, Attribute.class);
-		List<Attribute> parentAttrs;
-		if (attrs.size() == 1)
-		{
-			parentAttrs = attrQ.eq(CHILDREN, attrs.iterator().next()).findAll().collect(toList());
-		}
-		else
-		{
-			parentAttrs = attrQ.in(CHILDREN, attrs).findAll().collect(toList());
-		}
-
-		// recurse for parent attributes
-		if (!parentAttrs.isEmpty())
-		{
-			entities = Stream.concat(entities, getEntitiesRec(parentAttrs));
-		}
-
-		return entities;
 	}
 
 	private void validateAndUpdate(Attribute attr)
@@ -614,7 +545,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		validateUpdateAllowed(attr);
 		Attribute currentAttr = findOneById(attr.getIdentifier());
 		validateUpdate(currentAttr, attr);
-		updateEntities(currentAttr, attr);
+		updateEntity(currentAttr, attr);
 	}
 
 	private Stream<Attribute> filterCountPermission(Stream<Attribute> attrs)
@@ -634,18 +565,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 
 	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, Permission permission)
 	{
-		return attrs.filter(attr ->
-		{
-			Stream<EntityType> entities = runAsSystem(() -> getEntities(attr));
-			for (Iterator<EntityType> it = entities.iterator(); it.hasNext(); )
-			{
-				if (permissionService.hasPermissionOnEntity(it.next().getName(), permission))
-				{
-					return true;
-				}
-			}
-			return false;
-		});
+		return attrs.filter(attr -> permissionService.hasPermissionOnEntity(attr.getEntity().getName(), permission));
 	}
 
 	private class FilteredConsumer
