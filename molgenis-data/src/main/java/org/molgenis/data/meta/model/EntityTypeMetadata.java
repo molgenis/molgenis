@@ -1,15 +1,10 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.RepositoryCollectionRegistry;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
@@ -42,6 +37,8 @@ public class EntityTypeMetadata extends SystemEntityType
 	private PackageMetadata packageMetadata;
 	private TagMetaData tagMetaData;
 
+	private List<String> backendEnumOptions;
+
 	EntityTypeMetadata()
 	{
 		super(SIMPLE_NAME_, PACKAGE_META);
@@ -69,15 +66,23 @@ public class EntityTypeMetadata extends SystemEntityType
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
-
-		// get the backend registry from the context because autowiring is not possible (unresolvable circular dependencies)
-		RepositoryCollectionRegistry registry = (RepositoryCollectionRegistry) ApplicationContextProvider
-				.getApplicationContext().getBean("repositoryCollectionRegistry");
-		List<String> backendEnumOptions = registry.getRepositoryCollections().map(RepositoryCollection::getName)
-				.collect(Collectors.toList());
-		backendEnumOptions.sort(Comparator.naturalOrder());
 		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
 				.setLabel("Backend").setDescription("Backend data store");
+	}
+
+	/**
+	 * Used during bootstrapping to set the enum options for the backend field. Circumvents unresolvable circular
+	 * dependencies when autowiring RepositoryCollectionRegistry into this bean.
+	 *
+	 * @param repositoryCollectionNames list of RepositoryCollection names
+	 */
+	public void setBackendEnumOptions(List<String> repositoryCollectionNames)
+	{
+		if (this.backendEnumOptions != null)
+		{
+			throw new IllegalArgumentException("backend enum options already set!");
+		}
+		this.backendEnumOptions = requireNonNull(repositoryCollectionNames);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
