@@ -148,10 +148,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		if (entityType.getAttribute(attr.getName()) == null)
-		{
-			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
-		}
 		updateAttributeRec(entityType, attr, updatedAttr);
 	}
 

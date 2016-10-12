@@ -76,6 +76,9 @@ public class Attribute extends StaticEntity
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
+		attrMetaCopy.setIdAttribute(attrMeta.isIdAttribute());
+		attrMetaCopy.setLabelAttribute(attrMeta.isLabelAttribute());
+		attrMetaCopy.setLookupAttributeIndex(attrMeta.getLookupAttributeIndex());
 		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
 		attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
 		attrMetaCopy.setOrderBy(attrMeta.getOrderBy());

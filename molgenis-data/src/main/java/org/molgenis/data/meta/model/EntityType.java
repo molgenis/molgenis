@@ -639,7 +639,7 @@ public class EntityType extends StaticEntity
 	{
 		Map<String, Attribute> cachedOwnAttrs = getCachedOwnAttrs();
 		cachedOwnAttrs.remove(attr.getName());
-		set(ATTRIBUTE_META_DATA, cachedOwnAttrs.values());
+		set(ATTRIBUTES	, cachedOwnAttrs.values());
 	}
 
 	/**

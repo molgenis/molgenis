@@ -396,15 +396,15 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		populateAutoAttributeValues(existingEntityType, entityType);
 
-		// add new attributes, update modified attributes
-		upsertAttributes(entityType, existingEntityType);
-
 		// update entity
 		if (!EntityUtils.equals(entityType, existingEntityType))
 		{
 			// note: leave it up to the data service to decided what to do with attributes removed from entity meta data
 			dataService.update(ENTITY_TYPE_META_DATA, entityType);
 		}
+
+		// add new attributes, update modified attributes
+		upsertAttributes(entityType, existingEntityType);
 	}
 
 	private static void populateAutoAttributeValues(EntityType existingEntityType, EntityType entityType)

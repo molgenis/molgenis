@@ -308,6 +308,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	{
 		validateAdd(attr);
 		decoratedRepo.add(attr);
+		attr.getEntity().getBackend();
 	}
 
 	@Override
@@ -536,7 +537,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 
 	private void updateEntity(Attribute attr, Attribute updatedAttr)
 	{
-		EntityType entityType = attr.getEntityType();
+		EntityType entityType = attr.getEntity();
 		dataService.getMeta().getBackend(entityType.getBackend()).updateAttribute(entityType, attr, updatedAttr);
 	}
 

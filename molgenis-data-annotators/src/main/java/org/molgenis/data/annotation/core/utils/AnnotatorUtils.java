@@ -107,6 +107,7 @@ public class AnnotatorUtils
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
 				.forEachOrdered(part -> part.setParent(compound));
 		entityType.addAttribute(compound);
+		entityType.addAttributes(attributes);
 	}
 
 	/**
@@ -212,6 +213,7 @@ public class AnnotatorUtils
 			for (Attribute atomicAttribute : attribute.getAttributeParts())
 			{
 				atomicAttribute.setParent(infoAttribute);
+				entityType.addAttribute(atomicAttribute);
 			}
 		}
 	}
