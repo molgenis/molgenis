@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.TEXT;
 
 public class AnnotatorDependencyOrderResolver
 {

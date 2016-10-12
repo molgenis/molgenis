@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.request;
 import com.google.common.collect.Iterables;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.*;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;

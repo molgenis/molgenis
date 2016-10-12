@@ -1,6 +1,7 @@
 package org.molgenis.util;
 
 import com.google.gson.*;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 
@@ -8,7 +9,6 @@ import java.lang.reflect.Type;
 import java.util.Date;
 
 import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.AttributeType;
 
 /**
  * Serializer for concrete Entity subclasses. This allows you to return Entities in your Controllers, without having to

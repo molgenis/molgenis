@@ -1,9 +1,9 @@
 package org.molgenis.data.i18n.model;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
+import static org.molgenis.AttributeType.BOOL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -32,6 +32,6 @@ public class LanguageMetaData extends SystemEntityType
 		addAttribute(CODE, ROLE_ID).setDescription("Lowercase ISO 639 alpha-2 or alpha-3 code")
 				.setValidationExpression("/^[a-z]{2,3}$/.test($('code').value())");
 		addAttribute(NAME).setNillable(false);
-		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.AttributeType.BOOL).setNillable(false);
+		addAttribute(ACTIVE).setDataType(BOOL).setNillable(false);
 	}
 }

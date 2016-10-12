@@ -1,6 +1,6 @@
 package org.molgenis.charts.data;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.charts.MolgenisSerieType;
 
 import java.util.ArrayList;

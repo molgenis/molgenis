@@ -14,7 +14,7 @@ import java.sql.ResultSet;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlEntityFactoryTest

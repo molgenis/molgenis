@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
 
 @Configuration

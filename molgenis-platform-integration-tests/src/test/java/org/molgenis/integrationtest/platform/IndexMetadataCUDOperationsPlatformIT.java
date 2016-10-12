@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -17,6 +17,9 @@ import org.molgenis.test.data.EntityTestHarness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.molgenis.AttributeType.EMAIL;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.getValueString;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.*;
 
@@ -81,7 +84,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 
 		// 2. change dataType value of ATTR_EMAIL
 		Attribute toUpdateAttribute = entityTypeDynamic.getAttribute(EntityTestHarness.ATTR_EMAIL);
-		toUpdateAttribute.setDataType(MolgenisFieldTypes.AttributeType.STRING);
+		toUpdateAttribute.setDataType(STRING);
 		Object toUpdateAttributeId = toUpdateAttribute.getIdValue();
 
 		// 3. Preform update
@@ -97,11 +100,11 @@ public class IndexMetadataCUDOperationsPlatformIT
 		EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
 		q2.eq(AttributeMetadata.ID, toUpdateAttributeId);
 		q2.and();
-		q2.eq(AttributeMetadata.TYPE, MolgenisFieldTypes.STRING);
+		q2.eq(AttributeMetadata.TYPE, getValueString(STRING));
 		assertEquals(searchService.count(q2, emdActual), 1);
 
 		// Reset context
-		toUpdateAttribute.setDataType(MolgenisFieldTypes.AttributeType.EMAIL);
+		toUpdateAttribute.setDataType(EMAIL);
 		runAsSystem(() ->
 		{
 			metaDataService.deleteEntityType(entityTypeDynamic.getName());

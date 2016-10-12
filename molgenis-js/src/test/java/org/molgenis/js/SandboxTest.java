@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.SCRIPT;
+import static org.molgenis.AttributeType.SCRIPT;
 
 public class SandboxTest
 {

@@ -1,6 +1,6 @@
 package org.molgenis.charts.highcharts.convert;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
