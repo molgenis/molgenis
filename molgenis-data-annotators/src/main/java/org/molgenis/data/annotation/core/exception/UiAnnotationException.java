@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.exception;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.stream.Collectors;
 
@@ -35,7 +35,7 @@ public class UiAnnotationException extends AnnotationException
 		return message;
 	}
 
-	private String concatAttributeNameValue(AttributeMetaData attribute)
+	private String concatAttributeNameValue(Attribute attribute)
 	{
 		String value;
 		if (attribute.getName().equals(VARIANT))

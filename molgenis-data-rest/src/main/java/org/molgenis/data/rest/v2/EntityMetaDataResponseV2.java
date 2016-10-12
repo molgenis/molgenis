@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityMetaDataUtils;
@@ -63,13 +63,13 @@ class EntityMetaDataResponseV2
 		this.label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
+		Iterable<Attribute> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
 		this.attributes = Lists.newArrayList(
-				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+				Iterables.transform(filteredAttrs, new Function<Attribute, AttributeMetaDataResponseV2>()
 				{
 					@Override
-					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
+					public AttributeMetaDataResponseV2 apply(Attribute attr)
 					{
 						Fetch subAttrFetch;
 						if (fetch != null)
@@ -99,18 +99,18 @@ class EntityMetaDataResponseV2
 
 		languageCode = languageService.getCurrentUserLanguageCode();
 
-		AttributeMetaData labelAttribute = meta.getLabelAttribute(languageCode);
+		Attribute labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 
-		AttributeMetaData idAttribute = meta.getIdAttribute();
+		Attribute idAttribute = meta.getIdAttribute();
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
-		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+		Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 		this.lookupAttributes = lookupAttributes != null ? Lists
-				.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+				.newArrayList(Iterables.transform(lookupAttributes, new Function<Attribute, String>()
 				{
 					@Override
-					public String apply(AttributeMetaData attribute)
+					public String apply(Attribute attribute)
 					{
 						return attribute.getName();
 					}

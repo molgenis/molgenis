@@ -7,7 +7,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.ResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -29,7 +29,7 @@ public class ResourceImplTest extends AbstractMolgenisSpringTest
 {
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -55,7 +55,7 @@ public class ResourceImplTest extends AbstractMolgenisSpringTest
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new TabixVcfRepositoryFactory("cadd", vcfAttributes, entityMetaDataFactory,
-						attributeMetaDataFactory);
+						attributeFactory);
 			}
 		};
 	}

@@ -5,7 +5,7 @@ import com.google.common.collect.TreeTraverser;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
@@ -358,12 +358,12 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 					entityMeta.getIdValue().toString()));
 		}
 
-		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
+		Map<String, Attribute> currentAttrMap = StreamSupport
 				.stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.identity()));
-		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
+				.collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> updateAttrMap = StreamSupport
 				.stream(entityMeta.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.identity()));
+				.collect(toMap(Attribute::getName, Function.identity()));
 
 		// add attributes
 		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
@@ -409,7 +409,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 			// delete attributes removed from entity meta data
 			// assumption: the attribute is owned by this entity or a compound attribute owned by this entity
 			dataService.deleteAll(ATTRIBUTE_META_DATA,
-					deletedAttrNames.stream().map(currentAttrMap::get).map(AttributeMetaData::getIdentifier));
+					deletedAttrNames.stream().map(currentAttrMap::get).map(Attribute::getIdentifier));
 		}
 	}
 
@@ -466,8 +466,8 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 	private void deleteEntityAttributes(EntityMetaData entityMetaData)
 	{
-		Iterable<AttributeMetaData> rootAttrs = entityMetaData.getOwnAttributes();
-		Stream<AttributeMetaData> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
+		Iterable<Attribute> rootAttrs = entityMetaData.getOwnAttributes();
+		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
 				attrEntity -> StreamSupport
 						.stream(new AttributeMetaDataTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
 								false));
@@ -501,11 +501,11 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 	}
 
-	private static class AttributeMetaDataTreeTraverser extends TreeTraverser<AttributeMetaData>
+	private static class AttributeMetaDataTreeTraverser extends TreeTraverser<Attribute>
 	{
 
 		@Override
-		public Iterable<AttributeMetaData> children(@Nonnull AttributeMetaData attr)
+		public Iterable<Attribute> children(@Nonnull Attribute attr)
 		{
 			return attr.getAttributeParts();
 		}

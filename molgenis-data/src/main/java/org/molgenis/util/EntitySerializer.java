@@ -2,7 +2,7 @@ package org.molgenis.util;
 
 import com.google.gson.*;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.lang.reflect.Type;
 import java.util.Date;
@@ -27,7 +27,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 	{
 		JsonObject result = new JsonObject();
 		result.addProperty("__entityName", entity.getEntityMetaData().getName());
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
 		{
 			String attributeName = attr.getName();
 			Object value = entity.get(attributeName);

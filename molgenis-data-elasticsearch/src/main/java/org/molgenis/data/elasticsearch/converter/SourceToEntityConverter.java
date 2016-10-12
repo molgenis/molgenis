@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class SourceToEntityConverter
 		source.entrySet().forEach(entry ->
 		{
 			String attrName = entry.getKey();
-			AttributeMetaData attr = entityMeta.getAttribute(attrName);
+			Attribute attr = entityMeta.getAttribute(attrName);
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(

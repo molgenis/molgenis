@@ -7,7 +7,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 
@@ -43,7 +43,7 @@ public class AttributeMetaDataResponse
 	private String visibleExpression;
 	private String validationExpression;
 
-	public AttributeMetaDataResponse(String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+	public AttributeMetaDataResponse(String entityParentName, EntityMetaData entityMeta, Attribute attr,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		this(entityParentName, entityMeta, attr, null, null, permissionService, dataService, languageService);
@@ -56,7 +56,7 @@ public class AttributeMetaDataResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, Attribute attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
@@ -130,19 +130,19 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
-			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
+			Iterable<Attribute> attributeParts = attr.getAttributeParts();
 			this.attributes = attributeParts != null ? Lists
-					.newArrayList(Iterables.transform(attributeParts, new Function<AttributeMetaData, Object>()
+					.newArrayList(Iterables.transform(attributeParts, new Function<Attribute, Object>()
 					{
 
 						@Override
-						public Object apply(AttributeMetaData attributeMetaData)
+						public Object apply(Attribute attribute)
 						{
 							if (attributeExpandsSet != null && attributeExpandsSet
 									.containsKey("attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeMetaDataResponse(entityParentName, entityMeta, attributeMetaData,
+								return new AttributeMetaDataResponse(entityParentName, entityMeta, attribute,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
 										permissionService, dataService, languageService);
 							}
@@ -150,7 +150,7 @@ public class AttributeMetaDataResponse
 							{
 								return Collections.<String, Object>singletonMap("href",
 										Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName,
-												attributeMetaData.getName()));
+												attribute.getName()));
 							}
 						}
 					})) : null;

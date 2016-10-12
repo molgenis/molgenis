@@ -9,7 +9,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.populate.IdGenerator;
@@ -44,7 +44,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private MappingProjectRepositoryImpl mappingProjectRepositoryImpl;

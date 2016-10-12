@@ -7,7 +7,7 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
@@ -164,7 +164,7 @@ public class TabixRepository extends AbstractRepository
 		CSVParser csvParser = getCsvParser();
 		String[] columns = csvParser.parseLine(line);
 		int i = 0;
-		for (AttributeMetaData amd : entityMetaData.getAtomicAttributes())
+		for (Attribute amd : entityMetaData.getAtomicAttributes())
 		{
 			if (i < columns.length)
 			{

@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.core.entity;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 
@@ -23,9 +23,9 @@ public interface EntityAnnotator extends Annotator
 	Iterable<Entity> annotateEntity(Entity sourceEntity, boolean updateMode);
 
 	/**
-	 * @return the {@link List<AttributeMetaData>} that must be present in the source entity.
+	 * @return the {@link List< Attribute >} that must be present in the source entity.
 	 */
-	List<AttributeMetaData> getRequiredAttributes();
+	List<Attribute> getRequiredAttributes();
 
 	// TODO: plus aanwijzing wat er ontbreekt
 

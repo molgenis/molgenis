@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.populate.IdGenerator;
@@ -18,13 +18,13 @@ import static org.testng.Assert.assertEquals;
 
 public class SystemEntityMetaDataTest
 {
-	AttributeMetaDataFactory metaDataFactory;
+	AttributeFactory metaDataFactory;
 	EntityMetaDataMetaData metaDataMetaData;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		metaDataFactory = mock(AttributeMetaDataFactory.class);
+		metaDataFactory = mock(AttributeFactory.class);
 		metaDataMetaData = mock(EntityMetaDataMetaData.class);
 
 		when(metaDataFactory.getAttributeMetaDataMetaData()).thenReturn(mock(AttributeMetaDataMetaData.class));
@@ -34,7 +34,7 @@ public class SystemEntityMetaDataTest
 	public void testAssignRolesToAttributeParts()
 	{
 		TestCompoundEMD testEMD = new TestCompoundEMD("Test");
-		testEMD.setAttributeMetaDataFactory(metaDataFactory);
+		testEMD.setAttributeFactory(metaDataFactory);
 		testEMD.bootstrap(metaDataMetaData);
 
 		assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
@@ -49,7 +49,7 @@ public class SystemEntityMetaDataTest
 	public void testAssignRolesToAttributePartsNested()
 	{
 		TestNestedCompoundEMD testEMD = new TestNestedCompoundEMD("Test");
-		testEMD.setAttributeMetaDataFactory(metaDataFactory);
+		testEMD.setAttributeFactory(metaDataFactory);
 		testEMD.bootstrap(metaDataMetaData);
 
 		assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
@@ -72,7 +72,7 @@ public class SystemEntityMetaDataTest
 		@Override
 		protected void init()
 		{
-			AttributeMetaData compoundAttr1 = mock(AttributeMetaData.class);
+			Attribute compoundAttr1 = mock(Attribute.class);
 			addAttribute(compoundAttr1);
 			addAttribute("compoundAttr2", compoundAttr1);
 			addAttribute("idAttr", compoundAttr1, ROLE_ID);
@@ -94,7 +94,7 @@ public class SystemEntityMetaDataTest
 		@Override
 		protected void init()
 		{
-			AttributeMetaData compoundAttr = mock(AttributeMetaData.class);
+			Attribute compoundAttr = mock(Attribute.class);
 			addAttribute(compoundAttr);
 			addAttribute("idAttr", compoundAttr, ROLE_ID);
 			addAttribute("labelAttr", compoundAttr, ROLE_LABEL);

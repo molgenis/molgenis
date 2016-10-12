@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -44,7 +44,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -74,7 +74,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
 		emdIn.addAttribute(vcfAttributes.getAltAttribute());
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING)
+		emdIn.addAttribute(attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING)
 				.setDescription(
 						"The allele frequency for variants seen in the population used for the thousand genomes project")
 				.setLabel(THOUSAND_GENOME_AF_LABEL));

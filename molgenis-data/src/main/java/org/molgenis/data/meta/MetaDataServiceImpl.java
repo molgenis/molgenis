@@ -3,7 +3,7 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
@@ -185,7 +185,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void addEntityMeta(EntityMetaData entityMeta)
 	{
 		// create attributes
-		Stream<AttributeMetaData> attrs = stream(entityMeta.getOwnAllAttributes().spliterator(), false);
+		Stream<Attribute> attrs = stream(entityMeta.getOwnAllAttributes().spliterator(), false);
 		dataService.add(ATTRIBUTE_META_DATA, attrs);
 
 		// create entity
@@ -194,7 +194,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addAttribute(AttributeMetaData attr)
+	public void addAttribute(Attribute attr)
 	{
 		dataService.add(ATTRIBUTE_META_DATA, attr);
 	}
@@ -305,10 +305,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	private void upsertAttributes(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
 	{
 		// analyze both compound and atomic attributes owned by the entity
-		Map<String, AttributeMetaData> attrsMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.identity()));
-		Map<String, AttributeMetaData> existingAttrsMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(),
-				false).collect(toMap(AttributeMetaData::getName, Function.identity()));
+		Map<String, Attribute> attrsMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(),
+				false).collect(toMap(Attribute::getName, Function.identity()));
 
 		// determine attributes to add, update and delete
 		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
@@ -355,14 +355,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			EntityMetaData oldEntityMetaData = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = stream(oldEntityMetaData.getAtomicAttributes().spliterator(),
+			List<Attribute> oldAtomicAttributes = stream(oldEntityMetaData.getAtomicAttributes().spliterator(),
 					false).collect(toList());
 
-			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = newLinkedHashMap();
+			LinkedHashMap<String, Attribute> newAtomicAttributesMap = newLinkedHashMap();
 			stream(newEntityMetaData.getAtomicAttributes().spliterator(), false)
 					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
-			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
+			for (Attribute oldAttribute : oldAtomicAttributes)
 			{
 				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
 				// FIXME This implies that an attribute can never be different when doing an update import?

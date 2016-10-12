@@ -19,7 +19,7 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
@@ -225,7 +225,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Stream<IndexRequest> references = Stream.of();
 		// Find entity metadata that is currently, in the database, referring to the entity we're reindexing
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils
+		for (Pair<EntityMetaData, List<Attribute>> pair : EntityUtils
 				.getReferencingEntityMetaData(entityMetaData, dataService))
 		{
 			EntityMetaData refEntityMetaData = pair.getA();
@@ -254,16 +254,16 @@ public class ElasticsearchService implements SearchService
 	 *
 	 * @param referredEntity          the entity that should be referred to in the documents
 	 * @param referringEntityMetaData {@link EntityMetaData} of the referring documents
-	 * @param referringAttributes     {@link List} of {@link AttributeMetaData} of attributes that may reference the #referredEntity
+	 * @param referringAttributes     {@link List} of {@link Attribute} of attributes that may reference the #referredEntity
 	 * @return Stream of {@link Entity} references representing the documents.
 	 */
 	private Stream<Entity> findReferringDocuments(Entity referredEntity, EntityMetaData referringEntityMetaData,
-			List<AttributeMetaData> referringAttributes)
+			List<Attribute> referringAttributes)
 	{
 		// Find out which documents of this type currently, in ElasticSearch, contain a reference to
 		// the entity we're reindexing
 		QueryImpl<Entity> q = null;
-		for (AttributeMetaData attributeMetaData : referringAttributes)
+		for (Attribute attribute : referringAttributes)
 		{
 			if (q == null)
 			{
@@ -273,7 +273,7 @@ public class ElasticsearchService implements SearchService
 			{
 				q.or();
 			}
-			q.eq(attributeMetaData.getName(), referredEntity);
+			q.eq(attribute.getName(), referredEntity);
 		}
 		LOG.debug("q: [{}], referringEntityMetaData: [{}]", q.toString(), referringEntityMetaData.getName());
 		if (hasMapping(referringEntityMetaData))
@@ -392,9 +392,9 @@ public class ElasticsearchService implements SearchService
 	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityMetaData entityMetaData)
 	{
 		Query<Entity> q = aggregateQuery.getQuery();
-		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
-		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
-		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+		Attribute xAttr = aggregateQuery.getAttributeX();
+		Attribute yAttr = aggregateQuery.getAttributeY();
+		Attribute distinctAttr = aggregateQuery.getAttributeDistinct();
 		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();

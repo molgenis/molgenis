@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
@@ -413,7 +413,7 @@ class RestControllerV2
 
 		try
 		{
-			AttributeMetaData attr = meta.getAttribute(attributeName);
+			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
 				throw createUnknownAttributeException(entityName, attributeName);
@@ -550,7 +550,7 @@ class RestControllerV2
 			throw new UnknownEntityException(entityName + " not found");
 		}
 
-		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		Attribute attribute = entity.getAttribute(attributeName);
 		if (attribute == null)
 		{
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
@@ -578,8 +578,8 @@ class RestControllerV2
 		{
 			// return aggregates for aggregate query
 			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
-			AttributeMetaData xAttr = aggsQ.getAttributeX();
-			AttributeMetaData yAttr = aggsQ.getAttributeY();
+			Attribute xAttr = aggsQ.getAttributeX();
+			Attribute yAttr = aggsQ.getAttributeY();
 			if (xAttr == null && yAttr == null)
 			{
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
@@ -670,16 +670,16 @@ class RestControllerV2
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
 	{
-		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAtomicAttributes();
+		Iterable<Attribute> attrs = entity.getEntityMetaData().getAtomicAttributes();
 		createEntityValuesResponseRec(entity, attrs, fetch, responseData);
 	}
 
-	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs, Fetch fetch,
+	private void createEntityValuesResponseRec(Entity entity, Iterable<Attribute> attrs, Fetch fetch,
 			Map<String, Object> responseData)
 	{
 		responseData.put("_href",
 				Href.concatEntityHref(BASE_URI, entity.getEntityMetaData().getName(), entity.getIdValue()));
-		for (AttributeMetaData attr : attrs) // TODO performance use fetch instead of attrs
+		for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();
 			if (fetch == null || fetch.hasField(attr))

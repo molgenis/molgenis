@@ -4,7 +4,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -27,7 +27,7 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private EntityMetaData entityMeta;
 

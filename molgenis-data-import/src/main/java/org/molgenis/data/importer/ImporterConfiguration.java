@@ -42,7 +42,7 @@ public class ImporterConfiguration
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private EntityMetaDataFactory entityMetaDataFactory;

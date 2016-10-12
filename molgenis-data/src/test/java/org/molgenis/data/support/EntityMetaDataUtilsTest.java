@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.testng.annotations.Test;
 
@@ -16,8 +16,8 @@ public class EntityMetaDataUtilsTest
 	@Test
 	public void getAttributeNames()
 	{
-		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
-		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
 		assertEquals(newArrayList(EntityMetaDataUtils.getAttributeNames(asList(attr0, attr1))),
 				asList("attr0", "attr1"));
 	}

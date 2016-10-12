@@ -127,7 +127,7 @@ public class SystemEntityMetaDataPersister
 	{
 		// inject existing auto-generated identifiers in system entity meta data
 		Map<String, String> attrMap = stream(existingEntityMeta.getAllAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
+				.collect(toMap(Attribute::getName, Attribute::getIdentifier));
 		entityMeta.getAllAttributes().forEach(attr ->
 		{
 			String attrIdentifier = attrMap.get(attr.getName());

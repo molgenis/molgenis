@@ -60,15 +60,15 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	public void removeAttributeTag(EntityMetaData entityMetaData,
-			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> removeTag)
+			SemanticTag<Attribute, LabeledResource, LabeledResource> removeTag)
 	{
-		AttributeMetaData attributeMetaData = removeTag.getSubject();
-		Entity attributeEntity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
+		Attribute attribute = removeTag.getSubject();
+		Entity attributeEntity = findAttributeEntity(entityMetaData, attribute.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag = SemanticTag
-					.asTag(attributeMetaData, tagEntity);
+			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag
+					.asTag(attribute, tagEntity);
 			if (!removeTag.equals(tag))
 			{
 				tags.add(tagEntity);
@@ -81,16 +81,16 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	@Override
 	@RunAsSystem
 	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityMetaData entityMetaData,
-			AttributeMetaData attributeMetaData)
+			Attribute attribute)
 	{
-		Entity entity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
+		Entity entity = findAttributeEntity(entityMetaData, attribute.getName());
 		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource>create();
 
 		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource>create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag = SemanticTag
-					.asTag(attributeMetaData, tagEntity);
+			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag
+					.asTag(attribute, tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
@@ -119,7 +119,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	public void addAttributeTag(EntityMetaData entityMetaData,
-			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag)
+			SemanticTag<Attribute, LabeledResource, LabeledResource> tag)
 	{
 		Entity entity = findAttributeEntity(entityMetaData, tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();

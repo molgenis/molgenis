@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Iterator;
@@ -48,21 +48,21 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
+	public void addAttribute(EntityMetaData entityMeta, Attribute attribute)
 	{
 		this.indexActionRegisterService.register(entityMeta.getName(), null);
 		this.decorated.addAttribute(entityMeta, attribute);
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityMetaData entityMetaData, Attribute attr, Attribute updatedAttr)
 	{
 		this.indexActionRegisterService.register(entityMetaData.getName(), null);
 		this.decorated.updateAttribute(entityMetaData, attr, updatedAttr);
 	}
 
 	@Override
-	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
+	public void deleteAttribute(EntityMetaData entityMeta, Attribute attr)
 	{
 		this.indexActionRegisterService.register(entityMeta.getName(), null);
 		this.decorated.deleteAttribute(entityMeta, attr);

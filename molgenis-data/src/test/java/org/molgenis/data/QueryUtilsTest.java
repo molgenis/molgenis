@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -101,11 +101,11 @@ public class QueryUtilsTest
 		when(qRule2.getNestedRules()).thenReturn(Collections.emptyList());
 		when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
 
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.getExpression()).thenReturn(null);
 
-		AttributeMetaData attr2 = mock(AttributeMetaData.class);
+		Attribute attr2 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.getExpression()).thenReturn(null);
 
@@ -129,11 +129,11 @@ public class QueryUtilsTest
 		when(qRule2.getNestedRules()).thenReturn(Collections.emptyList());
 		when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
 
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.hasExpression()).thenReturn(false);
 
-		AttributeMetaData attr2 = mock(AttributeMetaData.class);
+		Attribute attr2 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.hasExpression()).thenReturn(true);
 
@@ -162,19 +162,19 @@ public class QueryUtilsTest
 		when(qRule2.getNestedRules()).thenReturn(Lists.newArrayList(nestedRule1, nestedRule2));
 		when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
 
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.hasExpression()).thenReturn(false);
 
-		AttributeMetaData attr2 = mock(AttributeMetaData.class);
+		Attribute attr2 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.hasExpression()).thenReturn(false);
 
-		AttributeMetaData attr3 = mock(AttributeMetaData.class);
+		Attribute attr3 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr3")).thenReturn(attr3);
 		when(attr1.hasExpression()).thenReturn(false);
 
-		AttributeMetaData attr4 = mock(AttributeMetaData.class);
+		Attribute attr4 = mock(Attribute.class);
 		when(entityMetaData.getAttribute("attr4")).thenReturn(attr4);
 		when(attr1.hasExpression()).thenReturn(true);
 

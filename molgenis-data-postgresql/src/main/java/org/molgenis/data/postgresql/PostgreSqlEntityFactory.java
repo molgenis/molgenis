@@ -3,7 +3,7 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public class PostgreSqlEntityFactory
 			Entity e = entityManager.create(entityMetaData, fetch);
 
 			// TODO performance, iterate over fetch if available
-			for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
+			for (Attribute attr : entityMetaData.getAtomicAttributes())
 			{
 				if (fetch == null || fetch.hasField(attr.getName()))
 				{
@@ -88,7 +88,7 @@ public class PostgreSqlEntityFactory
 		 * @return value for the given attribute in the type defined by the attribute type
 		 * @throws SQLException if an error occurs reading from the result set
 		 */
-		private Object mapValue(ResultSet resultSet, AttributeMetaData attr) throws SQLException
+		private Object mapValue(ResultSet resultSet, Attribute attr) throws SQLException
 		{
 			return mapValue(resultSet, attr, attr.getName());
 		}
@@ -103,7 +103,7 @@ public class PostgreSqlEntityFactory
 		 * @return value for the given attribute in the type defined by the attribute type
 		 * @throws SQLException if an error occurs reading from the result set
 		 */
-		private Object mapValue(ResultSet resultSet, AttributeMetaData attr, String colName) throws SQLException
+		private Object mapValue(ResultSet resultSet, Attribute attr, String colName) throws SQLException
 		{
 			Object value;
 			switch (attr.getDataType())
@@ -181,7 +181,7 @@ public class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
-				AttributeMetaData idAttr = entityMeta.getIdAttribute();
+				Attribute idAttr = entityMeta.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
 				for (String[] mrefIdAndOrder : mrefIdsAndOrder)
 				{
@@ -208,7 +208,7 @@ public class PostgreSqlEntityFactory
 		 * @param idAttr     id attribute
 		 * @return entity value
 		 */
-		private static Object convertMrefIdValue(String idValueStr, AttributeMetaData idAttr)
+		private static Object convertMrefIdValue(String idValueStr, Attribute idAttr)
 		{
 			// use iteration instead of tail recursion
 			while (true)

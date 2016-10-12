@@ -1,6 +1,6 @@
 package org.molgenis.util;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
@@ -27,7 +27,7 @@ public class EntityUtilsTest
 	public void isEmptyAttributeValuesNull()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityMeta.getAtomicAttributes()).thenReturn(singletonList(attr));
 		when(entityMeta.getAttribute("attr")).thenReturn(attr);
@@ -38,7 +38,7 @@ public class EntityUtilsTest
 	public void isEmptyAttributeValuesNotNull()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityMeta.getAtomicAttributes()).thenReturn(singletonList(attr));
 		when(entityMeta.getAttribute("attr")).thenReturn(attr);

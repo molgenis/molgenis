@@ -6,7 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
@@ -44,17 +44,17 @@ public class VcfRepository extends AbstractRepository
 	private final String entityName;
 	private final VcfAttributes vcfAttributes;
 	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
 
 	public VcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
+			EntityMetaDataFactory entityMetaFactory, AttributeFactory attrMetaFactory) throws IOException
 	{
 		this(new VcfReaderFactoryImpl(file), entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 	}
 
 	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityMetaDataFactory entityMetaFactory, AttributeFactory attrMetaFactory)
 	{
 		this.vcfReaderFactory = requireNonNull(vcfReaderFactory);
 		this.entityName = requireNonNull(entityName);

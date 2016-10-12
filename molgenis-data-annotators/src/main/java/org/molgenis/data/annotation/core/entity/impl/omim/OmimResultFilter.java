@@ -5,8 +5,8 @@ import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -20,19 +20,19 @@ import static org.molgenis.data.annotation.core.entity.impl.omim.OmimAnnotator.*
 public class OmimResultFilter implements ResultFilter
 {
 	private EntityMetaDataFactory entityMetaDataFactory;
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	private OmimAnnotator omimAnnotator;
 
 	public OmimResultFilter(EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory, OmimAnnotator omimAnnotator)
+			AttributeFactory attributeFactory, OmimAnnotator omimAnnotator)
 	{
 		this.entityMetaDataFactory = entityMetaDataFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 		this.omimAnnotator = omimAnnotator;
 	}
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return Collections.emptyList();
 	}
@@ -49,7 +49,7 @@ public class OmimResultFilter implements ResultFilter
 		EntityMetaData emd = entityMetaDataFactory.create().setName(OmimAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
-		AttributeMetaData id = attributeMetaDataFactory.create().setName("ID").setAuto(true);
+		Attribute id = attributeFactory.create().setName("ID").setAuto(true);
 		emd.setIdAttribute(id);
 
 		return firstResult.transform(e ->

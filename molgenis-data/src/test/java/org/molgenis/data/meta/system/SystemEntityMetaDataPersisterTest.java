@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
@@ -65,7 +65,7 @@ public class SystemEntityMetaDataPersisterTest
 		EntityMetaData removedMeta = when(mock(EntityMetaData.class).getName()).thenReturn("removed").getMock();
 		when(removedMeta.getPackage()).thenReturn(systemPackage);
 		when(removedMeta.toString()).thenReturn("removed");
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getRefEntity()).thenReturn(refRemovedMeta)
+		Attribute refAttr = when(mock(Attribute.class).getRefEntity()).thenReturn(refRemovedMeta)
 				.getMock();
 		when(removedMeta.getAtomicAttributes()).thenReturn(singletonList(refAttr));
 
@@ -96,7 +96,7 @@ public class SystemEntityMetaDataPersisterTest
 	@Test
 	public void persistSystemPackageChange()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(Stream.empty());
@@ -126,7 +126,7 @@ public class SystemEntityMetaDataPersisterTest
 	@Test
 	public void persistSystemPackageNoChange()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(Stream.empty());

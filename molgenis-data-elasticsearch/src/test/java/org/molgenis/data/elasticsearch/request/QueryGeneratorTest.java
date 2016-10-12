@@ -8,8 +8,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -68,7 +68,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attrFactory;
+	AttributeFactory attrFactory;
 
 	@BeforeMethod
 	public void setUp()
@@ -86,8 +86,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		entityMeta.addAttribute(attrFactory.create().setName(boolAttrName).setDataType(BOOL));
 		entityMeta.addAttribute(
 				attrFactory.create().setName(categoricalAttrName).setDataType(CATEGORICAL).setRefEntity(refEntityMeta));
-		AttributeMetaData compoundPart0Attr = attrFactory.create().setName(compoundPart0AttrName).setDataType(STRING);
-		AttributeMetaData compoundPart1Attr = attrFactory.create().setName(compoundPart1AttrName).setDataType(STRING);
+		Attribute compoundPart0Attr = attrFactory.create().setName(compoundPart0AttrName).setDataType(STRING);
+		Attribute compoundPart1Attr = attrFactory.create().setName(compoundPart1AttrName).setDataType(STRING);
 		entityMeta.addAttribute(attrFactory.create().setName(compoundAttrName).setDataType(COMPOUND)
 				.setAttributeParts(asList(compoundPart0Attr, compoundPart1Attr)));
 		entityMeta.addAttribute(attrFactory.create().setName(dateAttrName).setDataType(DATE));
