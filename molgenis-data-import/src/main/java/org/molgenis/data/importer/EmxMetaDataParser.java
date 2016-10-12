@@ -83,6 +83,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ATTRIBUTES_NAME = "name";
 	private static final String EMX_ATTRIBUTES_ENTITY = "entity";
 	private static final String EMX_ATTRIBUTES_REF_ENTITY = "refEntity";
+	private static final String EMX_ATTRIBUTES_MAPPED_BY = "mappedBy";
+	private static final String EMX_ATTRIBUTES_DEFAULT_VALUE = "defaultValue";
 	private static final String EMX_ATTRIBUTES_ID_ATTRIBUTE = "idAttribute";
 	private static final String EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE = "lookupAttribute";
 	private static final String EMX_ATTRIBUTES_LABEL_ATTRIBUTE = "labelAttribute";
@@ -100,10 +102,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
 	private static final String EMX_ATTRIBUTES_UNIQUE = "unique";
 	private static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
-	private static final String EMX_ATTRIBUTES_DEFAULT_VALUE = "defaultValue";
 
 	// NOT YET SUPPORTED
-	// private static final String EMX_ATTRIBUTES_MAPPED_BY = "mappedBy";
 	// private static final String EMX_ATTRIBUTES_AUTO = "auto";
 	// private static final String EMX_ATTRIBUTES_VISIBLE_EXPRESSION = "visibleExpression";
 
@@ -147,8 +147,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ATTRIBUTES_LABEL, EMX_ATTRIBUTES_LABEL_ATTRIBUTE, EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE,
 					EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE, EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
 					EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN, EMX_ATTRIBUTES_READ_ONLY,
-					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE, EMX_ATTRIBUTES_EXPRESSION,
-					EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE);
+					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_MAPPED_BY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE,
+					EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE);
 
 	private static final String AUTO = "auto";
 
@@ -1034,6 +1034,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String entityName = attribute.getString(EMX_ATTRIBUTES_ENTITY);
 			final String attributeName = attribute.getString(EMX_ATTRIBUTES_NAME);
 			final String refEntityName = (String) attribute.get(EMX_ATTRIBUTES_REF_ENTITY);
+			final String mappedByAttrName = (String) attribute.get(EMX_ATTRIBUTES_MAPPED_BY);
 			EntityType EntityType = intermediateResults.getEntityType(entityName);
 			Attribute Attribute = EntityType.getAttribute(attributeName);
 
@@ -1049,13 +1050,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				if (dataService != null)
 				{
+					EntityType refEntityType;
 					if (intermediateResults.knowsEntity(refEntityName))
 					{
-						Attribute.setRefEntity(intermediateResults.getEntityType(refEntityName));
+						refEntityType = intermediateResults.getEntityType(refEntityName);
 					}
 					else
 					{
-						EntityType refEntityType;
 						refEntityType = dataService.getEntityType(refEntityName);
 						if (refEntityType == null)
 						{
@@ -1063,8 +1064,19 @@ public class EmxMetaDataParser implements MetaDataParser
 									"attributes.refEntity error on line " + rowIndex + ": " + refEntityName
 											+ " unknown");
 						}
-						// allow computed xref attributes to refer to pre-existing entities
-						Attribute.setRefEntity(refEntityType);
+					}
+					Attribute.setRefEntity(refEntityType);
+
+					if (mappedByAttrName != null)
+					{
+						Attribute mappedByAttr = refEntityType.getAttribute(mappedByAttrName);
+						if (mappedByAttr == null)
+						{
+							throw new IllegalArgumentException(
+									"attributes.mappedBy error on line " + rowIndex + ": " + mappedByAttrName
+											+ " unknown");
+						}
+						Attribute.setMappedBy(mappedByAttr);
 					}
 				}
 				else
