@@ -8,10 +8,10 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.settings.DefaultSettingsEntityMetaData.ATTR_ID;
+import static org.molgenis.data.settings.DefaultSettingsEntityType.ATTR_ID;
 
 /**
- * Populates the data service with default setting values for all {@link DefaultSettingsEntityMetaData} beans.
+ * Populates the data service with default setting values for all {@link DefaultSettingsEntityType} beans.
  */
 @Component
 public class SettingsPopulator
@@ -27,17 +27,17 @@ public class SettingsPopulator
 	public void initialize(ContextRefreshedEvent event)
 	{
 		ApplicationContext ctx = event.getApplicationContext();
-		ctx.getBeansOfType(DefaultSettingsEntityMetaData.class).values().forEach(this::initialize);
+		ctx.getBeansOfType(DefaultSettingsEntityType.class).values().forEach(this::initialize);
 	}
 
-	private void initialize(DefaultSettingsEntityMetaData defaultSettingsEntityMeta)
+	private void initialize(DefaultSettingsEntityType defaultSettingsEntityType)
 	{
-		Entity settingsEntity = defaultSettingsEntityMeta.getSettings();
+		Entity settingsEntity = defaultSettingsEntityType.getSettings();
 		if (settingsEntity == null)
 		{
-			Entity defaultSettingsEntity = defaultSettingsEntityMeta.getDefaultSettings();
-			defaultSettingsEntity.set(ATTR_ID, defaultSettingsEntityMeta.getSimpleName());
-			dataService.add(defaultSettingsEntityMeta.getName(), defaultSettingsEntity);
+			Entity defaultSettingsEntity = defaultSettingsEntityType.getDefaultSettings();
+			defaultSettingsEntity.set(ATTR_ID, defaultSettingsEntityType.getSimpleName());
+			dataService.add(defaultSettingsEntityType.getName(), defaultSettingsEntity);
 		}
 	}
 }

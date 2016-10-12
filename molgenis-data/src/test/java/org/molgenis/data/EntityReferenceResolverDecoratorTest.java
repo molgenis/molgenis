@@ -3,7 +3,7 @@ package org.molgenis.data;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,7 +25,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Mock
 	private Repository<Entity> decoratedRepo;
 	@Mock
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 	@Mock
 	private EntityManager entityManager;
 	private EntityReferenceResolverDecorator entityReferenceResolverDecorator;
@@ -40,7 +40,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void setUpBeforeMethod()
 	{
 		initMocks(this);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
+		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		entityReferenceResolverDecorator = new EntityReferenceResolverDecorator(decoratedRepo, entityManager);
 	}
 
@@ -155,7 +155,7 @@ public class EntityReferenceResolverDecoratorTest
 		when(query.getFetch()).thenReturn(fetch);
 		Stream<Entity> entities = Stream.of(entity0);
 		when(decoratedRepo.findAll(query)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityMeta, entities, fetch)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityType, entities, fetch)).thenReturn(entities);
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
@@ -167,7 +167,7 @@ public class EntityReferenceResolverDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		Stream<Entity> entities = Stream.of(entity0);
 		when(decoratedRepo.findAll(query)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(entities);
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
@@ -184,7 +184,7 @@ public class EntityReferenceResolverDecoratorTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		when(decoratedRepo.findAll(entityIds)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityMeta, entities, null))
+		when(entityManager.resolveReferences(entityType, entities, null))
 				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
@@ -203,7 +203,7 @@ public class EntityReferenceResolverDecoratorTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityMeta, entities, fetch))
+		when(entityManager.resolveReferences(entityType, entities, fetch))
 				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
@@ -220,7 +220,7 @@ public class EntityReferenceResolverDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		List<Entity> entitiesWithRefs = Arrays.asList(entity0WithRefs, entity1WithRefs);
 
-		when(entityManager.resolveReferences(eq(entityMeta), streamArgumentCaptor.capture(), eq(fetch)))
+		when(entityManager.resolveReferences(eq(entityType), streamArgumentCaptor.capture(), eq(fetch)))
 				.thenReturn(entitiesWithRefs.stream());
 
 		// the test
@@ -245,7 +245,7 @@ public class EntityReferenceResolverDecoratorTest
 		when(decoratedRepo.findOne(q)).thenReturn(entity);
 		entityReferenceResolverDecorator.findOne(q);
 		verify(decoratedRepo, times(1)).findOne(q);
-		verify(entityManager).resolveReferences(entityMeta, entity, fetch);
+		verify(entityManager).resolveReferences(entityType, entity, fetch);
 	}
 
 	@Test
@@ -286,7 +286,7 @@ public class EntityReferenceResolverDecoratorTest
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
 		entityReferenceResolverDecorator.findOneById(id, fetch);
 		verify(decoratedRepo, times(1)).findOneById(id, fetch);
-		verify(entityManager).resolveReferences(entityMeta, entity, fetch);
+		verify(entityManager).resolveReferences(entityType, entity, fetch);
 	}
 
 	@Test
@@ -307,10 +307,10 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void getEntityMetaData()
+	public void getEntityType()
 	{
-		entityReferenceResolverDecorator.getEntityMetaData();
-		verify(decoratedRepo, times(1)).getEntityMetaData();
+		entityReferenceResolverDecorator.getEntityType();
+		verify(decoratedRepo, times(1)).getEntityType();
 		verifyZeroInteractions(entityManager);
 	}
 
@@ -328,10 +328,10 @@ public class EntityReferenceResolverDecoratorTest
 		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		when(decoratedRepo.findAll(q)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(entities);
 		entityReferenceResolverDecorator.iterator();
 		verify(decoratedRepo, times(1)).findAll(q);
-		verify(entityManager).resolveReferences(entityMeta, entities, null);
+		verify(entityManager).resolveReferences(entityType, entities, null);
 	}
 
 	@Test

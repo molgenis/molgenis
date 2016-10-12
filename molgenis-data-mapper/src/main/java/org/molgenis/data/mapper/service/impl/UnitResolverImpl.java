@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.utils.UnitHelper;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -42,7 +42,7 @@ public class UnitResolverImpl implements UnitResolver
 	}
 
 	@Override
-	public Unit<? extends Quantity> resolveUnit(AttributeMetaData attr, EntityMetaData entityMeta)
+	public Unit<? extends Quantity> resolveUnit(Attribute attr, EntityType entityType)
 	{
 		Set<String> tokens = tokenize(attr.getLabel(), attr.getDescription());
 

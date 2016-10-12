@@ -2,7 +2,7 @@ package org.molgenis.ontology.sorta.job;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.*;
 
@@ -13,15 +13,15 @@ public class SortaJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public SortaJobExecution(EntityMetaData entityMeta)
+	public SortaJobExecution(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
-	public SortaJobExecution(String identifier, EntityMetaData entityMeta)
+	public SortaJobExecution(String identifier, EntityType entityType)
 	{
-		super(identifier, entityMeta);
+		super(identifier, entityType);
 		setDefaultValues();
 	}
 

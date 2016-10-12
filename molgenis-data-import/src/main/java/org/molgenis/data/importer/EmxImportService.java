@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -55,7 +55,7 @@ public class EmxImportService implements ImportService
 				if (entityName.equalsIgnoreCase(EMX_ATTRIBUTES)) return true;
 				if (entityName.equalsIgnoreCase(EMX_LANGUAGES)) return true;
 				if (entityName.equalsIgnoreCase(EMX_I18NSTRINGS)) return true;
-				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
+				if (dataService.getMeta().getEntityType(entityName) != null) return true;
 			}
 		}
 
@@ -68,7 +68,7 @@ public class EmxImportService implements ImportService
 	{
 		ParsedMetaData parsedMetaData = parser.parse(source, defaultPackage);
 
-		// TODO altered entities (merge, see getEntityMetaData)
+		// TODO altered entities (merge, see getEntityType)
 		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData, defaultPackage));
 	}
 
@@ -126,14 +126,14 @@ public class EmxImportService implements ImportService
 			RepositoryCollection repositoryCollection, String selectedPackage)
 	{
 		List<String> skipEntities = newArrayList(EMX_ATTRIBUTES, EMX_PACKAGES, EMX_ENTITIES, EMX_TAGS);
-		ImmutableMap<String, EntityMetaData> entityMetaDataMap = parser.parse(repositoryCollection, selectedPackage)
+		ImmutableMap<String, EntityType> EntityTypeMap = parser.parse(repositoryCollection, selectedPackage)
 				.getEntityMap();
 
 		LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
-		stream(entityMetaDataMap.keySet().spliterator(), false).forEach(entityName ->
+		stream(EntityTypeMap.keySet().spliterator(), false).forEach(entityName ->
 		{
 			boolean importable = skipEntities.contains(entityName) || metaDataService
-					.isEntityMetaDataCompatible(entityMetaDataMap.get(entityName));
+					.isEntityTypeCompatible(EntityTypeMap.get(entityName));
 
 			importableEntitiesMap.put(entityName, importable);
 		});

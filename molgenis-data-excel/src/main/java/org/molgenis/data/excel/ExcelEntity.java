@@ -3,7 +3,7 @@ package org.molgenis.data.excel;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -26,9 +26,9 @@ public class ExcelEntity extends DynamicEntity
 	private transient Map<String, Object> cachedValueMap;
 
 	public ExcelEntity(Row row, Map<String, Integer> colNamesMap, List<CellProcessor> cellProcessors,
-			EntityMetaData entityMetaData)
+			EntityType entityType)
 	{
-		super(entityMetaData);
+		super(entityType);
 
 		if (row == null) throw new IllegalArgumentException("row is null");
 		if (colNamesMap == null) throw new IllegalArgumentException("column names map is null");

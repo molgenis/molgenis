@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -29,10 +29,9 @@ public class PartialEntity implements Entity
 		this.entityManager = requireNonNull(entityManager);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedEntity.getEntityMetaData();
+		return decoratedEntity.getEntityType();
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).get(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).get(attributeName);
 		}
 	}
 
@@ -81,7 +80,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getString(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getString(attributeName);
 		}
 	}
 
@@ -95,7 +94,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getInt(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getInt(attributeName);
 		}
 	}
 
@@ -108,7 +107,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getLong(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getLong(attributeName);
 		}
 	}
 
@@ -121,7 +120,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getBoolean(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getBoolean(attributeName);
 		}
 	}
 
@@ -134,7 +133,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getDouble(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getDouble(attributeName);
 		}
 	}
 
@@ -147,7 +146,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getDate(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getDate(attributeName);
 		}
 	}
 
@@ -160,7 +159,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getUtilDate(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getUtilDate(attributeName);
 		}
 	}
 
@@ -173,7 +172,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getTimestamp(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getTimestamp(attributeName);
 		}
 	}
 
@@ -186,7 +185,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntity(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getEntity(attributeName);
 		}
 	}
 
@@ -199,7 +198,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntity(attributeName, clazz);
+			return entityManager.getReference(getEntityType(), getIdValue()).getEntity(attributeName, clazz);
 		}
 	}
 
@@ -212,7 +211,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntities(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getEntities(attributeName);
 		}
 	}
 
@@ -225,7 +224,7 @@ public class PartialEntity implements Entity
 		}
 		else
 		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntities(attributeName, clazz);
+			return entityManager.getReference(getEntityType(), getIdValue()).getEntities(attributeName, clazz);
 		}
 	}
 

@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.login.MolgenisLoginController;
-import org.molgenis.security.user.MolgenisUserDetailsService;
+import org.molgenis.security.user.UserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +36,10 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
-import static org.molgenis.auth.MolgenisUserMetaData.*;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.GroupMetaData.NAME;
+import static org.molgenis.auth.UserMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
@@ -55,25 +55,25 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 	private final GooglePublicKeysManager googlePublicKeysManager;
 	private final DataService dataService;
-	private final MolgenisUserDetailsService molgenisUserDetailsService;
+	private final UserDetailsService userDetailsService;
 	private final AppSettings appSettings;
-	private final MolgenisUserFactory molgenisUserFactory;
-	private final MolgenisGroupMemberFactory molgenisGroupMemberFactory;
+	private final UserFactory userFactory;
+	private final GroupMemberFactory groupMemberFactory;
 
 	@Autowired
 	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
-			DataService dataService, MolgenisUserDetailsService molgenisUserDetailsService, AppSettings appSettings,
-			MolgenisUserFactory molgenisUserFactory, MolgenisGroupMemberFactory molgenisGroupMemberFactory)
+			DataService dataService, UserDetailsService userDetailsService, AppSettings appSettings,
+			UserFactory userFactory, GroupMemberFactory groupMemberFactory)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
-		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
-		this.molgenisGroupMemberFactory = requireNonNull(molgenisGroupMemberFactory);
+		this.userFactory = requireNonNull(userFactory);
+		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 
 		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 
 		this.googlePublicKeysManager = requireNonNull(googlePublicKeysManager);
 		this.dataService = requireNonNull(dataService);
-		this.molgenisUserDetailsService = requireNonNull(molgenisUserDetailsService);
+		this.userDetailsService = requireNonNull(userDetailsService);
 		this.appSettings = requireNonNull(appSettings);
 	}
 
@@ -140,18 +140,18 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 		return runAsSystem(() ->
 		{
-			MolgenisUser user;
+			User user;
 
-			user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(GOOGLEACCOUNTID, principal).findOne();
+			user = dataService.query(USER, User.class).eq(GOOGLEACCOUNTID, principal).findOne();
 			if (user == null)
 			{
 				// no user with google account
-				user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(EMAIL, email).findOne();
+				user = dataService.query(USER, User.class).eq(EMAIL, email).findOne();
 				if (user != null)
 				{
 					// connect google account to user
 					user.setGoogleAccountId(principal);
-					dataService.update(MOLGENIS_USER, user);
+					dataService.update(USER, user);
 				}
 				else
 				{
@@ -169,12 +169,12 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 				throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
 			}
 			// create authentication
-			Collection<? extends GrantedAuthority> authorities = molgenisUserDetailsService.getAuthorities(user);
+			Collection<? extends GrantedAuthority> authorities = userDetailsService.getAuthorities(user);
 			return new UsernamePasswordAuthenticationToken(user.getUsername(), credentials, authorities);
 		});
 	}
 
-	private MolgenisUser createMolgenisUser(String username, String email, String givenName, String familyName,
+	private User createMolgenisUser(String username, String email, String givenName, String familyName,
 			String googleAccountId)
 	{
 		if (!appSettings.getSignUp())
@@ -189,7 +189,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 		// create user
 		LOG.info("first login for [{}], creating MOLGENIS user", username);
-		MolgenisUser user = molgenisUserFactory.create();
+		User user = userFactory.create();
 		user.setUsername(username);
 		user.setPassword(UUID.randomUUID().toString());
 		user.setEmail(email);
@@ -205,14 +205,14 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 			user.setLastName(familyName);
 		}
 		user.setGoogleAccountId(googleAccountId);
-		dataService.add(MOLGENIS_USER, user);
+		dataService.add(USER, user);
 
 		// add user to all-users group
-		MolgenisGroupMember groupMember = molgenisGroupMemberFactory.create();
-		MolgenisGroup group = dataService.query(MOLGENIS_GROUP, MolgenisGroup.class).eq(NAME, ALL_USER_GROUP).findOne();
-		groupMember.setMolgenisGroup(group);
-		groupMember.setMolgenisUser(user);
-		dataService.add(MOLGENIS_GROUP_MEMBER, groupMember);
+		GroupMember groupMember = groupMemberFactory.create();
+		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
+		groupMember.setGroup(group);
+		groupMember.setUser(user);
+		dataService.add(GROUP_MEMBER, groupMember);
 
 		return user;
 	}

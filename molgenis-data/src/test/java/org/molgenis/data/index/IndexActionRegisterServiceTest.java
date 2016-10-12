@@ -3,11 +3,11 @@ package org.molgenis.data.index;
 import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
@@ -66,10 +66,10 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
-		EntityMetaData emd = mock(EntityMetaData.class);
+		EntityType emd = mock(EntityType.class);
 
 		// To avoid addReferencingEntities(IndexAction indexAction)
-		when(dataService.getEntityMetaData(indexAction.getEntityFullName())).thenReturn(emd);
+		when(dataService.getEntityType(indexAction.getEntityFullName())).thenReturn(emd);
 		when(dataService.getEntityNames()).thenReturn(Stream.empty());
 
 		indexActionRegisterService.register("TestEntityName", "123");
@@ -80,8 +80,7 @@ public class IndexActionRegisterServiceTest
 
 		verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);
 		verify(dataService).add(eq(INDEX_ACTION), indexActionStreamCaptor.capture());
-		assertEquals(indexActionStreamCaptor.getValue().collect(Collectors.toList()),
-				Lists.newArrayList(indexAction));
+		assertEquals(indexActionStreamCaptor.getValue().collect(Collectors.toList()), Lists.newArrayList(indexAction));
 	}
 
 	@Test
@@ -124,8 +123,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-		when(entityMetaData.getName()).thenReturn("ABC");
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("ABC");
 		indexActionRegisterService.addExcludedEntity("ABC");
 
 		indexActionRegisterService.register("ABC", "123");

@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -57,10 +57,9 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 		return decoratedRepository.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepository.getEntityMetaData();
+		return decoratedRepository.getEntityType();
 	}
 
 	@Override

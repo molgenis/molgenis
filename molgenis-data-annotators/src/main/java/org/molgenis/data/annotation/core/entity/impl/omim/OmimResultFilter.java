@@ -5,10 +5,10 @@ import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 
 import java.util.Arrays;
@@ -19,20 +19,20 @@ import static org.molgenis.data.annotation.core.entity.impl.omim.OmimAnnotator.*
 
 public class OmimResultFilter implements ResultFilter
 {
-	private EntityMetaDataFactory entityMetaDataFactory;
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
+	private AttributeFactory attributeFactory;
 	private OmimAnnotator omimAnnotator;
 
-	public OmimResultFilter(EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory, OmimAnnotator omimAnnotator)
+	public OmimResultFilter(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
+			OmimAnnotator omimAnnotator)
 	{
-		this.entityMetaDataFactory = entityMetaDataFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
+		this.attributeFactory = attributeFactory;
 		this.omimAnnotator = omimAnnotator;
 	}
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return Collections.emptyList();
 	}
@@ -46,10 +46,10 @@ public class OmimResultFilter implements ResultFilter
 		}
 		Optional<Entity> firstResult = FluentIterable.from(results).first();
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName(OmimAnnotator.NAME);
+		EntityType emd = entityTypeFactory.create().setName(OmimAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
-		AttributeMetaData id = attributeMetaDataFactory.create().setName("ID").setAuto(true);
+		Attribute id = attributeFactory.create().setName("ID").setAuto(true);
 		emd.setIdAttribute(id);
 
 		return firstResult.transform(e ->

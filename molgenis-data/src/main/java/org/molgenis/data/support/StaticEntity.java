@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -22,14 +22,14 @@ public abstract class StaticEntity implements Entity
 		this.entity = requireNonNull(entity);
 	}
 
-	public StaticEntity(EntityMetaData entityMeta)
+	public StaticEntity(EntityType entityType)
 	{
-		this.entity = new DynamicEntity(entityMeta);
+		this.entity = new DynamicEntity(entityType);
 	}
 
-	public StaticEntity(Object id, EntityMetaData entityMeta)
+	public StaticEntity(Object id, EntityType entityType)
 	{
-		this(entityMeta);
+		this(entityType);
 		setIdValue(id);
 	}
 
@@ -97,10 +97,9 @@ public abstract class StaticEntity implements Entity
 		return entity.getEntity(attributeName, clazz);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return entity.getEntityMetaData();
+		return entity.getEntityType();
 	}
 
 	@Override
@@ -161,5 +160,11 @@ public abstract class StaticEntity implements Entity
 	public void setIdValue(Object id)
 	{
 		entity.setIdValue(id);
+	}
+
+	@Override
+	public String toString()
+	{
+		return entity.toString();
 	}
 }

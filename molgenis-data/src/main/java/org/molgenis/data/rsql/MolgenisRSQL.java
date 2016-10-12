@@ -5,7 +5,7 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,10 +20,10 @@ public class MolgenisRSQL
 {
 	private final RSQLParser rsqlParser = new RSQLParser();
 
-	public Query<Entity> createQuery(String rsql, EntityMetaData entityMetaData) throws RSQLParserException
+	public Query<Entity> createQuery(String rsql, EntityType entityType) throws RSQLParserException
 	{
 		Node rootNode = rsqlParser.parse(rsql);
-		MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(entityMetaData);
+		MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(entityType);
 
 		return rootNode.accept(visitor);
 	}

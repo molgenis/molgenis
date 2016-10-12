@@ -4,8 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
 import java.util.List;
@@ -44,18 +44,18 @@ public interface RepositoryAnnotator
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
 	/**
-	 * returns an entityMetaData containing the attributes the annotator will add
+	 * returns an EntityType containing the attributes the annotator will add
 	 *
 	 * @return ouputMetadata
 	 */
-	List<AttributeMetaData> getOutputAttributes();
+	List<Attribute> getOutputAttributes();
 
 	/**
-	 * Returns a entityMetaData containing the attributes needed for the annotator to work
+	 * Returns a EntityType containing the attributes needed for the annotator to work
 	 *
 	 * @return inputMetaData;
 	 */
-	List<AttributeMetaData> getRequiredAttributes();
+	List<Attribute> getRequiredAttributes();
 
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so
@@ -63,7 +63,7 @@ public interface RepositoryAnnotator
 	 * @param inputMetaData
 	 * @return canAnnotate
 	 */
-	String canAnnotate(EntityMetaData inputMetaData);
+	String canAnnotate(EntityType inputMetaData);
 
 	/**
 	 * Return the name of the annotator

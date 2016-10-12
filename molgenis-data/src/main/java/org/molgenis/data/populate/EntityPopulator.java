@@ -2,7 +2,7 @@ package org.molgenis.data.populate;
 
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,21 +37,20 @@ public class EntityPopulator
 	public void populate(Entity entity)
 	{
 		// auto date
-		generateAutoDateOrDateTime(singletonList(entity), entity.getEntityMetaData().getAttributes());
+		generateAutoDateOrDateTime(singletonList(entity), entity.getEntityType().getAttributes());
 
 		// auto id
-		AttributeMetaData idAttr = entity.getEntityMetaData().getIdAttribute();
+		Attribute idAttr = entity.getEntityType().getIdAttribute();
 		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null && (idAttr.getDataType() == STRING))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
 	}
 
-	private static void generateAutoDateOrDateTime(Iterable<? extends Entity> entities,
-			Iterable<AttributeMetaData> attrs)
+	private static void generateAutoDateOrDateTime(Iterable<? extends Entity> entities, Iterable<Attribute> attrs)
 	{
 		// get auto date and datetime attributes
-		Iterable<AttributeMetaData> autoAttrs = stream(attrs.spliterator(), false).filter(attr ->
+		Iterable<Attribute> autoAttrs = stream(attrs.spliterator(), false).filter(attr ->
 		{
 			if (attr.isAuto())
 			{
@@ -68,7 +67,7 @@ public class EntityPopulator
 		Date dateNow = new Date();
 		for (Entity entity : entities)
 		{
-			for (AttributeMetaData attr : autoAttrs)
+			for (Attribute attr : autoAttrs)
 			{
 				AttributeType type = attr.getDataType();
 				switch (type)

@@ -7,7 +7,7 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -53,7 +53,7 @@ public class OntologyImportService implements ImportService
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
-		List<EntityMetaData> addedEntities = Lists.newArrayList();
+		List<EntityType> addedEntities = Lists.newArrayList();
 		EntityImportReport report = new EntityImportReport();
 		try
 		{
@@ -88,7 +88,7 @@ public class OntologyImportService implements ImportService
 		catch (Exception e)
 		{
 			// Remove created repositories
-			for (EntityMetaData emd : addedEntities)
+			for (EntityType emd : addedEntities)
 			{
 				if (dataService.hasRepository(emd.getName()))
 				{

@@ -5,9 +5,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -32,14 +32,14 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.AttributeType.INT;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = L3CacheRepositoryDecoratorTest.Config.class)
 public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
 	private L3CacheRepositoryDecorator l3CacheRepositoryDecorator;
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 
 	private Entity entity1;
 	private Entity entity2;
@@ -59,10 +59,10 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private TransactionInformation transactionInformation;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private EntityManager entityManager;
@@ -80,21 +80,21 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityMetaData = entityMetaDataFactory.create(repositoryName);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
+		entityType = entityTypeFactory.create(repositoryName);
+		entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
+		entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
 
-		when(entityManager.create(entityMetaData, NO_POPULATE)).thenReturn(new DynamicEntity(entityMetaData));
+		when(entityManager.create(entityType, NO_POPULATE)).thenReturn(new DynamicEntity(entityType));
 
-		entity1 = entityManager.create(entityMetaData, NO_POPULATE);
+		entity1 = entityManager.create(entityType, NO_POPULATE);
 		entity1.set(ID, 1);
 		entity1.set(COUNTRY, "NL");
 
-		entity2 = entityManager.create(entityMetaData, NO_POPULATE);
+		entity2 = entityManager.create(entityType, NO_POPULATE);
 		entity2.set(ID, 2);
 		entity2.set(COUNTRY, "NL");
 
-		entity3 = entityManager.create(entityMetaData, NO_POPULATE);
+		entity3 = entityManager.create(entityType, NO_POPULATE);
 		entity3.set(ID, 3);
 		entity3.set(COUNTRY, "GB");
 
@@ -112,7 +112,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void beforeMethod()
 	{
 		reset(l3Cache, transactionInformation, decoratedRepository);
-		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMetaData);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		when(decoratedRepository.getName()).thenReturn(repositoryName);
 	}
 

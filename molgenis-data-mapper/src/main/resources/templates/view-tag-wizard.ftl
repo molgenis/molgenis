@@ -90,20 +90,20 @@
             <th></th>
             </thead>
             <tbody>
-            <#list attributes as attributeMetaData>
+            <#list attributes as attribute>
             <tr>
                 <td>
-                    <b>${attributeMetaData.name}</b>
-                    <p><i>${attributeMetaData.label!""}</i></p>
-                    <p><i>${attributeMetaData.description!""}</i></p>
+                    <b>${attribute.name}</b>
+                    <p><i>${attribute.label!""}</i></p>
+                    <p><i>${attribute.description!""}</i></p>
                 </td>
-                <#assign relationsAndTagsMap = taggedAttributeMetaDatas[attributeMetaData.name]>
+                <#assign relationsAndTagsMap = taggedAttributes[attribute.name]>
                 <#if relationsAndTagsMap.keySet()?has_content>
                     <#list relationsAndTagsMap.keySet() as relation>
-                        <td class="tag-column" id="${attributeMetaData.name}-tag-column">
+                        <td class="tag-column" id="${attribute.name}-tag-column">
                             <#list relationsAndTagsMap.get(relation) as tag>
                                 <button type="btn" class="btn btn-primary btn-xs remove-tag-btn"
-                                        data-relation="${relation.IRI}" data-attribute="${attributeMetaData.name}"
+                                        data-relation="${relation.IRI}" data-attribute="${attribute.name}"
                                         data-tag="${tag.IRI}">
                                 ${tag.label} <span class="glyphicon glyphicon-remove"></span>
                                 </button>
@@ -113,17 +113,17 @@
                     <td>
                         <button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right"
                                 data-relation="http://molgenis.org#isAssociatedWith"
-                                data-attribute="${attributeMetaData.name}" data-toggle="modal"
+                                data-attribute="${attribute.name}" data-toggle="modal"
                                 data-target="#edit-ontology-modal">
                             Edit <span class="glyphicon glyphicon-pencil"></span>
                         </button>
                     </td>
                 <#else>
-                    <td class="tag-column" id="${attributeMetaData.name}-tag-column"></td>
+                    <td class="tag-column" id="${attribute.name}-tag-column"></td>
                     <td style="width:10px">
                         <button type="btn" class="btn btn-default btn-xs edit-attribute-tags-btn pull-right"
                                 data-relation="http://molgenis.org#isAssociatedWith"
-                                data-attribute="${attributeMetaData.name}" data-toggle="modal"
+                                data-attribute="${attribute.name}" data-toggle="modal"
                                 data-target="#edit-ontology-modal">
                             Edit <span class="glyphicon glyphicon-pencil"></span>
                         </button>

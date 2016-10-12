@@ -14,8 +14,6 @@ import java.util.*;
 
 /**
  * This data util is made for converting the Molgenis charts structure to the Highchart structure
- *
- * @author jjetten
  */
 @Component
 public class HighchartSeriesUtil

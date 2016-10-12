@@ -3,8 +3,8 @@ package org.molgenis.ontology.sorta;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.*;
@@ -243,18 +243,18 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void findOntologyTermEntities()
 	{
-		AttributeMetaData nameAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Name").getMock();
+		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("Name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData omimAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("OMIM").getMock();
+		Attribute omimAttr = when(mock(Attribute.class).getName()).thenReturn("OMIM").getMock();
 		when(omimAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getAtomicAttributes()).thenReturn(asList(nameAttr, omimAttr));
-		when(entityMeta.getAttribute("Name")).thenReturn(nameAttr);
-		when(entityMeta.getAttribute("OMIM")).thenReturn(omimAttr);
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(nameAttr, omimAttr));
+		when(entityType.getAttribute("Name")).thenReturn(nameAttr);
+		when(entityType.getAttribute("OMIM")).thenReturn(omimAttr);
 
 		// Test one: match only the name of input with ontology terms
-		Entity firstInput = new DynamicEntity(entityMeta);
+		Entity firstInput = new DynamicEntity(entityType);
 		firstInput.set("Name", "hearing impairment");
 
 		Iterable<Entity> ontologyTerms_test1 = sortaServiceImpl.findOntologyTermEntities(ONTOLOGY_IRI, firstInput);
@@ -271,7 +271,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		assertEquals(iterator_test1.hasNext(), false);
 
 		// Test two: match the database annotation of input with ontology terms
-		Entity secondInput = new DynamicEntity(entityMeta);
+		Entity secondInput = new DynamicEntity(entityType);
 		secondInput.set("Name", "input");
 		secondInput.set("OMIM", "123456");
 
@@ -286,7 +286,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 
 		// Test three: match only the name of input with ontology terms, since the name contains multiple synonyms
 		// therefore add up all the scores from synonyms
-		Entity thirdInput = new DynamicEntity(entityMeta);
+		Entity thirdInput = new DynamicEntity(entityType);
 		thirdInput.set("Name", "proptosis, protruding eye, Exophthalmos ");
 
 		Iterable<Entity> ontologyTerms_test3 = sortaServiceImpl.findOntologyTermEntities(ONTOLOGY_IRI, thirdInput);

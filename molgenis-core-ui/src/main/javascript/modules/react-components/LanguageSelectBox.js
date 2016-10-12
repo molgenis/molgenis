@@ -1,4 +1,4 @@
-import RestClient from "rest-client/RestClientV1";
+import RestClient from "rest-client/RestClientV2";
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import Spinner from "./Spinner";
 import Select2 from "./wrapper/Select2";
@@ -46,13 +46,20 @@ var LanguageSelectBox = React.createClass({
     },
     _loadLanguages: function () {
         var self = this;
-        api.getAsync('/api/v2/sys_languages').done(function (languages) {
+        var query = {
+            'q': [{
+                'field': "active",
+                'operator': "EQUALS",
+                'value': true
+            }]
+        };
+        api.get('/api/v2/sys_language', query).done(function (languages) {
             var selectedLanguage = null;
             var select2Data = languages.items.map(function (item) {
                 if (item.code === languages.meta.languageCode) {
                     selectedLanguage = {id: item.code, text: item.name};
                 }
-                return {id: item.code, text: item.name}
+                return {id: item.code, text: item.name};
             });
 
             self.setState({

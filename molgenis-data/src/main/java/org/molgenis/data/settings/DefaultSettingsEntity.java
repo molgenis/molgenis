@@ -4,7 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +37,11 @@ public abstract class DefaultSettingsEntity implements Entity
 		this.entityName = PACKAGE_SETTINGS + '_' + entityId;
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
 		return RunAsSystemProxy.runAsSystem(() ->
 		{
-			return dataService.getEntityMetaData(entityName);
+			return dataService.getEntityType(entityName);
 		});
 	}
 
@@ -184,7 +183,7 @@ public abstract class DefaultSettingsEntity implements Entity
 				@Override
 				public Object getEntityId()
 				{
-					return getEntityMetaData().getSimpleName();
+					return getEntityType().getSimpleName();
 				}
 			});
 		});
@@ -211,7 +210,7 @@ public abstract class DefaultSettingsEntity implements Entity
 				@Override
 				public Object getEntityId()
 				{
-					return getEntityMetaData().getSimpleName();
+					return getEntityType().getSimpleName();
 				}
 			});
 		});
@@ -235,7 +234,7 @@ public abstract class DefaultSettingsEntity implements Entity
 	{
 		if (cachedEntity == null)
 		{
-			String id = getEntityMetaData().getSimpleName();
+			String id = getEntityType().getSimpleName();
 			cachedEntity = RunAsSystemProxy.runAsSystem(() ->
 			{
 				Entity entity = dataService.findOneById(entityName, id);

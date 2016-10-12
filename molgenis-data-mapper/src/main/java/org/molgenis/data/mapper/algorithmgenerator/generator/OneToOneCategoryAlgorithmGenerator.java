@@ -10,8 +10,8 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.MissingCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.NegativeCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRule;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
 
@@ -35,20 +35,20 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 	}
 
 	@Override
-	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public boolean isSuitable(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream()
 				.allMatch(this::isXrefOrCategorialDataType)) && sourceAttributes.size() == 1;
 	}
 
 	@Override
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
+			EntityType sourceEntityType)
 	{
 		String mapAlgorithm = null;
 		if (sourceAttributes.size() > 0)
 		{
-			AttributeMetaData firstSourceAttribute = sourceAttributes.get(0);
+			Attribute firstSourceAttribute = sourceAttributes.get(0);
 
 			List<Category> targetCategories = convertToCategory(targetAttribute);
 			List<Category> sourceCategories = convertToCategory(firstSourceAttribute);
@@ -68,7 +68,7 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 		return mapAlgorithm;
 	}
 
-	public String mapCategories(AttributeMetaData sourceAttributeMetaData, List<Category> targetCategories,
+	public String mapCategories(Attribute sourceAttribute, List<Category> targetCategories,
 			List<Category> sourceCategories, CategoryMapper categoryMapper)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
@@ -80,7 +80,7 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 			{
 				if (stringBuilder.length() == 0)
 				{
-					stringBuilder.append("$('").append(sourceAttributeMetaData.getName()).append("')").append(".map({");
+					stringBuilder.append("$('").append(sourceAttribute.getName()).append("')").append(".map({");
 				}
 				stringBuilder.append("\"").append(sourceCategory.getCode()).append("\":\"")
 						.append(bestTargetCategory.getCode()).append("\",");

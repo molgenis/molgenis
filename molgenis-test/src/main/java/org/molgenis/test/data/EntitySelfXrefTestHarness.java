@@ -1,6 +1,6 @@
 package org.molgenis.test.data;
 
-import org.molgenis.AttributeType;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
@@ -11,10 +11,10 @@ import javax.annotation.PostConstruct;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 
 @Component
 public class EntitySelfXrefTestHarness
@@ -27,10 +27,10 @@ public class EntitySelfXrefTestHarness
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private TestPackage testPackage;
@@ -40,26 +40,26 @@ public class EntitySelfXrefTestHarness
 	{
 	}
 
-	public EntityMetaData createDynamicEntityMetaData()
+	public EntityType createDynamicEntityType()
 	{
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("SelfRef").setBackend("PostgreSQL")
+		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("SelfRef").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID).addAttribute(createAttribute(ATTR_XREF, XREF))
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
 	}
 
-	private AttributeMetaData createAttribute(String name, AttributeType dataType)
+	private Attribute createAttribute(String name, AttributeType dataType)
 	{
-		return attributeMetaDataFactory.create().setName(name).setDataType(dataType);
+		return attributeFactory.create().setName(name).setDataType(dataType);
 	}
 
-	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities)
+	public Stream<Entity> createTestEntities(EntityType entityType, int numberOfEntities)
 	{
-		return IntStream.range(0, numberOfEntities).mapToObj(i -> createEntity(entityMetaData, i));
+		return IntStream.range(0, numberOfEntities).mapToObj(i -> createEntity(entityType, i));
 	}
 
-	private Entity createEntity(EntityMetaData entityMetaData, int id)
+	private Entity createEntity(EntityType entityType, int id)
 	{
-		Entity entity1 = new DynamicEntity(entityMetaData);
+		Entity entity1 = new DynamicEntity(entityType);
 		entity1.set(ATTR_ID, "" + id);
 		entity1.set(ATTR_XREF, entity1);
 		entity1.set(ATTR_STRING, "attr_string_old");

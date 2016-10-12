@@ -4,10 +4,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.molgenis.security.owned.OwnedEntityType;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -57,12 +57,12 @@ public class QuestionnairePluginController extends MolgenisPluginController
 				() -> QuestionnaireUtils.findQuestionnairesMetaData(dataService).collect(Collectors.toList()));
 
 		List<Questionnaire> questionnaires = questionnaireMeta.stream()
-				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME))
+				.map(e -> e.getString(EntityTypeMetadata.FULL_NAME))
 				.filter(name -> SecurityUtils.currentUserIsSu() || SecurityUtils
 						.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name ->
 				{
 					// Create entity if not yet exists for current user
-					EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
+					EntityType emd = dataService.getMeta().getEntityType(name);
 					Entity entity = findQuestionnaireEntity(name);
 					if (entity == null) entity = createQuestionnaireEntity(emd, QuestionnaireStatus.NOT_STARTED);
 
@@ -78,7 +78,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	public String showQuestionnairForm(@PathVariable("name") String name, Model model, HttpServletResponse response)
 			throws IOException
 	{
-		EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
+		EntityType emd = dataService.getMeta().getEntityType(name);
 		if (emd == null)
 		{
 			response.sendError(404);
@@ -106,7 +106,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	public String showThanks(@PathVariable("name") String name, Model model, HttpServletResponse response)
 			throws IOException
 	{
-		EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
+		EntityType emd = dataService.getMeta().getEntityType(name);
 		if (emd == null)
 		{
 			response.sendError(404);
@@ -117,17 +117,17 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		return "view-thanks";
 	}
 
-	private Entity createQuestionnaireEntity(EntityMetaData emd, QuestionnaireStatus status)
+	private Entity createQuestionnaireEntity(EntityType emd, QuestionnaireStatus status)
 	{
 		Entity entity = entityManager.create(emd, POPULATE);
-		entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		entity.set(QuestionnaireMetaData.ATTR_STATUS, status.toString());
 		dataService.add(emd.getName(), entity);
 
 		return entity;
 	}
 
-	private Questionnaire toQuestionnaireModel(Entity entity, EntityMetaData emd)
+	private Questionnaire toQuestionnaireModel(Entity entity, EntityType emd)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(QuestionnaireMetaData.ATTR_STATUS));
 		return new Questionnaire(emd.getName(), emd.getLabel(languageService.getCurrentUserLanguageCode()), status,
@@ -136,7 +136,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private Entity findQuestionnaireEntity(String name)
 	{
-		return dataService.findOne(name, EQ(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
+		return dataService.findOne(name, EQ(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
 	}
 
 	public String getThankYouText(String questionnaireName)

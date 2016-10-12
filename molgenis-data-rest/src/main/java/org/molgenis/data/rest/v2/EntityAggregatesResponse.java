@@ -4,7 +4,7 @@ import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AnonymizedAggregateResult;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +12,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {
 	private final AggregateResultResponse aggs;
-	private final AttributeMetaDataResponseV2 xAttr;
-	private final AttributeMetaDataResponseV2 yAttr;
+	private final AttributeResponseV2 xAttr;
+	private final AttributeResponseV2 yAttr;
 
-	public EntityAggregatesResponse(AggregateResult aggs, AttributeMetaDataResponseV2 xAttr,
-			AttributeMetaDataResponseV2 yAttr, String href)
+	public EntityAggregatesResponse(AggregateResult aggs, AttributeResponseV2 xAttr, AttributeResponseV2 yAttr,
+			String href)
 	{
 		super(href);
 		this.aggs = checkNotNull(AggregateResultResponse.toResponse(aggs));
@@ -33,12 +34,12 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 		return aggs;
 	}
 
-	public AttributeMetaDataResponseV2 getXAttr()
+	public AttributeResponseV2 getXAttr()
 	{
 		return xAttr;
 	}
 
-	public AttributeMetaDataResponseV2 getYAttr()
+	public AttributeResponseV2 getYAttr()
 	{
 		return yAttr;
 	}
@@ -99,20 +100,11 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 				{
 					Map<String, Object> valueMap = new HashMap<String, Object>();
 					Entity entity = (Entity) xLabel;
-					for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+					for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 					{
-						switch (attr.getDataType())
+						if (!isReferenceType(attr))
 						{
-							case XREF:
-							case CATEGORICAL:
-							case MREF:
-							case CATEGORICAL_MREF:
-							case COMPOUND:
-							case FILE:
-								break;
-							// $CASES-OMITTED$
-							default:
-								valueMap.put(attr.getName(), entity.getString(attr.getName()));
+							valueMap.put(attr.getName(), entity.getString(attr.getName()));
 						}
 					}
 					value = valueMap;

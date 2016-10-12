@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.meta;
 
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +13,11 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.AttributeType.ENUM;
 import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.mapper.meta.MapperPackage.PACKAGE_MAPPER;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class AttributeMappingMetaData extends SystemEntityMetaData
+public class AttributeMappingMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "AttributeMapping";
 	public static final String ATTRIBUTE_MAPPING = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;

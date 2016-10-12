@@ -1,7 +1,7 @@
 package org.molgenis.data.index.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.COUNT;
@@ -14,14 +14,14 @@ public class IndexActionGroup extends StaticEntity
 		super(entity);
 	}
 
-	public IndexActionGroup(EntityMetaData entityMeta)
+	public IndexActionGroup(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public IndexActionGroup(String id, EntityMetaData entityMeta)
+	public IndexActionGroup(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		set(ID, id);
 	}
 

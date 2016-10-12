@@ -2,10 +2,13 @@ package org.molgenis.util;
 
 import com.google.gson.*;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.lang.reflect.Type;
 import java.util.Date;
+
+import static java.lang.String.format;
+import static org.molgenis.MolgenisFieldTypes.AttributeType;
 
 /**
  * Serializer for concrete Entity subclasses. This allows you to return Entities in your Controllers, without having to
@@ -16,7 +19,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 	private JsonElement serializeReference(Entity entity, JsonSerializationContext context)
 	{
 		JsonObject result = new JsonObject();
-		result.addProperty("__entityName", entity.getEntityMetaData().getName());
+		result.addProperty("__entityName", entity.getEntityType().getName());
 		result.add("__idValue", context.serialize(entity.getIdValue()));
 		result.add("__labelValue", context.serialize(entity.getLabelValue()));
 		return result;
@@ -26,14 +29,15 @@ public class EntitySerializer implements JsonSerializer<Entity>
 	public JsonElement serialize(Entity entity, Type type, JsonSerializationContext context)
 	{
 		JsonObject result = new JsonObject();
-		result.addProperty("__entityName", entity.getEntityMetaData().getName());
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		result.addProperty("__entityName", entity.getEntityType().getName());
+		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attributeName = attr.getName();
 			Object value = entity.get(attributeName);
 			if (value != null)
 			{
-				switch (attr.getDataType())
+				AttributeType attrType = attr.getDataType();
+				switch (attrType)
 				{
 					case BOOL:
 						result.addProperty(attributeName, entity.getBoolean(attributeName));
@@ -46,6 +50,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
+					case ONE_TO_MANY:
 						JsonArray jsonArray = new JsonArray();
 						entity.getEntities(attributeName).forEach(e -> jsonArray.add(serializeReference(e, context)));
 						result.add(attributeName, jsonArray);
@@ -73,8 +78,10 @@ public class EntitySerializer implements JsonSerializer<Entity>
 					case TEXT:
 						result.addProperty(attributeName, value.toString());
 						break;
+					case COMPOUND:
+						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 					default:
-						throw new IllegalArgumentException("Unknown datatype!");
+						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 				}
 			}
 		}

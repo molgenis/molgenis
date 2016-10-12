@@ -33,7 +33,7 @@ public class JobExecutionUpdaterImpl implements JobExecutionUpdater
 	{
 		try
 		{
-			dataService.update(jobExecution.getEntityMetaData().getName(), jobExecution);
+			dataService.update(jobExecution.getEntityType().getName(), jobExecution);
 		}
 		catch (Exception ex)
 		{

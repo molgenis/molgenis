@@ -3,7 +3,7 @@ package org.molgenis.data;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -65,16 +65,16 @@ public class DataServiceImplTest
 		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
 		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
 		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("Entity1").getMock();
-		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn("Entity2").getMock();
-		EntityMetaData entityMeta3 = when(mock(EntityMetaData.class).getName()).thenReturn("Entity3").getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn("Entity1").getMock();
+		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn("Entity2").getMock();
+		EntityType entityType3 = when(mock(EntityType.class).getName()).thenReturn("Entity3").getMock();
 
-		when(metaDataService.getEntityMetaDatas()).thenAnswer(new Answer<Stream<EntityMetaData>>()
+		when(metaDataService.getEntityTypes()).thenAnswer(new Answer<Stream<EntityType>>()
 		{
 			@Override
-			public Stream<EntityMetaData> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<EntityType> answer(InvocationOnMock invocation) throws Throwable
 			{
-				return asList(entityMeta1, entityMeta2, entityMeta3).stream();
+				return asList(entityType1, entityType2, entityType3).stream();
 			}
 		});
 		dataService.setMetaDataService(metaDataService);

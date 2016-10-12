@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class AnnotationJobFactory
 	private MailSender mailSender;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
@@ -82,7 +82,7 @@ public class AnnotationJobFactory
 		AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
 		List<RepositoryAnnotator> annotators = Lists.newArrayList(
 				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository,
-						entityMetaDataFactory));
+						entityTypeFactory));
 		return new AnnotationJob(crudRepositoryAnnotator, username, annotators, repository,
 				new ProgressImpl(metaData, jobExecutionUpdater, mailSender), runAsAuthentication,
 				new TransactionTemplate(transactionManager));

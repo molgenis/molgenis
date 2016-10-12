@@ -3,8 +3,8 @@ package org.molgenis.data.importer;
 import com.google.common.collect.*;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
@@ -17,25 +17,25 @@ import java.util.Map;
  */
 public final class ParsedMetaData
 {
-	private final ImmutableMap<String, EntityMetaData> entities;
+	private final ImmutableMap<String, EntityType> entities;
 	private final ImmutableMap<String, Package> packages;
-	private final ImmutableSetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
-	private final ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final ImmutableSetMultimap<EntityType, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags;
+	private final ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> entityTags;
 	private final ImmutableMap<String, Language> languages;
 	private final ImmutableMap<String, I18nString> i18nStrings;
 
-	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
-			SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
-			List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags,
-			Map<String, Language> languages, ImmutableMap<String, I18nString> i18nStrings)
+	public ParsedMetaData(List<? extends EntityType> entities, Map<String, ? extends Package> packages,
+			SetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags,
+			List<SemanticTag<EntityType, LabeledResource, LabeledResource>> entityTags, Map<String, Language> languages,
+			ImmutableMap<String, I18nString> i18nStrings)
 	{
 		if (entities == null)
 		{
 			throw new NullPointerException("Null entities");
 		}
 
-		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.builder();
-		for (EntityMetaData emd : entities)
+		ImmutableMap.Builder<String, EntityType> builder = ImmutableMap.builder();
+		for (EntityType emd : entities)
 		{
 			builder.put(emd.getName(), emd);
 		}
@@ -45,17 +45,16 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
-		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
+		ImmutableSetMultimap.Builder<EntityType, SemanticTag<Attribute, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
 				.builder();
 		for (String simpleEntityName : attributeTags.keys())
 		{
-			EntityMetaData emd = this.entities.get(simpleEntityName);
+			EntityType emd = this.entities.get(simpleEntityName);
 			if (emd == null)
 			{
 				throw new NullPointerException("Unknown entity [" + simpleEntityName + "]");
 			}
-			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags
-					.get(simpleEntityName))
+			for (SemanticTag<Attribute, LabeledResource, LabeledResource> tag : attributeTags.get(simpleEntityName))
 			{
 				attrTagBuilder.put(emd, tag);
 			}
@@ -66,12 +65,12 @@ public final class ParsedMetaData
 		this.i18nStrings = ImmutableMap.copyOf(i18nStrings);
 	}
 
-	public ImmutableCollection<EntityMetaData> getEntities()
+	public ImmutableCollection<EntityType> getEntities()
 	{
 		return entities.values();
 	}
 
-	public ImmutableMap<String, EntityMetaData> getEntityMap()
+	public ImmutableMap<String, EntityType> getEntityMap()
 	{
 		return entities;
 	}
@@ -81,12 +80,12 @@ public final class ParsedMetaData
 		return packages;
 	}
 
-	public SetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public SetMultimap<EntityType, SemanticTag<Attribute, LabeledResource, LabeledResource>> getAttributeTags()
 	{
 		return attributeTags;
 	}
 
-	public ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
+	public ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> getEntityTags()
 	{
 		return entityTags;
 	}

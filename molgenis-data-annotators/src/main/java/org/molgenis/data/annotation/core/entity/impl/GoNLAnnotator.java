@@ -19,9 +19,9 @@ import org.molgenis.data.annotation.core.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.core.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -63,10 +63,10 @@ public class GoNLAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -80,14 +80,13 @@ public class GoNLAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData goNlAfAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_AF)
-				.setDataType(STRING)
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute goNlAfAttribute = attributeFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL);
 
-		AttributeMetaData goNlGtcAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_GTC)
-				.setDataType(STRING).setDescription(
+		Attribute goNlGtcAttribute = attributeFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING)
+				.setDescription(
 						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
 				.setLabel(GONL_GTC_LABEL);
 
@@ -219,8 +218,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory,
-						attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityTypeFactory,
+						attributeFactory);
 			}
 		};
 	}

@@ -1,7 +1,7 @@
 package org.molgenis.data.system.model;
 
 import org.molgenis.data.meta.SystemPackage;
-import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +11,9 @@ public class RootSystemPackage extends SystemPackage
 	public static final String PACKAGE_SYSTEM = "sys";
 
 	@Autowired
-	public RootSystemPackage(PackageMetaData packageMetaData)
+	public RootSystemPackage(PackageMetadata packageMetadata)
 	{
-		super(PACKAGE_SYSTEM, packageMetaData);
+		super(PACKAGE_SYSTEM, packageMetadata);
 	}
 
 	@Override

@@ -4,12 +4,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +65,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	private Repository<Entity> repository;
 
 	@Mock
-	private MolgenisUserService molgenisUserService;
+	private UserService userService;
 
 	@Autowired
 	private IndexService indexService;

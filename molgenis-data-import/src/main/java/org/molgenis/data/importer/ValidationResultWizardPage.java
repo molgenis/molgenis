@@ -1,7 +1,7 @@
 package org.molgenis.data.importer;
 
 import com.google.common.collect.Lists;
-import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.Group;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -9,7 +9,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.system.ImportRun;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.GroupMetaData.GROUP;
 
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
@@ -54,9 +54,9 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	UserAccountService userAccountService;
 
 	@Autowired
-	MolgenisUserService userService;
+	UserService userService;
 
-	private List<MolgenisGroup> groups;
+	private List<Group> groups;
 
 	@Override
 	public String getTitle()
@@ -116,7 +116,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-			groups = dataService.findAll(MOLGENIS_GROUP, MolgenisGroup.class).collect(toList());
+			groups = dataService.findAll(GROUP, Group.class).collect(toList());
 		}
 
 		((ImportWizard) wizard).setGroups(groups);

@@ -1,8 +1,8 @@
 package org.molgenis.data.excel;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private ExcelWriter excelWriter;
 	private ByteArrayOutputStream bos;
@@ -45,7 +45,7 @@ public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
-		Entity entity = new DynamicEntity(mock(EntityMetaData.class))
+		Entity entity = new DynamicEntity(mock(EntityType.class))
 		{
 			@Override
 			protected void validateValueType(String attrName, Object value)
@@ -66,7 +66,7 @@ public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest
 	@Test
 	public void write() throws IOException
 	{
-		Entity entity1 = new DynamicEntity(mock(EntityMetaData.class))
+		Entity entity1 = new DynamicEntity(mock(EntityType.class))
 		{
 			@Override
 			protected void validateValueType(String attrName, Object value)
@@ -78,7 +78,7 @@ public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest
 		entity1.set("col2", "val2");
 		excelSheetWriter.add(entity1);
 
-		Entity entity2 = new DynamicEntity(mock(EntityMetaData.class))
+		Entity entity2 = new DynamicEntity(mock(EntityType.class))
 		{
 			@Override
 			protected void validateValueType(String attrName, Object value)

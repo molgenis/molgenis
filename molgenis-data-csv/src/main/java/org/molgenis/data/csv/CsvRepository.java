@@ -3,10 +3,10 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.springframework.util.StringUtils;
@@ -26,36 +26,36 @@ import static org.molgenis.AttributeType.STRING;
 public class CsvRepository extends AbstractRepository
 {
 	private final File file;
-	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final EntityTypeFactory entityTypeFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final String sheetName;
 	private List<CellProcessor> cellProcessors;
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 	private Character separator = null;
 
-	public CsvRepository(String file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+	public CsvRepository(String file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
-		this(new File(file), entityMetaFactory, attrMetaFactory, null);
+		this(new File(file), entityTypeFactory, attrMetaFactory, null);
 	}
 
-	public CsvRepository(File file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory,
 			@Nullable List<CellProcessor> cellProcessors, Character separator)
 	{
-		this(file, entityMetaFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
+		this(file, entityTypeFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
 		this.separator = separator;
 	}
 
-	public CsvRepository(File file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory,
 			@Nullable List<CellProcessor> cellProcessors)
 	{
-		this(file, entityMetaFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
+		this(file, entityTypeFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
 	}
 
-	public CsvRepository(File file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory,
 			String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
 		this.file = file;
-		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.sheetName = sheetName;
 		this.cellProcessors = cellProcessors;
@@ -64,24 +64,23 @@ public class CsvRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return new CsvIterator(file, sheetName, cellProcessors, separator, getEntityMetaData());
+		return new CsvIterator(file, sheetName, cellProcessors, separator, getEntityType());
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		if (entityMetaData == null)
+		if (entityType == null)
 		{
-			entityMetaData = entityMetaFactory.create().setSimpleName(sheetName);
+			entityType = entityTypeFactory.create().setSimpleName(sheetName);
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{
-				AttributeMetaData attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
-				entityMetaData.addAttribute(attr);
+				Attribute attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
+				entityType.addAttribute(attr);
 			}
 		}
 
-		return entityMetaData;
+		return entityType;
 	}
 
 	public void addCellProcessor(CellProcessor cellProcessor)

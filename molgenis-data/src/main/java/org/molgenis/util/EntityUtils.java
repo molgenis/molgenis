@@ -4,10 +4,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.support.EntityTypeUtils;
 
 import java.text.ParseException;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -33,19 +35,12 @@ public class EntityUtils
 	 * @return typed value
 	 * @throws MolgenisDataException if attribute references another entity
 	 */
-	public static Object getTypedValue(String valueStr, AttributeMetaData attr)
+	public static Object getTypedValue(String valueStr, Attribute attr)
 	{
-		switch (attr.getDataType())
+		if (EntityTypeUtils.isReferenceType(attr))
 		{
-			case CATEGORICAL:
-			case FILE:
-			case XREF:
-			case CATEGORICAL_MREF:
-			case MREF:
-				throw new MolgenisDataException(
-						"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
-			default:
-				break;
+			throw new MolgenisDataException(
+					"getTypedValue(String, AttributeMetadata) can't be used for attributes referencing entities");
 		}
 		return getTypedValue(valueStr, attr, null);
 	}
@@ -58,7 +53,7 @@ public class EntityUtils
 	 * @param entityManager entity manager used to convert referenced entity values
 	 * @return typed value
 	 */
-	public static Object getTypedValue(String valueStr, AttributeMetaData attr, EntityManager entityManager)
+	public static Object getTypedValue(String valueStr, Attribute attr, EntityManager entityManager)
 	{
 		if (valueStr == null) return null;
 		switch (attr.getDataType())
@@ -68,16 +63,18 @@ public class EntityUtils
 			case CATEGORICAL:
 			case FILE:
 			case XREF:
-				EntityMetaData xrefEntity = attr.getRefEntity();
+				EntityType xrefEntity = attr.getRefEntity();
 				Object xrefIdValue = getTypedValue(valueStr, xrefEntity.getIdAttribute(), entityManager);
 				return entityManager.getReference(xrefEntity, xrefIdValue);
 			case CATEGORICAL_MREF:
 			case MREF:
-				EntityMetaData mrefEntity = attr.getRefEntity();
+			case ONE_TO_MANY:
+				EntityType mrefEntity = attr.getRefEntity();
 				List<String> mrefIdStrValues = ListEscapeUtils.toList(valueStr);
 				return mrefIdStrValues.stream()
 						.map(mrefIdStrValue -> getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(),
-								entityManager));
+								entityManager)).map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
+						.collect(toList());
 			case COMPOUND:
 				throw new IllegalArgumentException("Compound attribute has no value");
 			case DATE:
@@ -131,53 +128,54 @@ public class EntityUtils
 		return true;
 	}
 
-	public static List<Pair<EntityMetaData, List<AttributeMetaData>>> getReferencingEntityMetaData(
-			EntityMetaData entityMetaData, DataService dataService)
+	public static List<Pair<EntityType, List<Attribute>>> getReferencingEntityType(EntityType entityType,
+			DataService dataService)
 	{
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = newArrayList();
+		List<Pair<EntityType, List<Attribute>>> referencingEntityType = newArrayList();
 
 		// get entity types that referencing the given entity (including self)
-		String entityName = entityMetaData.getName();
+		String entityName = entityType.getName();
 		dataService.getEntityNames().forEach(otherEntityName ->
 		{
-			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
+			EntityType otherEntityType = dataService.getEntityType(otherEntityName);
 
 			// get referencing attributes for other entity
-			List<AttributeMetaData> referencingAttributes = null;
-			for (AttributeMetaData attributeMetaData : otherEntityMetaData.getAtomicAttributes())
+			List<Attribute> referencingAttributes = null;
+			for (Attribute attribute : otherEntityType.getAtomicAttributes())
 			{
-				EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-				if (refEntityMetaData != null && refEntityMetaData.getName().equals(entityName))
+				EntityType refEntityType = attribute.getRefEntity();
+				if (refEntityType != null && refEntityType.getName().equals(entityName))
 				{
 					if (referencingAttributes == null) referencingAttributes = newArrayList();
-					referencingAttributes.add(attributeMetaData);
+					referencingAttributes.add(attribute);
 				}
 			}
 
 			// store references
 			if (referencingAttributes != null)
 			{
-				referencingEntityMetaData.add(new Pair<>(otherEntityMetaData, referencingAttributes));
+				referencingEntityType.add(new Pair<>(otherEntityType, referencingAttributes));
 			}
 		});
 
-		return referencingEntityMetaData;
+		return referencingEntityType;
 	}
 
 	/**
-	 * Gets all attribute names of an EntityMetaData (atomic + compound)
+	 * Gets all attribute names of an EntityType (atomic + compound)
 	 *
-	 * @param entityMetaData
+	 * @param entityType
 	 * @return
 	 */
-	public static Iterable<String> getAttributeNames(EntityMetaData entityMetaData)
+	public static Iterable<String> getAttributeNames(EntityType entityType)
 	{
 		// atomic
-		Iterable<String> atomicAttributes = transform(entityMetaData.getAtomicAttributes(), AttributeMetaData::getName);
+		Iterable<String> atomicAttributes = transform(entityType.getAtomicAttributes(), Attribute::getName);
 
 		// compound
-		Iterable<String> compoundAttributes = transform(filter(entityMetaData.getAttributes(),
-				attributeMetaData -> attributeMetaData.getDataType() == COMPOUND), AttributeMetaData::getName);
+		Iterable<String> compoundAttributes = transform(
+				filter(entityType.getAttributes(), attribute -> attribute.getDataType() == COMPOUND),
+				Attribute::getName);
 
 		// all = atomic + compound
 		return concat(atomicAttributes, compoundAttributes);
@@ -186,13 +184,13 @@ public class EntityUtils
 	/**
 	 * Checks if an entity has another entity as one of its parents
 	 *
-	 * @param entityMetaData
+	 * @param entityType
 	 * @param entityName
 	 * @return
 	 */
-	public static boolean doesExtend(EntityMetaData entityMetaData, String entityName)
+	public static boolean doesExtend(EntityType entityType, String entityName)
 	{
-		EntityMetaData parent = entityMetaData.getExtends();
+		EntityType parent = entityType.getExtends();
 		while (parent != null)
 		{
 			if (parent.getName().equalsIgnoreCase(entityName)) return true;
@@ -215,31 +213,31 @@ public class EntityUtils
 	/**
 	 * Returns true if entity metadata equals another entity metadata. TODO docs
 	 *
-	 * @param entityMeta
-	 * @param otherEntityMeta
+	 * @param entityType
+	 * @param otherEntityType
 	 * @return
 	 */
-	public static boolean equals(EntityMetaData entityMeta, EntityMetaData otherEntityMeta)
+	public static boolean equals(EntityType entityType, EntityType otherEntityType)
 	{
-		if (entityMeta == null && otherEntityMeta != null) return false;
-		if (entityMeta != null && otherEntityMeta == null) return false;
-		if (!entityMeta.getName().equals(otherEntityMeta.getName())) return false;
-		if (!entityMeta.getSimpleName().equals(otherEntityMeta.getSimpleName())) return false;
-		if (!Objects.equals(entityMeta.getLabel(), otherEntityMeta.getLabel())) return false;
-		if (!Objects.equals(entityMeta.getDescription(), otherEntityMeta.getDescription())) return false;
-		if (entityMeta.isAbstract() != otherEntityMeta.isAbstract()) return false;
+		if (entityType == null && otherEntityType != null) return false;
+		if (entityType != null && otherEntityType == null) return false;
+		if (!entityType.getName().equals(otherEntityType.getName())) return false;
+		if (!entityType.getSimpleName().equals(otherEntityType.getSimpleName())) return false;
+		if (!Objects.equals(entityType.getLabel(), otherEntityType.getLabel())) return false;
+		if (!Objects.equals(entityType.getDescription(), otherEntityType.getDescription())) return false;
+		if (entityType.isAbstract() != otherEntityType.isAbstract()) return false;
 
 		//NB Thsi is at such a low level that we do not know the default backend
 		// so we don't check if the other one is the default if the backend is null.
-		String backend = entityMeta.getBackend();
-		String otherBackend = otherEntityMeta.getBackend();
+		String backend = entityType.getBackend();
+		String otherBackend = otherEntityType.getBackend();
 		if (backend == null && otherBackend != null) return false;
 		else if (backend != null && otherBackend == null) return false;
 		else if (backend != null && !backend.equals(otherBackend)) return false;
 
 		// compare package identifiers
-		Package package_ = entityMeta.getPackage();
-		Package otherPackage = otherEntityMeta.getPackage();
+		Package package_ = entityType.getPackage();
+		Package otherPackage = otherEntityType.getPackage();
 		if (package_ == null && otherPackage != null) return false;
 		if (package_ != null && otherPackage == null) return false;
 
@@ -250,24 +248,24 @@ public class EntityUtils
 		//}
 
 		// compare id attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
-		AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
-		AttributeMetaData otherOwnIdAttribute = otherEntityMeta.getOwnIdAttribute();
+		Attribute ownIdAttribute = entityType.getOwnIdAttribute();
+		Attribute otherOwnIdAttribute = otherEntityType.getOwnIdAttribute();
 		if (ownIdAttribute == null && otherOwnIdAttribute != null) return false;
 		if (ownIdAttribute != null && otherOwnIdAttribute == null) return false;
 		if (ownIdAttribute != null && otherOwnIdAttribute != null && !Objects
 				.equals(ownIdAttribute.getIdentifier(), otherOwnIdAttribute.getIdentifier())) return false;
 
 		// compare label attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
-		AttributeMetaData ownLabelAttribute = entityMeta.getOwnLabelAttribute();
-		AttributeMetaData otherOwnLabelAttribute = otherEntityMeta.getOwnLabelAttribute();
+		Attribute ownLabelAttribute = entityType.getOwnLabelAttribute();
+		Attribute otherOwnLabelAttribute = otherEntityType.getOwnLabelAttribute();
 		if (ownLabelAttribute == null && otherOwnLabelAttribute != null) return false;
 		if (ownLabelAttribute != null && otherOwnLabelAttribute == null) return false;
 		if (ownLabelAttribute != null && otherOwnLabelAttribute != null && !Objects
 				.equals(ownLabelAttribute.getIdentifier(), otherOwnLabelAttribute.getIdentifier())) return false;
 
 		// compare lookup attribute identifiers
-		List<AttributeMetaData> lookupAttrs = newArrayList(entityMeta.getOwnLookupAttributes());
-		List<AttributeMetaData> otherLookupAttrs = newArrayList(otherEntityMeta.getOwnLookupAttributes());
+		List<Attribute> lookupAttrs = newArrayList(entityType.getOwnLookupAttributes());
+		List<Attribute> otherLookupAttrs = newArrayList(otherEntityType.getOwnLookupAttributes());
 		if (lookupAttrs.size() != otherLookupAttrs.size()) return false;
 		for (int i = 0; i < lookupAttrs.size(); ++i)
 		{
@@ -279,19 +277,19 @@ public class EntityUtils
 		}
 
 		// compare extends entity identifier
-		EntityMetaData extendsEntityMeta = entityMeta.getExtends();
-		EntityMetaData otherExtendsEntityMeta = otherEntityMeta.getExtends();
-		if (extendsEntityMeta == null && otherExtendsEntityMeta != null) return false;
-		if (extendsEntityMeta != null && otherExtendsEntityMeta == null) return false;
-		if (extendsEntityMeta != null && otherExtendsEntityMeta != null && !extendsEntityMeta.getName()
-				.equals(otherExtendsEntityMeta.getName())) return false;
+		EntityType extendsEntityType = entityType.getExtends();
+		EntityType otherExtendsEntityType = otherEntityType.getExtends();
+		if (extendsEntityType == null && otherExtendsEntityType != null) return false;
+		if (extendsEntityType != null && otherExtendsEntityType == null) return false;
+		if (extendsEntityType != null && otherExtendsEntityType != null && !extendsEntityType.getName()
+				.equals(otherExtendsEntityType.getName())) return false;
 
 		// compare attributes
-		if (!equals(entityMeta.getOwnAttributes(), otherEntityMeta.getOwnAttributes())) return false;
+		if (!equals(entityType.getOwnAttributes(), otherEntityType.getOwnAttributes())) return false;
 
 		// compare tag identifiers
-		List<Tag> tags = newArrayList(entityMeta.getTags());
-		List<Tag> otherTags = newArrayList(otherEntityMeta.getTags());
+		List<Tag> tags = newArrayList(entityType.getTags());
+		List<Tag> otherTags = newArrayList(otherEntityType.getTags());
 		if (tags.size() != otherTags.size()) return false;
 		for (int i = 0; i < tags.size(); ++i)
 		{
@@ -307,10 +305,10 @@ public class EntityUtils
 	 * @param otherAttrsIt
 	 * @return
 	 */
-	public static boolean equals(Iterable<AttributeMetaData> attrsIt, Iterable<AttributeMetaData> otherAttrsIt)
+	public static boolean equals(Iterable<Attribute> attrsIt, Iterable<Attribute> otherAttrsIt)
 	{
-		List<AttributeMetaData> attrs = newArrayList(attrsIt);
-		List<AttributeMetaData> otherAttrs = newArrayList(otherAttrsIt);
+		List<Attribute> attrs = newArrayList(attrsIt);
+		List<Attribute> otherAttrs = newArrayList(otherAttrsIt);
 
 		if (attrs.size() != otherAttrs.size()) return false;
 		for (int i = 0; i < attrs.size(); ++i)
@@ -346,7 +344,7 @@ public class EntityUtils
 	 * @param otherAttr
 	 * @return
 	 */
-	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr)
+	public static boolean equals(Attribute attr, Attribute otherAttr)
 	{
 		return equals(attr, otherAttr, true);
 	}
@@ -364,7 +362,7 @@ public class EntityUtils
 	 * @param checkIdentifier
 	 * @return
 	 */
-	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr, boolean checkIdentifier)
+	public static boolean equals(Attribute attr, Attribute otherAttr, boolean checkIdentifier)
 	{
 		if (attr == null || otherAttr == null)
 		{
@@ -382,8 +380,8 @@ public class EntityUtils
 		if (!EntityUtils.equals(attr.getAttributeParts(), otherAttr.getAttributeParts())) return false;
 
 		// compare entity identifier
-		EntityMetaData refEntity = attr.getRefEntity();
-		EntityMetaData otherRefEntity = otherAttr.getRefEntity();
+		EntityType refEntity = attr.getRefEntity();
+		EntityType otherRefEntity = otherAttr.getRefEntity();
 		if (refEntity == null && otherRefEntity != null) return false;
 		if (refEntity != null && otherRefEntity == null) return false;
 		if (refEntity != null && otherRefEntity != null && !refEntity.getName().equals(otherRefEntity.getName()))
@@ -425,8 +423,8 @@ public class EntityUtils
 	{
 		if (entity == null && otherEntity != null) return false;
 		if (entity != null && otherEntity == null) return false;
-		if (!entity.getEntityMetaData().getName().equals(otherEntity.getEntityMetaData().getName())) return false;
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		if (!entity.getEntityType().getName().equals(otherEntity.getEntityType().getName())) return false;
+		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attrName = attr.getName();
 			switch (attr.getDataType())
@@ -445,6 +443,7 @@ public class EntityUtils
 							.equals(otherXrefValue.getIdValue())) return false;
 					break;
 				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
 				case MREF:
 					List<Entity> entities = newArrayList(entity.getEntities(attrName));
 					List<Entity> otherEntities = newArrayList(otherEntity.getEntities(attrName));
@@ -496,7 +495,7 @@ public class EntityUtils
 	public static int hashCode(Entity entity)
 	{
 		int h = 0;
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			int hValue = 0;
 			String attrName = attr.getName();
@@ -513,6 +512,7 @@ public class EntityUtils
 					hValue = Objects.hashCode(xrefIdValue);
 					break;
 				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
 				case MREF:
 					for (Entity mrefValue : entity.getEntities(attrName))
 					{
@@ -552,7 +552,7 @@ public class EntityUtils
 			h += Objects.hashCode(attrName) ^ hValue;
 		}
 
-		int result = entity.getEntityMetaData().getName().hashCode();
+		int result = entity.getEntityType().getName().hashCode();
 		return 31 * result + h;
 	}
 

@@ -3,23 +3,23 @@ package org.molgenis.data.mapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +43,10 @@ import static org.testng.Assert.assertTrue;
 public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private AttributeMappingMetaData attrMappingMeta;
@@ -65,18 +65,17 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testToEntityMappings()
 	{
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
-		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+		List<Attribute> sourceAttributes = Lists.newArrayList();
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		EntityType targetEntityType = entityTypeFactory.create("target");
+		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
-		attributeMappings
-				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
+		attributeMappings.add(new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes));
 
 		List<EntityMapping> entityMappings = singletonList(
-				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));
+				new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
@@ -90,17 +89,15 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		List<Entity> entityMappingEntities = Lists.newArrayList();
 		Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "targetAttribute");
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE, "targetAttribute");
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 
 		entityMappingEntities.add(entityMappingEntity);
 
-		when(dataService
-				.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA)))
-				.thenReturn(targetEntityMetaData);
-		when(dataService
-				.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA)))
-				.thenReturn(sourceEntityMetaData);
+		when(dataService.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE)))
+				.thenReturn(targetEntityType);
+		when(dataService.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE)))
+				.thenReturn(sourceEntityType);
 
 		assertEquals(entityMappingRepository.toEntityMappings(entityMappingEntities), entityMappings);
 	}
@@ -108,18 +105,18 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpsert()
 	{
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
-		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+		List<Attribute> sourceAttributes = Lists.newArrayList();
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		EntityType targetEntityType = entityTypeFactory.create("target");
+		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
-		attributeMappings.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas,
-				CURATED.toString()));
+		attributeMappings
+				.add(new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes, CURATED.toString()));
 
 		Collection<EntityMapping> entityMappings = singletonList(
-				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));
+				new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
@@ -134,8 +131,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		List<Entity> entityMappingEntities = Lists.newArrayList();
 		Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, "source");
-		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "target");
+		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, "source");
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE, "target");
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		entityMappingEntities.add(entityMappingEntity);
 
@@ -175,9 +172,9 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		MolgenisUserService userService()
+		UserService userService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 
 		@Bean

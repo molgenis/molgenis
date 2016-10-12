@@ -2,8 +2,8 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import org.molgenis.AttributeType;
 import org.molgenis.data.mapper.service.UnitResolver;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.converter.ConversionException;
@@ -26,23 +26,23 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		this.unitResolver = requireNonNull(unitResolver);
 	}
 
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
+			EntityType sourceEntityType)
 	{
 		StringBuilder algorithm = new StringBuilder();
 
 		if (sourceAttributes.size() == 1)
 		{
-			algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
-					sourceAttributes.get(0), sourceEntityMetaData));
+			algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityType, sourceAttributes.get(0),
+					sourceEntityType));
 		}
 		else if (sourceAttributes.size() > 1)
 		{
 			algorithm.append("var counter = 0;\nvar SUM=newValue(0);\n");
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			for (Attribute sourceAttribute : sourceAttributes)
 			{
-				String generate = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
-						sourceEntityMetaData);
+				String generate = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
+						sourceEntityType);
 				algorithm.append("if(!$('").append(sourceAttribute.getName()).append("').isNull().value()){\n\t")
 						.append("SUM.plus(")
 						.append(generate.endsWith(";") ? generate.substring(0, generate.length() - 1) : generate)
@@ -53,25 +53,25 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 		return algorithm.toString();
 	}
 
-	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public boolean isSuitable(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		return isNumericDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isNumericDataType));
 	}
 
-	boolean isNumericDataType(AttributeMetaData attribute)
+	boolean isNumericDataType(Attribute attribute)
 	{
 		AttributeType enumType = attribute.getDataType();
 		return enumType == INT || enumType == LONG || enumType == DECIMAL;
 	}
 
-	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
-			AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
+	String generateUnitConversionAlgorithm(Attribute targetAttribute, EntityType targetEntityType,
+			Attribute sourceAttribute, EntityType sourceEntityType)
 	{
 		String algorithm = null;
 
-		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityType);
 
-		Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+		Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityType);
 
 		if (sourceUnit != null)
 		{

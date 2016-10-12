@@ -5,9 +5,9 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -31,16 +31,16 @@ import static org.testng.Assert.assertTrue;
 public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	private EntityMetaData emd;
-	private EntityMetaData resultEmd;
+	private EntityType emd;
+	private EntityType resultEmd;
 	private DynamicEntity entity1;
 	private DynamicEntity entity2;
 	private DynamicEntity entity3;
@@ -65,9 +65,9 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUp()
 	{
-		emd = entityMetaDataFactory.create().setName("entity");
+		emd = entityTypeFactory.create().setName("entity");
 
-		resultEmd = entityMetaDataFactory.create().setName("resultEntity");
+		resultEmd = entityTypeFactory.create().setName("resultEntity");
 
 		emd.addAttribute(vcfAttributes.getChromAttribute());
 		emd.addAttribute(vcfAttributes.getPosAttribute());
@@ -80,7 +80,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 		resultEmd.addAttribute(vcfAttributes.getRefAttribute());
 		resultEmd.addAttribute(vcfAttributes.getAltAttribute());
 		resultEmd.addAttribute(vcfAttributes.getIdAttribute());
-		resultEmd.addAttribute(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING));
+		resultEmd.addAttribute(attributeFactory.create().setName("annotation").setDataType(STRING));
 
 		entity1 = new DynamicEntity(emd);
 		entity1.set(VcfAttributes.CHROM, "1");
@@ -227,7 +227,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest1()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result1 = filter.filterResults(Collections.singletonList(resultEntity1), entity1, false);
 		assertEquals(Lists.newArrayList(result1.asSet()).get(0).getString("annotation"), "1");
@@ -237,7 +237,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest2()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result2 = filter.filterResults(Collections.singletonList(resultEntity2), entity1, false);
 		Assert.assertTrue(Lists.newArrayList(result2.asSet()).size() == 0);
@@ -248,7 +248,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest3()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result3 = filter.filterResults(Collections.singletonList(resultEntity3), entity2, false);
 		assertEquals(Lists.newArrayList(result3.asSet()).get(0).getString("annotation"), "3,4");
@@ -259,7 +259,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest4()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result4 = filter.filterResults(Collections.singletonList(resultEntity4), entity2, false);
 		assertEquals(Lists.newArrayList(result4.asSet()).get(0).getString("annotation"), "6,5");
@@ -270,7 +270,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest5()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result5 = filter.filterResults(Collections.singletonList(resultEntity5), entity3, false);
 		assertEquals(Lists.newArrayList(result5.asSet()).get(0).getString("annotation"), "8,9,7");
@@ -281,7 +281,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest6()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result6 = filter.filterResults(Collections.singletonList(resultEntity2), entity2, false);
 		assertEquals(Lists.newArrayList(result6.asSet()).get(0).getString("annotation"), ".,2");
@@ -292,7 +292,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest7()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result7 = filter.filterResults(Collections.singletonList(resultEntity6), entity3, false);
 		assertEquals(Lists.newArrayList(result7.asSet()).get(0).getString("annotation"), "11,.,10");
@@ -303,7 +303,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest8()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result8 = filter.filterResults(Collections.singletonList(resultEntity5), entity1, false);
 		assertEquals(Lists.newArrayList(result8.asSet()).get(0).getString("annotation"), "8");
@@ -314,7 +314,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest9()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity7), entity7, false);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "13");
@@ -324,7 +324,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest10()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity8), entity8, false);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "15");
@@ -335,7 +335,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest11()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity9), entity9, false);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "16");
@@ -346,7 +346,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsTest12()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entity10, false);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "19");
@@ -357,7 +357,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsSourceHasNoRef()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				vcfAttributes);
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entityNoRef, false);
 		assertEquals(result, Optional.absent());
@@ -367,7 +367,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsMergeMultilineMismatchChrom()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				true, vcfAttributes);
 		try
 		{
@@ -385,7 +385,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsMergeMultilineMismatchPos()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeMetaDataFactory.create().setName("annotation").setDataType(STRING)),
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
 				true, vcfAttributes);
 		try
 		{
@@ -420,14 +420,14 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	{
 
 		String customAttrb = "MyAnnotation";
-		EntityMetaData multiLineTestEMD = entityMetaDataFactory.create().setName("entity");
+		EntityType multiLineTestEMD = entityTypeFactory.create().setName("entity");
 
 		multiLineTestEMD.addAttribute(vcfAttributes.getChromAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getPosAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getIdAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getRefAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getAltAttribute());
-		multiLineTestEMD.addAttribute(attributeMetaDataFactory.create().setName(customAttrb).setDataType(STRING));
+		multiLineTestEMD.addAttribute(attributeFactory.create().setName(customAttrb).setDataType(STRING));
 
 		Entity multiLineEntity1 = new DynamicEntity(multiLineTestEMD);
 		multiLineEntity1.set(VcfAttributes.CHROM, "3");

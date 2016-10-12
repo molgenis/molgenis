@@ -2,12 +2,13 @@ package org.molgenis.integrationtest.platform;
 
 import com.google.common.io.Files;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrar;
-import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
+import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.settings.AppSettings;
@@ -45,6 +46,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -82,11 +84,11 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Autowired
 	private RepositoryCollectionBootstrapper repoCollectionBootstrapper;
 	@Autowired
-	private SystemEntityMetaDataRegistrar systemEntityMetaRegistrar;
+	private SystemEntityTypeRegistrar systemEntityTypeRegistrar;
 	@Autowired
 	private EntityFactoryRegistrar entityFactoryRegistrar;
 	@Autowired
-	private SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper;
+	private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -112,6 +114,16 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		((ComboPooledDataSource) dataSource).close();
 		PostgreSqlDatabase.dropDatabase();
+
+		try
+		{
+			// Delete molgenis home folder
+			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
+		}
+		catch (IOException e)
+		{
+			LOG.error("Error removing molgenis home directory", e);
+		}
 	}
 
 	public PlatformITConfig()
@@ -171,7 +183,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Registered repository collections");
 
 					LOG.trace("Registering system entity meta data ...");
-					systemEntityMetaRegistrar.register(event);
+					systemEntityTypeRegistrar.register(event);
 					LOG.trace("Registered system entity meta data");
 
 					LOG.trace("Registering entity factories ...");
@@ -180,7 +192,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.debug("Bootstrapped registries");
 
 					LOG.trace("Bootstrapping system entity meta data ...");
-					systemEntityMetaDataBootstrapper.bootstrap(event);
+					systemEntityTypeBootstrapper.bootstrap(event);
 					LOG.debug("Bootstrapped system entity meta data");
 				});
 			}

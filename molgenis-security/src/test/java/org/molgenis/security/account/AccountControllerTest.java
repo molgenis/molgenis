@@ -3,8 +3,8 @@ package org.molgenis.security.account;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
@@ -12,7 +12,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.account.AccountControllerTest.Config;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +34,8 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.EMAIL;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -116,7 +116,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk()).andExpect(
 				content().string("{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
-		ArgumentCaptor<MolgenisUser> molgenisUserCaptor = ArgumentCaptor.forClass(MolgenisUser.class);
+		ArgumentCaptor<User> molgenisUserCaptor = ArgumentCaptor.forClass(User.class);
 		ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
 		verify(accountService).createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
 		assertEquals(baseActivationUriCaptor.getValue(), "http://website.com/account/activate");
@@ -135,7 +135,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk()).andExpect(
 				content().string("{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
-		ArgumentCaptor<MolgenisUser> molgenisUserCaptor = ArgumentCaptor.forClass(MolgenisUser.class);
+		ArgumentCaptor<User> molgenisUserCaptor = ArgumentCaptor.forClass(User.class);
 		ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
 		verify(accountService).createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
 		assertEquals(baseActivationUriCaptor.getValue(), "https://website.com/account/activate");
@@ -262,32 +262,32 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public DataService dataService()
 		{
 			DataService dataService = mock(DataService.class);
-			MolgenisUser molgenisUser = mock(MolgenisUser.class);
-			when(dataService.findAll(MOLGENIS_USER, new QueryImpl().eq(EMAIL, "admin@molgenis.org")))
-					.thenReturn(Collections.<Entity>singletonList(molgenisUser).stream());
+			User user = mock(User.class);
+			when(dataService.findAll(USER, new QueryImpl().eq(EMAIL, "admin@molgenis.org")))
+					.thenReturn(Collections.<Entity>singletonList(user).stream());
 
 			return dataService;
 		}
 
 		@Bean
-		public MolgenisUserService molgenisUserService()
+		public UserService molgenisUserService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 
 		@Bean
-		public MolgenisUserFactory molgenisUserFactory()
+		public UserFactory molgenisUserFactory()
 		{
-			MolgenisUserFactory molgenisUserFactory = mock(MolgenisUserFactory.class);
-			when(molgenisUserFactory.create()).thenAnswer(new Answer<MolgenisUser>()
+			UserFactory userFactory = mock(UserFactory.class);
+			when(userFactory.create()).thenAnswer(new Answer<User>()
 			{
 				@Override
-				public MolgenisUser answer(InvocationOnMock invocationOnMock) throws Throwable
+				public User answer(InvocationOnMock invocationOnMock) throws Throwable
 				{
-					return mock(MolgenisUser.class);
+					return mock(User.class);
 				}
 			});
-			return molgenisUserFactory;
+			return userFactory;
 		}
 	}
 }

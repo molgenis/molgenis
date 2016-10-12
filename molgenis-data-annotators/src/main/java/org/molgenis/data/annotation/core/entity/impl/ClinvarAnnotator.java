@@ -18,9 +18,9 @@ import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -57,10 +57,10 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -74,15 +74,14 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
+		List<Attribute> attributes = new ArrayList<>();
 
-		AttributeMetaData clinvar_clnsig = attributeMetaDataFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING)
-				.setDescription(
-						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
+		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING).setDescription(
+				"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
 				.setLabel(CLINVAR_CLNSIG_LABEL);
 
-		AttributeMetaData clinvar_clnalle = attributeMetaDataFactory.create().setName(CLINVAR_CLNALLE)
-				.setDataType(STRING).setDescription("Value representing the clinical significanct according to ClinVar")
+		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
+				.setDescription("Value representing the clinical significanct according to ClinVar")
 				.setLabel(CLINVAR_CLNALLE_LABEL);
 
 		attributes.add(clinvar_clnsig);
@@ -110,7 +109,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_LOCATION, clinvarAnnotatorSettings))
 		{
 			@Override
-			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
+			protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 			{
 				String attrName = null;
 				if (CLINVAR_CLNSIG.equals(attr.getName()))
@@ -142,8 +141,8 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
-						attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityTypeFactory,
+						attributeFactory);
 			}
 		};
 

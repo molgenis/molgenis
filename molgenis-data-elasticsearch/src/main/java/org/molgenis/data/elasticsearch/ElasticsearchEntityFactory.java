@@ -7,8 +7,8 @@ import org.elasticsearch.common.xcontent.XContentGenerator;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,14 +62,14 @@ public class ElasticsearchEntityFactory
 
 	private void createRec(Entity entity, XContentGenerator generator, int depth, int maxDepth) throws IOException
 	{
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			generator.writeFieldName(attr.getName());
 			createRec(entity, attr, generator, depth, maxDepth);
 		}
 	}
 
-	private void createRec(Entity entity, AttributeMetaData attr, XContentGenerator generator, int depth, int maxDepth)
+	private void createRec(Entity entity, Attribute attr, XContentGenerator generator, int depth, int maxDepth)
 			throws IOException
 	{
 		String attrName = attr.getName();
@@ -177,7 +177,7 @@ public class ElasticsearchEntityFactory
 					}
 					else
 					{
-						AttributeMetaData xrefIdAttr = xrefEntity.getEntityMetaData().getIdAttribute();
+						Attribute xrefIdAttr = xrefEntity.getEntityType().getIdAttribute();
 						createRec(xrefEntity, xrefIdAttr, generator, depth + 1, maxDepth);
 					}
 				}
@@ -189,6 +189,7 @@ public class ElasticsearchEntityFactory
 			}
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 			{
 				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
 				if (!Iterables.isEmpty(mrefEntities))
@@ -204,7 +205,7 @@ public class ElasticsearchEntityFactory
 						}
 						else
 						{
-							AttributeMetaData mrefIdAttr = mrefEntity.getEntityMetaData().getIdAttribute();
+							Attribute mrefIdAttr = mrefEntity.getEntityType().getIdAttribute();
 							createRec(mrefEntity, mrefIdAttr, generator, depth + 1, maxDepth);
 						}
 					}
@@ -223,8 +224,8 @@ public class ElasticsearchEntityFactory
 		}
 	}
 
-	Entity getReference(EntityMetaData entityMeta, Object idObject)
+	Entity getReference(EntityType entityType, Object idObject)
 	{
-		return entityManager.getReference(entityMeta, idObject);
+		return entityManager.getReference(entityType, idObject);
 	}
 }

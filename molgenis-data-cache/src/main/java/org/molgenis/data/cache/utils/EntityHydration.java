@@ -3,8 +3,8 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +17,11 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Hydrates and dehydrates entities.
@@ -41,17 +42,17 @@ public class EntityHydration
 	 * Rehydrate an entity. Entity can be an {@link EntityWithComputedAttributes}
 	 * if there are attributes present with an expression
 	 *
-	 * @param entityMetaData   metadata of the entity to rehydrate
+	 * @param entityType       metadata of the entity to rehydrate
 	 * @param dehydratedEntity map with key value pairs representing this entity
 	 * @return hydrated entity
 	 */
-	public Entity hydrate(Map<String, Object> dehydratedEntity, EntityMetaData entityMetaData)
+	public Entity hydrate(Map<String, Object> dehydratedEntity, EntityType entityType)
 	{
-		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
+		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getName());
 
-		Entity hydratedEntity = entityManager.create(entityMetaData, NO_POPULATE);
+		Entity hydratedEntity = entityManager.create(entityType, NO_POPULATE);
 
-		for (AttributeMetaData attribute : entityMetaData.getAtomicAttributes())
+		for (Attribute attribute : entityType.getAtomicAttributes())
 		{
 			// Only hydrate the attribute if it is NOT computed.
 			// Computed attributes will be calculated based on the metadata
@@ -89,9 +90,9 @@ public class EntityHydration
 	{
 		LOG.trace("Dehydrating entity {}", entity);
 		Map<String, Object> dehydratedEntity = newHashMap();
-		EntityMetaData entityMetaData = entity.getEntityMetaData();
+		EntityType entityType = entity.getEntityType();
 
-		entityMetaData.getAtomicAttributes().forEach(attribute ->
+		entityType.getAtomicAttributes().forEach(attribute ->
 		{
 			// Only dehydrate if the attribute is NOT computed
 			if (!attribute.hasExpression())
@@ -106,19 +107,20 @@ public class EntityHydration
 		return dehydratedEntity;
 	}
 
-	private Object getValueBasedOnType(Entity entity, String name, AttributeType type)
+	private static Object getValueBasedOnType(Entity entity, String name, AttributeType type)
 	{
 		Object value;
 		switch (type)
 		{
 			case CATEGORICAL:
-			case XREF:
 			case FILE:
+			case XREF:
 				Entity xrefEntity = entity.getEntity(name);
 				value = xrefEntity != null ? xrefEntity.getIdValue() : null;
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				List<Object> mrefIdentifiers = newArrayList();
 				entity.getEntities(name).forEach(mrefEntity ->
 				{
@@ -135,7 +137,6 @@ public class EntityHydration
 				value = dateTime != null ? dateTime : null;
 				break;
 			case BOOL:
-			case COMPOUND:
 			case DECIMAL:
 			case EMAIL:
 			case ENUM:
@@ -148,6 +149,8 @@ public class EntityHydration
 			case TEXT:
 				value = entity.get(name);
 				break;
+			case COMPOUND:
+				throw new RuntimeException(format("Illegal attribute type [%s]", type.toString()));
 			default:
 				throw new RuntimeException(String.format("Unknown attribute type [%s]", type));
 		}

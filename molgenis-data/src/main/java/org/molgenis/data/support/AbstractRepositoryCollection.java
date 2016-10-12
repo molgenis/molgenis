@@ -4,12 +4,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 
@@ -26,44 +25,38 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityType entityType)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteRepository(EntityMetaData entityMeta)
+	public void deleteRepository(EntityType entityType)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
+	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
+	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	public Repository<Entity> getRepository(EntityType entityType)
 	{
-		return getRepository(entityMetaData.getName());
-	}
-
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		throw new UnsupportedOperationException();
+		return getRepository(entityType.getName());
 	}
 }

@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.*;
@@ -13,14 +13,14 @@ public class OntologyTermNodePath extends StaticEntity
 		super(entity);
 	}
 
-	public OntologyTermNodePath(EntityMetaData entityMeta)
+	public OntologyTermNodePath(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public OntologyTermNodePath(String id, EntityMetaData entityMeta)
+	public OntologyTermNodePath(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

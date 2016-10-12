@@ -4,8 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -50,7 +50,7 @@ public class FailingAnnotator implements RepositoryAnnotator
 			}
 
 			@Override
-			public List<AttributeMetaData> getOutputAttributes()
+			public List<Attribute> getOutputAttributes()
 			{
 				return Collections.emptyList();
 			}
@@ -82,19 +82,19 @@ public class FailingAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getOutputAttributes()
+	public List<Attribute> getOutputAttributes()
 	{
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<AttributeMetaData> getRequiredAttributes()
+	public List<Attribute> getRequiredAttributes()
 	{
 		return Collections.emptyList();
 	}
 
 	@Override
-	public String canAnnotate(EntityMetaData inputMetaData)
+	public String canAnnotate(EntityType inputMetaData)
 	{
 		return null;
 	}

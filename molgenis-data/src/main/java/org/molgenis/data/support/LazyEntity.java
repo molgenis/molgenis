@@ -3,8 +3,8 @@ package org.molgenis.data.support;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -15,15 +15,15 @@ public class LazyEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
-	private final EntityMetaData entityMetaData;
+	private final EntityType entityType;
 	private final DataService dataService;
 	private final Object id;
 
 	private Entity entity;
 
-	public LazyEntity(EntityMetaData entityMetaData, DataService dataService, Object id)
+	public LazyEntity(EntityType entityType, DataService dataService, Object id)
 	{
-		this.entityMetaData = requireNonNull(entityMetaData);
+		this.entityType = requireNonNull(entityType);
 		this.dataService = requireNonNull(dataService);
 		this.id = requireNonNull(id);
 	}
@@ -40,23 +40,22 @@ public class LazyEntity implements Entity
 		throw new UnsupportedOperationException("Identifier of a lazy entity cannot be modified");
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return entityMetaData;
+		return entityType;
 	}
 
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return EntityMetaDataUtils.getAttributeNames(entityMetaData.getAtomicAttributes());
+		return EntityTypeUtils.getAttributeNames(entityType.getAtomicAttributes());
 	}
 
 	@Override
 	public Object getLabelValue()
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
-		AttributeMetaData labelAttr = entityMetaData.getLabelAttribute();
+		Attribute idAttr = entityType.getIdAttribute();
+		Attribute labelAttr = entityType.getLabelAttribute();
 		if (idAttr.equals(labelAttr))
 		{
 			return id;
@@ -70,7 +69,7 @@ public class LazyEntity implements Entity
 	@Override
 	public Object get(String attributeName)
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		Attribute idAttr = entityType.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
 			return id;
@@ -81,7 +80,7 @@ public class LazyEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		Attribute idAttr = entityType.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
 			return (String) id;
@@ -92,7 +91,7 @@ public class LazyEntity implements Entity
 	@Override
 	public Integer getInt(String attributeName)
 	{
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		Attribute idAttr = entityType.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
 			return (Integer) id;
@@ -176,14 +175,28 @@ public class LazyEntity implements Entity
 	{
 		if (entity == null)
 		{
-			entity = dataService.findOneById(entityMetaData.getName(), id);
+			entity = dataService.findOneById(entityType.getName(), id);
 			if (entity == null)
 			{
 				throw new UnknownEntityException(
-						"entity [" + entityMetaData.getName() + "] with " + entityMetaData.getIdAttribute().getName()
-								+ " [" + id.toString() + "] does not exist");
+						"entity [" + entityType.getName() + "] with " + entityType.getIdAttribute().getName() + " ["
+								+ id.toString() + "] does not exist");
 			}
 		}
 		return entity;
+	}
+
+	@Override
+	public String toString()
+	{
+		if (entity != null)
+		{
+			return entity.toString();
+		}
+		else
+		{
+			return entityType.getName() + '{' + entityType.getIdAttribute().getName() + '=' + id
+					+ ",<lazy attributes not loaded>}";
+		}
 	}
 }

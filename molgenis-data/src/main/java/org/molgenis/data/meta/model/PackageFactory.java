@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PackageFactory extends AbstractSystemEntityFactory<Package, PackageMetaData, String>
+public class PackageFactory extends AbstractSystemEntityFactory<Package, PackageMetadata, String>
 {
 	@Autowired
-	PackageFactory(PackageMetaData packageMetaData, EntityPopulator entityPopulator)
+	PackageFactory(PackageMetadata packageMetadata, EntityPopulator entityPopulator)
 	{
-		super(Package.class, packageMetaData, entityPopulator);
+		super(Package.class, packageMetadata, entityPopulator);
 	}
 
 	public Package create(String id, String description)

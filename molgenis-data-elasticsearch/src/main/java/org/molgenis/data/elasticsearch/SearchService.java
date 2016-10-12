@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;
 
@@ -16,60 +16,60 @@ public interface SearchService
 	 */
 	Iterable<String> getTypes();
 
-	boolean hasMapping(EntityMetaData entityMetaData);
+	boolean hasMapping(EntityType entityType);
 
 	boolean hasMapping(String entityName);
 
-	void createMappings(EntityMetaData entityMetaData);
+	void createMappings(EntityType entityType);
 
-	void createMappings(EntityMetaData entityMetaData, boolean enableNorms, boolean createAllIndex);
+	void createMappings(EntityType entityType, boolean enableNorms, boolean createAllIndex);
 
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
 	 */
 	void refresh();
 
-	long count(EntityMetaData entityMetaData);
+	long count(EntityType entityType);
 
-	long count(Query<Entity> q, EntityMetaData entityMetaData);
+	long count(Query<Entity> q, EntityType entityType);
 
-	void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode);
+	void index(Entity entity, EntityType entityType, IndexingMode indexingMode);
 
 	/**
 	 * Adds or updated the given entities in the index
 	 *
 	 * @param entities
-	 * @param entityMetaData
+	 * @param entityType
 	 * @param indexingMode
 	 * @return number of indexed entities, which equals the size of the input entities iterable
 	 */
-	long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode);
+	long index(Iterable<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode);
 
 	/**
 	 * Adds or updated the given entities in the index
 	 *
 	 * @param entities
-	 * @param entityMetaData
+	 * @param entityType
 	 * @param indexingMode
 	 * @return number of indexed entities
 	 */
-	long index(Stream<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode);
+	long index(Stream<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode);
 
-	void delete(Entity entity, EntityMetaData entityMetaData);
+	void delete(Entity entity, EntityType entityType);
 
-	void deleteById(String id, EntityMetaData entityMetaData);
+	void deleteById(String id, EntityType entityType);
 
-	void deleteById(Stream<String> ids, EntityMetaData entityMetaData);
+	void deleteById(Stream<String> ids, EntityType entityType);
 
-	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
+	void delete(Iterable<? extends Entity> entities, EntityType entityType);
 
 	/**
 	 * Deletes entities from index
 	 *
 	 * @param entities       entity stream
-	 * @param entityMetaData
+	 * @param entityType
 	 */
-	void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData);
+	void delete(Stream<? extends Entity> entities, EntityType entityType);
 
 	/**
 	 * Deletes data and meta data
@@ -79,18 +79,18 @@ public interface SearchService
 	void delete(String entityName);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
-	Iterable<Entity> search(Query<Entity> q, EntityMetaData entityMetaData);
+	Iterable<Entity> search(Query<Entity> q, EntityType entityType);
 
 	/**
 	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
 	 *
 	 * @param q
-	 * @param entityMetaData
+	 * @param entityType
 	 * @return
 	 */
-	Stream<Entity> searchAsStream(Query<Entity> q, EntityMetaData entityMetaData);
+	Stream<Entity> searchAsStream(Query<Entity> q, EntityType entityType);
 
-	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityMetaData entityMetaData);
+	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityType entityType);
 
 	/**
 	 * Frees memory from the index by flushing data to the index storage and clearing the internal transaction log
@@ -106,5 +106,5 @@ public interface SearchService
 
 	void refreshIndex();
 
-	Entity findOne(Query<Entity> q, EntityMetaData entityMetaData);
+	Entity findOne(Query<Entity> q, EntityType entityType);
 }

@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
@@ -23,7 +23,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 {
 	private static final Charset CHARSET = Charset.forName("UTF-8");
 	private final String repositoryName;
-	private final EntityMetaData entityMeta;
+	private final EntityType entityType;
 	private ZipFile zipFile;
 	private CSVReader csvReader;
 	private final List<CellProcessor> cellProcessors;
@@ -38,12 +38,12 @@ public class CsvIterator implements CloseableIterator<Entity>
 	}
 
 	public CsvIterator(File file, String repositoryName, List<CellProcessor> cellProcessors, Character separator,
-			EntityMetaData entityMeta)
+			EntityType entityType)
 	{
 		this.repositoryName = repositoryName;
 		this.cellProcessors = cellProcessors;
 		this.separator = separator;
-		this.entityMeta = entityMeta;
+		this.entityType = entityType;
 
 		try
 		{
@@ -125,7 +125,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 						values[i] = processCell(value, false);
 					}
 
-					next = new DynamicEntity(entityMeta);
+					next = new DynamicEntity(entityType);
 
 					for (String name : colNamesMap.keySet())
 					{

@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.Closeable;
 import java.util.List;
@@ -60,7 +60,7 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	 *
 	 * @return repository meta data
 	 */
-	EntityMetaData getEntityMetaData();
+	EntityType getEntityType();
 
 	/**
 	 * Returns the number of entities in this repository

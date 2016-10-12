@@ -9,10 +9,10 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.DannAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -43,10 +43,10 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -57,10 +57,10 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 	Resources resourcess;
 
 	// Can annotate
-	public EntityMetaData metaDataCanAnnotate;
+	public EntityType metaDataCanAnnotate;
 
 	// Negative test cannot annotate
-	public EntityMetaData metaDataCantAnnotate;
+	public EntityType metaDataCantAnnotate;
 
 	public ArrayList<Entity> input1;
 	public ArrayList<Entity> input2;
@@ -76,24 +76,24 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 
 	public void setValues()
 	{
-		AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
-		AttributeMetaData attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(INT);
-		AttributeMetaData attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(TEXT);
-		AttributeMetaData attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(TEXT);
+		Attribute attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
+		Attribute attributePos = attributeFactory.create().setName(POS).setDataType(INT);
+		Attribute attributeRef = attributeFactory.create().setName(REF).setDataType(TEXT);
+		Attribute attributeAlt = attributeFactory.create().setName(ALT).setDataType(TEXT);
 
-		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(STRING));
+		metaDataCanAnnotate.addAttribute(attributeChrom);
+		metaDataCanAnnotate.addAttribute(attributePos);
+		metaDataCanAnnotate.addAttribute(attributeRef);
+		metaDataCanAnnotate.addAttribute(attributeAlt);
+		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName("DANN_SCORE").setDataType(STRING));
 
-		AttributeMetaData attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM)
+		Attribute attributeCantAnnotateChrom = attributeFactory.create().setName(CHROM)
 				.setDataType(LONG);
 
-		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributePos);
+		metaDataCantAnnotate.addAttribute(attributeRef);
+		metaDataCantAnnotate.addAttribute(attributeAlt);
 
 		entity = new DynamicEntity(metaDataCanAnnotate);
 		entity1 = new DynamicEntity(metaDataCanAnnotate);
@@ -109,10 +109,10 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 	public void beforeClass() throws IOException
 	{
 		// Can annotate
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
 
 		// Negative test cannot annotate
-		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();

@@ -2,18 +2,18 @@ package org.molgenis.data.idcard.model;
 
 import org.molgenis.AttributeType;
 import org.molgenis.data.idcard.IdCardRepositoryCollection;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class IdCardBiobankMetaData extends SystemEntityMetaData
+public class IdCardBiobankMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "rdconnect_regbb";
 	public static final String ID_CARD_BIOBANK = PACKAGE_ID_CARD + PACKAGE_SEPARATOR + SIMPLE_NAME;
