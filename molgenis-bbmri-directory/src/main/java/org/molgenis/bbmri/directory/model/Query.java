@@ -13,12 +13,12 @@ public abstract class Query
 
 	public abstract List<Collection> getCollections();
 
-	public abstract Filter getFilters();
+	public abstract String getHumanReadable();
 
 	public abstract String getNToken();
 
-	public static Query createQuery(String url, List<Collection> collections, Filter filter, String nToken)
+	public static Query createQuery(String url, List<Collection> collections, String humanReadable, String nToken)
 	{
-		return new AutoValue_Query(url, collections, filter, nToken);
+		return new AutoValue_Query(url, collections, humanReadable, nToken);
 	}
 }

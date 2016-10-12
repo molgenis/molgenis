@@ -1,9 +1,7 @@
 package org.molgenis.bbmri.directory.controller;
 
-import com.google.api.client.http.BasicAuthentication;
 import com.google.gson.Gson;
 import org.molgenis.bbmri.directory.model.Collection;
-import org.molgenis.bbmri.directory.model.Filter;
 import org.molgenis.bbmri.directory.model.Query;
 import org.molgenis.bbmri.directory.settings.DirectorySettings;
 import org.molgenis.ui.MolgenisPluginController;
@@ -25,7 +23,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
 import static org.molgenis.bbmri.directory.model.Collection.createCollection;
-import static org.molgenis.bbmri.directory.model.Filter.createFilter;
 import static org.molgenis.bbmri.directory.model.Query.createQuery;
 
 @Controller
@@ -64,12 +61,12 @@ public class DirectoryController extends MolgenisPluginController
 		Collection collection = createCollection("eric:collectionID:AT_MUG:collection:all_samples",
 				"bbmri-eric:biobankID:AT_MUG");
 
-		Filter filter = createFilter("name:Biobank Graz");
+		String humanReadable = "name:Biobank Graz";
 		List<Collection> collections = singletonList(collection);
 
 		String url = "http://molgenis.todo.nl";
 
-		Query query = createQuery(url, collections, filter, null);
+		Query query = createQuery(url, collections, humanReadable, null);
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
