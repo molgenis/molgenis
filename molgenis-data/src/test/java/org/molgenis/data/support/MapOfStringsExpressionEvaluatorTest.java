@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
@@ -200,6 +201,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
 		systemEntityMetaMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}

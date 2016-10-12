@@ -46,6 +46,8 @@ public class EntityTypeMetadata extends SystemEntityType
 
 	public void init()
 	{
+		requireNonNull(backendEnumOptions, "backend enum options not set!");
+
 		setLabel("Entity");
 		setDescription("Meta data for entity classes");
 
@@ -78,10 +80,6 @@ public class EntityTypeMetadata extends SystemEntityType
 	 */
 	public void setBackendEnumOptions(List<String> repositoryCollectionNames)
 	{
-		if (this.backendEnumOptions != null)
-		{
-			throw new IllegalArgumentException("backend enum options already set!");
-		}
 		this.backendEnumOptions = requireNonNull(repositoryCollectionNames);
 	}
 
