@@ -278,14 +278,7 @@ public class VcfUtils
 	private static EntityType removeRefFieldFromInfoMetadata(Attribute attributeToParse, Entity inputEntity)
 	{
 		EntityType newMeta = inputEntity.getEntityType();
-		Attribute newInfoMetadata = newMeta.getAttribute(VcfAttributes.INFO);
-		// FIXME update compounds
-//		newInfoMetadata.setAttributeParts(
-//				StreamSupport.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
-//						.filter(attr -> !attr.getName().equals(attributeToParse.getName()))
-//						.collect(Collectors.toList()));
-		newMeta.removeAttribute(newMeta.getAttribute(VcfAttributes.INFO));
-		newMeta.addAttribute(newInfoMetadata);
+		newMeta.removeAttribute(attributeToParse);
 		return newMeta;
 	}
 
