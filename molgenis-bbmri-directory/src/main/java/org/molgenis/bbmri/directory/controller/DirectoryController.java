@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import org.molgenis.bbmri.directory.model.Collection;
 import org.molgenis.bbmri.directory.model.Filter;
 import org.molgenis.bbmri.directory.model.Query;
-import org.molgenis.bbmri.directory.model.URL;
 import org.molgenis.bbmri.directory.settings.DirectorySettings;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
@@ -64,7 +63,7 @@ public class DirectoryController extends MolgenisPluginController
 		Filter filter = createFilter("name:Biobank Graz");
 		List<Collection> collections = singletonList(collection);
 
-		URL url = URL.createURL("http://molgenis.todo.nl");
+		String url = "http://molgenis.todo.nl";
 
 		Query query = createQuery(url, collections, filter, null);
 
