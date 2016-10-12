@@ -9,12 +9,16 @@ import java.util.List;
 @AutoGson(autoValueClass = AutoValue_Query.class)
 public abstract class Query
 {
+	public abstract String getURL();
+
 	public abstract List<Collection> getCollections();
 
-	public abstract Filter getFilters();
+	public abstract String getHumanReadable();
 
-	public static Query createQuery(List<Collection> collections, Filter filter)
+	public abstract String getNToken();
+
+	public static Query createQuery(String url, List<Collection> collections, String humanReadable, String nToken)
 	{
-		return new AutoValue_Query(collections, filter);
+		return new AutoValue_Query(url, collections, humanReadable, nToken);
 	}
 }
