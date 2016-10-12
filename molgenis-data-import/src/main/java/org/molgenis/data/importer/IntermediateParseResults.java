@@ -5,9 +5,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
@@ -28,9 +28,9 @@ import static com.google.common.collect.ImmutableSetMultimap.copyOf;
 public final class IntermediateParseResults
 {
 	/**
-	 * Maps full name to EntityMetaData
+	 * Maps full name to EntityType
 	 */
-	private final Map<String, EntityMetaData> entities;
+	private final Map<String, EntityType> entities;
 	/**
 	 * Maps full name to PackageImpl (with tags)
 	 */
@@ -38,11 +38,11 @@ public final class IntermediateParseResults
 	/**
 	 * Contains all Attribute tags
 	 */
-	private final SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final SetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags;
 	/**
 	 * Contains all {@link Entity} tags
 	 */
-	private final List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final List<SemanticTag<EntityType, LabeledResource, LabeledResource>> entityTags;
 	/**
 	 * Contains all tag entities from the tag sheet
 	 */
@@ -55,9 +55,9 @@ public final class IntermediateParseResults
 	 * Contains all i18nString entities from the i18nstrings sheet
 	 */
 	private final Map<String, I18nString> i18nStrings;
-	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final EntityTypeFactory entityTypeFactory;
 
-	public IntermediateParseResults(EntityMetaDataFactory entityMetaDataFactory)
+	public IntermediateParseResults(EntityTypeFactory entityTypeFactory)
 	{
 		this.tags = new LinkedHashMap<>();
 		this.entities = new LinkedHashMap<>();
@@ -66,7 +66,7 @@ public final class IntermediateParseResults
 		this.entityTags = new ArrayList<>();
 		this.languages = new LinkedHashMap<>();
 		this.i18nStrings = new LinkedHashMap<>();
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
 	}
 
 	public void addTag(String identifier, Entity tag)
@@ -107,22 +107,22 @@ public final class IntermediateParseResults
 
 	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
 	{
-		EntityMetaData entityMeta = getEntityMetaData(entityName);
-		if (entityMeta == null) entityMeta = addEntityMetaData(entityName);
+		EntityType entityType = getEntityType(entityName);
+		if (entityType == null) entityType = addEntityType(entityName);
 
 		for (EmxAttribute emxAttr : emxAttrs)
 		{
-			AttributeMetaData attr = emxAttr.getAttr();
-			entityMeta.addAttribute(attr);
+			Attribute attr = emxAttr.getAttr();
+			entityType.addAttribute(attr);
 
 			// set attribute roles
-			if (emxAttr.isIdAttr()) entityMeta.setIdAttribute(attr);
-			if (emxAttr.isLabelAttr()) entityMeta.setLabelAttribute(attr);
-			if (emxAttr.isLookupAttr()) entityMeta.addLookupAttribute(attr);
+			if (emxAttr.isIdAttr()) entityType.setIdAttribute(attr);
+			if (emxAttr.isLabelAttr()) entityType.setLabelAttribute(attr);
+			if (emxAttr.isLookupAttr()) entityType.addLookupAttribute(attr);
 		}
 	}
 
-	public EntityMetaData addEntityMetaData(String name)
+	public EntityType addEntityType(String name)
 	{
 		String simpleName = name;
 		for (String packageName : packages.keySet())
@@ -133,12 +133,12 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName(name).setSimpleName(simpleName);
+		EntityType emd = entityTypeFactory.create().setName(name).setSimpleName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}
 
-	public EntityMetaData getEntityMetaData(String name)
+	public EntityType getEntityType(String name)
 	{
 		return entities.get(name);
 	}
@@ -169,12 +169,12 @@ public final class IntermediateParseResults
 		packages.put(name, p);
 	}
 
-	public ImmutableMap<String, EntityMetaData> getEntityMap()
+	public ImmutableMap<String, EntityType> getEntityMap()
 	{
 		return copyOf(entities);
 	}
 
-	public ImmutableList<EntityMetaData> getEntities()
+	public ImmutableList<EntityType> getEntities()
 	{
 		return copyOf(entities.values());
 	}
@@ -184,12 +184,12 @@ public final class IntermediateParseResults
 		return copyOf(packages);
 	}
 
-	public ImmutableSetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public ImmutableSetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> getAttributeTags()
 	{
 		return copyOf(attributeTags);
 	}
 
-	public ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
+	public ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> getEntityTags()
 	{
 		return copyOf(entityTags);
 	}

@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.core.resources.impl.tabix;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import java.io.IOException;
  */
 public class TabixRepositoryFactory implements RepositoryFactory
 {
-	private EntityMetaData emd;
+	private EntityType emd;
 
-	public TabixRepositoryFactory(EntityMetaData emd)
+	public TabixRepositoryFactory(EntityType emd)
 	{
 		this.emd = emd;
 	}

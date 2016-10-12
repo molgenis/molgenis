@@ -89,7 +89,7 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 	private CacheLoader<Query<Entity>, List<Object>> createCacheLoader(final Repository<Entity> repository)
 	{
 		String repositoryName = repository.getName();
-		Fetch idAttributeFetch = new Fetch().field(repository.getEntityMetaData().getIdAttribute().getName());
+		Fetch idAttributeFetch = new Fetch().field(repository.getEntityType().getIdAttribute().getName());
 		return new CacheLoader<Query<Entity>, List<Object>>()
 		{
 			/**

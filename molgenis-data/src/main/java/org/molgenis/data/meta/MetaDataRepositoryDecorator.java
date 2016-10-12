@@ -2,7 +2,7 @@ package org.molgenis.data.meta;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -66,10 +66,9 @@ public class MetaDataRepositoryDecorator implements Repository<Entity>
 		return decorated.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decorated.getEntityMetaData();
+		return decorated.getEntityType();
 	}
 
 	@Override

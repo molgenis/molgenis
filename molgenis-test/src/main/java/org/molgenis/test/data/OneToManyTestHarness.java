@@ -3,7 +3,15 @@ package org.molgenis.test.data;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonFactory1;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.person2.PersonFactory2;
+import org.molgenis.test.data.staticentity.bidirectional.person2.PersonMetaData2;
+import org.molgenis.test.data.staticentity.bidirectional.person3.PersonFactory3;
+import org.molgenis.test.data.staticentity.bidirectional.person3.PersonMetaData3;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonFactory4;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorFactory1;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookFactory1;
@@ -182,7 +190,7 @@ public class OneToManyTestHarness
 	 * Create Author and Book test entities and set the Books.author fields.
 	 */
 	private AuthorsAndBooks createTestEntitiesSetBooksField(AbstractSystemEntityFactory authorFactory,
-			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
+			AbstractSystemEntityFactory bookFactory, EntityType authorMetaData, EntityType bookMetaData)
 	{
 		List<Entity> authors = createAuthorEntities(authorFactory);
 		List<Entity> books = createBookEntities(bookFactory);
@@ -258,11 +266,11 @@ public class OneToManyTestHarness
 	{
 		private final List<Entity> books;
 		private final List<Entity> authors;
-		private final EntityMetaData bookMetaData;
-		private final EntityMetaData authorMetaData;
+		private final EntityType bookMetaData;
+		private final EntityType authorMetaData;
 
 		AuthorsAndBooks(@NonNull List<Entity> authors, @NonNull List<Entity> books,
-				@NonNull EntityMetaData authorMetaData, @NonNull EntityMetaData bookMetaData)
+				@NonNull EntityType authorMetaData, @NonNull EntityType bookMetaData)
 		{
 			this.authors = requireNonNull(authors);
 			this.books = requireNonNull(books);
@@ -280,12 +288,12 @@ public class OneToManyTestHarness
 			return authors;
 		}
 
-		public EntityMetaData getBookMetaData()
+		public EntityType getBookMetaData()
 		{
 			return bookMetaData;
 		}
 
-		public EntityMetaData getAuthorMetaData()
+		public EntityType getAuthorMetaData()
 		{
 			return authorMetaData;
 		}

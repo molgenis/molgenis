@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.util;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;
 
@@ -41,9 +41,9 @@ public class ElasticsearchEntityUtils
 		});
 	}
 
-	public static String toElasticsearchId(Entity entity, EntityMetaData entityMetaData)
+	public static String toElasticsearchId(Entity entity, EntityType entityType)
 	{
-		String idAttributeName = entityMetaData.getIdAttribute().getName();
+		String idAttributeName = entityType.getIdAttribute().getName();
 		Object entityId = entity.get(idAttributeName);
 		return toElasticsearchId(entityId);
 	}

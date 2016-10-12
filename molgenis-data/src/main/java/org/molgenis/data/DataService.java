@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,13 +60,13 @@ public interface DataService extends Iterable<Repository<Entity>>
 	<E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass);
 
 	/**
-	 * Returns the meta data for the given entity
+	 * Returns the type for the given entity
 	 *
 	 * @param entityName entity name
-	 * @return entity meta data
+	 * @return entity type
 	 * @throws UnknownEntityException
 	 */
-	EntityMetaData getEntityMetaData(String entityName);
+	EntityType getEntityType(String entityName);
 
 	/**
 	 * Returns the number of entities of the given type.

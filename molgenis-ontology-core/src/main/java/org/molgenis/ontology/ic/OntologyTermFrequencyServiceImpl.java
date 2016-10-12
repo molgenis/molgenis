@@ -60,8 +60,8 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 		if (pubMedTFEntity == null) return null;
 
 		// FIXME remove reference to getApplicationContext
-		TermFrequencyMetaData termFrequencyEntityMeta = getApplicationContext().getBean(TermFrequencyMetaData.class);
-		Entity entity = new DynamicEntity(termFrequencyEntityMeta);
+		TermFrequencyMetaData termFrequencyEntityType = getApplicationContext().getBean(TermFrequencyMetaData.class);
+		Entity entity = new DynamicEntity(termFrequencyEntityType);
 		entity.set(TERM, term);
 		entity.set(FREQUENCY, pubMedTFEntity.getFrequency());
 		entity.set(OCCURRENCE, pubMedTFEntity.getOccurrence());
@@ -87,9 +87,9 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 			if (pubMedTFEntity != null)
 			{
 				// FIXME remove reference to getApplicationContext
-				TermFrequencyMetaData termFrequencyEntityMeta = getApplicationContext()
+				TermFrequencyMetaData termFrequencyEntityType = getApplicationContext()
 						.getBean(TermFrequencyMetaData.class);
-				Entity mapEntity = new DynamicEntity(termFrequencyEntityMeta);
+				Entity mapEntity = new DynamicEntity(termFrequencyEntityType);
 				mapEntity.set(TERM, ontologyTermSynonym);
 				mapEntity.set(FREQUENCY, pubMedTFEntity.getFrequency());
 				mapEntity.set(OCCURRENCE, pubMedTFEntity.getOccurrence());

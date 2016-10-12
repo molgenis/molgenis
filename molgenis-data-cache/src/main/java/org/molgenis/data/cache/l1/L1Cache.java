@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.slf4j.Logger;
@@ -104,14 +104,14 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 * null if no information available about this entity in the cache
 	 */
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
-	public Optional<Entity> get(String entityName, Object id, EntityMetaData entityMetaData)
+	public Optional<Entity> get(String entityName, Object id, EntityType entityType)
 	{
 		CombinedEntityCache cache = caches.get();
 		if (cache == null)
 		{
 			return null;
 		}
-		Optional<Entity> result = cache.getIfPresent(entityMetaData, id);
+		Optional<Entity> result = cache.getIfPresent(entityType, id);
 		if (result != null)
 		{
 			LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityName);

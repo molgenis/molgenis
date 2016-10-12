@@ -6,10 +6,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -38,15 +38,16 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.EntityKey.create;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = L1CacheRepositoryDecoratorTest.Config.class)
 public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
 	private L1CacheRepositoryDecorator l1CacheRepositoryDecorator;
-	private EntityMetaData authorMetaData;
-	private EntityMetaData bookMetaData;
+
+	private EntityType authorMetaData;
+	private EntityType bookMetaData;
 
 	private final String authorEntityName = "Author";
 	private final String bookEntityName = "Book";
@@ -58,10 +59,10 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private Entity author2;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Mock
 	private DataService dataService;
@@ -89,19 +90,18 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		authorMetaData = entityMetaDataFactory.create(authorEntityName);
-		bookMetaData = entityMetaDataFactory.create(bookEntityName);
+		authorMetaData = entityTypeFactory.create(authorEntityName);
+		bookMetaData = entityTypeFactory.create(bookEntityName);
 
-		authorMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
-		authorMetaData.addAttribute(attributeMetaDataFactory.create().setName("name"));
-		AttributeMetaData authorAttribute = attributeMetaDataFactory.create().setName("author").setDataType(XREF)
+		authorMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
+		authorMetaData.addAttribute(attributeFactory.create().setName("name"));
+		Attribute authorAttribute = attributeFactory.create().setName("author").setDataType(XREF)
 				.setRefEntity(authorMetaData);
 		authorMetaData.addAttribute(
-				attributeMetaDataFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
+				attributeFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
 						.setRefEntity(bookMetaData));
-
-		bookMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
-		bookMetaData.addAttribute(attributeMetaDataFactory.create().setName("title"));
+		bookMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
+		bookMetaData.addAttribute(attributeFactory.create().setName("title"));
 		bookMetaData.addAttribute(authorAttribute);
 
 		author = new DynamicEntity(authorMetaData);
@@ -116,7 +116,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		when(authorRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
 		when(authorRepository.getName()).thenReturn(authorEntityName);
-		when(authorRepository.getEntityMetaData()).thenReturn(authorMetaData);
+		when(authorRepository.getEntityType()).thenReturn(authorMetaData);
 
 		l1CacheRepositoryDecorator = new L1CacheRepositoryDecorator(authorRepository, l1Cache);
 	}
@@ -254,7 +254,6 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		assertNull(actualEntity);
 
 		verify(authorRepository).findOneById(authorID);
-
 	}
 
 	@Test

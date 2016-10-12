@@ -2,7 +2,7 @@ package org.molgenis.annotation.cmd;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.sql.Timestamp;
@@ -15,7 +15,7 @@ public class CmdLineSettingsEntity implements Entity
 	private final Map<String, Object> values = new LinkedCaseInsensitiveMap<>();
 
 	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
 		throw new UnsupportedOperationException();
 	}

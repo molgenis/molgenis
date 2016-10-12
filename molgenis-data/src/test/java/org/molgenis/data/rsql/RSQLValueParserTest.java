@@ -1,8 +1,8 @@
 package org.molgenis.data.rsql;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -35,10 +35,10 @@ public class RSQLValueParserTest
 	@Test(dataProvider = "parseProvider")
 	public void parse(AttributeType attrType, AttributeType refIdAttrType, Object parsedValue)
 	{
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getDataType()).thenReturn(attrType);
-		EntityMetaData refEntity = mock(EntityMetaData.class);
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		EntityType refEntity = mock(EntityType.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(refIdAttrType);
 		when(refEntity.getIdAttribute()).thenReturn(refIdAttr);
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntity);

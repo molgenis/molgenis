@@ -1,21 +1,24 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
-import org.molgenis.data.*;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +36,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.testng.Assert.*;
 
@@ -41,16 +44,16 @@ import static org.testng.Assert.*;
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private MappingProjectRepositoryImpl mappingProjectRepositoryImpl;
 
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
+	private UserFactory userFactory;
 
 	@Autowired
 	private DataService dataService;
@@ -62,7 +65,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	private IdGenerator idGenerator;
 
 	@Autowired
-	private MolgenisUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private MappingProjectMetaData mappingProjectMeta;
@@ -70,7 +73,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private MappingTargetMetaData mappingTargetMeta;
 
-	private MolgenisUser owner;
+	private User owner;
 
 	private MappingTarget mappingTarget1;
 
@@ -85,7 +88,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		owner = molgenisUserFactory.create();
+		owner = userFactory.create();
 		owner.setUsername("flup");
 		owner.setPassword("geheim");
 		owner.setId("12345");
@@ -94,9 +97,9 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		owner.setFirstName("Flup");
 		owner.setLastName("de Flap");
 
-		EntityMetaData target1 = entityMetaFactory.create("target1");
+		EntityType target1 = entityTypeFactory.create("target1");
 		target1.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
-		EntityMetaData target2 = entityMetaFactory.create("target2");
+		EntityType target2 = entityTypeFactory.create("target2");
 		target2.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);
@@ -219,9 +222,9 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public MolgenisUserService molgenisUserService()
+		public UserService molgenisUserService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 
 		@Bean

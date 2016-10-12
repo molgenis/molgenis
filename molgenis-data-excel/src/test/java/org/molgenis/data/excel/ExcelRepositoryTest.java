@@ -7,9 +7,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +27,10 @@ import static org.testng.Assert.*;
 public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private ExcelRepository excelSheetReader;
 
@@ -42,7 +42,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		workbook = WorkbookFactory.create(is);
-		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"), entityMetaFactory,
+		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"), entityTypeFactory,
 				attrMetaFactory);
 	}
 
@@ -56,7 +56,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void ExcelRepository()
 	{
-		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"), entityMetaFactory, attrMetaFactory);
+		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"), entityTypeFactory, attrMetaFactory);
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getAttribute()
 	{
-		AttributeMetaData attr = excelSheetReader.getEntityMetaData().getAttribute("col1");
+		Attribute attr = excelSheetReader.getEntityType().getAttribute("col1");
 		assertNotNull(attr);
 		assertEquals(attr.getDataType(), AttributeType.STRING);
 		assertEquals(attr.getName(), "col1");
@@ -100,7 +100,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getAttributes()
 	{
-		Iterator<AttributeMetaData> it = excelSheetReader.getEntityMetaData().getAttributes().iterator();
+		Iterator<Attribute> it = excelSheetReader.getEntityType().getAttributes().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "col1");
 		assertTrue(it.hasNext());
@@ -111,25 +111,25 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getDescription()
 	{
-		assertNull(excelSheetReader.getEntityMetaData().getDescription());
+		assertNull(excelSheetReader.getEntityType().getDescription());
 	}
 
 	@Test
 	public void getIdAttribute()
 	{
-		assertNull(excelSheetReader.getEntityMetaData().getIdAttribute());
+		assertNull(excelSheetReader.getEntityType().getIdAttribute());
 	}
 
 	@Test
 	public void getLabel()
 	{
-		assertEquals(excelSheetReader.getEntityMetaData().getLabel(), "test");
+		assertEquals(excelSheetReader.getEntityType().getLabel(), "test");
 	}
 
 	@Test
 	public void getLabelAttribute()
 	{
-		assertNull(excelSheetReader.getEntityMetaData().getLabelAttribute());
+		assertNull(excelSheetReader.getEntityType().getLabelAttribute());
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void attributesAndIterator() throws IOException
 	{
-		Iterator<AttributeMetaData> headerIt = excelSheetReader.getEntityMetaData().getAttributes().iterator();
+		Iterator<Attribute> headerIt = excelSheetReader.getEntityType().getAttributes().iterator();
 		assertTrue(headerIt.hasNext());
 		assertEquals(headerIt.next().getName(), "col1");
 		assertTrue(headerIt.hasNext());

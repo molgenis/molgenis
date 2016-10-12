@@ -9,9 +9,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 public class SemanticSearchServiceHelper
 {
@@ -100,8 +100,8 @@ public class SemanticSearchServiceHelper
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		queryTerms.stream().filter(StringUtils::isNotEmpty).map(this::escapeCharsExcludingCaretChar).forEach(query ->
 		{
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
-			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetadata.DESCRIPTION, Operator.FUZZY_MATCH, query));
 		});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
@@ -219,22 +219,22 @@ public class SemanticSearchServiceHelper
 	}
 
 	/**
-	 * A helper function that gets identifiers of all the attributes from one entityMetaData
+	 * A helper function that gets identifiers of all the attributes from one EntityType
 	 *
-	 * @param sourceEntityMetaData
+	 * @param sourceEntityType
 	 * @return
 	 */
-	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
+	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
-		Entity entityMetaDataEntity = dataService.findOne(ENTITY_META_DATA,
-				new QueryImpl<Entity>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName()));
+		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
+				new QueryImpl<Entity>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityType.getName()));
 
-		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
-				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
+		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(
+				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getName());
 
 		List<String> attributeIdentifiers = new ArrayList<String>();
 
-		recursivelyCollectAttributeIdentifiers(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES),
+		recursivelyCollectAttributeIdentifiers(EntityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES),
 				attributeIdentifiers);
 
 		return attributeIdentifiers;
@@ -245,12 +245,11 @@ public class SemanticSearchServiceHelper
 	{
 		for (Entity attributeEntity : attributeEntities)
 		{
-			if (!attributeEntity.getString(AttributeMetaDataMetaData.DATA_TYPE)
-					.equals(MolgenisFieldTypes.COMPOUND.toString()))
+			if (!attributeEntity.getString(AttributeMetadata.TYPE).equals(MolgenisFieldTypes.COMPOUND.toString()))
 			{
-				attributeIdentifiers.add(attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER));
+				attributeIdentifiers.add(attributeEntity.getString(AttributeMetadata.ID));
 			}
-			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetaDataMetaData.PARTS);
+			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetadata.PARTS);
 
 			if (entities != null)
 			{

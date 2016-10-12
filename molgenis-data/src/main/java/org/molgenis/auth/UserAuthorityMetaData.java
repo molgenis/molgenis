@@ -1,6 +1,6 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,29 +10,29 @@ import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class UserAuthorityMetaData extends SystemEntityMetaData
+public class UserAuthorityMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "UserAuthority";
 	public static final String USER_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String MOLGENIS_USER = "molgenisUser";
+	public static final String USER = "User";
 	public static final String ID = "id";
 
 	private final SecurityPackage securityPackage;
-	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final UserMetaData userMetaData;
 	private final AuthorityMetaData authorityMetaData;
 
 	@Autowired
-	UserAuthorityMetaData(SecurityPackage securityPackage, MolgenisUserMetaData molgenisUserMetaData,
+	UserAuthorityMetaData(SecurityPackage securityPackage, UserMetaData userMetaData,
 			AuthorityMetaData authorityMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.userMetaData = requireNonNull(userMetaData);
 		this.authorityMetaData = requireNonNull(authorityMetaData);
 	}
 
@@ -44,12 +44,12 @@ public class UserAuthorityMetaData extends SystemEntityMetaData
 
 		setExtends(authorityMetaData);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData).setAggregatable(true)
+		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
 	}
 
 	@Override
-	public Set<SystemEntityMetaData> getDependencies()
+	public Set<SystemEntityType> getDependencies()
 	{
 		return singleton(authorityMetaData);
 	}

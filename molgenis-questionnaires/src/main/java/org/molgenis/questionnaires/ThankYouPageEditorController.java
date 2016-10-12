@@ -2,7 +2,7 @@ package org.molgenis.questionnaires;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -42,7 +42,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 			@RequestParam(value = "edit", required = false, defaultValue = "false") String edit, Model model,
 			HttpServletResponse response) throws IOException
 	{
-		if ((questionnaireName != null) && dataService.getMeta().getEntityMetaData(questionnaireName) == null)
+		if ((questionnaireName != null) && dataService.getMeta().getEntityType(questionnaireName) == null)
 		{
 			response.sendError(404);
 			return null;
@@ -55,7 +55,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 
 		if ((questionnaireName == null) && !questionnaires.isEmpty())
 		{
-			questionnaireName = questionnaires.get(0).getString(EntityMetaDataMetaData.FULL_NAME);
+			questionnaireName = questionnaires.get(0).getString(EntityTypeMetadata.FULL_NAME);
 		}
 
 		model.addAttribute("content", thankYouTextService.getThankYouText(questionnaireName));
@@ -68,7 +68,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 	public String save(@RequestParam("questionnaireName") String questionnaireName,
 			@RequestParam("content") String content, Model model)
 	{
-		if (dataService.getMeta().getEntityMetaData(questionnaireName) != null)
+		if (dataService.getMeta().getEntityType(questionnaireName) != null)
 		{
 			thankYouTextService.saveThankYouText(questionnaireName, content);
 		}

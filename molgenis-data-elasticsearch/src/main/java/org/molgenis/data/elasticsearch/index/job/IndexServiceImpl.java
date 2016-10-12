@@ -91,7 +91,7 @@ public class IndexServiceImpl implements IndexService
 	@RunAsSystem
 	public void waitForIndexToBeStableIncludingReferences(String entityName) throws InterruptedException
 	{
-		indexStatus.waitForIndexToBeStableIncludingReferences(dataService.getEntityMetaData(entityName));
+		indexStatus.waitForIndexToBeStableIncludingReferences(dataService.getEntityType(entityName));
 	}
 
 	/**

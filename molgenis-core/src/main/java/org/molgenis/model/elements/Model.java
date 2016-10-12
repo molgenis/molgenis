@@ -326,7 +326,7 @@ public class Model implements Serializable
 	// FileMetaInfo fileinfo = model.getFileInfo();
 	// UserMetaInfo userinfo = model.getUserInfo();
 	// RoleMetaInfo roleinfo = model.getRoleInfo();
-	// EntityMetaInfo entityinfo = model.getEntityInfo();
+	// entityTypeInfo entityinfo = model.getEntityInfo();
 	// ScreenMetaInfo screeninfo = model.getScreenInfo();
 	//
 	// // files

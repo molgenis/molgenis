@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import com.google.common.collect.Maps;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -37,11 +37,11 @@ public class EntityFactoryRegistry
 	/**
 	 * Returns a entity factory for the given entity meta data.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return static entity factory or null if no factory exists for the given meta data.
 	 */
-	EntityFactory<? extends Entity, ?> getEntityFactory(EntityMetaData entityMeta)
+	EntityFactory<? extends Entity, ?> getEntityFactory(EntityType entityType)
 	{
-		return staticEntityFactoryMap.get(entityMeta.getName());
+		return staticEntityFactoryMap.get(entityType.getName());
 	}
 }

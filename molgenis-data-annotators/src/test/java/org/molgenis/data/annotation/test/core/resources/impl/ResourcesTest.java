@@ -7,10 +7,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -34,10 +34,10 @@ import static org.testng.Assert.*;
 public class ResourcesTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private Resource resource;
@@ -48,15 +48,15 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private Resources resources;
 
-	private EntityMetaData emd;
+	private EntityType emd;
 
 	private Entity e1;
 
 	@BeforeClass
 	public void beforeClass()
 	{
-		emd = entityMetaDataFactory.create().setName("resourceName");
-		AttributeMetaData attr = attributeMetaDataFactory.create().setName("id");
+		emd = entityTypeFactory.create().setName("resourceName");
+		Attribute attr = attributeFactory.create().setName("id");
 		emd.addAttribute(attr);
 		emd.setLabelAttribute(attr);
 		emd.setIdAttribute(attr);

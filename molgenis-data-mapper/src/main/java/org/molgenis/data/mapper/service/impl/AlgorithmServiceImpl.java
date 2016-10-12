@@ -11,10 +11,10 @@ import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorSer
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
@@ -64,33 +64,33 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
-			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
+	public String generateAlgorithm(Attribute targetAttribute, EntityType targetEntityType,
+			List<Attribute> sourceAttributes, EntityType sourceEntityType)
 	{
 		return algorithmGeneratorService
-				.generate(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
+				.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
 	}
 
 	@Override
 	@RunAsSystem
-	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
-			EntityMapping mapping, AttributeMetaData targetAttribute)
+	public void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping,
+			Attribute targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
-				.getTagsForAttribute(targetEntityMetaData, targetAttribute);
+				.getTagsForAttribute(targetEntityType, targetAttribute);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
-				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
+		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService
+				.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute, tagsForAttribute.values(),
 						null);
 		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService
-				.generate(targetAttribute, relevantAttributes, targetEntityMetaData, sourceEntityMetaData);
+				.generate(targetAttribute, relevantAttributes, targetEntityType, sourceEntityType);
 
 		if (StringUtils.isNotBlank(generatedAlgorithm.getAlgorithm()))
 		{
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 			attributeMapping.setAlgorithm(generatedAlgorithm.getAlgorithm());
-			attributeMapping.getSourceAttributeMetaDatas().addAll(generatedAlgorithm.getSourceAttributes());
+			attributeMapping.getSourceAttributes().addAll(generatedAlgorithm.getSourceAttributes());
 			attributeMapping.setAlgorithmState(generatedAlgorithm.getAlgorithmState());
 			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = " + generatedAlgorithm
 					.getAlgorithm());
@@ -98,7 +98,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+	public Iterable<AlgorithmEvaluation> applyAlgorithm(Attribute targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities)
 	{
 		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
@@ -111,7 +111,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Entity mapEntity = createEntity(attributeNames, entity); // why is this necessary?
 			try
 			{
-				Object result = eval(algorithm, mapEntity, entity.getEntityMetaData());
+				Object result = eval(algorithm, mapEntity, entity.getEntityType());
 				derivedValue = convert(result, targetAttribute);
 			}
 			catch (RuntimeException e)
@@ -125,7 +125,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	private Entity createEntity(Collection<String> attributeNames, Entity entity)
 	{
-		Entity mapEntity = new DynamicEntity(entity.getEntityMetaData());
+		Entity mapEntity = new DynamicEntity(entity.getEntityType());
 		for (String attributeName : attributeNames)
 		{
 			mapEntity.set(attributeName, entity.get(attributeName));
@@ -134,7 +134,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	}
 
 	@Override
-	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity, EntityMetaData sourceEntityMetaData)
+	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity, EntityType sourceEntityType)
 	{
 		String algorithm = attributeMapping.getAlgorithm();
 		if (isEmpty(algorithm))
@@ -143,19 +143,19 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 
 		Entity entity = createEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
-		Object value = eval(algorithm, entity, sourceEntityMetaData);
-		return convert(value, attributeMapping.getTargetAttributeMetaData());
+		Object value = eval(algorithm, entity, sourceEntityType);
+		return convert(value, attributeMapping.getTargetAttribute());
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object convert(Object value, AttributeMetaData attributeMetaData)
+	private Object convert(Object value, Attribute attribute)
 	{
 		if (value == null)
 		{
 			return null;
 		}
 		Object convertedValue;
-		AttributeType targetDataType = attributeMetaData.getDataType();
+		AttributeType targetDataType = attribute.getDataType();
 		try
 		{
 			switch (targetDataType)
@@ -180,7 +180,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				case XREF:
 				case CATEGORICAL:
 					convertedValue = dataService
-							.findOneById(attributeMetaData.getRefEntity().getName(), Context.toString(value));
+							.findOneById(attribute.getRefEntity().getName(), Context.toString(value));
 					break;
 				case MREF:
 				case CATEGORICAL_MREF:
@@ -188,7 +188,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					NativeArray mrefIds = (NativeArray) value;
 					if (mrefIds != null && !mrefIds.isEmpty())
 					{
-						EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
+						EntityType refEntityMeta = attribute.getRefEntity();
 						convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds.stream())
 								.collect(toList());
 					}

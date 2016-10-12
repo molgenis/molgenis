@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.QueryCreator;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.core.resources.Resources;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +53,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getAnnotationAttributeMetaDatas()
+	public List<Attribute> getAnnotationAttributeMetadatas()
 	{
 		return getInfo().getOutputAttributes();
 	}
@@ -65,9 +65,9 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getRequiredAttributes()
+	public List<Attribute> getRequiredAttributes()
 	{
-		List<AttributeMetaData> sourceMetaData = new ArrayList<>();
+		List<Attribute> sourceMetaData = new ArrayList<>();
 		sourceMetaData.addAll(queryCreator.getRequiredAttributes());
 		return sourceMetaData;
 	}

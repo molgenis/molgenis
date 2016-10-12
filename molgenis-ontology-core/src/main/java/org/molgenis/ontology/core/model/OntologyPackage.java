@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.model;
 
 import org.molgenis.data.meta.SystemPackage;
-import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,9 +18,9 @@ public class OntologyPackage extends SystemPackage
 	private final RootSystemPackage rootSystemPackage;
 
 	@Autowired
-	public OntologyPackage(PackageMetaData packageMetaData, RootSystemPackage rootSystemPackage)
+	public OntologyPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetaData);
+		super(SIMPLE_NAME, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

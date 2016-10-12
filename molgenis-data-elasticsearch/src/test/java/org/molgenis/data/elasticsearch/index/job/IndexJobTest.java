@@ -12,7 +12,7 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.index.meta.*;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
@@ -69,7 +69,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 	private IndexJob indexJob;
 	private IndexActionGroup indexActionGroup;
-	private EntityMetaData testEntityMetaData;
+	private EntityType testEntityType;
 	private Entity toIndexEntity;
 
 	@BeforeMethod
@@ -82,9 +82,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class))
 				.thenReturn(indexActionGroup);
 		when(dataService.getMeta()).thenReturn(mds);
-		testEntityMetaData = harness.createDynamicRefEntityMetaData();
-		when(mds.getEntityMetaData("test")).thenReturn(testEntityMetaData);
-		toIndexEntity = harness.createTestRefEntities(testEntityMetaData, 1).get(0);
+		testEntityType = harness.createDynamicRefEntityType();
+		when(mds.getEntityType("test")).thenReturn(testEntityType);
+		toIndexEntity = harness.createTestRefEntities(testEntityType, 1).get(0);
 		when(dataService.findOneById("test", "entityId")).thenReturn(toIndexEntity);
 	}
 
@@ -139,7 +139,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexJob.call(progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(searchService).deleteById("entityId", testEntityMetaData);
+		verify(searchService).deleteById("entityId", testEntityType);
 
 		// verify progress messages
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
@@ -163,7 +163,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void rebuildIndexUpdateSingleEntityTest()
 	{
 		Entity actualEntity = dataService.findOneById("test", "entityId");
-		EntityMetaData emd = actualEntity.getEntityMetaData();
+		EntityType emd = actualEntity.getEntityType();
 		Query q = new QueryImpl();
 		q.eq(emd.getIdAttribute().getName(), "entityId");
 
@@ -182,7 +182,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(this.searchService).index(toIndexEntity, testEntityMetaData, indexingMode);
+		verify(this.searchService).index(toIndexEntity, testEntityType, indexingMode);
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
@@ -199,8 +199,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	private void rebuildIndexMetaUpdateDataTest()
 	{
 		when(dataService.hasRepository("test")).thenReturn(true);
-		EntityMetaData entityMeta = dataService.getEntityMetaData("test");
-		when(searchService.hasMapping(entityMeta)).thenReturn(true);
+		EntityType entityType = dataService.getEntityType("test");
+		when(searchService.hasMapping(entityType)).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
 				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
@@ -303,7 +303,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexActionGroup.setCount(3);
 
 		MolgenisDataException mde = new MolgenisDataException("Random unrecoverable exception");
-		doThrow(mde).when(searchService).deleteById("entityId2", testEntityMetaData);
+		doThrow(mde).when(searchService).deleteById("entityId2", testEntityType);
 
 		try
 		{
@@ -314,9 +314,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 			assertSame(expected, mde);
 		}
 
-		verify(searchService).deleteById("entityId1", testEntityMetaData);
-		verify(searchService).deleteById("entityId2", testEntityMetaData);
-		verify(searchService).deleteById("entityId3", testEntityMetaData);
+		verify(searchService).deleteById("entityId1", testEntityType);
+		verify(searchService).deleteById("entityId2", testEntityType);
+		verify(searchService).deleteById("entityId3", testEntityType);
 
 		verify(searchService).refreshIndex();
 

@@ -2,7 +2,7 @@ package org.molgenis.data.idcard.settings;
 
 import org.molgenis.data.idcard.indexer.IdCardIndexerController;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.fieldtypes.StringField;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	}
 
 	@Component
-	private static class Meta extends DefaultSettingsEntityMetaData
+	private static class Meta extends DefaultSettingsEntityType
 	{
 		private static final String API_BASE_URI = "apiBaseUri";
 		private static final String API_TIMEOUT = "apiTimeout";

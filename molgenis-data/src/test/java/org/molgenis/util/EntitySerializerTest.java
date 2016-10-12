@@ -3,8 +3,8 @@ package org.molgenis.util;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,26 +31,26 @@ public class EntitySerializerTest
 	@Test
 	public void testSerialize() throws Exception
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("entity");
 
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
+		Attribute manyToOneAttr = mock(Attribute.class);
 		String manyToOneAttrName = "xrefAttr";
 		when(manyToOneAttr.getName()).thenReturn(manyToOneAttrName);
 		when(manyToOneAttr.getDataType()).thenReturn(XREF);
-		when(entityMeta.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn("refEntity");
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn("refEntity");
 
 		String oneToManyEntity0IdValue = "oneToManyEntity0";
 		String oneToManyEntity0LabelValue = "oneToManyEntityLabel0";
 		Entity oneToManyEntity0 = mock(Entity.class);
-		when(oneToManyEntity0.getEntityMetaData()).thenReturn(refEntityMeta);
+		when(oneToManyEntity0.getEntityType()).thenReturn(refEntityType);
 		when(oneToManyEntity0.getIdValue()).thenReturn(oneToManyEntity0IdValue);
 		when(oneToManyEntity0.getLabelValue()).thenReturn(oneToManyEntity0LabelValue);
 
@@ -59,19 +59,19 @@ public class EntitySerializerTest
 		Entity oneToManyEntity1 = mock(Entity.class);
 		when(oneToManyEntity1.getIdValue()).thenReturn(oneToManyEntity1IdValue);
 		when(oneToManyEntity1.getLabelValue()).thenReturn(oneToManyEntity1LabelValue);
-		when(oneToManyEntity1.getEntityMetaData()).thenReturn(refEntityMeta);
+		when(oneToManyEntity1.getEntityType()).thenReturn(refEntityType);
 
 		List<Entity> oneToManyEntities = newArrayList(oneToManyEntity0, oneToManyEntity1);
 
 		String manyToOneEntityIdValue = "xrefEntity0";
 		String manyToOneEntityLabelValue = "xrefEntityLabel0";
 		Entity manyToOneEntity = mock(Entity.class);
-		when(manyToOneEntity.getEntityMetaData()).thenReturn(refEntityMeta);
+		when(manyToOneEntity.getEntityType()).thenReturn(refEntityType);
 		when(manyToOneEntity.getIdValue()).thenReturn(manyToOneEntityIdValue);
 		when(manyToOneEntity.getLabelValue()).thenReturn(manyToOneEntityLabelValue);
 
 		Entity entity = mock(Entity.class);
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entity.getEntityType()).thenReturn(entityType);
 		when(entity.get(oneToManyAttrName)).thenReturn(oneToManyEntities);
 		when(entity.get(manyToOneAttrName)).thenReturn(manyToOneEntity);
 		when(entity.getEntities(oneToManyAttrName)).thenReturn(oneToManyEntities);

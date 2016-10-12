@@ -3,8 +3,8 @@ package org.molgenis.data.excel;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -23,7 +23,7 @@ import static org.testng.Assert.assertNotNull;
 public class ExcelWriterTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = NullPointerException.class)
@@ -97,7 +97,7 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest
 		excelWriter.addCellProcessor(processor);
 		try
 		{
-			Entity entity = new DynamicEntity(mock(EntityMetaData.class))
+			Entity entity = new DynamicEntity(mock(EntityType.class))
 			{
 				@Override
 				protected void validateValueType(String attrName, Object value)

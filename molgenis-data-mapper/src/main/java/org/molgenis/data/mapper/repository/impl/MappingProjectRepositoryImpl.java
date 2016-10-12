@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import com.google.common.collect.Lists;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
@@ -10,7 +10,7 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -23,16 +23,16 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
 	private final DataService dataService;
 	private final MappingTargetRepository mappingTargetRepo;
-	private final MolgenisUserService molgenisUserService;
+	private final UserService userService;
 	private final IdGenerator idGenerator;
 	private final MappingProjectMetaData mappingProjectMeta;
 
 	public MappingProjectRepositoryImpl(DataService dataService, MappingTargetRepository mappingTargetRepo,
-			MolgenisUserService molgenisUserService, IdGenerator idGenerator, MappingProjectMetaData mappingProjectMeta)
+			UserService userService, IdGenerator idGenerator, MappingProjectMetaData mappingProjectMeta)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mappingTargetRepo = requireNonNull(mappingTargetRepo);
-		this.molgenisUserService = requireNonNull(molgenisUserService);
+		this.userService = requireNonNull(userService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.mappingProjectMeta = requireNonNull(mappingProjectMeta);
 	}
@@ -98,7 +98,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	{
 		String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
-		MolgenisUser owner = mappingProjectEntity.getEntity(MappingProjectMetaData.OWNER, MolgenisUser.class);
+		User owner = mappingProjectEntity.getEntity(MappingProjectMetaData.OWNER, User.class);
 		List<Entity> mappingTargetEntities = Lists
 				.newArrayList(mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPING_TARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepo.toMappingTargets(mappingTargetEntities);

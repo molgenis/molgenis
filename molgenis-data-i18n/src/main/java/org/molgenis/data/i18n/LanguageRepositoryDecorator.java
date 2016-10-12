@@ -3,7 +3,7 @@ package org.molgenis.data.i18n;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -63,10 +63,9 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		return decorated.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decorated.getEntityMetaData();
+		return decorated.getEntityType();
 	}
 
 	@Override
@@ -144,8 +143,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	@Override
 	public void delete(Language language)
 	{
-		throw new MolgenisDataException(
-				format("Deleting languages is not allowed"));
+		throw new MolgenisDataException(format("Deleting languages is not allowed"));
 	}
 
 	@Override
@@ -179,8 +177,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 
 		if (!languageService.hasLanguageCode(language.getCode()))
 		{
-			throw new MolgenisDataException(
-					format("Adding languages is not allowed"));
+			throw new MolgenisDataException(format("Adding languages is not allowed"));
 		}
 		else
 		{

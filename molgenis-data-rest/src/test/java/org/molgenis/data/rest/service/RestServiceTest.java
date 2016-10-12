@@ -2,9 +2,12 @@ package org.molgenis.data.rest.service;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
@@ -47,7 +50,7 @@ public class RestServiceTest
 	@Test
 	public void toEntityValue()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(MREF);
 		assertEquals(restService.toEntityValue(attr, null), emptyList());
 	}
@@ -65,16 +68,16 @@ public class RestServiceTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		String refEntityName = "refEntity";
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(INT);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(attrType);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(entityManager.getReference(refEntityMeta, 0)).thenReturn(entity0);
-		when(entityManager.getReference(refEntityMeta, 1)).thenReturn(entity1);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+		when(entityManager.getReference(refEntityType, 0)).thenReturn(entity0);
+		when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
@@ -85,16 +88,16 @@ public class RestServiceTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		String refEntityName = "refEntity";
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(attrType);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
-		when(entityManager.getReference(refEntityMeta, "1")).thenReturn(entity1);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+		when(entityManager.getReference(refEntityType, "0")).thenReturn(entity0);
+		when(entityManager.getReference(refEntityType, "1")).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
@@ -104,12 +107,12 @@ public class RestServiceTest
 	{
 		Entity entity0 = mock(Entity.class);
 		String refEntityName = "refEntity";
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(XREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
@@ -119,7 +122,7 @@ public class RestServiceTest
 	@Test
 	public void toEntityDateStringValueValid() throws ParseException
 	{
-		AttributeMetaData dateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("dateAttr").getMock();
+		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
 		when(dateAttr.getDataType()).thenReturn(DATE);
 		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31"),
 				MolgenisDateFormat.getDateFormat().parse("2000-12-31"));
@@ -128,7 +131,7 @@ public class RestServiceTest
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute \\[dateAttr\\] value \\[invalidDate\\] does not match date format \\[yyyy-MM-dd\\]")
 	public void toEntityDateStringValueInvalid()
 	{
-		AttributeMetaData dateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("dateAttr").getMock();
+		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
 		when(dateAttr.getDataType()).thenReturn(DATE);
 		restService.toEntityValue(dateAttr, "invalidDate");
 	}
@@ -136,15 +139,15 @@ public class RestServiceTest
 	@Test
 	public void updateMappedByEntitiesEntity() {
 		String refEntityName = "refEntityName";
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 
 		String mappedByAttrName = "mappedByAttr";
-		AttributeMetaData mappedByAttr = mock(AttributeMetaData.class);
+		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn(mappedByAttrName);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		EntityType entityMeta = mock(EntityType.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
@@ -158,7 +161,7 @@ public class RestServiceTest
 
 		Entity entity = mock(Entity.class);
 		when(entity.getEntities(oneToManyAttrName)).thenReturn(newArrayList(refEntity0, refEntity1));
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entity.getEntityType()).thenReturn(entityMeta);
 		restService.updateMappedByEntities(entity);
 
 		//noinspection unchecked
@@ -174,15 +177,15 @@ public class RestServiceTest
 	@Test
 	public void updateMappedByEntitiesEntityEntity() {
 		String refEntityName = "refEntityName";
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 
 		String mappedByAttrName = "mappedByAttr";
-		AttributeMetaData mappedByAttr = mock(AttributeMetaData.class);
+		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn(mappedByAttrName);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		EntityType entityMeta = mock(EntityType.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
@@ -197,11 +200,11 @@ public class RestServiceTest
 
 		Entity entity = mock(Entity.class);
 		when(entity.getEntities(oneToManyAttrName)).thenReturn(newArrayList(refEntity0, refEntity1));
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entity.getEntityType()).thenReturn(entityMeta);
 
 		Entity existingEntity = mock(Entity.class);
 		when(existingEntity.getEntities(oneToManyAttrName)).thenReturn(newArrayList(refEntity1, refEntity2));
-		when(existingEntity.getEntityMetaData()).thenReturn(entityMeta);
+		when(existingEntity.getEntityType()).thenReturn(entityMeta);
 
 		restService.updateMappedByEntities(entity, existingEntity);
 

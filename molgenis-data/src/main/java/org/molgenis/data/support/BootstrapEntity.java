@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 /**
  * Entity used during application bootstrapping. Same as {@link DynamicEntity} but without value validation.
@@ -12,11 +12,11 @@ public class BootstrapEntity extends DynamicEntity
 	/**
 	 * Constructs an entity with the given entity meta data.
 	 *
-	 * @param entityMeta entity meta
+	 * @param entityType entity meta
 	 */
-	public BootstrapEntity(EntityMetaData entityMeta)
+	public BootstrapEntity(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
 	protected void validateValueType(String attrName, Object value)

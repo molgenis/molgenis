@@ -3,8 +3,8 @@ package org.molgenis.data.elasticsearch.index;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
 
@@ -28,21 +28,21 @@ public class MappingsBuilder
 	/**
 	 * Creates a Elasticsearch mapping for the given entity meta data
 	 *
-	 * @param jsonBuilder    {@link XContentBuilder} to write the mapping to
-	 * @param entityMetaData {@link EntityMetaData} for the entity to map
+	 * @param jsonBuilder {@link XContentBuilder} to write the mapping to
+	 * @param entityType  {@link EntityType} for the entity to map
 	 * @throws IOException writing to JSON builder
 	 */
-	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean enableNorms,
+	public static void buildMapping(XContentBuilder jsonBuilder, EntityType entityType, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
-		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityType.getName());
 		jsonBuilder.startObject().startObject(documentType);
 
 		jsonBuilder.startObject("_source").field("enabled", false).endObject();
 
 		jsonBuilder.startObject("properties");
 
-		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
+		for (Attribute attr : entityType.getAtomicAttributes())
 		{
 			createAttributeMapping(attr, enableNorms, createAllIndex, true, true, jsonBuilder);
 		}
@@ -52,7 +52,7 @@ public class MappingsBuilder
 	}
 
 	// TODO discuss: use null_value for nillable attributes?
-	private static void createAttributeMapping(AttributeMetaData attr, boolean enableNorms, boolean createAllIndex,
+	private static void createAttributeMapping(Attribute attr, boolean enableNorms, boolean createAllIndex,
 			boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder) throws IOException
 	{
 		String attrName = attr.getName();
@@ -61,9 +61,8 @@ public class MappingsBuilder
 		jsonBuilder.endObject();
 	}
 
-	private static void createAttributeMappingContents(AttributeMetaData attr, boolean enableNorms,
-			boolean createAllIndex, boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder)
-			throws IOException
+	private static void createAttributeMappingContents(Attribute attr, boolean enableNorms, boolean createAllIndex,
+			boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder) throws IOException
 	{
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
@@ -80,13 +79,13 @@ public class MappingsBuilder
 			case MREF:
 			case ONE_TO_MANY:
 			case XREF:
-				EntityMetaData refEntity = attr.getRefEntity();
+				EntityType refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
 					jsonBuilder.field("type", "nested");
 					jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
 					jsonBuilder.startObject("properties");
-					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
+					for (Attribute refAttr : refEntity.getAtomicAttributes())
 					{
 						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, true, jsonBuilder);
 					}

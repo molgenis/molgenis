@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -27,15 +27,15 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 	}
 
 	@Override
-	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public boolean isSuitable(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream()
 				.allMatch(this::isXrefOrCategorialDataType)) && sourceAttributes.size() > 1;
 	}
 
 	@Override
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes,
+			EntityType targetEntityType, EntityType sourceEntityType)
 	{
 		// if the target attribute and all the source attributes contain frequency related categories
 		StringBuilder stringBuilder = new StringBuilder();
@@ -47,24 +47,23 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		}
 		else
 		{
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			for (Attribute sourceAttribute : sourceAttributes)
 			{
 				stringBuilder.append(oneToOneCategoryAlgorithmGenerator
-						.generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
-								sourceEntityMetaData));
+						.generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType, sourceEntityType));
 			}
 		}
 
 		return stringBuilder.toString();
 	}
 
-	String createAlgorithmElseBlock(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	String createAlgorithmElseBlock(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		if (sourceAttributes.size() > 0)
 		{
 			stringBuilder.append("else{\n").append("\tSUM_WEIGHT = new newValue(0);\n");
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			for (Attribute sourceAttribute : sourceAttributes)
 			{
 				String generateWeightedMap = generateWeightedMap(sourceAttribute);
 
@@ -79,7 +78,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		return stringBuilder.toString();
 	}
 
-	String createAlgorithmNullCheckIfStatement(List<AttributeMetaData> sourceAttributes)
+	String createAlgorithmNullCheckIfStatement(List<Attribute> sourceAttributes)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		if (sourceAttributes.size() > 0)
@@ -93,8 +92,8 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		return stringBuilder.toString();
 	}
 
-	boolean suitableForGeneratingWeightedMap(AttributeMetaData targetAttribute,
-			List<AttributeMetaData> sourceAttributes)
+	boolean suitableForGeneratingWeightedMap(Attribute targetAttribute,
+			List<Attribute> sourceAttributes)
 	{
 		boolean isTargetSuitable = oneToOneCategoryAlgorithmGenerator
 				.isFrequencyCategory(convertToCategory(targetAttribute));
@@ -103,18 +102,18 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		return isTargetSuitable && areSourcesSuitable;
 	}
 
-	public String generateWeightedMap(AttributeMetaData attributeMetaData)
+	public String generateWeightedMap(Attribute attribute)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
-		for (Category sourceCategory : convertToCategory(attributeMetaData))
+		for (Category sourceCategory : convertToCategory(attribute))
 		{
 			AmountWrapper amountWrapper = sourceCategory.getAmountWrapper();
 			if (amountWrapper != null)
 			{
 				if (stringBuilder.length() == 0)
 				{
-					stringBuilder.append("$('").append(attributeMetaData.getName()).append("').map({");
+					stringBuilder.append("$('").append(attribute.getName()).append("').map({");
 				}
 
 				double estimatedValue = amountWrapper.getAmount().getEstimatedValue();
@@ -133,11 +132,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		return stringBuilder.toString();
 	}
 
-	public String groupCategoryValues(AttributeMetaData attributeMetaData)
+	public String groupCategoryValues(Attribute attribute)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Category> sortedCategories = convertToCategory(attributeMetaData).stream()
+		List<Category> sortedCategories = convertToCategory(attribute).stream()
 				.filter(category -> category.getAmountWrapper() != null).collect(Collectors.toList());
 
 		Collections.sort(sortedCategories, new Comparator<Category>()

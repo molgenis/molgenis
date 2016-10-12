@@ -1,10 +1,10 @@
 package org.molgenis.security.owned;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNER_USERNAME;
+import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 
 /**
  * Base class for owned entities.
@@ -16,14 +16,14 @@ public abstract class OwnedEntity extends StaticEntity
 		super(entity);
 	}
 
-	public OwnedEntity(EntityMetaData entityMeta)
+	public OwnedEntity(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public OwnedEntity(Object id, EntityMetaData entityMeta)
+	public OwnedEntity(Object id, EntityType entityType)
 	{
-		super(id, entityMeta);
+		super(id, entityType);
 	}
 
 	public String getOwnerUsername()

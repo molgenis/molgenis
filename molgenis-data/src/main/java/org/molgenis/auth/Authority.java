@@ -1,7 +1,7 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
@@ -13,9 +13,9 @@ public abstract class Authority extends StaticEntity
 		super(entity);
 	}
 
-	public Authority(EntityMetaData entityMeta)
+	public Authority(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
 	public String getRole()

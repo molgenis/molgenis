@@ -6,8 +6,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.datastructures.Location;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.*;
@@ -52,19 +52,19 @@ import static org.molgenis.data.vcf.model.VcfAttributes.REF;
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
-	private final List<AttributeMetaData> attributes;
+	private final List<Attribute> attributes;
 	private final boolean mergeMultilineResourceResults;
 	private final VcfAttributes vcfAttributes;
 
-	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes,
-			boolean mergeMultilineResourceResults, VcfAttributes vcfAttributes)
+	public MultiAllelicResultFilter(List<Attribute> alleleSpecificAttributes, boolean mergeMultilineResourceResults,
+			VcfAttributes vcfAttributes)
 	{
 		this.attributes = alleleSpecificAttributes;
 		this.mergeMultilineResourceResults = mergeMultilineResourceResults;
 		this.vcfAttributes = vcfAttributes;
 	}
 
-	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes, VcfAttributes vcfAttributes)
+	public MultiAllelicResultFilter(List<Attribute> alleleSpecificAttributes, VcfAttributes vcfAttributes)
 	{
 		this.attributes = alleleSpecificAttributes;
 		this.mergeMultilineResourceResults = false;
@@ -72,7 +72,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return asList(vcfAttributes.getRefAttribute(), vcfAttributes.getAltAttribute());
 	}
@@ -127,22 +127,21 @@ public class MultiAllelicResultFilter implements ResultFilter
 		Map<String, String> sourceAlleleValueMap = new HashMap<>();
 		String[] alts = resourceEntity.getString(VcfAttributes.ALT).split(",");
 		String[] sourceAlts = sourceEntity.getString(VcfAttributes.ALT).split(",");
-		for (AttributeMetaData attributeMetaData : attributes)
+		for (Attribute attribute : attributes)
 		{
-			String[] values = resourceEntity.getString(attributeMetaData.getName()).split(",", -1);
+			String[] values = resourceEntity.getString(attribute.getName()).split(",", -1);
 			for (int i = 0; i < alts.length; i++)
 			{
 				alleleValueMap.put(alts[i] + resourcePostfix, values[i]);
 			}
 
 			// also compile a list of original source alleles and their values for use in 'update mode'
-			if (updateMode && sourceEntity.get(attributeMetaData.getName()) != null)
+			if (updateMode && sourceEntity.get(attribute.getName()) != null)
 			{
-				AttributeMetaData sourceAttr = sourceEntity.getEntityMetaData()
-						.getAttribute(attributeMetaData.getName());
-				if (EntityMetaDataUtils.isTextType(sourceAttr) || EntityMetaDataUtils.isStringType(sourceAttr))
+				Attribute sourceAttr = sourceEntity.getEntityType().getAttribute(attribute.getName());
+				if (EntityTypeUtils.isTextType(sourceAttr) || EntityTypeUtils.isStringType(sourceAttr))
 				{
-					String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
+					String[] sourceValues = sourceEntity.getString(attribute.getName()).split(",", -1);
 					for (int i = 0; i < sourceAlts.length; i++)
 					{
 						sourceAlleleValueMap.put(sourceAlts[i] + resourcePostfix,
@@ -151,7 +150,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 				}
 				else if (sourceAlts.length == 1)
 				{
-					sourceAlleleValueMap.put(sourceAlts[0], sourceEntity.get(attributeMetaData.getName()).toString());
+					sourceAlleleValueMap.put(sourceAlts[0], sourceEntity.get(attribute.getName()).toString());
 				}
 			}
 
@@ -194,7 +193,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 			// add entity only if something was found, so no '.' or any multiple of '.,' (e.g. ".,.,.")
 			if (!newAttributeValue.toString().matches("[\\.,]+"))
 			{
-				resourceEntity.set(attributeMetaData.getName(), newAttributeValue.toString());
+				resourceEntity.set(attribute.getName(), newAttributeValue.toString());
 				result.add(resourceEntity);
 			}
 		}
@@ -281,7 +280,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 					mergeWithMe.set(ALT, mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
 
 					// concatenate allele specific attributes
-					for (AttributeMetaData alleleSpecificAttributes : attributes)
+					for (Attribute alleleSpecificAttributes : attributes)
 					{
 						String attrName = alleleSpecificAttributes.getName();
 						mergeWithMe.set(attrName,

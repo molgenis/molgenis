@@ -4,8 +4,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -45,27 +44,27 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 	private Entity hydratedEntity;
 	private Map<String, Object> dehydratedEntity;
 	private EntityHydration entityHydration;
 
 	@Captor
-	private ArgumentCaptor<EntityMetaData> entityMetaDataArgumentCaptor;
+	private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
 
 	@BeforeClass
 	public void beforeClass() throws ParseException
 	{
 		initMocks(this);
 		// create metadata
-		entityMetaData = entityTestHarness.createDynamicTestEntityMetaData();
+		entityType = entityTestHarness.createDynamicTestEntityType();
 
 		// create referenced entities
-		EntityMetaData refEntityMetaData = entityTestHarness.createDynamicRefEntityMetaData();
-		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityMetaData, 1);
+		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
+		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 1);
 
 		// create hydrated entity
-		hydratedEntity = entityTestHarness.createTestEntities(entityMetaData, 1, refEntities).collect(toList()).get(0);
+		hydratedEntity = entityTestHarness.createTestEntities(entityType, 1, refEntities).collect(toList()).get(0);
 
 		Date date = MolgenisDateFormat.getDateFormat().parse("2012-12-21");
 		Date dateTime = MolgenisDateFormat.getDateTimeFormat().parse("1985-08-12T11:12:13+0500");
@@ -90,11 +89,11 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
 
 		// mock entity manager
-		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData, NO_POPULATE))
-				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityMetaData))).getMock();
-		when(entityManager.getReference(entityMetaDataArgumentCaptor.capture(), eq("0")))
-				.thenReturn(refEntities.get(0));
-		when(entityManager.getReferences(entityMetaDataArgumentCaptor.capture(), eq(newArrayList("0"))))
+		EntityManager entityManager = when(
+				mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
+				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityType))).getMock();
+		when(entityManager.getReference(entityTypeArgumentCaptor.capture(), eq("0"))).thenReturn(refEntities.get(0));
+		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0"))))
 				.thenReturn(refEntities);
 		entityHydration = new EntityHydration(entityManager);
 	}
@@ -102,10 +101,10 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	@Test
 	public void hydrateTest()
 	{
-		Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityMetaData);
+		Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityType);
 		assertTrue(EntityUtils.equals(actualHydratedEntity, hydratedEntity));
 		// check that it has retrieved references of type TypeTestRef
-		assertTrue(entityMetaDataArgumentCaptor.getAllValues().stream()
+		assertTrue(entityTypeArgumentCaptor.getAllValues().stream()
 				.allMatch(emd -> emd.getName().equals("test_TypeTestRefDynamic")));
 	}
 
@@ -128,12 +127,12 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		String oneToManyEntity1IdValue = "ref1";
 		when(oneToManyEntity1.getIdValue()).thenReturn(oneToManyEntity1IdValue);
 		when(entity.getEntities(attrName)).thenReturn(newArrayList(oneToManyEntity0, oneToManyEntity1));
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		EntityType entityType = mock(EntityType.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getName()).thenReturn(attrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entityType.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		when(entity.getEntityType()).thenReturn(entityType);
 		assertEquals(entityHydration.dehydrate(entity),
 				singletonMap(attrName, newArrayList(oneToManyEntity0IdValue, oneToManyEntity1IdValue)));
 	}
@@ -147,12 +146,12 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		String manyToOneEntityIdValue = "ref0";
 		when(manyToOneEntity.getIdValue()).thenReturn(manyToOneEntityIdValue);
 		when(entity.getEntity(attrName)).thenReturn(manyToOneEntity);
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
+		EntityType entityType = mock(EntityType.class);
+		Attribute xrefAttr = mock(Attribute.class);
 		when(xrefAttr.getName()).thenReturn(attrName);
 		when(xrefAttr.getDataType()).thenReturn(XREF);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
-		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		when(entityType.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
+		when(entity.getEntityType()).thenReturn(entityType);
 		assertEquals(entityHydration.dehydrate(entity), singletonMap(attrName, manyToOneEntityIdValue));
 	}
 

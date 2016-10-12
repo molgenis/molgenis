@@ -82,14 +82,14 @@ public class AnnotationJob extends Job<Void>
 
 	private String getMessage()
 	{
-		return String.format("Annotated \"%s\" with %s (started by \"%s\")", repository.getEntityMetaData().getLabel(),
+		return String.format("Annotated \"%s\" with %s (started by \"%s\")", repository.getEntityType().getLabel(),
 				StringUtils.join(successfulAnnotators, ","), username);
 	}
 
 	private String getMessage(int i, RepositoryAnnotator annotator)
 	{
 		return String.format("Annotating \"%s\" with %s (annotator %d of %d, started by \"%s\")",
-				repository.getEntityMetaData().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(),
+				repository.getEntityType().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(),
 				username);
 	}
 }

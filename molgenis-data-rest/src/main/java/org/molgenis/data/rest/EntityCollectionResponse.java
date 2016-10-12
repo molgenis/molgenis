@@ -2,7 +2,7 @@ package org.molgenis.data.rest;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Map;
 public class EntityCollectionResponse
 {
 	private final String href;
-	private final EntityMetaDataResponse meta;
+	private final EntityTypeResponse meta;
 	private final int start;
 	private final int num;
 	private final long total;
@@ -20,12 +20,12 @@ public class EntityCollectionResponse
 	private final List<Map<String, Object>> items;
 
 	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
-			EntityMetaData meta, MolgenisPermissionService permissionService, DataService dataService,
+			EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
 		this.href = href;
 		this.meta =
-				meta != null ? new EntityMetaDataResponse(meta, permissionService, dataService, languageService) : null;
+				meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
@@ -44,7 +44,7 @@ public class EntityCollectionResponse
 		return href;
 	}
 
-	public EntityMetaDataResponse getMeta()
+	public EntityTypeResponse getMeta()
 	{
 		return meta;
 	}

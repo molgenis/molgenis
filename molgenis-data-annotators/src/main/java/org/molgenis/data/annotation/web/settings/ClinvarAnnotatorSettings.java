@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.web.settings;
 import org.molgenis.data.annotation.core.entity.impl.ClinvarAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +18,7 @@ public class ClinvarAnnotatorSettings extends DefaultSettingsEntity
 	}
 
 	@Component
-	public static class Meta extends DefaultSettingsEntityMetaData
+	public static class Meta extends DefaultSettingsEntityType
 	{
 		public static final String CLINVAR_LOCATION = "clinvarLocation";
 

@@ -1,8 +1,8 @@
 package org.molgenis.data.annotation.core.effects;
 
-import org.molgenis.data.annotation.web.meta.AnnotatorEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.annotation.web.meta.AnnotatorEntityType;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,10 +13,10 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 
 @Component
-public class EffectsMetaData implements AnnotatorEntityMetaData
+public class EffectsMetaData implements AnnotatorEntityType
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	public static final String ID = "id";
 	public static final String VARIANT = VcfWriterUtils.VARIANT;
@@ -37,26 +37,26 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
 	public static final String ERRORS = "Errors";
 
-	public LinkedList<AttributeMetaData> getOrderedAttributes()
+	public LinkedList<Attribute> getOrderedAttributes()
 	{
-		AttributeMetaData ALT_ATTR = getAltAttr();
-		AttributeMetaData PUTATIVE_IMPACT_ATTR = getPutativeImpactAttr();
-		AttributeMetaData GENE_NAME_ATTR = getGeneNameAttr();
-		AttributeMetaData GENE_ID_ATTR = getGeneIdAttr();
-		AttributeMetaData FEATURE_TYPE_ATTR = getFeatureTypeAttr();
-		AttributeMetaData FEATURE_ID_ATTR = getFeatureIdAttr();
-		AttributeMetaData TRANSCRIPT_BIOTYPE_ATTR = getTranscriptBiotypeAttr();
-		AttributeMetaData RANK_TOTAL_ATTR = getRankTotalAttr();
-		AttributeMetaData HGVS_C_ATTR = getHgvsCAttr();
-		AttributeMetaData HGVS_P_ATTR = getHgvsPAttr();
-		AttributeMetaData C_DNA_POSITION_ATTR = getCdnaPositionAttr();
-		AttributeMetaData CDS_POSITION_ATTR = getCdsPositionAttr();
-		AttributeMetaData PROTEIN_POSITION_ATTR = getProteinPositionAttr();
-		AttributeMetaData DISTANCE_TO_FEATURE_ATTR = getDistanceToFeatureAttr();
-		AttributeMetaData ERRORS_ATTR = getErrorsAttr();
-		AttributeMetaData ANNOTATION_ATTR = getAnnotationAttr();
+		Attribute ALT_ATTR = getAltAttr();
+		Attribute PUTATIVE_IMPACT_ATTR = getPutativeImpactAttr();
+		Attribute GENE_NAME_ATTR = getGeneNameAttr();
+		Attribute GENE_ID_ATTR = getGeneIdAttr();
+		Attribute FEATURE_TYPE_ATTR = getFeatureTypeAttr();
+		Attribute FEATURE_ID_ATTR = getFeatureIdAttr();
+		Attribute TRANSCRIPT_BIOTYPE_ATTR = getTranscriptBiotypeAttr();
+		Attribute RANK_TOTAL_ATTR = getRankTotalAttr();
+		Attribute HGVS_C_ATTR = getHgvsCAttr();
+		Attribute HGVS_P_ATTR = getHgvsPAttr();
+		Attribute C_DNA_POSITION_ATTR = getCdnaPositionAttr();
+		Attribute CDS_POSITION_ATTR = getCdsPositionAttr();
+		Attribute PROTEIN_POSITION_ATTR = getProteinPositionAttr();
+		Attribute DISTANCE_TO_FEATURE_ATTR = getDistanceToFeatureAttr();
+		Attribute ERRORS_ATTR = getErrorsAttr();
+		Attribute ANNOTATION_ATTR = getAnnotationAttr();
 
-		LinkedList<AttributeMetaData> attributes = new LinkedList<>();
+		LinkedList<Attribute> attributes = new LinkedList<>();
 		attributes.add(ALT_ATTR);
 		attributes.add(GENE_NAME_ATTR);
 		attributes.add(ANNOTATION_ATTR);
@@ -77,105 +77,105 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 		return attributes;
 	}
 
-	public AttributeMetaData getTranscriptBiotypeAttr()
+	public Attribute getTranscriptBiotypeAttr()
 	{
-		return attributeMetaDataFactory.create().setName(TRANSCRIPT_BIOTYPE).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(TRANSCRIPT_BIOTYPE).setDataType(STRING).setDescription(
 				"The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)")
 				.setAggregatable(true);
 	}
 
-	public AttributeMetaData getRankTotalAttr()
+	public Attribute getRankTotalAttr()
 	{
-		return attributeMetaDataFactory.create().setName(RANK_TOTAL).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(RANK_TOTAL).setDataType(STRING).setDescription(
 				"Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getHgvsCAttr()
+	public Attribute getHgvsCAttr()
 	{
-		return attributeMetaDataFactory.create().setName(HGVS_C).setDataType(TEXT)
+		return attributeFactory.create().setName(HGVS_C).setDataType(TEXT)
 				.setDescription("Variant using HGVS notation (DNA level)(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getHgvsPAttr()
+	public Attribute getHgvsPAttr()
 	{
-		return attributeMetaDataFactory.create().setName(HGVS_P).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(HGVS_P).setDataType(STRING).setDescription(
 				"If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getCdnaPositionAttr()
+	public Attribute getCdnaPositionAttr()
 	{
-		return attributeMetaDataFactory.create().setName(C_DNA_POSITION).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(C_DNA_POSITION).setDataType(STRING).setDescription(
 				"Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getCdsPositionAttr()
+	public Attribute getCdsPositionAttr()
 	{
-		return attributeMetaDataFactory.create().setName(CDS_POSITION).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(CDS_POSITION).setDataType(STRING).setDescription(
 				"Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getProteinPositionAttr()
+	public Attribute getProteinPositionAttr()
 	{
-		return attributeMetaDataFactory.create().setName(PROTEIN_POSITION).setDataType(STRING)
+		return attributeFactory.create().setName(PROTEIN_POSITION).setDataType(STRING)
 				.setDescription("Position and number of AA (one based, including START, but not STOP)");
 	}
 
-	public AttributeMetaData getDistanceToFeatureAttr()
+	public Attribute getDistanceToFeatureAttr()
 	{
-		return attributeMetaDataFactory.create().setName(DISTANCE_TO_FEATURE).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(DISTANCE_TO_FEATURE).setDataType(STRING).setDescription(
 				"All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getErrorsAttr()
+	public Attribute getErrorsAttr()
 	{
-		return attributeMetaDataFactory.create().setName(ERRORS).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(ERRORS).setDataType(STRING).setDescription(
 				"Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getAnnotationAttr()
+	public Attribute getAnnotationAttr()
 	{
-		return attributeMetaDataFactory.create().setName(ANNOTATION).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(ANNOTATION).setDataType(STRING).setDescription(
 				"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)")
 				.setAggregatable(true);
 	}
 
-	public AttributeMetaData getFeatureIdAttr()
+	public Attribute getFeatureIdAttr()
 	{
-		return attributeMetaDataFactory.create().setName(FEATURE_ID).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(FEATURE_ID).setDataType(STRING).setDescription(
 				"Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
 	}
 
-	public AttributeMetaData getFeatureTypeAttr()
+	public Attribute getFeatureTypeAttr()
 	{
-		return attributeMetaDataFactory.create().setName(FEATURE_TYPE).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(FEATURE_TYPE).setDataType(STRING).setDescription(
 				"Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
 						+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)")
 				.setAggregatable(true);
 	}
 
-	public AttributeMetaData getGeneIdAttr()
+	public Attribute getGeneIdAttr()
 	{
-		return attributeMetaDataFactory.create().setName(GENE_ID).setDataType(STRING).setDescription("Gene ID")
+		return attributeFactory.create().setName(GENE_ID).setDataType(STRING).setDescription("Gene ID")
 				.setAggregatable(true);
 	}
 
-	public AttributeMetaData getGeneNameAttr()
+	public Attribute getGeneNameAttr()
 	{
-		return attributeMetaDataFactory.create().setName(GENE_NAME).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(GENE_NAME).setDataType(STRING).setDescription(
 				"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)")
 				.setAggregatable(true);
 	}
 
-	public AttributeMetaData getPutativeImpactAttr()
+	public Attribute getPutativeImpactAttr()
 	{
-		return attributeMetaDataFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING).setDescription(
 				"A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)")
 				.setAggregatable(true);
 	}
 
-	public AttributeMetaData getAltAttr()
+	public Attribute getAltAttr()
 	{
-		return attributeMetaDataFactory.create().setName(ALT).setDataType(TEXT)
+		return attributeFactory.create().setName(ALT).setDataType(TEXT)
 				.setDescription("The alternative allele on which this EFFECT applies");
 	}
 }

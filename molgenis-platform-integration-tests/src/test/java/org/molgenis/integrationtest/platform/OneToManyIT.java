@@ -111,7 +111,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> persons = importPersons(testCase);
 
-		String personEntityName = persons.get(0).getEntityMetaData().getName();
+		String personEntityName = persons.get(0).getEntityType().getName();
 		Entity person1 = dataService.findOneById(personEntityName, PERSON_1);
 		Entity person2 = dataService.findOneById(personEntityName, PERSON_2);
 		Entity person3 = dataService.findOneById(personEntityName, PERSON_3);
@@ -143,7 +143,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_2);
 
 			book1.set(BookMetaData1.AUTHOR, author2);
-			dataService.update(book1.getEntityMetaData().getName(), book1);
+			dataService.update(book1.getEntityType().getName(), book1);
 
 			Entity author1RetrievedAgain = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
@@ -178,7 +178,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_2);
 
 			book1.set(BookMetaData1.AUTHOR, author2);
-			dataService.update(book1.getEntityMetaData().getName(), Stream.of(book1));
+			dataService.update(book1.getEntityType().getName(), Stream.of(book1));
 
 			Entity author1RetrievedAgain = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
@@ -211,7 +211,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
 			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
 
-			dataService.delete(book1.getEntityMetaData().getName(), book1);
+		dataService.delete(book1.getEntityType().getName(), book1);
 
 			Entity author1RetrievedAgain = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
@@ -235,7 +235,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
 			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
 
-			dataService.delete(book1.getEntityMetaData().getName(), Stream.of(book1));
+			dataService.delete(book1.getEntityType().getName(), Stream.of(book1));
 
 			Entity author1RetrievedAgain = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
@@ -281,7 +281,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	public void testUpdateParentValue(TestCaseType testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
-		String personName = persons.get(0).getEntityMetaData().getName();
+		String personName = persons.get(0).getEntityType().getName();
 
 		Entity person1 = dataService.findOneById(personName, PERSON_1);
 		Entity person2 = dataService.findOneById(personName, PERSON_2);
@@ -362,7 +362,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	public void testUpdateParentOrderAscending()
 	{
 		List<Entity> persons = importPersons(ASCENDING_ORDER);
-		String personName = persons.get(0).getEntityMetaData().getName();
+		String personName = persons.get(0).getEntityType().getName();
 
 		Entity person1 = dataService.findOneById(personName, PERSON_1);
 		Entity person2 = dataService.findOneById(personName, PERSON_2);
@@ -387,7 +387,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	public void testUpdateParentOrderDescending()
 	{
 		List<Entity> persons = importPersons(DESCENDING_ORDER);
-		String personName = persons.get(0).getEntityMetaData().getName();
+		String personName = persons.get(0).getEntityType().getName();
 
 		Entity person1 = dataService.findOneById(personName, PERSON_1);
 		Entity person2 = dataService.findOneById(personName, PERSON_2);
@@ -433,8 +433,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		List<Entity> persons = oneToManyTestHarness.createPersonEntities(testCase);
 		runAsSystem(() ->
 		{
-			dataService.add(persons.get(0).getEntityMetaData().getName(), persons.stream());
-			waitForIndexToBeStable(persons.get(0).getEntityMetaData().getName(), indexService, LOG);
+			dataService.add(persons.get(0).getEntityType().getName(), persons.stream());
+			waitForIndexToBeStable(persons.get(0).getEntityType().getName(), indexService, LOG);
 		});
 		return persons;
 	}

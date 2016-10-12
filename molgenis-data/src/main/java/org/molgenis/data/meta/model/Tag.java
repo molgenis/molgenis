@@ -12,20 +12,20 @@ public class Tag extends StaticEntity
 		super(entity);
 	}
 
-	public Tag(EntityMetaData entityMeta)
+	public Tag(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public Tag(String identifier, EntityMetaData entityMeta)
+	public Tag(String identifier, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setIdentifier(identifier);
 	}
 
 	public static Tag newInstance(Tag tag)
 	{
-		Tag tagCopy = new Tag(tag.getEntityMetaData());
+		Tag tagCopy = new Tag(tag.getEntityType());
 		tagCopy.setIdentifier(tag.getIdentifier());
 		tagCopy.setObjectIri(tag.getObjectIri());
 		tagCopy.setLabel(tag.getLabel());

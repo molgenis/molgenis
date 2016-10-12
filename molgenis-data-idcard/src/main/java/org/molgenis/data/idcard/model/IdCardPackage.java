@@ -1,7 +1,7 @@
 package org.molgenis.data.idcard.model;
 
 import org.molgenis.data.meta.SystemPackage;
-import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,9 +18,9 @@ public class IdCardPackage extends SystemPackage
 	private final RootSystemPackage rootSystemPackage;
 
 	@Autowired
-	public IdCardPackage(PackageMetaData packageMetaData, RootSystemPackage rootSystemPackage)
+	public IdCardPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetaData);
+		super(SIMPLE_NAME, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

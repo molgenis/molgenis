@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
 import java.text.MessageFormat;
@@ -22,7 +22,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
-import static org.molgenis.data.support.EntityMetaDataUtils.*;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}
@@ -34,20 +34,20 @@ class PostgreSqlQueryGenerator
 
 	}
 
-	private static String getSqlConstraintPrimaryKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlConstraintPrimaryKey(EntityType entityType, Attribute attr)
 	{
-		return "CONSTRAINT " + getPrimaryKeyName(entityMeta, attr) + " PRIMARY KEY (" + getColumnName(attr) + ')';
+		return "CONSTRAINT " + getPrimaryKeyName(entityType, attr) + " PRIMARY KEY (" + getColumnName(attr) + ')';
 	}
 
-	private static String getSqlForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlForeignKey(EntityType entityType, Attribute attr)
 	{
-		StringBuilder strBuilder = new StringBuilder("CONSTRAINT ").append(getForeignKeyName(entityMeta, attr))
+		StringBuilder strBuilder = new StringBuilder("CONSTRAINT ").append(getForeignKeyName(entityType, attr))
 				.append(" FOREIGN KEY (").append(getColumnName(attr)).append(") REFERENCES ")
 				.append(getTableName(attr.getRefEntity())).append('(')
 				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
 
 		// for self-referencing data or inversed attributes defer checking constraints until the end of the transaction
-		if (attr.getRefEntity().getName().equals(entityMeta.getName()))
+		if (attr.getRefEntity().getName().equals(entityType.getName()))
 		{
 			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
@@ -55,12 +55,12 @@ class PostgreSqlQueryGenerator
 		return strBuilder.toString();
 	}
 
-	private static String getSqlUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlUniqueKey(EntityType entityType, Attribute attr)
 	{
-		return "CONSTRAINT " + getUniqueKeyName(entityMeta, attr) + " UNIQUE (" + getColumnName(attr) + ')';
+		return "CONSTRAINT " + getUniqueKeyName(entityType, attr) + " UNIQUE (" + getColumnName(attr) + ')';
 	}
 
-	private static String getSqlCheckConstraint(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlCheckConstraint(EntityType entityType, Attribute attr)
 	{
 		if (attr.getDataType() != ENUM)
 		{
@@ -68,37 +68,37 @@ class PostgreSqlQueryGenerator
 					format("Check constraint only allowed for attribute type [%s]", ENUM.toString()));
 		}
 
-		return "CONSTRAINT " + getCheckConstraintName(entityMeta, attr) + " CHECK (" + getColumnName(attr) + " IN ("
+		return "CONSTRAINT " + getCheckConstraintName(entityType, attr) + " CHECK (" + getColumnName(attr) + " IN ("
 				+ attr.getEnumOptions().stream().map(enumOption -> '\'' + enumOption + '\'').collect(joining(","))
 				+ "))";
 	}
 
-	static String getSqlCreateForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateForeignKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " ADD " + getSqlForeignKey(entityMeta, attr);
+		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlForeignKey(entityType, attr);
 	}
 
-	static String getSqlDropForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropForeignKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " DROP CONSTRAINT " + getForeignKeyName(entityMeta, attr);
+		return "ALTER TABLE " + getTableName(entityType) + " DROP CONSTRAINT " + getForeignKeyName(entityType, attr);
 	}
 
-	static String getSqlCreateUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateUniqueKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " ADD " + getSqlUniqueKey(entityMeta, attr);
+		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlUniqueKey(entityType, attr);
 	}
 
-	static String getSqlDropUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropUniqueKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " DROP CONSTRAINT " + getUniqueKeyName(entityMeta, attr);
+		return "ALTER TABLE " + getTableName(entityType) + " DROP CONSTRAINT " + getUniqueKeyName(entityType, attr);
 	}
 
-	static String getSqlCreateCheckConstraint(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateCheckConstraint(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " ADD " + getSqlCheckConstraint(entityMeta, attr);
+		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlCheckConstraint(entityType, attr);
 	}
 
-	static String getSqlDropCheckConstraint(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropCheckConstraint(EntityType entityType, Attribute attr)
 	{
 		if (attr.getDataType() != ENUM)
 		{
@@ -106,41 +106,41 @@ class PostgreSqlQueryGenerator
 					format("Check constraint only allowed for attribute type [%s]", ENUM.toString()));
 		}
 
-		return "ALTER TABLE " + getTableName(entityMeta) + " DROP CONSTRAINT " + getCheckConstraintName(entityMeta,
+		return "ALTER TABLE " + getTableName(entityType) + " DROP CONSTRAINT " + getCheckConstraintName(entityType,
 				attr);
 	}
 
-	static String getSqlSetNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlSetNotNull(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " ALTER COLUMN " + getColumnName(attr) + " SET NOT NULL";
+		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " SET NOT NULL";
 	}
 
-	static String getSqlDropNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropNotNull(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " ALTER COLUMN " + getColumnName(attr) + " DROP NOT NULL";
+		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " DROP NOT NULL";
 	}
 
-	static String getSqlSetDataType(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlSetDataType(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " ALTER COLUMN " + getColumnName(attr) + " SET DATA TYPE "
+		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " SET DATA TYPE "
 				+ getPostgreSqlType(attr) + " USING " + getColumnName(attr) + "::" + getPostgreSqlType(attr);
 	}
 
 	/**
 	 * Returns SQL string to add a column to an existing table.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @param attr       attribute
 	 * @return SQL string
 	 */
-	static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlAddColumn(EntityType entityType, Attribute attr)
 	{
 		StringBuilder sql = new StringBuilder("ALTER TABLE ");
 
-		String columnSql = getSqlColumn(entityMeta, attr);
-		sql.append(getTableName(entityMeta)).append(" ADD ").append(columnSql);
+		String columnSql = getSqlColumn(entityType, attr);
+		sql.append(getTableName(entityType)).append(" ADD ").append(columnSql);
 
-		List<String> sqlTableConstraints = getSqlTableConstraints(entityMeta, attr);
+		List<String> sqlTableConstraints = getSqlTableConstraints(entityType, attr);
 		if (!sqlTableConstraints.isEmpty())
 		{
 			sqlTableConstraints.forEach(sqlTableConstraint -> sql.append(",ADD ").append(sqlTableConstraint));
@@ -148,17 +148,17 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	static String getSqlCreateTable(EntityMetaData entityMeta)
+	static String getSqlCreateTable(EntityType entityType)
 	{
-		List<AttributeMetaData> persistedTableAttrs = getTableAttributes(entityMeta).collect(toList());
+		List<Attribute> persistedTableAttrs = getTableAttributes(entityType).collect(toList());
 
-		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getTableName(entityMeta)).append('(');
+		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getTableName(entityType)).append('(');
 
 		// add columns
-		for (Iterator<AttributeMetaData> it = persistedTableAttrs.iterator(); it.hasNext(); )
+		for (Iterator<Attribute> it = persistedTableAttrs.iterator(); it.hasNext(); )
 		{
-			AttributeMetaData attr = it.next();
-			sql.append(getSqlColumn(entityMeta, attr));
+			Attribute attr = it.next();
+			sql.append(getSqlColumn(entityType, attr));
 
 			if (it.hasNext())
 			{
@@ -167,9 +167,9 @@ class PostgreSqlQueryGenerator
 		}
 
 		// add table constraints
-		for (AttributeMetaData persistedTableAttr : persistedTableAttrs)
+		for (Attribute persistedTableAttr : persistedTableAttrs)
 		{
-			List<String> sqlTableConstraints = getSqlTableConstraints(entityMeta, persistedTableAttr);
+			List<String> sqlTableConstraints = getSqlTableConstraints(entityType, persistedTableAttr);
 			if (!sqlTableConstraints.isEmpty())
 			{
 				sqlTableConstraints.forEach(sqlTableConstraint -> sql.append(',').append(sqlTableConstraint));
@@ -181,19 +181,19 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	static String getSqlCreateJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)
 	{
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityMeta, attr))
+		Attribute idAttr = entityType.getIdAttribute();
+		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityType, attr))
 				.append(" (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
 				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
 				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
 				.append(" NOT NULL").append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
-				.append(getTableName(entityMeta)).append('(').append(getColumnName(idAttr))
+				.append(getTableName(entityType)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
 
 		// for self-referencing data defer checking constraints until the end of the transaction
-		if (attr.getRefEntity().getName().equals(entityMeta.getName()))
+		if (attr.getRefEntity().getName().equals(entityType.getName()))
 		{
 			sql.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
@@ -205,7 +205,7 @@ class PostgreSqlQueryGenerator
 					.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
 
 			// for self-referencing data defer checking constraints until the end of the transaction
-			if (attr.getRefEntity().getName().equals(entityMeta.getName()))
+			if (attr.getRefEntity().getName().equals(entityType.getName()))
 			{
 				sql.append(" DEFERRABLE INITIALLY DEFERRED");
 			}
@@ -230,35 +230,35 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateJunctionTableIndex(EntityType entityType, Attribute attr)
 	{
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		String junctionTableName = getJunctionTableName(entityMeta, attr);
-		String junctionTableIndexName = getJunctionTableIndexName(entityMeta, attr, idAttr);
+		Attribute idAttr = entityType.getIdAttribute();
+		String junctionTableName = getJunctionTableName(entityType, attr);
+		String junctionTableIndexName = getJunctionTableIndexName(entityType, attr, idAttr);
 		String idxColumnName = getColumnName(idAttr);
 		return "CREATE INDEX " + junctionTableIndexName + " ON " + junctionTableName + " (" + idxColumnName + ')';
 	}
 
-	static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropJunctionTable(EntityType entityType, Attribute attr)
 	{
-		return getSqlDropTable(getJunctionTableName(entityMeta, attr));
+		return getSqlDropTable(getJunctionTableName(entityType, attr));
 	}
 
-	static String getSqlDropTable(EntityMetaData entityMeta)
+	static String getSqlDropTable(EntityType entityType)
 	{
-		return getSqlDropTable(getTableName(entityMeta));
+		return getSqlDropTable(getTableName(entityType));
 	}
 
-	static String getSqlDropColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropColumn(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " DROP COLUMN " + getColumnName(attr);
+		return "ALTER TABLE " + getTableName(entityType) + " DROP COLUMN " + getColumnName(attr);
 	}
 
-	static String getSqlInsert(EntityMetaData entityMeta)
+	static String getSqlInsert(EntityType entityType)
 	{
-		StringBuilder sql = new StringBuilder("INSERT INTO ").append(getTableName(entityMeta)).append(" (");
+		StringBuilder sql = new StringBuilder("INSERT INTO ").append(getTableName(entityType)).append(" (");
 		StringBuilder params = new StringBuilder();
-		getTableAttributes(entityMeta).forEach(attr ->
+		getTableAttributes(entityType).forEach(attr ->
 		{
 			sql.append(getColumnName(attr)).append(", ");
 			params.append("?, ");
@@ -272,24 +272,24 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	static String getSqlInsertJunction(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlInsertJunction(EntityType entityType, Attribute attr)
 	{
-		String junctionTableName = getJunctionTableName(entityMeta, attr);
+		String junctionTableName = getJunctionTableName(entityType, attr);
 		return "INSERT INTO " + junctionTableName + " (" + getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME) + ','
-				+ getColumnName(entityMeta.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
+				+ getColumnName(entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
 	}
 
-	static String getSqlDeleteAll(EntityMetaData entityMeta)
+	static String getSqlDeleteAll(EntityType entityType)
 	{
-		return "DELETE FROM " + getTableName(entityMeta);
+		return "DELETE FROM " + getTableName(entityType);
 	}
 
-	static String getSqlDelete(EntityMetaData entityMeta)
+	static String getSqlDelete(EntityType entityType)
 	{
-		return getSqlDelete(getTableName(entityMeta), entityMeta.getIdAttribute());
+		return getSqlDelete(getTableName(entityType), entityType.getIdAttribute());
 	}
 
-	static String getSqlDelete(String tableName, AttributeMetaData attr)
+	static String getSqlDelete(String tableName, Attribute attr)
 	{
 		return "DELETE FROM " + tableName + " WHERE " + getColumnName(attr) + " = ?";
 	}
@@ -301,19 +301,19 @@ class PostgreSqlQueryGenerator
 	 * @param attr attribute
 	 * @return whether this attribute is stored in another table than the entity table
 	 */
-	private static boolean isPersistedInOtherTable(AttributeMetaData attr)
+	private static boolean isPersistedInOtherTable(Attribute attr)
 	{
 		boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
 		return isMultipleReferenceType(attr) || bidirectionalOneToMany;
 	}
 
-	static String getSqlJunctionTableSelect(EntityMetaData entityMeta, AttributeMetaData attr, int numOfIds)
+	static String getSqlJunctionTableSelect(EntityType entityType, Attribute attr, int numOfIds)
 	{
-		String idColName = getColumnName(entityMeta.getIdAttribute());
+		String idColName = getColumnName(entityType.getIdAttribute());
 		String refIdColName = getColumnName(attr);
 
 		return "SELECT " + idColName + ", \"" + JUNCTION_TABLE_ORDER_ATTR_NAME + "\"," + refIdColName + " FROM "
-				+ getJunctionTableName(entityMeta, attr) + " WHERE " + idColName + " in (" + range(0, numOfIds)
+				+ getJunctionTableName(entityType, attr) + " WHERE " + idColName + " in (" + range(0, numOfIds)
 				.mapToObj((x) -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ", \""
 				+ JUNCTION_TABLE_ORDER_ATTR_NAME + '"';
 	}
@@ -321,18 +321,18 @@ class PostgreSqlQueryGenerator
 	/**
 	 * Determines whether a distinct select is required based on a given query.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @param q          query
 	 * @param <E>        entity type
 	 * @return <code>true</code> if a distinct select is required for SQL queries based on the given query
 	 * @throws UnknownAttributeException if query field refers to an attribute that does not exist in entity meta
 	 */
-	private static <E extends Entity> boolean isDistinctSelectRequired(EntityMetaData entityMeta, Query<E> q)
+	private static <E extends Entity> boolean isDistinctSelectRequired(EntityType entityType, Query<E> q)
 	{
-		return isDistinctSelectRequiredRec(entityMeta, q.getRules());
+		return isDistinctSelectRequiredRec(entityType, q.getRules());
 	}
 
-	private static boolean isDistinctSelectRequiredRec(EntityMetaData entityMeta, List<QueryRule> queryRules)
+	private static boolean isDistinctSelectRequiredRec(EntityType entityType, List<QueryRule> queryRules)
 	{
 		if (queryRules.isEmpty())
 		{
@@ -342,7 +342,7 @@ class PostgreSqlQueryGenerator
 		{
 			if (queryRule.getOperator() == NESTED)
 			{
-				if (isDistinctSelectRequiredRec(entityMeta, queryRule.getNestedRules()))
+				if (isDistinctSelectRequiredRec(entityType, queryRule.getNestedRules()))
 				{
 					return true;
 				}
@@ -352,11 +352,11 @@ class PostgreSqlQueryGenerator
 				String attrName = queryRule.getField();
 				if (attrName != null)
 				{
-					AttributeMetaData attr = entityMeta.getAttribute(attrName);
+					Attribute attr = entityType.getAttribute(attrName);
 					if (attr == null)
 					{
 						throw new UnknownAttributeException(
-								format("Unknown attribute [%s] in entity [%s]", attrName, entityMeta.getName()));
+								format("Unknown attribute [%s] in entity [%s]", attrName, entityType.getName()));
 					}
 					if (isPersistedInOtherTable(attr))
 					{
@@ -368,18 +368,18 @@ class PostgreSqlQueryGenerator
 		return false;
 	}
 
-	static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
+	static <E extends Entity> String getSqlSelect(EntityType entityType, Query<E> q, List<Object> parameters,
 			boolean includeMrefs)
 	{
 		final StringBuilder select = new StringBuilder("SELECT ");
-		if (isDistinctSelectRequired(entityMeta, q))
+		if (isDistinctSelectRequired(entityType, q))
 		{
 			select.append("DISTINCT ");
 		}
 		final StringBuilder group = new StringBuilder();
 		final AtomicInteger count = new AtomicInteger();
-		final AttributeMetaData idAttribute = entityMeta.getIdAttribute();
-		getPersistedAttributes(entityMeta).forEach(attr ->
+		final Attribute idAttribute = entityType.getIdAttribute();
+		getPersistedAttributes(entityType).forEach(attr ->
 		{
 			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()) || (q.getSort() != null && q.getSort()
 					.hasField(attr.getName())))
@@ -395,7 +395,7 @@ class PostgreSqlQueryGenerator
 					{
 						if (attr.getDataType() == ONE_TO_MANY && attr.isMappedBy())
 						{
-							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
 							String mrefSelect = "(SELECT array_agg(" + getColumnName(refIdAttr);
 
 							Sort orderBy = attr.getOrderBy();
@@ -404,10 +404,11 @@ class PostgreSqlQueryGenerator
 								orderBy = new Sort(refIdAttr.getName());
 							}
 
-							mrefSelect += ' ' + getSqlSort(attr.getRefEntity(), new QueryImpl<>().sort(orderBy)) + ") FROM "
-									+ getTableName(attr.getRefEntity()) + " WHERE this." + getColumnName(idAttribute)
-									+ " = " + getTableName(attr.getRefEntity()) + '.' + getColumnName(
-									attr.getMappedBy()) + ") AS " + getColumnName(attr);
+							mrefSelect +=
+									' ' + getSqlSort(attr.getRefEntity(), new QueryImpl<>().sort(orderBy)) + ") FROM "
+											+ getTableName(attr.getRefEntity()) + " WHERE this." + getColumnName(
+											idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
+											+ getColumnName(attr.getMappedBy()) + ") AS " + getColumnName(attr);
 							select.append(mrefSelect);
 						}
 						else
@@ -417,7 +418,7 @@ class PostgreSqlQueryGenerator
 									.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
 													+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
 											getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-											getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
+											getJunctionTableName(entityType, attr), getColumnName(idAttribute));
 							select.append(mrefSelect);
 						}
 					}
@@ -443,15 +444,15 @@ class PostgreSqlQueryGenerator
 		});
 
 		// from
-		StringBuilder result = new StringBuilder().append(select).append(getSqlFrom(entityMeta, q));
+		StringBuilder result = new StringBuilder().append(select).append(getSqlFrom(entityType, q));
 		// where
-		String where = getSqlWhere(entityMeta, q, parameters, 0);
+		String where = getSqlWhere(entityType, q, parameters, 0);
 		if (where.length() > 0)
 		{
 			result.append(" WHERE ").append(where);
 		}
 		// order by
-		result.append(' ').append(getSqlSort(entityMeta, q));
+		result.append(' ').append(getSqlSort(entityType, q));
 		// limit
 		if (q.getPageSize() > 0)
 		{
@@ -465,14 +466,15 @@ class PostgreSqlQueryGenerator
 		return result.toString().trim();
 	}
 
-	static String getSqlUpdate(EntityMetaData entityMeta)
+	static String getSqlUpdate(EntityType entityType)
 	{
 		// use (readonly) identifier
-		AttributeMetaData idAttribute = entityMeta.getIdAttribute();
+		Attribute idAttribute = entityType.getIdAttribute();
 
 		// create sql
-		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityMeta)).append(" SET ");
-		getTableAttributes(entityMeta).forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
+		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityType)).append(" SET ");
+		getTableAttributes(entityType).forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
+
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
@@ -488,19 +490,19 @@ class PostgreSqlQueryGenerator
 	 * @param parameters prepared statement parameters
 	 * @return SQL string
 	 */
-	static <E extends Entity> String getSqlCount(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
+	static <E extends Entity> String getSqlCount(EntityType entityType, Query<E> q, List<Object> parameters)
 	{
 		StringBuilder sqlBuilder = new StringBuilder("SELECT COUNT");
-		String idAttribute = getColumnName(entityMeta.getIdAttribute());
+		String idAttribute = getColumnName(entityType.getIdAttribute());
 
 		List<QueryRule> queryRules = q.getRules();
 		if (queryRules == null || queryRules.isEmpty())
 		{
-			sqlBuilder.append("(*) FROM ").append(getTableName(entityMeta));
+			sqlBuilder.append("(*) FROM ").append(getTableName(entityType));
 		}
 		else
 		{
-			boolean distinctSelectRequired = isDistinctSelectRequired(entityMeta, q);
+			boolean distinctSelectRequired = isDistinctSelectRequired(entityType, q);
 			if (distinctSelectRequired)
 			{
 				// distinct count in case query contains one or more rules referring to MREF attributes.
@@ -511,14 +513,14 @@ class PostgreSqlQueryGenerator
 				sqlBuilder.append("(*)");
 			}
 
-			String from = getSqlFrom(entityMeta, q);
-			String where = getSqlWhere(entityMeta, q, parameters, 0);
+			String from = getSqlFrom(entityType, q);
+			String where = getSqlWhere(entityType, q, parameters, 0);
 			sqlBuilder.append(from).append(" WHERE ").append(where);
 		}
 		return sqlBuilder.toString();
 	}
 
-	private static String getSqlColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlColumn(EntityType entityType, Attribute attr)
 	{
 		StringBuilder sqlBuilder = new StringBuilder(getColumnName(attr)).append(' ');
 
@@ -554,7 +556,7 @@ class PostgreSqlQueryGenerator
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 
-		String sqlColumnConstraints = getSqlColumnConstraints(entityMeta, attr);
+		String sqlColumnConstraints = getSqlColumnConstraints(entityType, attr);
 		if (!sqlColumnConstraints.isEmpty())
 		{
 			sqlBuilder.append(' ').append(sqlColumnConstraints);
@@ -562,10 +564,10 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static String getSqlColumnConstraints(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getSqlColumnConstraints(EntityType entityType, Attribute attr)
 	{
 		StringBuilder sqlBuilder = new StringBuilder();
-		if (!attr.getName().equals(entityMeta.getIdAttribute().getName()))
+		if (!attr.getName().equals(entityType.getIdAttribute().getName()))
 		{
 			if (!attr.isNillable())
 			{
@@ -575,27 +577,27 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static List<String> getSqlTableConstraints(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static List<String> getSqlTableConstraints(EntityType entityType, Attribute attr)
 	{
 		List<String> tableConstraints = Lists.newArrayList();
 
-		if (attr.getName().equals(entityMeta.getIdAttribute().getName()))
+		if (attr.getName().equals(entityType.getIdAttribute().getName()))
 		{
-			tableConstraints.add(getSqlConstraintPrimaryKey(entityMeta, attr));
+			tableConstraints.add(getSqlConstraintPrimaryKey(entityType, attr));
 		}
 		else
 		{
 			if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 			{
-				tableConstraints.add(getSqlForeignKey(entityMeta, attr));
+				tableConstraints.add(getSqlForeignKey(entityType, attr));
 			}
 			if (attr.isUnique())
 			{
-				tableConstraints.add(getSqlUniqueKey(entityMeta, attr));
+				tableConstraints.add(getSqlUniqueKey(entityType, attr));
 			}
 			if (attr.getDataType() == ENUM)
 			{
-				tableConstraints.add(getSqlCheckConstraint(entityMeta, attr));
+				tableConstraints.add(getSqlCheckConstraint(entityType, attr));
 			}
 		}
 
@@ -607,16 +609,16 @@ class PostgreSqlQueryGenerator
 		return "DROP TABLE " + tableName;
 	}
 
-	private static <E extends Entity> String getSqlWhere(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
+	private static <E extends Entity> String getSqlWhere(EntityType entityType, Query<E> q, List<Object> parameters,
 			int mrefFilterIndex)
 	{
 		StringBuilder result = new StringBuilder();
 		for (QueryRule r : q.getRules())
 		{
-			AttributeMetaData attr = null;
+			Attribute attr = null;
 			if (r.getField() != null)
 			{
-				attr = entityMeta.getAttribute(r.getField());
+				attr = entityType.getAttribute(r.getField());
 				if (attr == null)
 				{
 					throw new MolgenisDataException(format("Unknown attribute [%s]", r.getField()));
@@ -636,7 +638,7 @@ class PostgreSqlQueryGenerator
 					break;
 				case NESTED:
 					QueryImpl<Entity> nestedQ = new QueryImpl<>(r.getNestedRules());
-					result.append('(').append(getSqlWhere(entityMeta, nestedQ, parameters, mrefFilterIndex))
+					result.append('(').append(getSqlWhere(entityType, nestedQ, parameters, mrefFilterIndex))
 							.append(')');
 					break;
 				case OR:
@@ -678,7 +680,7 @@ class PostgreSqlQueryGenerator
 					}
 
 					StringBuilder in = new StringBuilder();
-					AttributeMetaData inAttr = attr;
+					Attribute inAttr = attr;
 					Stream<Object> postgreSqlIds = stream(((Iterable<?>) inValue).spliterator(), false)
 							.map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
 					for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); )
@@ -844,14 +846,14 @@ class PostgreSqlQueryGenerator
 		return result.toString().trim();
 	}
 
-	private static <E extends Entity> String getSqlSort(EntityMetaData entityMeta, Query<E> q)
+	private static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
 	{
 		StringBuilder sortSql = new StringBuilder();
 		if (q.getSort() != null)
 		{
 			for (Sort.Order o : q.getSort())
 			{
-				AttributeMetaData attr = entityMeta.getAttribute(o.getAttr());
+				Attribute attr = entityType.getAttribute(o.getAttr());
 				if (isPersistedInOtherTable(attr))
 				{
 					sortSql.append(", ").append(getColumnName(attr));
@@ -878,17 +880,17 @@ class PostgreSqlQueryGenerator
 		return sortSql.toString();
 	}
 
-	private static <E extends Entity> String getSqlFrom(EntityMetaData entityMeta, Query<E> q)
+	private static <E extends Entity> String getSqlFrom(EntityType entityType, Query<E> q)
 	{
-		List<AttributeMetaData> mrefAttrsInQuery = getJoinQueryAttrs(entityMeta, q);
-		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityMeta)).append(" AS this");
+		List<Attribute> mrefAttrsInQuery = getJoinQueryAttrs(entityType, q);
+		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityType)).append(" AS this");
 
-		AttributeMetaData idAttribute = entityMeta.getIdAttribute();
+		Attribute idAttribute = entityType.getIdAttribute();
 
 		for (int i = 0; i < mrefAttrsInQuery.size(); i++)
 		{
 			// extra join so we can filter on the mrefs
-			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
+			Attribute mrefAttr = mrefAttrsInQuery.get(i);
 
 			if (mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy())
 			{
@@ -901,7 +903,7 @@ class PostgreSqlQueryGenerator
 			else
 			{
 				// query junction table
-				from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
+				from.append(" LEFT JOIN ").append(getJunctionTableName(entityType, mrefAttr)).append(" AS ")
 						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
 						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
 						.append('.').append(getColumnName(idAttribute)).append(')');
@@ -911,7 +913,7 @@ class PostgreSqlQueryGenerator
 		return from.toString();
 	}
 
-	private static String getColumnName(AttributeMetaData attr)
+	private static String getColumnName(Attribute attr)
 	{
 		return getColumnName(attr.getName());
 	}
@@ -921,51 +923,50 @@ class PostgreSqlQueryGenerator
 		return '"' + attrName + '"';
 	}
 
-	private static String getFilterColumnName(AttributeMetaData attr, int filterIndex)
+	private static String getFilterColumnName(Attribute attr, int filterIndex)
 	{
 		return '"' + attr.getName() + "_filter" + filterIndex + '"';
 	}
 
-	private static String getPrimaryKeyName(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getPrimaryKeyName(EntityType entityType, Attribute attr)
 	{
-		return getConstraintName(entityMeta, attr, "pkey");
+		return getConstraintName(entityType, attr, "pkey");
 	}
 
-	private static String getForeignKeyName(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getForeignKeyName(EntityType entityType, Attribute attr)
 	{
-		return getConstraintName(entityMeta, attr, "fkey");
+		return getConstraintName(entityType, attr, "fkey");
 	}
 
-	private static String getUniqueKeyName(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getUniqueKeyName(EntityType entityType, Attribute attr)
 	{
-		return getConstraintName(entityMeta, attr, "key");
+		return getConstraintName(entityType, attr, "key");
 	}
 
-	private static String getCheckConstraintName(EntityMetaData entityMeta, AttributeMetaData attr)
+	private static String getCheckConstraintName(EntityType entityType, Attribute attr)
 	{
-		return getConstraintName(entityMeta, attr, "chk");
+		return getConstraintName(entityType, attr, "chk");
 	}
 
-	private static String getConstraintName(EntityMetaData entityMeta, AttributeMetaData attr, String constraintPostfix)
+	private static String getConstraintName(EntityType entityType, Attribute attr, String constraintPostfix)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + constraintPostfix + '"';
+		return '"' + entityType.getName() + '_' + attr.getName() + '_' + constraintPostfix + '"';
 	}
 
-	private static <E extends Entity> List<AttributeMetaData> getJoinQueryAttrs(EntityMetaData entityMeta, Query<E> q)
+	private static <E extends Entity> List<Attribute> getJoinQueryAttrs(EntityType entityType, Query<E> q)
 	{
-		List<AttributeMetaData> joinAttrs = Lists.newArrayList();
-		getJoinQueryAttrsRec(entityMeta, q.getRules(), joinAttrs);
+		List<Attribute> joinAttrs = Lists.newArrayList();
+		getJoinQueryAttrsRec(entityType, q.getRules(), joinAttrs);
 		return joinAttrs;
 	}
 
-	private static void getJoinQueryAttrsRec(EntityMetaData entityMeta, List<QueryRule> rules,
-			List<AttributeMetaData> joinAttrs)
+	private static void getJoinQueryAttrsRec(EntityType entityType, List<QueryRule> rules, List<Attribute> joinAttrs)
 	{
 		for (QueryRule rule : rules)
 		{
 			if (rule.getField() != null)
 			{
-				AttributeMetaData attr = entityMeta.getAttribute(rule.getField());
+				Attribute attr = entityType.getAttribute(rule.getField());
 				if (attr != null && isPersistedInOtherTable(attr))
 				{
 					joinAttrs.add(attr);
@@ -974,12 +975,12 @@ class PostgreSqlQueryGenerator
 
 			if (rule.getNestedRules() != null && !rule.getNestedRules().isEmpty())
 			{
-				getJoinQueryAttrsRec(entityMeta, rule.getNestedRules(), joinAttrs);
+				getJoinQueryAttrsRec(entityType, rule.getNestedRules(), joinAttrs);
 			}
 		}
 	}
 
-	private static String getPostgreSqlType(AttributeMetaData attr)
+	private static String getPostgreSqlType(Attribute attr)
 	{
 		while (true)
 		{

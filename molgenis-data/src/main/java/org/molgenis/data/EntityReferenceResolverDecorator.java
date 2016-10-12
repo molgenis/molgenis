@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
 import java.io.IOException;
@@ -43,10 +43,9 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 		return decoratedRepo.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepo.getEntityMetaData();
+		return decoratedRepo.getEntityType();
 	}
 
 	@Override
@@ -203,21 +202,21 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 
 	private Entity resolveEntityReferences(Entity entity)
 	{
-		return entityManager.resolveReferences(getEntityMetaData(), entity, null);
+		return entityManager.resolveReferences(getEntityType(), entity, null);
 	}
 
 	private Entity resolveEntityReferences(Entity entity, Fetch fetch)
 	{
-		return entityManager.resolveReferences(getEntityMetaData(), entity, fetch);
+		return entityManager.resolveReferences(getEntityType(), entity, fetch);
 	}
 
 	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities)
 	{
-		return entityManager.resolveReferences(getEntityMetaData(), entities, null);
+		return entityManager.resolveReferences(getEntityType(), entities, null);
 	}
 
 	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities, Fetch fetch)
 	{
-		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
+		return entityManager.resolveReferences(getEntityType(), entities, fetch);
 	}
 }

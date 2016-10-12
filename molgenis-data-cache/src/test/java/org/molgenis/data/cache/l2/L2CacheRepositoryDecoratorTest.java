@@ -9,7 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
@@ -52,14 +52,14 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private ArgumentCaptor<Iterable<Object>> cacheIdCaptor;
 	@Captor
 	private ArgumentCaptor<Stream<Object>> repoIdCaptor;
-	private EntityMetaData emd;
+	private EntityType emd;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
 
-		emd = entityTestHarness.createDynamicRefEntityMetaData();
+		emd = entityTestHarness.createDynamicRefEntityType();
 		entities = entityTestHarness.createTestRefEntities(emd, 4);
 		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
 		l2CacheRepositoryDecorator = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache,
@@ -70,7 +70,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void beforeMethod()
 	{
 		reset(l2Cache, transactionInformation, decoratedRepository);
-		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
+		when(decoratedRepository.getEntityType()).thenReturn(emd);
 		when(decoratedRepository.getName()).thenReturn(emd.getName());
 	}
 

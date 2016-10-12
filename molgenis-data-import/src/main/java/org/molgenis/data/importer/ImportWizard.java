@@ -1,6 +1,6 @@
 package org.molgenis.data.importer;
 
-import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.Group;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.GroupMetaData.GROUP;
 
 public class ImportWizard extends Wizard
 {
@@ -29,7 +29,7 @@ public class ImportWizard extends Wizard
 	private String importRunId;
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
-	private Iterable<MolgenisGroup> groups;
+	private Iterable<Group> groups;
 	private List<String> entityNames;
 	private boolean allowPermissions;
 	private List<String> packages;
@@ -156,12 +156,12 @@ public class ImportWizard extends Wizard
 		this.mustChangeEntityName = mustChangeEntityName;
 	}
 
-	public void setGroups(Iterable<MolgenisGroup> groups)
+	public void setGroups(Iterable<Group> groups)
 	{
 		this.groups = groups;
 	}
 
-	public Iterable<MolgenisGroup> getGroups()
+	public Iterable<Group> getGroups()
 	{
 		return groups;
 	}
@@ -209,7 +209,7 @@ public class ImportWizard extends Wizard
 	public boolean getAllowPermissions()
 	{
 		allowPermissions = SecurityUtils
-				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + MOLGENIS_GROUP.toUpperCase())
+				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP.toUpperCase())
 				&& SecurityUtils
 				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY.toUpperCase());
 		return allowPermissions || SecurityUtils.currentUserIsSu();
