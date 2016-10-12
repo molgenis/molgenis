@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -282,6 +283,8 @@ class RestControllerV2
 
 			entities.forEach(entity ->
 			{
+				restService.updateMappedByEntities(entity);
+
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
@@ -383,6 +386,8 @@ class RestControllerV2
 
 			// update all entities
 			this.dataService.update(entityName, entities);
+			entities.forEach(entity -> restService
+					.updateMappedByEntities(entity, dataService.findOneById(entityName, entity.getIdValue())));
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		catch (Exception e)
@@ -697,7 +702,10 @@ class RestControllerV2
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
 						{
-							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attr) : null;
+							Fetch refAttrFetch =
+									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
+											languageService.getCurrentUserLanguageCode());
+							;
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -708,12 +716,16 @@ class RestControllerV2
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
+					case ONE_TO_MANY:
 						Iterable<Entity> refEntities = entity.getEntities(attrName);
 						List<Map<String, Object>> refEntityResponses;
 						if (refEntities != null)
 						{
 							refEntityResponses = new ArrayList<Map<String, Object>>();
-							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attrName) : null;
+							Fetch refAttrFetch =
+									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
+											languageService.getCurrentUserLanguageCode());
+							;
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));

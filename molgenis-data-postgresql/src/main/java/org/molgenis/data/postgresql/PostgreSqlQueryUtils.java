@@ -3,11 +3,11 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.EntityMetaDataUtils;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
@@ -92,25 +92,31 @@ class PostgreSqlQueryUtils
 	}
 
 	/**
-	 * Returns all MREF attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an
-	 * expression)
+	 * Returns all non-bidirectional attributes persisted by PostgreSQL in junction tables (e.g. no compound attributes and attributes
+	 * with an expression)
 	 *
-	 * @return stream of persisted MREF attributes
+	 * @return stream of attributes persisted by PostgreSQL in junction tables
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getJunctionTableAttributes(EntityMetaData entityMeta)
 	{
-		return getPersistedAttributes(entityMeta).filter(EntityMetaDataUtils::isMultipleReferenceType);
+		// return all attributes referencing multiple entities except for one-to-many attributes that are mapped by
+		// another attribute
+		return getPersistedAttributes(entityMeta)
+				.filter(attr -> isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr
+						.isMappedBy()));
 	}
 
 	/**
-	 * Returns all non-MREF attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an
-	 * expression)
+	 * Returns all attributes persisted by PostgreSQL in entity table (e.g. no compound attributes and attributes
+	 * with an expression)
 	 *
 	 * @return stream of persisted non-MREF attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getTableAttributes(EntityMetaData entityMeta)
 	{
-		return getPersistedAttributes(entityMeta).filter(attr -> !isMultipleReferenceType(attr));
+		return getPersistedAttributes(entityMeta)
+				.filter(attr -> !isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr
+						.isMappedBy()));
 	}
 
 	/**

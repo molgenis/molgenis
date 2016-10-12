@@ -16,7 +16,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -98,7 +97,7 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 					// Also missing in app language, use default
 					if (msg == null)
 					{
-						msg = entity.getString(DEFAULT_LANGUAGE_CODE);
+						msg = entity.getString(LanguageService.DEFAULT_LANGUAGE_CODE);
 					}
 
 					if (msg == null)

@@ -9,19 +9,13 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.Package;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
-	/**
-	 * Returns the application language codes
-	 *
-	 * @return the application language codes
-	 */
-	Stream<String> getLanguageCodes();
-
 	/**
 	 * Returns the repository for the given entity name.
 	 *
@@ -185,18 +179,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void addEntityMeta(EntityMetaData entityMeta);
 
 	/**
-	 * Deletes an EntityMeta
+	 * Add a collection of entity meta data and entity meta data attributes.
 	 *
-	 * @param entityName entity name
+	 * @param entityMetas entity meta data collection
 	 */
-	void deleteEntityMeta(String entityName);
-
-	/**
-	 * Deletes a list of EntityMetaData
-	 *
-	 * @param entities
-	 */
-	void delete(List<EntityMetaData> entities);
+	void addEntityMeta(Collection<EntityMetaData> entityMetas);
 
 	/**
 	 * Updates entity meta data and entity meta data attributes.
@@ -205,6 +192,42 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @throws UnknownEntityException if entity meta data does not exist
 	 */
 	void updateEntityMeta(EntityMetaData entityMeta);
+
+	/**
+	 * Updates a collection of entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMetas entity meta data collection
+	 * @throws UnknownEntityException if the entity meta data collection contains a entity meta data that does not exist
+	 */
+	void updateEntityMeta(Collection<EntityMetaData> entityMetas);
+
+	/**
+	 * Add or update entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMeta entity meta data
+	 */
+	void upsertEntityMeta(EntityMetaData entityMeta);
+
+	/**
+	 * Add or update a collection of entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMetas entity meta data collection
+	 */
+	void upsertEntityMeta(Collection<EntityMetaData> entityMetas);
+
+	/**
+	 * Deletes an EntityMeta
+	 *
+	 * @param entityName entity name
+	 */
+	void deleteEntityMeta(String entityName);
+
+	/**
+	 * Deletes a collection of entity meta data.
+	 *
+	 * @param entityMetas entity meta data collection
+	 */
+	void deleteEntityMeta(Collection<EntityMetaData> entityMetas);
 
 	/**
 	 * Adds an Attribute to an EntityMeta

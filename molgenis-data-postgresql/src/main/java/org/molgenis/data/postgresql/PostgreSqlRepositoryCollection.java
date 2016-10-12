@@ -16,20 +16,17 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
-import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
@@ -71,28 +68,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		if (isTableExists(LANGUAGE))
-		{
-			String sql = "SELECT \"" + CODE + "\" FROM \"" + LANGUAGE + '"';
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Fetching languages");
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", sql);
-				}
-			}
-			return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString(CODE)).stream();
-		}
-		else
-		{
-			return Stream.of(DEFAULT_LANGUAGE_CODE);
-		}
 	}
 
 	@Override
@@ -151,7 +126,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			throw new UnknownRepositoryException(entityMeta.getName());
 		}
 
-		getPersistedAttributesMref(entityMeta).forEach(mrefAttr -> dropJunctionTable(entityMeta, mrefAttr));
+		getJunctionTableAttributes(entityMeta).forEach(mrefAttr -> dropJunctionTable(entityMeta, mrefAttr));
 
 		String sqlDropTable = getSqlDropTable(entityMeta);
 		if (LOG.isDebugEnabled())
@@ -220,13 +195,16 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else
 		{
-			if (isMultipleReferenceType(attr))
+			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 			{
-				createJunctionTable(entityMeta, attr);
-			}
-			else
-			{
-				createColumn(entityMeta, attr);
+				if (isMultipleReferenceType(attr))
+				{
+					createJunctionTable(entityMeta, attr);
+				}
+				else
+				{
+					createColumn(entityMeta, attr);
+				}
 			}
 		}
 	}
@@ -469,7 +447,17 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else
 		{
-			dropColumn(entityMeta, attr);
+			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
+			{
+				if (isMultipleReferenceType(attr))
+				{
+					dropJunctionTable(entityMeta, attr);
+				}
+				else
+				{
+					dropColumn(entityMeta, attr);
+				}
+			}
 		}
 	}
 
@@ -559,7 +547,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	private void createTable(EntityMetaData entityMeta)
 	{
 		// create table
@@ -575,7 +562,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(createTableSql);
 
 		// create junction tables for attributes referencing multiple entities
-		getPersistedAttributesMref(entityMeta).forEach(attr -> createJunctionTable(entityMeta, attr));
+		createJunctionTables(entityMeta);
+	}
+
+	private void createJunctionTables(EntityMetaData entityMeta)
+	{
+		getJunctionTableAttributes(entityMeta).forEach(attr -> createJunctionTable(entityMeta, attr));
 	}
 
 	private void createForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -674,7 +666,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			}
 		}
 		jdbcTemplate.execute(addColumnSql);
-	}
+		}
 
 	private void dropColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{

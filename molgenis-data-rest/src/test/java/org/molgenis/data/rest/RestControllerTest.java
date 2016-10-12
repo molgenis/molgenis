@@ -146,6 +146,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(entityMeta.getAttribute("name")).thenReturn(attrName);
 		when(entityMeta.getAttribute("enum")).thenReturn(attrEnum);
 		when(entityMeta.getAttribute("int")).thenReturn(attrInt);
+		when(entityMeta.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityMeta.getIdAttribute()).thenReturn(attrId);
 		when(entityMeta.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		when(entityMeta.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
@@ -341,17 +342,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityCollectionConvertValue() throws Exception
 	{
-		ArgumentCaptor<QueryImpl> captor = ArgumentCaptor.forClass(QueryImpl.class);
-		Entity e = new DynamicEntity(mock(EntityMetaData.class));
-		when(dataService.findAll(eq(ENTITY_NAME), captor.capture())).thenReturn(Stream.of(e));
+		//noinspection unchecked
+		ArgumentCaptor<Query<Entity>> captor = ArgumentCaptor.forClass((Class) Query.class);
+		Entity entity = mock(Entity.class);
+		when(dataService.findAll(eq(ENTITY_NAME), captor.capture())).thenReturn(Stream.of(entity));
 
 		mockMvc.perform(get(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
 				.param("q[0].field", "int").param("q[0].value", "2")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON));
 
-		for (Object qr : captor.getValue().getRules())
+		for (QueryRule queryRule : captor.getValue().getRules())
 		{
-			assertEquals(((QueryRule) qr).getValue(), Integer.valueOf(2));
+			assertEquals(queryRule.getValue(), Integer.valueOf(2));
 		}
 	}
 

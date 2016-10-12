@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -62,8 +61,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.QueryRule.Operator.IN;
+import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -1024,7 +1027,16 @@ public class RestController
 					if (queryRule.getValue() != null)
 					{
 						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
-						queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
+						{
+							//noinspection unchecked
+							queryRule.setValue(stream(((Iterable<Object>) queryRule.getValue()).spliterator(), false)
+									.map(val -> restService.toEntityValue(attribute, val)).collect(toList()));
+						}
+						else
+						{
+							queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+						}
 					}
 				}
 			}
@@ -1050,6 +1062,7 @@ public class RestController
 		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
+		restService.updateMappedByEntities(entity, existing);
 	}
 
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
@@ -1059,6 +1072,8 @@ public class RestController
 		Entity entity = this.restService.toEntity(meta, entityMap);
 
 		dataService.add(entityName, entity);
+		restService.updateMappedByEntities(entity);
+
 		Object id = entity.getIdValue();
 		if (id != null)
 		{
@@ -1121,6 +1136,7 @@ public class RestController
 				return entityHasAttributeMap;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				List<Entity> mrefEntities = new ArrayList<Entity>();
 				for (Entity e : entity.getEntities((attr.getName())))
 					mrefEntities.add(e);
@@ -1246,7 +1262,7 @@ public class RestController
 							.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
-						&& attrType != FILE)
+						&& attrType != ONE_TO_MANY && attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
@@ -1263,8 +1279,8 @@ public class RestController
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
-				else if ((attrType == MREF || attrType == CATEGORICAL_MREF) && attributeExpandsSet != null
-						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
+				else if ((attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
+						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
 					Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
@@ -1289,7 +1305,8 @@ public class RestController
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null) || (attrType == CATEGORICAL
 						&& entity.get(attr.getName()) != null) || (attrType == FILE
-						&& entity.get(attr.getName()) != null) || attrType == MREF || attrType == CATEGORICAL_MREF)
+						&& entity.get(attr.getName()) != null) || attrType == MREF || attrType == CATEGORICAL_MREF
+						|| attrType == ONE_TO_MANY)
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
@@ -1312,8 +1329,8 @@ public class RestController
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return attributes != null && attributes.length > 0 ? Sets
-				.newHashSet(Iterables.transform(Arrays.asList(attributes), new Function<String, String>()
+		return attributes != null && attributes.length > 0 ? Sets.newHashSet(
+				Iterables.transform(Arrays.asList(attributes), new com.google.common.base.Function<String, String>()
 				{
 					@Override
 					public String apply(String attribute)

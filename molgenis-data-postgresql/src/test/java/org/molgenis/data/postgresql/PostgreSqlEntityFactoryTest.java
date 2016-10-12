@@ -8,6 +8,13 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.sql.Array;
+import java.sql.ResultSet;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singleton;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import java.sql.ResultSet;
 
 import static java.util.Collections.singleton;
@@ -26,6 +33,40 @@ public class PostgreSqlEntityFactoryTest
 	{
 		entityManager = mock(EntityManager.class);
 		postgreSqlEntityFactory = new PostgreSqlEntityFactory(entityManager);
+	}
+
+	@Test
+	public void createRowMapperOneToMany() throws Exception
+	{
+		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		when(refIdAttr.getDataType()).thenReturn(STRING);
+
+		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+
+		String oneToManyAttrName = "oneToManyAttr";
+		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
+		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
+
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		ResultSet rs = mock(ResultSet.class);
+		Array oneToManyArray = mock(Array.class);
+		when(oneToManyArray.getArray()).thenReturn(new String[] { "id0", "id1" });
+		when(rs.getArray(oneToManyAttrName)).thenReturn(oneToManyArray);
+		int rowNum = 0;
+
+		Entity entity = mock(Entity.class);
+		Fetch fetch = null;
+		when(entityManager.create(entityMeta, fetch)).thenReturn(entity);
+		Entity refEntity1 = mock(Entity.class);
+		Entity refEntity0 = mock(Entity.class);
+		when(entityManager.getReferences(refEntityMeta, newArrayList("id0", "id1")))
+				.thenReturn(newArrayList(refEntity0, refEntity1));
+		assertEquals(postgreSqlEntityFactory.createRowMapper(entityMeta, null).mapRow(rs, rowNum), entity);
+		verify(entity).set(oneToManyAttrName, newArrayList(refEntity0, refEntity1));
 	}
 
 	@Test

@@ -108,6 +108,7 @@ public class AttributeFilterToFetchConverter
 			case FILE:
 			case MREF:
 			case XREF:
+			case ONE_TO_MANY:
 			{
 				AttributeFilter subAttrFilter =
 						attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr) : null;

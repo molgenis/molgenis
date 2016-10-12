@@ -15,7 +15,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -36,12 +35,13 @@ public class SystemEntityMetaDataPersisterTest
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 	private SystemEntityMetaDataPersister systemEntityMetaDataPersister;
 	private AttributeMetaDataMetaData attrMetaMeta;
+	private MetaDataService metaDataService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		attrMetaMeta = mock(AttributeMetaDataMetaData.class);
-		MetaDataService metaDataService = mock(MetaDataService.class);
+		metaDataService = mock(MetaDataService.class);
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
 		dataService = mock(DataService.class);
@@ -87,10 +87,7 @@ public class SystemEntityMetaDataPersisterTest
 		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class))
 				.thenReturn(Stream.of(refEntityMeta, entityMeta, refRemovedMeta, removedMeta));
 		systemEntityMetaDataPersister.removeNonExistingSystemEntities();
-		//noinspection unchecked
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(ENTITY_META_DATA), captor.capture());
-		assertEquals(captor.getValue().collect(toList()), Arrays.asList(removedMeta, refRemovedMeta));
+		verify(metaDataService).deleteEntityMeta(newArrayList(refRemovedMeta, removedMeta));
 	}
 
 	@Test
