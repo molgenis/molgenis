@@ -1,8 +1,15 @@
 package org.molgenis.data.meta.model;
 
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCollectionRegistry;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
@@ -51,19 +58,26 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setNillable(false).setLabel("Attributes");
+		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setNillable(false)
+				.setLabel("Attributes");
 		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setReadOnly(true)
 				.setLabel("ID attribute");
 		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setLabel("Lookup attributes");
 		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
-				.setReadOnly(true)
-				.setDefaultValue(FALSE.toString());
+				.setReadOnly(true).setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
-		addAttribute(BACKEND).setNillable(false).setReadOnly(true).setLabel("Backend")
-				.setDescription("Backend data store");
+
+		// get the backend registry from the context because autowiring is not possible (unresolvable circular dependencies)
+		RepositoryCollectionRegistry registry = (RepositoryCollectionRegistry) ApplicationContextProvider
+				.getApplicationContext().getBean("repositoryCollectionRegistry");
+		List<String> backendEnumOptions = registry.getRepositoryCollections().map(RepositoryCollection::getName)
+				.collect(Collectors.toList());
+		backendEnumOptions.sort(Comparator.naturalOrder());
+		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
+				.setLabel("Backend").setDescription("Backend data store");
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
