@@ -147,7 +147,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ATTRIBUTES_LABEL, EMX_ATTRIBUTES_LABEL_ATTRIBUTE, EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE,
 					EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE, EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
 					EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN, EMX_ATTRIBUTES_READ_ONLY,
-					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE, EMX_ATTRIBUTES_EXPRESSION,
+					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_MAPPED_BY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE, EMX_ATTRIBUTES_EXPRESSION,
 					EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE);
 
 	private static final String AUTO = "auto";
@@ -1036,6 +1036,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String entityName = attribute.getString(EMX_ATTRIBUTES_ENTITY);
 			final String attributeName = attribute.getString(EMX_ATTRIBUTES_NAME);
 			final String refEntityName = (String) attribute.get(EMX_ATTRIBUTES_REF_ENTITY);
+			final String mappedByAttrName = (String) attribute.get(EMX_ATTRIBUTES_MAPPED_BY);
 			EntityType EntityType = intermediateResults.getEntityType(entityName);
 			Attribute Attribute = EntityType.getAttribute(attributeName);
 
@@ -1051,13 +1052,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				if (dataService != null)
 				{
+					EntityMetaData refEntityType;
 					if (intermediateResults.knowsEntity(refEntityName))
 					{
-						Attribute.setRefEntity(intermediateResults.getEntityType(refEntityName));
+						refEntityType = intermediateResults.getEntityType(refEntityName);
 					}
 					else
 					{
-						EntityType refEntityType;
 						refEntityType = dataService.getEntityType(refEntityName);
 						if (refEntityType == null)
 						{
@@ -1065,8 +1066,19 @@ public class EmxMetaDataParser implements MetaDataParser
 									"attributes.refEntity error on line " + rowIndex + ": " + refEntityName
 											+ " unknown");
 						}
-						// allow computed xref attributes to refer to pre-existing entities
-						Attribute.setRefEntity(refEntityType);
+					}
+					AttributeMetaData.setRefEntity(refEntityType);
+
+					if (mappedByAttrName != null)
+					{
+						AttributeMetaData mappedByAttr = refEntityType.getAttribute(mappedByAttrName);
+						if (mappedByAttr == null)
+						{
+							throw new IllegalArgumentException(
+									"attributes.mappedBy error on line " + rowIndex + ": " + mappedByAttrName
+											+ " unknown");
+						}
+						AttributeMetaData.setMappedBy(mappedByAttr);
 					}
 				}
 				else
