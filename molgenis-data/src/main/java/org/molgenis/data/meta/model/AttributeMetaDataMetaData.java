@@ -29,6 +29,13 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
 	 */
 	public static final String MAPPED_BY = "mappedBy";
+	/**
+	 * For attributes with data type ONE_TO_MANY defines how to sort the entity collection.
+	 * Syntax: attribute_name,[ASC | DESC] [;attribute_name,[ASC | DESC]]*
+	 * - If ASC or DESC is not specified, ASC (ascending order) is assumed.
+	 * - If the ordering element is not specified, ordering by the id attribute of the associated entity is assumed.
+	 */
+	public static final String ORDER_BY = "orderBy";
 	public static final String EXPRESSION = "expression";
 	public static final String NILLABLE = "nillable";
 	public static final String AUTO = "auto";
@@ -70,6 +77,9 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
 				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
+		addAttribute(ORDER_BY).setLabel("Order by").setDescription(
+				"Order expression that defines entity collection order of a onetomany attribute (e.g. \"attr0\", \"attr0,ASC\", \"attr0,DESC\" or \"attr0,ASC;attr1,DESC\"")
+				.setValidationExpression(getOrderByValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
@@ -109,6 +119,13 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		return "$('" + MAPPED_BY + "').isNull().and($('" + DATA_TYPE + "').eq('" + getValueString(ONE_TO_MANY)
 				+ "').not()).or(" + "$('" + MAPPED_BY + "').isNull().not().and($('" + DATA_TYPE + "').eq('"
 				+ getValueString(ONE_TO_MANY) + "'))).value()";
+	}
+
+	private static String getOrderByValidationExpression()
+	{
+		String regex = "/^\\w+(,(ASC|DESC))?(;\\w+(,(ASC|DESC))?)*$/";
+		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').matches(" + regex + ").and($('" + DATA_TYPE
+				+ "').eq('" + getValueString(ONE_TO_MANY) + "'))).value()";
 	}
 
 	private static String getEnumOptionsValidationExpression()

@@ -52,7 +52,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
+		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
 		long count = 123L;
 		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
 		postgreSqlRepo.setMetaData(entityMeta);
@@ -71,7 +71,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(DISTINCT ARRAY[\"oneToManyAttr\".\"order\"::TEXT,\"oneToManyAttr\".\"refEntityId\"::TEXT]) FROM \"RefEntity_xrefAttr\" AS \"oneToManyAttr\" WHERE this.\"entityId\" = \"oneToManyAttr\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"RefEntity\" WHERE this.\"entityId\" = \"RefEntity\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
 		//noinspection unchecked
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
 		when(postgreSqlEntityFactory.createRowMapper(entityMeta, null)).thenReturn(rowMapper);
@@ -97,6 +97,8 @@ public class PostgreSqlRepositoryTest
 		String refEntityName = "RefEntity";
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityMeta.getAttribute(refIdAttrName)).thenReturn(refIdAttr);
+		when(refEntityMeta.getAttribute(xrefAttrName)).thenReturn(xrefAttr);
 
 		String idAttrName = "entityId";
 		AttributeMetaData idAttr = mock(AttributeMetaData.class);
@@ -114,6 +116,7 @@ public class PostgreSqlRepositoryTest
 		String entityName = "Entity";
 		when(entityMeta.getName()).thenReturn(entityName);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityMeta.getAttribute(idAttrName)).thenReturn(idAttr);
 		when(entityMeta.getAttribute(oneToManyAttrName)).thenReturn(oneToManyAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
 		return entityMeta;

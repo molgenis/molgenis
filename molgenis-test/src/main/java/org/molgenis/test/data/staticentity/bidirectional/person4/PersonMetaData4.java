@@ -1,16 +1,21 @@
 package org.molgenis.test.data.staticentity.bidirectional.person4;
 
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.springframework.stereotype.Component;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+/**
+ * Defines a Person entity with a self-referencing nullable OneToMany with descending order.
+ */
 @Component
 public class PersonMetaData4 extends SystemEntityMetaData
 {
@@ -34,9 +39,8 @@ public class PersonMetaData4 extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
-		AttributeMetaData parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this)
-				.setNillable(false);
+		AttributeMetaData parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this);
 		addAttribute(ATTR_CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setNillable(false);
+				.setOrderBy(new Sort(ID, DESC));
 	}
 }

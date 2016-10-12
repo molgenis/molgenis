@@ -11,6 +11,9 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LAB
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+/**
+ * Defines a Person entity with a self-referencing OneToMany relation with a required XREF.
+ */
 @Component
 public class PersonMetaData2 extends SystemEntityMetaData
 {

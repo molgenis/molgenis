@@ -125,9 +125,9 @@ public class EmxMetaDataParser implements MetaDataParser
 					ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(), ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(),
 					LABEL_ATTRIBUTE.toLowerCase(), LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(),
 					PART_OF_ATTRIBUTE.toLowerCase(), RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(),
-					READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(), UNIQUE.toLowerCase(),
-					TAGS.toLowerCase(), EXPRESSION.toLowerCase(), VALIDATION_EXPRESSION.toLowerCase(),
-					DEFAULT_VALUE.toLowerCase());
+					READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), MAPPED_BY.toLowerCase(), VISIBLE.toLowerCase(),
+					UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase(),
+					VALIDATION_EXPRESSION.toLowerCase(), DEFAULT_VALUE.toLowerCase());
 
 	private static final String AUTO = "auto";
 
@@ -1011,6 +1011,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
+			final String mappedByAttrName = (String) attribute.get(MAPPED_BY);
 			EntityMetaData EntityMetaData = intermediateResults.getEntityMetaData(entityName);
 			AttributeMetaData AttributeMetaData = EntityMetaData.getAttribute(attributeName);
 
@@ -1026,13 +1027,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				if (dataService != null)
 				{
+					EntityMetaData refEntityMeta;
 					if (intermediateResults.knowsEntity(refEntityName))
 					{
-						AttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
+						refEntityMeta = intermediateResults.getEntityMetaData(refEntityName);
 					}
 					else
 					{
-						EntityMetaData refEntityMeta;
 						refEntityMeta = dataService.getEntityMetaData(refEntityName);
 						if (refEntityMeta == null)
 						{
@@ -1040,8 +1041,19 @@ public class EmxMetaDataParser implements MetaDataParser
 									"attributes.refEntity error on line " + rowIndex + ": " + refEntityName
 											+ " unknown");
 						}
-						// allow computed xref attributes to refer to pre-existing entities
-						AttributeMetaData.setRefEntity(refEntityMeta);
+					}
+					AttributeMetaData.setRefEntity(refEntityMeta);
+
+					if (mappedByAttrName != null)
+					{
+						AttributeMetaData mappedByAttr = refEntityMeta.getAttribute(mappedByAttrName);
+						if (mappedByAttr == null)
+						{
+							throw new IllegalArgumentException(
+									"attributes.mappedBy error on line " + rowIndex + ": " + mappedByAttrName
+											+ " unknown");
+						}
+						AttributeMetaData.setMappedBy(mappedByAttr);
 					}
 				}
 				else
@@ -1193,8 +1205,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		i18nString.setMessageId(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
 		i18nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
 
-		LanguageService.getLanguageCodes()
-				.forEach(lang -> i18nString.set(lang, emxI18nStringEntity.getString(lang)));
+		LanguageService.getLanguageCodes().forEach(lang -> i18nString.set(lang, emxI18nStringEntity.getString(lang)));
 		return i18nString;
 	}
 

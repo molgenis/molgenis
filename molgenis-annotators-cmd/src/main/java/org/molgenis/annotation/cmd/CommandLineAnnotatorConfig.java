@@ -8,6 +8,8 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -43,7 +45,13 @@ public class CommandLineAnnotatorConfig
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
 		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
 				.getBeansOfType(SystemEntityMetaData.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+
+		systemEntityMetaMap.values().stream()
+				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(EntityMetaDataMetaData.ENTITY_META_DATA)
+						|| systemEntityMeta.getName().equals(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)
+						|| systemEntityMeta.getName().equals(PackageMetaData.PACKAGE) || systemEntityMeta.getName()
+						.equals(TagMetaData.TAG))
+				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
 	}
 
 	@Value("${vcf-validator-location:@null}")

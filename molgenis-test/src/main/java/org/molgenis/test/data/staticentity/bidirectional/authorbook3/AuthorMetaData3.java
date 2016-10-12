@@ -1,5 +1,6 @@
 package org.molgenis.test.data.staticentity.bidirectional.authorbook3;
 
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,14 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
- * AuthorMetaData3 and BookMetaData3 define two entities with a OneToMany relation of which the OneToMany part (Author.books) is required.
+ * AuthorMetaData3 and BookMetaData3 define two entities having a nullable OneToMany relation with an ascending order.
  */
 @Component
 public class AuthorMetaData3 extends SystemEntityMetaData
@@ -44,7 +46,7 @@ public class AuthorMetaData3 extends SystemEntityMetaData
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
 		AttributeMetaData attribute = bookMetaData.getAttribute(BookMetaData3.AUTHOR);
 		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute)
-				.setNillable(false);
+				.setOrderBy(new Sort(BookMetaData3.ID, ASC));
 	}
 
 	@Autowired

@@ -345,7 +345,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityMetaData> resolvedEntityMeta = entityMetaDependencyResolver.resolve(entityMetas);
 
 		Map<String, EntityMetaData> existingEntityMetaMap = dataService
-				.findAll(ENTITY_META_DATA, entityMetas.stream().map(EntityMetaData::getName), EntityMetaData.class)
+				.findAll(ENTITY_META_DATA, entityMetas.stream().map(EntityMetaData::getName), MetaUtils.getEntityMetaDataFetch(), EntityMetaData.class)
 				.collect(toMap(EntityMetaData::getName, Function.identity()));
 
 		// 1st pass: create entities and attributes except for mappedBy attributes

@@ -613,7 +613,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 
 		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
-		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
+		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -678,7 +678,7 @@ public class PostgreSqlRepositoryCollectionTest
 
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
-		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+		verifyZeroInteractions(jdbcTemplate);
 	}
 
 	@Test
