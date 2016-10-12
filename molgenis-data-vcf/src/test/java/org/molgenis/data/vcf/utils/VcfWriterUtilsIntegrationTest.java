@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -59,13 +59,13 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	public static final String GTC = "GTC";
 	public static final String AN = "AN";
 	public static final String AC = "AC";
-	private static AttributeMetaData INFO_ATTR;
-	private static AttributeMetaData GTC_ATTR;
-	private static AttributeMetaData AC_ATTR;
-	private static AttributeMetaData AN_ATTR;
-	private static AttributeMetaData PUTATIVE_IMPACT_ATTR;
-	private static AttributeMetaData EFFECT_ATTR;
-	private static AttributeMetaData GENES_ATTR;
+	private static Attribute INFO_ATTR;
+	private static Attribute GTC_ATTR;
+	private static Attribute AC_ATTR;
+	private static Attribute AN_ATTR;
+	private static Attribute PUTATIVE_IMPACT_ATTR;
+	private static Attribute EFFECT_ATTR;
+	private static Attribute GENES_ATTR;
 	private EntityMetaData annotatedEntityMetadata;
 	public EntityMetaData metaDataCanAnnotate;
 	public EntityMetaData metaDataCantAnnotate;
@@ -73,11 +73,11 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	EntityMetaData effectMeta;
 	EntityMetaData vcfMeta;
 	EntityMetaData sampleEntityMeta;
-	public AttributeMetaData attributeMetaDataChrom;
-	public AttributeMetaData attributeMetaDataPos;
-	public AttributeMetaData attributeMetaDataRef;
-	public AttributeMetaData attributeMetaDataAlt;
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom;
+	public Attribute attributeChrom;
+	public Attribute attributePos;
+	public Attribute attributeRef;
+	public Attribute attributeAlt;
+	public Attribute attributeCantAnnotateChrom;
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;
@@ -96,22 +96,22 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		effectMeta = entityMetaDataFactory.create().setName(EFFECT);
 		vcfMeta = entityMetaDataFactory.create().setName("vcfMeta");
 		sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
-		attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
-		attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(INT);
-		attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
-		attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
-		attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(LONG);
+		attributeChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
+		attributePos = attributeMetaDataFactory.create().setName(POS).setDataType(INT);
+		attributeRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
+		attributeAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
+		attributeCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(LONG);
 
-		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttribute(attributePos);
+		metaDataCanAnnotate.addAttribute(attributeChrom);
 
-		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributePos);
+		metaDataCantAnnotate.addAttribute(attributeRef);
+		metaDataCantAnnotate.addAttribute(attributeAlt);
 
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom);
-		metaDataCantAnnotate.setIdAttribute(attributeMetaDataCantAnnotateChrom);
+		metaDataCanAnnotate.setIdAttribute(attributeChrom);
+		metaDataCantAnnotate.setIdAttribute(attributeCantAnnotateChrom);
 
 		entity = new DynamicEntity(metaDataCanAnnotate);
 		entity1 = new DynamicEntity(metaDataCanAnnotate);
@@ -120,8 +120,8 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		entity4 = new DynamicEntity(metaDataCanAnnotate);
 
 		metaDataCanAnnotate.addAttribute(attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
-		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeRef);
+		metaDataCanAnnotate.addAttribute(attributeAlt);
 		metaDataCanAnnotate.addAttribute(attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
 		metaDataCanAnnotate.addAttribute(attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING));
 		INFO_ATTR = attributeMetaDataFactory.create().setName(INFO).setDataType(COMPOUND);
@@ -133,12 +133,12 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		INFO_ATTR.addAttributePart(GTC_ATTR);
 		metaDataCanAnnotate.addAttribute(INFO_ATTR);
 
-		annotatedEntityMetadata.addAttribute(attributeMetaDataChrom);
-		annotatedEntityMetadata.setIdAttribute(attributeMetaDataChrom);
-		annotatedEntityMetadata.addAttribute(attributeMetaDataPos);
+		annotatedEntityMetadata.addAttribute(attributeChrom);
+		annotatedEntityMetadata.setIdAttribute(attributeChrom);
+		annotatedEntityMetadata.addAttribute(attributePos);
 		annotatedEntityMetadata.addAttribute(attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(attributeMetaDataRef);
-		annotatedEntityMetadata.addAttribute(attributeMetaDataAlt);
+		annotatedEntityMetadata.addAttribute(attributeRef);
+		annotatedEntityMetadata.addAttribute(attributeAlt);
 
 		annotatedEntityMetadata.addAttribute(attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
 		annotatedEntityMetadata.addAttribute(attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING))
@@ -178,13 +178,13 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		entities.add(entity2);
 		entities.add(entity3);
 
-		AttributeMetaData geneId = attributeMetaDataFactory.create().setName("id").setDataType(STRING)
+		Attribute geneId = attributeMetaDataFactory.create().setName("id").setDataType(STRING)
 				.setDescription("Random generated ID").setVisible(false);
 		geneMeta.addAttribute(geneId);
 		geneMeta.setIdAttribute(geneId);
 		geneMeta.addAttribute(
 				attributeMetaDataFactory.create().setName("Gene").setDataType(STRING).setDescription("HGNC symbol"));
-		AttributeMetaData id = attributeMetaDataFactory.create().setName("id").setDataType(STRING)
+		Attribute id = attributeMetaDataFactory.create().setName("id").setDataType(STRING)
 				.setDescription("effect identifier").setVisible(false);
 		effectMeta.addAttribute(id);
 		effectMeta.setIdAttribute(id);
@@ -208,7 +208,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		String formatGtAttrName = FORMAT_GT;
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		AttributeMetaData sampleId = attributeMetaDataFactory.create().setName(sampleIdAttrName);
+		Attribute sampleId = attributeMetaDataFactory.create().setName(sampleIdAttrName);
 		sampleEntityMeta.addAttribute(sampleId);
 		sampleEntityMeta.setIdAttribute(sampleId);
 		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatDpAttrName));
@@ -228,7 +228,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		String sampleIdAttrName = VcfRepository.NAME;
 
 		EntityMetaData sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
-		AttributeMetaData sampleId = attributeMetaDataFactory.create().setName(sampleIdAttrName);
+		Attribute sampleId = attributeMetaDataFactory.create().setName(sampleIdAttrName);
 		sampleEntityMeta.addAttribute(sampleId);
 		sampleEntityMeta.setIdAttribute(sampleId);
 		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatDpAttrName));
@@ -236,7 +236,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatGtAttrName));
 
 		EntityMetaData entityMeta = entityMetaDataFactory.create().setName("vcfEntity");
-		AttributeMetaData id = attributeMetaDataFactory.create().setName(idAttrName);
+		Attribute id = attributeMetaDataFactory.create().setName(idAttrName);
 		entityMeta.addAttribute(id);
 		entityMeta.setIdAttribute(id);
 		entityMeta.addAttribute(vcfAttributes.getChromAttribute());
@@ -356,7 +356,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		INFO_ATTR.addAttributePart(AN_ATTR);
 		INFO_ATTR.addAttributePart(GTC_ATTR);
 
-		AttributeMetaData attr = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
+		Attribute attr = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
 		vcfMeta.addAttribute(attr);
 		vcfMeta.setIdAttribute(attr);
 		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(POS).setDataType(INT));

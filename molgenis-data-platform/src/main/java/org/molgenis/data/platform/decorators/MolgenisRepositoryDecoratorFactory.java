@@ -172,7 +172,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
-					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
+					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
 					dataService, permissionService);
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))

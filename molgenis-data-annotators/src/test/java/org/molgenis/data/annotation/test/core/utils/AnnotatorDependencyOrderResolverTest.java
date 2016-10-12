@@ -7,7 +7,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.exception.UnresolvedAnnotatorDependencyException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -55,18 +55,18 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 	{
 		MockitoAnnotations.initMocks(this);
 
-		AttributeMetaData attra = attributeMetaDataFactory.create().setName("A").setDataType(STRING);
+		Attribute attra = attributeMetaDataFactory.create().setName("A").setDataType(STRING);
 		// to check for matching "STRING" attributes to required "TEXT" attributes
-		AttributeMetaData attra2 = attributeMetaDataFactory.create().setName("A").setDataType(TEXT);
-		AttributeMetaData attrb = attributeMetaDataFactory.create().setName("B").setDataType(STRING);
-		AttributeMetaData attrc = attributeMetaDataFactory.create().setName("C").setDataType(STRING);
-		AttributeMetaData attrd = attributeMetaDataFactory.create().setName("D").setDataType(STRING);
-		AttributeMetaData attre = attributeMetaDataFactory.create().setName("E").setDataType(STRING);
-		AttributeMetaData attrf = attributeMetaDataFactory.create().setName("F").setDataType(STRING);
-		AttributeMetaData attrg = attributeMetaDataFactory.create().setName("G").setDataType(STRING);
-		AttributeMetaData attrh = attributeMetaDataFactory.create().setName("H").setDataType(STRING);
-		AttributeMetaData attri = attributeMetaDataFactory.create().setName("I").setDataType(STRING);
-		AttributeMetaData attrj = attributeMetaDataFactory.create().setName("J").setDataType(STRING);
+		Attribute attra2 = attributeMetaDataFactory.create().setName("A").setDataType(TEXT);
+		Attribute attrb = attributeMetaDataFactory.create().setName("B").setDataType(STRING);
+		Attribute attrc = attributeMetaDataFactory.create().setName("C").setDataType(STRING);
+		Attribute attrd = attributeMetaDataFactory.create().setName("D").setDataType(STRING);
+		Attribute attre = attributeMetaDataFactory.create().setName("E").setDataType(STRING);
+		Attribute attrf = attributeMetaDataFactory.create().setName("F").setDataType(STRING);
+		Attribute attrg = attributeMetaDataFactory.create().setName("G").setDataType(STRING);
+		Attribute attrh = attributeMetaDataFactory.create().setName("H").setDataType(STRING);
+		Attribute attri = attributeMetaDataFactory.create().setName("I").setDataType(STRING);
+		Attribute attrj = attributeMetaDataFactory.create().setName("J").setDataType(STRING);
 
 		EntityMetaData emd = entityMetaDataFactory.create().setName("test");
 		emd.addAttributes(Arrays.asList(attra, attrb));

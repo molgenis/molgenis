@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
@@ -27,9 +27,9 @@ public class ExcelSheetWriter extends AbstractWritable
 	 * process cells before writing
 	 */
 	private List<CellProcessor> cellProcessors;
-	private Iterable<AttributeMetaData> cachedAttributes;
+	private Iterable<Attribute> cachedAttributes;
 
-	ExcelSheetWriter(Sheet sheet, Iterable<AttributeMetaData> attributes, AttributeWriteMode attributeWriteMode,
+	ExcelSheetWriter(Sheet sheet, Iterable<Attribute> attributes, AttributeWriteMode attributeWriteMode,
 			List<CellProcessor> cellProcessors)
 	{
 		if (sheet == null) throw new IllegalArgumentException("sheet is null");
@@ -55,7 +55,7 @@ public class ExcelSheetWriter extends AbstractWritable
 
 		int i = 0;
 		Row poiRow = sheet.createRow(row++);
-		for (AttributeMetaData attribute : cachedAttributes)
+		for (Attribute attribute : cachedAttributes)
 		{
 			Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
 			cell.setCellValue(toValue(entity.get(attribute.getName())));
@@ -67,7 +67,7 @@ public class ExcelSheetWriter extends AbstractWritable
 	/**
 	 * Write sheet column headers
 	 */
-	public void writeAttributeHeaders(Iterable<AttributeMetaData> attributes, AttributeWriteMode attributeWriteMode)
+	public void writeAttributeHeaders(Iterable<Attribute> attributes, AttributeWriteMode attributeWriteMode)
 	{
 		if (attributes == null) throw new IllegalArgumentException("Attributes cannot be null");
 		if (attributeWriteMode == null) throw new IllegalArgumentException("AttributeWriteMode cannot be null");
@@ -78,7 +78,7 @@ public class ExcelSheetWriter extends AbstractWritable
 
 			// write header
 			int i = 0;
-			for (AttributeMetaData attribute : attributes)
+			for (Attribute attribute : attributes)
 			{
 				Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
 

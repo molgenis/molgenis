@@ -18,7 +18,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -80,15 +80,15 @@ public class ExacAnnotator implements AnnotatorConfig
 	public void init()
 	{
 
-		AttributeMetaData outputAttribute_AF = getExacAFAttr(attributeMetaDataFactory);
-		AttributeMetaData outputAttribute_AC_HOM = getExacAcHomAttr(attributeMetaDataFactory);
-		AttributeMetaData outputAttribute_AC_HET = getExacAcHetAttr(attributeMetaDataFactory);
+		Attribute outputAttribute_AF = getExacAFAttr(attributeMetaDataFactory);
+		Attribute outputAttribute_AC_HOM = getExacAcHomAttr(attributeMetaDataFactory);
+		Attribute outputAttribute_AC_HET = getExacAcHetAttr(attributeMetaDataFactory);
 
-		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
-				new AttributeMetaData[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
+		List<Attribute> outputMetaData = new ArrayList<Attribute>(Arrays.asList(
+				new Attribute[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
 
-		List<AttributeMetaData> resourceMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
-				new AttributeMetaData[] {
+		List<Attribute> resourceMetaData = new ArrayList<Attribute>(Arrays.asList(
+				new Attribute[] {
 						attributeMetaDataFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
 						attributeMetaDataFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(
 								STRING),
@@ -111,7 +111,7 @@ public class ExacAnnotator implements AnnotatorConfig
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_LOCATION, exacAnnotatorSettings))
 		{
 			@Override
-			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
+			protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 			{
 				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM
 						.equals(attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET
@@ -123,19 +123,19 @@ public class ExacAnnotator implements AnnotatorConfig
 		annotator.init(entityAnnotator);
 	}
 
-	public static AttributeMetaData getExacAcHetAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getExacAcHetAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AC_HET).setDataType(STRING)
 				.setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
 	}
 
-	public static AttributeMetaData getExacAcHomAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getExacAcHomAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM).setDataType(STRING)
 				.setDescription("The ExAC homozygous alternative genotype count").setLabel(EXAC_AC_HOM_LABEL);
 	}
 
-	public static AttributeMetaData getExacAFAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getExacAFAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
 				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);

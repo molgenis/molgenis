@@ -1,7 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.slf4j.Logger;
@@ -166,13 +166,13 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
+	public void addAttribute(EntityMetaData entityMeta, Attribute attr)
 	{
 		addAttributeRec(entityMeta, attr, true);
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		if (entityMeta.getAttribute(attr.getName()) == null)
 		{
@@ -182,7 +182,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
+	public void deleteAttribute(EntityMetaData entityMeta, Attribute attr)
 	{
 		if (entityMeta.getAttribute(attr.getName()) == null)
 		{
@@ -198,7 +198,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr            attribute to add
 	 * @param checkAttrExists whether or not to perform a check if the attribute exists for the given entity
 	 */
-	private void addAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr, boolean checkAttrExists)
+	private void addAttributeRec(EntityMetaData entityMeta, Attribute attr, boolean checkAttrExists)
 	{
 		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
 		{
@@ -238,7 +238,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr        existing attribute
 	 * @param updatedAttr updated attribute
 	 */
-	private void updateAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateAttributeRec(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		if ((attr.getExpression() != null && updatedAttr.getExpression() != null) || (attr.getDataType() == COMPOUND
 				&& updatedAttr.getDataType() == COMPOUND))
@@ -280,7 +280,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr        current attribute
 	 * @param updatedAttr updated attribute
 	 */
-	private void updateColumn(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateColumn(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		// nullable changes
 		if (!Objects.equals(attr.isNillable(), updatedAttr.isNillable()))
@@ -321,7 +321,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr        current attribute
 	 * @param updatedAttr updated attribute
 	 */
-	private void updateRefEntity(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateRefEntity(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		if (isSingleReferenceType(attr) && isSingleReferenceType(updatedAttr))
 		{
@@ -351,7 +351,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr        current attribute
 	 * @param updatedAttr updated attribute
 	 */
-	private void updateEnumOptions(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateEnumOptions(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		if (attr.getDataType() == ENUM)
 		{
@@ -383,9 +383,9 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr        current attribute
 	 * @param updatedAttr updated attribute
 	 */
-	private void updateDataType(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateDataType(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
+		Attribute idAttr = entityMeta.getIdAttribute();
 		if (idAttr != null && idAttr.getName().equals(attr.getName()))
 		{
 			throw new MolgenisDataException(
@@ -427,11 +427,11 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param attr        current attribute
 	 * @param updatedAttr updated attribute
 	 */
-	private void updateUnique(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateUnique(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		if (attr.isUnique() && !updatedAttr.isUnique())
 		{
-			AttributeMetaData idAttr = entityMeta.getIdAttribute();
+			Attribute idAttr = entityMeta.getIdAttribute();
 			if (idAttr != null && idAttr.getName().equals(attr.getName()))
 			{
 				throw new MolgenisDataException(
@@ -453,7 +453,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * @param entityMeta entity meta data
 	 * @param attr       attribute to delete
 	 */
-	private void deleteAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void deleteAttributeRec(EntityMetaData entityMeta, Attribute attr)
 	{
 		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
 		{
@@ -519,7 +519,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 	}
 
-	private void updateNillable(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateNillable(EntityMetaData entityMeta, Attribute attr, Attribute updatedAttr)
 	{
 		if (attr.isNillable() && !updatedAttr.isNillable())
 		{
@@ -537,7 +537,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else if (!attr.isNillable() && updatedAttr.isNillable())
 		{
-			AttributeMetaData idAttr = entityMeta.getIdAttribute();
+			Attribute idAttr = entityMeta.getIdAttribute();
 			if (idAttr != null && idAttr.getName().equals(attr.getName()))
 			{
 				throw new MolgenisDataException(
@@ -578,7 +578,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		getPersistedAttributesMref(entityMeta).forEach(attr -> createJunctionTable(entityMeta, attr));
 	}
 
-	private void createForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void createForeignKey(EntityMetaData entityMeta, Attribute attr)
 	{
 		String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -592,7 +592,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(createForeignKeySql);
 	}
 
-	private void dropForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void dropForeignKey(EntityMetaData entityMeta, Attribute attr)
 	{
 		String dropForeignKeySql = getSqlDropForeignKey(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -606,7 +606,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(dropForeignKeySql);
 	}
 
-	private void createUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void createUniqueKey(EntityMetaData entityMeta, Attribute attr)
 	{
 		String createUniqueKeySql = getSqlCreateUniqueKey(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -620,7 +620,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(createUniqueKeySql);
 	}
 
-	private void dropUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void dropUniqueKey(EntityMetaData entityMeta, Attribute attr)
 	{
 		String dropUniqueKeySql = getSqlDropUniqueKey(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -634,7 +634,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(dropUniqueKeySql);
 	}
 
-	private void createCheckConstraint(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void createCheckConstraint(EntityMetaData entityMeta, Attribute attr)
 	{
 		String sqlCreateCheckConstraint = getSqlCreateCheckConstraint(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -648,7 +648,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(sqlCreateCheckConstraint);
 	}
 
-	private void dropCheckConstraint(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void dropCheckConstraint(EntityMetaData entityMeta, Attribute attr)
 	{
 		String sqlDropCheckConstraint = getSqlDropCheckConstraint(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -662,7 +662,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(sqlDropCheckConstraint);
 	}
 
-	private void createColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void createColumn(EntityMetaData entityMeta, Attribute attr)
 	{
 		String addColumnSql = getSqlAddColumn(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -676,7 +676,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(addColumnSql);
 	}
 
-	private void dropColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void dropColumn(EntityMetaData entityMeta, Attribute attr)
 	{
 		String dropColumnSql = getSqlDropColumn(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -690,7 +690,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(dropColumnSql);
 	}
 
-	private void updateColumnDataType(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void updateColumnDataType(EntityMetaData entityMeta, Attribute attr)
 	{
 		String sqlSetDataType = getSqlSetDataType(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -705,7 +705,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(sqlSetDataType);
 	}
 
-	private void createJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void createJunctionTable(EntityMetaData entityMeta, Attribute attr)
 	{
 		String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
 		if (LOG.isDebugEnabled())
@@ -731,7 +731,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(createJunctionTableIndexSql);
 	}
 
-	private void dropJunctionTable(EntityMetaData entityMeta, AttributeMetaData mrefAttr)
+	private void dropJunctionTable(EntityMetaData entityMeta, Attribute mrefAttr)
 	{
 		String sqlDropJunctionTable = getSqlDropJunctionTable(entityMeta, mrefAttr);
 		if (LOG.isDebugEnabled())

@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.QueryCreator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class GeneNameQueryCreator implements QueryCreator
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return singleton(attributeMetaDataFactory.create().setName(EffectsMetaData.GENE_NAME));
 	}

@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.EnumSet;
@@ -62,7 +62,7 @@ public class QueryUtils
 				return true;
 			}
 
-			AttributeMetaData amd = entityMetaData.getAttribute(rule.getField());
+			Attribute amd = entityMetaData.getAttribute(rule.getField());
 			if (amd != null && amd.hasExpression())
 			{
 				return true;

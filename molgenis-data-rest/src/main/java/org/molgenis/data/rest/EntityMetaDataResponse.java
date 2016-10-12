@@ -8,7 +8,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -80,7 +80,7 @@ public class EntityMetaDataResponse
 			this.attributes = new LinkedHashMap<String, Object>();
 			//the newArraylist is a fix for concurrency trouble
 			//FIXME properly fix this by making metadata immutable
-			for (AttributeMetaData attr : Lists.newArrayList(meta.getAttributes()))
+			for (Attribute attr : Lists.newArrayList(meta.getAttributes()))
 			{
 				if (!attr.getName().equals("__Type"))
 				{
@@ -104,26 +104,26 @@ public class EntityMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
-			AttributeMetaData labelAttribute = meta.getLabelAttribute(this.languageCode);
+			Attribute labelAttribute = meta.getLabelAttribute(this.languageCode);
 			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 		}
 		else this.labelAttribute = null;
 
 		if (attributesSet == null || attributesSet.contains("idAttribute".toLowerCase()))
 		{
-			AttributeMetaData idAttribute = meta.getIdAttribute();
+			Attribute idAttribute = meta.getIdAttribute();
 			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 		}
 		else this.idAttribute = null;
 
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
-			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
+			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 			this.lookupAttributes = lookupAttributes != null ? Lists
-					.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+					.newArrayList(Iterables.transform(lookupAttributes, new Function<Attribute, String>()
 					{
 						@Override
-						public String apply(AttributeMetaData attribute)
+						public String apply(Attribute attribute)
 						{
 							return attribute.getName();
 						}

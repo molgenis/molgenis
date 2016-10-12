@@ -1,7 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.EntityMetaDataUtils;
 
@@ -61,7 +61,7 @@ class PostgreSqlQueryUtils
 	 * @param attr       attribute
 	 * @return PostgreSQL junction table name
 	 */
-	static String getJunctionTableName(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getJunctionTableName(EntityMetaData entityMeta, Attribute attr)
 	{
 		return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
 	}
@@ -74,8 +74,8 @@ class PostgreSqlQueryUtils
 	 * @param idxAttr    indexed attribute
 	 * @return PostgreSQL junction table index name
 	 */
-	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
-			AttributeMetaData idxAttr)
+	static String getJunctionTableIndexName(EntityMetaData entityMeta, Attribute attr,
+			Attribute idxAttr)
 	{
 		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
 	}
@@ -85,7 +85,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributes(EntityMetaData entityMeta)
+	static Stream<Attribute> getPersistedAttributes(EntityMetaData entityMeta)
 	{
 		return StreamSupport.stream(entityMeta.getAtomicAttributes().spliterator(), false)
 				.filter(atomicAttr -> atomicAttr.getExpression() == null);
@@ -97,7 +97,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted MREF attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
+	static Stream<Attribute> getPersistedAttributesMref(EntityMetaData entityMeta)
 	{
 		return getPersistedAttributes(entityMeta).filter(EntityMetaDataUtils::isMultipleReferenceType);
 	}
@@ -108,7 +108,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted non-MREF attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
+	static Stream<Attribute> getPersistedAttributesNonMref(EntityMetaData entityMeta)
 	{
 		return getPersistedAttributes(entityMeta).filter(attr -> !isMultipleReferenceType(attr));
 	}

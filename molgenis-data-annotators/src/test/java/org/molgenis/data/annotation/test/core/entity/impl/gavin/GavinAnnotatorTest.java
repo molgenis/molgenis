@@ -14,7 +14,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -81,32 +81,32 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		annotatorConfig.init();
 		emd = entityMetaDataFactory.create().setName("gavin");
 		entityMetaData = entityMetaDataFactory.create().setName("test_variant");
-		List<AttributeMetaData> refAttributesList = Arrays
+		List<Attribute> refAttributesList = Arrays
 				.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
 						ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
 		entityMetaData.addAttributes(refAttributesList);
-		AttributeMetaData refAttr = attributeMetaDataFactory.create().setName("test_variant").setDataType(XREF)
+		Attribute refAttr = attributeMetaDataFactory.create().setName("test_variant").setDataType(XREF)
 				.setRefEntity(entityMetaData).setDescription(
 						"This annotator needs a references to an entity containing: " + StreamSupport
-								.stream(refAttributesList.spliterator(), false).map(AttributeMetaData::getName)
+								.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
 								.collect(Collectors.joining(", ")));
 
 		emd.addAttributes(
 				Arrays.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
 						vcfAttributes.getAltAttribute()));
 
-		AttributeMetaData idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
+		Attribute idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
 		emd.addAttribute(idAttr);
 		emd.setIdAttribute(idAttr);
 		emd.addAttributes(effectsMetaData.getOrderedAttributes());
 		emd.addAttribute(
 				attributeMetaDataFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
 						.setRefEntity(entityMetaData));
-		AttributeMetaData classification = attributeMetaDataFactory.create().setName(CLASSIFICATION).setDataType(STRING)
+		Attribute classification = attributeMetaDataFactory.create().setName(CLASSIFICATION).setDataType(STRING)
 				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		AttributeMetaData confidence = attributeMetaDataFactory.create().setName(CONFIDENCE).setDataType(STRING)
+		Attribute confidence = attributeMetaDataFactory.create().setName(CONFIDENCE).setDataType(STRING)
 				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		AttributeMetaData reason = attributeMetaDataFactory.create().setName(REASON).setDataType(STRING)
+		Attribute reason = attributeMetaDataFactory.create().setName(REASON).setDataType(STRING)
 				.setDescription(REASON).setLabel(REASON);
 		emd.addAttributes(Arrays.asList(classification, confidence, reason));
 

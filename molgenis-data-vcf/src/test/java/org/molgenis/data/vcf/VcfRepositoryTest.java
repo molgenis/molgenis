@@ -3,7 +3,7 @@ package org.molgenis.data.vcf;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -59,7 +59,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 				attrMetaFactory))
 		{
 			assertEquals(vcfRepository.getName(), "testData");
-			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
+			Iterator<Attribute> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfAttributes.CHROM, STRING);
 			assertTrue(it.hasNext());
@@ -84,7 +84,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 		}
 	}
 
-	private static void testAttribute(AttributeMetaData metadata, String name, AttributeType type)
+	private static void testAttribute(Attribute metadata, String name, AttributeType type)
 	{
 		assertEquals(metadata.getName(), name);
 		assertEquals(metadata.getDataType(), type);

@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
@@ -63,7 +63,7 @@ public class ExcelWriter implements WritableFactory
 	}
 
 	@Override
-	public ExcelSheetWriter createWritable(String entityName, Iterable<AttributeMetaData> attributes,
+	public ExcelSheetWriter createWritable(String entityName, Iterable<Attribute> attributes,
 			AttributeWriteMode attributeWriteMode)
 	{
 		Sheet poiSheet = workbook.createSheet(entityName);
@@ -87,7 +87,7 @@ public class ExcelWriter implements WritableFactory
 	@Override
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
+		List<Attribute> attributes = attributeNames != null ? attributeNames.stream()
 				.map(attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);

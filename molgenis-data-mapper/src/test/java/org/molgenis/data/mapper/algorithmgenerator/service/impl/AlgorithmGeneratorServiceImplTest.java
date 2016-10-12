@@ -10,7 +10,7 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -76,24 +76,24 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	public void testGenerateTemplateBasedAlgorithm()
 	{
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		AttributeMetaData targetBMIAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetBMIAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetBMIAttribute.setLabel("BMI kg/m²");
 		targetBMIAttribute.setDataType(DECIMAL);
 		targetEntityMetaData.addAttribute(targetBMIAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		AttributeMetaData heightSourceAttribute = attrMetaFactory.create().setName("sourceHeight");
+		Attribute heightSourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		heightSourceAttribute.setDataType(DECIMAL);
 		heightSourceAttribute.setLabel("body length in cm");
 
-		AttributeMetaData weightSourceAttribute = attrMetaFactory.create().setName("sourceWeight");
+		Attribute weightSourceAttribute = attrMetaFactory.create().setName("sourceWeight");
 		weightSourceAttribute.setDataType(DECIMAL);
 		weightSourceAttribute.setLabel("weight in kg");
 
 		sourceEntityMetaData.addAttribute(heightSourceAttribute);
 		sourceEntityMetaData.addAttribute(weightSourceAttribute);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
+		Map<Attribute, ExplainedAttributeMetaData> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
 				ExplainedAttributeMetaData.create(heightSourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
 				weightSourceAttribute, ExplainedAttributeMetaData.create(heightSourceAttribute,
@@ -122,13 +122,13 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	public void testConvertUnitsAlgorithm()
 	{
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(DECIMAL);
 		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
+		Attribute sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDataType(DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityMetaData.addAttribute(sourceAttribute);

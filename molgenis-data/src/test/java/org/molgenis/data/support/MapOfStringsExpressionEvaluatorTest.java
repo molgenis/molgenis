@@ -70,7 +70,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		try
 		{
@@ -86,7 +86,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("location").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getExpression()).thenReturn("{'a':b}");
 		try
@@ -103,7 +103,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("location").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("hallo");
@@ -121,7 +121,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':{'hallo1':'bla'}}");
@@ -140,7 +140,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'hallo':String}");
@@ -158,7 +158,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':hallo}");
@@ -177,7 +177,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Test
 	public void testEvaluate()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");

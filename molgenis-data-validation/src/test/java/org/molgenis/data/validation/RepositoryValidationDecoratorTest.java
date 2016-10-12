@@ -3,7 +3,7 @@ package org.molgenis.data.validation;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -36,13 +36,13 @@ public class RepositoryValidationDecoratorTest
 	private String attrNillableMrefName;
 	private String attrUniqueStringName;
 	private String attrUniqueXrefName;
-	private AttributeMetaData idAttr;
-	private AttributeMetaData xrefAttr;
-	private AttributeMetaData nillableXrefAttr;
-	private AttributeMetaData mrefAttr;
-	private AttributeMetaData nillableMrefAttr;
-	private AttributeMetaData uniqueStringAttr;
-	private AttributeMetaData uniqueXrefAttr;
+	private Attribute idAttr;
+	private Attribute xrefAttr;
+	private Attribute nillableXrefAttr;
+	private Attribute mrefAttr;
+	private Attribute nillableMrefAttr;
+	private Attribute uniqueStringAttr;
+	private Attribute uniqueXrefAttr;
 	private EntityMetaData entityMeta;
 	private Repository<Entity> decoratedRepo;
 	private Repository<Entity> refRepo;
@@ -64,7 +64,7 @@ public class RepositoryValidationDecoratorTest
 
 		refAttrIdName = "refId";
 
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrIdName).getMock();
+		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn(refAttrIdName).getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		refEntityMeta = mock(EntityMetaData.class);
@@ -84,34 +84,34 @@ public class RepositoryValidationDecoratorTest
 		attrUniqueStringName = "uniqueStringAttr";
 		attrUniqueXrefName = "uniqueXrefAttr";
 
-		idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrIdName).getMock();
+		idAttr = when(mock(Attribute.class).getName()).thenReturn(attrIdName).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 
-		xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrXrefName).getMock();
+		xrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrXrefName).getMock();
 		when(xrefAttr.getRefEntity()).thenReturn(refEntityMeta);
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.isNillable()).thenReturn(false);
 
-		nillableXrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrNillableXrefName).getMock();
+		nillableXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrNillableXrefName).getMock();
 		when(nillableXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
 		when(nillableXrefAttr.getDataType()).thenReturn(XREF);
 		when(nillableXrefAttr.isNillable()).thenReturn(true);
 
-		mrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrMrefName).getMock();
+		mrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrMrefName).getMock();
 		when(mrefAttr.getRefEntity()).thenReturn(refEntityMeta);
 		when(mrefAttr.getDataType()).thenReturn(MREF);
 		when(mrefAttr.isNillable()).thenReturn(false);
 
-		nillableMrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrNillableMrefName).getMock();
+		nillableMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrNillableMrefName).getMock();
 		when(nillableMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
 		when(nillableMrefAttr.getDataType()).thenReturn(MREF);
 		when(nillableMrefAttr.isNillable()).thenReturn(true);
 
-		uniqueStringAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrUniqueStringName).getMock();
+		uniqueStringAttr = when(mock(Attribute.class).getName()).thenReturn(attrUniqueStringName).getMock();
 		when(uniqueStringAttr.getDataType()).thenReturn(STRING);
 		when(uniqueStringAttr.isUnique()).thenReturn(true);
 
-		uniqueXrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrUniqueXrefName).getMock();
+		uniqueXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrUniqueXrefName).getMock();
 		when(uniqueXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
 		when(uniqueXrefAttr.getDataType()).thenReturn(XREF);
 		when(uniqueXrefAttr.isUnique()).thenReturn(true);
@@ -2663,7 +2663,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyStringName = "readonlyStringAttr";
 
-		AttributeMetaData readonlyStringAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyStringAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyStringName).getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
@@ -2735,7 +2735,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		AttributeMetaData readonlyXrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -2799,7 +2799,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		AttributeMetaData readonlyXrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -2872,7 +2872,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		AttributeMetaData readonlyMrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -2939,7 +2939,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		AttributeMetaData readonlyMrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -4031,7 +4031,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyStringName = "readonlyStringAttr";
 
-		AttributeMetaData readonlyStringAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyStringAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyStringName).getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
@@ -4111,7 +4111,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		AttributeMetaData readonlyXrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -4183,7 +4183,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		AttributeMetaData readonlyXrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -4264,7 +4264,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		AttributeMetaData readonlyMrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -4338,7 +4338,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		AttributeMetaData readonlyMrefAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);

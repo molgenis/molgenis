@@ -1,6 +1,6 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
@@ -72,7 +72,7 @@ public class SystemEntityMetaDataTest
 		@Override
 		protected void init()
 		{
-			AttributeMetaData compoundAttr1 = mock(AttributeMetaData.class);
+			Attribute compoundAttr1 = mock(Attribute.class);
 			addAttribute(compoundAttr1);
 			addAttribute("compoundAttr2", compoundAttr1);
 			addAttribute("idAttr", compoundAttr1, ROLE_ID);
@@ -94,7 +94,7 @@ public class SystemEntityMetaDataTest
 		@Override
 		protected void init()
 		{
-			AttributeMetaData compoundAttr = mock(AttributeMetaData.class);
+			Attribute compoundAttr = mock(Attribute.class);
 			addAttribute(compoundAttr);
 			addAttribute("idAttr", compoundAttr, ROLE_ID);
 			addAttribute("labelAttr", compoundAttr, ROLE_LABEL);

@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -31,7 +31,7 @@ public class AbstractRepositoryTest
 	@BeforeTest
 	public void beforeTest()
 	{
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		entityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		when(entityMetaData.getIdAttribute()).thenReturn(idAttr);
 		abstractRepository = Mockito.spy(new AbstractRepository()

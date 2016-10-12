@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.meta.model.Package;
@@ -38,7 +38,7 @@ public final class IntermediateParseResults
 	/**
 	 * Contains all Attribute tags
 	 */
-	private final SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final SetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags;
 	/**
 	 * Contains all {@link Entity} tags
 	 */
@@ -112,7 +112,7 @@ public final class IntermediateParseResults
 
 		for (EmxAttribute emxAttr : emxAttrs)
 		{
-			AttributeMetaData attr = emxAttr.getAttr();
+			Attribute attr = emxAttr.getAttr();
 			entityMeta.addAttribute(attr);
 
 			// set attribute roles
@@ -184,7 +184,7 @@ public final class IntermediateParseResults
 		return copyOf(packages);
 	}
 
-	public ImmutableSetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public ImmutableSetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> getAttributeTags()
 	{
 		return copyOf(attributeTags);
 	}

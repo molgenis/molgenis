@@ -18,7 +18,7 @@ import org.molgenis.data.annotation.core.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.core.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -71,7 +71,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		AttributeMetaData outputAttribute = attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF)
+		Attribute outputAttribute = attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF)
 				.setDataType(STRING).setDescription(
 						"The allele frequency for variants seen in the population used for the thousand genomes project")
 				.setLabel(THOUSAND_GENOME_AF_LABEL);
@@ -106,7 +106,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		})
 		{
 			@Override
-			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entityMetaData)
+			protected Object getResourceAttributeValue(Attribute attr, Entity entityMetaData)
 			{
 				String attrName = THOUSAND_GENOME_AF
 						.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();

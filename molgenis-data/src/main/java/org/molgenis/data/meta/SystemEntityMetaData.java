@@ -1,11 +1,11 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.meta.system.SystemAttributeMetaData;
+import org.molgenis.data.meta.system.SystemAttribute;
 import org.molgenis.data.support.BootstrapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -82,14 +82,14 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 		return entityName;
 	}
 
-	public AttributeMetaData addAttribute(String attrName, AttributeRole... attrTypes)
+	public Attribute addAttribute(String attrName, AttributeRole... attrTypes)
 	{
 		return addAttribute(attrName, null, attrTypes);
 	}
 
-	public AttributeMetaData addAttribute(String attrName, AttributeMetaData parentAttr, AttributeRole... attrTypes)
+	public Attribute addAttribute(String attrName, Attribute parentAttr, AttributeRole... attrTypes)
 	{
-		AttributeMetaData attr = new SystemAttributeMetaData(attributeMetaDataFactory.getAttributeMetaDataMetaData());
+		Attribute attr = new SystemAttribute(attributeMetaDataFactory.getAttributeMetaDataMetaData());
 		attr.setIdentifier(idGenerator.generateId());
 		attr.setDefaultValues();
 		attr.setName(attrName);

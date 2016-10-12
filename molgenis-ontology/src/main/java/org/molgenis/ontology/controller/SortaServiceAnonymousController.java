@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -201,9 +201,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private List<String> createDownloadTableHeaders(SortaCsvRepository csvRepository)
 	{
 		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityMetaData().getAtomicAttributes())
-				.transform(new Function<AttributeMetaData, String>()
+				.transform(new Function<Attribute, String>()
 				{
-					public String apply(AttributeMetaData attributeMetaData)
+					public String apply(Attribute attributeMetaData)
 					{
 						return attributeMetaData.getName();
 					}
@@ -260,9 +260,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	private boolean validateUserInputHeader(Repository<Entity> repository)
 	{
-		return Iterables.any(repository.getEntityMetaData().getAtomicAttributes(), new Predicate<AttributeMetaData>()
+		return Iterables.any(repository.getEntityMetaData().getAtomicAttributes(), new Predicate<Attribute>()
 		{
-			public boolean apply(AttributeMetaData attr)
+			public boolean apply(Attribute attr)
 			{
 				return StringUtils.isNotEmpty(attr.getName()) && StringUtils
 						.equalsIgnoreCase(attr.getName(), SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);

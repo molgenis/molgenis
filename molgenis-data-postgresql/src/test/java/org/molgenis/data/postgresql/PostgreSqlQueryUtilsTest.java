@@ -1,6 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.Test;
 
@@ -14,8 +14,8 @@ public class PostgreSqlQueryUtilsTest
 	public void getJunctionTableIndexName() throws Exception
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		AttributeMetaData idxAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idxAttr").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		Attribute idxAttr = when(mock(Attribute.class).getName()).thenReturn("idxAttr").getMock();
 		assertEquals(PostgreSqlQueryUtils.getJunctionTableIndexName(entityMeta, attr, idxAttr),
 				"\"entity_attr_idxAttr_idx\"");
 	}

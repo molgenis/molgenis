@@ -3,7 +3,7 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -65,8 +65,8 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	 * </li>
 	 */
 	private EntityMetaData entityMeta;
-	private AttributeMetaData labelAttr;
-	private AttributeMetaData xrefAttr;
+	private Attribute labelAttr;
+	private Attribute xrefAttr;
 	private EntityMetaData xrefEntityMeta;
 	private EntityMetaData selfRefEntityMetaData;
 
@@ -81,7 +81,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void setUpBeforeMethod()
 	{
 		selfRefEntityMetaData = entityMetaDataFactory.create().setName("SelfRefEntity");
-		AttributeMetaData selfRefIdAttr = attributeMetaDataFactory.create().setName("id");
+		Attribute selfRefIdAttr = attributeMetaDataFactory.create().setName("id");
 		selfRefEntityMetaData.addAttribute(selfRefIdAttr, ROLE_ID)
 				.addAttribute(attributeMetaDataFactory.create().setName("label"), ROLE_LABEL).addAttribute(
 				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF)
@@ -97,17 +97,17 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 				.addAttribute(attributeMetaDataFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(attributeMetaDataFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 
-		AttributeMetaData compoundPartAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_ATTR_NAME)
+		Attribute compoundPartAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_ATTR_NAME)
 				.setDataType(COMPOUND);
-		AttributeMetaData compoundPartFileAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
+		Attribute compoundPartFileAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
 				.setDataType(FILE).setRefEntity(fileMetaMeta);
-		AttributeMetaData compoundAttr = attributeMetaDataFactory.create().setName(COMPOUND_ATTR_NAME)
+		Attribute compoundAttr = attributeMetaDataFactory.create().setName(COMPOUND_ATTR_NAME)
 				.setDataType(COMPOUND);
-		AttributeMetaData compoundPartCompoundAttr = attributeMetaDataFactory.create()
+		Attribute compoundPartCompoundAttr = attributeMetaDataFactory.create()
 				.setName(COMPOUND_PART_COMPOUND_ATTR_NAME).setDataType(COMPOUND);
-		AttributeMetaData compoundPartCompoundPartAttr = attributeMetaDataFactory.create()
+		Attribute compoundPartCompoundPartAttr = attributeMetaDataFactory.create()
 				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME);
-		AttributeMetaData compoundPartCompoundPartAttr2 = attributeMetaDataFactory.create()
+		Attribute compoundPartCompoundPartAttr2 = attributeMetaDataFactory.create()
 				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
 		compoundAttr.setAttributeParts(asList(compoundPartAttr, compoundPartFileAttr, compoundPartCompoundAttr));
 		compoundPartCompoundAttr.setAttributeParts(asList(compoundPartCompoundPartAttr, compoundPartCompoundPartAttr2));

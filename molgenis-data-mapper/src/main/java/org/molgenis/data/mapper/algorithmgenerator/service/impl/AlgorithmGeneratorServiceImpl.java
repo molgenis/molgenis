@@ -14,7 +14,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmTemplate;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.utils.AlgorithmGeneratorHelper;
 import org.molgenis.data.mapper.utils.MagmaUnitConverter;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	}
 
 	@Override
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		if (sourceAttributes.size() > 0)
@@ -68,7 +68,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		return StringUtils.EMPTY;
 	}
 
-	String generateMixedTypes(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+	String generateMixedTypes(Attribute targetAttribute, List<Attribute> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
@@ -79,7 +79,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		}
 		else if (sourceAttributes.size() > 1)
 		{
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			for (Attribute sourceAttribute : sourceAttributes)
 			{
 				stringBuilder.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData));
@@ -90,13 +90,13 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	}
 
 	@Override
-	public GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes, EntityMetaData targetEntityMetaData,
+	public GeneratedAlgorithm generate(Attribute targetAttribute,
+			Map<Attribute, ExplainedAttributeMetaData> sourceAttributes, EntityMetaData targetEntityMetaData,
 			EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = StringUtils.EMPTY;
 		AlgorithmState algorithmState = null;
-		Set<AttributeMetaData> mappedSourceAttributes = null;
+		Set<Attribute> mappedSourceAttributes = null;
 
 		if (sourceAttributes.size() > 0)
 		{
@@ -113,9 +113,9 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			}
 			else
 			{
-				Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = sourceAttributes.entrySet().stream()
+				Entry<Attribute, ExplainedAttributeMetaData> firstEntry = sourceAttributes.entrySet().stream()
 						.findFirst().get();
-				AttributeMetaData sourceAttribute = firstEntry.getKey();
+				Attribute sourceAttribute = firstEntry.getKey();
 				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);
 				mappedSourceAttributes = AlgorithmGeneratorHelper
@@ -127,13 +127,13 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		return GeneratedAlgorithm.create(algorithm, mappedSourceAttributes, algorithmState);
 	}
 
-	String convertUnitForTemplateAlgorithm(String algorithm, AttributeMetaData targetAttribute,
-			EntityMetaData targetEntityMetaData, Set<AttributeMetaData> sourceAttributes,
+	String convertUnitForTemplateAlgorithm(String algorithm, Attribute targetAttribute,
+			EntityMetaData targetEntityMetaData, Set<Attribute> sourceAttributes,
 			EntityMetaData sourceEntityMetaData)
 	{
 		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
 
-		for (AttributeMetaData sourceAttribute : sourceAttributes)
+		for (Attribute sourceAttribute : sourceAttributes)
 		{
 			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
 

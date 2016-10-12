@@ -3,7 +3,7 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,14 +31,14 @@ public class PostgreSqlEntityFactoryTest
 	@Test
 	public void createRowMapperXref() throws Exception
 	{
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 
 		String xrefAttr = "xrefAttr";
-		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getName()).thenReturn(xrefAttr);
 		when(oneToManyAttr.getDataType()).thenReturn(XREF);
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);

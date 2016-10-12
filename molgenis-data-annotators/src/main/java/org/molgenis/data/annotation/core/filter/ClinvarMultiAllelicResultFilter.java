@@ -5,7 +5,7 @@ import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.*;
@@ -22,7 +22,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return Arrays.asList(vcfAttributes.getRefAttribute(), vcfAttributes.getAltAttribute());
 	}

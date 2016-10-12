@@ -6,7 +6,7 @@ import com.google.gdata.data.TextConstruct;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -108,7 +108,7 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
 		EntityMetaData entityMetaData = spreadsheetRepository.getEntityMetaData();
 		assertEquals(entityMetaData.getName(), "name");
-		Iterator<AttributeMetaData> it = entityMetaData.getAttributes().iterator();
+		Iterator<Attribute> it = entityMetaData.getAttributes().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "col1");
 		assertTrue(it.hasNext());

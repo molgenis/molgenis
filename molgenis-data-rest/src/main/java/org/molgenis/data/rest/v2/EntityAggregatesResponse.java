@@ -4,7 +4,7 @@ import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AnonymizedAggregateResult;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +99,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 				{
 					Map<String, Object> valueMap = new HashMap<String, Object>();
 					Entity entity = (Entity) xLabel;
-					for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+					for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
 					{
 						switch (attr.getDataType())
 						{
