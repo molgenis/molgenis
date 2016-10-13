@@ -24,6 +24,7 @@ import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
@@ -88,7 +89,7 @@ public class EntityType extends StaticEntity
 	 */
 	public static EntityType newInstance(EntityType entityType)
 	{
-		return newInstance(entityType, AttributeCopyMode.SHALLOW_COPY_ATTRS, null);
+		return newInstance(entityType, SHALLOW_COPY_ATTRS, null);
 	}
 
 	/**

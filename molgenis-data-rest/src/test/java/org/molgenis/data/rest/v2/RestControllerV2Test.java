@@ -45,6 +45,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -220,10 +221,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrCategoricalMref = createAttributeMeta(entityType, attrCategoricalMrefName, CATEGORICAL_MREF,
 				refEntityType).setNillable(false);
 		Attribute attrCompound = createAttributeMeta(entityType, attrCompoundName, COMPOUND);
-		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false).setParent(attrCompound);
+		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false)
+				.setParent(attrCompound);
 		Attribute compoundAttr0Optional = createAttributeMeta(entityType, attrCompoundAttr0OptionalName, STRING)
 				.setNillable(true).setParent(attrCompound);
-		Attribute compoundAttrCompound = createAttributeMeta(entityType, attrCompoundAttrCompoundName, COMPOUND).setParent(attrCompound);
+		Attribute compoundAttrCompound = createAttributeMeta(entityType, attrCompoundAttrCompoundName, COMPOUND)
+				.setParent(attrCompound);
 		Attribute compoundAttrCompoundAttr0 = createAttributeMeta(entityType, attrCompoundAttrCompoundAttr0Name, STRING)
 				.setNillable(false).setParent(compoundAttrCompound);
 		Attribute compoundAttrCompoundAttr0Optional = createAttributeMeta(entityType,
@@ -266,8 +269,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrStringOptional = createAttributeMeta(entityType, attrStringOptionalName, STRING);
 		Attribute attrTextOptional = createAttributeMeta(entityType, attrTextOptionalName, TEXT);
 		Attribute attrXrefOptional = createAttributeMeta(entityType, attrXrefOptionalName, XREF, refEntityType);
-
-
 
 		Entity refRefEntity = new DynamicEntity(refRefEntityType);
 		refRefEntity.set(REF_REF_ATTR_ID_NAME, REF_REF_ENTITY_ID);
@@ -358,7 +359,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		});
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setMessageConverters(gsonHttpMessageConverter)
-				.setConversionService(conversionService).build();
+				.setConversionService(conversionService)
+				.setHandlerExceptionResolvers(new DefaultHandlerExceptionResolver()).build();
 	}
 
 	private Attribute createAttributeMeta(EntityType entityType, String attrName, AttributeType type)
@@ -371,7 +373,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		Attribute attr = attributeFactory.create().setName(attrName).setLabel(attrName).setDataType(type)
 				.setRefEntity(refEntityMeta).setNillable(true);
-			entityType.addAttribute(attr);
+		entityType.addAttribute(attr);
 		return attr;
 	}
 
@@ -841,8 +843,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>()
 				{
 				}.getType());
-		@SuppressWarnings("unchecked")
-		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		@SuppressWarnings("unchecked") Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 		assertEquals(lvl2.get("selfRef").toString(),
 				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
 	}

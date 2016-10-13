@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.ApplicationContextProvider;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,8 +40,8 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		Gson gson = new Gson();
 		try
 		{
-			@SuppressWarnings("unchecked")
-			Map<String, String> attributeExpressions = gson.fromJson(expression, Map.class);
+			@SuppressWarnings("unchecked") Map<String, String> attributeExpressions = gson
+					.fromJson(expression, Map.class);
 			ImmutableMap.Builder<String, ExpressionEvaluator> builder = ImmutableMap.builder();
 			for (Entry<String, String> entry : attributeExpressions.entrySet())
 			{
@@ -48,7 +50,9 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 				{
 					throw new IllegalArgumentException("Unknown target attribute: " + entry.getKey() + '.');
 				}
-				Attribute amd = Attribute.newInstance(targetAttribute, SHALLOW_COPY_ATTRS, null)
+				AttributeFactory attrFactory = ApplicationContextProvider.getApplicationContext()
+						.getBean(AttributeFactory.class);
+				Attribute amd = Attribute.newInstance(targetAttribute, SHALLOW_COPY_ATTRS, attrFactory)
 						.setExpression(entry.getValue());
 				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityType);
 				builder.put(entry.getKey(), evaluator);
@@ -73,4 +77,8 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 		return result;
 	}
+
+//	private static class AttributeWithJsonExpression extends Attribute {
+//
+//	}
 }

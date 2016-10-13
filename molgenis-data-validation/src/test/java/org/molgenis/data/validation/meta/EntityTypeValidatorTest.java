@@ -127,25 +127,6 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Attribute \\[labelAttr\\] is owned by entity \\[ownerEntity\\]")
-	public void testValidateAttributeOwnedByOtherEntity()
-	{
-		//noinspection unchecked
-		Query<EntityType> entityQ0 = mock(Query.class);
-		//noinspection unchecked
-		Query<EntityType> entityQ1 = mock(Query.class);
-		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
-		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
-		when(entityQ0.findOne()).thenReturn(null);
-
-		EntityType ownerEntityType = when(mock(EntityType.class).getName()).thenReturn("ownerEntity").getMock();
-		when(entityQ1.findOne()).thenReturn(ownerEntityType);
-		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
-		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ);
-		when(attrQ.findOne()).thenReturn(null);
-		entityTypeValidator.validate(entityType);
-	}
-
 	@Test
 	public void testValidateAttributeOwnedBySameEntity()
 	{
@@ -161,30 +142,6 @@ public class EntityTypeValidatorTest
 		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
 		entityTypeValidator.validate(entityType); // should not throw an exception
-	}
-
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Attribute \\[labelAttr\\] is owned by entity \\[ownerEntity\\]")
-	public void testValidateAttributePartOwnedByOtherEntity()
-	{
-		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ);
-		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ);
-		when(entityQ.findOne()).thenReturn(null);
-		//noinspection unchecked
-		Query<Attribute> attrQ0 = mock(Query.class);
-		//noinspection unchecked
-		Query<Attribute> attrQ1 = mock(Query.class);
-		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
-		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ0);
-		when(attrQ.eq(CHILDREN, labelAttr)).thenReturn(attrQ1);
-		when(attrQ0.findOne()).thenReturn(null);
-		Attribute attrParent = when(mock(Attribute.class).getName()).thenReturn("attrParent").getMock();
-		when(attrQ1.findOne()).thenReturn(attrParent);
-		//noinspection unchecked
-		Query<EntityType> entityQ0 = mock(Query.class);
-		when(entityQ.eq(ATTRIBUTES, attrParent)).thenReturn(entityQ0);
-		EntityType ownerEntityType = when(mock(EntityType.class).getName()).thenReturn("ownerEntity").getMock();
-		when(entityQ0.findOne()).thenReturn(ownerEntityType);
-		entityTypeValidator.validate(entityType);
 	}
 
 	@Test

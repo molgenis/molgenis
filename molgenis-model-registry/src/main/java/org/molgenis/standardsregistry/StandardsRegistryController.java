@@ -241,7 +241,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "package");
 
-		for (Package subPackage : package_.getSubPackages())
+		for (Package subPackage : package_.getChildren())
 		{
 			result.add(createPackageTreeNode(subPackage));
 		}
@@ -332,7 +332,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel(), emd.isAbstract()));
 		}
-		Iterable<Package> subPackages = aPackage.getSubPackages();
+		Iterable<Package> subPackages = aPackage.getChildren();
 		if (subPackages != null)
 		{
 			for (Package subPackage : subPackages)

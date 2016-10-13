@@ -69,7 +69,7 @@ public class Attribute extends StaticEntity
 	 * @param attrMeta     attribute
 	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attribute parts
 	 * @param attrFactory  attribute factory used to create new attributes in deep-copy mode
-	 * @return deep copy of attribute
+	 * @return shallow or deep copy of attribute
 	 */
 	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode,
 			AttributeFactory attrFactory)
