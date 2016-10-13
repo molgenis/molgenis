@@ -24,6 +24,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -45,6 +46,7 @@ public class CommandLineAnnotatorConfig
 	public void bootstrap()
 	{
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
+		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
 
