@@ -40,7 +40,7 @@ public class EntityTypeTest
 
 		compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(compoundAttribute.getName()).thenReturn("compoundAttribute");
-		when(compoundAttribute.getAttributeParts()).thenReturn(attributeParts);
+		when(compoundAttribute.getChildren()).thenReturn(attributeParts);
 
 		Iterable<Attribute> mockedAttributes = newArrayList(compoundAttribute, randomAttribute);
 
@@ -53,11 +53,11 @@ public class EntityTypeTest
 		Iterable<Attribute> nestedCompoundAttributeParts = newArrayList(nestedAttributePart);
 
 		nestedCompoundPart = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
-		when(nestedCompoundPart.getAttributeParts()).thenReturn(nestedCompoundAttributeParts);
+		when(nestedCompoundPart.getChildren()).thenReturn(nestedCompoundAttributeParts);
 		Iterable<Attribute> nestedAttributeParts = newArrayList(nestedCompoundPart, attributePart);
 
 		nestedCompoundParent = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
-		when(nestedCompoundParent.getAttributeParts()).thenReturn(nestedAttributeParts);
+		when(nestedCompoundParent.getChildren()).thenReturn(nestedAttributeParts);
 
 		Iterable<Attribute> mockedNestedAttributes = newArrayList(nestedCompoundParent, randomAttribute);
 

@@ -42,7 +42,7 @@ public class AttributeTest
 	{
 		Attribute parentAttr = mock(Attribute.class);
 		attribute.setParent(parentAttr);
-		verify(parentAttr).addAttributePart(attribute);
+		verify(parentAttr).addChild(attribute);
 		verifyNoMoreInteractions(parentAttr);
 	}
 
@@ -58,11 +58,11 @@ public class AttributeTest
 	{
 		Attribute parentAttr = mock(Attribute.class);
 		attribute.setParent(parentAttr);
-		verify(parentAttr).addAttributePart(attribute);
+		verify(parentAttr).addChild(attribute);
 
 		attribute.setParent(null);
 		assertNull(attribute.getParent());
-		verify(parentAttr).removeAttributePart(attribute);
+		verify(parentAttr).removeChild(attribute);
 		verifyNoMoreInteractions(parentAttr);
 	}
 
@@ -71,15 +71,15 @@ public class AttributeTest
 	{
 		Attribute currentParentAttr = mock(Attribute.class);
 		attribute.setParent(currentParentAttr);
-		verify(currentParentAttr).addAttributePart(attribute);
+		verify(currentParentAttr).addChild(attribute);
 
 		Attribute parentAttr = mock(Attribute.class);
 		attribute.setParent(parentAttr);
 		assertEquals(attribute.getParent(), parentAttr);
 
-		verify(currentParentAttr).removeAttributePart(attribute);
+		verify(currentParentAttr).removeChild(attribute);
 		verifyNoMoreInteractions(currentParentAttr);
-		verify(parentAttr).addAttributePart(attribute);
+		verify(parentAttr).addChild(attribute);
 		verifyNoMoreInteractions(parentAttr);
 	}
 

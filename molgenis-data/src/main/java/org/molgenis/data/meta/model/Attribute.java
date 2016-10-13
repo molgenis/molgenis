@@ -295,8 +295,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
 	 */
-	// FIXME rename to getChildren
-	public Iterable<Attribute> getAttributeParts()
+	public Iterable<Attribute> getChildren()
 	{
 		return getEntities(CHILDREN, Attribute.class);
 	}
@@ -591,13 +590,13 @@ public class Attribute extends StaticEntity
 		Attribute currentParent = getParent();
 		if (currentParent != null)
 		{
-			currentParent.removeAttributePart(this);
+			currentParent.removeChild(this);
 		}
 		set(PARENT, parentAttr);
 
 		if (parentAttr != null)
 		{
-			parentAttr.addAttributePart(this);
+			parentAttr.addChild(this);
 		}
 		return this;
 	}
@@ -608,20 +607,20 @@ public class Attribute extends StaticEntity
 	 * @param attrName attribute name (case insensitive)
 	 * @return attribute or null
 	 */
-	public Attribute getAttributePart(String attrName)
+	public Attribute getChild(String attrName)
 	{
 		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
 		return stream(attrParts.spliterator(), false).filter(attrPart -> attrPart.getName().equals(attrName))
 				.findFirst().orElse(null);
 	}
 
-	void addAttributePart(Attribute attrPart)
+	void addChild(Attribute attrPart)
 	{
 		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
 		set(CHILDREN, concat(attrParts, singletonList(attrPart)));
 	}
 
-	void removeAttributePart(Attribute attrPart)
+	void removeChild(Attribute attrPart)
 	{
 		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
 		set(CHILDREN, stream(attrParts.spliterator(), false).filter(attr -> !attr.getName().equals(attrPart.getName()))
