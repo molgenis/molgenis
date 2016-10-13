@@ -483,8 +483,8 @@ public class EntityType extends StaticEntity
 
 	public EntityType setOwnAttributes(Iterable<Attribute> attrs)
 	{
+		invalidateCachedOwnAttrs();
 		set(ATTRIBUTES, attrs);
-		//		invalidateCachedAttrs();
 		return this;
 	}
 

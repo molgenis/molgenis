@@ -308,7 +308,6 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	{
 		validateAdd(attr);
 		decoratedRepo.add(attr);
-		attr.getEntity().getBackend();
 	}
 
 	@Override

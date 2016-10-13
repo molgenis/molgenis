@@ -154,13 +154,13 @@ public class EntityTypeTest
 
 		EntityType extendsEntityType = mock(EntityType.class);
 
-		Attribute attrId = mock(Attribute.class);
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(attrId.isIdAttribute()).thenReturn(true);
 		when(attrId.getLookupAttributeIndex()).thenReturn(0);
-		Attribute attrLabel = mock(Attribute.class);
+		Attribute attrLabel = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(attrLabel.isLabelAttribute()).thenReturn(true);
 		when(attrLabel.getLookupAttributeIndex()).thenReturn(1);
-		Attribute attrCompound = mock(Attribute.class);
+		Attribute attrCompound = when(mock(Attribute.class).getName()).thenReturn("compound").getMock();
 		when(attrCompound.getLookupAttributeIndex()).thenReturn(null);
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
