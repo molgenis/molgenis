@@ -50,6 +50,7 @@ public class RepositoryCollectionBootstrapper
 			throw new UnknownRepositoryCollectionException(defaultRepoCollectionName);
 		}
 		repoCollectionRegistry.setDefaultRepoCollection(defaultRepoCollection);
+		entityTypeMetadata.setDefaultBackend(defaultRepoCollection.getName());
 	}
 
 	private void register(RepositoryCollection repositoryCollection)
