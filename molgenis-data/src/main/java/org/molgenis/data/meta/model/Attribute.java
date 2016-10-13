@@ -153,13 +153,11 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 	
-	// FIXME rename to getEntityType
 	public EntityType getEntity()
 	{
 		return getEntity(ENTITY, EntityType.class);
 	}
 
-	// FIXME rename to setEntityType
 	public Attribute setEntity(EntityType entityMeta)
 	{
 		set(ENTITY, entityMeta);
