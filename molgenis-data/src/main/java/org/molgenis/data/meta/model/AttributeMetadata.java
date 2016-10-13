@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,8 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false);
-		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number").setDescription("Number that defines order of attributes in a entity").setNillable(false);
+		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number")
+				.setDescription("Number that defines order of attributes in a entity").setNillable(false);
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
 		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute");
@@ -86,7 +88,7 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index");
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
 		addAttribute(CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setLabel("Attribute parts");
+				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
