@@ -5,6 +5,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 import static java.lang.Boolean.FALSE;
@@ -37,6 +38,9 @@ public class EntityTypeMetadata extends SystemEntityType
 	private PackageMetadata packageMetadata;
 	private TagMetaData tagMetaData;
 
+	private List<String> backendEnumOptions;
+	private String defaultBackend;
+
 	EntityTypeMetadata()
 	{
 		super(SIMPLE_NAME_, PACKAGE_META);
@@ -44,6 +48,8 @@ public class EntityTypeMetadata extends SystemEntityType
 
 	public void init()
 	{
+		requireNonNull(backendEnumOptions, "backend enum options not set!");
+
 		setLabel("Entity");
 		setDescription("Meta data for entity classes");
 
@@ -63,6 +69,27 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
 		addAttribute(BACKEND).setNillable(false).setReadOnly(true).setLabel("Backend")
 				.setDescription("Backend data store");
+	}
+
+	/**
+	 * Used during bootstrapping to set the enum options for the backend field. Circumvents unresolvable circular
+	 * dependencies when autowiring RepositoryCollectionRegistry into this bean.
+	 *
+	 * @param repositoryCollectionNames list of RepositoryCollection names
+	 */
+	public void setBackendEnumOptions(List<String> repositoryCollectionNames)
+	{
+		this.backendEnumOptions = requireNonNull(repositoryCollectionNames);
+	}
+
+	/**
+	 * Used during bootstrapping to set the default value of the backend field.
+	 *
+	 * @param repositoryCollectionName list of RepositoryCollection names
+	 */
+	public void setDefaultBackend(String repositoryCollectionName)
+	{
+		this.defaultBackend = requireNonNull(repositoryCollectionName);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
