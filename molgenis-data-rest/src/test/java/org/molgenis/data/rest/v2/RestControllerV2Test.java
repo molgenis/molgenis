@@ -17,6 +17,7 @@ import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
@@ -117,6 +118,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
+
+	@Autowired
+	private RepositoryCopier repoCopier;
 
 	@Autowired
 	private Gson gson;
@@ -492,7 +496,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody))
 				.andExpect(header().string("Location", "/api/v2/org_molgenis_blah_newEntity"));
 
-		verify(dataService).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
+		verify(repoCopier).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
 	}
 
 	@Test
@@ -507,7 +511,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
-		verify(dataService, never()).copyRepository(any(), any(), any(), any());
+		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -523,7 +527,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		this.assertEqualsErrorMessage(resultActions,
 				"Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'");
-		verify(dataService, never()).copyRepository(any(), any(), any(), any());
+		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -541,7 +545,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
-		verify(dataService, never()).copyRepository(any(), any(), any(), any());
+		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -562,7 +566,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No write capabilities for entity entity");
-		verify(dataService, never()).copyRepository(any(), any(), any(), any());
+		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
@@ -587,7 +591,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("org_molgenis_blah_newEntity");
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
-		when(dataService.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
+		when(repoCopier.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService)
 				.giveUserEntityPermissions(any(SecurityContext.class), Collections.singletonList(any(String.class)));
@@ -969,6 +973,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public RepositoryCopier repositoryCopier()
+		{
+			return mock(RepositoryCopier.class);
+		}
+
+		@Bean
 		public IdGenerator idGenerator()
 		{
 			return mock(IdGenerator.class);
@@ -1003,7 +1013,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		{
 			return new RestControllerV2(dataService(), molgenisPermissionService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager()),
-					languageService(), permissionSystemService());
+					languageService(), permissionSystemService(), repositoryCopier());
 		}
 
 	}

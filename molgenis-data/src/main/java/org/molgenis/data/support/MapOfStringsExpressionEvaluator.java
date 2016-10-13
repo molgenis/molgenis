@@ -48,7 +48,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 				{
 					throw new IllegalArgumentException("Unknown target attribute: " + entry.getKey() + '.');
 				}
-				Attribute amd = Attribute.newInstance(targetAttribute, SHALLOW_COPY_ATTRS)
+				Attribute amd = Attribute.newInstance(targetAttribute, SHALLOW_COPY_ATTRS, null)
 						.setExpression(entry.getValue());
 				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityType);
 				builder.put(entry.getKey(), evaluator);

@@ -68,13 +68,15 @@ public class Attribute extends StaticEntity
 	 *
 	 * @param attrMeta     attribute
 	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attribute parts
+	 * @param attrFactory  attribute factory used to create new attributes in deep-copy mode
 	 * @return deep copy of attribute
 	 */
-	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode)
+	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode,
+			AttributeFactory attrFactory)
 	{
-		Attribute attrMetaCopy = new Attribute(attrMeta.getEntityType()); // do not deep-copy
-		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
+		Attribute attrMetaCopy = attrFactory.create(); // create new attribute with unique identifier
 		attrMetaCopy.setName(attrMeta.getName());
+		attrMetaCopy.setEntity(attrMeta.getEntity());
 		attrMetaCopy.setSequenceNumber(attrMeta.getSequenceNumber());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		attrMetaCopy.setIdAttribute(attrMeta.isIdAttribute());
@@ -97,7 +99,8 @@ public class Attribute extends StaticEntity
 		Attribute parentAttr = attrMeta.getParent();
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
-			attrMetaCopy.setParent(parentAttr != null ? Attribute.newInstance(parentAttr, attrCopyMode) : null);
+			attrMetaCopy.setParent(
+					parentAttr != null ? Attribute.newInstance(parentAttr, attrCopyMode, attrFactory) : null);
 		}
 		else
 		{
@@ -152,7 +155,7 @@ public class Attribute extends StaticEntity
 		set(SEQUENCE_NR, seqNr);
 		return this;
 	}
-	
+
 	// FIXME rename to getEntityType
 	public EntityType getEntity()
 	{

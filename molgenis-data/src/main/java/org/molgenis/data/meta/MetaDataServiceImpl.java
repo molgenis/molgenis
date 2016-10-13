@@ -752,11 +752,6 @@ public class MetaDataServiceImpl implements MetaDataService
 			entityType.setIdValue(id);
 		}
 
-		public static EntityType newInstance(EntityType entityType, AttributeCopyMode attrCopyMode)
-		{
-			return EntityType.newInstance(entityType, attrCopyMode);
-		}
-
 		@Override
 		public Iterable<String> getAttributeNames()
 		{

@@ -182,7 +182,7 @@ public class EntityTypeTest
 		when(entityType.getTags()).thenReturn(asList(tag0, tag1));
 		when(entityType.getBackend()).thenReturn("backend");
 
-		EntityType entityTypeCopy = EntityType.newInstance(entityType, EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS);
+		EntityType entityTypeCopy = EntityType.newInstance(entityType);
 		assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
 		assertEquals(entityTypeCopy.getSimpleName(), "myEntity");
 		assertEquals(entityTypeCopy.getName(), "myPackage_myEntity");

@@ -83,11 +83,25 @@ public class EntityType extends StaticEntity
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
 	 * {@link #EntityType(EntityType)}). Creates shallow-copy of package, tags and extended entity.
 	 *
-	 * @param entityType   entity meta data
-	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attributes
+	 * @param entityType entity meta data
 	 * @return copy of entity meta data
 	 */
-	public static EntityType newInstance(EntityType entityType, AttributeCopyMode attrCopyMode)
+	public static EntityType newInstance(EntityType entityType)
+	{
+		return newInstance(entityType, AttributeCopyMode.SHALLOW_COPY_ATTRS, null);
+	}
+
+	/**
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
+	 * {@link #EntityType(EntityType)}). Creates shallow-copy of package, tags and extended entity.
+	 *
+	 * @param entityType   entity meta data
+	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attributes
+	 * @param attrFactory  attribute factory used to create new attributes in deep-copy mode
+	 * @return copy of entity meta data
+	 */
+	public static EntityType newInstance(EntityType entityType, AttributeCopyMode attrCopyMode,
+			AttributeFactory attrFactory)
 	{
 		EntityType entityTypeCopy = new EntityType(entityType.getEntityType()); // do not deep-copy
 		entityTypeCopy.setSimpleName(entityType.getSimpleName());
@@ -99,8 +113,8 @@ public class EntityType extends StaticEntity
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
 			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAttributes().spliterator(), false)
-					.map(attr -> Attribute.newInstance(attr, attrCopyMode))
-					.map(attrCopy -> attrCopy.setIdentifier(null))
+					.map(attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
+					.map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
 					.collect(toMap(Attribute::getName, Function.identity(), (u, v) ->
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
