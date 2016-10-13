@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
@@ -37,6 +38,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	private PackageMetadata packageMetadata;
 	private TagMetaData tagMetaData;
 
+	private static final String DEFAULT_BACKEND = "PostgreSQL";
 	private List<String> backendEnumOptions;
 
 	EntityTypeMetadata()
@@ -69,7 +71,7 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
 		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
-				.setLabel("Backend").setDescription("Backend data store");
+				.setDefaultValue(DEFAULT_BACKEND).setLabel("Backend").setDescription("Backend data store");
 	}
 
 	/**
