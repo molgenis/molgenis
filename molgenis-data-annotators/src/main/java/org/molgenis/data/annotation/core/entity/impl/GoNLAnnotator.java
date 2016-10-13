@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.*;
 
 @Configuration

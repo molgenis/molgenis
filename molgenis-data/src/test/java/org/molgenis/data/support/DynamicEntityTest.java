@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
@@ -13,8 +13,8 @@ import java.util.Iterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.ONE_TO_MANY;
+import static org.molgenis.AttributeType.XREF;
 
 public class DynamicEntityTest
 {

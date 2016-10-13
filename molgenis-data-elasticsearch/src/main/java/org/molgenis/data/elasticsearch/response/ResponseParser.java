@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
+import static org.molgenis.AttributeType.MREF;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object

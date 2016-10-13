@@ -3,7 +3,6 @@ package org.molgenis.data.semanticsearch.service.impl;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -25,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 public class SemanticSearchServiceHelper
@@ -245,7 +245,7 @@ public class SemanticSearchServiceHelper
 	{
 		for (Entity attributeEntity : attributeEntities)
 		{
-			if (!attributeEntity.getString(AttributeMetadata.TYPE).equals(MolgenisFieldTypes.COMPOUND.toString()))
+			if (!attributeEntity.getString(AttributeMetadata.TYPE).equals(COMPOUND.toString()))
 			{
 				attributeIdentifiers.add(attributeEntity.getString(AttributeMetadata.ID));
 			}

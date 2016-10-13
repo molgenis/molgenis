@@ -33,8 +33,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
 import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;

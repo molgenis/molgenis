@@ -18,7 +18,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static java.util.Arrays.asList;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;

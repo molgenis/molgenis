@@ -18,7 +18,7 @@ import static com.google.common.collect.ImmutableMap.of;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.testng.Assert.assertEquals;

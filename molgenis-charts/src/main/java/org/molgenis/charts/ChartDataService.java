@@ -1,6 +1,6 @@
 package org.molgenis.charts;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.data.Entity;

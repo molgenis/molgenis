@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.AttributeType.*;
 
 public class NumericAlgorithmGenerator implements AlgorithmGenerator
 {

@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
@@ -218,7 +218,7 @@ public class DynamicEntity implements Entity
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
 		}
 
-		MolgenisFieldTypes.AttributeType dataType = attr.getDataType();
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 			case BOOL:
