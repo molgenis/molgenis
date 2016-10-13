@@ -45,7 +45,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -142,6 +141,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void beforeMethod() throws ParseException
 	{
 		reset(dataService);
+		reset(repoCopier);
 
 		EntityType refRefEntityType = entityTypeFactory.create().setName(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
@@ -359,8 +359,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		});
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setMessageConverters(gsonHttpMessageConverter)
-				.setConversionService(conversionService)
-				.setHandlerExceptionResolvers(new DefaultHandlerExceptionResolver()).build();
+				.setConversionService(conversionService).build();
 	}
 
 	private Attribute createAttributeMeta(EntityType entityType, String attrName, AttributeType type)
