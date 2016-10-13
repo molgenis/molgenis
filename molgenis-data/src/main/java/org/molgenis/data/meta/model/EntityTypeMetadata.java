@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.SEQUENCE_NR;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -53,7 +55,7 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);
 		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY).setRefEntity(attributeMetadata).setMappedBy(refAttr)
-				.setNillable(true).setLabel("Attributes");
+				.setOrderBy(new Sort(SEQUENCE_NR)).setNillable(true).setLabel("Attributes");
 		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
 				.setReadOnly(true).setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3

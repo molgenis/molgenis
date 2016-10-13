@@ -75,6 +75,7 @@ public class Attribute extends StaticEntity
 		Attribute attrMetaCopy = new Attribute(attrMeta.getEntityType()); // do not deep-copy
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
+		attrMetaCopy.setSequenceNumber(attrMeta.getSequenceNumber());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		attrMetaCopy.setIdAttribute(attrMeta.isIdAttribute());
 		attrMetaCopy.setLabelAttribute(attrMeta.isLabelAttribute());
@@ -136,6 +137,22 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	/**
+	 * Attribute sequence number that determines attribute order within an entity
+	 *
+	 * @return attribute sequence number
+	 */
+	public int getSequenceNumber()
+	{
+		return getInt(SEQUENCE_NR);
+	}
+
+	public Attribute setSequenceNumber(int seqNr)
+	{
+		set(SEQUENCE_NR, seqNr);
+		return this;
+	}
+	
 	// FIXME rename to getEntityType
 	public EntityType getEntity()
 	{

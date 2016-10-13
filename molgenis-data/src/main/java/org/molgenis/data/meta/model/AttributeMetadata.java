@@ -24,6 +24,7 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String ENTITY = "entity";
+	public static final String SEQUENCE_NR = "sequenceNr";
 	public static final String TYPE = "type";
 	public static final String IS_ID_ATTRIBUTE = "isIdAttribute";
 	public static final String IS_LABEL_ATTRIBUTE = "isLabelAttribute";
@@ -77,6 +78,7 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false);
+		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number").setDescription("Number that defines order of attributes in a entity").setNillable(false);
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
 		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute");

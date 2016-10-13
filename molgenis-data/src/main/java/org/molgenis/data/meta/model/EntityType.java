@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
@@ -20,13 +21,10 @@ import static java.util.Collections.sort;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.SIMPLE_NAME;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
@@ -572,6 +570,7 @@ public class EntityType extends StaticEntity
 
 		attr.setEntity(this);
 		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
+		attr.setSequenceNumber(Iterables.size(attrs));
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		setAttributeRoles(attr, attrTypes);
 		return this;
@@ -639,7 +638,7 @@ public class EntityType extends StaticEntity
 	{
 		Map<String, Attribute> cachedOwnAttrs = getCachedOwnAttrs();
 		cachedOwnAttrs.remove(attr.getName());
-		set(ATTRIBUTES	, cachedOwnAttrs.values());
+		set(ATTRIBUTES, cachedOwnAttrs.values());
 	}
 
 	/**
