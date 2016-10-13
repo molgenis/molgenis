@@ -13,6 +13,8 @@ import org.testng.annotations.BeforeClass;
 
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 @ContextConfiguration(classes = { AbstractMolgenisSpringTest.Config.class })
 public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests
 {
@@ -21,6 +23,7 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 	{
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
+		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext.getBeansOfType(SystemEntityType.class);
 		new GenericDependencyResolver().resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
