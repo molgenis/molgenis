@@ -67,8 +67,8 @@ public class EntityTypeMetadata extends SystemEntityType
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
-		addAttribute(BACKEND).setNillable(false).setReadOnly(true).setLabel("Backend")
-				.setDescription("Backend data store");
+		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
+				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
 	}
 
 	/**
