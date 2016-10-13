@@ -5,6 +5,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 import static java.lang.Boolean.FALSE;
@@ -114,7 +115,5 @@ public class EntityTypeMetadata extends SystemEntityType
 	public Set<SystemEntityType> getDependencies()
 	{
 		return singleton(attributeMetadata);
-import java.util.List;
-
 	}
 }
