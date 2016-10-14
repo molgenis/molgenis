@@ -5,6 +5,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -47,6 +51,11 @@ public class SystemEntityTypePersister
 
 		// persist entity meta data
 		List<EntityType> metaEntityMetaSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
+
+		// inject attribute identifiers
+		injectExistingIdentifiers(metaEntityMetaSet);
+
+		// upsert entity types
 		dataService.getMeta().upsertEntityType(metaEntityMetaSet);
 
 		// remove entity meta data
@@ -128,5 +137,37 @@ public class SystemEntityTypePersister
 	private boolean isNotExists(EntityType entityType)
 	{
 		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getName());
+	}
+
+	/**
+	 * Inject existing attribute identifiers in system entity types
+	 *
+	 * @param entityTypes system entity types
+	 */
+	private void injectExistingIdentifiers(List<EntityType> entityTypes)
+	{
+
+		Map<Object, EntityType> existingEntityTypeMap = dataService
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getIdValue), EntityType.class)
+				.collect(toMap(EntityType::getIdValue, Function.identity()));
+
+		entityTypes.forEach(entityType ->
+		{
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getIdValue());
+			if (existingEntityType != null)
+			{
+				Map<String, Attribute> existingAttrs = stream(existingEntityType.getOwnAllAttributes().spliterator(),
+						false).collect(toMap(Attribute::getName, Function.identity()));
+				entityType.getOwnAllAttributes().forEach(attr ->
+				{
+					Attribute existingAttr = existingAttrs.get(attr.getName());
+					if (existingAttr != null)
+					{
+						// inject existing attribute identifier
+						attr.setIdentifier(existingAttr.getIdentifier());
+					}
+				});
+			}
+		});
 	}
 }

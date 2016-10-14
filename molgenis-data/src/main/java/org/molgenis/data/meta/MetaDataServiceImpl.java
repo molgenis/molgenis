@@ -394,8 +394,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private void updateEntityType(EntityType entityType, EntityType existingEntityType)
 	{
-		populateAutoAttributeValues(existingEntityType, entityType);
-
 		// update entity
 		if (!EntityUtils.equals(entityType, existingEntityType))
 		{
@@ -405,22 +403,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		// add new attributes, update modified attributes
 		upsertAttributes(entityType, existingEntityType);
-	}
-
-	private static void populateAutoAttributeValues(EntityType existingEntityType, EntityType entityType)
-	{
-		// inject existing auto-generated identifiers in system entity meta data
-		Map<String, String> attrMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Attribute::getIdentifier));
-
-		entityType.getOwnAllAttributes().forEach(attr ->
-		{
-			String attrIdentifier = attrMap.get(attr.getName());
-			if (attrIdentifier != null)
-			{
-				attr.setIdentifier(attrIdentifier);
-			}
-		});
 	}
 
 	@Transactional
@@ -522,6 +504,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// determine attributes to add, update and delete
 		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
 		Set<String> sharedAttrNames = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
+		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
 
 		// add new attributes
 		if (!addedAttrNames.isEmpty())
@@ -536,6 +519,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (!updatedAttrNames.isEmpty())
 		{
 			dataService.update(ATTRIBUTE_META_DATA, updatedAttrNames.stream().map(attrsMap::get));
+		}
+
+		// delete removed attributes
+		if (!deletedAttrNames.isEmpty())
+		{
+			dataService.delete(ATTRIBUTE_META_DATA, deletedAttrNames.stream().map(existingAttrsMap::get));
 		}
 	}
 
