@@ -216,6 +216,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrCategoricalMref = createAttributeMeta(entityType, attrCategoricalMrefName, CATEGORICAL_MREF,
 				refEntityType).setNillable(false);
 		Attribute attrCompound = createAttributeMeta(entityType, attrCompoundName, COMPOUND);
+		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false).setParent(attrCompound);
+		Attribute compoundAttr0Optional = createAttributeMeta(entityType, attrCompoundAttr0OptionalName, STRING)
+				.setNillable(true).setParent(attrCompound);
+		Attribute compoundAttrCompound = createAttributeMeta(entityType, attrCompoundAttrCompoundName, COMPOUND).setParent(attrCompound);
+		Attribute compoundAttrCompoundAttr0 = createAttributeMeta(entityType, attrCompoundAttrCompoundAttr0Name, STRING)
+				.setNillable(false).setParent(compoundAttrCompound);
+		Attribute compoundAttrCompoundAttr0Optional = createAttributeMeta(entityType,
+				attrCompoundAttrCompoundAttr0OptionalName, STRING).setNillable(true).setParent(compoundAttrCompound);
 		Attribute attrDate = createAttributeMeta(entityType, attrDateName, DATE).setNillable(false);
 		Attribute attrDateTime = createAttributeMeta(entityType, attrDateTimeName, DATE_TIME).setNillable(false);
 		Attribute attrDecimal = createAttributeMeta(entityType, attrDecimalName, DECIMAL, null).setReadOnly(true)
@@ -255,18 +263,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrTextOptional = createAttributeMeta(entityType, attrTextOptionalName, TEXT);
 		Attribute attrXrefOptional = createAttributeMeta(entityType, attrXrefOptionalName, XREF, refEntityType);
 
-		Attribute compoundAttrCompoundAttr0 = createAttributeMeta(null, attrCompoundAttrCompoundAttr0Name, STRING)
-				.setNillable(false);
-		Attribute compoundAttrCompoundAttr0Optional = createAttributeMeta(null,
-				attrCompoundAttrCompoundAttr0OptionalName, STRING).setNillable(true);
 
-		Attribute compoundAttrCompound = createAttributeMeta(null, attrCompoundAttrCompoundName, COMPOUND);
-		compoundAttrCompound.setAttributeParts(asList(compoundAttrCompoundAttr0, compoundAttrCompoundAttr0Optional));
-
-		Attribute compoundAttr0 = createAttributeMeta(null, attrCompoundAttr0Name, STRING).setNillable(false);
-		Attribute compoundAttr0Optional = createAttributeMeta(null, attrCompoundAttr0OptionalName, STRING)
-				.setNillable(true);
-		attrCompound.setAttributeParts(asList(compoundAttr0, compoundAttr0Optional, compoundAttrCompound));
 
 		Entity refRefEntity = new DynamicEntity(refRefEntityType);
 		refRefEntity.set(REF_REF_ATTR_ID_NAME, REF_REF_ENTITY_ID);
@@ -370,11 +367,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		Attribute attr = attributeFactory.create().setName(attrName).setLabel(attrName).setDataType(type)
 				.setRefEntity(refEntityMeta).setNillable(true);
-
-		if (entityType != null)
-		{
 			entityType.addAttribute(attr);
-		}
 		return attr;
 	}
 

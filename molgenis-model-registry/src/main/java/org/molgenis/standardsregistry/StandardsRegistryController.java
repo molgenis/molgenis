@@ -291,7 +291,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		if (amd.getDataType() == AttributeType.COMPOUND)
 		{
-			for (Attribute subAmd : amd.getAttributeParts())
+			for (Attribute subAmd : amd.getChildren())
 			{
 				result.add(createPackageTreeNode(subAmd, emd));
 			}

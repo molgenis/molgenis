@@ -442,11 +442,11 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		// delete EntityType permissions
 		deleteEntityPermissions(entityType);
 
-		// delete row from entities table
-		decoratedRepo.delete(entityType);
-
 		// delete rows from attributes table
 		deleteEntityAttributes(entityType);
+
+		// delete row from entities table
+		decoratedRepo.delete(entityType);
 	}
 
 	private void validateDeleteAllowed(EntityType entityType)
@@ -503,7 +503,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		@Override
 		public Iterable<Attribute> children(@Nonnull Attribute attr)
 		{
-			return attr.getAttributeParts();
+			return attr.getChildren();
 		}
 
 	}

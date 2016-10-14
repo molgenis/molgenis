@@ -63,7 +63,7 @@ public class SortaCsvRepository extends AbstractRepository
 			Attribute nameAttribute = entityType.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{
-				entityType.setLabelAttribute(nameAttribute);
+				nameAttribute.setLabelAttribute(true);
 			}
 		}
 		return entityType;

@@ -132,7 +132,7 @@ public class AttributeResponse
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
-			Iterable<Attribute> attributeParts = attr.getAttributeParts();
+			Iterable<Attribute> attributeParts = attr.getChildren();
 			this.attributes = attributeParts != null ? Lists
 					.newArrayList(Iterables.transform(attributeParts, new Function<Attribute, Object>()
 					{

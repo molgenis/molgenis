@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.importer.ImportWizardControllerTest.Config;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
@@ -173,9 +174,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
-				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+		when(dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
+						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 		{
 			@Override
 			public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
@@ -183,16 +184,16 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 				return Stream.of(authority1, authority2, authority3, authority4);
 			}
 		});
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"), GroupAuthority.class))
-				.thenAnswer(new Answer<Stream<GroupAuthority>>()
-				{
-					@Override
-					public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.of(authority1, authority2, authority3, authority4);
-					}
-				});
+		when(dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
+						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+		{
+			@Override
+			public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(authority1, authority2, authority3, authority4);
+			}
+		});
 		when(dataService.getEntityNames()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		Authentication authentication = mock(Authentication.class);
@@ -596,6 +597,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		public MailSender mailSender()
 		{
 			return mock(MailSender.class);
+		}
+
+		@Bean
+		public EntityTypeDependencyResolver entityTypeDependencyResolver()
+		{
+			return mock(EntityTypeDependencyResolver.class);
 		}
 	}
 }
