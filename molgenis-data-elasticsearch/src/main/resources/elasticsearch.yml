@@ -235,7 +235,7 @@ network.host: localhost
 
 # Disable HTTP completely:
 #
-http.enabled: false
+# http.enabled: false
 
 
 ################################### Gateway ###################################
