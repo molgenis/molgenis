@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -260,42 +259,5 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
 	{
 		return getRepository(entityName, clazz).findAll(ids, fetch);
-	}
-
-	@Transactional
-	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
-			String newRepositoryLabel)
-	{
-		return copyRepository(repository, simpleName, pack, newRepositoryLabel, new QueryImpl<>());
-	}
-
-	@Transactional
-	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
-			String label, Query<Entity> query)
-	{
-		if (repository.getEntityType().hasMappedByAttributes())
-		{
-			throw new MolgenisDataException(
-					format("Copy not possible because entity [%s] contains one or more bidirectional one-to-many attributes",
-							repository.getName()));
-		}
-
-		LOG.info("Creating a copy of {} repository, with simpleName: {}, package: {} and label: {}",
-				repository.getName(), simpleName, pack, label);
-
-		// create copy of entity meta data
-		EntityType emd = EntityType.newInstance(repository.getEntityType(), DEEP_COPY_ATTRS);
-		emd.setSimpleName(simpleName);
-		emd.setPackage(pack);
-		emd.setLabel(label);
-
-		// create repository for copied entity meta data
-		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
-
-		// copy data to new repository
-		repositoryCopy.add(repository.findAll(query));
-		return repositoryCopy;
 	}
 }

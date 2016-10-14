@@ -1,14 +1,18 @@
 package org.molgenis.data.meta.model;
 
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.Boolean.FALSE;
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.SEQUENCE_NR;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -25,9 +29,6 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String ATTRIBUTES = "attributes";
-	public static final String ID_ATTRIBUTE = "idAttribute";
-	public static final String LABEL_ATTRIBUTE = "labelAttribute";
-	public static final String LOOKUP_ATTRIBUTES = "lookupAttributes";
 	public static final String IS_ABSTRACT = "isAbstract";
 	public static final String EXTENDS = "extends";
 	public static final String TAGS = "tags";
@@ -58,12 +59,9 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setNillable(false)
-				.setLabel("Attributes");
-		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setReadOnly(true)
-				.setLabel("ID attribute");
-		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setLabel("Label attribute");
-		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setLabel("Lookup attributes");
+		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);
+		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY).setRefEntity(attributeMetadata).setMappedBy(refAttr)
+				.setOrderBy(new Sort(SEQUENCE_NR)).setNillable(true).setLabel("Attributes");
 		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
 				.setReadOnly(true).setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
@@ -111,5 +109,11 @@ public class EntityTypeMetadata extends SystemEntityType
 	public void setTagMetaData(TagMetaData tagMetaData)
 	{
 		this.tagMetaData = requireNonNull(tagMetaData);
+	}
+
+	@Override
+	public Set<SystemEntityType> getDependencies()
+	{
+		return singleton(attributeMetadata);
 	}
 }
