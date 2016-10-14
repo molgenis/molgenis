@@ -271,9 +271,9 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
-		public Iterable<Attribute> getAttributeParts()
+		public Iterable<Attribute> getChildren()
 		{
-			return attr.getAttributeParts();
+			return attr.getChildren();
 		}
 
 		@Override
@@ -391,9 +391,9 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
-		public Attribute getAttributePart(String attrName)
+		public Attribute getChild(String attrName)
 		{
-			return attr.getAttributePart(attrName);
+			return attr.getChild(attrName);
 		}
 
 		@Override
