@@ -210,7 +210,7 @@ public class AnnotatorUtils
 		Attribute infoAttribute = entityType.getAttribute(VcfAttributes.INFO);
 		for (Attribute attribute : annotator.getOutputAttributes())
 		{
-			for (Attribute atomicAttribute : attribute.getAttributeParts())
+			for (Attribute atomicAttribute : attribute.getChildren())
 			{
 				atomicAttribute.setParent(infoAttribute);
 				entityType.addAttribute(atomicAttribute);

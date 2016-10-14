@@ -138,7 +138,7 @@
     <td class="description-column"><#if attribute.description?has_content>${attribute.description?html}</#if></td>
 </tr>
     <#if attribute.dataType == "COMPOUND">
-        <#list attribute.attributeParts as attributePart>
+        <#list attribute.children as attributePart>
             <@renderAttribute attributePart entity nextDepth/>
         </#list>
     </#if>

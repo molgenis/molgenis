@@ -440,7 +440,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		@Override
 		public Iterable<Attribute> children(@Nonnull Attribute attr)
 		{
-			return attr.getAttributeParts();
+			return attr.getChildren();
 		}
 
 	}

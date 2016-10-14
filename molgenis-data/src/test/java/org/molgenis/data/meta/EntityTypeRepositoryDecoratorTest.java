@@ -629,13 +629,13 @@ public class EntityTypeRepositoryDecoratorTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr0 = mock(Attribute.class);
-		when(attr0.getAttributeParts()).thenReturn(emptyList());
+		when(attr0.getChildren()).thenReturn(emptyList());
 		Attribute attrCompound = mock(Attribute.class);
 		Attribute attr1a = mock(Attribute.class);
-		when(attr1a.getAttributeParts()).thenReturn(emptyList());
+		when(attr1a.getChildren()).thenReturn(emptyList());
 		Attribute attr1b = mock(Attribute.class);
-		when(attr1b.getAttributeParts()).thenReturn(emptyList());
-		when(attrCompound.getAttributeParts()).thenReturn(newArrayList(attr1a, attr1b));
+		when(attr1b.getChildren()).thenReturn(emptyList());
+		when(attrCompound.getChildren()).thenReturn(newArrayList(attr1a, attr1b));
 		when(entityType.getOwnAttributes()).thenReturn(newArrayList(attr0, attrCompound));
 
 		String backendName = "backend";
@@ -696,7 +696,7 @@ public class EntityTypeRepositoryDecoratorTest
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.isAbstract()).thenReturn(true);
 		Attribute attr0 = mock(Attribute.class);
-		when(attr0.getAttributeParts()).thenReturn(emptyList());
+		when(attr0.getChildren()).thenReturn(emptyList());
 		when(entityType.getOwnAttributes()).thenReturn(singletonList(attr0));
 
 		String backendName = "backend";
@@ -750,7 +750,7 @@ public class EntityTypeRepositoryDecoratorTest
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		when(entityType.isAbstract()).thenReturn(true);
 		Attribute attr0 = mock(Attribute.class);
-		when(attr0.getAttributeParts()).thenReturn(emptyList());
+		when(attr0.getChildren()).thenReturn(emptyList());
 		when(entityType.getOwnAttributes()).thenReturn(singletonList(attr0));
 		when(systemEntityTypeRegistry.hasSystemEntityType(entityName)).thenReturn(true);
 
