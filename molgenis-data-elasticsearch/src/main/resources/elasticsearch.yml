@@ -215,7 +215,7 @@ path.data: data
 
 # Set both 'bind_host' and 'publish_host':
 #
-# network.host: 192.168.0.1
+network.host: localhost
 
 # Set a custom port for the node to node communication (9300 by default):
 #
@@ -235,7 +235,7 @@ path.data: data
 
 # Disable HTTP completely:
 #
-# http.enabled: false
+http.enabled: false
 
 
 ################################### Gateway ###################################
@@ -324,7 +324,7 @@ path.data: data
 #
 # 1. Disable multicast discovery (enabled by default):
 #
-# discovery.zen.ping.multicast.enabled: false
+discovery.zen.ping.multicast.enabled: false
 #
 # 2. Configure an initial list of master nodes in the cluster
 #    to perform discovery when new nodes (master or data) are started:
