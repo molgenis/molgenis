@@ -22,6 +22,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 public class EntityTypeValidatorTest
 {
@@ -86,7 +87,7 @@ public class EntityTypeValidatorTest
 		Package package_ = when(mock(Package.class).getName()).thenReturn(packageName).getMock();
 		when(entityType.getPackage()).thenReturn(package_);
 		String name = "name";
-		when(entityType.getName()).thenReturn(packageName + '_' + name);
+		when(entityType.getName()).thenReturn(packageName + PACKAGE_SEPARATOR + name);
 		when(entityType.getSimpleName()).thenReturn(name);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);

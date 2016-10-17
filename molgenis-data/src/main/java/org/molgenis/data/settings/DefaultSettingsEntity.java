@@ -13,6 +13,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ResourceBundle;
 
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 /**
@@ -34,7 +35,7 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	public DefaultSettingsEntity(String entityId)
 	{
-		this.entityName = PACKAGE_SETTINGS + '_' + entityId;
+		this.entityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + entityId;
 	}
 
 	public EntityType getEntityType()
