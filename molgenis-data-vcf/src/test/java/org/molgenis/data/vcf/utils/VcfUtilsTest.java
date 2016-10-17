@@ -97,13 +97,13 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING));
 		Attribute INFO = attributeFactory.create().setName("INFO").setDataType(COMPOUND);
-		Attribute AC = attributeFactory.create().setName("AC").setDataType(STRING);
-		Attribute AN = attributeFactory.create().setName("AN").setDataType(STRING);
-		Attribute GTC = attributeFactory.create().setName("GTC").setDataType(STRING);
-		INFO.addAttributePart(AC);
-		INFO.addAttributePart(AN);
-		INFO.addAttributePart(GTC);
+		Attribute AC = attributeFactory.create().setName("AC").setDataType(STRING).setParent(INFO);
+		Attribute AN = attributeFactory.create().setName("AN").setDataType(STRING).setParent(INFO);
+		Attribute GTC = attributeFactory.create().setName("GTC").setDataType(STRING).setParent(INFO);
 		metaDataCanAnnotate.addAttribute(INFO);
+		metaDataCanAnnotate.addAttribute(AC);
+		metaDataCanAnnotate.addAttribute(AN);
+		metaDataCanAnnotate.addAttribute(GTC);
 
 		annotatedEntityType.addAttribute(attributeChrom, ROLE_ID);
 		annotatedEntityType.addAttribute(attributePos);
@@ -114,8 +114,13 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		annotatedEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING))
 				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
-		INFO.addAttributePart(attributeFactory.create().setName("ANNO").setDataType(STRING));
+		Attribute annoAttr = attributeFactory.create().setName("ANNO").setDataType(STRING).setParent(INFO);
 		annotatedEntityType.addAttribute(INFO);
+		annotatedEntityType.addAttribute(AC);
+		annotatedEntityType.addAttribute(AN);
+		annotatedEntityType.addAttribute(GTC);
+		annotatedEntityType.addAttribute(annoAttr);
+		metaDataCanAnnotate.addAttribute(annoAttr);
 
 		entity1.set(VcfAttributes.CHROM, "1");
 		entity1.set(VcfAttributes.POS, 10050000);

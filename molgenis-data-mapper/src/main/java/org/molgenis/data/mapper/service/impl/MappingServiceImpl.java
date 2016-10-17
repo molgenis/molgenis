@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.HEAD;
 import java.util.List;
 import java.util.Map;
 
@@ -170,7 +169,7 @@ public class MappingServiceImpl implements MappingService
 	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
-		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS);
+		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
 		if (addSourceAttribute)

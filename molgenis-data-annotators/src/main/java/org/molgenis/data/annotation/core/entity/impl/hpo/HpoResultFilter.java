@@ -69,8 +69,6 @@ public class HpoResultFilter implements ResultFilter
 
 		EntityType emd = entityTypeFactory.create().setName(HPOAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(hpoAnnotator.getIdsAttr(), hpoAnnotator.getTermsAttr()));
-		Attribute id = attributeFactory.create().setName("ID").setAuto(true);
-		emd.setIdAttribute(id);
 		Entity aggregated = new DynamicEntity(emd);
 		aggregated.set(HPO_IDS, ids.toString());
 		aggregated.set(HPO_TERMS, terms.toString());

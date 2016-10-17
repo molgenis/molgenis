@@ -56,14 +56,14 @@ public class SortaCsvRepository extends AbstractRepository
 		{
 			AttributeFactory attrMetaFactory = getApplicationContext().getBean(AttributeFactory.class);
 
-			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS);
+			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS, attrMetaFactory);
 			entityType.setName(entityName);
 			entityType.setLabel(entityLabel);
 			entityType.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
 			Attribute nameAttribute = entityType.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{
-				entityType.setLabelAttribute(nameAttribute);
+				nameAttribute.setLabelAttribute(true);
 			}
 		}
 		return entityType;

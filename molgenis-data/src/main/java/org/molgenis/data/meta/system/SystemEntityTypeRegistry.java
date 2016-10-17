@@ -85,7 +85,7 @@ public class SystemEntityTypeRegistry
 			{
 				if (attr.getDataType() == COMPOUND)
 				{
-					return getSystemAttributeRec(attr.getAttributeParts(), attrIdentifier);
+					return getSystemAttributeRec(attr.getChildren(), attrIdentifier);
 				}
 			}
 		}
