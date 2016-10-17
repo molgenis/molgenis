@@ -45,6 +45,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -176,6 +177,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID, getEntityTypeFetch())).thenReturn(entity);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(entity);
 
 		Query<Entity> q = new QueryImpl<>().eq("name", "Piet").pageSize(10).offset(5);
@@ -538,7 +540,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoExistingIsNull() throws Exception
 	{
-		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID, getEntityTypeFetch())).thenReturn(null);
 
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isNotFound());
