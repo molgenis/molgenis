@@ -244,7 +244,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				"simpleName");
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("nl").getName(),
 				"simpleName");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(), "simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(),
+				"simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
@@ -1345,5 +1346,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}
+
+	@Test(singleThreaded = true)
+	public void testMetadataEditAddAttribute()
+	{
+		MetadataEditOperationsPlatformIT
+				.testMetadataEditAddAttribute(entityTypeDynamic, dataService, attributeFactory, indexService);
+	}
+
 }
 
