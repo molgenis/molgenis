@@ -34,7 +34,7 @@
      * Returns the plugin settings entity id
      */
     molgenis.getPluginSettingsId = function () {
-        return 'sys_set_' + molgenis.getPluginId();
+        return 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + molgenis.getPluginId();
     };
 
     /**

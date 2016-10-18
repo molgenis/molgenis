@@ -36,6 +36,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.integrationtest.platform.PlatformIT.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.OneToManyTestHarness.*;
@@ -60,9 +61,9 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		List<GrantedAuthority> authorities = newArrayList();
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			authorities.addAll(makeAuthorities("sys_Author" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys_Book" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys_Person" + i, true, true, true));
+			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Author" + i, true, true, true));
+			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true));
+			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true));
 		}
 
 		SecurityContextHolder.getContext()
@@ -410,8 +411,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	private void deleteBooksThenAuthors(int testCase)
 	{
-		dataService.deleteAll("sys_Book" + testCase);
-		dataService.deleteAll("sys_Author" + testCase);
+		dataService.deleteAll("sys" + PACKAGE_SEPARATOR + "Book" + testCase);
+		dataService.deleteAll("sys" + PACKAGE_SEPARATOR + "Author" + testCase);
 	}
 
 	private OneToManyTestHarness.AuthorsAndBooks importAuthorsAndBooks(TestCaseType testCase)

@@ -71,7 +71,7 @@
                             $(document).on('click', '#' + key + '-settings-btn', function () {
                                 React.unmountComponentAtNode($('#' + key + '-settings-container')[0]); // fix https://github.com/molgenis/molgenis/issues/3587
                                 React.render(molgenis.ui.Form({
-                                    entity: 'sys_set_' + key,
+                                    entity: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + key,
                                     entityInstance: key,
                                     mode: 'edit',
                                     modal: true,

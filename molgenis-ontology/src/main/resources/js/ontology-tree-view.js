@@ -33,7 +33,7 @@
         }
 
         function getRootOntologyTerms(ontology) {
-            var rootOntologyTerms = restApi.get('/api/v1/sys_ont_' + ontology[ONTOLOGY_NAME], {
+            var rootOntologyTerms = restApi.get('/api/v1/sys' + molgenis.packageSeparator + 'ont' + molgenis.packageSeparator + ontology[ONTOLOGY_NAME], {
                 'expand': ['attributes'], 'q': {
                     'q': [{
                         'field': ROOT,
@@ -80,7 +80,7 @@
         }
 
         function searchByQuery(ontology, query) {
-            var ontologyTermResult = restApi.get('/api/v1/sys_ont_' + ontology[ONTOLOGY_ID], {
+            var ontologyTermResult = restApi.get('/api/v1/sys' + molgenis.packageSeparator + 'ont' + molgenis.packageSeparator + ontology[ONTOLOGY_ID], {
                 'expand': ['attributes'], 'q': {
                     'q': [{
                         'field': SYNONYMS,
@@ -184,13 +184,13 @@
                     'value': ontologyIRI
                 }]
             };
-            return restApi.get("/api/v1/sys_ont_ontologyindex/", {'q': request}, null);
+            return restApi.get("/api/v1/sys" + molgenis.packageSeparator + "ont" + molgenis.packageSeparator + "ontologyindex/", {'q': request}, null);
         }
         return null;
     }
 
     function getOntologyTerm(option) {
-        var ontologyTerms = restApi.get('/api/v1/sys_ont_' + option[ONTOLOGY_NAME], {
+        var ontologyTerms = restApi.get('/api/v1/sys' + molgenis.packageSeparator + 'ont' + molgenis.packageSeparator + option[ONTOLOGY_NAME], {
             'expand': ['attributes'], 'q': {
                 'q': [{
                     'field': ONTOLOGY_TERM_IRI,
@@ -209,7 +209,7 @@
     }
 
     function getParentOntologyTerm(option) {
-        var parentOntologyTerms = restApi.get('/api/v1/sys_ont_' + option[ONTOLOGY_NAME], {
+        var parentOntologyTerms = restApi.get('/api/v1/sys' + molgenis.packageSeparator + 'ont' + molgenis.packageSeparator + option[ONTOLOGY_NAME], {
             'expand': ['attributes'], 'q': {
                 'q': [{
                     'field': ONTOLOGY_TERM_IRI,

@@ -1,6 +1,7 @@
 import {Table} from "./Table";
 import React, {Component} from "react";
 import $ from "jquery";
+import {packageSeparator} from "rest-client";
 
 class FileIngestPlugin extends Component {
     constructor(props) {
@@ -18,7 +19,7 @@ class FileIngestPlugin extends Component {
         return <div>
             <legend>Automatic imports</legend>
             <div className='ingest-table'>
-                <Table entity='sys_FileIngest'
+                <Table entity={'sys' + packageSeparator + 'FileIngest'}
                        attrs={{name: null, url: null, entityType: null, cronexpression: null, active: null}}
                        defaultSelectFirstRow={true}
                        selectedRow={this.state.selectedFileIngest}
@@ -36,7 +37,7 @@ class FileIngestPlugin extends Component {
                     </legend>
 
                     <div className='ingest-table'>
-                        <Table entity='sys_FileIngestJobExecution'
+                        <Table entity={'sys' + packageSeparator + 'FileIngestJobExecution'}
                                enableAdd={false}
                                sort={{attr: {name: 'startDate'}, order: 'desc', path: []}}
                                attrs={{status: null, startDate: null, endDate: null, progressMessage: null, file: null}}

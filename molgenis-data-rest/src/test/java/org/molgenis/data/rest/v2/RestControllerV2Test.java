@@ -65,6 +65,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -527,7 +528,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions,
-				"Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'");
+				"Operation failed. Duplicate entity: 'org" + PACKAGE_SEPARATOR + "molgenis" + PACKAGE_SEPARATOR + "blah"
+						+ PACKAGE_SEPARATOR + "duplicateEntity'");
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
@@ -842,7 +844,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>()
 				{
 				}.getType());
-		@SuppressWarnings("unchecked") Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		@SuppressWarnings("unchecked")
+		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 		assertEquals(lvl2.get("selfRef").toString(),
 				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
 	}
