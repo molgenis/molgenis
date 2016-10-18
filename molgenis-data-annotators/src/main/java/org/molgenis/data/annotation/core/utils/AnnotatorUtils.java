@@ -104,10 +104,10 @@ public class AnnotatorUtils
 		Attribute compound;
 		compound = attributeFactory.create().setName(compoundName).setLabel(annotator.getFullName())
 				.setDataType(COMPOUND).setLabel(annotator.getSimpleName());
-		Attribute finalCompound = compound;
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
-				.forEachOrdered(finalCompound::addAttributePart);
+				.forEachOrdered(part -> part.setParent(compound));
 		entityType.addAttribute(compound);
+		entityType.addAttributes(attributes);
 	}
 
 	/**
@@ -210,9 +210,10 @@ public class AnnotatorUtils
 		Attribute infoAttribute = entityType.getAttribute(VcfAttributes.INFO);
 		for (Attribute attribute : annotator.getOutputAttributes())
 		{
-			for (Attribute atomicAttribute : attribute.getAttributeParts())
+			for (Attribute atomicAttribute : attribute.getChildren())
 			{
-				infoAttribute.addAttributePart(atomicAttribute);
+				atomicAttribute.setParent(infoAttribute);
+				entityType.addAttribute(atomicAttribute);
 			}
 		}
 	}

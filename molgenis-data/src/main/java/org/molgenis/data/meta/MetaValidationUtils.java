@@ -81,7 +81,7 @@ public class MetaValidationUtils
 			validateAttribute(amd);
 			if (amd.getDataType() == COMPOUND)
 			{
-				validateAttributes(amd.getAttributeParts());
+				validateAttributes(amd.getChildren());
 			}
 		}
 	}
