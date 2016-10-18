@@ -15,7 +15,8 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
-        <dependency> <!-- specify higher jackson version, otherwise we become incompatible with spring! -->
+        <dependency>
+            <!-- specify jackson version, otherwise we become incompatible with spring! -->
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>2.6.0</version>
@@ -24,7 +25,7 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>apache-jena-libs</artifactId>
             <type>pom</type>
-            <version>2.12.1</version>
+            <version>3.1.0</version><!-- both versions appear to be working fine now, let's go for the latest? -->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -33,7 +34,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <!-- need these cause otherwise xerces, included by jena, fails in the MydasServlet -->
+            <!-- need to include these cause otherwise xerces, included by jena, fails when parsing xml -->
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
             <version>1.4.01</version>
