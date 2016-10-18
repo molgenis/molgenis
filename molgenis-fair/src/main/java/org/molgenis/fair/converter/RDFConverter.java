@@ -11,13 +11,17 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
+
+import static org.molgenis.fair.converter.RDFMediaType.APPLICATION_TRIG;
+import static org.molgenis.fair.converter.RDFMediaType.TEXT_TURTLE;
 
 @Component
 public class RDFConverter extends AbstractHttpMessageConverter<Entity>
 {
 	public RDFConverter()
 	{
-		super(RDFMediaType.APPLICATION_TRIG);
+		super(TEXT_TURTLE, APPLICATION_TRIG);
 	}
 
 	@Override
@@ -37,7 +41,8 @@ public class RDFConverter extends AbstractHttpMessageConverter<Entity>
 	protected void writeInternal(Entity entity, HttpOutputMessage httpOutputMessage)
 			throws IOException, HttpMessageNotWritableException
 	{
-		Writer writer = new OutputStreamWriter(httpOutputMessage.getBody());
+		Writer writer = new OutputStreamWriter(httpOutputMessage.getBody(),
+				Charset.forName("UTF-8"));
 		writer.write("TODO: turn into RDF!\n");
 		writer.write(entity.toString());
 		writer.close();

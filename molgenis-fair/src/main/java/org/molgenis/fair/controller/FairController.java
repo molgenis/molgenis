@@ -27,7 +27,7 @@ public class FairController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(method = GET, produces = RDFMediaType.APPLICATION_TRIG_VALUE)
+	@RequestMapping(method = GET, produces = RDFMediaType.TEXT_TURTLE_VALUE)
 	@ResponseBody
 	@RunAsSystem
 	public Entity getMetadata()
