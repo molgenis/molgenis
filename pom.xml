@@ -725,5 +725,7 @@
         <module>molgenis-data-cache</module>
         <module>molgenis-data-platform</module>
         <module>molgenis-annotators-cmd</module>
+        <module>../../intellij/molgenis/molgenis-fair</module>
+        <module>molgenis-fair</module>
     </modules>
 </project>
