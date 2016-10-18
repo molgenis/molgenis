@@ -12,6 +12,7 @@ import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -64,6 +65,7 @@ class RestControllerV2
 	private final MolgenisPermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
+	private final RepositoryCopier repoCopier;
 
 	static UnknownEntityException createUnknownEntityException(String entityName)
 	{
@@ -115,13 +117,15 @@ class RestControllerV2
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService)
+			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
+			RepositoryCopier repoCopier)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.repoCopier = requireNonNull(repoCopier);
 	}
 
 	@Autowired
@@ -359,7 +363,7 @@ class RestControllerV2
 	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName, Package pack,
 			String label)
 	{
-		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
+		RunAsSystemProxy.runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
 
 	/**

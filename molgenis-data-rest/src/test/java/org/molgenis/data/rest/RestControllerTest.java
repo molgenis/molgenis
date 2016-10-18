@@ -113,7 +113,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrId.isUnique()).thenReturn(true);
 		when(attrId.isNillable()).thenReturn(false);
 		when(attrId.isVisible()).thenReturn(false);
-		when(attrId.getAttributeParts()).thenReturn(emptyList());
+		when(attrId.getChildren()).thenReturn(emptyList());
 		when(attrId.getEnumOptions()).thenReturn(emptyList());
 
 		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
@@ -122,7 +122,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrName.getDataType()).thenReturn(STRING);
 		when(attrName.isNillable()).thenReturn(true);
 		when(attrName.isVisible()).thenReturn(true);
-		when(attrName.getAttributeParts()).thenReturn(emptyList());
+		when(attrName.getChildren()).thenReturn(emptyList());
 		when(attrName.getEnumOptions()).thenReturn(emptyList());
 
 		Attribute attrEnum = when(mock(Attribute.class).getName()).thenReturn("enum").getMock();
@@ -132,7 +132,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrEnum.getEnumOptions()).thenReturn(asList("enum0, enum1"));
 		when(attrEnum.isNillable()).thenReturn(true);
 		when(attrEnum.isVisible()).thenReturn(true);
-		when(attrEnum.getAttributeParts()).thenReturn(emptyList());
+		when(attrEnum.getChildren()).thenReturn(emptyList());
 
 		Attribute attrInt = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
 		when(attrInt.getLabel()).thenReturn("int");
@@ -140,7 +140,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrInt.getDataType()).thenReturn(INT);
 		when(attrInt.isNillable()).thenReturn(true);
 		when(attrInt.isVisible()).thenReturn(true);
-		when(attrInt.getAttributeParts()).thenReturn(emptyList());
+		when(attrInt.getChildren()).thenReturn(emptyList());
 
 		when(entityType.getAttribute("id")).thenReturn(attrId);
 		when(entityType.getAttribute("name")).thenReturn(attrName);
@@ -445,7 +445,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrId.isUnique()).thenReturn(true);
 		when(attrId.isNillable()).thenReturn(false);
 		when(attrId.isVisible()).thenReturn(false);
-		when(attrId.getAttributeParts()).thenReturn(emptyList());
+		when(attrId.getChildren()).thenReturn(emptyList());
 		when(attrId.getEnumOptions()).thenReturn(emptyList());
 
 		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
@@ -454,7 +454,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrName.getDataType()).thenReturn(STRING);
 		when(attrName.isNillable()).thenReturn(true);
 		when(attrName.isVisible()).thenReturn(true);
-		when(attrName.getAttributeParts()).thenReturn(emptyList());
+		when(attrName.getChildren()).thenReturn(emptyList());
 		when(attrName.getEnumOptions()).thenReturn(emptyList());
 
 		when(refEntityType.getAttribute("id")).thenReturn(attrId);
@@ -472,7 +472,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrXref.getDataType()).thenReturn(XREF);
 		when(attrXref.isNillable()).thenReturn(true);
 		when(attrXref.isVisible()).thenReturn(true);
-		when(attrXref.getAttributeParts()).thenReturn(emptyList());
+		when(attrXref.getChildren()).thenReturn(emptyList());
 		when(attrXref.getEnumOptions()).thenReturn(emptyList());
 		when(attrXref.getRefEntity()).thenReturn(refEntityType);
 

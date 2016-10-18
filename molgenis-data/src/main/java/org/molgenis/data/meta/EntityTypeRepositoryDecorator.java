@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
@@ -17,24 +16,19 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetadata.NAME;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -349,65 +343,8 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	{
 		validateUpdateAllowed(entityType);
 
-		EntityType existingEntityType = findOneById(entityType.getIdValue(),
-				new Fetch().field(FULL_NAME).field(ATTRIBUTES, new Fetch().field(NAME)));
-		if (existingEntityType == null)
-		{
-			throw new UnknownEntityException(format("Unknown entity meta data [%s] with id [%s]", getName(),
-					entityType.getIdValue().toString()));
-		}
-		Map<String, Attribute> currentAttrMap = StreamSupport
-				.stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Function.identity()));
-		Map<String, Attribute> updateAttrMap = StreamSupport
-				.stream(entityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Function.identity()));
-
-		// add attributes
-		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
-		if (!addedAttrNames.isEmpty())
-		{
-			String backend = entityType.getBackend();
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
-			addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
-			{
-				repoCollection.addAttribute(existingEntityType, addedAttrEntity);
-
-				if (entityType.getName().equals(ENTITY_TYPE_META_DATA))
-				{
-					// update system entity meta data
-					systemEntityTypeRegistry.getSystemEntityType(ENTITY_TYPE_META_DATA).addAttribute(addedAttrEntity);
-				}
-			});
-		}
-
 		// update entity
 		decoratedRepo.update(entityType);
-
-		// remove attributes
-		Set<String> deletedAttrNames = Sets.difference(currentAttrMap.keySet(), updateAttrMap.keySet());
-
-		if (!deletedAttrNames.isEmpty())
-		{
-			String backend = entityType.getBackend();
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
-			deletedAttrNames.forEach(deletedAttrName ->
-			{
-				repoCollection.deleteAttribute(existingEntityType, currentAttrMap.get(deletedAttrName));
-
-				if (entityType.getName().equals(ENTITY_TYPE_META_DATA))
-				{
-					// update system entity meta data
-					systemEntityTypeRegistry.getSystemEntityType(ENTITY_TYPE_META_DATA)
-							.removeAttribute(currentAttrMap.get(deletedAttrName));
-				}
-			});
-
-			// delete attributes removed from entity meta data
-			// assumption: the attribute is owned by this entity or a compound attribute owned by this entity
-			dataService.deleteAll(ATTRIBUTE_META_DATA,
-					deletedAttrNames.stream().map(currentAttrMap::get).map(Attribute::getIdentifier));
-		}
 	}
 
 	/**
@@ -442,11 +379,11 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		// delete EntityType permissions
 		deleteEntityPermissions(entityType);
 
-		// delete row from entities table
-		decoratedRepo.delete(entityType);
-
 		// delete rows from attributes table
 		deleteEntityAttributes(entityType);
+
+		// delete row from entities table
+		decoratedRepo.delete(entityType);
 	}
 
 	private void validateDeleteAllowed(EntityType entityType)
@@ -503,7 +440,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		@Override
 		public Iterable<Attribute> children(@Nonnull Attribute attr)
 		{
-			return attr.getAttributeParts();
+			return attr.getChildren();
 		}
 
 	}

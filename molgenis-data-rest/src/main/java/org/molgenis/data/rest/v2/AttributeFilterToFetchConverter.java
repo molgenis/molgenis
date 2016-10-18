@@ -89,14 +89,14 @@ public class AttributeFilterToFetchConverter
 					subAttrFilter.forEach(entry ->
 					{
 						String attrPartName = entry.getKey();
-						Attribute attrPart = attr.getAttributePart(attrPartName);
+						Attribute attrPart = attr.getChild(attrPartName);
 						createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode);
 					});
 				}
 				else
 				{
 					// include all compound attribute parts
-					attr.getAttributeParts().forEach(attrPart ->
+					attr.getChildren().forEach(attrPart ->
 					{
 						createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode);
 					});
