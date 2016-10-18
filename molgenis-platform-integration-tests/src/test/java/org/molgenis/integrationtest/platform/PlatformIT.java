@@ -1301,7 +1301,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(singleThreaded = true)
+	@Test(singleThreaded = true, enabled = false)
 	public void l3CacheTest()
 	{
 		String COUNTRY = "Country";
