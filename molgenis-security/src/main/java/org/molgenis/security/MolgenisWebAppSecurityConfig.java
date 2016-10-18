@@ -163,6 +163,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.antMatchers("/files/**").permitAll()
 
+				.antMatchers("/appstore/**").permitAll()
+
 				.anyRequest().denyAll().and()
 
 				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
