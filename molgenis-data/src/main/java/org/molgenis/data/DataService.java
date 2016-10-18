@@ -2,6 +2,8 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.stream.Stream;
@@ -337,4 +339,12 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Get names of all the entities in this source
 	 */
 	Stream<String> getEntityNames();
+
+	@Transactional
+	Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
+			String newRepositoryLabel);
+
+	@Transactional
+	Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack, String label,
+			Query<Entity> query);
 }

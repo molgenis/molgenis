@@ -203,12 +203,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addEntityType(EntityType entityType)
 	{
-		// create entity
-		dataService.add(ENTITY_TYPE_META_DATA, entityType);
-
 		// create attributes
 		Stream<Attribute> attrs = stream(entityType.getOwnAllAttributes().spliterator(), false);
 		dataService.add(ATTRIBUTE_META_DATA, attrs);
+
+		// create entity
+		dataService.add(ENTITY_TYPE_META_DATA, entityType);
 	}
 
 	@Transactional
@@ -394,15 +394,33 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private void updateEntityType(EntityType entityType, EntityType existingEntityType)
 	{
+		populateAutoAttributeValues(existingEntityType, entityType);
+
+		// add new attributes, update modified attributes
+		upsertAttributes(entityType, existingEntityType);
+
 		// update entity
 		if (!EntityUtils.equals(entityType, existingEntityType))
 		{
 			// note: leave it up to the data service to decided what to do with attributes removed from entity meta data
 			dataService.update(ENTITY_TYPE_META_DATA, entityType);
 		}
+	}
 
-		// add new attributes, update modified attributes
-		upsertAttributes(entityType, existingEntityType);
+	private static void populateAutoAttributeValues(EntityType existingEntityType, EntityType entityType)
+	{
+		// inject existing auto-generated identifiers in system entity meta data
+		Map<String, String> attrMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Attribute::getIdentifier));
+
+		entityType.getOwnAllAttributes().forEach(attr ->
+		{
+			String attrIdentifier = attrMap.get(attr.getName());
+			if (attrIdentifier != null)
+			{
+				attr.setIdentifier(attrIdentifier);
+			}
+		});
 	}
 
 	@Transactional
@@ -504,7 +522,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		// determine attributes to add, update and delete
 		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
 		Set<String> sharedAttrNames = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
-		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
 
 		// add new attributes
 		if (!addedAttrNames.isEmpty())
@@ -519,12 +536,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (!updatedAttrNames.isEmpty())
 		{
 			dataService.update(ATTRIBUTE_META_DATA, updatedAttrNames.stream().map(attrsMap::get));
-		}
-
-		// delete removed attributes
-		if (!deletedAttrNames.isEmpty())
-		{
-			dataService.delete(ATTRIBUTE_META_DATA, deletedAttrNames.stream().map(existingAttrsMap::get));
 		}
 	}
 
@@ -741,6 +752,11 @@ public class MetaDataServiceImpl implements MetaDataService
 			entityType.setIdValue(id);
 		}
 
+		public static EntityType newInstance(EntityType entityType, AttributeCopyMode attrCopyMode)
+		{
+			return EntityType.newInstance(entityType, attrCopyMode);
+		}
+
 		@Override
 		public Iterable<String> getAttributeNames()
 		{
@@ -856,6 +872,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
+		public EntityType setIdAttribute(Attribute idAttr)
+		{
+			return entityType.setIdAttribute(idAttr);
+		}
+
+		@Override
 		public Attribute getLabelAttribute()
 		{
 			return entityType.getLabelAttribute();
@@ -880,6 +902,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
+		public EntityType setLabelAttribute(Attribute labelAttr)
+		{
+			return entityType.setLabelAttribute(labelAttr);
+		}
+
+		@Override
 		public Attribute getLookupAttribute(String lookupAttrName)
 		{
 			return entityType.getLookupAttribute(lookupAttrName);
@@ -895,6 +923,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		public Iterable<Attribute> getOwnLookupAttributes()
 		{
 			return entityType.getOwnLookupAttributes();
+		}
+
+		@Override
+		public EntityType setLookupAttributes(Iterable<Attribute> lookupAttrs)
+		{
+			return entityType.setLookupAttributes(lookupAttrs);
 		}
 
 		@Override
@@ -936,6 +970,12 @@ public class MetaDataServiceImpl implements MetaDataService
 					return !attr.isMappedBy();
 				}
 			}).iterator();
+		}
+
+		@Override
+		public LinkedHashSet<Attribute> getCompoundOrderedAttributes()
+		{
+			return entityType.getCompoundOrderedAttributes();
 		}
 
 		@Override
@@ -1012,6 +1052,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		public void removeAttribute(Attribute attr)
 		{
 			entityType.removeAttribute(attr);
+		}
+
+		@Override
+		public void addLookupAttribute(Attribute lookupAttr)
+		{
+			entityType.addLookupAttribute(lookupAttr);
 		}
 
 		@Override

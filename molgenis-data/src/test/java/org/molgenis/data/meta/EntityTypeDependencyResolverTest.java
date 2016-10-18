@@ -83,4 +83,22 @@ public class EntityTypeDependencyResolverTest
 		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType2, entityType0)),
 				newArrayList(entityType0, entityType2));
 	}
+
+	@Test
+	public void resolveDependenciesEntityAttributeWorkaround()
+	{
+		EntityType entitiesMeta = when(mock(EntityType.class).getName()).thenReturn(ENTITY_TYPE_META_DATA).getMock();
+		EntityType attrsMeta = when(mock(EntityType.class).getName()).thenReturn(ATTRIBUTE_META_DATA).getMock();
+
+		Attribute entitiesAttr = when(mock(Attribute.class).getName()).thenReturn("attrs").getMock();
+		when(entitiesAttr.getRefEntity()).thenReturn(attrsMeta);
+		Attribute attrAttr = when(mock(Attribute.class).getName()).thenReturn("entity").getMock();
+		when(attrAttr.getRefEntity()).thenReturn(entitiesMeta);
+
+		when(entitiesMeta.getOwnAllAttributes()).thenReturn(singleton(entitiesAttr));
+		when(attrsMeta.getOwnAllAttributes()).thenReturn(singleton(attrAttr));
+
+		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entitiesMeta, attrsMeta)),
+				newArrayList(attrsMeta, entitiesMeta));
+	}
 }

@@ -84,11 +84,24 @@ public abstract class SystemEntityType extends EntityType
 
 	public Attribute addAttribute(String attrName, AttributeRole... attrTypes)
 	{
+		return addAttribute(attrName, null, attrTypes);
+	}
+
+	public Attribute addAttribute(String attrName, Attribute parentAttr, AttributeRole... attrTypes)
+	{
 		Attribute attr = new SystemAttribute(attributeFactory.getAttributeMetadata());
 		attr.setIdentifier(idGenerator.generateId());
 		attr.setDefaultValues();
 		attr.setName(attrName);
-		addAttribute(attr, attrTypes);
+		if (parentAttr != null)
+		{
+			parentAttr.addAttributePart(attr);
+			setAttributeRoles(attr, attrTypes);
+		}
+		else
+		{
+			addAttribute(attr, attrTypes);
+		}
 		return attr;
 	}
 

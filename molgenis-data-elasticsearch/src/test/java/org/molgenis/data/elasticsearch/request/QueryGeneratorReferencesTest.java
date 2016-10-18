@@ -84,14 +84,12 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		refEntityType.addAttribute(attrFactory.create().setName(refBoolAttributeName).setDataType(BOOL));
 		refEntityType.addAttribute(attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
 				.setRefEntity(refEntityType).setNillable(true));
-		Attribute attrCompound = attrFactory.create().setName(refCompoundAttributeName).setDataType(COMPOUND);
 		Attribute compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
-				.setDataType(STRING).setParent(attrCompound);
+				.setDataType(STRING);
 		Attribute compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
-				.setDataType(STRING).setParent(attrCompound);
-		refEntityType.addAttribute(attrCompound);
-		refEntityType.addAttribute(compoundPart0Attribute);
-		refEntityType.addAttribute(compoundPart1Attribute);
+				.setDataType(STRING);
+		refEntityType.addAttribute(attrFactory.create().setName(refCompoundAttributeName).setDataType(COMPOUND)
+				.setAttributeParts(Arrays.asList(compoundPart0Attribute, compoundPart1Attribute)));
 		refEntityType.addAttribute(attrFactory.create().setName(refDateAttributeName).setDataType(DATE));
 		refEntityType.addAttribute(attrFactory.create().setName(refDateTimeAttributeName).setDataType(DATE_TIME));
 		refEntityType.addAttribute(attrFactory.create().setName(refDecimalAttributeName).setDataType(DECIMAL));

@@ -389,6 +389,17 @@ public class PostgreSqlRepositoryCollectionTest
 				"ALTER TABLE \"entity1\" ALTER COLUMN \"attr\" SET NOT NULL"));
 	}
 
+	@Test(expectedExceptions = UnknownAttributeException.class)
+	public void updateAttributeDoesNotExist()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		when(attr.isNillable()).thenReturn(true);
+		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		when(updatedAttr.isNillable()).thenReturn(false);
+		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
+	}
+
 	@Test
 	public void updateAttributeRefEntityXref()
 	{

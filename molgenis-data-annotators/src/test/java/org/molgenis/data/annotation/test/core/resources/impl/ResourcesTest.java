@@ -56,8 +56,10 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 	public void beforeClass()
 	{
 		emd = entityTypeFactory.create().setName("resourceName");
-		Attribute attr = attributeFactory.create().setName("id").setIdAttribute(true).setLabelAttribute(true);
+		Attribute attr = attributeFactory.create().setName("id");
 		emd.addAttribute(attr);
+		emd.setLabelAttribute(attr);
+		emd.setIdAttribute(attr);
 
 		e1 = new DynamicEntity(emd);
 		e1.set("id", "5");

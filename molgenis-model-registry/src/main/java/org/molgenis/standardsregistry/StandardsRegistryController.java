@@ -241,7 +241,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "package");
 
-		for (Package subPackage : package_.getChildren())
+		for (Package subPackage : package_.getSubPackages())
 		{
 			result.add(createPackageTreeNode(subPackage));
 		}
@@ -291,7 +291,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		if (amd.getDataType() == AttributeType.COMPOUND)
 		{
-			for (Attribute subAmd : amd.getChildren())
+			for (Attribute subAmd : amd.getAttributeParts())
 			{
 				result.add(createPackageTreeNode(subAmd, emd));
 			}
@@ -332,7 +332,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel(), emd.isAbstract()));
 		}
-		Iterable<Package> subPackages = aPackage.getChildren();
+		Iterable<Package> subPackages = aPackage.getSubPackages();
 		if (subPackages != null)
 		{
 			for (Package subPackage : subPackages)

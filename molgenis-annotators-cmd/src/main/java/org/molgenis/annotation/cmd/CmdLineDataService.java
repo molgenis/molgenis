@@ -231,6 +231,20 @@ public class CmdLineDataService implements DataService
 	}
 
 	@Override
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
+			String newRepositoryLabel)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
+			String label, Query<Entity> query)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
 		throw new UnsupportedOperationException();

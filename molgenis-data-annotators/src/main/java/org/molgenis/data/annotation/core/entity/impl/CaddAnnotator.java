@@ -143,8 +143,9 @@ public class CaddAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(attributeFactory.create().setName(CADD_ABS).setDataType(STRING));
 				repoMetaData.addAttribute(attributeFactory.create().setName(CADD_SCALED).setDataType(STRING));
 				Attribute idAttribute = attributeFactory.create().setName(idAttrName)
-						.setVisible(false).setIdAttribute(true);
+						.setVisible(false);
 				repoMetaData.addAttribute(idAttribute);
+				repoMetaData.setIdAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}
 		};

@@ -49,6 +49,8 @@ public class OmimResultFilter implements ResultFilter
 		EntityType emd = entityTypeFactory.create().setName(OmimAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
+		Attribute id = attributeFactory.create().setName("ID").setAuto(true);
+		emd.setIdAttribute(id);
 
 		return firstResult.transform(e ->
 		{

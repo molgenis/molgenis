@@ -86,10 +86,10 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		entityType.addAttribute(attrFactory.create().setName(boolAttrName).setDataType(BOOL));
 		entityType.addAttribute(
 				attrFactory.create().setName(categoricalAttrName).setDataType(CATEGORICAL).setRefEntity(refEntityType));
-		Attribute compoundAttr = attrFactory.create().setName(compoundAttrName).setDataType(COMPOUND);
-		Attribute compoundPart0Attr = attrFactory.create().setName(compoundPart0AttrName).setDataType(STRING).setParent(compoundAttr);
-		Attribute compoundPart1Attr = attrFactory.create().setName(compoundPart1AttrName).setDataType(STRING).setParent(compoundAttr);
-		entityType.addAttribute(compoundAttr).addAttribute(compoundPart0Attr).addAttribute(compoundPart1Attr);
+		Attribute compoundPart0Attr = attrFactory.create().setName(compoundPart0AttrName).setDataType(STRING);
+		Attribute compoundPart1Attr = attrFactory.create().setName(compoundPart1AttrName).setDataType(STRING);
+		entityType.addAttribute(attrFactory.create().setName(compoundAttrName).setDataType(COMPOUND)
+				.setAttributeParts(asList(compoundPart0Attr, compoundPart1Attr)));
 		entityType.addAttribute(attrFactory.create().setName(dateAttrName).setDataType(DATE));
 		entityType.addAttribute(attrFactory.create().setName(dateTimeAttrName).setDataType(DATE_TIME));
 		entityType.addAttribute(attrFactory.create().setName(decimalAttrName).setDataType(DECIMAL));

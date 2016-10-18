@@ -12,8 +12,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
-import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
@@ -103,16 +101,6 @@ public class Package extends StaticEntity
 		set(PackageMetadata.PARENT, parentPackage);
 		updateFullName();
 		return this;
-	}
-
-	/**
-	 * Gets the subpackages of this package or an empty list if this package doesn't have any subpackages.
-	 *
-	 * @return sub-packages
-	 */
-	public Iterable<Package> getChildren()
-	{
-		return getEntities(CHILDREN, Package.class);
 	}
 
 	/**
@@ -214,7 +202,25 @@ public class Package extends StaticEntity
 	 */
 	public Iterable<EntityType> getEntityTypes()
 	{
-		return getEntities(ENTITY_TYPES, EntityType.class);
+		// TODO Use one-to-many relationship for EntityType.package
+		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
+		Query<EntityType> query = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
+				.eq(EntityTypeMetadata.PACKAGE, getName());
+		return () -> query.findAll().iterator();
+	}
+
+	/**
+	 * Gets the subpackages of this package or an empty list if this package doesn't have any subpackages.
+	 *
+	 * @return sub-packages
+	 */
+	public Iterable<Package> getSubPackages()
+	{
+		// TODO use one-to-many relationship for Package.parent
+		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
+		Query<Package> query = dataService.query(PackageMetadata.PACKAGE, Package.class)
+				.eq(PackageMetadata.PARENT, this);
+		return () -> query.findAll().iterator();
 	}
 
 	/**

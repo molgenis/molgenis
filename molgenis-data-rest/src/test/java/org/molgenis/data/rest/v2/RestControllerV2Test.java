@@ -17,7 +17,6 @@ import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
@@ -120,9 +119,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private PermissionSystemService permissionSystemService;
 
 	@Autowired
-	private RepositoryCopier repoCopier;
-
-	@Autowired
 	private Gson gson;
 
 	@Autowired
@@ -141,7 +137,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void beforeMethod() throws ParseException
 	{
 		reset(dataService);
-		reset(repoCopier);
 
 		EntityType refRefEntityType = entityTypeFactory.create().setName(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
@@ -221,16 +216,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrCategoricalMref = createAttributeMeta(entityType, attrCategoricalMrefName, CATEGORICAL_MREF,
 				refEntityType).setNillable(false);
 		Attribute attrCompound = createAttributeMeta(entityType, attrCompoundName, COMPOUND);
-		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false)
-				.setParent(attrCompound);
-		Attribute compoundAttr0Optional = createAttributeMeta(entityType, attrCompoundAttr0OptionalName, STRING)
-				.setNillable(true).setParent(attrCompound);
-		Attribute compoundAttrCompound = createAttributeMeta(entityType, attrCompoundAttrCompoundName, COMPOUND)
-				.setParent(attrCompound);
-		Attribute compoundAttrCompoundAttr0 = createAttributeMeta(entityType, attrCompoundAttrCompoundAttr0Name, STRING)
-				.setNillable(false).setParent(compoundAttrCompound);
-		Attribute compoundAttrCompoundAttr0Optional = createAttributeMeta(entityType,
-				attrCompoundAttrCompoundAttr0OptionalName, STRING).setNillable(true).setParent(compoundAttrCompound);
 		Attribute attrDate = createAttributeMeta(entityType, attrDateName, DATE).setNillable(false);
 		Attribute attrDateTime = createAttributeMeta(entityType, attrDateTimeName, DATE_TIME).setNillable(false);
 		Attribute attrDecimal = createAttributeMeta(entityType, attrDecimalName, DECIMAL, null).setReadOnly(true)
@@ -269,6 +254,19 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrStringOptional = createAttributeMeta(entityType, attrStringOptionalName, STRING);
 		Attribute attrTextOptional = createAttributeMeta(entityType, attrTextOptionalName, TEXT);
 		Attribute attrXrefOptional = createAttributeMeta(entityType, attrXrefOptionalName, XREF, refEntityType);
+
+		Attribute compoundAttrCompoundAttr0 = createAttributeMeta(null, attrCompoundAttrCompoundAttr0Name, STRING)
+				.setNillable(false);
+		Attribute compoundAttrCompoundAttr0Optional = createAttributeMeta(null,
+				attrCompoundAttrCompoundAttr0OptionalName, STRING).setNillable(true);
+
+		Attribute compoundAttrCompound = createAttributeMeta(null, attrCompoundAttrCompoundName, COMPOUND);
+		compoundAttrCompound.setAttributeParts(asList(compoundAttrCompoundAttr0, compoundAttrCompoundAttr0Optional));
+
+		Attribute compoundAttr0 = createAttributeMeta(null, attrCompoundAttr0Name, STRING).setNillable(false);
+		Attribute compoundAttr0Optional = createAttributeMeta(null, attrCompoundAttr0OptionalName, STRING)
+				.setNillable(true);
+		attrCompound.setAttributeParts(asList(compoundAttr0, compoundAttr0Optional, compoundAttrCompound));
 
 		Entity refRefEntity = new DynamicEntity(refRefEntityType);
 		refRefEntity.set(REF_REF_ATTR_ID_NAME, REF_REF_ENTITY_ID);
@@ -372,7 +370,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		Attribute attr = attributeFactory.create().setName(attrName).setLabel(attrName).setDataType(type)
 				.setRefEntity(refEntityMeta).setNillable(true);
-		entityType.addAttribute(attr);
+
+		if (entityType != null)
+		{
+			entityType.addAttribute(attr);
+		}
 		return attr;
 	}
 
@@ -497,7 +499,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody))
 				.andExpect(header().string("Location", "/api/v2/org_molgenis_blah_newEntity"));
 
-		verify(repoCopier).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
+		verify(dataService).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
 	}
 
 	@Test
@@ -512,7 +514,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -528,7 +530,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		this.assertEqualsErrorMessage(resultActions,
 				"Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -546,7 +548,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -567,7 +569,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No write capabilities for entity entity");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
@@ -592,7 +594,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("org_molgenis_blah_newEntity");
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
-		when(repoCopier.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
+		when(dataService.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService)
 				.giveUserEntityPermissions(any(SecurityContext.class), Collections.singletonList(any(String.class)));
@@ -842,7 +844,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>()
 				{
 				}.getType());
-		@SuppressWarnings("unchecked") Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		@SuppressWarnings("unchecked")
+		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 		assertEquals(lvl2.get("selfRef").toString(),
 				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
 	}
@@ -973,12 +976,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public RepositoryCopier repositoryCopier()
-		{
-			return mock(RepositoryCopier.class);
-		}
-
-		@Bean
 		public IdGenerator idGenerator()
 		{
 			return mock(IdGenerator.class);
@@ -1013,7 +1010,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		{
 			return new RestControllerV2(dataService(), molgenisPermissionService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager()),
-					languageService(), permissionSystemService(), repositoryCopier());
+					languageService(), permissionSystemService());
 		}
 
 	}

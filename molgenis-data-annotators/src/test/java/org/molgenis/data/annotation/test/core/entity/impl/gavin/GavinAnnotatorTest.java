@@ -93,8 +93,9 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 				Arrays.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
 						vcfAttributes.getAltAttribute()));
 
-		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true).setIdAttribute(true);
+		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true);
 		emd.addAttribute(idAttr);
+		emd.setIdAttribute(idAttr);
 		emd.addAttributes(effectsMetaData.getOrderedAttributes());
 		emd.addAttribute(attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
 				.setRefEntity(entityType));
@@ -107,6 +108,8 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		emd.addAttributes(Arrays.asList(classification, confidence, reason));
 
 		entityType.addAttribute(idAttr);
+		entityType.setIdAttribute(idAttr);
+
 	}
 
 	@Test

@@ -236,8 +236,9 @@ public class FitConAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(attributeFactory.create().setName("PHRED"));
 
 				Attribute idAttribute = attributeFactory.create().setName("id")
-						.setVisible(false).setIdAttribute(true);
+						.setVisible(false);
 				repoMetaData.addAttribute(idAttribute);
+				repoMetaData.setIdAttribute(idAttribute);
 
 				return new TabixRepositoryFactory(repoMetaData);
 			}

@@ -377,7 +377,7 @@ public class EntityUtils
 		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
 
 		// recursively compare attribute parts
-		if (!EntityUtils.equals(attr.getChildren(), otherAttr.getChildren())) return false;
+		if (!EntityUtils.equals(attr.getAttributeParts(), otherAttr.getAttributeParts())) return false;
 
 		// compare entity identifier
 		EntityType refEntity = attr.getRefEntity();

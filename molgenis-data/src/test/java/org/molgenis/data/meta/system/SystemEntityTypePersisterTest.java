@@ -2,12 +2,9 @@ package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Maps;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -18,6 +15,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -51,9 +49,8 @@ public class SystemEntityTypePersisterTest
 		dataService = mock(DataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
-		EntityTypeDependencyResolver entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
-		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
-				entityTypeDependencyResolver);
+		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry);
+		systemEntityTypePersister.setAttributeMetadata(attrMetaMeta);
 	}
 
 	@Test
@@ -101,7 +98,7 @@ public class SystemEntityTypePersisterTest
 		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
-		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
@@ -131,7 +128,7 @@ public class SystemEntityTypePersisterTest
 		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
-		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
@@ -149,14 +146,5 @@ public class SystemEntityTypePersisterTest
 		systemEntityTypePersister.persist(event);
 		//noinspection unchecked
 		verify(dataService, times(0)).add(eq(PACKAGE), any(Stream.class));
-	}
-
-	private static class EmptyStreamAnswer implements Answer<Stream<EntityType>>
-	{
-		@Override
-		public Stream<EntityType> answer(InvocationOnMock invocation) throws Throwable
-		{
-			return Stream.empty();
-		}
 	}
 }

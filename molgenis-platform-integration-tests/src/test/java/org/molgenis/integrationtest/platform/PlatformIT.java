@@ -1305,7 +1305,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		String COUNTRY = "Country";
 		final EntityType entityType = EntityType
-				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS, attributeFactory);
+				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS);
 		final Attribute newAttr = attributeFactory.create().setName(COUNTRY);
 
 		runAsSystem(() ->

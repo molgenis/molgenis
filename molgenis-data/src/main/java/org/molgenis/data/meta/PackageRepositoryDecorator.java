@@ -1,7 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityType;
@@ -22,6 +20,7 @@ import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -29,14 +28,11 @@ public class PackageRepositoryDecorator implements Repository<Package>
 {
 	private final Repository<Package> decoratedRepo;
 	private final DataService dataService;
-	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-	public PackageRepositoryDecorator(Repository<Package> decoratedRepo, DataService dataService,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+	public PackageRepositoryDecorator(Repository<Package> decoratedRepo, DataService dataService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
-		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
 
 	@Override
@@ -236,8 +232,9 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	{
 		// delete entities in package
 		Repository<EntityType> entityRepo = getEntityRepository();
-		List<EntityType> entityTypes = Lists.newArrayList(package_.getEntityTypes());
-		entityRepo.delete(entityTypeDependencyResolver.resolve(entityTypes).stream());
+		Set<EntityType> entities = entityRepo.query().eq(EntityTypeMetadata.PACKAGE, package_).findAll()
+				.collect(toSet());
+		entityRepo.delete(DependencyResolver.resolve(entities).stream());
 
 		// delete row from package table
 		decoratedRepo.delete(package_);
@@ -265,7 +262,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		}
 	}
 
-	private static Stream<Package> getPackageTreeTraversal(Package package_)
+	private Stream<Package> getPackageTreeTraversal(Package package_)
 	{
 		return StreamSupport.stream(new PackageTreeTraverser().postOrderTraversal(package_).spliterator(), false);
 	}
@@ -281,12 +278,12 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		return dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
 	}
 
-	private static class PackageTreeTraverser extends TreeTraverser<Package>
+	private class PackageTreeTraverser extends TreeTraverser<Package>
 	{
 		@Override
 		public Iterable<Package> children(@Nonnull Package packageEntity)
 		{
-			return packageEntity.getChildren();
+			return () -> query().eq(PackageMetadata.PARENT, packageEntity).findAll().iterator();
 		}
 	}
 }
