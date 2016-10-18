@@ -68,20 +68,14 @@ public class Attribute extends StaticEntity
 	 *
 	 * @param attrMeta     attribute
 	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attribute parts
-	 * @param attrFactory  attribute factory used to create new attributes in deep-copy mode
-	 * @return shallow or deep copy of attribute
+	 * @return deep copy of attribute
 	 */
-	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode,
-			AttributeFactory attrFactory)
+	public static Attribute newInstance(Attribute attrMeta, AttributeCopyMode attrCopyMode)
 	{
-		Attribute attrMetaCopy = attrFactory.create(); // create new attribute with unique identifier
+		Attribute attrMetaCopy = new Attribute(attrMeta.getEntityType()); // do not deep-copy
+		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
-		attrMetaCopy.setEntity(attrMeta.getEntity());
-		attrMetaCopy.setSequenceNumber(attrMeta.getSequenceNumber());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
-		attrMetaCopy.setIdAttribute(attrMeta.isIdAttribute());
-		attrMetaCopy.setLabelAttribute(attrMeta.isLabelAttribute());
-		attrMetaCopy.setLookupAttributeIndex(attrMeta.getLookupAttributeIndex());
 		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
 		attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
 		attrMetaCopy.setOrderBy(attrMeta.getOrderBy());
@@ -96,15 +90,15 @@ public class Attribute extends StaticEntity
 		attrMetaCopy.setRangeMax(attrMeta.getRangeMax());
 		attrMetaCopy.setReadOnly(attrMeta.isReadOnly());
 		attrMetaCopy.setUnique(attrMeta.isUnique());
-		Attribute parentAttr = attrMeta.getParent();
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
-			attrMetaCopy.setParent(
-					parentAttr != null ? Attribute.newInstance(parentAttr, attrCopyMode, attrFactory) : null);
+			attrMetaCopy.setAttributeParts(stream(attrMeta.getAttributeParts().spliterator(), false)
+					.map(attr -> Attribute.newInstance(attr, attrCopyMode))
+					.map(attrCopy -> attrCopy.setIdentifier(null)).collect(toList()));
 		}
 		else
 		{
-			attrMetaCopy.setParent(parentAttr);
+			attrMetaCopy.setAttributeParts(Lists.newArrayList(attrMeta.getAttributeParts()));
 		}
 
 		attrMetaCopy.setTags(Lists.newArrayList(attrMeta.getTags())); // do not deep-copy
@@ -137,74 +131,6 @@ public class Attribute extends StaticEntity
 	public Attribute setName(String name)
 	{
 		set(NAME, name);
-		return this;
-	}
-
-	/**
-	 * Attribute sequence number that determines attribute order within an entity
-	 *
-	 * @return attribute sequence number
-	 */
-	public int getSequenceNumber()
-	{
-		return getInt(SEQUENCE_NR);
-	}
-
-	public Attribute setSequenceNumber(int seqNr)
-	{
-		set(SEQUENCE_NR, seqNr);
-		return this;
-	}
-
-	public EntityType getEntity()
-	{
-		return getEntity(ENTITY, EntityType.class);
-	}
-
-	public Attribute setEntity(EntityType entityMeta)
-	{
-		set(ENTITY, entityMeta);
-		return this;
-	}
-
-	public boolean isIdAttribute()
-	{
-		Boolean isIdAttr = getBoolean(IS_ID_ATTRIBUTE);
-		return isIdAttr != null && isIdAttr;
-	}
-
-	public Attribute setIdAttribute(Boolean isIdAttr)
-	{
-		set(IS_ID_ATTRIBUTE, isIdAttr);
-		if (isIdAttr != null && isIdAttr)
-		{
-			setReadOnly(true);
-			setUnique(true);
-			setNillable(false);
-		}
-		return this;
-	}
-
-	public boolean isLabelAttribute()
-	{
-		Boolean isLabelAttr = getBoolean(IS_LABEL_ATTRIBUTE);
-		return isLabelAttr != null && isLabelAttr;
-	}
-
-	public Attribute setLabelAttribute(Boolean isLabelAttr)
-	{
-		set(IS_LABEL_ATTRIBUTE, isLabelAttr);
-		return this;
-	}
-
-	public Integer getLookupAttributeIndex()
-	{
-		return getInt(LOOKUP_ATTRIBUTE_INDEX);
-	}
-
-	public Attribute setLookupAttributeIndex(Integer lookupAttrIdx)
-	{
-		set(LOOKUP_ATTRIBUTE_INDEX, lookupAttrIdx);
 		return this;
 	}
 
@@ -298,9 +224,15 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
 	 */
-	public Iterable<Attribute> getChildren()
+	public Iterable<Attribute> getAttributeParts()
 	{
-		return getEntities(CHILDREN, Attribute.class);
+		return getEntities(PARTS, Attribute.class);
+	}
+
+	public Attribute setAttributeParts(Iterable<Attribute> parts)
+	{
+		set(PARTS, parts);
+		return this;
 	}
 
 	/**
@@ -583,51 +515,23 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
-	public Attribute getParent()
-	{
-		return getEntity(PARENT, Attribute.class);
-	}
-
-	public Attribute setParent(Attribute parentAttr)
-	{
-		Attribute currentParent = getParent();
-		if (currentParent != null)
-		{
-			currentParent.removeChild(this);
-		}
-		set(PARENT, parentAttr);
-
-		if (parentAttr != null)
-		{
-			parentAttr.addChild(this);
-		}
-		return this;
-	}
-
 	/**
 	 * Get attribute part by name (case insensitive), returns null if not found
 	 *
 	 * @param attrName attribute name (case insensitive)
 	 * @return attribute or null
 	 */
-	public Attribute getChild(String attrName)
+	public Attribute getAttributePart(String attrName)
 	{
-		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
+		Iterable<Attribute> attrParts = getEntities(PARTS, Attribute.class);
 		return stream(attrParts.spliterator(), false).filter(attrPart -> attrPart.getName().equals(attrName))
 				.findFirst().orElse(null);
 	}
 
-	void addChild(Attribute attrPart)
+	public void addAttributePart(Attribute attrPart)
 	{
-		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
-		set(CHILDREN, concat(attrParts, singletonList(attrPart)));
-	}
-
-	void removeChild(Attribute attrPart)
-	{
-		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
-		set(CHILDREN, stream(attrParts.spliterator(), false).filter(attr -> !attr.getName().equals(attrPart.getName()))
-				.collect(toList()));
+		Iterable<Attribute> attrParts = getEntities(PARTS, Attribute.class);
+		set(PARTS, concat(attrParts, singletonList(attrPart)));
 	}
 
 	/**

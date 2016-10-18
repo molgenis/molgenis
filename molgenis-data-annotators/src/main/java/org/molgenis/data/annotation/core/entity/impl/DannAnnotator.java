@@ -126,8 +126,9 @@ public class DannAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 				repoMetaData.addAttribute(attributeFactory.create().setName("DANN_SCORE").setDataType(STRING));
 				Attribute idAttribute = attributeFactory.create().setName(idAttrName)
-						.setVisible(false).setIdAttribute(true);
+						.setVisible(false);
 				repoMetaData.addAttribute(idAttribute);
+				repoMetaData.setIdAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}
 		};

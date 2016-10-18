@@ -1,12 +1,8 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.AttributeType.*;
@@ -26,12 +22,9 @@ public class PackageMetadata extends SystemEntityType
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String PARENT = "parent";
-	public static final String CHILDREN = "children";
-	public static final String ENTITY_TYPES = "entityTypes";
 	public static final String TAGS = "tags";
 
 	private TagMetaData tagMetaData;
-	private EntityTypeMetadata entityTypeMetadata;
 
 	public PackageMetadata()
 	{
@@ -47,14 +40,7 @@ public class PackageMetadata extends SystemEntityType
 		addAttribute(SIMPLE_NAME).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		Attribute parentAttr = addAttribute(PARENT).setReadOnly(true).setDataType(XREF).setRefEntity(this)
-				.setLabel("Parent");
-		addAttribute(CHILDREN).setReadOnly(true).setDataType(ONE_TO_MANY).setMappedBy(parentAttr)
-				.setOrderBy(new Sort(LABEL)).setRefEntity(this).setLabel("Children");
-		addAttribute(ENTITY_TYPES).setReadOnly(true).setDataType(ONE_TO_MANY)
-				.setMappedBy(entityTypeMetadata.getAttribute(EntityTypeMetadata.PACKAGE))
-				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL)).setRefEntity(entityTypeMetadata)
-				.setLabel("Entity types");
+		addAttribute(PARENT).setReadOnly(true).setDataType(XREF).setRefEntity(this).setLabel("Parent");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
 	}
 
@@ -63,17 +49,5 @@ public class PackageMetadata extends SystemEntityType
 	public void setTagMetaData(TagMetaData tagMetaData)
 	{
 		this.tagMetaData = requireNonNull(tagMetaData);
-	}
-
-	@Autowired
-	public void setEntityTypeMetadata(EntityTypeMetadata entityTypeMetadata)
-	{
-		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
-	}
-
-	@Override
-	public Set<SystemEntityType> getDependencies()
-	{
-		return Collections.singleton(entityTypeMetadata);
 	}
 }

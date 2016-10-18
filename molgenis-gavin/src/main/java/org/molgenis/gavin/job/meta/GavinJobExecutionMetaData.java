@@ -3,6 +3,7 @@ package org.molgenis.gavin.job.meta;
 import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 public class GavinJobExecutionMetaData extends SystemEntityType
 {
 	private final JobExecutionMetaData jobExecutionMetaData;
+	AttributeFactory attributeFactory;
 
 	private static final String SIMPLE_NAME = "GavinJobExecution";
 	public static final String GAVIN_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -23,11 +25,13 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 	private final IndexPackage indexPackage;
 
 	@Autowired
-	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData)
+	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData,
+			AttributeFactory attributeFactory)
 	{
 		super(SIMPLE_NAME, PACKAGE_INDEX);
 		this.indexPackage = requireNonNull(indexPackage);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
+		this.attributeFactory = requireNonNull(attributeFactory);
 	}
 
 	@Override
@@ -37,6 +41,6 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 		setPackage(indexPackage);
 
 		setExtends(jobExecutionMetaData);
-		addAttribute(FILENAME).setDataType(STRING).setNillable(false);
+		addAttribute(attributeFactory.create().setName(FILENAME).setDataType(STRING).setNillable(false));
 	}
 }

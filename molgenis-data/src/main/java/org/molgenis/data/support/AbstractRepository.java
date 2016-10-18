@@ -126,7 +126,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 		Entity result = index.get(id);
 		if (result == null)
 		{
-			LOG.debug("Lookup: Couldn't find {} for id {}.", getName(), id);
+			LOG.warn("Lookup: Couldn't find {} for id {}.", getName(), id);
 		}
 		return result;
 	}

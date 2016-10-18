@@ -161,7 +161,7 @@ public class AnnotatorController
 	{
 		if (outputAttrs.size() == 1 && outputAttrs.get(0).getDataType() == COMPOUND)
 		{
-			return getAtomicAttributesFromList(Lists.newArrayList(outputAttrs.get(0).getChildren()));
+			return getAtomicAttributesFromList(Lists.newArrayList(outputAttrs.get(0).getAttributeParts()));
 		}
 		else
 		{

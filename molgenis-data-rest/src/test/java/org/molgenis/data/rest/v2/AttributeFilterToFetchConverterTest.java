@@ -95,23 +95,19 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 				.addAttribute(attributeFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(attributeFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 
-		Attribute compoundAttr = attributeFactory.create().setName(COMPOUND_ATTR_NAME).setDataType(COMPOUND);
-		Attribute compoundPartAttr = attributeFactory.create().setName(COMPOUND_PART_ATTR_NAME).setDataType(COMPOUND)
-				.setParent(compoundAttr);
+		Attribute compoundPartAttr = attributeFactory.create().setName(COMPOUND_PART_ATTR_NAME).setDataType(COMPOUND);
 		Attribute compoundPartFileAttr = attributeFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
-				.setParent(compoundAttr).setDataType(FILE).setRefEntity(fileMetaMeta);
+				.setDataType(FILE).setRefEntity(fileMetaMeta);
+		Attribute compoundAttr = attributeFactory.create().setName(COMPOUND_ATTR_NAME).setDataType(COMPOUND);
 		Attribute compoundPartCompoundAttr = attributeFactory.create().setName(COMPOUND_PART_COMPOUND_ATTR_NAME)
-				.setDataType(COMPOUND).setParent(compoundAttr);
-
+				.setDataType(COMPOUND);
 		Attribute compoundPartCompoundPartAttr = attributeFactory.create()
-				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).setParent(compoundPartCompoundAttr);
+				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME);
 		Attribute compoundPartCompoundPartAttr2 = attributeFactory.create()
-				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME).setParent(compoundPartCompoundAttr);
+				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
+		compoundAttr.setAttributeParts(asList(compoundPartAttr, compoundPartFileAttr, compoundPartCompoundAttr));
+		compoundPartCompoundAttr.setAttributeParts(asList(compoundPartCompoundPartAttr, compoundPartCompoundPartAttr2));
 		entityType.addAttribute(compoundAttr);
-		entityType.addAttribute(compoundPartAttr);
-		entityType.addAttribute(compoundPartFileAttr);
-		entityType.addAttribute(compoundPartCompoundPartAttr);
-		entityType.addAttribute(compoundPartCompoundPartAttr2);
 
 		xrefAttr = attributeFactory.create().setName(XREF_ATTR_NAME).setDataType(XREF).setRefEntity(xrefEntityType);
 		entityType.addAttribute(xrefAttr);

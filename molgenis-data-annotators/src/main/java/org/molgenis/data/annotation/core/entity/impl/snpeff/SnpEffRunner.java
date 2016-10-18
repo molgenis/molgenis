@@ -332,8 +332,9 @@ public class SnpEffRunner
 				.setSimpleName(sourceEntityType.getSimpleName() + ENTITY_NAME_SUFFIX)
 				.setPackage(sourceEntityType.getPackage());
 		entityType.setBackend(sourceEntityType.getBackend());
-		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false).setIdAttribute(true);
+		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false);
 		entityType.addAttribute(id);
+		entityType.setIdAttribute(id);
 		for (Attribute attr : effectsMetaData.getOrderedAttributes())
 		{
 			entityType.addAttribute(attr);

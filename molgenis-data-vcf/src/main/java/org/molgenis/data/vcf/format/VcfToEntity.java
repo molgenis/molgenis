@@ -75,6 +75,7 @@ public class VcfToEntity
 		entityType.addAttribute(idAttribute, ROLE_ID);
 
 		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
+		List<Attribute> metadataInfoField = new ArrayList<>();
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 		{
 			// according to the VCF standard it is allowed to have info columns with names that equal default VCF cols.
@@ -103,13 +104,14 @@ public class VcfToEntity
 				name = name + "_";
 			}
 			Attribute attribute = attrMetaFactory.create().setName(name + postFix)
-					.setDataType(vcfReaderFormatToMolgenisType(info)).setAggregatable(true).setParent(infoMetaData);
+					.setDataType(vcfReaderFormatToMolgenisType(info)).setAggregatable(true);
 
 			attribute.setDescription(
 					StringUtils.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
 							.getDescription());
-			entityType.addAttribute(attribute);
+			metadataInfoField.add(attribute);
 		}
+		infoMetaData.setAttributeParts(metadataInfoField);
 		entityType.addAttribute(infoMetaData);
 		if (sampleEntityType != null)
 		{

@@ -79,7 +79,7 @@ class AttributeResponseV2
 		Attribute mappedByAttr = attr.getMappedBy();
 		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
-		Iterable<Attribute> attrParts = attr.getChildren();
+		Iterable<Attribute> attrParts = attr.getAttributeParts();
 		if (attrParts != null)
 		{
 			// filter attribute parts
@@ -160,7 +160,7 @@ class AttributeResponseV2
 	{
 		if (attr.getDataType() == COMPOUND)
 		{
-			for (Attribute attrPart : attr.getChildren())
+			for (Attribute attrPart : attr.getAttributeParts())
 			{
 				if (filterAttributeRec(fetch, attrPart))
 				{

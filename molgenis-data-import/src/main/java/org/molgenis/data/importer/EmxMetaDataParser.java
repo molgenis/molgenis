@@ -982,16 +982,18 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ rowIndex);
 				}
 
-				attribute.setParent(compoundAttribute);
+				compoundAttribute.addAttributePart(attribute);
 			}
-
-			Set<String> entityRootAttributes = rootAttributes.get(entityName);
-			if (entityRootAttributes == null)
+			else
 			{
-				entityRootAttributes = new LinkedHashSet<>();
-				rootAttributes.put(entityName, entityRootAttributes);
+				Set<String> entityRootAttributes = rootAttributes.get(entityName);
+				if (entityRootAttributes == null)
+				{
+					entityRootAttributes = new LinkedHashSet<>();
+					rootAttributes.put(entityName, entityRootAttributes);
+				}
+				entityRootAttributes.add(attributeName);
 			}
-			entityRootAttributes.add(attributeName);
 		}
 
 		// store attributes with entities

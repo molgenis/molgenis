@@ -73,13 +73,12 @@ public class SystemEntityTypeTest
 		protected void init()
 		{
 			Attribute compoundAttr1 = mock(Attribute.class);
-			when(compoundAttr1.getLookupAttributeIndex()).thenReturn(null);
 			addAttribute(compoundAttr1);
-			addAttribute("compoundAttr2").setParent(compoundAttr1);
-			addAttribute("idAttr", ROLE_ID).setParent(compoundAttr1);
-			addAttribute("labelAttr", ROLE_LABEL).setParent(compoundAttr1);
-			addAttribute("lookupAttr1", ROLE_LOOKUP).setParent(compoundAttr1);
-			addAttribute("lookupAttr2", ROLE_LOOKUP).setParent(compoundAttr1);
+			addAttribute("compoundAttr2", compoundAttr1);
+			addAttribute("idAttr", compoundAttr1, ROLE_ID);
+			addAttribute("labelAttr", compoundAttr1, ROLE_LABEL);
+			addAttribute("lookupAttr1", compoundAttr1, ROLE_LOOKUP);
+			addAttribute("lookupAttr2", compoundAttr1, ROLE_LOOKUP);
 		}
 	}
 
@@ -96,12 +95,11 @@ public class SystemEntityTypeTest
 		protected void init()
 		{
 			Attribute compoundAttr = mock(Attribute.class);
-			when(compoundAttr.getLookupAttributeIndex()).thenReturn(null);
 			addAttribute(compoundAttr);
-			addAttribute("idAttr", ROLE_ID).setParent(compoundAttr);
-			addAttribute("labelAttr", ROLE_LABEL).setParent(compoundAttr);
-			addAttribute("lookupAttr1", ROLE_LOOKUP).setParent(compoundAttr);
-			addAttribute("lookupAttr2", ROLE_LOOKUP).setParent(compoundAttr);
+			addAttribute("idAttr", compoundAttr, ROLE_ID);
+			addAttribute("labelAttr", compoundAttr, ROLE_LABEL);
+			addAttribute("lookupAttr1", compoundAttr, ROLE_LOOKUP);
+			addAttribute("lookupAttr2", compoundAttr, ROLE_LOOKUP);
 		}
 	}
 }

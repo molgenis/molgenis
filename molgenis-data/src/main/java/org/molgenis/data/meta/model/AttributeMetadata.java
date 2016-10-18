@@ -1,7 +1,6 @@
 package org.molgenis.data.meta.model;
 
 import org.molgenis.AttributeType;
-import org.molgenis.data.Sort;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +23,7 @@ public class AttributeMetadata extends SystemEntityType
 
 	public static final String ID = "id";
 	public static final String NAME = "name";
-	public static final String ENTITY = "entity";
-	public static final String SEQUENCE_NR = "sequenceNr";
 	public static final String TYPE = "type";
-	public static final String IS_ID_ATTRIBUTE = "isIdAttribute";
-	public static final String IS_LABEL_ATTRIBUTE = "isLabelAttribute";
-	public static final String LOOKUP_ATTRIBUTE_INDEX = "lookupAttributeIndex";
 	public static final String REF_ENTITY_TYPE = "refEntityType";
 	/**
 	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
@@ -56,8 +50,7 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String ENUM_OPTIONS = "enumOptions";
 	public static final String RANGE_MIN = "rangeMin";
 	public static final String RANGE_MAX = "rangeMax";
-	public static final String PARENT = "parent";
-	public static final String CHILDREN = "children";
+	public static final String PARTS = "parts";
 	public static final String TAGS = "tags";
 	public static final String VISIBLE_EXPRESSION = "visibleExpression";
 	public static final String VALIDATION_EXPRESSION = "validationExpression";
@@ -78,17 +71,9 @@ public class AttributeMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false);
-		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number")
-				.setDescription("Number that defines order of attributes in a entity").setNillable(false);
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
-		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute");
-		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute");
-		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index");
-		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
-		addAttribute(CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts");
+		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
@@ -126,7 +111,7 @@ public class AttributeMetadata extends SystemEntityType
 	}
 
 	@Autowired
-	public void setEntityTypeMetadata(EntityTypeMetadata entityTypeMeta)
+	public void setEntityTypeMetaData(EntityTypeMetadata entityTypeMeta)
 	{
 		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 	}

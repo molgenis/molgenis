@@ -249,7 +249,7 @@ public class SemanticSearchServiceHelper
 			{
 				attributeIdentifiers.add(attributeEntity.getString(AttributeMetadata.ID));
 			}
-			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetadata.CHILDREN);
+			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetadata.PARTS);
 
 			if (entities != null)
 			{

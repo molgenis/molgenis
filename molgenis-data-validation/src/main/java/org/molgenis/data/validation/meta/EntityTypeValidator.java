@@ -22,6 +22,8 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaValidationUtils.validateName;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
@@ -142,53 +144,61 @@ public class EntityTypeValidator
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not part of the entity attributes",
-								entityType.getName(), ownIdAttr.getName())));
+						format("ID attribute [%s] is not part of the entity attributes", ownIdAttr.getName())));
 			}
 
 			// Validate that ID attribute data type is allowed
 			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] type [%s] is not allowed", entityType.getName(),
-								ownIdAttr.getName(), ownIdAttr.getDataType().toString())));
+						format("ID attribute [%s] type [%s] is not allowed", ownIdAttr.getName(),
+								ownIdAttr.getDataType().toString())));
 			}
 
 			// Validate that ID attribute is unique
 			if (!ownIdAttr.isUnique())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a unique attribute", entityType.getName(),
-								ownIdAttr.getName())));
+						format("ID attribute [%s] is not a unique attribute", ownIdAttr.getName())));
 			}
 
 			// Validate that ID attribute is not nillable
 			if (ownIdAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getName(),
-								ownIdAttr.getName())));
+						format("ID attribute [%s] is not a non-nillable attribute", ownIdAttr.getName())));
 			}
 		}
 		else
 		{
 			if (!entityType.isAbstract() && entityType.getIdAttribute() == null)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] is missing required ID attribute", entityType.getName())));
+				throw new MolgenisValidationException(new ConstraintViolation("Missing required ID attribute"));
 			}
 		}
 	}
 
 	/**
 	 * Validates the attributes owned by this entity:
-	 * 1) validates that the parent entity doesn't have entities with the same name
+	 * 1) validates that attributes are not owned by another entity
+	 * 2) validates that the parent entity doesn't have entities with the same name
 	 *
 	 * @param entityType entity meta data
 	 * @throws MolgenisValidationException if an attribute is owned by another entity or a parent attribute has the same name
 	 */
-	private static void validateOwnAttributes(EntityType entityType)
+	private void validateOwnAttributes(EntityType entityType)
 	{
+		// Validate that entity attributes are not owned by another entity
+		entityType.getOwnAllAttributes().forEach(attr ->
+		{
+			EntityType ownerEntityType = getAttributeOwner(attr);
+			if (ownerEntityType != null && !ownerEntityType.getName().equals(entityType.getName()))
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Attribute [%s] is owned by entity [%s]", attr.getName(), ownerEntityType.getName())));
+			}
+		});
+
 		// Validate that entity attributes with same name do no exist in parent entity
 		EntityType extendsEntityType = entityType.getExtends();
 		if (extendsEntityType != null)
@@ -255,5 +265,29 @@ public class EntityTypeValidator
 								entityType.getSimpleName())));
 			}
 		}
+	}
+
+	/**
+	 * Returns the entity that owns the given attribute.
+	 *
+	 * @param attr attribute
+	 * @return attribute owner
+	 */
+	private EntityType getAttributeOwner(Attribute attr)
+	{
+		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(ATTRIBUTES, attr).findOne();
+		if (entityType == null)
+		{
+			Attribute parentAttr = dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(PARTS, attr).findOne();
+			if (parentAttr != null)
+			{
+				entityType = getAttributeOwner(parentAttr);
+			}
+			else
+			{
+				entityType = null;
+			}
+		}
+		return entityType;
 	}
 }

@@ -87,16 +87,16 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
 
 		Attribute infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
-				.setDescription("Number of Samples With Data").setAggregatable(true).setParent(infoMetaData);
+				.setDescription("Number of Samples With Data").setAggregatable(true);
+		infoMetaData.addAttributePart(infoNS);
 		Attribute infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
-				.setAggregatable(true).setParent(infoMetaData);
+				.setAggregatable(true);
+		infoMetaData.addAttributePart(infoDF);
 		Attribute infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
-				.setDescription("Flag field 2").setAggregatable(true).setParent(infoMetaData);
+				.setDescription("Flag field 2").setAggregatable(true);
+		infoMetaData.addAttributePart(infoDF2);
 
 		expectedEntityType.addAttribute(infoMetaData);
-		expectedEntityType.addAttribute(infoNS);
-		expectedEntityType.addAttribute(infoDF);
-		expectedEntityType.addAttribute(infoDF2);
 
 		EntityType actualEntityType = vcfToEntitySmall.getEntityType();
 		String backend = "test";

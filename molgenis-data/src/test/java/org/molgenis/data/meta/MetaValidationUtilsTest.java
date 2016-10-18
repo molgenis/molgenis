@@ -89,7 +89,7 @@ public class MetaValidationUtilsTest
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
 		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("aComp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getChildren()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
 		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 		MetaValidationUtils.validateEntityType(entityType);
 	}
@@ -107,7 +107,7 @@ public class MetaValidationUtilsTest
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
 		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("aComp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getChildren()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
 		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 
 		MetaValidationUtils.validateEntityType(entityType);
@@ -126,7 +126,7 @@ public class MetaValidationUtilsTest
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
 		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("a.Comp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getChildren()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
 		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 
 		MetaValidationUtils.validateEntityType(entityType);
