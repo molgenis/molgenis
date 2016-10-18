@@ -1331,7 +1331,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
-		q0.pageSize(10); // The only reason to be cached l3, important!
+		q0.pageSize(10); // L3 only caches queries with a page size
 		q0.sort(new Sort().on(COUNTRY));
 
 		Repository repoQ0 = dataService.getRepository(entityTypeDynamic.getName());
@@ -1346,13 +1346,5 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}
-
-	@Test(singleThreaded = true)
-	public void testMetadataEditAddAttribute()
-	{
-		MetadataEditOperationsPlatformIT
-				.testMetadataEditAddAttribute(entityTypeDynamic, dataService, attributeFactory, indexService);
-	}
-
 }
 
