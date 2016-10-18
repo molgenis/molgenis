@@ -3,6 +3,7 @@ package org.molgenis.fair.controller;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,16 +19,17 @@ public class FairController
 {
 	static final String BASE_URI = "/fdp";
 
-	@Autowired
 	private final DataService dataService;
 
+	@Autowired
 	public FairController(DataService dataService)
 	{
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(value = "/", method = GET, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@RunAsSystem
 	public Entity getMetadata()
 	{
 		return dataService.findOne("fdp_Metadata", new QueryImpl<>());
