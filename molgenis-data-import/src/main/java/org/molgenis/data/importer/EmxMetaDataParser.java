@@ -102,6 +102,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
 	private static final String EMX_ATTRIBUTES_UNIQUE = "unique";
 	private static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
+	private static final String EMX_ATTRIBUTES_TAGS = "tags";
 
 	// NOT YET SUPPORTED
 	// private static final String EMX_ATTRIBUTES_AUTO = "auto";
@@ -148,7 +149,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE, EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
 					EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN, EMX_ATTRIBUTES_READ_ONLY,
 					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_MAPPED_BY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE,
-					EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE);
+					EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE, EMX_ATTRIBUTES_TAGS);
 
 	private static final String AUTO = "auto";
 
@@ -661,7 +662,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					attr.getName().startsWith(EMX_ATTRIBUTES_LABEL) || attr.getName()
 							.startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
 			{
-				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
+				throw new IllegalArgumentException("Unsupported attribute metadata: attributes." + attr.getName());
 			}
 		}
 
