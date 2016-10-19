@@ -564,10 +564,13 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			else if (isMultipleReferenceType(readonlyAttr))
 			{
 				List<Object> entityIds = new ArrayList<>();
-				((Iterable<Entity>) value).forEach(mrefEntity ->
+				if(value != null)
 				{
-					entityIds.add(mrefEntity.getIdValue());
-				});
+					((Iterable<Entity>) value).forEach(mrefEntity ->
+					{
+						entityIds.add(mrefEntity.getIdValue());
+					});
+				}
 				value = entityIds;
 
 				List<Object> existingEntityIds = new ArrayList<>();
