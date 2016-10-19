@@ -1,4 +1,4 @@
-package org.molgenis.fair.converter;
+package org.molgenis.ui.converter;
 
 import org.springframework.http.MediaType;
 

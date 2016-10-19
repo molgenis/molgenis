@@ -1,4 +1,4 @@
-package org.molgenis.fair.converter;
+package org.molgenis.ui.converter;
 
 import org.molgenis.data.Entity;
 import org.springframework.http.HttpInputMessage;
@@ -13,8 +13,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import static org.molgenis.fair.converter.RDFMediaType.APPLICATION_TRIG;
-import static org.molgenis.fair.converter.RDFMediaType.TEXT_TURTLE;
+import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
+import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
 @Component
 public class RDFConverter extends AbstractHttpMessageConverter<Entity>
