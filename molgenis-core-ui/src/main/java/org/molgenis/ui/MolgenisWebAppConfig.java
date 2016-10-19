@@ -8,6 +8,7 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.fair.converter.RDFConverter;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -73,6 +74,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Autowired
+	private RDFConverter rdfConverter;
+
+	@Autowired
 	private LanguageService languageService;
 
 	@Override
@@ -109,6 +113,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
 		converters.add(new ResourceHttpMessageConverter());
+		converters.add(rdfConverter);
 	}
 
 	@Bean

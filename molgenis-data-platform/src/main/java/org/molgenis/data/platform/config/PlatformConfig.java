@@ -8,6 +8,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.platform.decorators.RepositoryDecoratorRegistry;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.fair.converter.RDFConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,7 +17,8 @@ import javax.annotation.PostConstruct;
 
 @Configuration
 @Import({ DataServiceImpl.class, MetaDataServiceImpl.class, EntityManagerImpl.class, RepositoryDecoratorRegistry.class,
-		EntityFactoryRegistry.class, EntityListenersService.class })
+		EntityFactoryRegistry.class, EntityListenersService.class, RDFConverter.class
+})
 public class PlatformConfig
 {
 	@Autowired
