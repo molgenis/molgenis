@@ -1,6 +1,9 @@
 package org.molgenis.ui.converter;
 
 import com.google.common.collect.Multimap;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
@@ -52,22 +56,43 @@ public class RDFConverter extends AbstractHttpMessageConverter<Entity>
 	protected void writeInternal(Entity entity, HttpOutputMessage httpOutputMessage)
 			throws IOException, HttpMessageNotWritableException
 	{
-		Writer writer = new OutputStreamWriter(httpOutputMessage.getBody(),
-				Charset.forName("UTF-8"));
+		Writer writer = new OutputStreamWriter(httpOutputMessage.getBody(), Charset.forName("UTF-8"));
 		EntityType entityType = entity.getEntityType();
+		Model model = ModelFactory.createDefaultModel();
+		String subject = "http://molgenis01.gcc.rug.nl/fdp";
 		for (Attribute attribute : entityType.getAtomicAttributes())
 		{
 			Multimap<Relation, LabeledResource> tags = tagService.getTagsForAttribute(entityType, attribute);
-			for(LabeledResource tag: tags.get(Relation.isAssociatedWith)){
-				writer.write(tag.getIri());
-				writer.write(',');
-				writer.write(tag.getLabel());
-				writer.write(':');
-				writer.write(entity.get(attribute.getName()).toString());
-				writer.write('\n');
+			for (LabeledResource tag : tags.get(Relation.isAssociatedWith))
+			{
+				convertToRdf(subject ,tag.getIri(), entity.get(attribute.getName()).toString(), model);
 			}
 		}
-		writer.write(entity.toString());
+		RDFDataMgr.write(writer, model, RDFFormat.TURTLE);
 		writer.close();
+
+	}
+
+	public String convertToRdf(String subjectString, String tag, String attrName, Model model)
+	{
+		StringWriter stringWriter = new StringWriter();
+		try
+		{
+			Resource subject = model.createResource(subjectString);
+			Property predicate = model.createProperty(tag);
+			Resource object = model.createResource(attrName);
+			connect(subject, predicate, object, model);
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		return stringWriter.toString();
+	}
+
+	private static Statement connect(Resource subject, Property predicate, Resource object, Model model)
+	{
+		model.add(subject, predicate, object);
+		return model.createStatement(subject, predicate, object);
 	}
 }
