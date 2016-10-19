@@ -3,6 +3,7 @@ package org.molgenis.fair.controller;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fair.converter.RDFMediaType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import static org.molgenis.fair.controller.FairController.BASE_URI;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
@@ -27,7 +27,7 @@ public class FairController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(method = GET, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(method = GET, produces = RDFMediaType.TEXT_TURTLE_VALUE)
 	@ResponseBody
 	@RunAsSystem
 	public Entity getMetadata()
