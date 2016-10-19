@@ -8,7 +8,6 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.fair.converter.RDFConverter;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -17,6 +16,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.ui.converter.RDFConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -61,7 +61,7 @@ import java.util.Properties;
 import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
-@Import(PlatformConfig.class)
+@Import({PlatformConfig.class, RDFConverter.class})
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired

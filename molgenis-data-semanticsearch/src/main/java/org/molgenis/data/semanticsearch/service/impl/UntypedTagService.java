@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
@@ -30,7 +31,8 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 /**
- * Service to tag metadata with simple String terms.
+ * Service to tag metadata with simple
+ * String terms.
  */
 public class UntypedTagService implements TagService<LabeledResource, LabeledResource>
 {
@@ -41,8 +43,8 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	public UntypedTagService(DataService dataService, TagRepository tagRepository)
 	{
-		this.dataService = dataService;
-		this.tagRepository = tagRepository;
+		this.dataService = requireNonNull(dataService);
+		this.tagRepository = requireNonNull(tagRepository);
 	}
 
 	private Entity findAttributeEntity(EntityType entityType, String attributeName)

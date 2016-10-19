@@ -16,7 +16,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
@@ -89,7 +87,7 @@ public class VcfUtils
 		{
 			if (attribute.getDataType() == COMPOUND)
 			{
-				result.addAll(getAtomicAttributesFromList(attribute.getAttributeParts()));
+				result.addAll(getAtomicAttributesFromList(attribute.getChildren()));
 			}
 			else
 			{
@@ -278,13 +276,7 @@ public class VcfUtils
 	private static EntityType removeRefFieldFromInfoMetadata(Attribute attributeToParse, Entity inputEntity)
 	{
 		EntityType newMeta = inputEntity.getEntityType();
-		Attribute newInfoMetadata = newMeta.getAttribute(VcfAttributes.INFO);
-		newInfoMetadata.setAttributeParts(
-				StreamSupport.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
-						.filter(attr -> !attr.getName().equals(attributeToParse.getName()))
-						.collect(Collectors.toList()));
-		newMeta.removeAttribute(newMeta.getAttribute(VcfAttributes.INFO));
-		newMeta.addAttribute(newInfoMetadata);
+		newMeta.removeAttribute(attributeToParse);
 		return newMeta;
 	}
 

@@ -94,7 +94,9 @@ public class EntityTestHarness
 	public EntityType createDynamicTestEntityType()
 	{
 		EntityType refEntityType = createDynamicRefEntityType();
-		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic").setBackend("PostgreSQL")
+		EntityType entityType = entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic")
+				.setBackend("PostgreSQL");
+		return entityType
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))

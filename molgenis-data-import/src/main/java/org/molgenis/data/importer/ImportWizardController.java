@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.system.ImportRun;
@@ -29,10 +28,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -402,8 +403,26 @@ public class ImportWizardController extends AbstractWizardController
 
 	private ResponseEntity<String> createCreatedResponseEntity(ImportRun importRun) throws URISyntaxException
 	{
-		String href = Href.concatEntityHref("/api/v2", importRun.getEntityType().getName(), importRun.getIdValue());
+		String href = concatEntityHref("/api/v2", importRun.getEntityType().getName(), importRun.getIdValue());
 		return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
+	}
+
+	private static String concatEntityHref(String baseUri, String qualifiedEntityName, Object entityIdValue)
+	{
+		if (null == qualifiedEntityName)
+		{
+			qualifiedEntityName = "";
+		}
+
+		try
+		{
+			return String.format(baseUri + "/%s/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
+					UriUtils.encodePathSegment(DataConverter.toString(entityIdValue), "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new UnknownEntityException(qualifiedEntityName);
+		}
 	}
 
 	private File fileLocationToStoredRenamedFile(String fileLocation, String entityName) throws IOException
