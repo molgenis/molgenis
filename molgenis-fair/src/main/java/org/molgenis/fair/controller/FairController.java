@@ -62,7 +62,7 @@ public class FairController
 	@RunAsSystem
 	public SubjectEntity getCatalog(@PathVariable("catalogID") String catalogID, HttpServletRequest request)
 	{
-		return new SubjectEntity(getBaseUri(request), dataService.findOneById("fdp_Catalog", catalogID));
+		return new SubjectEntity(getBaseUri(request)+"/"+catalogID, dataService.findOneById("fdp_Catalog", catalogID));
 	}
 
 }
