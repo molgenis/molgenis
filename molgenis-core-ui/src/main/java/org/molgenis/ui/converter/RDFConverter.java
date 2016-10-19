@@ -43,7 +43,7 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 	@Override
 	protected boolean supports(Class<?> aClass)
 	{
-		return Entity.class.isAssignableFrom(aClass);
+		return SubjectEntity.class.isAssignableFrom(aClass);
 	}
 
 	@Override
