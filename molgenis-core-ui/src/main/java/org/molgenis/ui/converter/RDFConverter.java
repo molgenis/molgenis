@@ -66,7 +66,11 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 			Multimap<Relation, LabeledResource> tags = tagService.getTagsForAttribute(entityType, attribute);
 			for (LabeledResource tag : tags.get(Relation.isAssociatedWith))
 			{
-				convertToRdf(subjectEntity.getSubject() ,tag.getIri(), entity.get(attribute.getName()).toString(), model);
+				Object value = entity.get(attribute.getName());
+				if(value != null)
+				{
+					convertToRdf(subjectEntity.getSubject() ,tag.getIri(), value.toString(), model);
+				}
 			}
 		}
 		RDFDataMgr.write(writer, model, RDFFormat.TURTLE);
