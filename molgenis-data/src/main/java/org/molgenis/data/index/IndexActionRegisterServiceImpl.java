@@ -101,9 +101,38 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
+		Set<String> entityFillName = Sets.newHashSet();
+
 		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()))
+				.filter(indexAction ->
+				{
+					if (excludedEntities.contains(indexAction.getEntityFullName()))
+					{
+						return false;
+					}
+
+					if (null != indexAction.getEntityFullName() && null == indexAction.getEntityId())
+					{
+						entityFillName.add(indexAction.getEntityFullName());
+					}
+
+					return true;
+				})
 				.flatMap(this::addReferencingEntities).collect(toSet());
+
+		Set<IndexAction> indexActionSetToRemove = Sets.newHashSet();
+		entityFillName.forEach(entityFullName ->
+		{
+			indexActionSet.stream().forEach(indexAction ->
+			{
+				if(null != indexAction.getEntityId() && indexAction.getEntityFullName().equals(entityFullName)){
+					indexActionSetToRemove.add(indexAction);
+					LOG.info("remove index actions of row when entity will already be indexed: [{}].[{}]", indexAction.getEntityFullName(), indexAction.getEntityId());
+				}
+			});
+		});
+
+		indexActionSet.removeAll(indexActionSetToRemove);
 
 		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
 		for (int i = 0; i < indexActions1.size(); i++)
