@@ -19,6 +19,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(BASE_URI)
+/**
+ * Serves metadata for the molgenis FAIR DataPoint.
+ */
 public class FairController
 {
 	static final String BASE_URI = "/fdp";
