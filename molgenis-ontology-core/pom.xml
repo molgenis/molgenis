@@ -45,11 +45,7 @@
             <artifactId>molgenis-data-elasticsearch</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-rest</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-csv</artifactId>
