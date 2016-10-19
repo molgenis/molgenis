@@ -18,11 +18,14 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
@@ -30,8 +33,10 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 /**
- * Service to tag metadata with simple String terms.
+ * Service to tag metadata with simple
+ * String terms.
  */
+@Component
 public class UntypedTagService implements TagService<LabeledResource, LabeledResource>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(UntypedTagService.class);
@@ -39,10 +44,11 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	private final DataService dataService;
 	private final TagRepository tagRepository;
 
+	@Autowired
 	public UntypedTagService(DataService dataService, TagRepository tagRepository)
 	{
-		this.dataService = dataService;
-		this.tagRepository = tagRepository;
+		this.dataService = requireNonNull(dataService);
+		this.tagRepository = requireNonNull(tagRepository);
 	}
 
 	private Entity findAttributeEntity(EntityType entityType, String attributeName)
