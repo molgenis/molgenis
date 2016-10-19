@@ -7,8 +7,11 @@ import org.molgenis.ui.converter.RDFMediaType;
 import org.molgenis.ui.model.SubjectEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.molgenis.fair.controller.FairController.BASE_URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -26,13 +29,27 @@ public class FairController
 	{
 		this.dataService = dataService;
 	}
+
+	private static String getBaseUri(HttpServletRequest request)
+	{
+		String apiUrl;
+		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+		{
+			apiUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort() + BASE_URI;
+		}
+		else
+		{
+			apiUrl = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + BASE_URI;
+		}
+		return apiUrl;
 	}
 
 	@RequestMapping(method = GET, produces = RDFMediaType.TEXT_TURTLE_VALUE)
 	@ResponseBody
 	@RunAsSystem
-	public SubjectEntity getMetadata()
+	public SubjectEntity getMetadata(HttpServletRequest request)
 	{
-		return new SubjectEntity("http://molgenis01.gcc.rug.nl/fdp", dataService.findOne("fdp_Metadata", new QueryImpl<>()));
+		return new SubjectEntity(getBaseUri(request),
+				dataService.findOne("fdp_Metadata", new QueryImpl<>()));
 	}
 }
