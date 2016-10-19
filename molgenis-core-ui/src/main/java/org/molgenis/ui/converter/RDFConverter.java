@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -26,13 +26,13 @@ import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 @Component
 public class RDFConverter extends AbstractHttpMessageConverter<Entity>
 {
-	private final UntypedTagService untypedTagService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
-	public RDFConverter(UntypedTagService untypedTagService)
+	public RDFConverter(TagService<LabeledResource, LabeledResource> tagService)
 	{
 		super(TEXT_TURTLE, APPLICATION_TRIG);
-		this.untypedTagService = untypedTagService;
+		this.tagService = tagService;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class RDFConverter extends AbstractHttpMessageConverter<Entity>
 		EntityType entityType = entity.getEntityType();
 		for (Attribute attribute : entityType.getAtomicAttributes())
 		{
-			Multimap<Relation, LabeledResource> tags = untypedTagService.getTagsForAttribute(entityType, attribute);
+			Multimap<Relation, LabeledResource> tags = tagService.getTagsForAttribute(entityType, attribute);
 			for(LabeledResource tag: tags.get(Relation.isAssociatedWith)){
 				writer.write(tag.getIri());
 				writer.write(',');

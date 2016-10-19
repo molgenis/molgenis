@@ -18,8 +18,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,6 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
  * Service to tag metadata with simple
  * String terms.
  */
-@Component
 public class UntypedTagService implements TagService<LabeledResource, LabeledResource>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(UntypedTagService.class);
@@ -44,7 +41,6 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	private final DataService dataService;
 	private final TagRepository tagRepository;
 
-	@Autowired
 	public UntypedTagService(DataService dataService, TagRepository tagRepository)
 	{
 		this.dataService = requireNonNull(dataService);
