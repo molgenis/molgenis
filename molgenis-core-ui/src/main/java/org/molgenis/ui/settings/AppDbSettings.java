@@ -127,27 +127,27 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			// tracking settings
 			Attribute trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
 
-			addAttribute(GOOGLE_ANALYTICS_IP_ANONYMIZATION, trackingAttr).setDataType(BOOL).setNillable(false)
+			addAttribute(GOOGLE_ANALYTICS_IP_ANONYMIZATION).setParent(trackingAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION))
 					.setLabel("IP anonymization").setDescription(
 					"Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
-			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID, trackingAttr).setDataType(STRING).setNillable(true)
+			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID).setParent(trackingAttr).setDataType(STRING).setNillable(true)
 					.setLabel("Google analytics tracking ID")
 					.setDescription("Google analytics tracking ID (e.g. UA-XXXX-Y)");
-			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS, trackingAttr).setDataType(BOOL)
+			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setParent(trackingAttr).setDataType(BOOL)
 					.setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS))
 					.setLabel("Google analytics account privacy friendly").setDescription(
 					"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
-			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS, trackingAttr).setDataType(STRING).setNillable(true)
+			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS).setParent(trackingAttr).setDataType(STRING).setNillable(true)
 					.setLabel("Google analytics tracking ID (MOLGENIS)")
 					.setDescription("Google analytics tracking ID used by MOLGENIS");
-			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS, trackingAttr).setDataType(BOOL)
+			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS).setParent(trackingAttr).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(
 					String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS))
 					.setReadOnly(true).setLabel("Google analytics account privacy friendly (MOLGENIS)").setDescription(
 					"Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
-			addAttribute(TRACKING_CODE_FOOTER, trackingAttr).setDataType(SCRIPT).setNillable(true)
+			addAttribute(TRACKING_CODE_FOOTER).setParent(trackingAttr).setDataType(SCRIPT).setNillable(true)
 					.setLabel("Tracking code footer").setDescription(
 					"JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
 		}
