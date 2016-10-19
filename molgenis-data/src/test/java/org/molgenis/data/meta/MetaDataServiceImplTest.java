@@ -952,6 +952,11 @@ public class MetaDataServiceImplTest
 		inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
+		//noinspection unchecked
+		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
+		assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
+
 		inOrder.verifyNoMoreInteractions();
 	}
 
@@ -1054,6 +1059,10 @@ public class MetaDataServiceImplTest
 		inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
+		//noinspection unchecked
+		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
+		assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
 
 		inOrder.verifyNoMoreInteractions();
 	}
