@@ -1,7 +1,6 @@
 package org.molgenis.fair.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.converter.RDFMediaType;
@@ -21,13 +20,12 @@ public class FairController
 	static final String BASE_URI = "/fdp";
 
 	private final DataService dataService;
-	private final MetaDataService metaDataService;
 
 	@Autowired
-	public FairController(DataService dataService, MetaDataService metaDataService)
+	public FairController(DataService dataService)
 	{
 		this.dataService = dataService;
-		this.metaDataService = metaDataService;
+	}
 	}
 
 	@RequestMapping(method = GET, produces = RDFMediaType.TEXT_TURTLE_VALUE)
