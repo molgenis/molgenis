@@ -244,7 +244,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				"simpleName");
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("nl").getName(),
 				"simpleName");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(), "simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(),
+				"simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
@@ -1304,7 +1305,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(singleThreaded = true)
+	@Test(singleThreaded = true, enabled = false)
 	public void l3CacheTest()
 	{
 		String COUNTRY = "Country";
@@ -1334,7 +1335,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
-		q0.pageSize(10); // The only reason to be cached l3, important!
+		q0.pageSize(10); // L3 only caches queries with a page size
 		q0.sort(new Sort().on(COUNTRY));
 
 		Repository repoQ0 = dataService.getRepository(entityTypeDynamic.getName());
