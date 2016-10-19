@@ -5,6 +5,8 @@ import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -22,9 +24,6 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Calendar;
 
 import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
@@ -34,12 +33,24 @@ import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 {
 	private final TagService<LabeledResource, LabeledResource> tagService;
+	private final PrefixMapping prefixMapping = new PrefixMappingImpl();
 
 	@Autowired
 	public RDFConverter(TagService<LabeledResource, LabeledResource> tagService)
 	{
 		super(TEXT_TURTLE, APPLICATION_TRIG);
 		this.tagService = tagService;
+
+		prefixMapping.setNsPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		prefixMapping.setNsPrefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+		prefixMapping.setNsPrefix("dcat", "http://www.w3.org/ns/dcat#");
+		prefixMapping.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
+		prefixMapping.setNsPrefix("owl", "http://www.w3.org/2002/07/owl#");
+		prefixMapping.setNsPrefix("dct", "http://purl.org/dc/terms/");
+		prefixMapping.setNsPrefix("lang", "http://id.loc.gov/vocabulary/iso639-1/");
+		prefixMapping.setNsPrefix("fdpo", "http://rdf.biosemantics.org/ontologies/fdp-o#");
+		prefixMapping.setNsPrefix("gct", "http://purl.org/gc/terms/");
+		prefixMapping.setNsPrefix("ldp", "http://www.w3.org/ns/ldp#");
 	}
 
 	@Override
@@ -60,7 +71,6 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 			throws IOException, HttpMessageNotWritableException
 	{
 		Entity entity = subjectEntity.getEntity();
-		Writer writer = new OutputStreamWriter(httpOutputMessage.getBody(), Charset.forName("UTF-8"));
 		EntityType entityType = entity.getEntityType();
 		Model model = ModelFactory.createDefaultModel();
 		for (Attribute attribute : entityType.getAtomicAttributes())
@@ -90,8 +100,9 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 				}
 			}
 		}
-		RDFDataMgr.write(writer, model, RDFFormat.TURTLE);
-		writer.close();
+		model.setNsPrefixes(prefixMapping);
+		RDFDataMgr.write(httpOutputMessage.getBody(), model, RDFFormat.TURTLE);
+		httpOutputMessage.getBody().close();
 	}
 
 	public void convertValueToRdf(String subjectString, String tag, Object attrValue, Model model)
