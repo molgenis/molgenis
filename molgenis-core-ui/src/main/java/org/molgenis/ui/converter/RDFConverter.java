@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.ui.model.SubjectEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -28,7 +29,7 @@ import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
 @Component
-public class RDFConverter extends AbstractHttpMessageConverter<Entity>
+public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 {
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
@@ -46,26 +47,26 @@ public class RDFConverter extends AbstractHttpMessageConverter<Entity>
 	}
 
 	@Override
-	protected Entity readInternal(Class<? extends Entity> aClass, HttpInputMessage httpInputMessage)
+	protected SubjectEntity readInternal(Class<? extends SubjectEntity> aClass, HttpInputMessage httpInputMessage)
 			throws IOException, HttpMessageNotReadableException
 	{
 		throw new HttpMessageNotReadableException("RDF support is readonly!");
 	}
 
 	@Override
-	protected void writeInternal(Entity entity, HttpOutputMessage httpOutputMessage)
+	protected void writeInternal(SubjectEntity subjectEntity, HttpOutputMessage httpOutputMessage)
 			throws IOException, HttpMessageNotWritableException
 	{
+		Entity entity = subjectEntity.getEntity();
 		Writer writer = new OutputStreamWriter(httpOutputMessage.getBody(), Charset.forName("UTF-8"));
 		EntityType entityType = entity.getEntityType();
 		Model model = ModelFactory.createDefaultModel();
-		String subject = "http://molgenis01.gcc.rug.nl/fdp";
 		for (Attribute attribute : entityType.getAtomicAttributes())
 		{
 			Multimap<Relation, LabeledResource> tags = tagService.getTagsForAttribute(entityType, attribute);
 			for (LabeledResource tag : tags.get(Relation.isAssociatedWith))
 			{
-				convertToRdf(subject ,tag.getIri(), entity.get(attribute.getName()).toString(), model);
+				convertToRdf(subjectEntity.getSubject() ,tag.getIri(), entity.get(attribute.getName()).toString(), model);
 			}
 		}
 		RDFDataMgr.write(writer, model, RDFFormat.TURTLE);
