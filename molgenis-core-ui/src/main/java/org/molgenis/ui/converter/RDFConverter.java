@@ -27,6 +27,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
@@ -75,6 +76,15 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 					{
 						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(), entity.getString(attribute.getName()),
 								model);
+					}
+					else if (isMultipleReferenceType(attribute))
+					{
+						Iterable<Entity> mrefs = entity.getEntities(attribute.getName());
+						for (Entity mref : mrefs)
+						{
+							convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
+									subjectEntity.getSubject() + "/" + mref.getIdValue(), model);
+						}
 					}
 					else
 					{
