@@ -8,6 +8,7 @@ import org.molgenis.ui.model.SubjectEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -52,4 +53,13 @@ public class FairController
 		return new SubjectEntity(getBaseUri(request),
 				dataService.findOne("fdp_Metadata", new QueryImpl<>()));
 	}
+
+	@RequestMapping(method = GET, produces = RDFMediaType.TEXT_TURTLE_VALUE, value = "/{catalogID:.+}")
+	@ResponseBody
+	@RunAsSystem
+	public SubjectEntity getCatalog(@PathVariable("catalogID") String catalogID, HttpServletRequest request)
+	{
+		return new SubjectEntity(getBaseUri(request), dataService.findOneById("fdp_Catalog", catalogID));
+	}
+
 }
