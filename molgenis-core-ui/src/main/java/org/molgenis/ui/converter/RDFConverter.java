@@ -1,22 +1,8 @@
 package org.molgenis.ui.converter;
 
-import com.google.common.collect.Multimap;
-import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.molgenis.AttributeType;
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.ui.model.SubjectEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
@@ -25,50 +11,27 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Calendar;
 
-import static com.google.common.collect.Iterables.any;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.apache.jena.riot.RDFFormat.TURTLE;
 import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
 @Component
-public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
+public class RDFConverter extends AbstractHttpMessageConverter<Model>
 {
-	public static final String KEYWORD = "http://www.w3.org/ns/dcat#keyword";
-
-	private final TagService<LabeledResource, LabeledResource> tagService;
-	private final PrefixMapping prefixMapping = new PrefixMappingImpl();
-
-	@Autowired
-	public RDFConverter(TagService<LabeledResource, LabeledResource> tagService)
+	public RDFConverter()
 	{
 		super(TEXT_TURTLE, APPLICATION_TRIG);
-		this.tagService = tagService;
-
-		prefixMapping.setNsPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-		prefixMapping.setNsPrefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-		prefixMapping.setNsPrefix("dcat", "http://www.w3.org/ns/dcat#");
-		prefixMapping.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
-		prefixMapping.setNsPrefix("owl", "http://www.w3.org/2002/07/owl#");
-		prefixMapping.setNsPrefix("dct", "http://purl.org/dc/terms/");
-		prefixMapping.setNsPrefix("lang", "http://id.loc.gov/vocabulary/iso639-1/");
-		prefixMapping.setNsPrefix("fdpo", "http://rdf.biosemantics.org/ontologies/fdp-o#");
-		prefixMapping.setNsPrefix("gct", "http://purl.org/gc/terms/");
-		prefixMapping.setNsPrefix("ldp", "http://www.w3.org/ns/ldp#");
-		prefixMapping.setNsPrefix("foaf", "http://xmlns.com/foaf/0.1/");
 	}
 
 	@Override
 	protected boolean supports(Class<?> aClass)
 	{
-		return SubjectEntity.class.isAssignableFrom(aClass);
+		return Model.class.isAssignableFrom(aClass);
 	}
 
 	@Override
-	protected SubjectEntity readInternal(Class<? extends SubjectEntity> aClass, HttpInputMessage httpInputMessage)
+	protected Model readInternal(Class<? extends Model> aClass, HttpInputMessage httpInputMessage)
 			throws IOException, HttpMessageNotReadableException
 	{
 		throw new HttpMessageNotReadableException("RDF support is readonly!");
@@ -76,119 +39,11 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 
 	@Override
 	@RunAsSystem
-	protected void writeInternal(SubjectEntity subjectEntity, HttpOutputMessage httpOutputMessage)
+	protected void writeInternal(Model model, HttpOutputMessage httpOutputMessage)
 			throws IOException, HttpMessageNotWritableException
 	{
-		Entity entity = subjectEntity.getEntity();
-		EntityType entityType = entity.getEntityType();
-		Model model = ModelFactory.createDefaultModel();
-		for (Attribute attribute : entityType.getAtomicAttributes())
-		{
-			Multimap<Relation, LabeledResource> tags = tagService.getTagsForAttribute(entityType, attribute);
-			Object value = entity.get(attribute.getName());
-			if (value != null)
-			{
-				for (LabeledResource tag : tags.get(Relation.isAssociatedWith))
-				{
-					if (attribute.getDataType() == AttributeType.HYPERLINK)
-					{
-						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(), entity.getString(attribute.getName()),
-								model);
-					}
-					else if (isMultipleReferenceType(attribute))
-					{
-						Iterable<Entity> mrefs = entity.getEntities(attribute.getName());
-						for (Entity objectEntity : mrefs)
-						{
-							convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
-									getObjectIri(subjectEntity, objectEntity), model);
-						}
-					}
-					else if (isSingleReferenceType(attribute))
-					{
-						Entity objectEntity = entity.getEntity(attribute.getName());
-						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
-								getObjectIri(subjectEntity, objectEntity), model);
-					}
-					else if (attribute.getDataType() == AttributeType.DATE_TIME)
-					{
-						convertValueToRdf(subjectEntity.getSubject(), tag.getIri(),
-								getXmlDateObject(entity, attribute, value), model);
-					}
-					else if (tag.getIri().equals(KEYWORD))
-					{
-						Arrays.asList(((String) value).split(",")).stream().forEach(
-								keyword -> convertValueToRdf(subjectEntity.getSubject(), tag.getIri(),
-										keyword, model));
-					}
-					else
-					{
-						convertValueToRdf(subjectEntity.getSubject(), tag.getIri(), value, model);
-					}
-				}
-			}
-		}
-		model.setNsPrefixes(prefixMapping);
-		RDFDataMgr.write(httpOutputMessage.getBody(), model, RDFFormat.TURTLE);
+		RDFDataMgr.write(httpOutputMessage.getBody(), model, TURTLE);
 		httpOutputMessage.getBody().close();
 	}
 
-	/**
-	 * Creates the object IRI for an object.
-	 * If the object has an attribute named IRI, this is the value of that attribute.
-	 * Otherwise, we create it by postfixing the subject's IRI with '/' and the object's ID value.
-	 */
-	private String getObjectIri(SubjectEntity subjectEntity, Entity object)
-	{
-		if (any(object.getEntityType().getAtomicAttributes(), attr -> "IRI".equals(attr.getName())))
-		{
-			return object.getString("IRI");
-		}
-		else
-		{
-			return subjectEntity.getSubject() + "/" + object.getIdValue();
-		}
-	}
-
-	private Object getXmlDateObject(Entity entity, Attribute attribute, Object value)
-	{
-
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(entity.getUtilDate(attribute.getName()));
-		XSDDateTime xsdDateTime = new XSDDateTime(calendar);
-		value = xsdDateTime;
-		return value;
-	}
-
-	public void convertValueToRdf(String subjectString, String tag, Object attrValue, Model model)
-	{
-		try
-		{
-			Resource subject = model.createResource(subjectString);
-			Property predicate = model.createProperty(tag);
-			Literal object = model.createTypedLiteral(attrValue);
-			model.add(subject, predicate, object);
-			model.createStatement(subject, predicate, object);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void convertIRIToRdf(String subjectString, String tag, String attrValue, Model model)
-	{
-		try
-		{
-			Resource subject = model.createResource(subjectString);
-			Property predicate = model.createProperty(tag);
-			Resource object = model.createResource(attrValue);
-			model.add(subject, predicate, object);
-			model.createStatement(subject, predicate, object);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
 }
