@@ -124,8 +124,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		 *
 		 * See https://jira.spring.io/browse/SPR-10655
 		 */
-		String corsInterceptPattern = "/api/**";
-		return new MappedInterceptor(new String[] { corsInterceptPattern }, corsInterceptor());
+		return new MappedInterceptor(new String[] { "/api/**", "/fdp/**" }, corsInterceptor());
 	}
 
 	@Override
