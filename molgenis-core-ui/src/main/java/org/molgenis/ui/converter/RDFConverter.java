@@ -1,7 +1,7 @@
 package org.molgenis.ui.converter;
 
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.RDFDataMgr;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.rio.Rio;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static org.apache.jena.riot.RDFFormat.TURTLE;
+import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
@@ -42,7 +42,7 @@ public class RDFConverter extends AbstractHttpMessageConverter<Model>
 	protected void writeInternal(Model model, HttpOutputMessage httpOutputMessage)
 			throws IOException, HttpMessageNotWritableException
 	{
-		RDFDataMgr.write(httpOutputMessage.getBody(), model, TURTLE);
+		Rio.write(model, httpOutputMessage.getBody(), TURTLE);
 		httpOutputMessage.getBody().close();
 	}
 
