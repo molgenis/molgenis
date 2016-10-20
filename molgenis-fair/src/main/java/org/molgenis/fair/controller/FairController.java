@@ -75,4 +75,15 @@ public class FairController
 				dataService.findOneById("fdp_Dataset", datasetID));
 	}
 
+	@RequestMapping(method = GET, produces = RDFMediaType.TEXT_TURTLE_VALUE, value="/{catalogID:.+}/{datasetID:.+}/{distributionID:.+}")
+	@ResponseBody
+	@RunAsSystem
+	public SubjectEntity getDistribution(@PathVariable("catalogID") String catalogID,
+			@PathVariable("datasetID") String datasetID, @PathVariable("distributionID") String distributionID,
+			HttpServletRequest request)
+	{
+		return new SubjectEntity(getBaseUri(request) + "/" + catalogID + "/" + datasetID + "/" + distributionID,
+				dataService.findOneById("fdp_Distribution", distributionID));
+	}
+
 }
