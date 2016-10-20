@@ -119,9 +119,24 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 		return createRdfModel(subjectIRI, subjectEntity);
 	}
 
+	private void setNamespacePrefixes(Model model)
+	{
+		model.setNamespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		model.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+		model.setNamespace("dcat", "http://www.w3.org/ns/dcat#");
+		model.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
+		model.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
+		model.setNamespace("dct", "http://purl.org/dc/terms/");
+		model.setNamespace("lang", "http://id.loc.gov/vocabulary/iso639-1/");
+		model.setNamespace("fdpo", "http://rdf.biosemantics.org/ontologies/fdp-o#");
+		model.setNamespace("ldp", "http://www.w3.org/ns/ldp#");
+		model.setNamespace("foaf", "http://xmlns.com/foaf/0.1/");
+	}
+
 	private Model createRdfModel(String subjectIRI, Entity entity)
 	{
 		Model model = new LinkedHashModel();
+		setNamespacePrefixes(model);
 		EntityType entityType = entity.getEntityType();
 
 		for (Attribute attribute : entityType.getAtomicAttributes())
