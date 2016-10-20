@@ -24,6 +24,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
@@ -34,6 +35,8 @@ import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 @Component
 public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 {
+	public static final String KEYWORD = "http://www.w3.org/ns/dcat#keyword";
+
 	private final TagService<LabeledResource, LabeledResource> tagService;
 	private final PrefixMapping prefixMapping = new PrefixMappingImpl();
 
@@ -101,13 +104,18 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 					{
 						Entity objectEntity = entity.getEntity(attribute.getName());
 						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
-								getObjectIri(subjectEntity, objectEntity),
-								model);
+								getObjectIri(subjectEntity, objectEntity), model);
 					}
 					else if (attribute.getDataType() == AttributeType.DATE_TIME)
 					{
 						convertValueToRdf(subjectEntity.getSubject(), tag.getIri(),
 								getXmlDateObject(entity, attribute, value), model);
+					}
+					else if (tag.getIri().equals(KEYWORD))
+					{
+						Arrays.asList(((String) value).split(",")).stream().forEach(
+								keyword -> convertValueToRdf(subjectEntity.getSubject(), tag.getIri(),
+										keyword, model));
 					}
 					else
 					{
