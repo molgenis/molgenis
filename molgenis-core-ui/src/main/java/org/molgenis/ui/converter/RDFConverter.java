@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
@@ -86,15 +87,19 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 									subjectEntity.getSubject() + "/" + mref.getIdValue(), model);
 						}
 					}
+					else if (isSingleReferenceType(attribute))
+					{
+						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
+								subjectEntity.getSubject() + "/" + entity.getEntity(attribute.getName()).getIdValue(),
+								model);
+					}
+					else if (attribute.getDataType().equals(AttributeType.DATE_TIME))
+					{
+						convertValueToRdf(subjectEntity.getSubject(), tag.getIri(),
+								getXmlDateObject(entity, attribute, value), model);
+					}
 					else
 					{
-						if (attribute.getDataType().equals(AttributeType.DATE_TIME))
-						{
-							Calendar calendar = Calendar.getInstance();
-							calendar.setTime(entity.getUtilDate(attribute.getName()));
-							XSDDateTime xsdDateTime = new XSDDateTime(calendar);
-							value = xsdDateTime;
-						}
 						convertValueToRdf(subjectEntity.getSubject(), tag.getIri(), value, model);
 					}
 				}
@@ -102,6 +107,16 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 		}
 		RDFDataMgr.write(writer, model, RDFFormat.TURTLE);
 		writer.close();
+	}
+
+	private Object getXmlDateObject(Entity entity, Attribute attribute, Object value)
+	{
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(entity.getUtilDate(attribute.getName()));
+		XSDDateTime xsdDateTime = new XSDDateTime(calendar);
+		value = xsdDateTime;
+		return value;
 	}
 
 	public void convertValueToRdf(String subjectString, String tag, Object attrValue, Model model)
