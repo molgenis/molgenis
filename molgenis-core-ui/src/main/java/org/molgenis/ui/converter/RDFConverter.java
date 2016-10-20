@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.model.SubjectEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpInputMessage;
@@ -74,6 +75,7 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 	}
 
 	@Override
+	@RunAsSystem
 	protected void writeInternal(SubjectEntity subjectEntity, HttpOutputMessage httpOutputMessage)
 			throws IOException, HttpMessageNotWritableException
 	{
