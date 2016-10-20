@@ -1,10 +1,11 @@
 package org.molgenis.fair.controller;
 
 import com.google.common.collect.Multimap;
-import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.rdf.model.*;
-import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -23,8 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import static com.google.common.collect.Iterables.any;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
@@ -37,36 +42,23 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping(BASE_URI)
 /**
  * Serves metadata for the molgenis FAIR DataPoint.
- */
-public class FairController
+ */ public class FairController
 {
 	static final String BASE_URI = "/fdp";
 
 	private final DataService dataService;
 
-	private final PrefixMapping prefixMapping = new PrefixMappingImpl();
-
 	public static final String KEYWORD = "http://www.w3.org/ns/dcat#keyword";
 
 	private final TagService<LabeledResource, LabeledResource> tagService;
+	private final ValueFactory valueFactory;
 
 	@Autowired
 	public FairController(DataService dataService, TagService<LabeledResource, LabeledResource> tagService)
 	{
 		this.dataService = dataService;
 		this.tagService = tagService;
-
-		prefixMapping.setNsPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-		prefixMapping.setNsPrefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-		prefixMapping.setNsPrefix("dcat", "http://www.w3.org/ns/dcat#");
-		prefixMapping.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
-		prefixMapping.setNsPrefix("owl", "http://www.w3.org/2002/07/owl#");
-		prefixMapping.setNsPrefix("dct", "http://purl.org/dc/terms/");
-		prefixMapping.setNsPrefix("lang", "http://id.loc.gov/vocabulary/iso639-1/");
-		prefixMapping.setNsPrefix("fdpo", "http://rdf.biosemantics.org/ontologies/fdp-o#");
-		prefixMapping.setNsPrefix("gct", "http://purl.org/gc/terms/");
-		prefixMapping.setNsPrefix("ldp", "http://www.w3.org/ns/ldp#");
-		prefixMapping.setNsPrefix("foaf", "http://xmlns.com/foaf/0.1/");
+		this.valueFactory = SimpleValueFactory.getInstance();
 	}
 
 	private static String getBaseUri(HttpServletRequest request)
@@ -106,15 +98,15 @@ public class FairController
 	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID:.+}/{datasetID:.+}")
 	@ResponseBody
 	@RunAsSystem
-	public Model getDataset(@PathVariable("catalogID") String catalogID,
-			@PathVariable("datasetID") String datasetID, HttpServletRequest request)
+	public Model getDataset(@PathVariable("catalogID") String catalogID, @PathVariable("datasetID") String datasetID,
+			HttpServletRequest request)
 	{
 		String subjectIRI = getBaseUri(request) + "/" + catalogID + "/" + datasetID;
 		Entity subjectEntity = dataService.findOneById("fdp_Dataset", datasetID);
 		return createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value="/{catalogID:.+}/{datasetID:.+}/{distributionID:.+}")
+	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID:.+}/{datasetID:.+}/{distributionID:.+}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getDistribution(@PathVariable("catalogID") String catalogID,
@@ -129,7 +121,7 @@ public class FairController
 
 	private Model createRdfModel(String subjectIRI, Entity entity)
 	{
-		Model model = ModelFactory.createDefaultModel();
+		Model model = new LinkedHashModel();
 		EntityType entityType = entity.getEntityType();
 
 		for (Attribute attribute : entityType.getAtomicAttributes())
@@ -159,7 +151,15 @@ public class FairController
 					}
 					else if (attribute.getDataType() == AttributeType.DATE_TIME)
 					{
-						convertValueToRdf(subjectIRI, tag.getIri(), getXmlDateObject(entity, attribute), model);
+						try
+						{
+							literalToRdf(subjectIRI, tag.getIri(),
+									getDateObject(entity.getUtilDate(attribute.getName())), model);
+						}
+						catch (DatatypeConfigurationException e)
+						{
+							throw new RuntimeException(e);
+						}
 					}
 					else if (tag.getIri().equals(KEYWORD))
 					{
@@ -173,7 +173,6 @@ public class FairController
 				}
 			}
 		}
-		model.setNsPrefixes(prefixMapping);
 		return model;
 	}
 
@@ -194,29 +193,37 @@ public class FairController
 		}
 	}
 
-	private Object getXmlDateObject(Entity entity, Attribute attribute)
+	private Literal getDateObject(Date date) throws DatatypeConfigurationException
 	{
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(entity.getUtilDate(attribute.getName()));
-		return new XSDDateTime(calendar);
+		GregorianCalendar c = new GregorianCalendar();
+		c.setTime(date);
+		XMLGregorianCalendar xmlDate = DatatypeFactory.newInstance().
+				newXMLGregorianCalendar(c);
+		Literal currentTime = new LiteralImpl(xmlDate.toXMLFormat(), XMLSchema.DATETIME);
+		return currentTime;
 	}
 
 	public void convertValueToRdf(String subjectIRI, String tag, Object attrValue, Model model)
 	{
-		Resource subject = model.createResource(subjectIRI);
-		Property predicate = model.createProperty(tag);
-		Literal object = model.createTypedLiteral(attrValue);
+		Resource subject = valueFactory.createIRI(subjectIRI);
+		IRI predicate = valueFactory.createIRI(tag);
+		Literal object = valueFactory.createLiteral(attrValue.toString());
 		model.add(subject, predicate, object);
-		model.createStatement(subject, predicate, object);
+	}
+
+	public void literalToRdf(String subjectIRI, String tag, Literal attrValue, Model model)
+	{
+		Resource subject = valueFactory.createIRI(subjectIRI);
+		IRI predicate = valueFactory.createIRI(tag);
+		model.add(subject, predicate, attrValue);
 	}
 
 	public void convertIRIToRdf(String subjectIRI, String tag, String attrValue, Model model)
 	{
-		Resource subject = model.createResource(subjectIRI);
-		Property predicate = model.createProperty(tag);
-		Resource object = model.createResource(attrValue);
+		Resource subject = valueFactory.createIRI(subjectIRI);
+		IRI predicate = valueFactory.createIRI(tag);
+		Resource object = valueFactory.createIRI(attrValue.toString());
 		model.add(subject, predicate, object);
-		model.createStatement(subject, predicate, object);
 	}
 
 }

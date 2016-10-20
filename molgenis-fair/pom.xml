@@ -16,28 +16,9 @@
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
-            <!-- specify jackson version, otherwise we become incompatible with spring! -->
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>apache-jena-libs</artifactId>
-            <type>pom</type>
-            <version>3.1.0</version><!-- both versions appear to be working fine now, let's go for the latest? -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <!-- need to include these cause otherwise xerces, included by jena, fails when parsing xml -->
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-runtime</artifactId>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
