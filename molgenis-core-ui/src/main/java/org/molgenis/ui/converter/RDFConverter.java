@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import static com.google.common.collect.Iterables.tryFind;
+import static com.google.common.collect.Iterables.any;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
@@ -137,9 +137,14 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 	 */
 	private String getObjectIri(SubjectEntity subjectEntity, Entity object)
 	{
-		return tryFind(object.getEntityType().getAtomicAttributes(), attr -> "IRI".equals(attr.getName()))
-				.transform(attr -> attr.getString("IRI"))
-				.or(subjectEntity.getSubject() + "/" + object.getIdValue());
+		if (any(object.getEntityType().getAtomicAttributes(), attr -> "IRI".equals(attr.getName())))
+		{
+			return object.getString("IRI");
+		}
+		else
+		{
+			return subjectEntity.getSubject() + "/" + object.getIdValue();
+		}
 	}
 
 	private Object getXmlDateObject(Entity entity, Attribute attribute, Object value)
