@@ -57,6 +57,7 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 		prefixMapping.setNsPrefix("fdpo", "http://rdf.biosemantics.org/ontologies/fdp-o#");
 		prefixMapping.setNsPrefix("gct", "http://purl.org/gc/terms/");
 		prefixMapping.setNsPrefix("ldp", "http://www.w3.org/ns/ldp#");
+		prefixMapping.setNsPrefix("foaf", "http://xmlns.com/foaf/0.1/");
 	}
 
 	@Override
