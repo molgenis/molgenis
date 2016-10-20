@@ -79,11 +79,11 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 		{
 			Multimap<Relation, LabeledResource> tags = tagService.getTagsForAttribute(entityType, attribute);
 			Object value = entity.get(attribute.getName());
-			for (LabeledResource tag : tags.get(Relation.isAssociatedWith))
+			if (value != null)
 			{
-				if (value != null)
+				for (LabeledResource tag : tags.get(Relation.isAssociatedWith))
 				{
-					if (attribute.getDataType().equals(AttributeType.HYPERLINK))
+					if (attribute.getDataType() == AttributeType.HYPERLINK)
 					{
 						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(), entity.getString(attribute.getName()),
 								model);
@@ -91,19 +91,20 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 					else if (isMultipleReferenceType(attribute))
 					{
 						Iterable<Entity> mrefs = entity.getEntities(attribute.getName());
-						for (Entity mref : mrefs)
+						for (Entity objectEntity : mrefs)
 						{
 							convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
-									subjectEntity.getSubject() + "/" + mref.getIdValue(), model);
+									getObjectIri(subjectEntity, objectEntity), model);
 						}
 					}
 					else if (isSingleReferenceType(attribute))
 					{
+						Entity objectEntity = entity.getEntity(attribute.getName());
 						convertIRIToRdf(subjectEntity.getSubject(), tag.getIri(),
-								subjectEntity.getSubject() + "/" + entity.getEntity(attribute.getName()).getIdValue(),
+								getObjectIri(subjectEntity, objectEntity),
 								model);
 					}
-					else if (attribute.getDataType().equals(AttributeType.DATE_TIME))
+					else if (attribute.getDataType() == AttributeType.DATE_TIME)
 					{
 						convertValueToRdf(subjectEntity.getSubject(), tag.getIri(),
 								getXmlDateObject(entity, attribute, value), model);
@@ -118,6 +119,16 @@ public class RDFConverter extends AbstractHttpMessageConverter<SubjectEntity>
 		model.setNsPrefixes(prefixMapping);
 		RDFDataMgr.write(httpOutputMessage.getBody(), model, RDFFormat.TURTLE);
 		httpOutputMessage.getBody().close();
+	}
+
+	/**
+	 * Creates the object IRI for an object.
+	 * If the object has an attribute named IRI, this is the value of that attribute.
+	 * Otherwise, we create it by postfixing the subject's IRI with '/' and the object's ID value.
+	 */
+	private String getObjectIri(SubjectEntity subjectEntity, Entity object)
+	{
+		return subjectEntity.getSubject() + "/" + object.getIdValue();
 	}
 
 	private Object getXmlDateObject(Entity entity, Attribute attribute, Object value)
