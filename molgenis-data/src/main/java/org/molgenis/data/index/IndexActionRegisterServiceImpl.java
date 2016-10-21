@@ -101,6 +101,28 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
+		Set<IndexAction> indexActionSet = filterUnnecessaryIndexActions();
+		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
+		for (int i = 0; i < indexActions1.size(); i++)
+		{
+			indexActions1.get(i).setActionOrder(i);
+		}
+		List<IndexAction> indexActions = indexActions1;
+		if (!indexActions.isEmpty())
+		{
+			LOG.debug("Store index actions for transaction {}", transactionId);
+			dataService.add(INDEX_ACTION_GROUP,
+					indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+			dataService.add(INDEX_ACTION, indexActions.stream());
+		}
+	}
+
+	/**
+	 * Filter all unnecessary index actions
+	 *
+	 * @return
+	 */
+	Set<IndexAction>  filterUnnecessaryIndexActions(){
 		Set<String> entityFillName = Sets.newHashSet();
 
 		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
@@ -133,20 +155,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		});
 
 		indexActionSet.removeAll(indexActionSetToRemove);
-
-		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
-		for (int i = 0; i < indexActions1.size(); i++)
-		{
-			indexActions1.get(i).setActionOrder(i);
-		}
-		List<IndexAction> indexActions = indexActions1;
-		if (!indexActions.isEmpty())
-		{
-			LOG.debug("Store index actions for transaction {}", transactionId);
-			dataService.add(INDEX_ACTION_GROUP,
-					indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
-			dataService.add(INDEX_ACTION, indexActions.stream());
-		}
+		return indexActionSet;
 	}
 
 	/**
