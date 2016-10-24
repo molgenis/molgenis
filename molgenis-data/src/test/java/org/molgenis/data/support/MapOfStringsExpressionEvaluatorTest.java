@@ -204,7 +204,6 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
 		systemEntityMetaMap.values().forEach(systemEntityType ->
 		{
-			System.out.println("systemEntityType: " + systemEntityType.getName());
 			systemEntityType.bootstrap(entityTypeMeta);
 		});
 	}
