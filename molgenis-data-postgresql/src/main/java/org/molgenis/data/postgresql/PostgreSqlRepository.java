@@ -126,6 +126,7 @@ class PostgreSqlRepository extends AbstractRepository
 		return QUERY_OPERATORS;
 	}
 
+	@Override
 	public EntityType getEntityType()
 	{
 		return entityType;
