@@ -240,12 +240,12 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-runtime</artifactId>
-            <version>2.0.2</version>
+            <version>${apache.rdf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-api</artifactId>
-            <version>2.0.2</version>
+            <version>${apache.rdf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
