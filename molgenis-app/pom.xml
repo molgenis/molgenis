@@ -52,6 +52,23 @@
 						<artifactId>mysql-connector-java</artifactId>
 						<version>${mysql.connector.java.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>uk.ac.ebi.mydas</groupId>
+						<artifactId>mydas</artifactId>
+						<version>1.6.7</version>
+						<scope>system</scope>
+						<systemPath>${basedir}/../molgenis-das/src/main/resources/mydas-1.6.7.jar</systemPath>
+					</dependency>
+					<dependency>
+						<groupId>xpp3</groupId>
+						<artifactId>xpp3</artifactId>
+						<version>1.1.3.4.O</version>
+					</dependency>
+					<dependency>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+						<version>1.2.17</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 		</plugins>
