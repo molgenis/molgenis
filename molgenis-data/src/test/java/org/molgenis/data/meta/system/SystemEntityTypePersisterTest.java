@@ -2,6 +2,8 @@ package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Maps;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
@@ -41,9 +43,13 @@ public class SystemEntityTypePersisterTest
 	private AttributeMetadata attrMetaMeta;
 	private MetaDataService metaDataService;
 
+	@Captor
+	ArgumentCaptor<Stream<Object>> objectIdCaptor;
+
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		MockitoAnnotations.initMocks(this);
 		attrMetaMeta = mock(AttributeMetadata.class);
 		metaDataService = mock(MetaDataService.class);
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
@@ -101,6 +107,9 @@ public class SystemEntityTypePersisterTest
 		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
+				.thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
@@ -131,6 +140,8 @@ public class SystemEntityTypePersisterTest
 		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
+				.thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
