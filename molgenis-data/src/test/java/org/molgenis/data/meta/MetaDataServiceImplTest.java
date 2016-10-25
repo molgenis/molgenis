@@ -1075,14 +1075,6 @@ public class MetaDataServiceImplTest
 		verify(dataService).add(ATTRIBUTE_META_DATA, attr);
 	}
 
-	@Test
-	public void deleteAttributeById()
-	{
-		Object attrId = "attr0";
-		metaDataServiceImpl.deleteAttributeById(attrId);
-		verify(dataService).deleteById(ATTRIBUTE_META_DATA, attrId);
-	}
-
 	@DataProvider(name = "isMetaEntityTypeProvider")
 	public static Iterator<Object[]> isMetaEntityTypeProvider()
 	{

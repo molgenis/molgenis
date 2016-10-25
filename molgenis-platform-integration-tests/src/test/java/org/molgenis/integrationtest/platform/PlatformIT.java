@@ -1301,18 +1301,21 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(singleThreaded = true, enabled = false)
-	public void l3CacheTest()
+	/**
+	 * Test add and remove attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void metadataAttributeChanges()
 	{
-		String COUNTRY = "Country";
-		final EntityType entityType = EntityType
-				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS, attributeFactory);
-		final Attribute newAttr = attributeFactory.create().setName(COUNTRY);
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+		newAttr.setSequenceNumber(0);
 
 		runAsSystem(() ->
 		{
-			entityType.addAttribute(newAttr);
-			dataService.getMeta().updateEntityType(entityType);
+			dataService.getMeta().addAttribute(newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
@@ -1322,28 +1325,39 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 			dataService.update(entityType.getName(),
-					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).filter(e ->
-					{
-						e.set(COUNTRY, "NL" + e.getIdValue());
-						return true;
-					}));
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
+							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
+					));
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
-		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
+		// Tunnel via L3 flow
+		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
 		q0.pageSize(10); // L3 only caches queries with a page size
-		q0.sort(new Sort().on(COUNTRY));
+		q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-		Repository repoQ0 = dataService.getRepository(entityTypeDynamic.getName());
 		runAsSystem(() ->
 		{
-			List expected = dataService.findAll(repoQ0.getName(), q0).map(e -> e.getIdValue()).collect(toList());
+			// get new attr from backend, the old one points at an EntityType instance that doesn't know about it yet.
+			Attribute attr2 = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class);
+
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(e -> e.getIdValue())
+					.collect(toList());
 			assertEquals(expected, Arrays.asList("0", "1"));
 
 			// Remove added attribute
-			entityType.removeAttribute(newAttr);
-			dataService.getMeta().updateEntityType(entityType);
+			dataService.delete(ATTRIBUTE_META_DATA, attr2);
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		// verify attribute is deleted by adding it again
+		runAsSystem(() ->
+		{
+			dataService.getMeta().addAttribute(newAttr);
+			// get new attr from backend, the old one points at an EntityType instance that doesn't know about it yet.
+			Attribute attr3 = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class);
+			dataService.delete(ATTRIBUTE_META_DATA, attr3);
 		});
 	}
 }

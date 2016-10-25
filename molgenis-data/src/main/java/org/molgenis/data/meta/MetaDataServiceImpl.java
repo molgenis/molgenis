@@ -182,13 +182,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getName).collect(joining(",")));
 	}
 
-	@Transactional
-	@Override
-	public void deleteAttributeById(Object id)
-	{
-		dataService.deleteById(ATTRIBUTE_META_DATA, id);
-	}
-
 	@Override
 	public RepositoryCollection getBackend(EntityType entityType)
 	{
