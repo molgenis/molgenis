@@ -49,13 +49,10 @@ public class CommandLineAnnotatorConfig
 		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
-
-		systemEntityMetaMap.values().stream()
-				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_TYPE_META_DATA)
-						|| systemEntityMeta.getName().equals(ATTRIBUTE_META_DATA)
-						|| systemEntityMeta.getName().equals(PACKAGE) || systemEntityMeta.getName()
-						.equals(TAG))
-				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
+		systemEntityMetaMap.get(TAG).bootstrap(entityTypeMeta);
+		systemEntityMetaMap.get(ENTITY_TYPE_META_DATA).bootstrap(entityTypeMeta);
+		systemEntityMetaMap.get(ATTRIBUTE_META_DATA).bootstrap(entityTypeMeta);
+		systemEntityMetaMap.get(PACKAGE).bootstrap(entityTypeMeta);
 	}
 
 	@Value("${vcf-validator-location:@null}")
