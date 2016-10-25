@@ -51,9 +51,10 @@ public class CommandLineAnnotatorConfig
 		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
 
 		systemEntityMetaMap.values().stream()
-				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_TYPE_META_DATA) || systemEntityMeta
-						.getName().equals(ATTRIBUTE_META_DATA) || systemEntityMeta.getName().equals(PACKAGE)
-						|| systemEntityMeta.getName().equals(TAG))
+				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_TYPE_META_DATA)
+						|| systemEntityMeta.getName().equals(ATTRIBUTE_META_DATA)
+						|| systemEntityMeta.getName().equals(PACKAGE) || systemEntityMeta.getName()
+						.equals(TAG))
 				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
 	}
 
