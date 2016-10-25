@@ -1315,7 +1315,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		runAsSystem(() ->
 		{
-			dataService.getMeta().addAttribute(newAttr);
+			dataService.add(ATTRIBUTE_META_DATA, newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
@@ -1347,14 +1347,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertEquals(expected, Arrays.asList("0", "1"));
 
 			// Remove added attribute
-			dataService.delete(ATTRIBUTE_META_DATA, attr2);
+			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(attr2));
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 
 		// verify attribute is deleted by adding it again
 		runAsSystem(() ->
 		{
-			dataService.getMeta().addAttribute(newAttr);
+			dataService.add(ATTRIBUTE_META_DATA, newAttr);
 			// get new attr from backend, the old one points at an EntityType instance that doesn't know about it yet.
 			Attribute attr3 = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class);
 			dataService.delete(ATTRIBUTE_META_DATA, attr3);

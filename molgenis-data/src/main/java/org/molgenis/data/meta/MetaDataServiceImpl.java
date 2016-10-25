@@ -398,13 +398,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		upsertAttributes(entityType, existingEntityType);
 	}
 
-	@Transactional
-	@Override
-	public void addAttribute(Attribute attr)
-	{
-		dataService.add(ATTRIBUTE_META_DATA, attr);
-	}
-
 	@Override
 	public EntityType getEntityType(String fullyQualifiedEntityName)
 	{

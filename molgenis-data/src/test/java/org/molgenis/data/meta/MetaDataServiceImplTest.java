@@ -1067,14 +1067,6 @@ public class MetaDataServiceImplTest
 		inOrder.verifyNoMoreInteractions();
 	}
 
-	@Test
-	public void addAttribute()
-	{
-		Attribute attr = mock(Attribute.class);
-		metaDataServiceImpl.addAttribute(attr);
-		verify(dataService).add(ATTRIBUTE_META_DATA, attr);
-	}
-
 	@DataProvider(name = "isMetaEntityTypeProvider")
 	public static Iterator<Object[]> isMetaEntityTypeProvider()
 	{
