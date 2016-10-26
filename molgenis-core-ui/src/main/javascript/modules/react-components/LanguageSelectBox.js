@@ -37,7 +37,7 @@ var LanguageSelectBox = React.createClass({
                     data: this.state.select2Data,
                 },
                 value: this.state.selectedLanguage,
-                name: 'languages',
+                name: 'Language',
                 onChange: this._handleChange
             });
         }
@@ -53,7 +53,7 @@ var LanguageSelectBox = React.createClass({
                 'value': true
             }]
         };
-        api.get('/api/v2/sys_language', query).done(function (languages) {
+        api.get('/api/v2/sys_Language', query).done(function (languages) {
             var selectedLanguage = null;
             var select2Data = languages.items.map(function (item) {
                 if (item.code === languages.meta.languageCode) {
