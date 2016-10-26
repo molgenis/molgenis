@@ -1238,6 +1238,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		IndexMetadataCUDOperationsPlatformIT
 				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HYPERLINK,
 						searchService, metaDataService, indexService);
+
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_COMPOUND,
+						searchService, metaDataService, indexService);
 	}
 
 	// Derived from fix: https://github.com/molgenis/molgenis/issues/5227

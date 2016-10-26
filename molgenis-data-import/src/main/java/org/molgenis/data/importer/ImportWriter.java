@@ -200,7 +200,7 @@ public class ImportWriter
 		Entity entity = entityManager.create(entityType, POPULATE);
 		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			if (attr.getExpression() == null && !attr.isMappedBy())
+			if (!attr.isAuto() && attr.getExpression() == null && !attr.isMappedBy())
 			{
 				String attrName = attr.getName();
 				Object emxValue = emxEntity.get(attrName);
