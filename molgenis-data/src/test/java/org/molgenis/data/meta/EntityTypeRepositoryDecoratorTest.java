@@ -641,7 +641,7 @@ public class EntityTypeRepositoryDecoratorTest
 		String backendName = "backend";
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		when(metaDataService.getBackend(entityType)).thenReturn(repoCollection);
 		//noinspection unchecked
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
