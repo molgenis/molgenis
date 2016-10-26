@@ -43,7 +43,7 @@ public class StaticContentServiceImpl implements StaticContentService
 			StaticContent staticContent = dataService.findOneById(STATIC_CONTENT, key, StaticContent.class);
 			if (staticContent == null)
 			{
-				staticContent = staticContentFactory.create();
+				staticContent = staticContentFactory.create(key);
 				staticContent.setContent(content);
 				dataService.add(STATIC_CONTENT, staticContent);
 			}
