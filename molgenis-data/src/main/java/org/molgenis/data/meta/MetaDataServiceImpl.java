@@ -153,7 +153,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteEntityType(String entityName)
 	{
 		dataService.deleteById(ENTITY_TYPE_META_DATA, entityName);
-
 		LOG.info("Removed entity [{}]", entityName);
 	}
 
@@ -575,6 +574,14 @@ public class MetaDataServiceImpl implements MetaDataService
 			default:
 				return false;
 		}
+	}
+
+	@Override
+	public void deleteAttribute(Attribute attr){
+		// FIXME What to do when the entity is abstract?
+		RepositoryCollection rc = dataService.getMeta().getBackend(attr.getEntity());
+		rc.deleteAttribute(attr.getEntity(), attr);
+		dataService.delete(ATTRIBUTE_META_DATA, attr);
 	}
 
 	/**

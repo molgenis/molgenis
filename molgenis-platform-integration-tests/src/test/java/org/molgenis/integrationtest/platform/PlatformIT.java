@@ -54,7 +54,6 @@ import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -1347,7 +1346,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertEquals(expected, Arrays.asList("0", "1"));
 
 			// Remove added attribute
-			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(attr2));
+			dataService.getMeta().deleteAttribute(attr2);
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 
@@ -1357,7 +1356,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(ATTRIBUTE_META_DATA, newAttr);
 			// get new attr from backend, the old one points at an EntityType instance that doesn't know about it yet.
 			Attribute attr3 = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class);
-			dataService.delete(ATTRIBUTE_META_DATA, attr3);
+			dataService.getMeta().deleteAttribute(attr3);
 		});
 	}
 }

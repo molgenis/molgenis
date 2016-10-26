@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.*;
@@ -53,7 +54,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
 		runAsSystem(() ->
 		{
-			dataService.getMeta().deleteEntityType(entityTypeDynamic.getName());
+			dataService.delete(ENTITY_TYPE_META_DATA, entityTypeDynamic);
 		});
 		PlatformIT.waitForIndexToBeStable(EntityTypeMetadata.ENTITY_TYPE_META_DATA, indexService, LOG);
 		waitForWorkToBeFinished(indexService, LOG);

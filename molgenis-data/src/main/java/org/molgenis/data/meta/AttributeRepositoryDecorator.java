@@ -270,10 +270,6 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	public void delete(Attribute attr)
 	{
 		validateDeleteAllowed(attr);
-
-		// FIXME What to do when the entity is abstract?
-		dataService.getMeta().getBackend(attr.getEntity()).deleteAttribute(attr.getEntity(), attr);
-
 		// remove this attribute
 		decoratedRepo.delete(attr);
 	}

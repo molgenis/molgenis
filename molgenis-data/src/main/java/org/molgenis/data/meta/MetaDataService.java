@@ -253,4 +253,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return
 	 */
 	boolean isEntityTypeCompatible(EntityType entityTypeData);
+
+	/**
+	 * Delete attribute from repository and from the metadata registry
+	 *
+	 * @param attr
+	 */
+	void deleteAttribute(Attribute attr);
 }
