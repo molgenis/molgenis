@@ -57,13 +57,14 @@ var createRsqlAggregateQuery = function (aggs) {
 export function createRsqlQuery(rules) {
     var rsql = '';
 
-    // simplify query
-    while (rules.length === 1 && rules[0].operator === 'NESTED') {
-        rules = rules[0].nestedRules;
-    }
-
     for (var i = 0; i < rules.length; ++i) {
         var rule = rules[i];
+
+        // simplify query
+        while (rule.operator === 'NESTED' && rule.nestedRules.length === 1) {
+            rule = rule.nestedRules[0];
+        }
+
         switch (rule.operator) {
             case 'SEARCH':
                 var field = rule.field !== undefined ? rule.field : '*';
@@ -111,16 +112,9 @@ export function createRsqlQuery(rules) {
                 }
                 break;
             case 'NESTED':
-                // do not nest in case of only one nested rule
-                if (rule.nestedRules.length > 1) {
-                    rsql += '(';
-                }
                 // ignore rule without nested rules
                 if (rule.nestedRules.length > 0) {
-                    rsql += createRsqlQuery(rule.nestedRules);
-                }
-                if (rule.nestedRules.length > 1) {
-                    rsql += ')';
+                    rsql += '(' + createRsqlQuery(rule.nestedRules) + ')';
                 }
                 break;
             case 'SHOULD':
