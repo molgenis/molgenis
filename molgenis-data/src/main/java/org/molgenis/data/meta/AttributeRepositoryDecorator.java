@@ -3,6 +3,7 @@ package org.molgenis.data.meta;
 import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
@@ -270,6 +271,18 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	public void delete(Attribute attr)
 	{
 		validateDeleteAllowed(attr);
+
+		// If compound attribute is deleted then change the parent of children to null
+		// This will change the children attributes into regular attributes.
+		if(AttributeType.COMPOUND.equals(attr.getDataType()))
+		{
+			attr.getChildren().forEach(e -> {
+				if(null != e.getParent()){
+					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA).update(e.setParent(null));
+				}
+			});
+		}
+
 		// remove this attribute
 		decoratedRepo.delete(attr);
 	}

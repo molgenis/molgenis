@@ -1,9 +1,12 @@
 package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
@@ -725,6 +728,28 @@ public class AttributeRepositoryDecoratorTest
 		repo.delete(attr);
 
 		verify(decoratedRepo).delete(attr);
+	}
+
+	@Test
+	public void deleteCompoundAttribute()
+	{
+		// Compound parent attribute
+		Attribute compound = when(mock(Attribute.class).getName()).thenReturn("compound").getMock();
+		when(compound.getDataType()).thenReturn(AttributeType.COMPOUND);
+
+		// Child
+		Attribute child = when(mock(Attribute.class).getName()).thenReturn("child").getMock();
+		when(compound.getChildren()).thenReturn(newArrayList(child));
+		when(child.getParent()).thenReturn(mock(Attribute.class));
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		when(mds.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)).thenReturn(mock(Repository.class));
+
+		repo.delete(compound);
+
+		//Test
+		verify(child).setParent(null);
+		verify(decoratedRepo).delete(compound);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity attribute \\[attrName\\] is not allowed")

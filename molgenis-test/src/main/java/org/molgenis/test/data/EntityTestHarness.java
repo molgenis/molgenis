@@ -47,6 +47,8 @@ public class EntityTestHarness
 	public static final String ATTR_REF_ID = "ref_id_attr";
 	public static final String ATTR_REF_STRING = "ref_string_attr";
 	public static final String ATTR_COMPUTED_INT = "computed_int_attr";
+	public static final String ATTR_COMPOUND = "compound_attr";
+	public static final String ATTR_COMPOUND_CHILD_INT = "compound_child_int_attr";
 
 	@Autowired
 	private PackageFactory packageFactory;
@@ -96,7 +98,7 @@ public class EntityTestHarness
 		EntityType refEntityType = createDynamicRefEntityType();
 		EntityType entityType = entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic")
 				.setBackend("PostgreSQL");
-		return entityType
+		entityType
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))
@@ -110,6 +112,12 @@ public class EntityTestHarness
 				.addAttribute(createAttribute(ATTR_XREF, XREF).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_COMPUTED_INT, INT).setExpression(ATTR_INT));
+
+		// Add a compound attribute
+		Attribute compound = createAttribute(ATTR_COMPOUND, COMPOUND);
+		Attribute child = createAttribute(ATTR_COMPOUND_CHILD_INT, INT).setParent(compound);
+
+		return entityType.addAttribute(compound).addAttribute(child);
 	}
 
 	private Attribute createAttribute(String name, AttributeType dataType)
@@ -159,6 +167,7 @@ public class EntityTestHarness
 		entity.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		entity.set(ATTR_XREF, refEntity);
 		entity.set(ATTR_MREF, Collections.singletonList(refEntity));
+		entity.set(ATTR_COMPOUND_CHILD_INT, 10 + id);
 
 		return new EntityWithComputedAttributes(entity);
 	}
