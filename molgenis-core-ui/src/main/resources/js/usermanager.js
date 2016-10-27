@@ -21,7 +21,7 @@
     function getCreateForm(type) {
         React.render(molgenis.ui.Form({
             mode: 'create',
-            entity: 'sys_sec_Molgenis' + type,
+            entity: 'sys_sec_' + type,
             modal: true,
             onSubmitSuccess: function (e) {
 
@@ -44,7 +44,7 @@
      */
     function getEditForm(id, type) {
         React.render(molgenis.ui.Form({
-            entity: 'molgenis' + type,
+            entity: 'sys_sec_' + type,
             entityInstance: id,
             mode: 'edit',
             modal: true,
@@ -147,7 +147,7 @@
     }
 
     function getAllUsersGroup(callback) {
-        api.getAsync('/api/v1/sys_sec_MolgenisGroup', {
+        api.getAsync('/api/v1/sys_sec_Group', {
             q: [{
                 field: 'name',
                 operator: 'EQUALS',
