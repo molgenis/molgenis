@@ -170,6 +170,8 @@ public class MappingServiceImpl implements MappingService
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
+		targetMetaData.setPackage(null);
+		targetMetaData.setSimpleName(entityName);
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
 		if (addSourceAttribute)
