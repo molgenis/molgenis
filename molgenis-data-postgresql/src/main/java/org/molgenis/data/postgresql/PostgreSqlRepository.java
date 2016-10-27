@@ -1,10 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -20,7 +17,10 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -43,7 +43,6 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.AttributeType.ONE_TO_MANY;
-import static org.molgenis.AttributeType.getValueString;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
@@ -60,7 +59,7 @@ import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
  * <li>Query operators DIS_MAX, FUZZY_MATCH, FUZZY_MATCH_NGRAM, SEARCH, SHOULD are not supported</li>
  * </ul>
  */
-public class PostgreSqlRepository extends AbstractRepository
+class PostgreSqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepository.class);
 
@@ -88,7 +87,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private EntityType entityType;
 
-	public PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
+	PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
 			DataSource dataSource, PlatformTransactionManager transactionManager)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
@@ -127,6 +126,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		return QUERY_OPERATORS;
 	}
 
+	@Override
 	public EntityType getEntityType()
 	{
 		return entityType;
@@ -239,20 +239,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					LOG.trace("SQL: {}", sql);
 				}
 			}
-			jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter()
-			{
-				@Override
-				public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
-				{
-					preparedStatement.setObject(1, idsBatch.get(i));
-				}
-
-				@Override
-				public int getBatchSize()
-				{
-					return idsBatch.size();
-				}
-			});
+			jdbcTemplate.batchUpdate(sql, new BatchDeletePreparedStatementSetter(idsBatch));
 		});
 	}
 
@@ -389,7 +376,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		jdbcTemplate.query(junctionTableSelect, row ->
 		{
 			Object id;
-			switch(idAttributeDataType) {
+			switch (idAttributeDataType)
+			{
 				case EMAIL:
 				case HYPERLINK:
 				case STRING:
@@ -406,7 +394,8 @@ public class PostgreSqlRepository extends AbstractRepository
 			}
 
 			Object refId;
-			switch(refIdDataType) {
+			switch (refIdDataType)
+			{
 				case EMAIL:
 				case HYPERLINK:
 				case STRING:
@@ -473,64 +462,12 @@ public class PostgreSqlRepository extends AbstractRepository
 			}
 
 			// persist values in entity table
-			jdbcTemplate.batchUpdate(insertSql, new BatchPreparedStatementSetter()
-			{
-				@Override
-				public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
-				{
-					Entity entity = entitiesBatch.get(rowIndex);
-
-					int fieldIndex = 1;
-					for (Attribute attr : tableAttrs)
-					{
-						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
-						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
-					}
-				}
-
-				@Override
-				public int getBatchSize()
-				{
-					return entitiesBatch.size();
-				}
-			});
+			jdbcTemplate.batchUpdate(insertSql, new BatchAddPreparedStatementSetter(entitiesBatch, tableAttrs));
 
 			// persist values in entity junction table
 			if (!junctionTableAttrs.isEmpty())
 			{
-				Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
-
-				for (Entity entity : entitiesBatch)
-				{
-					for (Attribute attr : junctionTableAttrs)
-					{
-						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
-						if (entity.get(attr.getName()) != null)
-						{
-							AtomicInteger seqNr = new AtomicInteger();
-							Iterable<Entity> refEntities;
-							if (isSingleReferenceType(attr) && attr.isInversedBy())
-							{
-								refEntities = singletonList(entity.getEntity(attr.getName()));
-							}
-							else
-							{
-								refEntities = entity.getEntities(attr.getName());
-							}
-							for (Entity val : refEntities)
-							{
-								if (val != null)
-								{
-									Map<String, Object> mref = new HashMap<>();
-									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-									mref.put(idAttr.getName(), entity.get(idAttr.getName()));
-									mref.put(attr.getName(), val);
-									mrefs.get(attr.getName()).add(mref);
-								}
-							}
-						}
-					}
-				}
+				Map<String, List<Map<String, Object>>> mrefs = createMrefMap(idAttr, junctionTableAttrs, entitiesBatch);
 
 				for (Attribute attr : junctionTableAttrs)
 				{
@@ -546,6 +483,45 @@ public class PostgreSqlRepository extends AbstractRepository
 		});
 
 		return count.get();
+	}
+
+	private static Map<String, List<Map<String, Object>>> createMrefMap(Attribute idAttr,
+			List<Attribute> junctionTableAttrs, List<? extends Entity> entitiesBatch)
+	{
+		Map<String, List<Map<String, Object>>> mrefs = Maps.newHashMapWithExpectedSize(junctionTableAttrs.size());
+
+		AtomicInteger seqNr = new AtomicInteger();
+		for (Entity entity : entitiesBatch)
+		{
+			for (Attribute attr : junctionTableAttrs)
+			{
+				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
+				if (entity.get(attr.getName()) != null)
+				{
+					Iterable<Entity> refEntities;
+					if (isSingleReferenceType(attr) && attr.isInversedBy())
+					{
+						refEntities = singletonList(entity.getEntity(attr.getName()));
+					}
+					else
+					{
+						refEntities = entity.getEntities(attr.getName());
+					}
+
+					seqNr.set(0);
+					for (Entity val : refEntities)
+					{
+						Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
+						mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+						mref.put(idAttr.getName(), entity.get(idAttr.getName()));
+						mref.put(attr.getName(), val);
+						mrefs.get(attr.getName()).add(mref);
+					}
+				}
+			}
+		}
+
+		return mrefs;
 	}
 
 	private void updateBatching(Iterator<? extends Entity> entities)
@@ -566,64 +542,14 @@ public class PostgreSqlRepository extends AbstractRepository
 					LOG.trace("SQL: {}", updateSql);
 				}
 			}
-			jdbcTemplate.batchUpdate(updateSql, new BatchPreparedStatementSetter()
-			{
-				@Override
-				public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
-				{
-					Entity entity = entitiesBatch.get(rowIndex);
-
-					int fieldIndex = 1;
-					for (Attribute attr : tableAttrs)
-					{
-						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
-						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
-					}
-
-					preparedStatement.setObject(fieldIndex, getPostgreSqlValue(entity, idAttr));
-				}
-
-				@Override
-				public int getBatchSize()
-				{
-					return entitiesBatch.size();
-				}
-			});
+			jdbcTemplate
+					.batchUpdate(updateSql, new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr));
 
 			// update values in entity junction table
 			if (!junctionTableAttrs.isEmpty())
 			{
-				Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
+				Map<String, List<Map<String, Object>>> mrefs = createMrefMap(idAttr, junctionTableAttrs, entitiesBatch);
 
-				for (Entity entity : entitiesBatch)
-				{
-					// create the mref records
-					for (Attribute attr : junctionTableAttrs)
-					{
-						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
-						if (entity.get(attr.getName()) != null)
-						{
-							AtomicInteger seqNr = new AtomicInteger();
-							Iterable<Entity> refEntities;
-							if (isSingleReferenceType(attr) && attr.isInversedBy())
-							{
-								refEntities = singletonList(entity.getEntity(attr.getName()));
-							}
-							else
-							{
-								refEntities = entity.getEntities(attr.getName());
-							}
-							for (Entity val : refEntities)
-							{
-								Map<String, Object> mref = new HashMap<>();
-								mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-								mref.put(idAttr.getName(), entity.get(idAttr.getName()));
-								mref.put(attr.getName(), val);
-								mrefs.get(attr.getName()).add(mref);
-							}
-						}
-					}
-				}
 				// update mrefs
 				List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
 						.collect(toList());
@@ -657,37 +583,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				LOG.trace("SQL: {}", insertMrefSql);
 			}
 		}
-		jdbcTemplate.batchUpdate(insertMrefSql, new BatchPreparedStatementSetter()
-		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
-			{
-				Map<String, Object> mref = mrefs.get(i);
-
-				Object idValue0, idValue1;
-				if (attr.isMappedBy())
-				{
-					Entity mrefEntity = (Entity) mref.get(attr.getName());
-					idValue0 = getPostgreSqlValue(mrefEntity, attr.getRefEntity().getIdAttribute());
-					idValue1 = mref.get(idAttr.getName());
-				}
-				else
-				{
-					idValue0 = mref.get(idAttr.getName());
-					Entity mrefEntity = (Entity) mref.get(attr.getName());
-					idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute());
-				}
-				preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
-				preparedStatement.setObject(2, idValue0);
-				preparedStatement.setObject(3, idValue1);
-			}
-
-			@Override
-			public int getBatchSize()
-			{
-				return mrefs.size();
-			}
-		});
+		jdbcTemplate.batchUpdate(insertMrefSql, new BatchJunctionTableAddPreparedStatementSetter(mrefs, attr, idAttr));
 	}
 
 	private void removeMrefs(final List<Object> ids, final Attribute attr)
@@ -703,19 +599,160 @@ public class PostgreSqlRepository extends AbstractRepository
 				LOG.trace("SQL: {}", deleteMrefSql);
 			}
 		}
-		jdbcTemplate.batchUpdate(deleteMrefSql, new BatchPreparedStatementSetter()
+		jdbcTemplate.batchUpdate(deleteMrefSql, new BatchJunctionTableDeletePreparedStatementSetter(ids));
+	}
+
+	private static class BatchAddPreparedStatementSetter implements BatchPreparedStatementSetter
+	{
+		private final List<? extends Entity> entities;
+		private final List<Attribute> tableAttrs;
+
+		BatchAddPreparedStatementSetter(List<? extends Entity> entities, List<Attribute> tableAttrs)
 		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+			this.entities = entities;
+			this.tableAttrs = tableAttrs;
+		}
+
+		@Override
+		public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+		{
+			Entity entity = entities.get(rowIndex);
+
+			int fieldIndex = 1;
+			for (Attribute attr : tableAttrs)
 			{
-				preparedStatement.setObject(1, ids.get(i));
+				Object postgreSqlValue = getPostgreSqlValue(entity, attr);
+				preparedStatement.setObject(fieldIndex++, postgreSqlValue);
+			}
+		}
+
+		@Override
+		public int getBatchSize()
+		{
+			return entities.size();
+		}
+	}
+
+	private static class BatchUpdatePreparedStatementSetter implements BatchPreparedStatementSetter
+	{
+		private final List<? extends Entity> entities;
+		private final List<Attribute> tableAttrs;
+		private final Attribute idAttr;
+
+		BatchUpdatePreparedStatementSetter(List<? extends Entity> entities, List<Attribute> tableAttrs,
+				Attribute idAttr)
+		{
+			this.entities = entities;
+			this.tableAttrs = tableAttrs;
+			this.idAttr = idAttr;
+		}
+
+		@Override
+		public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+		{
+			Entity entity = entities.get(rowIndex);
+
+			int fieldIndex = 1;
+			for (Attribute attr : tableAttrs)
+			{
+				Object postgreSqlValue = getPostgreSqlValue(entity, attr);
+				preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 			}
 
-			@Override
-			public int getBatchSize()
+			preparedStatement.setObject(fieldIndex, getPostgreSqlValue(entity, idAttr));
+		}
+
+		@Override
+		public int getBatchSize()
+		{
+			return entities.size();
+		}
+	}
+
+	private static class BatchDeletePreparedStatementSetter implements BatchPreparedStatementSetter
+	{
+		private final List<Object> entityIds;
+
+		BatchDeletePreparedStatementSetter(List<Object> entityIds)
+		{
+			this.entityIds = entityIds;
+		}
+
+		@Override
+		public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+		{
+			preparedStatement.setObject(1, entityIds.get(i));
+		}
+
+		@Override
+		public int getBatchSize()
+		{
+			return entityIds.size();
+		}
+	}
+
+	private static class BatchJunctionTableAddPreparedStatementSetter implements BatchPreparedStatementSetter
+	{
+		private final List<Map<String, Object>> mrefs;
+		private final Attribute attr;
+		private final Attribute idAttr;
+
+		BatchJunctionTableAddPreparedStatementSetter(List<Map<String, Object>> mrefs, Attribute attr, Attribute idAttr)
+		{
+			this.mrefs = mrefs;
+			this.attr = attr;
+			this.idAttr = idAttr;
+		}
+
+		@Override
+		public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+		{
+			Map<String, Object> mref = mrefs.get(i);
+
+			Object idValue0, idValue1;
+			if (attr.isMappedBy())
 			{
-				return ids.size();
+				Entity mrefEntity = (Entity) mref.get(attr.getName());
+				idValue0 = getPostgreSqlValue(mrefEntity, attr.getRefEntity().getIdAttribute());
+				idValue1 = mref.get(idAttr.getName());
 			}
-		});
+			else
+			{
+				idValue0 = mref.get(idAttr.getName());
+				Entity mrefEntity = (Entity) mref.get(attr.getName());
+				idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute());
+			}
+			preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
+			preparedStatement.setObject(2, idValue0);
+			preparedStatement.setObject(3, idValue1);
+		}
+
+		@Override
+		public int getBatchSize()
+		{
+			return mrefs.size();
+		}
+	}
+
+	private static class BatchJunctionTableDeletePreparedStatementSetter implements BatchPreparedStatementSetter
+	{
+		private final List<Object> entityIds;
+
+		BatchJunctionTableDeletePreparedStatementSetter(List<Object> entityIds)
+		{
+			this.entityIds = entityIds;
+		}
+
+		@Override
+		public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+		{
+			preparedStatement.setObject(1, entityIds.get(i));
+		}
+
+		@Override
+		public int getBatchSize()
+		{
+			return entityIds.size();
+		}
 	}
 }
