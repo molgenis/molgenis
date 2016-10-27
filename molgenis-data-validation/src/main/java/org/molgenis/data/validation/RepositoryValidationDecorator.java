@@ -394,7 +394,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		String idAttrName = getEntityType().getIdAttribute().getName();
 		List<Attribute> readonlyAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.getName().equals(idAttrName))
+				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
+						.getName().equals(idAttrName))
 				.collect(toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
