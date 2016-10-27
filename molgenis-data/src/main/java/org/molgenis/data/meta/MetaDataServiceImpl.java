@@ -400,7 +400,6 @@ public class MetaDataServiceImpl implements MetaDataService
 			// note: leave it up to the data service to decided what to do with attributes removed from entity meta data
 			dataService.update(ENTITY_TYPE_META_DATA, entityType);
 		}
-
 		// add new attributes, update modified attributes
 		upsertAttributes(entityType, existingEntityType);
 	}

@@ -1,7 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
 import org.molgenis.data.*;
-import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
@@ -21,7 +20,6 @@ import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -54,7 +52,6 @@ import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -87,11 +84,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private MetaDataServiceImpl metaDataService;
 	@Autowired
-	private ConfigurableApplicationContext applicationContext;
-	@Autowired
 	private EntityListenersService entityListenersService;
-	@Autowired
-	private L2Cache l2Cache;
 	@Autowired
 	private LanguageService languageService;
 	@Autowired
@@ -1305,18 +1298,22 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(singleThreaded = true, enabled = false)
-	public void l3CacheTest()
+	/**
+	 * Test add and remove of a single attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void addAndDeleteSingleAttribute()
 	{
-		String COUNTRY = "Country";
-		final EntityType entityType = EntityType
-				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS, attributeFactory);
-		final Attribute newAttr = attributeFactory.create().setName(COUNTRY);
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+		entityType.addAttribute(newAttr); // appends at the end and sets sequence number
 
 		runAsSystem(() ->
 		{
-			entityType.addAttribute(newAttr);
-			dataService.getMeta().updateEntityType(entityType);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType); // Adds the column to the table
+			dataService.add(ATTRIBUTE_META_DATA, newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
@@ -1326,29 +1323,43 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 			dataService.update(entityType.getName(),
-					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).filter(e ->
-					{
-						e.set(COUNTRY, "NL" + e.getIdValue());
-						return true;
-					}));
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
+							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
+					));
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
-		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
+		// Tunnel via L3 flow
+		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
 		q0.pageSize(10); // L3 only caches queries with a page size
-		q0.sort(new Sort().on(COUNTRY));
+		q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-		Repository repoQ0 = dataService.getRepository(entityTypeDynamic.getName());
 		runAsSystem(() ->
 		{
-			List expected = dataService.findAll(repoQ0.getName(), q0).map(e -> e.getIdValue()).collect(toList());
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(Entity::getIdValue)
+					.collect(toList());
 			assertEquals(expected, Arrays.asList("0", "1"));
 
 			// Remove added attribute
 			entityType.removeAttribute(newAttr);
-			dataService.getMeta().updateEntityType(entityType);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+			dataService.delete(ATTRIBUTE_META_DATA, newAttr);
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		// verify attribute is deleted by adding and removing it again
+		runAsSystem(() ->
+		{
+			entityType.addAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+			dataService.add(ATTRIBUTE_META_DATA, newAttr);
+
+			// Remove added attribute
+			entityType.removeAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+			dataService.delete(ATTRIBUTE_META_DATA, newAttr);
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}
 }
-
