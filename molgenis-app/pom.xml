@@ -9,74 +9,56 @@
     <artifactId>molgenis-app</artifactId>
     <packaging>war</packaging>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<plugins>
-			<!-- minify resources -->
-			<plugin>
-				<groupId>com.samaxes.maven</groupId>
-				<artifactId>minify-maven-plugin</artifactId>
-			</plugin>
-			<!-- servlet container -->
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.6.v20141205</version>
-				<configuration>
-					<stopPort>8079</stopPort>
-					<stopKey>jetty-stop</stopKey>
-					<reload>manual</reload>
-					<systemProperties>
-						<systemProperty>
-							<name>molgenis.home</name>
-							<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-						</systemProperty>
-					</systemProperties>
-					<webAppConfig>
-						<contextPath>/</contextPath>
-						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
-						</baseResource>
-						<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
-						</webInfIncludeJarPattern>
-					</webAppConfig>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>uk.ac.ebi.mydas</groupId>
-						<artifactId>mydas</artifactId>
-						<version>1.6.7</version>
-						<scope>system</scope>
-						<systemPath>${basedir}/../molgenis-das/src/main/resources/mydas-1.6.7.jar</systemPath>
-					</dependency>
-					<dependency>
-						<groupId>xpp3</groupId>
-						<artifactId>xpp3</artifactId>
-						<version>1.1.3.4.O</version>
-					</dependency>
-					<dependency>
-						<groupId>org.slf4j</groupId>
-						<artifactId>log4j-over-slf4j</artifactId>
-						<version>1.7.21</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!-- web server -->
-				<plugin>
-					<groupId>org.mortbay.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- minify resources -->
+            <plugin>
+                <groupId>com.samaxes.maven</groupId>
+                <artifactId>minify-maven-plugin</artifactId>
+            </plugin>
+            <!-- servlet container -->
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.6.v20141205</version>
+                <configuration>
+                    <stopPort>8079</stopPort>
+                    <stopKey>jetty-stop</stopKey>
+                    <reload>manual</reload>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>molgenis.home</name>
+                            <value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
+                        </systemProperty>
+                    </systemProperties>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                        <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+                            <resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
+                        </baseResource>
+                        <webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
+                        </webInfIncludeJarPattern>
+                    </webAppConfig>
+                </configuration>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <!-- web server -->
+                <plugin>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
