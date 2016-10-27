@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
 import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -114,7 +115,7 @@ public class MetaValidationUtils
 	 * Validates an entity and all of its attributes.
 	 *
 	 * @param entityType entity meta data to validate
-	 * @throw MolgenisDataException if entity meta data is not valid
+	 * @throws MolgenisDataException if entity meta data is not valid
 	 */
 	public static void validateEntityType(EntityType entityType)
 	{
@@ -131,6 +132,12 @@ public class MetaValidationUtils
 			{
 				throw new MolgenisDataException(
 						"ID attribute " + entityType.getIdAttribute().getName() + " cannot have default value");
+			}
+
+			if (!entityType.isAbstract() && entityType.getLabelAttribute() == null)
+			{
+				throw new MolgenisDataException(
+						format("Entity [%s] is missing required label attribute", entityType.getName()));
 			}
 		}
 		catch (MolgenisDataException e)
