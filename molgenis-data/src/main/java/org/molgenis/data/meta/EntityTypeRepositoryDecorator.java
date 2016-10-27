@@ -409,8 +409,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 
 	private void deleteEntityRepository(EntityType entityType)
 	{
-		String backend = entityType.getBackend();
-		dataService.getMeta().getBackend(backend).deleteRepository(entityType);
+		dataService.getMeta().getBackend(entityType).deleteRepository(entityType);
 	}
 
 	private void deleteEntityPermissions(EntityType entityType)

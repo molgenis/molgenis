@@ -651,6 +651,15 @@ public class AttributeRepositoryDecoratorTest
 		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		EntityType entity = mock(EntityType.class);
+		when(attr.getEntity()).thenReturn(entity);
+		String backend = "PostgreSQL";
+		when(entity.getBackend()).thenReturn(backend);
+		when(mds.getBackend(backend)).thenReturn(mock(RepositoryCollection.class));
+
 		repo.add(attr);
 		verify(decoratedRepo).add(attr);
 	}
@@ -710,6 +719,12 @@ public class AttributeRepositoryDecoratorTest
 		when(attrQ.eq(CHILDREN, attr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
 
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		EntityType entity = mock(EntityType.class);
+		when(attr.getEntity()).thenReturn(entity);
+		when(mds.getBackend(attr.getEntity())).thenReturn(mock(RepositoryCollection.class));
 		repo.delete(attr);
 
 		verify(decoratedRepo).delete(attr);

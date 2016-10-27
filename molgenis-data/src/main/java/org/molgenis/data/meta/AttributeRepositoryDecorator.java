@@ -319,6 +319,10 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	public void add(Attribute attr)
 	{
 		validateAdd(attr);
+		EntityType owningEntity = attr.getEntity();
+
+		// FIXME What to do when the entity is abstract?
+		dataService.getMeta().getBackend(owningEntity.getBackend()).addAttribute(owningEntity, attr);
 		decoratedRepo.add(attr);
 	}
 

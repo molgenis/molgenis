@@ -228,20 +228,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void deleteEntityType(Collection<EntityType> entityTypes);
 
 	/**
-	 * Adds an Attribute to an EntityType
-	 *
-	 * @param attribute
-	 */
-	void addAttribute(Attribute attribute);
-
-	/**
-	 * Deletes an Attribute from an Entity
-	 *
-	 * @param id
-	 */
-	void deleteAttributeById(Object id);
-
-	/**
 	 * Check the integration of an entity type with existing entities Check only if the existing attributes are the
 	 * same as the new attributes
 	 *
@@ -267,4 +253,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return
 	 */
 	boolean isEntityTypeCompatible(EntityType entityTypeData);
+
+	/**
+	 * Delete attribute from repository and from the metadata registry
+	 *
+	 * @param attr
+	 */
+	void deleteAttribute(Attribute attr);
 }

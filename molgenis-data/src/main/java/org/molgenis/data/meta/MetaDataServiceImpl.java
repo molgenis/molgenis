@@ -153,7 +153,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteEntityType(String entityName)
 	{
 		dataService.deleteById(ENTITY_TYPE_META_DATA, entityName);
-
 		LOG.info("Removed entity [{}]", entityName);
 	}
 
@@ -180,13 +179,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getName));
 
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getName).collect(joining(",")));
-	}
-
-	@Transactional
-	@Override
-	public void deleteAttributeById(Object id)
-	{
-		dataService.deleteById(ATTRIBUTE_META_DATA, id);
 	}
 
 	@Override
@@ -405,13 +397,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		upsertAttributes(entityType, existingEntityType);
 	}
 
-	@Transactional
-	@Override
-	public void addAttribute(Attribute attr)
-	{
-		dataService.add(ATTRIBUTE_META_DATA, attr);
-	}
-
 	@Override
 	public EntityType getEntityType(String fullyQualifiedEntityName)
 	{
@@ -589,6 +574,14 @@ public class MetaDataServiceImpl implements MetaDataService
 			default:
 				return false;
 		}
+	}
+
+	@Override
+	public void deleteAttribute(Attribute attr){
+		// FIXME What to do when the entity is abstract?
+		RepositoryCollection rc = dataService.getMeta().getBackend(attr.getEntity());
+		rc.deleteAttribute(attr.getEntity(), attr);
+		dataService.delete(ATTRIBUTE_META_DATA, attr);
 	}
 
 	/**
