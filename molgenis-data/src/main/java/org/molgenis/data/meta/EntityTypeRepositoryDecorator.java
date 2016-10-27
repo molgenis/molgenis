@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
@@ -16,15 +17,19 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
@@ -38,7 +43,8 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 /**
  * Decorator for the entity meta data repository:
  * - filters requested entities based on the permissions of the current user.
- * - applies updates to the repository collection for entity meta data adds/updates/deletes
+ * - applies updates to the repository collection for entity meta data adds/deletes
+ * - adds and removes attribute columns to the repository collection for entity meta data updates
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
@@ -339,12 +345,55 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		}
 	}
 
-	private void updateEntity(EntityType entityType)
+	private void updateEntity(EntityType newEntityType)
 	{
-		validateUpdateAllowed(entityType);
+		validateUpdateAllowed(newEntityType);
+
+		// make sure the repository in the backend adds and removes columns
+		blah(newEntityType, decoratedRepo.findOneById(newEntityType.getIdValue()));
 
 		// update entity
-		decoratedRepo.update(entityType);
+		decoratedRepo.update(newEntityType);
+	}
+
+	/**
+	 * Add and update entity attributes
+	 *
+	 * @param entityType         entity meta data
+	 * @param existingEntityType existing entity meta data
+	 */
+	private void blah(EntityType entityType, EntityType existingEntityType)
+	{
+		// analyze both compound and atomic attributes owned by the entity
+		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
+
+		// determine attributes to add, update and delete
+		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
+		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
+
+		//TODO: If entityType is abstract, do this for all extending entityTypes.
+
+		// add new attributes
+		RepositoryCollection backend = dataService.getMeta().getBackend(entityType);
+		if (!addedAttrNames.isEmpty())
+		{
+			for (String attrName : addedAttrNames)
+			{
+				backend.addAttribute(existingEntityType, attrsMap.get(attrName));
+			}
+		}
+
+		// delete removed attributes
+		if (!deletedAttrNames.isEmpty())
+		{
+			for (String attrName : deletedAttrNames)
+			{
+				backend.deleteAttribute(existingEntityType, existingAttrsMap.get(attrName));
+			}
+		}
 	}
 
 	/**
