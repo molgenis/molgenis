@@ -87,6 +87,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		dehydratedEntity.put(ATTR_XREF, "0");
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
+		dehydratedEntity.put(ATTR_COMPOUND_CHILD_INT, 10);
 
 		// mock entity manager
 		EntityManager entityManager = when(

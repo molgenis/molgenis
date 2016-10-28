@@ -8,10 +8,10 @@ import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -57,7 +57,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -102,7 +102,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
 	@Autowired
-	private LanguageMetaData languageMetaData;
+	private LanguageMetadata languageMetadata;
 	@Autowired
 	private EntityTypeMetadata entityTypeMetadata;
 	@Autowired
@@ -194,7 +194,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(entityTypeDynamic.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getName(), false, true, true));
 		authorities.addAll(makeAuthorities(selfXrefEntityType.getName(), true, true, true));
-		authorities.addAll(makeAuthorities(languageMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(languageMetadata.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(attributeMetadata.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
 		authorities.addAll(makeAuthorities(entityTypeMetadata.getName(), true, true, true));
@@ -1244,6 +1244,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		IndexMetadataCUDOperationsPlatformIT
 				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HYPERLINK,
+						searchService, metaDataService, indexService);
+
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_COMPOUND,
 						searchService, metaDataService, indexService);
 	}
 

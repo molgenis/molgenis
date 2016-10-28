@@ -2,7 +2,6 @@ package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
@@ -199,10 +196,11 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	{
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
-		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
-		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
-		systemEntityMetaMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+		applicationContext.getBean(EntityTypeMetadata.class).bootstrap(entityTypeMeta);
+		applicationContext.getBean(PackageMetadata.class).bootstrap(entityTypeMeta);
+		applicationContext.getBean(TagMetadata.class).bootstrap(entityTypeMeta);
 	}
 
 	@Configuration

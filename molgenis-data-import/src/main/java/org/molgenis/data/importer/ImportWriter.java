@@ -39,9 +39,9 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.EmxMetaDataParser.*;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -200,7 +200,7 @@ public class ImportWriter
 		Entity entity = entityManager.create(entityType, POPULATE);
 		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			if (attr.getExpression() == null && !attr.isMappedBy())
+			if (!attr.isAuto() && attr.getExpression() == null && !attr.isMappedBy())
 			{
 				String attrName = attr.getName();
 				Object emxValue = emxEntity.get(attrName);

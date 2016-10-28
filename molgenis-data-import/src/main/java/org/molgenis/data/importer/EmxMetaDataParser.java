@@ -34,13 +34,13 @@ import static org.molgenis.data.DataConverter.toList;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.semantic.SemanticTag.asTag;
 import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
@@ -102,6 +102,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
 	private static final String EMX_ATTRIBUTES_UNIQUE = "unique";
 	private static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
+	private static final String EMX_ATTRIBUTES_TAGS = "tags";
 
 	// NOT YET SUPPORTED
 	// private static final String EMX_ATTRIBUTES_AUTO = "auto";
@@ -148,7 +149,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE, EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
 					EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN, EMX_ATTRIBUTES_READ_ONLY,
 					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_MAPPED_BY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE,
-					EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE);
+					EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE,
+					EMX_ATTRIBUTES_TAGS);
 
 	private static final String AUTO = "auto";
 
@@ -297,7 +299,71 @@ public class EmxMetaDataParser implements MetaDataParser
 		if (source.hasRepository(EMX_I18NSTRINGS))
 			parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
 
+		postProcessMetadata(intermediateResults);
+
 		return intermediateResults;
+	}
+
+	/**
+	 * Post process metadata:
+	 * - Select label attributes that are not defined in EMX
+	 * - Select lookup attributes that are not defined in EMX
+	 *
+	 * @param intermediateResults intermediate parse results
+	 */
+	private static void postProcessMetadata(IntermediateParseResults intermediateResults)
+	{
+		intermediateResults.getEntities().forEach(entityType ->
+		{
+			// skip abstract entities, because they do not require label or lookup attributes
+			if (!entityType.isAbstract())
+			{
+				// in case no label attribute was defined:
+				// try to set own id attribute or another own attribute as label attribute
+				if (entityType.getLabelAttribute() == null)
+				{
+					Attribute ownIdAttr = entityType.getOwnIdAttribute();
+					if (ownIdAttr != null && ownIdAttr.isVisible())
+					{
+						ownIdAttr.setLabelAttribute(true);
+					}
+					else
+					{
+						// select the first required visible owned attribute as label attribute
+						for (Attribute ownAttr : entityType.getOwnAtomicAttributes())
+						{
+							if (!ownAttr.isNillable() && ownAttr.isVisible())
+							{
+								ownAttr.setLabelAttribute(true);
+								break;
+							}
+						}
+					}
+				}
+
+				// in case no lookup attributes were defined:
+				// try to set own id attribute and own label attribute as lookup attributes
+				if (Iterables.size(entityType.getLookupAttributes()) == 0)
+				{
+					int lookupAttrIdx = 0;
+
+					Attribute ownIdAttr = entityType.getOwnIdAttribute();
+					if (ownIdAttr != null && ownIdAttr.isVisible())
+					{
+						ownIdAttr.setLookupAttributeIndex(lookupAttrIdx++);
+					}
+
+					Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
+					if (ownLabelAttr != null)
+					{
+						if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))
+						{
+							ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
+						}
+					}
+				}
+			}
+		});
 	}
 
 	/**
@@ -661,7 +727,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					attr.getName().startsWith(EMX_ATTRIBUTES_LABEL) || attr.getName()
 							.startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
 			{
-				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
+				throw new IllegalArgumentException("Unsupported attribute metadata: attributes." + attr.getName());
 			}
 		}
 

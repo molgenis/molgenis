@@ -5,9 +5,10 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -22,13 +23,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 import javax.annotation.PostConstruct;
-import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
 /**
  * Commandline-specific annotator configuration.
@@ -48,14 +44,9 @@ public class CommandLineAnnotatorConfig
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext.getBeansOfType(SystemEntityType.class);
-
-		systemEntityMetaMap.values().stream()
-				.filter(systemEntityMeta -> systemEntityMeta.getName().equals(ENTITY_TYPE_META_DATA)
-						|| systemEntityMeta.getName().equals(ATTRIBUTE_META_DATA)
-						|| systemEntityMeta.getName().equals(PACKAGE) || systemEntityMeta.getName()
-						.equals(TAG))
-				.forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
+		applicationContext.getBean(EntityTypeMetadata.class).bootstrap(entityTypeMeta);
+		applicationContext.getBean(PackageMetadata.class).bootstrap(entityTypeMeta);
+		applicationContext.getBean(TagMetadata.class).bootstrap(entityTypeMeta);
 	}
 
 	@Value("${vcf-validator-location:@null}")
