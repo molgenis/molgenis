@@ -369,12 +369,13 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		dataService.getMeta().forEachConcreteChild(entityType, concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
+			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());
 			// add added attributes in backend
 			difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
-					.forEach(addedAttribute -> backend.addAttribute(existingEntityType, addedAttribute));
+					.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
 			// remove removed attributes in backend
-			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(attrsMap::get)
-					.forEach(removedAttribute -> backend.deleteAttribute(existingEntityType, removedAttribute));
+			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(existingAttrsMap::get)
+					.forEach(removedAttribute -> backend.deleteAttribute(concreteExistingEntityType, removedAttribute));
 		});
 	}
 
