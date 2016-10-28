@@ -89,7 +89,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	{
 		reset(dataService);
 		chromosomeNameTagEntity = tagFactory.create();
-		chromosomeNameTagEntity.set(TagMetadata.IDENTIFIER, "1234");
+		chromosomeNameTagEntity.set(TagMetadata.ID, "1234");
 		chromosomeNameTagEntity.set(TagMetadata.LABEL, "Chromosome name");
 		chromosomeNameTagEntity.set(TagMetadata.OBJECT_IRI, "http://edamontology.org/data_0987");
 		chromosomeNameTagEntity.set(TagMetadata.RELATION_IRI, instanceOf.getIRI());
@@ -97,7 +97,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		chromosomeNameTagEntity.set(TagMetadata.CODE_SYSTEM, "http://edamontology.org");
 
 		geneAnnotationTagEntity = tagFactory.create();
-		geneAnnotationTagEntity.set(TagMetadata.IDENTIFIER, "4321");
+		geneAnnotationTagEntity.set(TagMetadata.ID, "4321");
 		geneAnnotationTagEntity.set(TagMetadata.LABEL, "Gene annotation (chromosome)");
 		geneAnnotationTagEntity.set(TagMetadata.OBJECT_IRI, "http://edamontology.org/data_0919");
 		geneAnnotationTagEntity.set(TagMetadata.RELATION_IRI, instanceOf.getIRI());
@@ -147,7 +147,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	public void testGetTagEntity()
 	{
 		Tag expected = tagFactory.create();
-		expected.set(TagMetadata.IDENTIFIER, "1233");
+		expected.set(TagMetadata.ID, "1233");
 		expected.set(TagMetadata.OBJECT_IRI, "http://edamontology.org/data_3031");
 		expected.set(TagMetadata.LABEL, "Core data");
 		expected.set(TagMetadata.RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf");

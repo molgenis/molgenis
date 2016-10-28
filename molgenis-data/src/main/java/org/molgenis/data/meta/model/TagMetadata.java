@@ -14,7 +14,7 @@ public class TagMetadata extends SystemEntityType
 	private static final String SIMPLE_NAME = "Tag";
 	public static final String TAG = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String IDENTIFIER = "id";
+	public static final String ID = "id";
 	public static final String OBJECT_IRI = "objectIRI";
 	public static final String LABEL = "label";
 	public static final String RELATION_IRI = "relationIRI";
@@ -31,7 +31,7 @@ public class TagMetadata extends SystemEntityType
 	{
 		setLabel("Tag");
 		setDescription("Semantic tags that can be applied to entities, attributes and other data");
-		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier");
+		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(TEXT).setLabel("Object IRI");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(RELATION_IRI).setNillable(false).setLabel("Relation IRI");

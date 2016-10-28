@@ -151,7 +151,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
 		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
 		Relation relation = Relation.forIRI(relationIRI);
-		tag.setIdentifier(idGenerator.generateId());
+		tag.setId(idGenerator.generateId());
 		tag.setCodeSystem(null);
 		tag.setRelationIri(relation.getIRI());
 		tag.setRelationLabel(relation.getLabel());
@@ -275,7 +275,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,
 			Entity tagEntity)
 	{
-		String identifier = tagEntity.getString(TagMetadata.IDENTIFIER);
+		String identifier = tagEntity.getString(TagMetadata.ID);
 		Relation relation = asRelation(tagEntity);
 		Ontology ontology = asOntology(tagEntity);
 		OntologyTerm ontologyTerm = asOntologyTerm(tagEntity);

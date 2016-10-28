@@ -45,7 +45,7 @@ public class TagRepository
 		if (tag == null)
 		{
 			tag = tagFactory.create();
-			tag.setIdentifier(idGenerator.generateId());
+			tag.setId(idGenerator.generateId());
 			tag.setObjectIri(objectIRI);
 			tag.setLabel(label);
 			tag.setRelationIri(relation.getIRI());

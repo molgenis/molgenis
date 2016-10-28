@@ -14,7 +14,7 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 	public static <SubjectType> SemanticTag<SubjectType, LabeledResource, LabeledResource> asTag(
 			SubjectType subjectType, Entity tagEntity)
 	{
-		String identifier = tagEntity.getString(TagMetadata.IDENTIFIER);
+		String identifier = tagEntity.getString(TagMetadata.ID);
 		String relationIri = tagEntity.getString(TagMetadata.RELATION_IRI);
 		Relation relation = Relation.forIRI(relationIri);
 		if (relation == null)

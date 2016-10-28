@@ -20,13 +20,13 @@ public class Tag extends StaticEntity
 	public Tag(String identifier, EntityType entityType)
 	{
 		super(entityType);
-		setIdentifier(identifier);
+		setId(identifier);
 	}
 
 	public static Tag newInstance(Tag tag)
 	{
 		Tag tagCopy = new Tag(tag.getEntityType());
-		tagCopy.setIdentifier(tag.getIdentifier());
+		tagCopy.setId(tag.getId());
 		tagCopy.setObjectIri(tag.getObjectIri());
 		tagCopy.setLabel(tag.getLabel());
 		tagCopy.setRelationIri(tag.getRelationIri());
@@ -35,14 +35,14 @@ public class Tag extends StaticEntity
 		return tagCopy;
 	}
 
-	public String getIdentifier()
+	public String getId()
 	{
-		return getString(TagMetadata.IDENTIFIER);
+		return getString(TagMetadata.ID);
 	}
 
-	public Tag setIdentifier(String identifier)
+	public Tag setId(String identifier)
 	{
-		set(TagMetadata.IDENTIFIER, identifier);
+		set(TagMetadata.ID, identifier);
 		return this;
 	}
 
