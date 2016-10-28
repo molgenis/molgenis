@@ -257,64 +257,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		updateEntityType(entityType, existingEntityType);
 	}
 
-	@Transactional
-	@Override
-	public void upsertEntityType(EntityType entityType)
-	{
-		EntityType existingEntityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
-				.eq(FULL_NAME, entityType.getName()).fetch(getEntityTypeFetch()).findOne();
-		if (existingEntityType != null)
-		{
-			updateEntityType(entityType);
-		}
-		else
-		{
-			addEntityType(entityType);
-		}
-	}
-
-	@Transactional
-	@Override
-	public void updateEntityType(Collection<EntityType> entityTypes)
-	{
-		if (entityTypes.isEmpty())
-		{
-			return;
-		}
-
-		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
-
-		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), EntityType.class)
-				.collect(toMap(EntityType::getName, Function.identity()));
-
-		// 1st pass: create entities and attributes except for mappedBy attributes
-		resolvedEntityType.forEach(entityType ->
-		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
-			if (existingEntityType == null)
-			{
-				throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getName()));
-			}
-			if (hasNewMappedByAttrs(entityType, existingEntityType))
-			{
-				entityType = new EntityTypeWithoutMappedByAttributes(entityType, existingEntityType);
-			}
-
-			updateEntityType(entityType, existingEntityType);
-		});
-
-		// 2nd pass: create mappedBy attributes and update entity
-		resolvedEntityType.forEach(entityType ->
-		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
-			if (hasNewMappedByAttrs(entityType, existingEntityType))
-			{
-				updateEntityType(entityType, existingEntityType);
-			}
-		});
-	}
-
 	/**
 	 * Returns true if entity meta contains mapped by attributes that do not exist in the existing entity meta.
 	 *
@@ -334,7 +276,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void upsertEntityType(Collection<EntityType> entityTypes)
+	public void upsertEntityTypes(Collection<EntityType> entityTypes)
 	{
 		if (entityTypes.isEmpty())
 		{
@@ -344,9 +286,41 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), MetaUtils.getEntityTypeFetch(), EntityType.class)
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), getEntityTypeFetch(), EntityType.class)
 				.collect(toMap(EntityType::getName, Function.identity()));
 
+		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
+		addMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
+
+	}
+
+	private void addMappedByAttributes(List<EntityType> resolvedEntityType,
+			Map<String, EntityType> existingEntityTypeMap)
+	{
+		// 2nd pass: create mappedBy attributes and update entity
+		resolvedEntityType.forEach(entityType ->
+		{
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			if (existingEntityType == null)
+			{
+				if (entityType.hasMappedByAttributes())
+				{
+					updateEntityType(entityType, new EntityTypeWithoutMappedByAttributes(entityType));
+				}
+			}
+			else
+			{
+				if (hasNewMappedByAttrs(entityType, existingEntityType))
+				{
+					updateEntityType(entityType, existingEntityType);
+				}
+			}
+		});
+	}
+
+	private void upsertEntityTypesSkipMappedByAttributes(List<EntityType> resolvedEntityType,
+			Map<String, EntityType> existingEntityTypeMap)
+	{
 		// 1st pass: create entities and attributes except for mappedBy attributes
 		resolvedEntityType.forEach(entityType ->
 		{
@@ -368,26 +342,6 @@ public class MetaDataServiceImpl implements MetaDataService
 				}
 
 				updateEntityType(entityType, existingEntityType);
-			}
-		});
-
-		// 2nd pass: create mappedBy attributes and update entity
-		resolvedEntityType.forEach(entityType ->
-		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
-			if (existingEntityType == null)
-			{
-				if (entityType.hasMappedByAttributes())
-				{
-					updateEntityType(entityType, new EntityTypeWithoutMappedByAttributes(entityType));
-				}
-			}
-			else
-			{
-				if (hasNewMappedByAttrs(entityType, existingEntityType))
-				{
-					updateEntityType(entityType, existingEntityType);
-				}
 			}
 		});
 	}

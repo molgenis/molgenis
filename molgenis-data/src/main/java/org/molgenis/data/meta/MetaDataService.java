@@ -4,7 +4,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 
 import java.util.Collection;
@@ -184,7 +186,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void addEntityType(Collection<EntityType> entityTypes);
 
 	/**
-	 * Updates entity type and entity type attributes.
+	 * Updates a single existing entity type and entity type attributes.
 	 *
 	 * @param entityType entity type
 	 * @throws UnknownEntityException if entity type does not exist
@@ -192,26 +194,19 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void updateEntityType(EntityType entityType);
 
 	/**
-	 * Updates a collection of entity type and entity type attributes.
-	 *
-	 * @param entityTypes entity type collection
-	 * @throws UnknownEntityException if the entity type collection contains a entity type that does not exist
-	 */
-	void updateEntityType(Collection<EntityType> entityTypes);
-
-	/**
-	 * Add or update entity type and entity type attributes.
-	 *
-	 * @param entityType entity type
-	 */
-	void upsertEntityType(EntityType entityType);
-
-	/**
 	 * Add or update a collection of entity type and entity type attributes.
+	 * Resolves the dependencies between them so that the entities and their metadata get added in proper order.
 	 *
-	 * @param entityTypes entity type collection
+	 * Adds ONE_TO_MANY attributes in a two-pass algorithm.
+	 * <ol>
+	 *     <li>Add the Author {@link EntityType} without books attribute and the Book {@link EntityType} with its author
+	 *     attribute.</li>
+	 *     <li>Update the Author EntityType adding the books attribute</li>
+	 * </ol>
+	 *
+	 * @param entityTypes {@link EntityType}s to add
 	 */
-	void upsertEntityType(Collection<EntityType> entityTypes);
+	void upsertEntityTypes(Collection<EntityType> entityTypes);
 
 	/**
 	 * Deletes an EntityType
