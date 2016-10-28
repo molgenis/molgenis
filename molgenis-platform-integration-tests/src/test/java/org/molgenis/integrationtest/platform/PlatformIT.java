@@ -1308,12 +1308,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
 		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
 		newAttr.setEntity(entityType);
-		entityType.addAttribute(newAttr); // appends at the end and sets sequence number
 
 		runAsSystem(() ->
 		{
-			dataService.update(ENTITY_TYPE_META_DATA, entityType); // Adds the column to the table
-			dataService.add(ATTRIBUTE_META_DATA, newAttr);
+			dataService.getMeta().addAttribute(newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
@@ -1321,7 +1319,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
 			dataService.add(entityTypeDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-
+			
 			dataService.update(entityType.getName(),
 					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
 							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
@@ -1342,23 +1340,18 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertEquals(expected, Arrays.asList("0", "1"));
 
 			// Remove added attribute
-			entityType.removeAttribute(newAttr);
-			dataService.update(ENTITY_TYPE_META_DATA, entityType);
-			dataService.delete(ATTRIBUTE_META_DATA, newAttr);
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 
 		// verify attribute is deleted by adding and removing it again
 		runAsSystem(() ->
 		{
-			entityType.addAttribute(newAttr);
-			dataService.update(ENTITY_TYPE_META_DATA, entityType);
-			dataService.add(ATTRIBUTE_META_DATA, newAttr);
+			// Add attribute
+			dataService.getMeta().addAttribute(newAttr);
 
-			// Remove added attribute
-			entityType.removeAttribute(newAttr);
-			dataService.update(ENTITY_TYPE_META_DATA, entityType);
-			dataService.delete(ATTRIBUTE_META_DATA, newAttr);
+			// Delete attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}
