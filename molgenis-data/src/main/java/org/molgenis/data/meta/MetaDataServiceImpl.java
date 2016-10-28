@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -513,6 +514,20 @@ public class MetaDataServiceImpl implements MetaDataService
 				return true;
 			default:
 				return false;
+		}
+	}
+
+	@Override
+	public void forEachConcreteChild(EntityType entityType, Consumer<EntityType> consumer)
+	{
+		if (entityType.isAbstract())
+		{
+			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
+					.forEach(childEntityType -> forEachConcreteChild(childEntityType, consumer));
+		}
+		else
+		{
+			consumer.accept(entityType);
 		}
 	}
 

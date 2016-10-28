@@ -34,8 +34,6 @@ import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -356,27 +354,6 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	}
 
 	/**
-	 * Performs an operation on each concrete child {@link EntityType} directly or indirectly extending a given
-	 * {@link EntityType}.
-	 * If the {@link EntityType} is concrete, will only perform the operation on the given {@link EntityType}.
-	 *
-	 * @param entityType the {@link EntityType} whose concrete child entities will be consumed
-	 * @param consumer   the operation to perform
-	 */
-	private void forEachConcreteChild(EntityType entityType, Consumer<EntityType> consumer)
-	{
-		if (entityType.isAbstract())
-		{
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> forEachConcreteChild(childEntityType, consumer));
-		}
-		else
-		{
-			consumer.accept(entityType);
-		}
-	}
-
-	/**
 	 * Add and remove entity attributes in the backend.
 	 * Updates are handled by the {@link AttributeRepositoryDecorator}.
 	 *
@@ -389,7 +366,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 				.collect(toMap(Attribute::getName, Function.identity()));
 		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
-		forEachConcreteChild(entityType, concreteEntityType ->
+		dataService.getMeta().forEachConcreteChild(entityType, concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
 			// add added attributes in backend

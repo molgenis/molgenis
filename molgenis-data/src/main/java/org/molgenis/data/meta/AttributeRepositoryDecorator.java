@@ -30,7 +30,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem
 /**
  * Decorator for the attribute repository:
  * - filters requested entities based on the entity permissions of the current user.
- * - applies updates to the repository collection for attribute meta data adds/updates/deletes
+ * - applies attribute metadata updates to the backend
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
@@ -546,10 +546,11 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		}
 	}
 
-	private void updateEntity(Attribute attr, Attribute updatedAttr)
+	private void updateAttributeInBackend(Attribute attr, Attribute updatedAttr)
 	{
-		EntityType entityType = attr.getEntity();
-		dataService.getMeta().getBackend(entityType.getBackend()).updateAttribute(entityType, attr, updatedAttr);
+		MetaDataService meta = dataService.getMeta();
+		meta.forEachConcreteChild(attr.getEntity(),
+				entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
 	}
 
 	private void validateAndUpdate(Attribute attr)
@@ -557,7 +558,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		validateUpdateAllowed(attr);
 		Attribute currentAttr = findOneById(attr.getIdentifier());
 		validateUpdate(currentAttr, attr);
-		updateEntity(currentAttr, attr);
+		updateAttributeInBackend(currentAttr, attr);
 	}
 
 	private Stream<Attribute> filterCountPermission(Stream<Attribute> attrs)
