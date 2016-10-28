@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -179,7 +180,31 @@ public class MetaValidationUtilsTest
 		when(attrWithDefaultValue.getDataType()).thenReturn(STRING);
 		when(attrWithDefaultValue.getDefaultValue()).thenReturn("5");
 		when(entityType.getAttributes()).thenReturn(singletonList(attrWithDefaultValue));
+		when(entityType.getLabelAttribute()).thenReturn(attrWithDefaultValue);
+		MetaValidationUtils.validateEntityType(entityType);
+	}
 
+	@Test
+	public void validateEntityTypeAbstractNoLabelAttribute()
+	{
+		String entityName = "MyEntity";
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.isAbstract()).thenReturn(true);
+		when(entityType.getLabelAttribute()).thenReturn(null);
+		when(entityType.getAttributes()).thenReturn(emptyList());
+		MetaValidationUtils.validateEntityType(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void validateEntityTypeConcreteNoLabelAttribute()
+	{
+		String entityName = "MyEntity";
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.isAbstract()).thenReturn(false);
+		when(entityType.getLabelAttribute()).thenReturn(null);
+		when(entityType.getAttributes()).thenReturn(emptyList());
 		MetaValidationUtils.validateEntityType(entityType);
 	}
 }
