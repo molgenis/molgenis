@@ -350,19 +350,19 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		validateUpdateAllowed(newEntityType);
 
 		// make sure the repository in the backend adds and removes columns
-		blah(newEntityType, decoratedRepo.findOneById(newEntityType.getIdValue()));
+		addAndRemoveAttributes(newEntityType, decoratedRepo.findOneById(newEntityType.getIdValue()));
 
 		// update entity
 		decoratedRepo.update(newEntityType);
 	}
 
 	/**
-	 * Add and update entity attributes
+	 * Add and remove entity attributes in the backend. Updates are handled by the {@link AttributeRepositoryDecorator}.
 	 *
 	 * @param entityType         entity meta data
 	 * @param existingEntityType existing entity meta data
 	 */
-	private void blah(EntityType entityType, EntityType existingEntityType)
+	private void addAndRemoveAttributes(EntityType entityType, EntityType existingEntityType)
 	{
 		// analyze both compound and atomic attributes owned by the entity
 		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
@@ -370,13 +370,10 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
 
-		// determine attributes to add, update and delete
-		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
-		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
-
 		//TODO: If entityType is abstract, do this for all extending entityTypes.
 
 		// add new attributes
+		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
 		RepositoryCollection backend = dataService.getMeta().getBackend(entityType);
 		if (!addedAttrNames.isEmpty())
 		{
@@ -387,6 +384,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		}
 
 		// delete removed attributes
+		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
 		if (!deletedAttrNames.isEmpty())
 		{
 			for (String attrName : deletedAttrNames)
