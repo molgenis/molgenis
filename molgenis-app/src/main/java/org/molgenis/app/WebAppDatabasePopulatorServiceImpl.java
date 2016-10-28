@@ -16,7 +16,7 @@ import java.util.Locale;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.i18n.model.LanguageMetaData.*;
+import static org.molgenis.data.i18n.model.LanguageMetadata.*;
 
 @Service
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService
