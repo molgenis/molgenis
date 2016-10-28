@@ -186,7 +186,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteAttributeById(Object id)
 	{
-		dataService.deleteById(ATTRIBUTE_META_DATA, id);
+		Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, id, Attribute.class);
+		EntityType entityType = attribute.getEntity();
+
+		// Update repository state
+		entityType.removeAttribute(attribute);
+
+		// Update repository state
+		dataService.update(ENTITY_TYPE_META_DATA, entityType);
+
+		// Update administration
+		dataService.delete(ATTRIBUTE_META_DATA, attribute);
 	}
 
 	@Override
@@ -411,7 +421,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		EntityType entityType = dataService.getEntityType(attr.getEntity().getName());
 		attr.setEntity(entityType);
 		entityType.addAttribute(attr);
-		dataService.update(ENTITY_TYPE_META_DATA, entityType); // Adds the column to the table
+
+		// Update repository state
+		dataService.update(ENTITY_TYPE_META_DATA, entityType);
+
+		// Update administration
 		dataService.add(ATTRIBUTE_META_DATA, attr);
 	}
 
