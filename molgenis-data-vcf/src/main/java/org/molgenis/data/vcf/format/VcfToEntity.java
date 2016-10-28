@@ -297,9 +297,19 @@ public class VcfToEntity
 				{
 					String strValue = sample.getData(i);
 					Object value = null;
-					if (strValue != null)
+					EntityType sampleEntityType = sampleEntity.getEntityType();
+					Attribute attr = sampleEntityType.getAttribute(format[i]);
+					if (attr != null)
 					{
-						value = getTypedValue(strValue, sampleEntity.getEntityType().getAttribute(format[i]));
+						if (strValue != null)
+						{
+							value = getTypedValue(strValue, attr);
+						}
+					}
+					else
+					{
+						throw new MolgenisDataException("Sample entity contains an attribute [" + format[i]
+								+ "] which is not specified in vcf headers");
 					}
 					sampleEntity.set(format[i], value);
 				}
@@ -387,6 +397,10 @@ public class VcfToEntity
 			}
 			if (val != null)
 			{
+				if (val instanceof Character)
+				{
+					val = val.toString();
+				}
 				entity.set(vcfInfo.getKey() + postFix, val);
 			}
 		}
