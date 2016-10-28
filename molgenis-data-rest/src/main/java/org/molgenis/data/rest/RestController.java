@@ -13,6 +13,8 @@ import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -66,6 +68,7 @@ import static org.molgenis.AttributeType.*;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.RANGE;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -1059,10 +1062,17 @@ public class RestController
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
 	{
 		EntityType meta = dataService.getEntityType(entityName);
-
 		Entity entity = this.restService.toEntity(meta, entityMap);
 
-		dataService.add(entityName, entity);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().addAttribute(new Attribute(entity));
+		}
+		else
+		{
+			dataService.add(entityName, entity);
+		}
+
 		restService.updateMappedByEntities(entity);
 
 		Object id = entity.getIdValue();

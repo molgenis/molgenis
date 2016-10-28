@@ -362,6 +362,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(Attribute attr)
 	{
+		EntityType entityType = dataService.getEntityType(attr.getEntity().getName());
+		attr.setEntity(entityType);
+		entityType.addAttribute(attr);
+		dataService.update(ENTITY_TYPE_META_DATA, entityType); // Adds the column to the table
 		dataService.add(ATTRIBUTE_META_DATA, attr);
 	}
 
