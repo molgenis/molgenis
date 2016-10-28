@@ -1319,7 +1319,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
 			dataService.add(entityTypeDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-			
+
 			dataService.update(entityType.getName(),
 					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
 							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
@@ -1357,6 +1357,67 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	/**
+	 * Test update of a single attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void updateAttribute()
+	{
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+
+		// Add attribute
+		runAsSystem(() ->
+		{
+			dataService.getMeta().addAttribute(newAttr);
+
+			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
+			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
+
+			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
+			dataService.add(entityTypeDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			dataService.update(entityType.getName(),
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
+							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
+					));
+		});
+		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+		assertNotEquals(newAttr.getSequenceNumber(), 0);
+		assertFalse(newAttr.isReadOnly());
+		assertFalse(newAttr.isUnique());
+
+		// New values
+		newAttr.setSequenceNumber(0);
+		newAttr.setReadOnly(true);
+		newAttr.setUnique(true);
+
+		// Update attribute
+		runAsSystem(() ->
+		{
+			// Update added attribute
+			dataService.update(ATTRIBUTE_META_DATA, newAttr);
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		Attribute attr = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
+		assertEquals(attr.getSequenceNumber(), 0);
+		assertTrue(attr.isReadOnly());
+		assertTrue(attr.isUnique());
+
+		// Delete attribute
+		runAsSystem(() ->
+		{
+			// Remove added attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
+
+	/*
 	 * Test add and remove of a single attribute of a dynamic entity
 	 */
 	@Test(singleThreaded = true)

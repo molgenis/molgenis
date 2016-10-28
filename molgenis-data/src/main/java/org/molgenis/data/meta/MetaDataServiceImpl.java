@@ -17,6 +17,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -342,7 +343,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void addAttribute(Attribute attr)
 	{
 		EntityType entityType = dataService.getEntityType(attr.getEntity().getName());
-		attr.setEntity(entityType);
 		entityType.addAttribute(attr);
 
 		// Update repository state
@@ -350,6 +350,21 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		// Update administration
 		dataService.add(ATTRIBUTE_META_DATA, attr);
+	}
+
+	@Transactional
+	@Override
+	public void addAttributes(String entityName, Stream<Attribute> attrs)
+	{
+		EntityType entityType = dataService.getEntityType(entityName);
+		List<Attribute> attributes = attrs.collect(toList());
+		entityType.addAttributes(attributes);
+
+		// Update repository state
+		dataService.update(ENTITY_TYPE_META_DATA, entityType);
+
+		// Update administration
+		dataService.add(ATTRIBUTE_META_DATA, attributes.stream());
 	}
 
 	@Override
