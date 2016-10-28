@@ -21,7 +21,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		IMPORTABLE(true), /**
 	 * Present in the source, unknown in the target
 	 */
-	UNKNOWN(false), /**
+	UNKNOWN(true), /**
 	 * Required in the target, missing in the source
 	 */
 	REQUIRED(false), /**
