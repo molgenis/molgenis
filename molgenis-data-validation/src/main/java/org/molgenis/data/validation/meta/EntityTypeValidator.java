@@ -26,7 +26,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 /**
- * Entity meta data validator
+ * Entity metadata validator
  */
 @Component
 public class EntityTypeValidator
