@@ -1,4 +1,4 @@
-[![Build Status](http://www.molgenis.org/jenkins/buildStatus/icon?job=molgenis)](http://www.molgenis.org/jenkins/job/molgenis/)
+[![Build Status](https://molgenis50.gcc.rug.nl/jenkins/buildStatus/icon?job=molgenis)](http://www.molgenis.org/jenkins/job/molgenis/)
 
 # Welcome to MOLGENIS
 
