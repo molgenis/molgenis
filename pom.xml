@@ -699,7 +699,6 @@
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
-        <module>molgenis-data-idcard</module>
         <module>molgenis-data-i18n</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
