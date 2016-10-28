@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LanguageFactory extends AbstractSystemEntityFactory<Language, LanguageMetaData, String>
+public class LanguageFactory extends AbstractSystemEntityFactory<Language, LanguageMetadata, String>
 {
 	@Autowired
-	LanguageFactory(LanguageMetaData languageMetaData, EntityPopulator entityPopulator)
+	LanguageFactory(LanguageMetadata languageMetadata, EntityPopulator entityPopulator)
 	{
-		super(Language.class, languageMetaData, entityPopulator);
+		super(Language.class, languageMetadata, entityPopulator);
 	}
 
 	/**

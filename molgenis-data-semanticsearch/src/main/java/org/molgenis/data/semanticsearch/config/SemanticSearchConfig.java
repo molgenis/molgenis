@@ -5,7 +5,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
-import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServiceImpl;
@@ -46,7 +46,7 @@ public class SemanticSearchConfig
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Autowired
-	TagMetaData tagMetaData;
+	TagMetadata tagMetadata;
 
 	@Autowired
 	TagFactory tagFactory;
@@ -60,7 +60,7 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetaData);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetadata);
 	}
 
 	@Bean

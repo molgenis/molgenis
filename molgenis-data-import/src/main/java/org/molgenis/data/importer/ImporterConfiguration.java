@@ -33,7 +33,7 @@ public class ImporterConfiguration
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	private TagMetaData tagMetaData;
+	private TagMetadata tagMetadata;
 
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
