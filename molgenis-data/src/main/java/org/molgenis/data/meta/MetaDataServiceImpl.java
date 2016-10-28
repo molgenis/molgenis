@@ -31,7 +31,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 
 /**
  * Meta data service for retrieving and editing meta data.

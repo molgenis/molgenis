@@ -36,7 +36,7 @@ public class EntityTypeMetadata extends SystemEntityType
 
 	private AttributeMetadata attributeMetadata;
 	private PackageMetadata packageMetadata;
-	private TagMetaData tagMetaData;
+	private TagMetadata tagMetadata;
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -66,7 +66,7 @@ public class EntityTypeMetadata extends SystemEntityType
 				.setReadOnly(true).setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
 				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
 	}
@@ -106,9 +106,9 @@ public class EntityTypeMetadata extends SystemEntityType
 	}
 
 	@Autowired
-	public void setTagMetaData(TagMetaData tagMetaData)
+	public void setTagMetadata(TagMetadata tagMetadata)
 	{
-		this.tagMetaData = requireNonNull(tagMetaData);
+		this.tagMetadata = requireNonNull(tagMetadata);
 	}
 
 	@Override

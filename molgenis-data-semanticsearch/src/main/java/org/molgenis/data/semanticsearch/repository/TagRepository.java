@@ -5,14 +5,14 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
-import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.semantic.Relation;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.TagMetaData.*;
+import static org.molgenis.data.meta.model.TagMetadata.*;
 
 /**
- * Helper class around the {@link TagMetaData} repository. Internal implementation class, use
+ * Helper class around the {@link TagMetadata} repository. Internal implementation class, use
  * {@link MetaDataServiceImpl} instead.
  */
 
@@ -36,7 +36,7 @@ public class TagRepository
 	 * @param label         label of the object
 	 * @param relation      {@link Relation} of the tag
 	 * @param codeSystemIRI the IRI of the code system of the tag
-	 * @return {@link Tag} of type {@link TagMetaData}
+	 * @return {@link Tag} of type {@link TagMetadata}
 	 */
 	public Tag getTagEntity(String objectIRI, String label, Relation relation, String codeSystemIRI)
 	{
@@ -45,7 +45,7 @@ public class TagRepository
 		if (tag == null)
 		{
 			tag = tagFactory.create();
-			tag.setIdentifier(idGenerator.generateId());
+			tag.setId(idGenerator.generateId());
 			tag.setObjectIri(objectIRI);
 			tag.setLabel(label);
 			tag.setRelationIri(relation.getIRI());

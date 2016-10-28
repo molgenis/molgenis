@@ -38,35 +38,35 @@ public class Language extends StaticEntity
 
 	public String getCode()
 	{
-		return getString(LanguageMetaData.CODE);
+		return getString(LanguageMetadata.CODE);
 	}
 
 	public Language setCode(String code)
 	{
-		set(LanguageMetaData.CODE, code);
+		set(LanguageMetadata.CODE, code);
 		return this;
 	}
 
 	public String getName()
 	{
-		return getString(LanguageMetaData.NAME);
+		return getString(LanguageMetadata.NAME);
 	}
 
 	public Language setName(String name)
 	{
-		set(LanguageMetaData.NAME, name);
+		set(LanguageMetadata.NAME, name);
 		return this;
 	}
 
 
 	public boolean isActive()
 	{
-		return getBoolean(LanguageMetaData.ACTIVE);
+		return getBoolean(LanguageMetadata.ACTIVE);
 	}
 
 	public Language setActive(boolean active)
 	{
-		set(LanguageMetaData.ACTIVE, active);
+		set(LanguageMetadata.ACTIVE, active);
 		return this;
 	}
 }

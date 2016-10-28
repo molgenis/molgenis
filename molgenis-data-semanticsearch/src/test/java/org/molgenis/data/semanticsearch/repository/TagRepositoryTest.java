@@ -23,7 +23,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.TagMetaData.*;
+import static org.molgenis.data.meta.model.TagMetadata.*;
 import static org.testng.Assert.assertTrue;
 
 @WebAppConfiguration
@@ -54,7 +54,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 	public void testGetTagEntityNew()
 	{
 		Tag tag = tagFactory.create();
-		tag.setIdentifier(uuid.toString());
+		tag.setId(uuid.toString());
 		tag.setObjectIri("http://edamontology.org/data_3031");
 		tag.setLabel("Core data");
 		tag.setRelationIri("http://molgenis.org/biobankconnect/instanceOf");
@@ -78,7 +78,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 	public void testGetTagEntityExisting()
 	{
 		Tag tag = tagFactory.create();
-		tag.setIdentifier(uuid.toString());
+		tag.setId(uuid.toString());
 		tag.setObjectIri("http://edamontology.org/data_3031");
 		tag.setLabel("Core data");
 		tag.setRelationIri("http://molgenis.org/biobankconnect/instanceOf");

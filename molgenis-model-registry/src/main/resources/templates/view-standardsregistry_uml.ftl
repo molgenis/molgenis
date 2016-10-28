@@ -97,11 +97,11 @@ textObj.textContent = "..."; //can't place at all
         <#list entityType.attributes as amd>
             <#if amd.type == 'xref' || amd.type == 'mref' || amd.type == 'categorical'>
             if (classes['<@entityName amd.refEntity />']) {
-            graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName entityType />'].id }, target: { id: classes['<@entityName amd.refEntity />'].id }}));
+            graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName entityType />'].id }, target: { id: classes['<@entityName amd.refEntityType />'].id }}));
             }
             </#if>
         </#list>
-        <#list package.subPackages as p>
+        <#list package.children as p>
             <@addVertices package=p />
         </#list>
     </#list>
@@ -111,7 +111,7 @@ textObj.textContent = "..."; //can't place at all
 
 <#macro listClasses package classes=[]>
     <#list package.entityTypes as entityType>
-        <#if entityType.abstract == true >
+        <#if entityType.isAbstract()>
         '<@entityName entityType />': new uml.Abstract({
         size: { width: RECT_WIDTH, height: ${(50 + 12 * entityType.attributes?size)?c} },
         name: '${entityType.label?js_string}',
@@ -119,7 +119,7 @@ textObj.textContent = "..."; //can't place at all
         '.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
         '.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
         },
-        attributes: [<#list entityType.attributes as amd>'${amd.label?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
+        attributes: [<#list entityType.attributes as amd>'${amd.label?js_string}: ${amd.type}'<#if amd_has_next>,</#if></#list>]
         }),
         <#else>
         '<@entityName entityType />': new uml.Class({
@@ -133,7 +133,7 @@ textObj.textContent = "..."; //can't place at all
         }),
         </#if>
     </#list>
-    <#list package.subPackages as p>
+    <#list package.children as p>
         <@listClasses package=p classes=classes />
     </#list>
 </#macro>

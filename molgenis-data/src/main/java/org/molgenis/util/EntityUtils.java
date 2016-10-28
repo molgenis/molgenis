@@ -293,7 +293,7 @@ public class EntityUtils
 		if (tags.size() != otherTags.size()) return false;
 		for (int i = 0; i < tags.size(); ++i)
 		{
-			if (!tags.get(i).getIdentifier().equals(otherTags.get(i).getIdentifier())) return false;
+			if (!tags.get(i).getId().equals(otherTags.get(i).getId())) return false;
 		}
 		return true;
 	}
@@ -327,7 +327,7 @@ public class EntityUtils
 	 */
 	public static boolean equals(Tag tag, Tag otherTag)
 	{
-		if (!Objects.equals(tag.getIdentifier(), otherTag.getIdentifier())) return false;
+		if (!Objects.equals(tag.getId(), otherTag.getId())) return false;
 		if (!Objects.equals(tag.getObjectIri(), otherTag.getObjectIri())) return false;
 		if (!Objects.equals(tag.getLabel(), otherTag.getLabel())) return false;
 		if (!Objects.equals(tag.getRelationIri(), otherTag.getRelationIri())) return false;
@@ -407,7 +407,7 @@ public class EntityUtils
 		if (tags.size() != otherTags.size()) return false;
 		for (int i = 0; i < tags.size(); ++i)
 		{
-			if (!Objects.equals(tags.get(i).getIdentifier(), otherTags.get(i).getIdentifier())) return false;
+			if (!Objects.equals(tags.get(i).getId(), otherTags.get(i).getId())) return false;
 		}
 		return true;
 	}
