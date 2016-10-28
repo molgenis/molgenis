@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
@@ -25,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Sets.difference;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -348,52 +348,35 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	private void updateEntity(EntityType newEntityType)
 	{
 		validateUpdateAllowed(newEntityType);
-
-		// make sure the repository in the backend adds and removes columns
-		blah(newEntityType, decoratedRepo.findOneById(newEntityType.getIdValue()));
-
+		addAndRemoveAttributesInBackend(newEntityType);
 		// update entity
 		decoratedRepo.update(newEntityType);
 	}
 
 	/**
-	 * Add and update entity attributes
+	 * Add and remove entity attributes in the backend.
+	 * Updates are handled by the {@link AttributeRepositoryDecorator}.
 	 *
-	 * @param entityType         entity meta data
-	 * @param existingEntityType existing entity meta data
+	 * @param entityType {@link EntityType} containing the desired situation
 	 */
-	private void blah(EntityType entityType, EntityType existingEntityType)
+	private void addAndRemoveAttributesInBackend(EntityType entityType)
 	{
-		// analyze both compound and atomic attributes owned by the entity
+		EntityType existingEntityType = decoratedRepo.findOneById(entityType.getIdValue());
 		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
 		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
-
-		// determine attributes to add, update and delete
-		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
-		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
-
-		//TODO: If entityType is abstract, do this for all extending entityTypes.
-
-		// add new attributes
-		RepositoryCollection backend = dataService.getMeta().getBackend(entityType);
-		if (!addedAttrNames.isEmpty())
+		dataService.getMeta().forEachConcreteChild(entityType, concreteEntityType ->
 		{
-			for (String attrName : addedAttrNames)
-			{
-				backend.addAttribute(existingEntityType, attrsMap.get(attrName));
-			}
-		}
-
-		// delete removed attributes
-		if (!deletedAttrNames.isEmpty())
-		{
-			for (String attrName : deletedAttrNames)
-			{
-				backend.deleteAttribute(existingEntityType, existingAttrsMap.get(attrName));
-			}
-		}
+			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
+			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());
+			// add added attributes in backend
+			difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
+					.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
+			// remove removed attributes in backend
+			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(existingAttrsMap::get)
+					.forEach(removedAttribute -> backend.deleteAttribute(concreteExistingEntityType, removedAttribute));
+		});
 	}
 
 	/**
