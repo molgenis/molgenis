@@ -213,38 +213,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addEntityType(Collection<EntityType> entityTypes)
-	{
-		if (entityTypes.isEmpty())
-		{
-			return;
-		}
-
-		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(entityTypes);
-
-		// 1st pass: create entities and attributes except for mappedBy attributes
-		resolvedEntityTypes.forEach(entityType ->
-		{
-			if (entityType.hasMappedByAttributes())
-			{
-				entityType = new EntityTypeWithoutMappedByAttributes(entityType);
-			}
-
-			addEntityType(entityType);
-		});
-
-		// 2nd pass: create mappedBy attributes and update entity
-		resolvedEntityTypes.forEach(entityType ->
-		{
-			if (entityType.hasMappedByAttributes())
-			{
-				updateEntityType(entityType, new EntityTypeWithoutMappedByAttributes(entityType));
-			}
-		});
-	}
-
-	@Transactional
-	@Override
 	public void updateEntityType(EntityType entityType)
 	{
 		EntityType existingEntityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)

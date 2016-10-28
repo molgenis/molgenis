@@ -179,13 +179,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void addEntityType(EntityType entityType);
 
 	/**
-	 * Add a collection of entity type and entity type attributes.
-	 *
-	 * @param entityTypes entity type collection
-	 */
-	void addEntityType(Collection<EntityType> entityTypes);
-
-	/**
 	 * Updates a single existing entity type and entity type attributes.
 	 *
 	 * @param entityType entity type
