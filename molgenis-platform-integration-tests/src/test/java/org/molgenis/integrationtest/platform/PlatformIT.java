@@ -1355,4 +1355,69 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}
+
+	/**
+	 * Test add and remove of a single attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void addAndDeleteSingleAttributeStream()
+	{
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+		entityType.addAttribute(newAttr); // appends at the end and sets sequence number
+
+		runAsSystem(() ->
+		{
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType)); // Adds the column to the table
+			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+
+			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
+			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
+
+			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
+			dataService.add(entityTypeDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			dataService.update(entityType.getName(),
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
+							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
+					));
+		});
+		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+		// Tunnel via L3 flow
+		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
+		q0.pageSize(10); // L3 only caches queries with a page size
+		q0.sort(new Sort().on(NEW_ATTRIBUTE));
+
+		runAsSystem(() ->
+		{
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(Entity::getIdValue)
+					.collect(toList());
+			assertEquals(expected, Arrays.asList("0", "1"));
+
+			// Remove added attribute
+			entityType.removeAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
+			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		// verify attribute is deleted by adding and removing it again
+		runAsSystem(() ->
+		{
+			entityType.addAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
+			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+
+			// Remove added attribute
+			entityType.removeAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
+			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
 }
