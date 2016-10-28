@@ -8,7 +8,7 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -46,7 +46,7 @@ public class CommandLineAnnotatorConfig
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		applicationContext.getBean(EntityTypeMetadata.class).bootstrap(entityTypeMeta);
 		applicationContext.getBean(PackageMetadata.class).bootstrap(entityTypeMeta);
-		applicationContext.getBean(TagMetaData.class).bootstrap(entityTypeMeta);
+		applicationContext.getBean(TagMetadata.class).bootstrap(entityTypeMeta);
 	}
 
 	@Value("${vcf-validator-location:@null}")

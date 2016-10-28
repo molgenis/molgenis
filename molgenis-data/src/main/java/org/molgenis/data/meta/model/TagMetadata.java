@@ -9,19 +9,19 @@ import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class TagMetaData extends SystemEntityType
+public class TagMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "tags";
+	private static final String SIMPLE_NAME = "Tag";
 	public static final String TAG = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String IDENTIFIER = "identifier";
+	public static final String IDENTIFIER = "id";
 	public static final String OBJECT_IRI = "objectIRI";
 	public static final String LABEL = "label";
 	public static final String RELATION_IRI = "relationIRI";
 	public static final String RELATION_LABEL = "relationLabel";
 	public static final String CODE_SYSTEM = "codeSystem";
 
-	TagMetaData()
+	TagMetadata()
 	{
 		super(SIMPLE_NAME, PACKAGE_META);
 	}
