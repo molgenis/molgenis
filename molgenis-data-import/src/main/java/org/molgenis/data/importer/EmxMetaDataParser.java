@@ -34,7 +34,7 @@ import static org.molgenis.data.DataConverter.toList;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;

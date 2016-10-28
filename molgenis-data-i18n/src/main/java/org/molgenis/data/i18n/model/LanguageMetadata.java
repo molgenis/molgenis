@@ -9,7 +9,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class LanguageMetaData extends SystemEntityType
+public class LanguageMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Language";
 	public static final String LANGUAGE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -18,7 +18,7 @@ public class LanguageMetaData extends SystemEntityType
 	public static final String NAME = "name";
 	public static final String ACTIVE = "active";
 
-	LanguageMetaData()
+	LanguageMetadata()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 	}
