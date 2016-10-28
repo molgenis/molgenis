@@ -1,7 +1,6 @@
 package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
