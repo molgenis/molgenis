@@ -392,6 +392,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
+		//FIXME: should only be possible to update system entities during bootstrap!
 		if (systemEntityType != null && !currentUserisSystem())
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
