@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static freemarker.template.Configuration.VERSION_2_3_23;
+import static java.io.File.separator;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
 @Import(PlatformConfig.class)
@@ -97,6 +98,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
+
+		// Add resource handler for apps
+		FileStore fileStore = fileStore();
+		registry.addResourceHandler("/appstore/**").addResourceLocations("file:///" + fileStore.getStorageDir() + "/appstore/");
 	}
 
 	@Value("${environment:production}")
@@ -214,10 +219,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
-		if (!molgenisHomeDir.endsWith(File.separator)) molgenisHomeDir = molgenisHomeDir + File.separator;
+		if (!molgenisHomeDir.endsWith(separator)) molgenisHomeDir = molgenisHomeDir + separator;
 
 		// create molgenis store directory in molgenis data directory if not exists
-		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + File.separator + "filestore";
+		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + separator + "filestore";
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
 		if (!molgenisDataDir.exists())
 		{
@@ -335,7 +340,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void validateMolgenisServerProperties()
 	{
 		// validate properties defined in molgenis-server.properties
-		String path = System.getProperty("molgenis.home") + File.separator + "molgenis-server.properties";
+		String path = System.getProperty("molgenis.home") + separator + "molgenis-server.properties";
 		if (environment == null)
 		{
 			throw new RuntimeException("Missing required property 'environment' in " + path
