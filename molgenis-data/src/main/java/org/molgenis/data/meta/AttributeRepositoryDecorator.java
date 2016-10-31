@@ -343,6 +343,12 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 
 	private void validateUpdate(Attribute currentAttr, Attribute newAttr)
 	{
+		if (!Objects.equals(currentAttr.getEntity().getIdValue(), newAttr.getEntity().getIdValue()))
+		{
+			throw new MolgenisDataException(
+					format("Cannot move attribute [%s] to different EntityType", currentAttr.getName()));
+		}
+
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
 		AttributeType newDataType = newAttr.getDataType();
@@ -546,6 +552,13 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		}
 	}
 
+	/**
+	 * Updates an attribute's representation in the backend for each concrete {@link EntityType} that
+	 * has the {@link Attribute}.
+	 *
+	 * @param attr        current version of the attribute
+	 * @param updatedAttr new version of the attribute
+	 */
 	private void updateAttributeInBackend(Attribute attr, Attribute updatedAttr)
 	{
 		MetaDataService meta = dataService.getMeta();
