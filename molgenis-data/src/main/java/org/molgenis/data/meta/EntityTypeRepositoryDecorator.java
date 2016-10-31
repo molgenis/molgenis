@@ -354,10 +354,11 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	}
 
 	/**
-	 * Add and remove entity attributes in the backend.
-	 * Updates are handled by the {@link AttributeRepositoryDecorator}.
+	 * Add and remove entity attributes in the backend for an {@link EntityType}.
+	 * If the {@link EntityType} is abstract, will update all concrete extending {@link EntityType}s.
+	 * Attribute updates are handled by the {@link AttributeRepositoryDecorator}.
 	 *
-	 * @param entityType {@link EntityType} containing the desired situation
+	 * @param entityType {@link EntityType} containing the desired situation.
 	 */
 	private void addAndRemoveAttributesInBackend(EntityType entityType)
 	{
