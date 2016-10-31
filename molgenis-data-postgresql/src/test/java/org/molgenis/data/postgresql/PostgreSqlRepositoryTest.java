@@ -35,8 +35,7 @@ public class PostgreSqlRepositoryTest
 		jdbcTemplate = mock(JdbcTemplate.class);
 		DataSource dataSource = mock(DataSource.class);
 		PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
-		postgreSqlRepo = new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource,
-				transactionManager);
+		postgreSqlRepo = new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource);
 	}
 
 	// TODO test all query operators for one-to-many

@@ -37,9 +37,8 @@ public class PostgreSqlRepositoryCollectionTest
 		DataSource dataSource = mock(DataSource.class);
 		jdbcTemplate = mock(JdbcTemplate.class);
 		dataService = mock(DataService.class);
-		PlatformTransactionManager platformTransactionManager = mock(PlatformTransactionManager.class);
 		postgreSqlRepoCollection = new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate,
-				dataService, platformTransactionManager);
+				dataService);
 	}
 
 	@Test
