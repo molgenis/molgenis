@@ -576,7 +576,7 @@ public class PostgreSqlRepositoryCollectionTest
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		when(attr.getExpression()).thenReturn("expression");
+		when(attr.hasExpression()).thenReturn(true);
 		when(attr.getDataType()).thenReturn(STRING);
 		postgreSqlRepoCollection.addAttribute(entityType, attr);
 		verifyZeroInteractions(jdbcTemplate);
