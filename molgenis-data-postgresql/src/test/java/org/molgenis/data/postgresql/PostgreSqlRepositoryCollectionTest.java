@@ -254,10 +254,12 @@ public class PostgreSqlRepositoryCollectionTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getExpression()).thenReturn("expression");
+		when(attr.hasExpression()).thenReturn(true);
 		when(attr.getDataType()).thenReturn(STRING);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getExpression()).thenReturn(null);
+		when(updatedAttr.hasExpression()).thenReturn(false);
 		when(updatedAttr.getDataType()).thenReturn(STRING);
 		when(updatedAttr.isNillable()).thenReturn(true);
 		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
@@ -272,10 +274,10 @@ public class PostgreSqlRepositoryCollectionTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityType.getAttribute(attrName)).thenReturn(attr);
-		when(attr.getExpression()).thenReturn(null);
+		when(attr.hasExpression()).thenReturn(false);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(updatedAttr.getExpression()).thenReturn("expression");
+		when(updatedAttr.hasExpression()).thenReturn(true);
 		when(updatedAttr.isNillable()).thenReturn(true);
 		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
@@ -288,10 +290,10 @@ public class PostgreSqlRepositoryCollectionTest
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		when(entityType.getAttribute(attrName)).thenReturn(attr);
-		when(attr.getExpression()).thenReturn("expression");
+		when(attr.hasExpression()).thenReturn(true);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(updatedAttr.getExpression()).thenReturn("expression");
+		when(updatedAttr.hasExpression()).thenReturn(true);
 		when(updatedAttr.isNillable()).thenReturn(true);
 		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		verifyZeroInteractions(jdbcTemplate);
