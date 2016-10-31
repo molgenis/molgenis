@@ -182,24 +182,15 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 					format("Adding attribute operation failed. Attribute already exists [%s]", attr.getName()));
 		}
 
-		if (entityType.isAbstract())
+		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 		{
-			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> addAttributeRec(childEntityType, attr, checkAttrExists));
-		}
-		else
-		{
-			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
+			if (isMultipleReferenceType(attr))
 			{
-				if (isMultipleReferenceType(attr))
-				{
-					createJunctionTable(entityType, attr);
-				}
-				else
-				{
-					createColumn(entityType, attr);
-				}
+				createJunctionTable(entityType, attr);
+			}
+			else
+			{
+				createColumn(entityType, attr);
 			}
 		}
 	}
@@ -219,30 +210,21 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			return;
 		}
 
-		if (entityType.isAbstract())
+		if ((attr.getExpression() == null && updatedAttr.getExpression() != null) || (attr.getDataType() != COMPOUND
+					&& updatedAttr.getDataType() == COMPOUND))
 		{
-			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> updateAttributeRec(childEntityType, attr, updatedAttr));
+			// computed attributes and compound attributes are not persisted
+			deleteAttribute(entityType, attr);
+		}
+		else if ((attr.getExpression() != null && updatedAttr.getExpression() == null) || (
+				attr.getDataType() == COMPOUND && updatedAttr.getDataType() != COMPOUND))
+		{
+			// computed attributes and compound attributes are not persisted
+			addAttributeRec(entityType, updatedAttr, false);
 		}
 		else
 		{
-			if ((attr.getExpression() == null && updatedAttr.getExpression() != null) || (attr.getDataType() != COMPOUND
-					&& updatedAttr.getDataType() == COMPOUND))
-			{
-				// computed attributes and compound attributes are not persisted
-				deleteAttribute(entityType, attr);
-			}
-			else if ((attr.getExpression() != null && updatedAttr.getExpression() == null) || (
-					attr.getDataType() == COMPOUND && updatedAttr.getDataType() != COMPOUND))
-			{
-				// computed attributes and compound attributes are not persisted
-				addAttributeRec(entityType, updatedAttr, false);
-			}
-			else
-			{
-				updateColumn(entityType, attr, updatedAttr);
-			}
+			updateColumn(entityType, attr, updatedAttr);
 		}
 	}
 
@@ -434,24 +416,15 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			return;
 		}
 
-		if (entityType.isAbstract())
+		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 		{
-			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> deleteAttributeRec(childEntityType, attr));
-		}
-		else
-		{
-			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
+			if (isMultipleReferenceType(attr))
 			{
-				if (isMultipleReferenceType(attr))
-				{
-					dropJunctionTable(entityType, attr);
-				}
-				else
-				{
-					dropColumn(entityType, attr);
-				}
+				dropJunctionTable(entityType, attr);
+			}
+			else
+			{
+				dropColumn(entityType, attr);
 			}
 		}
 	}
