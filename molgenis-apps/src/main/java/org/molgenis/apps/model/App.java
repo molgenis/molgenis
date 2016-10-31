@@ -1,7 +1,7 @@
 package org.molgenis.apps.model;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.file.model.FileMeta;
 
@@ -14,14 +14,14 @@ public class App extends StaticEntity
 		super(entity);
 	}
 
-	public App(EntityMetaData entityMeta)
+	public App(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public App(String name, EntityMetaData entityMeta)
+	public App(String name, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setAppName(name);
 	}
 
