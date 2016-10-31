@@ -23,7 +23,8 @@ public class GavinAlgorithm
 	public static final String SENS95THPERCADDTHRESHOLD = "Sens95thPerCADDThreshold";
 	private static final String CATEGORY = "Category";
 
-	public static final double GENOMEWIDE_MAF_THRESHOLD = 0.00474;
+	//this is the MAF threshold as calculated in r0.3 of the calibration data
+	public static final double GENOMEWIDE_MAF_THRESHOLD = 0.003456145;
 	public static final int GENOMEWIDE_CADD_THRESHOLD = 15;
 
 	/**
