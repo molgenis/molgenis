@@ -142,13 +142,34 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void addAttribute(EntityType entityType, Attribute attr)
 	{
-		addAttributeRec(entityType, attr, true);
+		if (entityType.getAttribute(attr.getName()) != null)
+		{
+			throw new MolgenisDataException(
+					format("Adding attribute operation failed. Attribute already exists [%s]", attr.getName()));
+		}
+		addAttributeInternal(entityType, attr);
 	}
 
 	@Override
 	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		updateAttributeRec(entityType, attr, updatedAttr);
+		if (!isPersisted(attr) && !isPersisted(updatedAttr))
+		{
+			return;
+		}
+
+		if (isPersisted(attr) && !isPersisted(updatedAttr))
+		{
+			deleteAttribute(entityType, attr);
+		}
+		else if (!isPersisted(attr) && isPersisted(updatedAttr))
+		{
+			addAttributeInternal(entityType, updatedAttr);
+		}
+		else
+		{
+			updateColumn(entityType, attr, updatedAttr);
+		}
 	}
 
 	@Override
@@ -177,13 +198,11 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	/**
-	 * Recursively add attribute to entity and entities extending from this entity.
-	 *
-	 * @param entityType      entity meta data
+	 * Add attribute to entityType.
+	 *  @param entityType      the {@link EntityType} to add attribute to
 	 * @param attr            attribute to add
-	 * @param checkAttrExists whether or not to perform a check if the attribute exists for the given entity
 	 */
-	private void addAttributeRec(EntityType entityType, Attribute attr, boolean checkAttrExists)
+	private void addAttributeInternal(EntityType entityType, Attribute attr)
 	{
 		if (!isPersisted(attr))
 		{
@@ -219,34 +238,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	private boolean isPersisted(Attribute attr)
 	{
 		return !attr.hasExpression() && attr.getDataType() != COMPOUND;
-	}
-
-	/**
-	 * Recursively update attribute of entity and entities extending from this entity.
-	 *
-	 * @param entityType  entity meta data
-	 * @param attr        existing attribute
-	 * @param updatedAttr updated attribute
-	 */
-	private void updateAttributeRec(EntityType entityType, Attribute attr, Attribute updatedAttr)
-	{
-		if (!isPersisted(attr) && !isPersisted(updatedAttr))
-		{
-			return;
-		}
-
-		if (isPersisted(attr) && !isPersisted(updatedAttr))
-		{
-			deleteAttribute(entityType, attr);
-		}
-		else if (!isPersisted(attr) && isPersisted(updatedAttr))
-		{
-			addAttributeRec(entityType, updatedAttr, false);
-		}
-		else
-		{
-			updateColumn(entityType, attr, updatedAttr);
-		}
 	}
 
 	/**
