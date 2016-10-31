@@ -123,7 +123,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 * @return
 	 */
 	Set<IndexAction>  filterUnnecessaryIndexActions(){
-		Set<String> entityFillName = Sets.newHashSet();
+		Set<String> entityFullNames = Sets.newHashSet();
 
 		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
 				.filter(indexAction ->
@@ -135,7 +135,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 					if (null != indexAction.getEntityFullName() && null == indexAction.getEntityId())
 					{
-						entityFillName.add(indexAction.getEntityFullName());
+						entityFullNames.add(indexAction.getEntityFullName());
 					}
 
 					return true;
@@ -143,13 +143,13 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 				.flatMap(this::addReferencingEntities).collect(toSet());
 
 		Set<IndexAction> indexActionSetToRemove = Sets.newHashSet();
-		entityFillName.forEach(entityFullName ->
+		entityFullNames.forEach(entityFullName ->
 		{
 			indexActionSet.stream().forEach(indexAction ->
 			{
 				if(null != indexAction.getEntityId() && indexAction.getEntityFullName().equals(entityFullName)){
 					indexActionSetToRemove.add(indexAction);
-					LOG.info("remove index actions of row when entity will already be indexed: [{}].[{}]", indexAction.getEntityFullName(), indexAction.getEntityId());
+					//LOG.info("remove index actions of row when entity will already be indexed: [{}].[{}]", indexAction.getEntityFullName(), indexAction.getEntityId());
 				}
 			});
 		});
