@@ -1085,16 +1085,31 @@ public class MetaDataServiceImplTest
 	public void addAttribute()
 	{
 		Attribute attr = mock(Attribute.class);
+		EntityType entityType = mock(EntityType.class);
+		EntityType currentEntityType = mock(EntityType.class);
+		when(attr.getEntity()).thenReturn(entityType);
+		when(entityType.getName()).thenReturn("EntityTypeName");
+		when(dataService.getEntityType("EntityTypeName")).thenReturn(currentEntityType);
+
 		metaDataServiceImpl.addAttribute(attr);
+		verify(dataService).update(ENTITY_TYPE_META_DATA, currentEntityType);
 		verify(dataService).add(ATTRIBUTE_META_DATA, attr);
+		verify(currentEntityType).addAttribute(attr);
 	}
 
 	@Test
 	public void deleteAttributeById()
 	{
 		Object attrId = "attr0";
+		Attribute attribute = mock(Attribute.class);
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.findOneById(ATTRIBUTE_META_DATA, attrId, Attribute.class)).thenReturn(attribute);
+		when(attribute.getEntity()).thenReturn(entityType);
+
 		metaDataServiceImpl.deleteAttributeById(attrId);
-		verify(dataService).deleteById(ATTRIBUTE_META_DATA, attrId);
+		verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
+		verify(dataService).delete(ATTRIBUTE_META_DATA, attribute);
+		verify(entityType).removeAttribute(attribute);
 	}
 
 	@DataProvider(name = "isMetaEntityTypeProvider")
