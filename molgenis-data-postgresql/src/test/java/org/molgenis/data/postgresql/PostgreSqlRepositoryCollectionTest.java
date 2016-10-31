@@ -723,7 +723,7 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		String attrName = "attr";
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(attr.getExpression()).thenReturn("expression");
+		when(attr.hasExpression()).thenReturn(true);
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
