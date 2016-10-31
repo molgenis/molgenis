@@ -40,16 +40,14 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	private final DataSource dataSource;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataService dataService;
-	private final PlatformTransactionManager transactionManager;
 
 	PostgreSqlRepositoryCollection(PostgreSqlEntityFactory postgreSqlEntityFactory, DataSource dataSource,
-			JdbcTemplate jdbcTemplate, DataService dataService, PlatformTransactionManager transactionManager)
+			JdbcTemplate jdbcTemplate, DataService dataService)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
 		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.dataService = requireNonNull(dataService);
-		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	@Override
