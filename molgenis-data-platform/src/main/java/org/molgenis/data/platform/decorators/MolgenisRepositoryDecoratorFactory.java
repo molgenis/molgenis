@@ -30,6 +30,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -41,6 +42,7 @@ import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
@@ -74,6 +76,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final L3Cache l3Cache;
 	private final LanguageService languageService;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final PlatformTransactionManager transactionManager;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -84,7 +87,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			PasswordEncoder passwordEncoder, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, L3Cache l3Cache,
-			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver)
+			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
+			PlatformTransactionManager transactionManager)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -107,6 +111,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.l3Cache = requireNonNull(l3Cache);
 		this.languageService = requireNonNull(languageService);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	@Override
@@ -150,6 +155,10 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 1. security decorator
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
+
+		// 0. transaction decorator
+		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);
+
 		return decoratedRepository;
 	}
 
