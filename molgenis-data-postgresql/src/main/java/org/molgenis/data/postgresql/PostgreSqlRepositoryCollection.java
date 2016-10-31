@@ -158,7 +158,22 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
 		}
-		deleteAttributeRec(entityType, attr);
+		if (!isPersisted(attr))
+		{
+			return;
+		}
+
+		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
+		{
+			if (isMultipleReferenceType(attr))
+			{
+				dropJunctionTable(entityType, attr);
+			}
+			else
+			{
+				dropColumn(entityType, attr);
+			}
+		}
 	}
 
 	/**
@@ -170,9 +185,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 */
 	private void addAttributeRec(EntityType entityType, Attribute attr, boolean checkAttrExists)
 	{
-		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
+		if (!isPersisted(attr))
 		{
-			// computed attributes and compound attributes are not persisted
 			return;
 		}
 
@@ -196,6 +210,18 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	/**
+	 * Indicates if the attribute is persisted in the database.
+	 * Compound attributes and computed attributes with an expression are not persisted.
+	 *
+	 * @param attr the attribute to check
+	 * @return boolean indicating if the entity is persisted in the database.
+	 */
+	private boolean isPersisted(Attribute attr)
+	{
+		return !attr.hasExpression() && attr.getDataType() != COMPOUND;
+	}
+
+	/**
 	 * Recursively update attribute of entity and entities extending from this entity.
 	 *
 	 * @param entityType  entity meta data
@@ -204,22 +230,17 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 */
 	private void updateAttributeRec(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		if ((attr.getExpression() != null && updatedAttr.getExpression() != null) || (attr.getDataType() == COMPOUND
-				&& updatedAttr.getDataType() == COMPOUND))
+		if (!isPersisted(attr) && !isPersisted(updatedAttr))
 		{
 			return;
 		}
 
-		if ((attr.getExpression() == null && updatedAttr.getExpression() != null) || (attr.getDataType() != COMPOUND
-					&& updatedAttr.getDataType() == COMPOUND))
+		if (isPersisted(attr) && !isPersisted(updatedAttr))
 		{
-			// computed attributes and compound attributes are not persisted
 			deleteAttribute(entityType, attr);
 		}
-		else if ((attr.getExpression() != null && updatedAttr.getExpression() == null) || (
-				attr.getDataType() == COMPOUND && updatedAttr.getDataType() != COMPOUND))
+		else if (!isPersisted(attr) && isPersisted(updatedAttr))
 		{
-			// computed attributes and compound attributes are not persisted
 			addAttributeRec(entityType, updatedAttr, false);
 		}
 		else
@@ -399,33 +420,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		else if (!attr.isUnique() && updatedAttr.isUnique())
 		{
 			createUniqueKey(entityType, updatedAttr);
-		}
-	}
-
-	/**
-	 * Recursively delete attribute in entity and entities extending from this entity.
-	 *
-	 * @param entityType entity meta data
-	 * @param attr       attribute to delete
-	 */
-	private void deleteAttributeRec(EntityType entityType, Attribute attr)
-	{
-		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
-		{
-			// computed attributes and compound attributes are not persisted
-			return;
-		}
-
-		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
-		{
-			if (isMultipleReferenceType(attr))
-			{
-				dropJunctionTable(entityType, attr);
-			}
-			else
-			{
-				dropColumn(entityType, attr);
-			}
 		}
 	}
 
