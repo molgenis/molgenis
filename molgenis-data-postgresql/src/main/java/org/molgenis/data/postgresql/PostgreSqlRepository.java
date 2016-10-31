@@ -21,8 +21,6 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -83,17 +81,15 @@ class PostgreSqlRepository extends AbstractRepository
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataSource dataSource;
-	private final PlatformTransactionManager transactionManager;
 
 	private EntityType entityType;
 
 	PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
-			DataSource dataSource, PlatformTransactionManager transactionManager)
+			DataSource dataSource)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.dataSource = requireNonNull(dataSource);
-		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	void setEntityType(EntityType entityType)
@@ -104,14 +100,8 @@ class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-		transactionTemplate.setReadOnly(true);
-
-		return transactionTemplate.execute((status) ->
-		{
-			Query<Entity> q = new QueryImpl<>();
-			return findAllBatching(q).iterator();
-		});
+		Query<Entity> q = new QueryImpl<>();
+		return findAllBatching(q).iterator();
 	}
 
 	@Override
@@ -152,10 +142,7 @@ class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-		transactionTemplate.setReadOnly(true);
-
-		return transactionTemplate.execute((status) -> stream(findAllBatching(q).spliterator(), false));
+		return stream(findAllBatching(q).spliterator(), false);
 	}
 
 	@Override
@@ -189,42 +176,36 @@ class PostgreSqlRepository extends AbstractRepository
 		return findOne(new QueryImpl<>().eq(entityType.getIdAttribute().getName(), id).fetch(fetch));
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void update(Entity entity)
 	{
 		update(Stream.of(entity));
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void update(Stream<Entity> entities)
 	{
 		updateBatching(entities.iterator());
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void delete(Entity entity)
 	{
 		this.delete(Stream.of(entity));
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
 		deleteAll(entities.map(Entity::getIdValue));
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteById(Object id)
 	{
 		this.deleteAll(Stream.of(id));
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
@@ -243,7 +224,6 @@ class PostgreSqlRepository extends AbstractRepository
 		});
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteAll()
 	{
@@ -259,7 +239,6 @@ class PostgreSqlRepository extends AbstractRepository
 		jdbcTemplate.update(deleteAllSql);
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void add(Entity entity)
 	{
@@ -270,7 +249,6 @@ class PostgreSqlRepository extends AbstractRepository
 		add(Stream.of(entity));
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{

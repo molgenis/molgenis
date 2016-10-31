@@ -461,7 +461,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 */
 	private PostgreSqlRepository createPostgreSqlRepository()
 	{
-		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, transactionManager);
+		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource);
 	}
 
 	private boolean isTableExists(EntityType entityType)
