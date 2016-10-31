@@ -1357,6 +1357,41 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	/**
+	 * Test add stream attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void addStreamAttribute()
+	{
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+
+		runAsSystem(() ->
+		{
+			dataService.getMeta().addAttributes(entityType.getName(), Stream.of(newAttr));
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
+			assertNotNull(attribute);
+
+			// Tunnel via L3 flow
+			Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+					.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
+			q0.pageSize(10); // L3 only caches queries with a page size
+			q0.sort(new Sort().on(NEW_ATTRIBUTE));
+
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(Entity::getIdValue)
+					.collect(toList());
+			assertEquals(expected, Arrays.asList());
+
+			// Remove added attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
+
+	/**
 	 * Test update of a single attribute of a dynamic entity
 	 */
 	@Test(singleThreaded = true)
