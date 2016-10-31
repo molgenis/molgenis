@@ -142,6 +142,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void addAttribute(EntityType entityType, Attribute attr)
 	{
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot add attribute [%s] to abstract entity type [%s].", attr.getName(),
+							entityType.getName()));
+		}
 		if (entityType.getAttribute(attr.getName()) != null)
 		{
 			throw new MolgenisDataException(
@@ -153,6 +159,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot update attribute [%s] for abstract entity type [%s].", attr.getName(),
+							entityType.getName()));
+		}
 		if (!isPersisted(attr) && !isPersisted(updatedAttr))
 		{
 			return;
@@ -175,6 +187,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot delete attribute [%s] from abstract entity type [%s].", attr.getName(),
+							entityType.getName()));
+		}
 		if (entityType.getAttribute(attr.getName()) == null)
 		{
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
