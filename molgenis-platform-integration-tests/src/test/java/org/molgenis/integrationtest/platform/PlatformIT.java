@@ -1386,14 +1386,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
+		// Verify old values
 		assertNotEquals(newAttr.getSequenceNumber(), 0);
 		assertFalse(newAttr.isReadOnly());
 		assertFalse(newAttr.isUnique());
+		assertNotEquals(newAttr.getLabel(), "test");
+		assertNotEquals(newAttr.getDescription(), "test");
+		assertTrue(newAttr.isNillable());
 
 		// New values
 		newAttr.setSequenceNumber(0);
 		newAttr.setReadOnly(true);
 		newAttr.setUnique(true);
+		newAttr.setLabel("test");
+		newAttr.setDescription("test");
 
 		// Update attribute
 		runAsSystem(() ->
@@ -1407,6 +1413,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(attr.getSequenceNumber(), 0);
 		assertTrue(attr.isReadOnly());
 		assertTrue(attr.isUnique());
+		assertEquals(attr.getLabel(), "test");
+		assertEquals(attr.getDescription(), "test");
 
 		// Delete attribute
 		runAsSystem(() ->
