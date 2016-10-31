@@ -53,11 +53,18 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String showView(Model model)
 	{
+		model.addAttribute("questionnaires", getQuestionnaires());
+		return "view-my-questionnaires";
+	}
+
+	private synchronized List<Questionnaire> getQuestionnaires()
+	{
+		List<Questionnaire> questionnaires;
+
 		List<Entity> questionnaireMeta = runAsSystem(
 				() -> QuestionnaireUtils.findQuestionnairesMetaData(dataService).collect(Collectors.toList()));
 
-		List<Questionnaire> questionnaires = questionnaireMeta.stream()
-				.map(e -> e.getString(EntityTypeMetadata.FULL_NAME))
+		questionnaires = questionnaireMeta.stream().map(e -> e.getString(EntityTypeMetadata.FULL_NAME))
 				.filter(name -> SecurityUtils.currentUserIsSu() || SecurityUtils
 						.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name ->
 				{
@@ -68,10 +75,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 					return toQuestionnaireModel(entity, emd);
 				}).collect(Collectors.toList());
-
-		model.addAttribute("questionnaires", questionnaires);
-
-		return "view-my-questionnaires";
+		return questionnaires;
 	}
 
 	@RequestMapping("/{name}")
