@@ -209,12 +209,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			return;
 		}
 
-		if (checkAttrExists && entityType.getAttribute(attr.getName()) != null)
-		{
-			throw new MolgenisDataException(
-					format("Adding attribute operation failed. Attribute already exists [%s]", attr.getName()));
-		}
-
 		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 		{
 			if (isMultipleReferenceType(attr))
