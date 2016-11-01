@@ -60,6 +60,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 				+ "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of Samples With Data\">\n"
 				+ "##INFO=<ID=DF,Number=0,Type=Flag,Description=\"Flag field\">\n"
 				+ "##INFO=<ID=DF2,Number=0,Type=Flag,Description=\"Flag field 2\">\n"
+				+ "##INFO=<ID=CHAR,Number=0,Type=Character,Description=\"char field\">\n"
 				+ "#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n";
 		vcfMetaSmall = parseHeaders(headersSmall);
 		vcfToEntitySmall = new VcfToEntity("EntityNameSmall", vcfMetaSmall, vcfAttrs, entityTypeFactory,
@@ -92,11 +93,14 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 				.setAggregatable(true).setParent(infoMetaData);
 		Attribute infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
 				.setDescription("Flag field 2").setAggregatable(true).setParent(infoMetaData);
+		Attribute infoChar2 = attrMetaFactory.create().setName("CHAR").setDataType(STRING)
+				.setDescription("char field").setAggregatable(true).setParent(infoMetaData);
 
 		expectedEntityType.addAttribute(infoMetaData);
 		expectedEntityType.addAttribute(infoNS);
 		expectedEntityType.addAttribute(infoDF);
 		expectedEntityType.addAttribute(infoDF2);
+		expectedEntityType.addAttribute(infoChar2);
 
 		EntityType actualEntityType = vcfToEntitySmall.getEntityType();
 		String backend = "test";
@@ -116,7 +120,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	public void testToEntity() throws IOException
 	{
 		VcfRecord record = new VcfRecord(vcfMetaSmall,
-				new String[] { "10", "12345", "id3", "A", "C", "7.9123", "pass", "DF" });
+				new String[] { "10", "12345", "id3", "A", "C", "7.9123", "pass", "DF;;CHAR=-" });
 		Entity entity = vcfToEntitySmall.toEntity(record);
 		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityType());
 		expected.set("#CHROM", "10");
@@ -130,6 +134,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		expected.set("DF", true);
 		// Flag fields whose flag is not present are set to false
 		expected.set("DF2", false);
+		expected.set("CHAR", "-");
 		assertTrue(EntityUtils.equals(entity, expected));
 	}
 
@@ -137,7 +142,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	public void testToEntityAlternativeAlleles() throws IOException
 	{
 		VcfRecord record = new VcfRecord(vcfMetaSmall,
-				new String[] { "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2" });
+				new String[] { "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2;CHAR=-" });
 		Entity entity = vcfToEntitySmall.toEntity(record);
 		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityType());
 		expected.set("#CHROM", "10");
@@ -150,6 +155,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		expected.set("INTERNAL_ID", entity.get("INTERNAL_ID"));
 		expected.set("DF", true);
 		expected.set("DF2", true);
+		expected.set("CHAR", "-");
 		assertTrue(EntityUtils.equals(entity, expected));
 	}
 
