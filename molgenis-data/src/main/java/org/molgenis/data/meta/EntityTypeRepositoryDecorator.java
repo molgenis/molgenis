@@ -336,7 +336,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		decoratedRepo.add(entityType);
 		if (!entityType.isAbstract() && !dataService.getMeta().isMetaEntityType(entityType))
 		{
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType.getBackend());
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
 			if (repoCollection == null)
 			{
 				throw new MolgenisDataException(format("Unknown backend [%s]", entityType.getBackend()));
