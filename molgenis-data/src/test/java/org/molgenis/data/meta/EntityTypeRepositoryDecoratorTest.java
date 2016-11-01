@@ -1,6 +1,10 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
@@ -43,22 +47,41 @@ import static org.testng.Assert.assertNull;
 
 public class EntityTypeRepositoryDecoratorTest
 {
+	private final String entityName1 = "EntityType1";
+	private final String entityName2 = "EntityType2";
+	private final String entityName3 = "EntityType3";
+	private final String entityName4 = "EntityType4";
 	private EntityTypeRepositoryDecorator repo;
+	@Mock
 	private Repository<EntityType> decoratedRepo;
+	@Mock
 	private DataService dataService;
+	@Mock
 	private MetaDataService metaDataService;
+	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	@Mock
 	private MolgenisPermissionService permissionService;
+	@Captor
+	private ArgumentCaptor<Consumer<List<EntityType>>> consumerCaptor;
+	@Mock
+	private EntityType entityType1;
+	@Mock
+	private EntityType entityType2;
+	@Mock
+	private EntityType entityType3;
+	@Mock
+	private EntityType entityType4;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
-		dataService = mock(DataService.class);
-		metaDataService = mock(MetaDataService.class);
+		MockitoAnnotations.initMocks(this);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
-		permissionService = mock(MolgenisPermissionService.class);
+		when(entityType1.getName()).thenReturn(entityName1);
+		when(entityType2.getName()).thenReturn(entityName2);
+		when(entityType3.getName()).thenReturn(entityName3);
+		when(entityType4.getName()).thenReturn(entityName4);
 		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, systemEntityTypeRegistry,
 				permissionService);
 	}
@@ -350,12 +373,26 @@ public class EntityTypeRepositoryDecoratorTest
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
 	}
 
-	// TODO implement forEachBatchedUser unit test, but how?
-	//	@Test
-	//	public void forEachBatchedUser() throws Exception
-	//	{
-	//
-	//	}
+	@Test
+	public void forEachBatchedUser() throws Exception
+	{
+		setUserAuthentication();
+
+		List<Entity> entities = newArrayList();
+		repo.forEachBatched(entities::addAll, 2);
+
+		when(permissionService.hasPermissionOnEntity(entityName1, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityName2, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityName3, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityName4, READ)).thenReturn(true);
+
+		// Decorated repo returns two batches of two entityTypes
+		verify(decoratedRepo).forEachBatched(eq(null), consumerCaptor.capture(), eq(2));
+		consumerCaptor.getValue().accept(Lists.newArrayList(entityType1, entityType2));
+		consumerCaptor.getValue().accept(Lists.newArrayList(entityType3, entityType4));
+
+		assertEquals(entities, newArrayList(entityType1, entityType4));
+	}
 
 	@Test
 	public void findOneQuerySu() throws Exception
