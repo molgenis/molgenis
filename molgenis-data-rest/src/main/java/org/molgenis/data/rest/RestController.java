@@ -1043,14 +1043,13 @@ public class RestController
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
-		Entity existing = dataService.findOneById(entityName, id, MetaUtils.getEntityTypeFetch());
+		Entity existing = dataService.findOneById(entityName, id, new Fetch().field(meta.getIdAttribute().getName()));
 		if (existing == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
 		Entity entity = this.restService.toEntity(meta, entityMap);
-		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
 		restService.updateMappedByEntities(entity, existing);
