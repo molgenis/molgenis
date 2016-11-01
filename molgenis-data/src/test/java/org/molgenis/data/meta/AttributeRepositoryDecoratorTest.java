@@ -638,57 +638,6 @@ public class AttributeRepositoryDecoratorTest
 	}
 
 	@Test
-	public void addMappedByValidEntity()
-	{
-		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
-		String attrName = "attrName";
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(attr.getRefEntity()).thenReturn(refEntity);
-		String mappedByAttrName = "mappedByAttrName";
-		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
-		when(mappedByAttr.getDataType()).thenReturn(XREF);
-		when(attr.getMappedBy()).thenReturn(mappedByAttr);
-		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
-		repo.add(attr);
-		verify(decoratedRepo).add(attr);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "mappedBy attribute \\[mappedByAttrName\\] is not part of entity \\[entityName\\].")
-	public void addMappedByInvalidEntity()
-	{
-		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
-		String attrName = "attrName";
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(attr.getRefEntity()).thenReturn(refEntity);
-		String mappedByAttrName = "mappedByAttrName";
-		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
-		when(mappedByAttr.getDataType()).thenReturn(XREF);
-		when(attr.getMappedBy()).thenReturn(mappedByAttr);
-		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-		repo.add(attr);
-		verify(decoratedRepo).add(attr);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid mappedBy attribute \\[mappedByAttrName\\] data type \\[STRING\\].")
-	public void addMappedByInvalidDataType()
-	{
-		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
-		String attrName = "attrName";
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		when(attr.getRefEntity()).thenReturn(refEntity);
-		String mappedByAttrName = "mappedByAttrName";
-		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
-		when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
-		when(attr.getMappedBy()).thenReturn(mappedByAttr);
-		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-		repo.add(attr);
-		verify(decoratedRepo).add(attr);
-	}
-
-	@Test
 	public void delete()
 	{
 		String attrName = "attrName";
