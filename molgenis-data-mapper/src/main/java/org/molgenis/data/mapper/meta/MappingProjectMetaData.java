@@ -1,19 +1,19 @@
 package org.molgenis.data.mapper.meta;
 
-import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.auth.UserMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.mapper.meta.MapperPackage.PACKAGE_MAPPER;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MappingProjectMetaData extends SystemEntityMetaData
+public class MappingProjectMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "MappingProject";
 	public static final String MAPPING_PROJECT = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -24,16 +24,16 @@ public class MappingProjectMetaData extends SystemEntityMetaData
 	public static final String MAPPING_TARGETS = "mappingtargets";
 
 	private final MapperPackage mapperPackage;
-	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final UserMetaData userMetaData;
 	private final MappingTargetMetaData mappingTargetMetaData;
 
 	@Autowired
-	public MappingProjectMetaData(MapperPackage mapperPackage, MolgenisUserMetaData molgenisUserMetaData,
+	public MappingProjectMetaData(MapperPackage mapperPackage, UserMetaData userMetaData,
 			MappingTargetMetaData mappingTargetMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);
 		this.mapperPackage = requireNonNull(mapperPackage);
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.userMetaData = requireNonNull(userMetaData);
 		this.mappingTargetMetaData = requireNonNull(mappingTargetMetaData);
 	}
 
@@ -45,7 +45,7 @@ public class MappingProjectMetaData extends SystemEntityMetaData
 
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
-		addAttribute(OWNER).setDataType(XREF).setRefEntity(molgenisUserMetaData);
+		addAttribute(OWNER).setDataType(XREF).setRefEntity(userMetaData);
 		addAttribute(MAPPING_TARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData);
 	}
 }

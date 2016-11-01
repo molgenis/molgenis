@@ -12,15 +12,15 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
+import static org.molgenis.AttributeType.MREF;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object
@@ -36,8 +36,8 @@ public class ResponseParser
 		this.aggregateResponseParser = new AggregateResponseParser();
 	}
 
-	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
-			EntityMetaData entityMetaData, DataService dataService)
+	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response, EntityType entityType,
+			DataService dataService)
 	{
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
@@ -76,16 +76,15 @@ public class ResponseParser
 					// information for labelAttribute from refeEntity and put it
 					// in the Hit result map
 					String fieldName = entry.getKey();
-					if (entityMetaData == null || entityMetaData.getAttribute(fieldName) == null
-							|| entityMetaData.getAttribute(fieldName).getDataType() != MREF)
+					if (entityType == null || entityType.getAttribute(fieldName) == null
+							|| entityType.getAttribute(fieldName).getDataType() != MREF)
 
 					{
 						columnValueMap.put(entry.getKey(), entry.getValue());
 					}
 					else
 					{
-						AttributeMetaData attributeMetaData = entityMetaData.getAttribute(fieldName).getRefEntity()
-								.getLabelAttribute();
+						Attribute attribute = entityType.getAttribute(fieldName).getRefEntity().getLabelAttribute();
 						List<Object> values = new ArrayList<Object>();
 						if (entry.getValue() instanceof List<?>)
 						{
@@ -95,7 +94,7 @@ public class ResponseParser
 								{
 									for (Map.Entry<?, ?> entrySet : ((Map<?, ?>) eachElement).entrySet())
 									{
-										if (entrySet.getKey().toString().equalsIgnoreCase(attributeMetaData.getName()))
+										if (entrySet.getKey().toString().equalsIgnoreCase(attribute.getName()))
 										{
 											Object value = entrySet.getValue();
 											if (value != null)

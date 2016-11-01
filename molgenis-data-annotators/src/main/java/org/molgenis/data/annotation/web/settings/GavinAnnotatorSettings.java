@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.web.settings;
 import org.molgenis.data.annotation.core.entity.impl.gavin.GavinAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +18,7 @@ public class GavinAnnotatorSettings extends DefaultSettingsEntity
 	}
 
 	@Component
-	public static class Meta extends DefaultSettingsEntityMetaData
+	public static class Meta extends DefaultSettingsEntityType
 	{
 		public static final String VARIANT_FILE_LOCATION = "variantFileLocation";
 

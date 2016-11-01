@@ -1,7 +1,7 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.User;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,21 +13,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserAccountServiceImpl implements UserAccountService
 {
 	@Autowired
-	private MolgenisUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Override
 	@Transactional(readOnly = true)
-	public MolgenisUser getCurrentUser()
+	public User getCurrentUser()
 	{
 		return userService.getUser(SecurityUtils.getCurrentUsername());
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<MolgenisGroup> getCurrentUserGroups()
+	public Iterable<Group> getCurrentUserGroups()
 	{
 		return userService.getUserGroups(SecurityUtils.getCurrentUsername());
 	}
@@ -35,7 +35,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_USERACCOUNT')")
 	@Transactional
-	public void updateCurrentUser(MolgenisUser updatedCurrentUser)
+	public void updateCurrentUser(User updatedCurrentUser)
 	{
 		String currentUsername = SecurityUtils.getCurrentUsername();
 		if (!currentUsername.equals(updatedCurrentUser.getUsername()))
@@ -43,7 +43,7 @@ public class UserAccountServiceImpl implements UserAccountService
 			throw new RuntimeException("Updated user differs from the current user");
 		}
 
-		MolgenisUser currentUser = userService.getUser(currentUsername);
+		User currentUser = userService.getUser(currentUsername);
 		if (currentUser == null)
 		{
 			throw new RuntimeException("User does not exist [" + currentUsername + "]");
@@ -59,7 +59,7 @@ public class UserAccountServiceImpl implements UserAccountService
 		if (password == null || password.isEmpty()) return false;
 
 		String currentUsername = SecurityUtils.getCurrentUsername();
-		MolgenisUser currentUser = userService.getUser(currentUsername);
+		User currentUser = userService.getUser(currentUsername);
 		if (currentUser == null)
 		{
 			throw new RuntimeException("User does not exist [" + SecurityUtils.getCurrentUsername() + "]");

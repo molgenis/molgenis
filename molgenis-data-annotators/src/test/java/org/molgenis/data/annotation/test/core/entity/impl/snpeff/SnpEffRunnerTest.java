@@ -4,15 +4,15 @@ import com.google.common.collect.Iterators;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffRunner;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.meta.model.*;
-import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
@@ -37,9 +37,9 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { SnpEffRunnerTest.Config.class })
@@ -49,10 +49,10 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -73,9 +73,9 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 
 	private final ArrayList<Entity> entities = new ArrayList<>();
 	;
-	private EntityMetaData metaDataCanAnnotate;
+	private EntityType metaDataCanAnnotate;
 
-	private EntityMetaData effectsEMD;
+	private EntityType effectsEMD;
 
 	@InjectMocks
 	private SnpEffRunner snpEffRunner;
@@ -94,21 +94,21 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		IdGenerator idGenerator = new UuidGenerator();
 
 		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
-				entityMetaDataFactory, attributeMetaDataFactory);
+				entityTypeFactory, attributeFactory);
 
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test").setSimpleName("test");
-		AttributeMetaData attributeMetaDataChrom = vcfAttributes.getChromAttribute();
-		AttributeMetaData attributeMetaDataPos = vcfAttributes.getPosAttribute();
-		AttributeMetaData attributeMetaDataRef = vcfAttributes.getRefAttribute();
-		AttributeMetaData attributeMetaDataAlt = vcfAttributes.getAltAttribute();
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test").setSimpleName("test");
+		Attribute attributeChrom = vcfAttributes.getChromAttribute();
+		Attribute attributePos = vcfAttributes.getPosAttribute();
+		Attribute attributeRef = vcfAttributes.getRefAttribute();
+		Attribute attributeAlt = vcfAttributes.getAltAttribute();
 
-		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributePos);
+		metaDataCanAnnotate.addAttribute(attributeRef);
+		metaDataCanAnnotate.addAttribute(attributeAlt);
 
-		effectsEMD = entityMetaDataFactory.create().setSimpleName("test_EFFECTS");
-		effectsEMD.addAttribute(attributeMetaDataFactory.create().setName("ID").setAuto(true).setVisible(false));
+		effectsEMD = entityTypeFactory.create().setSimpleName("test_EFFECTS");
+		effectsEMD.addAttribute(attributeFactory.create().setName("ID").setAuto(true).setVisible(false));
 		effectsEMD.addAttribute(effectsMetaData.getAltAttr());
 		effectsEMD.addAttribute(effectsMetaData.getGeneNameAttr());
 		effectsEMD.addAttribute(effectsMetaData.getAnnotationAttr());
@@ -126,7 +126,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		effectsEMD.addAttribute(effectsMetaData.getDistanceToFeatureAttr());
 		effectsEMD.addAttribute(effectsMetaData.getErrorsAttr());
 		effectsEMD.addAttribute(
-				attributeMetaDataFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
+				attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
 						.setRefEntity(metaDataCanAnnotate));
 
 		Entity singleAlleleEntity1 = new DynamicEntity(metaDataCanAnnotate);
@@ -899,11 +899,11 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetOutputMetaData()
 	{
-		EntityMetaData sourceEMD = entityMetaDataFactory.create().setSimpleName("source");
+		EntityType sourceEMD = entityTypeFactory.create().setSimpleName("source");
 		sourceEMD.setPackage(packageFactory.create("package").setName("package"));
 		sourceEMD.setBackend("TestBackend");
 
-		EntityMetaData outputEMD = snpEffRunner.getTargetEntityMetaData(sourceEMD);
+		EntityType outputEMD = snpEffRunner.getTargetEntityType(sourceEMD);
 
 		assertEquals(outputEMD.getBackend(), "TestBackend");
 		assertEquals(outputEMD.getName(), "package_source_EFFECTS");

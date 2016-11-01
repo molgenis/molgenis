@@ -29,7 +29,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +133,7 @@ public class ElasticsearchUtils
 		LOG.debug("Refreshed Elasticsearch index [{}]", index);
 	}
 
-	public long getCount(Query<Entity> q, EntityMetaData entityMetaData, String type, String indexName)
+	public long getCount(Query<Entity> q, EntityType entityType, String type, String indexName)
 	{
 		if (q != null)
 		{
@@ -144,7 +144,7 @@ public class ElasticsearchUtils
 			LOG.trace("Counting Elasticsearch [{}] docs", type);
 		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityMetaData);
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityType);
 		SearchResponse searchResponse = searchRequestBuilder.get();
 		if (searchResponse.getFailedShards() > 0)
 		{
@@ -257,13 +257,13 @@ public class ElasticsearchUtils
 		LOG.debug("Flushed Elasticsearch index [{}]", indexName);
 	}
 
-	public SearchResponse search(SearchType searchType, SearchRequest request, EntityMetaData entityMetaData,
+	public SearchResponse search(SearchType searchType, SearchRequest request, EntityType entityType,
 			String documentType, String indexName)
 	{
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 		generator
 				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getAggregateField1(),
-						request.getAggregateField2(), request.getAggregateFieldDistinct(), entityMetaData);
+						request.getAggregateField2(), request.getAggregateFieldDistinct(), entityType);
 		LOG.trace("*** REQUEST\n{}", builder);
 		SearchResponse response = builder.get();
 		LOG.trace("*** RESPONSE\n{}", response);

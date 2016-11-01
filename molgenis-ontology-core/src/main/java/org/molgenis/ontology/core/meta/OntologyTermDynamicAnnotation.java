@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.*;
@@ -13,14 +13,14 @@ public class OntologyTermDynamicAnnotation extends StaticEntity
 		super(entity);
 	}
 
-	public OntologyTermDynamicAnnotation(EntityMetaData entityMeta)
+	public OntologyTermDynamicAnnotation(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public OntologyTermDynamicAnnotation(String id, EntityMetaData entityMeta)
+	public OntologyTermDynamicAnnotation(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

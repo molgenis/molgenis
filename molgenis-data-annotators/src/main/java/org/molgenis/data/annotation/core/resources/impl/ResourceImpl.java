@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Iterator;
 
 /**
  * Implementation of {@link Resource}, a file-based repository. The location of the file is configured in
@@ -65,14 +64,7 @@ public abstract class ResourceImpl implements Resource
 	@Override
 	public Iterable<Entity> findAll(Query<Entity> q)
 	{
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return getRepository().findAll(q).iterator();
-			}
-		};
+		return () -> getRepository().findAll(q).iterator();
 	}
 
 	private boolean needsRefresh()

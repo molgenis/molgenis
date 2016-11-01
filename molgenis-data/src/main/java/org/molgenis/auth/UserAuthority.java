@@ -1,10 +1,10 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.auth.UserAuthorityMetaData.ID;
-import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER;
 
 public class UserAuthority extends Authority
 {
@@ -13,14 +13,14 @@ public class UserAuthority extends Authority
 		super(entity);
 	}
 
-	public UserAuthority(EntityMetaData entityMeta)
+	public UserAuthority(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public UserAuthority(String id, EntityMetaData entityMeta)
+	public UserAuthority(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 
@@ -34,13 +34,13 @@ public class UserAuthority extends Authority
 		set(ID, id);
 	}
 
-	public MolgenisUser getMolgenisUser()
+	public User getUser()
 	{
-		return getEntity(MOLGENIS_USER, MolgenisUser.class);
+		return getEntity(USER, User.class);
 	}
 
-	public void setMolgenisUser(MolgenisUser molgenisUser)
+	public void setUser(User user)
 	{
-		set(MOLGENIS_USER, molgenisUser);
+		set(USER, user);
 	}
 }

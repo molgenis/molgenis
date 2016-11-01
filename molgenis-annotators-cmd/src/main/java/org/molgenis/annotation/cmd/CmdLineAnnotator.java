@@ -13,9 +13,9 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.LoggerFactory;
@@ -63,10 +63,10 @@ public class CmdLineAnnotator
 	VcfUtils vcfUtils;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	// Default settings for running vcf-validator
 	private void run(OptionSet options, OptionParser parser) throws Exception
@@ -167,7 +167,7 @@ public class CmdLineAnnotator
 		}
 
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
-		annotate(annotator, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, inputVcfFile,
+		annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils, inputVcfFile,
 				outputVCFFile, options);
 	}
 
@@ -181,12 +181,12 @@ public class CmdLineAnnotator
 	 * @throws Exception
 	 */
 	private void annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
 			VcfUtils vcfUtils, File inputVcfFile, File outputVCFFile, OptionSet options) throws Exception
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
-		AnnotatorUtils.annotate(annotator, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
+		AnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils,
 				inputVcfFile, outputVCFFile, attributesToInclude, options.has("u"));
 		if (options.has(VALIDATE))
 		{
@@ -262,7 +262,7 @@ public class CmdLineAnnotator
 		System.out.println("Status:      " + info.getStatus());
 		System.out.print("Attributes:  ");
 
-		List<AttributeMetaData> attributes = info.getOutputAttributes();
+		List<Attribute> attributes = info.getOutputAttributes();
 		if (attributes.isEmpty())
 		{
 			System.out.println();

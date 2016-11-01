@@ -2,9 +2,9 @@ package org.molgenis.data.jobs;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,35 +19,35 @@ import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 @Component
 public class JobBootstrapper
 {
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
 
 	@Autowired
-	public JobBootstrapper(SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, DataService dataService)
+	public JobBootstrapper(SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService)
 	{
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.dataService = requireNonNull(dataService);
 	}
 
 	public void bootstrap()
 	{
-		systemEntityMetaDataRegistry.getSystemEntityMetaDatas().filter(this::isJobExecution).forEach(this::bootstrap);
+		systemEntityTypeRegistry.getSystemEntityTypes().filter(this::isJobExecution).forEach(this::bootstrap);
 	}
 
-	private void bootstrap(SystemEntityMetaData systemEntityMetaData)
+	private void bootstrap(SystemEntityType systemEntityType)
 	{
-		dataService.query(systemEntityMetaData.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll().forEach(this::setFailed);
+		dataService.query(systemEntityType.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll().forEach(this::setFailed);
 	}
 
 	private void setFailed(Entity jobExecutionEntity)
 	{
 		jobExecutionEntity.set(STATUS, FAILED.toString());
 		jobExecutionEntity.set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
-		dataService.update(jobExecutionEntity.getEntityMetaData().getName(), jobExecutionEntity);
+		dataService.update(jobExecutionEntity.getEntityType().getName(), jobExecutionEntity);
 	}
 
-	private boolean isJobExecution(EntityMetaData entityMetaData)
+	private boolean isJobExecution(EntityType entityType)
 	{
-		return entityMetaData.getExtends() != null && entityMetaData.getExtends().getName().equals(JOB_EXECUTION);
+		return entityType.getExtends() != null && entityType.getExtends().getName().equals(JOB_EXECUTION);
 	}
 }

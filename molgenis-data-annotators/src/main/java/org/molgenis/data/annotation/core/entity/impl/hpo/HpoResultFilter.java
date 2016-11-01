@@ -4,10 +4,10 @@ import com.google.common.base.Optional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 
 import java.util.Arrays;
@@ -22,20 +22,20 @@ import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HP
 
 public class HpoResultFilter implements ResultFilter
 {
-	private EntityMetaDataFactory entityMetaDataFactory;
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
+	private AttributeFactory attributeFactory;
 	private HPOAnnotator hpoAnnotator;
 
-	public HpoResultFilter(EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory, HPOAnnotator hpoAnnotator)
+	public HpoResultFilter(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
+			HPOAnnotator hpoAnnotator)
 	{
-		this.entityMetaDataFactory = entityMetaDataFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
+		this.attributeFactory = attributeFactory;
 		this.hpoAnnotator = hpoAnnotator;
 	}
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return Collections.emptyList();
 	}
@@ -67,10 +67,8 @@ public class HpoResultFilter implements ResultFilter
 			terms.append(hpoTerm);
 		}
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName(HPOAnnotator.NAME);
+		EntityType emd = entityTypeFactory.create().setName(HPOAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(hpoAnnotator.getIdsAttr(), hpoAnnotator.getTermsAttr()));
-		AttributeMetaData id = attributeMetaDataFactory.create().setName("ID").setAuto(true);
-		emd.setIdAttribute(id);
 		Entity aggregated = new DynamicEntity(emd);
 		aggregated.set(HPO_IDS, ids.toString());
 		aggregated.set(HPO_TERMS, terms.toString());

@@ -2,7 +2,7 @@ package org.molgenis.bbmri.directory.settings;
 
 import org.molgenis.bbmri.directory.controller.DirectoryController;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,7 +25,7 @@ public class DirectorySettings extends DefaultSettingsEntity
 	}
 
 	@Component
-	public static class Meta extends DefaultSettingsEntityMetaData
+	public static class Meta extends DefaultSettingsEntityType
 	{
 		public Meta()
 		{

@@ -19,14 +19,14 @@
         };
 
         var EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
-            entity: 'sys_md_entities',
+            entity: 'sys_md_EntityType',
             query: {
                 operator: 'NESTED',
                 nestedRules: [
                     {field: 'package', operator: 'EQUALS', value: 'sys_set'},
                     {operator: 'AND'},
                     {operator: 'NOT'},
-                    {field: 'abstract', operator: 'EQUALS', value: 'true'}
+                    {field: 'isAbstract', operator: 'EQUALS', value: 'true'}
                 ]
             },
             mode: 'view',

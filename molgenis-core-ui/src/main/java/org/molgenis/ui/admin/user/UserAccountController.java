@@ -2,7 +2,7 @@ package org.molgenis.ui.admin.user;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
@@ -62,11 +62,11 @@ public class UserAccountController extends MolgenisPluginController
 	{
 		try
 		{
-			if (!languageService.getLanguageCodes().contains(languageCode))
+			if (!languageService.hasLanguageCode(languageCode))
 			{
 				throw new MolgenisUserException("Unknown language code '" + languageCode + "'");
 			}
-			MolgenisUser user = userAccountService.getCurrentUser();
+			User user = userAccountService.getCurrentUser();
 			user.setLanguageCode(languageCode);
 			userAccountService.updateCurrentUser(user);
 		}
@@ -110,7 +110,7 @@ public class UserAccountController extends MolgenisPluginController
 		}
 
 		// update current user
-		MolgenisUser user = userAccountService.getCurrentUser();
+		User user = userAccountService.getCurrentUser();
 
 		if (StringUtils.isNotEmpty(newPassword)) user.setPassword(newPassword);
 		if (StringUtils.isNotEmpty(updateRequest.getPhone())) user.setPhone(updateRequest.getPhone());

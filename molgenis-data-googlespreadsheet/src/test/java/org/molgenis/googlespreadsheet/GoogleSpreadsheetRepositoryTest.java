@@ -6,10 +6,10 @@ import com.google.gdata.data.TextConstruct;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
@@ -27,10 +27,10 @@ import static org.testng.Assert.*;
 public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private GoogleSpreadsheetRepository spreadsheetRepository;
 	private SpreadsheetService spreadsheetService;
@@ -74,7 +74,7 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 		cells.add(entry3);
 		when(cellFeed.getEntries()).thenReturn(cells);
 		when(cellFeed.getTitle()).thenReturn(textConstruct);
-		spreadsheetRepository = new GoogleSpreadsheetRepository(spreadsheetService, "key", "id", entityMetaFactory,
+		spreadsheetRepository = new GoogleSpreadsheetRepository(spreadsheetService, "key", "id", entityTypeFactory,
 				attrMetaFactory);
 	}
 
@@ -103,13 +103,12 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void getEntityMetaData() throws IOException, ServiceException
+	public void getEntityType() throws IOException, ServiceException
 	{
 		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
-		EntityMetaData entityMetaData = spreadsheetRepository.getEntityMetaData();
-		assertEquals(entityMetaData.getName(), "name");
-		Iterator<AttributeMetaData> it = entityMetaData.getAttributes().iterator();
-		assertTrue(it.hasNext());
+		EntityType entityType = spreadsheetRepository.getEntityType();
+		assertEquals(entityType.getName(), "name");
+		Iterator<Attribute> it = entityType.getAttributes().iterator();
 		assertEquals(it.next().getName(), "col1");
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "col2");

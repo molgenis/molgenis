@@ -9,7 +9,7 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,17 +44,17 @@ public class IndexBootstrapper
 
 	public void bootstrap()
 	{
-		if (!searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA))
+		if (!searchService.hasMapping(AttributeMetadata.ATTRIBUTE_META_DATA))
 		{
 			LOG.debug(
-					"No index for AttributeMetaData found, asuming missing index, schedule (re)index for all entities");
+					"No index for Attribute found, asuming missing index, schedule (re)index for all entities");
 			metaDataService.getRepositories()
 					.forEach(repo -> indexActionRegisterService.register(repo.getName(), null));
 			LOG.debug("Done scheduling (re)index jobs for all entities");
 		}
 		else
 		{
-			LOG.debug("Index for AttributeMetaData found, index is present, no (re)index needed");
+			LOG.debug("Index for Attribute found, index is present, no (re)index needed");
 			List<IndexJobExecution> failedIndexJobs = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
 					IndexJobExecution.class).collect(Collectors.toList());

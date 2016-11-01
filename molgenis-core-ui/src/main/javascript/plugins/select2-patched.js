@@ -1137,7 +1137,6 @@
         event.preventDefault();
         event.stopPropagation();
     }
-
     function killEventImmediately(event) {
         event.preventDefault();
         event.stopImmediatePropagation();

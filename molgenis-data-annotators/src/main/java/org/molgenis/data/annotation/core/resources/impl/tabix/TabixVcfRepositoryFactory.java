@@ -3,8 +3,8 @@ package org.molgenis.data.annotation.core.resources.impl.tabix;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.io.File;
@@ -20,22 +20,22 @@ public class TabixVcfRepositoryFactory implements RepositoryFactory
 	private final String name;
 
 	private VcfAttributes vcfAttributes;
-	private EntityMetaDataFactory entityMetaDataFactory;
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
+	private AttributeFactory attributeFactory;
 
-	public TabixVcfRepositoryFactory(String name, VcfAttributes vcfAttributes, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+	public TabixVcfRepositoryFactory(String name, VcfAttributes vcfAttributes, EntityTypeFactory entityTypeFactory,
+			AttributeFactory attrMetaFactory)
 	{
 		this.name = requireNonNull(name);
-		this.entityMetaDataFactory = requireNonNull(entityMetaFactory);
-		this.attributeMetaDataFactory = requireNonNull(attrMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
+		this.attributeFactory = requireNonNull(attrMetaFactory);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 	}
 
 	@Override
 	public Repository<Entity> createRepository(File file) throws IOException
 	{
-		return new TabixVcfRepository(file, name, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+		return new TabixVcfRepository(file, name, vcfAttributes, entityTypeFactory, attributeFactory);
 	}
 
 }

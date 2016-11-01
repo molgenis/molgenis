@@ -1,18 +1,18 @@
 package org.molgenis.file.ingest.meta;
 
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class FileIngestJobExecutionMetaData extends SystemEntityMetaData
+public class FileIngestJobExecutionMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "FileIngestJobExecution";
 	public static final String FILE_INGEST_JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

@@ -567,7 +567,7 @@ var TableBody = React.createClass({
                         if (isCompoundAttr(attr)) {
                             this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, behindMref);
                         } else {
-                            behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF';
+                            behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF' || attr.fieldType === 'ONE_TO_MANY';
                             if (this._isExpandedAttr(attr, selectedAttrs)) {
                                 Cols.push(td({className: 'expanded-left', key: attrPath.join()}));
                                 this._createColsRec(this._getAttributeValues(item, attr.name), attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true, behindMref);
@@ -773,6 +773,7 @@ var TableCellContent = React.createClass({
                     break;
                 case 'CATEGORICAL_MREF':
                 case 'MREF':
+                case 'ONE_TO_MANY':
                     CellContent = (
                         span(null,
                             _.flatten(_.map(value, function (item, i) {

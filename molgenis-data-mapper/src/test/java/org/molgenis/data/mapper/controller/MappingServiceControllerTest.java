@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.controller;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -11,12 +11,12 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -39,8 +39,8 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.AttributeType.DATE;
+import static org.molgenis.AttributeType.INT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.testng.Assert.assertEquals;
@@ -50,16 +50,16 @@ import static org.testng.Assert.assertEquals;
 public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@InjectMocks
 	private MappingServiceController controller = new MappingServiceController();
 
 	@Mock
-	private MolgenisUserService molgenisUserService;
+	private UserService userService;
 
 	@Mock
 	private MappingService mappingService;
@@ -82,10 +82,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Mock
 	private MenuReaderService menuReaderService;
 
-	private MolgenisUser me;
+	private User me;
 
-	private EntityMetaData lifeLines;
-	private EntityMetaData hop;
+	private EntityType lifeLines;
+	private EntityType hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
 
@@ -94,15 +94,15 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeTest()
 	{
-		me = mock(MolgenisUser.class);
+		me = mock(User.class);
 		when(me.getUsername()).thenReturn("fdlk");
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("fdlk", null);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		hop = entityMetaFactory.create("HOP");
+		hop = entityTypeFactory.create("HOP");
 		hop.addAttribute(attrMetaFactory.create().setName("age").setDataType(INT));
-		lifeLines = entityMetaFactory.create("LifeLines");
+		lifeLines = entityTypeFactory.create("LifeLines");
 		hop.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);

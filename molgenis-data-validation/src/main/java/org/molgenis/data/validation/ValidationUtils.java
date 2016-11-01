@@ -2,7 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.js.ScriptEvaluator;
 import org.mozilla.javascript.EcmaError;
 import org.slf4j.Logger;
@@ -24,13 +24,13 @@ public class ValidationUtils
 	 * @return true or false
 	 * @throws MolgenisDataException if the script resolves to null or to a non boolean
 	 */
-	public static boolean resolveBooleanExpression(String expression, Entity entity, EntityMetaData meta)
+	public static boolean resolveBooleanExpression(String expression, Entity entity, EntityType meta)
 	{
 		return resolveBooleanExpressions(Collections.singletonList(expression), entity, meta).get(0);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity, EntityMetaData meta)
+	public static List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity, EntityType meta)
 	{
 		Object result = null;
 		try

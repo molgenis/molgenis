@@ -7,8 +7,8 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class TabixRepository extends AbstractRepository
 	private static final Logger LOG = LoggerFactory.getLogger(TabixRepository.class);
 
 	private TabixReader reader;
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 	private final String chromosomeAttributeName;
 	private final String positionAttributeName;
 
@@ -36,28 +36,28 @@ public class TabixRepository extends AbstractRepository
 	 * Creates a new {@link TabixRepository}
 	 *
 	 * @param file           the Tabix file
-	 * @param entityMetaData {@link EntityMetaData} for the tabix file. Attributes should be in the order of the file's columns
+	 * @param entityType {@link EntityType} for the tabix file. Attributes should be in the order of the file's columns
 	 * @throws IOException if something goes wrong creating the {@link TabixReader} for the file
 	 */
-	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
+	public TabixRepository(File file, EntityType entityType) throws IOException
 	{
-		this(file, entityMetaData, CHROM, POS);
+		this(file, entityType, CHROM, POS);
 	}
 
-	public TabixRepository(File file, EntityMetaData entityMetaData, String chromosomeAttributeName,
+	public TabixRepository(File file, EntityType entityType, String chromosomeAttributeName,
 			String positionAttributeName) throws IOException
 	{
-		this.entityMetaData = entityMetaData;
+		this.entityType = entityType;
 		this.reader = new TabixReader(file.getAbsolutePath());
 		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
 		this.positionAttributeName = requireNonNull(positionAttributeName);
 	}
 
-	TabixRepository(TabixReader reader, EntityMetaData entityMetaData, String chromosomeAttributeName,
+	TabixRepository(TabixReader reader, EntityType entityType, String chromosomeAttributeName,
 			String positionAttributeName)
 	{
 		this.reader = requireNonNull(reader);
-		this.entityMetaData = requireNonNull(entityMetaData);
+		this.entityType = requireNonNull(entityType);
 		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
 		this.positionAttributeName = requireNonNull(positionAttributeName);
 	}
@@ -73,10 +73,9 @@ public class TabixRepository extends AbstractRepository
 		return Collections.singleton(RepositoryCapability.QUERYABLE);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return entityMetaData;
+		return entityType;
 	}
 
 	@Override
@@ -160,11 +159,11 @@ public class TabixRepository extends AbstractRepository
 
 	protected Entity toEntity(String line) throws IOException
 	{
-		Entity result = new DynamicEntity(entityMetaData);
+		Entity result = new DynamicEntity(entityType);
 		CSVParser csvParser = getCsvParser();
 		String[] columns = csvParser.parseLine(line);
 		int i = 0;
-		for (AttributeMetaData amd : entityMetaData.getAtomicAttributes())
+		for (Attribute amd : entityType.getAtomicAttributes())
 		{
 			if (i < columns.length)
 			{

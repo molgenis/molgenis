@@ -1,7 +1,7 @@
 package org.molgenis.data.system;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 
@@ -33,14 +33,14 @@ public class ImportRun extends StaticEntity
 		super(entity);
 	}
 
-	public ImportRun(EntityMetaData entityMeta)
+	public ImportRun(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public ImportRun(String id, EntityMetaData entityMeta)
+	public ImportRun(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

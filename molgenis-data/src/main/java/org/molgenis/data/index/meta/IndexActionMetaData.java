@@ -1,21 +1,21 @@
 package org.molgenis.data.index.meta;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 /**
  * The index action is used to describe the action that needs to be done to make a
  * {@link org.molgenis.data.Repository}'s index consistent again.
  */
 @Component
-public class IndexActionMetaData extends SystemEntityMetaData
+public class IndexActionMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "IndexAction";
 	public static final String INDEX_ACTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -92,22 +92,18 @@ public class IndexActionMetaData extends SystemEntityMetaData
 		/**
 		 * index action is finished
 		 */
-		FINISHED,
-		/**
-		 * index action is canceled
-		 */
-		CANCELED,
-		/**
-		 * index action failed
-		 */
-		FAILED,
-		/**
-		 * index action is started
-		 */
-		STARTED,
-		/**
-		 * index action is just created and is not yet processed
-		 */
-		PENDING
+		FINISHED, /**
+	 * index action is canceled
+	 */
+	CANCELED, /**
+	 * index action failed
+	 */
+	FAILED, /**
+	 * index action is started
+	 */
+	STARTED, /**
+	 * index action is just created and is not yet processed
+	 */
+	PENDING
 	}
 }

@@ -1,6 +1,6 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.security.user.UserAccountServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,9 +36,9 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisUserService molgenisUserService()
+		public UserService molgenisUserService()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(UserService.class);
 		}
 	}
 
@@ -50,7 +50,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	private UserAccountServiceImpl userAccountServiceImpl;
 
 	@Autowired
-	private MolgenisUserService molgenisUserService;
+	private UserService userService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -75,73 +75,73 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 
-		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
-		assertEquals(userAccountServiceImpl.getCurrentUser(), existingMolgenisUser);
+		User existingUser = mock(User.class);
+		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
+		assertEquals(userAccountServiceImpl.getCurrentUser(), existingUser);
 	}
 
 	@Test
 	public void updateCurrentUser()
 	{
-		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn("1");
-		when(existingMolgenisUser.getUsername()).thenReturn(USERNAME_USER);
-		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		User existingUser = mock(User.class);
+		when(existingUser.getId()).thenReturn("1");
+		when(existingUser.getUsername()).thenReturn(USERNAME_USER);
+		when(existingUser.getPassword()).thenReturn("encrypted-password");
 
-		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
+		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
 
-		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
-		when(updatedMolgenisUser.getId()).thenReturn("1");
-		when(updatedMolgenisUser.getUsername()).thenReturn("username");
-		when(updatedMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		User updatedUser = mock(User.class);
+		when(updatedUser.getId()).thenReturn("1");
+		when(updatedUser.getUsername()).thenReturn("username");
+		when(updatedUser.getPassword()).thenReturn("encrypted-password");
 
-		userAccountServiceImpl.updateCurrentUser(updatedMolgenisUser);
+		userAccountServiceImpl.updateCurrentUser(updatedUser);
 		verify(passwordEncoder, never()).encode("encrypted-password");
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)
 	public void updateCurrentUser_wrongUser()
 	{
-		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn("1");
-		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		User existingUser = mock(User.class);
+		when(existingUser.getId()).thenReturn("1");
+		when(existingUser.getPassword()).thenReturn("encrypted-password");
 
-		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
+		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
 
-		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
-		when(updatedMolgenisUser.getId()).thenReturn("1");
-		when(updatedMolgenisUser.getUsername()).thenReturn("wrong-username");
-		when(updatedMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		User updatedUser = mock(User.class);
+		when(updatedUser.getId()).thenReturn("1");
+		when(updatedUser.getUsername()).thenReturn("wrong-username");
+		when(updatedUser.getPassword()).thenReturn("encrypted-password");
 
-		userAccountServiceImpl.updateCurrentUser(updatedMolgenisUser);
+		userAccountServiceImpl.updateCurrentUser(updatedUser);
 	}
 
 	@Test
 	public void updateCurrentUser_changePassword()
 	{
 		when(passwordEncoder.matches("new-password", "encrypted-password")).thenReturn(true);
-		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn("1");
-		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
-		when(existingMolgenisUser.getUsername()).thenReturn("username");
+		User existingUser = mock(User.class);
+		when(existingUser.getId()).thenReturn("1");
+		when(existingUser.getPassword()).thenReturn("encrypted-password");
+		when(existingUser.getUsername()).thenReturn("username");
 
-		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
+		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
 
-		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
-		when(updatedMolgenisUser.getId()).thenReturn("1");
-		when(updatedMolgenisUser.getPassword()).thenReturn("new-password");
-		when(updatedMolgenisUser.getUsername()).thenReturn("username");
+		User updatedUser = mock(User.class);
+		when(updatedUser.getId()).thenReturn("1");
+		when(updatedUser.getPassword()).thenReturn("new-password");
+		when(updatedUser.getUsername()).thenReturn("username");
 
-		userAccountServiceImpl.updateCurrentUser(updatedMolgenisUser);
+		userAccountServiceImpl.updateCurrentUser(updatedUser);
 	}
 
 	@Test
 	public void validateCurrentUserPassword()
 	{
-		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn("1");
-		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
-		when(existingMolgenisUser.getUsername()).thenReturn("username");
+		User existingUser = mock(User.class);
+		when(existingUser.getId()).thenReturn("1");
+		when(existingUser.getPassword()).thenReturn("encrypted-password");
+		when(existingUser.getUsername()).thenReturn("username");
 		when(passwordEncoder.matches("password", "encrypted-password")).thenReturn(true);
 		assertTrue(userAccountServiceImpl.validateCurrentUserPassword("password"));
 		assertFalse(userAccountServiceImpl.validateCurrentUserPassword("wrong-password"));

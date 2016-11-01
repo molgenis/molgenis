@@ -4,7 +4,7 @@ import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
@@ -89,21 +89,21 @@ public class WikiPathwaysController extends MolgenisPluginController
 	/**
 	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an effect attribute.
 	 *
-	 * @return {@link List} of {@link EntityMetaData} for the VCF entities
+	 * @return {@link List} of {@link EntityType} for the VCF entities
 	 */
-	private List<EntityMetaData> getVCFEntities()
+	private List<EntityType> getVCFEntities()
 	{
-		return stream(dataService.getEntityNames().spliterator(), false).map(dataService::getEntityMetaData)
+		return stream(dataService.getEntityNames().spliterator(), false).map(dataService::getEntityType)
 				.filter(this::hasEffectAttribute).collect(toList());
 	}
 
 	/**
 	 * Determines if an entity has an effect attribute.
 	 *
-	 * @param emd {@link EntityMetaData} of the entity
+	 * @param emd {@link EntityType} of the entity
 	 * @return boolean indicating if the entity has an effect column
 	 */
-	private boolean hasEffectAttribute(EntityMetaData emd)
+	private boolean hasEffectAttribute(EntityType emd)
 	{
 		return emd.getAttribute(EFFECT_ATTRIBUTE_NAME) != null;
 	}

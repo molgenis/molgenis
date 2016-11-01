@@ -33,7 +33,7 @@ public class ImporterConfiguration
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	private TagMetaData tagMetaData;
+	private TagMetadata tagMetadata;
 
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
@@ -42,10 +42,10 @@ public class ImporterConfiguration
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private TagFactory tagFactory;
@@ -75,7 +75,7 @@ public class ImporterConfiguration
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityMetaDataFactory, tagFactory,
+		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
 				languageFactory, i18nStringFactory);
 	}
 }

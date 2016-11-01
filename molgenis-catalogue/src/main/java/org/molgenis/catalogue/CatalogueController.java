@@ -3,7 +3,7 @@ package org.molgenis.catalogue;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,12 +38,12 @@ public class CatalogueController extends MolgenisPluginController
 			Model model)
 	{
 		AtomicBoolean showEntitySelectBoolean = new AtomicBoolean(true);
-		List<EntityMetaData> emds = Lists.newArrayList();
+		List<EntityType> emds = Lists.newArrayList();
 		dataService.getEntityNames().forEach(entityName ->
 		{
 			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase()))
 			{
-				emds.add(dataService.getEntityMetaData(entityName));
+				emds.add(dataService.getEntityType(entityName));
 				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
 				{
 					// Hide entity dropdown

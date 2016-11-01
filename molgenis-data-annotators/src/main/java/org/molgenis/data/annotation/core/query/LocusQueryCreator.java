@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.datastructures.Locus;
 import org.molgenis.data.annotation.core.entity.QueryCreator;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -41,7 +41,7 @@ public class LocusQueryCreator implements QueryCreator
 	}
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return Arrays.asList(vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute());
 	}

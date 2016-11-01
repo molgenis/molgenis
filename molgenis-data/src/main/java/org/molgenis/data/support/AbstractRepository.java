@@ -32,7 +32,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 	@Override
 	public String getName()
 	{
-		if (name == null) name = getEntityMetaData().getName();
+		if (name == null) name = getEntityType().getName();
 		return name;
 	}
 
@@ -114,7 +114,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
 	{
-		String fieldIdAttributeName = getEntityMetaData().getIdAttribute().getName();
+		String fieldIdAttributeName = getEntityType().getIdAttribute().getName();
 		if (fetch != null) fetch.field(fieldIdAttributeName);
 		Query<Entity> inQuery = new QueryImpl<>().in(fieldIdAttributeName, Sets.newHashSet(ids)).fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery).iterator(), Entity::getIdValue);
@@ -126,7 +126,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 		Entity result = index.get(id);
 		if (result == null)
 		{
-			LOG.warn("Lookup: Couldn't find {} for id {}.", getName(), id);
+			LOG.debug("Lookup: Couldn't find {} for id {}.", getName(), id);
 		}
 		return result;
 	}

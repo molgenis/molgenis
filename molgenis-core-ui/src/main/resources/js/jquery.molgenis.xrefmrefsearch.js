@@ -166,8 +166,8 @@
         return result;
     }
 
-    function createSelect2($container, attributeMetaData, options) {
-        var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
+    function createSelect2($container, attribute, options) {
+        var refEntityMetaData = restApi.get(attribute.refEntity.href, {expand: ['attributes']});
         var lookupAttrNames = refEntityMetaData.lookupAttributes;
 
         if (lookupAttrNames.length == 0) {
@@ -186,8 +186,8 @@
         $hiddenInput.select2({
             width: width,
             minimumInputLength: 1,
-            multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF'
-            || attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'FILE'),
+            multiple: (attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL_MREF'
+            || attribute.fieldType === 'XREF' || attribute.fieldType === 'FILE' || attribute.fieldType === 'ONE_TO_MANY'),
             closeOnSelect: false,
             query: function (options) {
                 var query = createQuery(lookupAttributes, options.term.match(/[^ ]+/g), false, true);
@@ -261,7 +261,7 @@
         }
     }
 
-    function addQueryPartSelect($container, attributeMetaData, options) {
+    function addQueryPartSelect($container, attribute, options) {
         var attrs = {};
 
         if (options.autofocus) {
@@ -271,7 +271,7 @@
         if (options.isfilter) {
             var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
-            if (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF') { // TODO remove CATEGORICAL_MREF when it is rendered like CATEGORICAL is rendered for XREF
+            if (attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL_MREF' || attribute.fieldType === 'ONE_TO_MANY') { // TODO remove CATEGORICAL_MREF when it is rendered like CATEGORICAL is rendered for XREF
                 var $dropdown = $('<div class="input-group-addon dropdown dropdown-toggle-container">');
                 var orValue = 'OR&nbsp;&nbsp;';
                 var andValue = 'AND';
@@ -296,14 +296,14 @@
                 $container.addClass("select2-bootstrap-prepend");
                 $container.prepend($dropdown);
             }
-            else if (attributeMetaData.fieldType === 'XREF') {
+            else if (attribute.fieldType === 'XREF') {
                 $operatorInput.val('OR');
                 $container.append($('<div class="input-group-addon dropdown-toggle-container"><button class="btn btn-default" type="button" disabled>OR</button></div>'));
                 $container.append($operatorInput);
             }
         }
 
-        var element = createInput(attributeMetaData, attrs, options.values);
+        var element = createInput(attribute, attrs, options.values);
 
         $container.addClass("input-group select2-bootstrap-prepend");
         $container.append(element);
@@ -328,9 +328,9 @@
         restApi.getAsync(attributeUri, {
             attributes: ['refEntity', 'fieldType'],
             expand: ['refEntity']
-        }, function (attributeMetaData) {
-            addQueryPartSelect(container, attributeMetaData, options);
-            createSelect2(container, attributeMetaData, options);
+        }, function (attribute) {
+            addQueryPartSelect(container, attribute, options);
+            createSelect2(container, attribute, options);
         });
 
         return container;

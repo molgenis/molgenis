@@ -5,8 +5,8 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
@@ -23,10 +23,10 @@ import static org.testng.Assert.assertNotNull;
 public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private InputStream is;
 	private ExcelRepositoryCollection excelRepositoryCollection;
@@ -36,8 +36,8 @@ public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
-		excelRepositoryCollection.setEntityMetaDataFactory(entityMetaFactory);
-		excelRepositoryCollection.setAttributeMetaDataFactory(attrMetaFactory);
+		excelRepositoryCollection.setEntityTypeFactory(entityTypeFactory);
+		excelRepositoryCollection.setAttributeFactory(attrMetaFactory);
 	}
 
 	@AfterMethod

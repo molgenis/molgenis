@@ -1,17 +1,17 @@
 package org.molgenis.data.annotation.web.meta;
 
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class AnnotationJobExecutionMetaData extends SystemEntityMetaData
+public class AnnotationJobExecutionMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "AnnotationJobExecution";
 	public static final String ANNOTATION_JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

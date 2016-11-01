@@ -22,8 +22,8 @@ import java.io.StringReader;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
 import static org.molgenis.data.vcf.model.VcfAttributes.INTERNAL_ID;
 import static org.testng.Assert.assertTrue;
@@ -35,10 +35,10 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	private VcfAttributes vcfAttrs;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	private VcfToEntity vcfToEntitySmall;
 	private VcfMeta vcfMetaSmall;
@@ -62,54 +62,54 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 				+ "##INFO=<ID=DF2,Number=0,Type=Flag,Description=\"Flag field 2\">\n"
 				+ "#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n";
 		vcfMetaSmall = parseHeaders(headersSmall);
-		vcfToEntitySmall = new VcfToEntity("EntityNameSmall", vcfMetaSmall, vcfAttrs, entityMetaFactory,
+		vcfToEntitySmall = new VcfToEntity("EntityNameSmall", vcfMetaSmall, vcfAttrs, entityTypeFactory,
 				attrMetaFactory);
 	}
 
 	@Test
-	public void testGetEntityMetaData()
+	public void testGetEntityType()
 	{
-		EntityMetaData expectedEntityMeta = entityMetaFactory.create();
-		expectedEntityMeta.setSimpleName("EntityNameSmall");
-		expectedEntityMeta.setName("EntityNameSmall");
-		expectedEntityMeta.addAttribute(vcfAttrs.getChromAttribute());
-		expectedEntityMeta.addAttribute(vcfAttrs.getAltAttribute());
-		expectedEntityMeta.addAttribute(vcfAttrs.getPosAttribute());
-		expectedEntityMeta.addAttribute(vcfAttrs.getRefAttribute());
-		expectedEntityMeta.addAttribute(vcfAttrs.getFilterAttribute());
-		expectedEntityMeta.addAttribute(vcfAttrs.getQualAttribute());
-		expectedEntityMeta.addAttribute(vcfAttrs.getIdAttribute());
+		EntityType expectedEntityType = entityTypeFactory.create();
+		expectedEntityType.setSimpleName("EntityNameSmall");
+		expectedEntityType.setName("EntityNameSmall");
+		expectedEntityType.addAttribute(vcfAttrs.getChromAttribute());
+		expectedEntityType.addAttribute(vcfAttrs.getAltAttribute());
+		expectedEntityType.addAttribute(vcfAttrs.getPosAttribute());
+		expectedEntityType.addAttribute(vcfAttrs.getRefAttribute());
+		expectedEntityType.addAttribute(vcfAttrs.getFilterAttribute());
+		expectedEntityType.addAttribute(vcfAttrs.getQualAttribute());
+		expectedEntityType.addAttribute(vcfAttrs.getIdAttribute());
 
-		AttributeMetaData internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING)
+		Attribute internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING)
 				.setVisible(false);
-		expectedEntityMeta.addAttribute(internalIdMeta, ROLE_ID);
+		expectedEntityType.addAttribute(internalIdMeta, ROLE_ID);
 
-		AttributeMetaData infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
+		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
 
-		AttributeMetaData infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
-				.setDescription("Number of Samples With Data").setAggregatable(true);
-		infoMetaData.addAttributePart(infoNS);
-		AttributeMetaData infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
-				.setAggregatable(true);
-		infoMetaData.addAttributePart(infoDF);
-		AttributeMetaData infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
-				.setDescription("Flag field 2").setAggregatable(true);
-		infoMetaData.addAttributePart(infoDF2);
+		Attribute infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
+				.setDescription("Number of Samples With Data").setAggregatable(true).setParent(infoMetaData);
+		Attribute infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
+				.setAggregatable(true).setParent(infoMetaData);
+		Attribute infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
+				.setDescription("Flag field 2").setAggregatable(true).setParent(infoMetaData);
 
-		expectedEntityMeta.addAttribute(infoMetaData);
+		expectedEntityType.addAttribute(infoMetaData);
+		expectedEntityType.addAttribute(infoNS);
+		expectedEntityType.addAttribute(infoDF);
+		expectedEntityType.addAttribute(infoDF2);
 
-		EntityMetaData actualEntityMeta = vcfToEntitySmall.getEntityMetaData();
+		EntityType actualEntityType = vcfToEntitySmall.getEntityType();
 		String backend = "test";
-		expectedEntityMeta.setBackend(backend);
-		actualEntityMeta.setBackend(backend);
+		expectedEntityType.setBackend(backend);
+		actualEntityType.setBackend(backend);
 		Package package_ = mock(Package.class);
 		when(package_.getIdValue()).thenReturn("pck0");
-		expectedEntityMeta.setPackage(package_);
-		actualEntityMeta.setPackage(package_);
+		expectedEntityType.setPackage(package_);
+		actualEntityType.setPackage(package_);
 
-		expectedEntityMeta.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
-		actualEntityMeta.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
-		assertTrue(EntityUtils.equals(expectedEntityMeta, actualEntityMeta));
+		expectedEntityType.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		actualEntityType.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		assertTrue(EntityUtils.equals(expectedEntityType, actualEntityType));
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		VcfRecord record = new VcfRecord(vcfMetaSmall,
 				new String[] { "10", "12345", "id3", "A", "C", "7.9123", "pass", "DF" });
 		Entity entity = vcfToEntitySmall.toEntity(record);
-		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityMetaData());
+		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityType());
 		expected.set("#CHROM", "10");
 		expected.set("ALT", "C");
 		expected.set("POS", 12345);
@@ -139,7 +139,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		VcfRecord record = new VcfRecord(vcfMetaSmall,
 				new String[] { "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2" });
 		Entity entity = vcfToEntitySmall.toEntity(record);
-		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityMetaData());
+		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityType());
 		expected.set("#CHROM", "10");
 		expected.set("ALT", "A,C,G,T,N,*");
 		expected.set("POS", 12345);

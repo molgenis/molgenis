@@ -2,7 +2,7 @@ package org.molgenis.file.ingest;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
@@ -59,10 +59,9 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 		return decorated.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decorated.getEntityMetaData();
+		return decorated.getEntityType();
 	}
 
 	@Override

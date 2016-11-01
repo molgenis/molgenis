@@ -3,8 +3,8 @@ package org.molgenis.gavin.job;
 import org.mockito.Mock;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
@@ -44,10 +44,10 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	VcfAttributes vcfAttributes;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Mock
 	private Progress progress;
@@ -110,7 +110,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(vcfUtils.reverseXrefMrefRelation(anyObject())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
-				exac, snpeff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory, attributeMetaDataFactory);
+				exac, snpeff, gavin, vcfAttributes, vcfUtils, entityTypeFactory, attributeFactory);
 	}
 
 	@Test

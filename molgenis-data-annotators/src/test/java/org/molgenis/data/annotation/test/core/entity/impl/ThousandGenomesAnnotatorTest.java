@@ -9,9 +9,9 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -31,10 +31,10 @@ import java.util.Iterator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator.THOUSAND_GENOME_AF;
 import static org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator.THOUSAND_GENOME_AF_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { ThousandGenomesAnnotatorTest.Config.class, ThousandGenomesAnnotator.class })
@@ -44,10 +44,10 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -69,12 +69,12 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotate()
 	{
-		EntityMetaData emdIn = entityMetaDataFactory.create().setName("test");
+		EntityType emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
 		emdIn.addAttribute(vcfAttributes.getAltAttribute());
-		emdIn.addAttribute(attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING)
+		emdIn.addAttribute(attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING)
 				.setDescription(
 						"The allele frequency for variants seen in the population used for the thousand genomes project")
 				.setLabel(THOUSAND_GENOME_AF_LABEL));
@@ -100,7 +100,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotateNegative()
 	{
-		EntityMetaData emdIn = entityMetaDataFactory.create().setName("test");
+		EntityType emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());

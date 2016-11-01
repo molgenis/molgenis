@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 
@@ -25,7 +25,7 @@ public class ExcelWriter implements WritableFactory
 {
 	private final Workbook workbook;
 	private final OutputStream os;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private List<CellProcessor> cellProcessors;
 
 	public enum FileFormat
@@ -33,24 +33,24 @@ public class ExcelWriter implements WritableFactory
 		XLS, XLSX
 	}
 
-	public ExcelWriter(OutputStream os, AttributeMetaDataFactory attrMetaFactory)
+	public ExcelWriter(OutputStream os, AttributeFactory attrMetaFactory)
 	{
 		this(os, attrMetaFactory, FileFormat.XLS);
 	}
 
-	public ExcelWriter(OutputStream os, AttributeMetaDataFactory attrMetaFactory, FileFormat format)
+	public ExcelWriter(OutputStream os, AttributeFactory attrMetaFactory, FileFormat format)
 	{
 		this.os = requireNonNull(os);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.workbook = requireNonNull(format) == FileFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
 	}
 
-	public ExcelWriter(File file, AttributeMetaDataFactory attrMetaFactory) throws FileNotFoundException
+	public ExcelWriter(File file, AttributeFactory attrMetaFactory) throws FileNotFoundException
 	{
 		this(new FileOutputStream(file), attrMetaFactory, FileFormat.XLS);
 	}
 
-	public ExcelWriter(File file, AttributeMetaDataFactory attrMetaFactory, FileFormat format)
+	public ExcelWriter(File file, AttributeFactory attrMetaFactory, FileFormat format)
 			throws FileNotFoundException
 	{
 		this(new FileOutputStream(file), attrMetaFactory, format);
@@ -63,7 +63,7 @@ public class ExcelWriter implements WritableFactory
 	}
 
 	@Override
-	public ExcelSheetWriter createWritable(String entityName, Iterable<AttributeMetaData> attributes,
+	public ExcelSheetWriter createWritable(String entityName, Iterable<Attribute> attributes,
 			AttributeWriteMode attributeWriteMode)
 	{
 		Sheet poiSheet = workbook.createSheet(entityName);
@@ -87,7 +87,7 @@ public class ExcelWriter implements WritableFactory
 	@Override
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
+		List<Attribute> attributes = attributeNames != null ? attributeNames.stream()
 				.map(attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);

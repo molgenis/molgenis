@@ -14,10 +14,10 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
@@ -42,8 +42,8 @@ import java.util.stream.StreamSupport;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.entity.impl.gavin.GavinAnnotator.*;
 import static org.testng.Assert.*;
 
@@ -57,10 +57,10 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -71,48 +71,42 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	@Autowired
 	EffectsMetaData effectsMetaData;
 
-	private EntityMetaData emd;
-	private EntityMetaData entityMetaData;
+	private EntityType emd;
+	private EntityType entityType;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();
-		emd = entityMetaDataFactory.create().setName("gavin");
-		entityMetaData = entityMetaDataFactory.create().setName("test_variant");
-		List<AttributeMetaData> refAttributesList = Arrays
-				.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
-						ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
-		entityMetaData.addAttributes(refAttributesList);
-		AttributeMetaData refAttr = attributeMetaDataFactory.create().setName("test_variant").setDataType(XREF)
-				.setRefEntity(entityMetaData).setDescription(
-						"This annotator needs a references to an entity containing: " + StreamSupport
-								.stream(refAttributesList.spliterator(), false).map(AttributeMetaData::getName)
-								.collect(Collectors.joining(", ")));
+		emd = entityTypeFactory.create().setName("gavin");
+		entityType = entityTypeFactory.create().setName("test_variant");
+		List<Attribute> refAttributesList = Arrays.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
+				ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
+		entityType.addAttributes(refAttributesList);
+		Attribute refAttr = attributeFactory.create().setName("test_variant").setDataType(XREF).setRefEntity(entityType)
+				.setDescription("This annotator needs a references to an entity containing: " + StreamSupport
+						.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
+						.collect(Collectors.joining(", ")));
 
 		emd.addAttributes(
 				Arrays.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
 						vcfAttributes.getAltAttribute()));
 
-		AttributeMetaData idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
+		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true).setIdAttribute(true);
 		emd.addAttribute(idAttr);
-		emd.setIdAttribute(idAttr);
 		emd.addAttributes(effectsMetaData.getOrderedAttributes());
-		emd.addAttribute(
-				attributeMetaDataFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
-						.setRefEntity(entityMetaData));
-		AttributeMetaData classification = attributeMetaDataFactory.create().setName(CLASSIFICATION).setDataType(STRING)
+		emd.addAttribute(attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
+				.setRefEntity(entityType));
+		Attribute classification = attributeFactory.create().setName(CLASSIFICATION).setDataType(STRING)
 				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		AttributeMetaData confidence = attributeMetaDataFactory.create().setName(CONFIDENCE).setDataType(STRING)
+		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
 				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		AttributeMetaData reason = attributeMetaDataFactory.create().setName(REASON).setDataType(STRING)
-				.setDescription(REASON).setLabel(REASON);
+		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING).setDescription(REASON)
+				.setLabel(REASON);
 		emd.addAttributes(Arrays.asList(classification, confidence, reason));
 
-		entityMetaData.addAttribute(idAttr);
-		entityMetaData.setIdAttribute(idAttr);
-
+		entityType.addAttribute(idAttr);
 	}
 
 	@Test
@@ -228,7 +222,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 
 	private Entity getVariantEntity(String alt, String caddScaled, String exacAF)
 	{
-		Entity variantEntity = new DynamicEntity(entityMetaData);
+		Entity variantEntity = new DynamicEntity(entityType);
 		variantEntity.set(VcfAttributes.ALT, alt);
 		variantEntity.set(CaddAnnotator.CADD_SCALED, caddScaled);
 		variantEntity.set(ExacAnnotator.EXAC_AF, exacAF);

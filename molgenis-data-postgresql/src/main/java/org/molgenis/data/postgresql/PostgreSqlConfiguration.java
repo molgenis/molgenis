@@ -22,9 +22,6 @@ public class PostgreSqlConfiguration
 	@Autowired
 	private DataService dataService;
 
-	@Autowired
-	private PlatformTransactionManager transactionManager;
-
 	@Bean
 	public JdbcTemplate jdbcTemplate()
 	{
@@ -36,7 +33,6 @@ public class PostgreSqlConfiguration
 	@Bean
 	public RepositoryCollection postgreSqlRepositoryCollection()
 	{
-		return new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate(), dataService,
-				transactionManager);
+		return new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate(), dataService);
 	}
 }

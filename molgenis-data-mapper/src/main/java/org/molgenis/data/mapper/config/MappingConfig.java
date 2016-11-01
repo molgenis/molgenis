@@ -14,14 +14,14 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.*;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ public class MappingConfig
 	DataService dataService;
 
 	@Autowired
-	MolgenisUserService userService;
+	UserService userService;
 
 	@Autowired
 	OntologyTagService ontologyTagService;
@@ -59,10 +59,7 @@ public class MappingConfig
 	AttributeMappingMetaData attributeMappingMetaData;
 
 	@Autowired
-	AttributeMetaDataFactory attrMetaFactory;
-
-	@Autowired
-	MolgenisUserService molgenisUserService;
+	AttributeFactory attrMetaFactory;
 
 	@Autowired
 	MappingProjectMetaData mappingProjectMeta;
@@ -96,7 +93,7 @@ public class MappingConfig
 	@Bean
 	public MappingProjectRepositoryImpl mappingProjectRepository()
 	{
-		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), molgenisUserService,
+		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), userService,
 				idGenerator, mappingProjectMeta);
 	}
 

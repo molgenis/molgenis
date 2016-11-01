@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.service;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.AttributeType;
+import org.molgenis.auth.User;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -16,7 +16,7 @@ public interface MappingService
 	 *
 	 * @param target name of the first target entity
 	 */
-	MappingProject addMappingProject(String name, MolgenisUser owner, String target);
+	MappingProject addMappingProject(String name, User owner, String target);
 
 	/**
 	 * Retrieves all {@link MappingProject}s.

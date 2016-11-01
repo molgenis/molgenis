@@ -1,19 +1,19 @@
 package org.molgenis.ontology.core.meta;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.AttributeType.DECIMAL;
+import static org.molgenis.AttributeType.TEXT;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
-public class OntologyTermSynonymMetaData extends SystemEntityMetaData
+public class OntologyTermSynonymMetaData extends SystemEntityType
 {
 	public static final String SIMPLE_NAME = "OntologyTermSynonym";
 	public final static String ONTOLOGY_TERM_SYNONYM = PACKAGE_ONTOLOGY + "_" + SIMPLE_NAME;

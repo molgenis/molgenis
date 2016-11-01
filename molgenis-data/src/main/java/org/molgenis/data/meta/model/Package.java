@@ -11,7 +11,9 @@ import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
+import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
@@ -30,34 +32,34 @@ public class Package extends StaticEntity
 	/**
 	 * Constructs a package with the given meta data
 	 *
-	 * @param entityMeta package meta data
+	 * @param entityType package meta data
 	 */
-	public Package(EntityMetaData entityMeta)
+	public Package(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
 	/**
 	 * Constructs a package with the given type code and meta data
 	 *
 	 * @param packageId  package identifier (fully qualified package name)
-	 * @param entityMeta language meta data
+	 * @param entityType language meta data
 	 */
-	public Package(String packageId, EntityMetaData entityMeta)
+	public Package(String packageId, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setSimpleName(packageId);
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityType)})
 	 *
 	 * @param package_ package
 	 * @return deep copy of package
 	 */
 	public static Package newInstance(Package package_)
 	{
-		Package packageCopy = new Package(package_.getEntityMetaData());
+		Package packageCopy = new Package(package_.getEntityType());
 		packageCopy.setName(package_.getName());
 		packageCopy.setSimpleName(package_.getSimpleName());
 		packageCopy.setLabel(package_.getLabel());
@@ -76,12 +78,12 @@ public class Package extends StaticEntity
 	 */
 	public String getSimpleName()
 	{
-		return getString(PackageMetaData.SIMPLE_NAME);
+		return getString(PackageMetadata.SIMPLE_NAME);
 	}
 
 	public Package setSimpleName(String simpleName)
 	{
-		set(PackageMetaData.SIMPLE_NAME, simpleName);
+		set(PackageMetadata.SIMPLE_NAME, simpleName);
 		updateFullName();
 		return this;
 	}
@@ -93,14 +95,24 @@ public class Package extends StaticEntity
 	 */
 	public Package getParent()
 	{
-		return getEntity(PackageMetaData.PARENT, Package.class);
+		return getEntity(PackageMetadata.PARENT, Package.class);
 	}
 
 	public Package setParent(Package parentPackage)
 	{
-		set(PackageMetaData.PARENT, parentPackage);
+		set(PackageMetadata.PARENT, parentPackage);
 		updateFullName();
 		return this;
+	}
+
+	/**
+	 * Gets the subpackages of this package or an empty list if this package doesn't have any subpackages.
+	 *
+	 * @return sub-packages
+	 */
+	public Iterable<Package> getChildren()
+	{
+		return getEntities(CHILDREN, Package.class);
 	}
 
 	/**
@@ -110,12 +122,12 @@ public class Package extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(PackageMetaData.FULL_NAME);
+		return getString(PackageMetadata.FULL_NAME);
 	}
 
 	public Package setName(String fullName)
 	{
-		set(PackageMetaData.FULL_NAME, fullName);
+		set(PackageMetadata.FULL_NAME, fullName);
 		return this;
 	}
 
@@ -126,12 +138,12 @@ public class Package extends StaticEntity
 	 */
 	public String getLabel()
 	{
-		return getString(PackageMetaData.LABEL);
+		return getString(PackageMetadata.LABEL);
 	}
 
 	public Package setLabel(String label)
 	{
-		set(PackageMetaData.LABEL, label);
+		set(PackageMetadata.LABEL, label);
 		return this;
 	}
 
@@ -142,12 +154,12 @@ public class Package extends StaticEntity
 	 */
 	public String getDescription()
 	{
-		return getString(PackageMetaData.DESCRIPTION);
+		return getString(PackageMetadata.DESCRIPTION);
 	}
 
 	public Package setDescription(String description)
 	{
-		set(PackageMetaData.DESCRIPTION, description);
+		set(PackageMetadata.DESCRIPTION, description);
 		return this;
 	}
 
@@ -158,7 +170,7 @@ public class Package extends StaticEntity
 	 */
 	public Iterable<Tag> getTags()
 	{
-		return getEntities(PackageMetaData.TAGS, Tag.class);
+		return getEntities(PackageMetadata.TAGS, Tag.class);
 	}
 
 	/**
@@ -169,7 +181,7 @@ public class Package extends StaticEntity
 	 */
 	public Package setTags(Iterable<Tag> tags)
 	{
-		set(PackageMetaData.TAGS, tags);
+		set(PackageMetadata.TAGS, tags);
 		return this;
 	}
 
@@ -180,7 +192,7 @@ public class Package extends StaticEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		set(PackageMetaData.TAGS, concat(getTags(), singletonList(tag)));
+		set(PackageMetadata.TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -192,7 +204,7 @@ public class Package extends StaticEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		set(PackageMetaData.TAGS, tag);
+		set(PackageMetadata.TAGS, tag);
 	}
 
 	/**
@@ -200,27 +212,9 @@ public class Package extends StaticEntity
 	 *
 	 * @return package entities
 	 */
-	public Iterable<EntityMetaData> getEntityMetaDatas()
+	public Iterable<EntityType> getEntityTypes()
 	{
-		// TODO Use one-to-many relationship for EntityMetaData.package
-		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<EntityMetaData> query = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(EntityMetaDataMetaData.PACKAGE, getName());
-		return () -> query.findAll().iterator();
-	}
-
-	/**
-	 * Gets the subpackages of this package or an empty list if this package doesn't have any subpackages.
-	 *
-	 * @return sub-packages
-	 */
-	public Iterable<Package> getSubPackages()
-	{
-		// TODO use one-to-many relationship for Package.parent
-		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<Package> query = dataService.query(PackageMetaData.PACKAGE, Package.class)
-				.eq(PackageMetaData.PARENT, this);
-		return () -> query.findAll().iterator();
+		return getEntities(ENTITY_TYPES, EntityType.class);
 	}
 
 	/**
@@ -253,7 +247,7 @@ public class Package extends StaticEntity
 			{
 				fullName = simpleName;
 			}
-			set(PackageMetaData.FULL_NAME, fullName);
+			set(PackageMetadata.FULL_NAME, fullName);
 		}
 	}
 

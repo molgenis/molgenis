@@ -1,11 +1,11 @@
 package org.molgenis.charts.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.charts.*;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,10 +30,10 @@ public class ChartDataServiceImpl implements ChartDataService
 			String split, List<QueryRule> queryRules)
 	{
 		Repository<Entity> repo = dataService.getRepository(entityName);
-		EntityMetaData entityMetaData = repo.getEntityMetaData();
+		EntityType entityType = repo.getEntityType();
 
-		final AttributeType attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType();
-		final AttributeType attributeYFieldTypeEnum = entityMetaData.getAttribute(attributeNameYaxis).getDataType();
+		final AttributeType attributeXFieldTypeEnum = entityType.getAttribute(attributeNameXaxis).getDataType();
+		final AttributeType attributeYFieldTypeEnum = entityType.getAttribute(attributeNameYaxis).getDataType();
 		final List<XYDataSerie> xYDataSeries;
 
 		// Sanity check
@@ -72,10 +72,10 @@ public class ChartDataServiceImpl implements ChartDataService
 			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
-		EntityMetaData entityMetaData = repo.getEntityMetaData();
+		EntityType entityType = repo.getEntityType();
 
 		XYDataSerie serie = new XYDataSerie();
-		serie.setName(entityMetaData.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityMetaData
+		serie.setName(entityType.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityType
 				.getAttribute(attributeNameYaxis).getLabel());
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
@@ -196,14 +196,14 @@ public class ChartDataServiceImpl implements ChartDataService
 			String split, double scaleToCalcOutliers)
 	{
 		Repository<Entity> repo = dataService.getRepository(entityName);
-		EntityMetaData entityMetaData = repo.getEntityMetaData();
+		EntityType entityType = repo.getEntityType();
 
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
-		boxPlotChart.setyLabel(entityMetaData.getAttribute(attributeName).getLabel());
+		boxPlotChart.setyLabel(entityType.getAttribute(attributeName).getLabel());
 
 		Sort sort = new Sort().on(attributeName);
 		Iterable<Entity> iterable = getIterable(entityName, repo, queryRules, sort);
-		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(entityMetaData, iterable, attributeName,
+		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(entityType, iterable, attributeName,
 				split);
 
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
@@ -260,13 +260,13 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * Get a map containing keys to different data lists
 	 *
-	 * @param entityMeta
+	 * @param entityType
 	 * @param iterable
 	 * @param attributeName
 	 * @param split         (String) if null or empty String will not split
 	 * @return map (Map<String, List<Double>>)
 	 */
-	private Map<String, List<Double>> getBoxPlotDataListMap(EntityMetaData entityMeta, Iterable<Entity> iterable,
+	private Map<String, List<Double>> getBoxPlotDataListMap(EntityType entityType, Iterable<Entity> iterable,
 			String attributeName, String split)
 	{
 		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
@@ -286,7 +286,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else
 		{
-			String key = entityMeta.getAttribute(attributeName).getLabel();
+			String key = entityType.getAttribute(attributeName).getLabel();
 			List<Double> list = new ArrayList<Double>();
 			for (Entity entity : iterable)
 			{

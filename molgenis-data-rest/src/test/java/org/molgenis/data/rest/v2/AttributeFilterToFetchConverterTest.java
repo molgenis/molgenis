@@ -3,13 +3,13 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.file.model.FileMetaMetaData;
-import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.molgenis.security.owned.OwnedEntityType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +19,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -64,58 +64,57 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	 * </ul>
 	 * </li>
 	 */
-	private EntityMetaData entityMeta;
-	private AttributeMetaData labelAttr;
-	private AttributeMetaData xrefAttr;
-	private EntityMetaData xrefEntityMeta;
-	private EntityMetaData selfRefEntityMetaData;
+	private EntityType entityType;
+	private Attribute labelAttr;
+	private Attribute xrefAttr;
+	private EntityType xrefEntityType;
+	private EntityType selfRefEntityType;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	@Autowired
 	private FileMetaMetaData fileMetaMeta;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityMetaData = entityMetaDataFactory.create().setName("SelfRefEntity");
-		AttributeMetaData selfRefIdAttr = attributeMetaDataFactory.create().setName("id");
-		selfRefEntityMetaData.addAttribute(selfRefIdAttr, ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName("label"), ROLE_LABEL).addAttribute(
-				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF)
-						.setRefEntity(selfRefEntityMetaData));
+		selfRefEntityType = entityTypeFactory.create().setName("SelfRefEntity");
+		Attribute selfRefIdAttr = attributeFactory.create().setName("id");
+		selfRefEntityType.addAttribute(selfRefIdAttr, ROLE_ID)
+				.addAttribute(attributeFactory.create().setName("label"), ROLE_LABEL).addAttribute(
+				attributeFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityType));
 
-		labelAttr = attributeMetaDataFactory.create().setName(REF_LABEL_ATTR_NAME);
-		xrefEntityMeta = entityMetaDataFactory.create().setName("xrefEntity")
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
-				.addAttribute(labelAttr, ROLE_LABEL)
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_NAME));
+		labelAttr = attributeFactory.create().setName(REF_LABEL_ATTR_NAME);
+		xrefEntityType = entityTypeFactory.create().setName("xrefEntity")
+				.addAttribute(attributeFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
+				.addAttribute(labelAttr, ROLE_LABEL).addAttribute(attributeFactory.create().setName(REF_ATTR_NAME));
 
-		entityMeta = entityMetaDataFactory.create().setName("entity")
-				.addAttribute(attributeMetaDataFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
+		entityType = entityTypeFactory.create().setName("entity")
+				.addAttribute(attributeFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 
-		AttributeMetaData compoundPartAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_ATTR_NAME)
-				.setDataType(COMPOUND);
-		AttributeMetaData compoundPartFileAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
-				.setDataType(FILE).setRefEntity(fileMetaMeta);
-		AttributeMetaData compoundAttr = attributeMetaDataFactory.create().setName(COMPOUND_ATTR_NAME)
-				.setDataType(COMPOUND);
-		AttributeMetaData compoundPartCompoundAttr = attributeMetaDataFactory.create()
-				.setName(COMPOUND_PART_COMPOUND_ATTR_NAME).setDataType(COMPOUND);
-		AttributeMetaData compoundPartCompoundPartAttr = attributeMetaDataFactory.create()
-				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME);
-		AttributeMetaData compoundPartCompoundPartAttr2 = attributeMetaDataFactory.create()
-				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
-		compoundAttr.setAttributeParts(asList(compoundPartAttr, compoundPartFileAttr, compoundPartCompoundAttr));
-		compoundPartCompoundAttr.setAttributeParts(asList(compoundPartCompoundPartAttr, compoundPartCompoundPartAttr2));
-		entityMeta.addAttribute(compoundAttr);
+		Attribute compoundAttr = attributeFactory.create().setName(COMPOUND_ATTR_NAME).setDataType(COMPOUND);
+		Attribute compoundPartAttr = attributeFactory.create().setName(COMPOUND_PART_ATTR_NAME).setDataType(COMPOUND)
+				.setParent(compoundAttr);
+		Attribute compoundPartFileAttr = attributeFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
+				.setParent(compoundAttr).setDataType(FILE).setRefEntity(fileMetaMeta);
+		Attribute compoundPartCompoundAttr = attributeFactory.create().setName(COMPOUND_PART_COMPOUND_ATTR_NAME)
+				.setDataType(COMPOUND).setParent(compoundAttr);
 
-		xrefAttr = attributeMetaDataFactory.create().setName(XREF_ATTR_NAME).setDataType(XREF)
-				.setRefEntity(xrefEntityMeta);
-		entityMeta.addAttribute(xrefAttr);
+		Attribute compoundPartCompoundPartAttr = attributeFactory.create()
+				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).setParent(compoundPartCompoundAttr);
+		Attribute compoundPartCompoundPartAttr2 = attributeFactory.create()
+				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME).setParent(compoundPartCompoundAttr);
+		entityType.addAttribute(compoundAttr);
+		entityType.addAttribute(compoundPartAttr);
+		entityType.addAttribute(compoundPartFileAttr);
+		entityType.addAttribute(compoundPartCompoundPartAttr);
+		entityType.addAttribute(compoundPartCompoundPartAttr2);
+
+		xrefAttr = attributeFactory.create().setName(XREF_ATTR_NAME).setDataType(XREF).setRefEntity(xrefEntityType);
+		entityType.addAttribute(xrefAttr);
 	}
 
 	@Test
@@ -125,14 +124,14 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 				new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME).field(FileMetaMetaData.URL))
 				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
 				.field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
-		assertEquals(AttributeFilterToFetchConverter.convert(null, entityMeta, "en"), fetch);
+		assertEquals(AttributeFilterToFetchConverter.convert(null, entityType, "en"), fetch);
 	}
 
 	@Test
 	public void convertAttrFilterIncludeAll()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().setIncludeAllAttrs(true);
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
 				new Fetch().field("attrId").field("attrLabel")
 						.field("attrCompoundPartFile", new Fetch().field("id").field("filename").field("url"))
 						.field("attrCompoundPartCompoundPart").field("attr2CompoundPartCompoundPart")
@@ -143,7 +142,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void convertAttrFilterIncludeIdAndLabelAttrs()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().setIncludeIdAttr(true).setIncludeLabelAttr(true);
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
 				new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME));
 	}
 
@@ -151,7 +150,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void convertAttrFilterIncludeAttr()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().add(LABEL_ATTR_NAME);
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
 				new Fetch().field(LABEL_ATTR_NAME));
 	}
 
@@ -159,7 +158,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void convertAttrFilterCompoundAttr()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME);
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"), new Fetch()
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"), new Fetch()
 				.field(COMPOUND_PART_FILE_ATTR_NAME,
 						new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME)
 								.field(FileMetaMetaData.URL)).field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
@@ -171,7 +170,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	{
 		AttributeFilter attrFilter = new AttributeFilter()
 				.add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_COMPOUND_ATTR_NAME));
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
 				new Fetch().field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
 	}
 
@@ -181,7 +180,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 		AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME, new AttributeFilter()
 				.add(COMPOUND_PART_COMPOUND_ATTR_NAME,
 						new AttributeFilter().add(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)));
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
 				new Fetch().field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME));
 	}
 
@@ -190,7 +189,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	{
 		AttributeFilter attrFilter = new AttributeFilter()
 				.add(XREF_ATTR_NAME, new AttributeFilter().add(REF_ATTR_NAME));
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
 				new Fetch().field(XREF_ATTR_NAME, new Fetch().field(REF_ATTR_NAME)));
 	}
 
@@ -198,7 +197,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void convertAttrFilterUnknownAttr()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().add("unknown");
-		AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en");
+		AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en");
 	}
 
 	@Test
@@ -208,13 +207,13 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 				new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME).field(FileMetaMetaData.URL))
 				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
 				.field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
-		assertEquals(AttributeFilterToFetchConverter.createDefaultEntityFetch(entityMeta, "en"), fetch);
+		assertEquals(AttributeFilterToFetchConverter.createDefaultEntityFetch(entityType, "en"), fetch);
 	}
 
 	@Test
 	public void createDefaultEntityFetchNoRefs()
 	{
-		assertNull(AttributeFilterToFetchConverter.createDefaultEntityFetch(xrefEntityMeta, "en"));
+		assertNull(AttributeFilterToFetchConverter.createDefaultEntityFetch(xrefEntityType, "en"));
 	}
 
 	@Test
@@ -230,55 +229,59 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 		assertNull(AttributeFilterToFetchConverter.createDefaultAttributeFetch(labelAttr, "en"));
 	}
 
-	@Test
 	/**
 	 * attrs=~id,selfRef should fetch id, and selfRef(id, label)
-	 */ public void testConvertSelfRefIncludeId()
+	 */
+	@Test
+	public void testConvertSelfRefIncludeId()
 	{
 		AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true).add("selfRef");
-		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityMetaData, "en");
+		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
 		assertEquals(fetch, new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")));
 	}
 
-	@Test
 	/**
 	 * attrs=id,selfRef should fetch id, and selfRef(id, label)
-	 */ public void testConvertIdSelfRef()
+	 */
+	@Test
+	public void testConvertIdSelfRef()
 	{
 		AttributeFilter filter = new AttributeFilter().add("id").add("selfRef");
-		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityMetaData, "en");
+		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
 		assertEquals(fetch, new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")));
 	}
 
-	@Test
 	/**
 	 * A Fetch for attrs=~id,selfRef(*) should fetch id and selfRef(id, label, selfRef(id, label))
-	 */ public void testConvertNestedSelfRef()
+	 */
+	@Test
+	public void testConvertNestedSelfRef()
 	{
 		AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true)
 				.add("selfRef", new AttributeFilter().setIncludeAllAttrs(true));
-		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityMetaData, "en");
+		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
 		assertEquals(fetch, new Fetch().field("id").field("selfRef",
 				new Fetch().field("id").field("label").field("selfRef", new Fetch().field("id").field("label"))));
 	}
 
-	@Test
 	/**
 	 * An AttributeFilter for ~id,~lbl,selfRef(*,selfRef(*)) should fetch (id, label, selfRef(id, label, selfRef(id,
 	 * label)))
-	 */ public void testConvertDoubleNestedSelfRef()
+	 */
+	@Test
+	public void testConvertDoubleNestedSelfRef()
 	{
 		AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true).setIncludeLabelAttr(true).add("selfRef",
 				new AttributeFilter().setIncludeAllAttrs(true)
 						.add("selfRef", new AttributeFilter().setIncludeAllAttrs(true)));
-		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityMetaData, "en");
+		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
 		assertEquals(fetch, new Fetch().field("id").field("label").field("selfRef",
 				new Fetch().field("id").field("label").field("selfRef", new Fetch().field("id").field("label")
 						.field("selfRef", new Fetch().field("id").field("label")))));
 	}
 
 	@Configuration
-	@Import({ FileMetaMetaData.class, OwnedEntityMetaData.class, SecurityPackage.class, RootSystemPackage.class })
+	@Import({ FileMetaMetaData.class, OwnedEntityType.class, SecurityPackage.class, RootSystemPackage.class })
 	public static class Config
 	{
 

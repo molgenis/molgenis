@@ -1,16 +1,17 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.AttributeType.STRING;
 
 public class MetaValidationUtilsTest
 {
@@ -76,116 +77,134 @@ public class MetaValidationUtilsTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateEntityMetaDataTooLong()
+	public void testValidateEntityTypeTooLong()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("aString").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName())
+		Attribute compoundAttrPart0 = when(mock(Attribute.class).getName())
 				.thenReturn("aCompStringWayTooLongToUseAsAnAttributeName1").getMock();
 		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString2")
-				.getMock();
+		Attribute compoundAttrPart1 = when(mock(Attribute.class).getName()).thenReturn("aCompString2").getMock();
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aComp").getMock();
+		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("aComp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
-		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+		when(compoundAttr.getChildren()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateEntityMetaDataStartsWithDigit()
+	public void testValidateEntityTypeStartsWithDigit()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("aString").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString1")
-				.getMock();
+		Attribute compoundAttrPart0 = when(mock(Attribute.class).getName()).thenReturn("aCompString1").getMock();
 		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("2aCompString")
-				.getMock();
+		Attribute compoundAttrPart1 = when(mock(Attribute.class).getName()).thenReturn("2aCompString").getMock();
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aComp").getMock();
+		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("aComp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
-		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
+		when(compoundAttr.getChildren()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateEntityMetaDataInvalidChar()
+	public void testValidateEntityTypeInvalidChar()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("aString").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString1")
-				.getMock();
+		Attribute compoundAttrPart0 = when(mock(Attribute.class).getName()).thenReturn("aCompString1").getMock();
 		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString2")
-				.getMock();
+		Attribute compoundAttrPart1 = when(mock(Attribute.class).getName()).thenReturn("aCompString2").getMock();
 		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("a.Comp").getMock();
+		Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("a.Comp").getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
-		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
+		when(compoundAttr.getChildren()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(entityType.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateEntityMetaDataIdAttributeWithDefaultValue()
+	public void testValidateEntityTypeIdAttributeWithDefaultValue()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(idAttr.getDefaultValue()).thenReturn("5");
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getAttributes()).thenReturn(singletonList(idAttr));
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttributes()).thenReturn(singletonList(idAttr));
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateEntityMetaDataUniqueAttributeWithDefaultValue()
+	public void testValidateEntityTypeUniqueAttributeWithDefaultValue()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData uniqueAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("uniqueAttr").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute uniqueAttr = when(mock(Attribute.class).getName()).thenReturn("uniqueAttr").getMock();
 		when(uniqueAttr.isUnique()).thenReturn(true);
 		when(uniqueAttr.getDefaultValue()).thenReturn("5");
-		when(entityMeta.getAttributes()).thenReturn(singletonList(uniqueAttr));
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+		when(entityType.getAttributes()).thenReturn(singletonList(uniqueAttr));
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityComputedAttributeWithDefaultValue()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData expressionAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("expressionAttr")
-				.getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute expressionAttr = when(mock(Attribute.class).getName()).thenReturn("expressionAttr").getMock();
 		when(expressionAttr.getExpression()).thenReturn("$('id').value()");
 		when(expressionAttr.getDefaultValue()).thenReturn("5");
-		when(entityMeta.getAttributes()).thenReturn(singletonList(expressionAttr));
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+		when(entityType.getAttributes()).thenReturn(singletonList(expressionAttr));
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 
 	@Test
-	public void testValidateEntityMetaDataOkayAttributeWithDefaultValue()
+	public void testValidateEntityTypeOkayAttributeWithDefaultValue()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		AttributeMetaData attrWithDefaultValue = when(mock(AttributeMetaData.class).getName())
-				.thenReturn("attrWithDefaultValue").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		Attribute attrWithDefaultValue = when(mock(Attribute.class).getName()).thenReturn("attrWithDefaultValue")
+				.getMock();
 		when(attrWithDefaultValue.getDataType()).thenReturn(STRING);
 		when(attrWithDefaultValue.getDefaultValue()).thenReturn("5");
-		when(entityMeta.getAttributes()).thenReturn(singletonList(attrWithDefaultValue));
+		when(entityType.getAttributes()).thenReturn(singletonList(attrWithDefaultValue));
+		when(entityType.getLabelAttribute()).thenReturn(attrWithDefaultValue);
+		MetaValidationUtils.validateEntityType(entityType);
+	}
 
-		MetaValidationUtils.validateEntityMetaData(entityMeta);
+	@Test
+	public void validateEntityTypeAbstractNoLabelAttribute()
+	{
+		String entityName = "MyEntity";
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.isAbstract()).thenReturn(true);
+		when(entityType.getLabelAttribute()).thenReturn(null);
+		when(entityType.getAttributes()).thenReturn(emptyList());
+		MetaValidationUtils.validateEntityType(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void validateEntityTypeConcreteNoLabelAttribute()
+	{
+		String entityName = "MyEntity";
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.isAbstract()).thenReturn(false);
+		when(entityType.getLabelAttribute()).thenReturn(null);
+		when(entityType.getAttributes()).thenReturn(emptyList());
+		MetaValidationUtils.validateEntityType(entityType);
 	}
 }

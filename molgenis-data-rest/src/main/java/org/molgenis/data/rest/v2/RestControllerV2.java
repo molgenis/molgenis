@@ -1,17 +1,18 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -63,6 +65,7 @@ class RestControllerV2
 	private final MolgenisPermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
+	private final RepositoryCopier repoCopier;
 
 	static UnknownEntityException createUnknownEntityException(String entityName)
 	{
@@ -114,13 +117,15 @@ class RestControllerV2
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService)
+			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
+			RepositoryCopier repoCopier)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.repoCopier = requireNonNull(repoCopier);
 	}
 
 	@Autowired
@@ -178,11 +183,11 @@ class RestControllerV2
 
 	private Map<String, Object> getEntityResponse(String entityName, String untypedId, AttributeFilter attributeFilter)
 	{
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Object id = getTypedValue(untypedId, entityMeta.getIdAttribute());
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
 		Fetch fetch = AttributeFilterToFetchConverter
-				.convert(attributeFilter, entityMeta, languageService.getCurrentUserLanguageCode());
+				.convert(attributeFilter, entityType, languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
@@ -197,8 +202,8 @@ class RestControllerV2
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Object id = getTypedValue(untypedId, entityMeta.getIdAttribute());
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
 		dataService.deleteById(entityName, id);
 	}
@@ -236,18 +241,18 @@ class RestControllerV2
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+	public AttributeResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName)
 	{
-		return createAttributeMetaDataResponse(entityName, attributeName);
+		return createAttributeResponse(entityName, attributeName);
 	}
 
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+	public AttributeResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName)
 	{
-		return createAttributeMetaDataResponse(entityName, attributeName);
+		return createAttributeResponse(entityName, attributeName);
 	}
 
 	/**
@@ -264,7 +269,7 @@ class RestControllerV2
 	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
-		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final EntityType meta = dataService.getEntityType(entityName);
 		if (meta == null)
 		{
 			throw createUnknownEntityException(entityName);
@@ -282,6 +287,8 @@ class RestControllerV2
 
 			entities.forEach(entity ->
 			{
+				restService.updateMappedByEntities(entity);
+
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
@@ -324,8 +331,8 @@ class RestControllerV2
 		MetaValidationUtils.validateName(request.getNewEntityName());
 
 		// Check if the entity already exists
-		String newFullName = EntityMetaDataUtils
-				.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
+		String newFullName = EntityTypeUtils
+				.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
@@ -340,7 +347,7 @@ class RestControllerV2
 
 		// Copy
 		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
-				repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
+				repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
 		Repository<Entity> repository = dataService.getRepository(newFullName);
@@ -356,7 +363,7 @@ class RestControllerV2
 	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName, Package pack,
 			String label)
 	{
-		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
+		RunAsSystemProxy.runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
 
 	/**
@@ -371,7 +378,7 @@ class RestControllerV2
 	public synchronized void updateEntities(@PathVariable("entityName") String entityName,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
-		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final EntityType meta = dataService.getEntityType(entityName);
 		if (meta == null)
 		{
 			throw createUnknownEntityException(entityName);
@@ -383,6 +390,8 @@ class RestControllerV2
 
 			// update all entities
 			this.dataService.update(entityName, entities);
+			entities.forEach(entity -> restService
+					.updateMappedByEntities(entity, dataService.findOneById(entityName, entity.getIdValue())));
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		catch (Exception e)
@@ -405,7 +414,7 @@ class RestControllerV2
 			@PathVariable("attributeName") String attributeName,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
-		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final EntityType meta = dataService.getEntityType(entityName);
 		if (meta == null)
 		{
 			throw createUnknownEntityException(entityName);
@@ -413,7 +422,7 @@ class RestControllerV2
 
 		try
 		{
-			AttributeMetaData attr = meta.getAttribute(attributeName);
+			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
 				throw createUnknownAttributeException(entityName, attributeName);
@@ -542,28 +551,28 @@ class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	private AttributeResponseV2 createAttributeResponse(String entityName, String attributeName)
 	{
-		EntityMetaData entity = dataService.getEntityMetaData(entityName);
+		EntityType entity = dataService.getEntityType(entityName);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " not found");
 		}
 
-		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		Attribute attribute = entity.getAttribute(attributeName);
 		if (attribute == null)
 		{
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, entity, attribute, null, permissionService, dataService,
+		return new AttributeResponseV2(entityName, entity, attribute, null, permissionService, dataService,
 				languageService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
 			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
-		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		EntityType meta = dataService.getEntityType(entityName);
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
@@ -578,18 +587,18 @@ class RestControllerV2
 		{
 			// return aggregates for aggregate query
 			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
-			AttributeMetaData xAttr = aggsQ.getAttributeX();
-			AttributeMetaData yAttr = aggsQ.getAttributeY();
+			Attribute xAttr = aggsQ.getAttributeX();
+			Attribute yAttr = aggsQ.getAttributeY();
 			if (xAttr == null && yAttr == null)
 			{
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse =
-					xAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, xAttr, fetch, permissionService,
+			AttributeResponseV2 xAttrResponse =
+					xAttr != null ? new AttributeResponseV2(entityName, meta, xAttr, fetch, permissionService,
 							dataService, languageService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse =
-					yAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, yAttr, fetch, permissionService,
+			AttributeResponseV2 yAttrResponse =
+					yAttr != null ? new AttributeResponseV2(entityName, meta, yAttr, fetch, permissionService,
 							dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
@@ -656,30 +665,30 @@ class RestControllerV2
 		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
 		if (includeMetaData)
 		{
-			createEntityMetaResponse(entity.getEntityMetaData(), fetch, responseData);
+			createEntityTypeResponse(entity.getEntityType(), fetch, responseData);
 		}
 		createEntityValuesResponse(entity, fetch, responseData);
 		return responseData;
 	}
 
-	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
+	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData)
 	{
 		responseData.put("_meta",
-				new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
+				new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
 	{
-		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAtomicAttributes();
+		Iterable<Attribute> attrs = entity.getEntityType().getAtomicAttributes();
 		createEntityValuesResponseRec(entity, attrs, fetch, responseData);
 	}
 
-	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs, Fetch fetch,
+	private void createEntityValuesResponseRec(Entity entity, Iterable<Attribute> attrs, Fetch fetch,
 			Map<String, Object> responseData)
 	{
-		responseData.put("_href",
-				Href.concatEntityHref(BASE_URI, entity.getEntityMetaData().getName(), entity.getIdValue()));
-		for (AttributeMetaData attr : attrs) // TODO performance use fetch instead of attrs
+		responseData
+				.put("_href", Href.concatEntityHref(BASE_URI, entity.getEntityType().getName(), entity.getIdValue()));
+		for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();
 			if (fetch == null || fetch.hasField(attr))
@@ -697,7 +706,10 @@ class RestControllerV2
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
 						{
-							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attr) : null;
+							Fetch refAttrFetch =
+									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
+											languageService.getCurrentUserLanguageCode());
+							;
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -708,12 +720,16 @@ class RestControllerV2
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
+					case ONE_TO_MANY:
 						Iterable<Entity> refEntities = entity.getEntities(attrName);
 						List<Map<String, Object>> refEntityResponses;
 						if (refEntities != null)
 						{
 							refEntityResponses = new ArrayList<Map<String, Object>>();
-							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attrName) : null;
+							Fetch refAttrFetch =
+									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
+											languageService.getCurrentUserLanguageCode());
+							;
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));

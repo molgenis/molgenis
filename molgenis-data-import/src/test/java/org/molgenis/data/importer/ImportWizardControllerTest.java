@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.importer.ImportWizardControllerTest.Config;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
@@ -67,7 +68,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
@@ -93,7 +94,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private ImportRunFactory importRunFactory;
 
 	@Autowired
-	private MolgenisGroupFactory molgenisGroupFactory;
+	private GroupFactory groupFactory;
 
 	@Autowired
 	private GroupAuthorityFactory groupAuthorityFactory;
@@ -136,32 +137,32 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		List<GroupAuthority> authorities = Lists.newArrayList();
 
-		MolgenisGroup group1 = molgenisGroupFactory.create();
+		Group group1 = groupFactory.create();
 		group1.setId("ID");
 		group1.setActive(true);
 		group1.setName("TestGroup");
 
 		Entity entity1 = groupAuthorityFactory.create("Entity1");
 		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
-		entity1.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
+		entity1.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority1 = groupAuthorityFactory.create();
 		authority1.set(entity1);
 
 		Entity entity2 = groupAuthorityFactory.create("Entity2");
 		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
-		entity2.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
+		entity2.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority2 = groupAuthorityFactory.create();
 		authority2.set(entity2);
 
 		Entity entity3 = groupAuthorityFactory.create("Entity3");
 		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
-		entity3.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
+		entity3.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority3 = groupAuthorityFactory.create();
 		authority3.set(entity3);
 
 		Entity entity4 = groupAuthorityFactory.create("Entity4");
 		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
-		entity4.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
+		entity4.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority4 = groupAuthorityFactory.create();
 		authority4.set(entity4);
 
@@ -172,10 +173,10 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
-		when(dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class)).thenReturn(group1);
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, group1),
-				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
+		when(dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
+						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 		{
 			@Override
 			public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
@@ -183,16 +184,16 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 				return Stream.of(authority1, authority2, authority3, authority4);
 			}
 		});
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, "ID"), GroupAuthority.class))
-				.thenAnswer(new Answer<Stream<GroupAuthority>>()
-				{
-					@Override
-					public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.of(authority1, authority2, authority3, authority4);
-					}
-				});
+		when(dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
+						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+		{
+			@Override
+			public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(authority1, authority2, authority3, authority4);
+			}
+		});
 		when(dataService.getEntityNames()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		Authentication authentication = mock(Authentication.class);
@@ -238,7 +239,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void addGroupEntityClassPermissionsTest()
 	{
-		MolgenisUser user = mock(MolgenisUser.class);
+		User user = mock(User.class);
 		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -248,7 +249,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(webRequest.getParameter("radio-entity4")).thenReturn(WRITE.toString());
 
 		GroupAuthority authority = groupAuthorityFactory.create();
-		authority.setMolgenisGroup(dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class));
+		authority.setGroup(dataService.findOneById(GROUP, "ID", Group.class));
 		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3".toUpperCase());
 
 		controller.addGroupEntityClassPermissions("ID", webRequest);
@@ -259,7 +260,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
-		MolgenisUser user = mock(MolgenisUser.class);
+		User user = mock(User.class);
 		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -274,7 +275,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@Test()
 	public void addGroupEntityClassPermissionsTestNoPermissionSU()
 	{
-		MolgenisUser user = mock(MolgenisUser.class);
+		User user = mock(User.class);
 		when(user.isSuperuser()).thenReturn(true);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -287,13 +288,13 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		verify(dataService).update(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
 		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_ENTITY3");
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getMolgenisGroup(),
-				dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class));
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
+				dataService.findOneById(GROUP, "ID", Group.class));
 
 		verify(dataService).add(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
 		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_ENTITY5");
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getMolgenisGroup(),
-				dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class));
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
+				dataService.findOneById(GROUP, "ID", Group.class));
 	}
 
 	@Test
@@ -596,6 +597,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		public MailSender mailSender()
 		{
 			return mock(MailSender.class);
+		}
+
+		@Bean
+		public EntityTypeDependencyResolver entityTypeDependencyResolver()
+		{
+			return mock(EntityTypeDependencyResolver.class);
 		}
 	}
 }

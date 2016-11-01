@@ -17,10 +17,10 @@ import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.DannAnnotatorSettings.Meta.DANN_LOCATION;
 
 @Configuration
@@ -54,10 +54,10 @@ public class DannAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -70,8 +70,8 @@ public class DannAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(DANN_SCORE).setDataType(STRING)
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute dann_score = attributeFactory.create().setName(DANN_SCORE).setDataType(STRING)
 				.setDescription("deleterious score of genetic variants using neural networks.")
 				.setLabel(DANN_SCORE_LABEL);
 
@@ -119,16 +119,15 @@ public class DannAnnotator implements AnnotatorConfig
 			{
 
 				String idAttrName = "id";
-				EntityMetaData repoMetaData = entityMetaDataFactory.create().setName(DANN_TABIX_RESOURCE);
+				EntityType repoMetaData = entityTypeFactory.create().setName(DANN_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
-				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(STRING));
-				AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName(idAttrName)
-						.setVisible(false);
-				repoMetaData.addAttribute(idAttributeMetaData);
-				repoMetaData.setIdAttribute(idAttributeMetaData);
+				repoMetaData.addAttribute(attributeFactory.create().setName("DANN_SCORE").setDataType(STRING));
+				Attribute idAttribute = attributeFactory.create().setName(idAttrName)
+						.setVisible(false).setIdAttribute(true);
+				repoMetaData.addAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}
 		};

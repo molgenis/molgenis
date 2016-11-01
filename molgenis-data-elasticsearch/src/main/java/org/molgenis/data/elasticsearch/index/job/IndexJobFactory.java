@@ -35,8 +35,8 @@ public class IndexJobFactory
 		RunAsSystemProxy
 				.runAsSystem(() -> dataService.add(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution));
 		ProgressImpl progress = new ProgressImpl(indexJobExecution, jobExecutionUpdater, mailSender);
-		return new IndexJob(progress, new SystemSecurityToken(), indexJobExecution.getIndexActionJobID(),
-				dataService, searchService);
+		return new IndexJob(progress, new SystemSecurityToken(), indexJobExecution.getIndexActionJobID(), dataService,
+				searchService);
 	}
 
 }

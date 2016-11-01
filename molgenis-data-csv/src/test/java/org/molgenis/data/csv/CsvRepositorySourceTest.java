@@ -3,8 +3,8 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
@@ -21,10 +21,10 @@ import static org.testng.Assert.assertNotNull;
 public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Test
 	public void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException
@@ -34,8 +34,8 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
-		repo.setEntityMetaDataFactory(entityMetaFactory);
-		repo.setAttributeMetaDataFactory(attrMetaFactory);
+		repo.setEntityTypeFactory(entityTypeFactory);
+		repo.setAttributeFactory(attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 1);
 		assertEquals(Iterables.get(repo.getEntityNames(), 0), "testdata");
@@ -84,8 +84,8 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 		}
 
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip);
-		repo.setEntityMetaDataFactory(entityMetaFactory);
-		repo.setAttributeMetaDataFactory(attrMetaFactory);
+		repo.setEntityTypeFactory(entityTypeFactory);
+		repo.setAttributeFactory(attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 3);
 		assertNotNull(repo.getRepository("0"));

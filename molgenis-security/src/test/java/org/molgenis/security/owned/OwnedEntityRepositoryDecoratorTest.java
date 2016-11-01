@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -20,13 +20,13 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNER_USERNAME;
+import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 public class OwnedEntityRepositoryDecoratorTest
 {
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 	private Repository decoratedRepository;
 	private OwnedEntityRepositoryDecorator ownedEntityRepositoryDecorator;
 	private ArgumentCaptor<Consumer<List>> consumerCaptor;
@@ -34,10 +34,10 @@ public class OwnedEntityRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUp()
 	{
-		entityMeta = mock(EntityMetaData.class);
+		entityType = mock(EntityType.class);
 		decoratedRepository = mock(Repository.class);
 		consumerCaptor = ArgumentCaptor.forClass((Class) Consumer.class);
-		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		ownedEntityRepositoryDecorator = new OwnedEntityRepositoryDecorator(decoratedRepository);
 	}
 
@@ -55,7 +55,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getIdValue()).thenReturn("0");
@@ -69,8 +69,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		verify(decoratedRepository, times(1)).add(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(entity0, entity1));
-		verify(entity0, times(1)).set(OwnedEntityMetaData.OWNER_USERNAME, "username");
-		verify(entity1, times(1)).set(OwnedEntityMetaData.OWNER_USERNAME, "username");
+		verify(entity0, times(1)).set(OwnedEntityType.OWNER_USERNAME, "username");
+		verify(entity1, times(1)).set(OwnedEntityType.OWNER_USERNAME, "username");
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity myEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Entity notMyEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
@@ -122,17 +122,17 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.get(OwnedEntityMetaData.OWNER_USERNAME)).thenReturn("usernameUpdate");
+		when(entity0.get(OwnedEntityType.OWNER_USERNAME)).thenReturn("usernameUpdate");
 		Stream<Entity> entities = Stream.of(entity0);
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
 		List<Entity> entityList = captor.getValue().collect(Collectors.toList());
 		assertEquals(entityList, asList(entity0));
-		verify(entityList.get(0)).set(OwnedEntityMetaData.OWNER_USERNAME, "username");
+		verify(entityList.get(0)).set(OwnedEntityType.OWNER_USERNAME, "username");
 	}
 
 	@Test
@@ -141,7 +141,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
@@ -158,7 +158,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
@@ -200,7 +200,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id0 = "id0";
 		Object id1 = "id1";
@@ -218,7 +218,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id0 = "id0";
 		Object id1 = "id1";
@@ -251,7 +251,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
 		Object id0 = "id0";
@@ -271,7 +271,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
 		Object id0 = "id0";
@@ -301,14 +301,14 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Query query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), asList(entity0));
-		verify(query, times(1)).eq(OwnedEntityMetaData.OWNER_USERNAME, "username");
+		verify(query, times(1)).eq(OwnedEntityType.OWNER_USERNAME, "username");
 	}
 
 	@Test
@@ -317,7 +317,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
@@ -340,7 +340,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData(mock(SecurityPackage.class)));
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();

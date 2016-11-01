@@ -3,8 +3,7 @@ package org.molgenis.data;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
@@ -62,7 +61,7 @@ public class DataConverter
 	 * @param attr   attribute that defines the type of the converted value
 	 * @return converted value or the input value if the attribute type is a reference type
 	 */
-	public static Object convert(Object source, AttributeMetaData attr)
+	public static Object convert(Object source, Attribute attr)
 	{
 		switch (attr.getDataType())
 		{
@@ -73,6 +72,7 @@ public class DataConverter
 			case CATEGORICAL_MREF:
 			case MREF:
 			case FILE:
+			case ONE_TO_MANY:
 				return source;
 			case COMPOUND:
 				throw new UnsupportedOperationException();
@@ -96,7 +96,6 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
-		if (source instanceof FieldType) return source.toString();
 		if (source instanceof Entity)
 		{
 			Object labelValue = ((Entity) source).getLabelValue();

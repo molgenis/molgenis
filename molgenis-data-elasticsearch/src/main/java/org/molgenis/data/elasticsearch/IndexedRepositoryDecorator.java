@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +45,9 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		unsupportedOperators = Collections.unmodifiableSet(operators);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepo.getEntityMetaData();
+		return decoratedRepo.getEntityType();
 	}
 
 	@Override
@@ -122,15 +121,15 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		if (querySupported(q))
 		{
-			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.findOne(q);
 		}
 		else
 		{
-			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
 					INDEX_REPOSITORY);
-			return searchService.findOne(q, getEntityMetaData());
+			return searchService.findOne(q, getEntityType());
 		}
 
 	}
@@ -152,15 +151,15 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		if (querySupported(q))
 		{
-			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.findAll(q);
 		}
 		else
 		{
-			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
 					INDEX_REPOSITORY);
-			return searchService.searchAsStream(q, getEntityMetaData());
+			return searchService.searchAsStream(q, getEntityType());
 		}
 	}
 
@@ -226,22 +225,22 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		// TODO check if the index is stable. If index is stable you can better check index for count results
 		if (querySupported(q))
 		{
-			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.count(q);
 		}
 		else
 		{
-			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
 					INDEX_REPOSITORY);
-			return searchService.count(q, getEntityMetaData());
+			return searchService.count(q, getEntityType());
 		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return searchService.aggregate(aggregateQuery, getEntityMetaData());
+		return searchService.aggregate(aggregateQuery, getEntityType());
 	}
 
 	/**
@@ -250,7 +249,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	 */
 	private boolean querySupported(Query<Entity> q)
 	{
-		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityMetaData());
+		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityType());
 
 	}
 }

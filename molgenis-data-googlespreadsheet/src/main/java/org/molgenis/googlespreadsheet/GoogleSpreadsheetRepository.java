@@ -7,10 +7,10 @@ import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {
@@ -39,27 +39,26 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	private final SpreadsheetService spreadsheetService;
 	private final String spreadsheetKey;
 	private final String worksheetId;
-	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final EntityTypeFactory entityTypeFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final Visibility visibility;
 
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
-			throws IOException, ServiceException
+			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory) throws IOException, ServiceException
 	{
-		this(spreadsheetService, spreadsheetKey, worksheetId, entityMetaFactory, attrMetaFactory, Visibility.PUBLIC);
+		this(spreadsheetService, spreadsheetKey, worksheetId, entityTypeFactory, attrMetaFactory, Visibility.PUBLIC);
 	}
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory, Visibility visibility)
+			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory, Visibility visibility)
 			throws IOException, ServiceException
 	{
 		this.spreadsheetService = requireNonNull(spreadsheetService);
 		this.spreadsheetKey = requireNonNull(spreadsheetKey);
 		this.worksheetId = requireNonNull(worksheetId);
-		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.visibility = requireNonNull(visibility);
 	}
@@ -67,7 +66,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		if (entityMetaData == null) entityMetaData = getEntityMetaData();
+		if (entityType == null) entityType = getEntityType();
 
 		ListFeed feed;
 		try
@@ -92,12 +91,12 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			@Override
 			public Entity next()
 			{
-				Entity entity = new DynamicEntity(getEntityMetaData());
+				Entity entity = new DynamicEntity(getEntityType());
 				CustomElementCollection customElements = it.next().getCustomElements();
-				for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
+				for (Attribute attribute : entityType.getAttributes())
 				{
-					// see remark in getEntityMetaData
-					String colName = attributeMetaData.getLabel();
+					// see remark in getEntityType
+					String colName = attribute.getLabel();
 					String normalizedColName = colName.replaceAll("_", "").toLowerCase();
 					String value = customElements.getValue(normalizedColName);
 					entity.set(colName, value);
@@ -113,10 +112,9 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		};
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		if (entityMetaData == null)
+		if (entityType == null)
 		{
 			// ListFeed does not give you the true column names, use CellFeed instead
 			CellFeed feed;
@@ -132,20 +130,20 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			EntityMetaData entityMetaData = entityMetaFactory.create().setSimpleName(feed.getTitle().getPlainText());
+			EntityType entityType = entityTypeFactory.create().setSimpleName(feed.getTitle().getPlainText());
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
 				Cell cell = cellEntry.getCell();
 				if (cell.getRow() == 1)
 				{
-					entityMetaData.addAttribute(attrMetaFactory.create().setName(cell.getValue()).setDataType(STRING));
+					entityType.addAttribute(attrMetaFactory.create().setName(cell.getValue()).setDataType(STRING));
 				}
 			}
-			this.entityMetaData = entityMetaData;
+			this.entityType = entityType;
 		}
 
-		return entityMetaData;
+		return entityType;
 	}
 
 	@Override

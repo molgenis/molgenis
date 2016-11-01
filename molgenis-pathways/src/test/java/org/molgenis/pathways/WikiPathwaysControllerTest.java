@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableMultimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.pathways.model.Impact;
@@ -34,7 +34,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { WikiPathwaysControllerTest.Config.class })
@@ -74,16 +74,16 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	private WikiPathwaysService serviceMock;
 	@Autowired
 	private DataService dataService;
-	private EntityMetaData vcf;
+	private EntityType vcf;
 
 	@BeforeTest
 	public void init()
 	{
-		vcf = mock(EntityMetaData.class);
+		vcf = mock(EntityType.class);
 		when(vcf.getName()).thenReturn("VCF");
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData effAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("EFF").getMock();
+		Attribute effAttr = when(mock(Attribute.class).getName()).thenReturn("EFF").getMock();
 		when(effAttr.getDataType()).thenReturn(STRING);
 		when(vcf.getIdAttribute()).thenReturn(idAttr);
 		when(vcf.getAtomicAttributes()).thenReturn(asList(idAttr, effAttr));
@@ -120,18 +120,18 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	public void testInit() throws RemoteException
 	{
 		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
-		EntityMetaData nonVcf = when(mock(EntityMetaData.class).getName()).thenReturn("NonVCF").getMock();
-		AttributeMetaData idAttr = mock(AttributeMetaData.class);
+		EntityType nonVcf = when(mock(EntityType.class).getName()).thenReturn("NonVCF").getMock();
+		Attribute idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn("id");
 		when(nonVcf.getIdAttribute()).thenReturn(idAttr);
 		when(nonVcf.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 
-		when(dataService.getEntityMetaData("NonVCF")).thenReturn(nonVcf);
-		when(dataService.getEntityMetaData("VCF")).thenReturn(vcf);
+		when(dataService.getEntityType("NonVCF")).thenReturn(nonVcf);
+		when(dataService.getEntityType("VCF")).thenReturn(vcf);
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		assertEquals(controller.init(model), "view-pathways");
-		assertEquals(model.get("entitiesMeta"), ImmutableList.<EntityMetaData>of(vcf));
+		assertEquals(model.get("entitiesMeta"), ImmutableList.<EntityType>of(vcf));
 	}
 
 	@Test

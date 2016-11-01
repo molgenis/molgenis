@@ -6,9 +6,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -47,6 +47,7 @@ import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaDa
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -94,7 +95,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private LanguageService languageService;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	public DataExplorerController()
 	{
@@ -113,8 +114,8 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		List<EntityMetaData> entitiesMeta = dataService.getMeta().getEntityMetaDatas()
-				.filter(entityMeta -> !entityMeta.isAbstract()).collect(toList());
+		List<EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract()).collect(toList());
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -276,24 +277,24 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<>();
-		dataService.getMeta().getEntityMetaDatas().filter(this::isGenomeBrowserEntity).forEach(entityMeta ->
+		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), WRITE);
 			if (canRead || canWrite)
 			{
-				genomeEntities.put(entityMeta.getName(), entityMeta.getLabel());
+				genomeEntities.put(entityType.getName(), entityType.getLabel());
 			}
 		});
 		return genomeEntities;
 	}
 
-	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
+	private boolean isGenomeBrowserEntity(EntityType entityType)
 	{
-		AttributeMetaData attributeStartPosition = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
-		AttributeMetaData attributeChromosome = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
+		Attribute attributeStartPosition = genomicDataSettings
+				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityType);
+		Attribute attributeChromosome = genomicDataSettings
+				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityType);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
@@ -381,8 +382,11 @@ public class DataExplorerController extends MolgenisPluginController
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
-		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(entityId));
-		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(entityId, entityType.getIdAttribute());
+
+		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(id));
+		model.addAttribute("entityType", entityType);
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}

@@ -33,8 +33,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
 import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;
@@ -71,10 +71,10 @@ public class GavinAnnotator implements AnnotatorConfig
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private EffectsMetaData effectsMetaData;
@@ -92,8 +92,8 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxMetaDataParser(packageFactory, attributeMetaDataFactory, entityMetaDataFactory),
-						entityMetaDataFactory, attributeMetaDataFactory);
+						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory),
+						entityTypeFactory, attributeFactory);
 			}
 		};
 
@@ -111,12 +111,12 @@ public class GavinAnnotator implements AnnotatorConfig
 
 	public void init()
 	{
-		LinkedList<AttributeMetaData> attributes = new LinkedList<>();
-		AttributeMetaData classification = attributeMetaDataFactory.create().setName(CLASSIFICATION).setDataType(STRING)
+		LinkedList<Attribute> attributes = new LinkedList<>();
+		Attribute classification = attributeFactory.create().setName(CLASSIFICATION).setDataType(STRING)
 				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		AttributeMetaData confidence = attributeMetaDataFactory.create().setName(CONFIDENCE).setDataType(STRING)
+		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
 				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		AttributeMetaData reason = attributeMetaDataFactory.create().setName(REASON).setDataType(STRING)
+		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING)
 				.setDescription(REASON).setLabel(REASON);
 
 		attributes.add(classification);
@@ -135,18 +135,18 @@ public class GavinAnnotator implements AnnotatorConfig
 		})
 		{
 			@Override
-			public List<AttributeMetaData> getRequiredAttributes()
+			public List<Attribute> getRequiredAttributes()
 			{
-				List<AttributeMetaData> requiredAttributes = new ArrayList<>();
-				EntityMetaData entityMetaData = entityMetaDataFactory.create().setName(VARIANT);
-				List<AttributeMetaData> refAttributesList = Arrays
-						.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
-								ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
-				entityMetaData.addAttributes(refAttributesList);
-				AttributeMetaData refAttr = attributeMetaDataFactory.create().setName(VARIANT).setDataType(XREF)
-						.setRefEntity(entityMetaData).setDescription(
+				List<Attribute> requiredAttributes = new ArrayList<>();
+				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
+				List<Attribute> refAttributesList = Arrays
+						.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
+								ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
+				entityType.addAttributes(refAttributesList);
+				Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF)
+						.setRefEntity(entityType).setDescription(
 								"This annotator needs a references to an entity containing: " + StreamSupport
-										.stream(refAttributesList.spliterator(), false).map(AttributeMetaData::getName)
+										.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
 										.collect(Collectors.joining(", ")));
 
 				requiredAttributes.addAll(Arrays

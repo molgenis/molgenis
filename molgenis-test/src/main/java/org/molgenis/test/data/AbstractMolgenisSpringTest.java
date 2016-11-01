@@ -1,8 +1,8 @@
 package org.molgenis.test.data;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,6 +13,8 @@ import org.testng.annotations.BeforeClass;
 
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 @ContextConfiguration(classes = { AbstractMolgenisSpringTest.Config.class })
 public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests
 {
@@ -20,17 +22,18 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 	public void bootstrap()
 	{
 		// bootstrap meta data
-		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
-		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = applicationContext
-				.getBeansOfType(SystemEntityMetaData.class);
-		new GenericDependencyResolver().resolve(systemEntityMetaDataMap.values(), SystemEntityMetaData::getDependencies)
-				.stream().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
+		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
+		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext.getBeansOfType(SystemEntityType.class);
+		new GenericDependencyResolver().resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
+				.stream().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate", "org.molgenis.test.data" })
+	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate",
+			"org.molgenis.test.data" })
 	public static class Config
 	{
 		@Bean

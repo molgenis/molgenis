@@ -10,7 +10,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.ontology.core.meta.*;
@@ -111,11 +111,11 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public void init() throws IOException
 	{
-		ontologyRepository = new InMemoryRepository(ontologyFactory.getEntityMetaData());
-		nodePathRepository = new InMemoryRepository(ontologyTermNodePathFactory.getEntityMetaData());
-		ontologyTermRepository = new InMemoryRepository(ontologyTermFactory.getEntityMetaData());
-		annotationRepository = new InMemoryRepository(ontologyTermDynamicAnnotationFactory.getEntityMetaData());
-		synonymRepository = new InMemoryRepository(ontologyTermSynonymFactory.getEntityMetaData());
+		ontologyRepository = new InMemoryRepository(ontologyFactory.getEntityType());
+		nodePathRepository = new InMemoryRepository(ontologyTermNodePathFactory.getEntityType());
+		ontologyTermRepository = new InMemoryRepository(ontologyTermFactory.getEntityType());
+		annotationRepository = new InMemoryRepository(ontologyTermDynamicAnnotationFactory.getEntityType());
+		synonymRepository = new InMemoryRepository(ontologyTermSynonymFactory.getEntityType());
 		repositories = ImmutableMap
 				.of(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, annotationRepository, ONTOLOGY_TERM_SYNONYM, synonymRepository,
 						ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository, ONTOLOGY_TERM,
@@ -346,8 +346,8 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityMeta.getName());
+		return hasRepository(entityType.getName());
 	}
 }

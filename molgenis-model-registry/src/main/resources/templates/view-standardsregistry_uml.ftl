@@ -88,52 +88,52 @@ textObj.textContent = "..."; //can't place at all
 </#if>
 
 <#macro addVertices package>
-    <#list package.entityMetaDatas as emd>
-        <#if emd.extends??>
-        if (classes['<@entityName emd.extends />']) {
-        graph.addCell(new uml.Generalization({ source: { id: classes['<@entityName emd />'].id }, target: { id: classes['<@entityName emd.extends />'].id }}));
+    <#list package.entityTypes as entityType>
+        <#if entityType.extends??>
+        if (classes['<@entityName entityType.extends />']) {
+        graph.addCell(new uml.Generalization({ source: { id: classes['<@entityName entityType />'].id }, target: { id: classes['<@entityName entityType.extends />'].id }}));
         }
         </#if>
-        <#list emd.attributes as amd>
-            <#if amd.dataType == 'xref' || amd.dataType == 'mref' || amd.dataType == 'categorical'>
+        <#list entityType.attributes as amd>
+            <#if amd.type == 'xref' || amd.type == 'mref' || amd.type == 'categorical'>
             if (classes['<@entityName amd.refEntity />']) {
-            graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName emd />'].id }, target: { id: classes['<@entityName amd.refEntity />'].id }}));
+            graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName entityType />'].id }, target: { id: classes['<@entityName amd.refEntityType />'].id }}));
             }
             </#if>
         </#list>
-        <#list package.subPackages as p>
+        <#list package.children as p>
             <@addVertices package=p />
         </#list>
     </#list>
 </#macro>
 
-<#macro entityName emd>${emd.name?replace("-", "_")?replace(" ", "_")?js_string}</#macro>
+<#macro entityName entityType>${entityType.name?replace("-", "_")?replace(" ", "_")?js_string}</#macro>
 
 <#macro listClasses package classes=[]>
-    <#list package.entityMetaDatas as emd>
-        <#if emd.abstract == true >
-        '<@entityName emd />': new uml.Abstract({
-        size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
-        name: '${emd.label?js_string}',
+    <#list package.entityTypes as entityType>
+        <#if entityType.isAbstract()>
+        '<@entityName entityType />': new uml.Abstract({
+        size: { width: RECT_WIDTH, height: ${(50 + 12 * entityType.attributes?size)?c} },
+        name: '${entityType.label?js_string}',
         attrs: {
         '.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
         '.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
         },
-        attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
+        attributes: [<#list entityType.attributes as amd>'${amd.label?js_string}: ${amd.type}'<#if amd_has_next>,</#if></#list>]
         }),
         <#else>
-        '<@entityName emd />': new uml.Class({
-        size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
-        name: '${emd.label?js_string}',
+        '<@entityName entityType />': new uml.Class({
+        size: { width: RECT_WIDTH, height: ${(50 + 12 * entityType.attributes?size)?c} },
+        name: '${entityType.label?js_string}',
         attrs: {
         '.uml-class-attrs-rect': { fill: 'white', stroke: 'black'},
         '.uml-class-methods-rect': { fill: 'white', stroke: 'black'},
         },
-        attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType?js_string}'<#if amd_has_next>,</#if></#list>]
+        attributes: [<#list entityType.attributes as amd>'${amd.label?js_string}: ${amd.type?js_string}'<#if amd_has_next>,</#if></#list>]
         }),
         </#if>
     </#list>
-    <#list package.subPackages as p>
+    <#list package.children as p>
         <@listClasses package=p classes=classes />
     </#list>
 </#macro>

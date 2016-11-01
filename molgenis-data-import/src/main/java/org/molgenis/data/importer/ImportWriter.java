@@ -6,8 +6,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
@@ -18,7 +17,6 @@ import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -41,9 +39,9 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.EmxMetaDataParser.*;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -87,18 +85,18 @@ public class ImportWriter
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
 		runAsSystem(() -> importTags(job.source));
 		runAsSystem(() -> importPackages(job.parsedMetaData));
-		runAsSystem(() -> addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges));
+		runAsSystem(() -> addEntityType(job.parsedMetaData, job.report, job.metaDataChanges));
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
-		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
-		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
-		for (EntityMetaData emd : job.parsedMetaData.getEntities())
+		Iterable<EntityType> existingMetaData = dataService.getMeta().getEntityTypes()::iterator;
+		Map<String, EntityType> allEntityTypeMap = new HashMap<>();
+		for (EntityType emd : job.parsedMetaData.getEntities())
 		{
-			allEntityMetaDataMap.put(emd.getName(), emd);
+			allEntityTypeMap.put(emd.getName(), emd);
 		}
-		scanMetaDataForSystemEntityMetaData(allEntityMetaDataMap, existingMetaData);
-		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityMetaDataMap.values())),
-				job.source, job.dbAction, job.defaultPackage);
+		scanMetaDataForSystemEntityType(allEntityTypeMap, existingMetaData);
+		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityTypeMap.values())), job.source,
+				job.dbAction, job.defaultPackage);
 		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
 
 		return job.report;
@@ -138,15 +136,15 @@ public class ImportWriter
 
 	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
 	{
-		for (SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
+		for (SemanticTag<EntityType, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
 		{
 			tagService.addEntityTag(tag);
 		}
 
-		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
+		for (EntityType emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData
-					.getAttributeTags().get(emd))
+			for (SemanticTag<Attribute, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
+					.get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);
 			}
@@ -156,26 +154,25 @@ public class ImportWriter
 	/**
 	 * Imports entity data for all entities in resolved from source
 	 */
-	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
+	private void importData(EntityImportReport report, Iterable<EntityType> resolved, RepositoryCollection source,
 			DatabaseAction dbAction, String defaultPackage)
 	{
-		for (final EntityMetaData entityMetaData : resolved)
+		for (final EntityType entityType : resolved)
 		{
-			String name = entityMetaData.getName();
+			String name = entityType.getName();
 
 			// Languages and i18nstrings are already done
 			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(I18N_STRING) && dataService
 					.hasRepository(name))
 			{
 				Repository<Entity> repository = dataService.getRepository(name);
-				Repository<Entity> emxEntityRepo = source.getRepository(entityMetaData.getName());
+				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getName());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityMetaData.getName().toLowerCase()
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getName().toLowerCase()
 						.startsWith(defaultPackage.toLowerCase() + "_"))
 				{
-					emxEntityRepo = source
-							.getRepository(entityMetaData.getName().substring(defaultPackage.length() + 1));
+					emxEntityRepo = source.getRepository(entityType.getName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -183,7 +180,7 @@ public class ImportWriter
 				{
 					// transforms entities so that they match the entity meta data of the output repository
 					Iterable<Entity> entities = Iterables
-							.transform(emxEntityRepo, emxEntity -> toEntity(entityMetaData, emxEntity));
+							.transform(emxEntityRepo, emxEntity -> toEntity(entityType, emxEntity));
 					int count = update(repository, entities, dbAction);
 					report.addEntityCount(name, count);
 				}
@@ -194,16 +191,16 @@ public class ImportWriter
 	/**
 	 * Create an entity from the EMX entity
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @param emxEntity  EMX entity
 	 * @return MOLGENIS entity
 	 */
-	private Entity toEntity(EntityMetaData entityMeta, Entity emxEntity)
+	private Entity toEntity(EntityType entityType, Entity emxEntity)
 	{
-		Entity entity = entityManager.create(entityMeta, POPULATE);
-		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
+		Entity entity = entityManager.create(entityType, POPULATE);
+		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			if (attr.getExpression() == null)
+			if (!attr.isAuto() && attr.getExpression() == null && !attr.isMappedBy())
 			{
 				String attrName = attr.getName();
 				Object emxValue = emxEntity.get(attrName);
@@ -239,7 +236,7 @@ public class ImportWriter
 							}
 							else
 							{
-								EntityMetaData xrefEntity = attr.getRefEntity();
+								EntityType xrefEntity = attr.getRefEntity();
 								Object entityId = DataConverter.convert(emxValue, xrefEntity.getIdAttribute());
 								value = entityManager.getReference(xrefEntity, entityId);
 							}
@@ -266,7 +263,7 @@ public class ImportWriter
 									}
 									else
 									{
-										EntityMetaData xrefEntity = attr.getRefEntity();
+										EntityType xrefEntity = attr.getRefEntity();
 										Object entityId = DataConverter
 												.convert(emxValueItem, xrefEntity.getIdAttribute());
 										entityValue = entityManager.getReference(xrefEntity, entityId);
@@ -277,8 +274,8 @@ public class ImportWriter
 							}
 							else
 							{
-								EntityMetaData mrefEntity = attr.getRefEntity();
-								AttributeMetaData refIdAttr = mrefEntity.getIdAttribute();
+								EntityType mrefEntity = attr.getRefEntity();
+								Attribute refIdAttr = mrefEntity.getIdAttribute();
 
 								String[] tokens = StringUtils.split(emxValue.toString(), ',');
 								List<Entity> mrefEntities = new ArrayList<>();
@@ -316,12 +313,12 @@ public class ImportWriter
 	{
 		return Iterables.filter(entities, entity ->
 		{
-			Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
+			Iterator<Attribute> attributes = entity.getEntityType().getAttributes().iterator();
 			while (attributes.hasNext())
 			{
-				AttributeMetaData attribute = attributes.next();
+				Attribute attribute = attributes.next();
 				if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
-						.equals(entity.getEntityMetaData().getName()))
+						.equals(entity.getEntityType().getName()))
 				{
 					List<String> ids = DataConverter.toList(entity.get(attribute.getName()));
 					Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
@@ -355,42 +352,42 @@ public class ImportWriter
 	/**
 	 * Adds the parsed {@link ParsedMetaData}, creating new repositories where necessary.
 	 */
-	private void addEntityMetaData(ParsedMetaData parsedMetaData, EntityImportReport report,
+	private void addEntityType(ParsedMetaData parsedMetaData, EntityImportReport report,
 			MetaDataChanges metaDataChanges)
 	{
-		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
-		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
-		for (EntityMetaData emd : parsedMetaData.getEntities())
+		Iterable<EntityType> existingMetaData = dataService.getMeta().getEntityTypes()::iterator;
+		Map<String, EntityType> allEntityTypeMap = new HashMap<>();
+		for (EntityType emd : parsedMetaData.getEntities())
 		{
-			allEntityMetaDataMap.put(emd.getName(), emd);
+			allEntityTypeMap.put(emd.getName(), emd);
 		}
-		scanMetaDataForSystemEntityMetaData(allEntityMetaDataMap, existingMetaData);
-		List<EntityMetaData> resolve = DependencyResolver
-				.resolve(new HashSet<EntityMetaData>(Sets.newLinkedHashSet(allEntityMetaDataMap.values())));
-		for (EntityMetaData entityMetaData : resolve)
+		scanMetaDataForSystemEntityType(allEntityTypeMap, existingMetaData);
+		List<EntityType> resolve = DependencyResolver
+				.resolve(new HashSet<EntityType>(Sets.newLinkedHashSet(allEntityTypeMap.values())));
+		for (EntityType entityType : resolve)
 		{
-			String name = entityMetaData.getName();
+			String name = entityType.getName();
 			if (!EMX_ENTITIES.equals(name) && !EMX_ATTRIBUTES.equals(name) && !EMX_PACKAGES.equals(name) && !EMX_TAGS
 					.equals(name) && !EMX_LANGUAGES.equals(name) && !EMX_I18NSTRINGS.equals(name))
 			{
-				EntityMetaData existingEntityMeta = dataService.getMeta().getEntityMetaData(entityMetaData.getName());
-				if (existingEntityMeta == null)
+				EntityType existingEntityType = dataService.getMeta().getEntityType(entityType.getName());
+				if (existingEntityType == null)
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
-					dataService.getMeta().addEntityMeta(entityMetaData);
-					if (!entityMetaData.isAbstract())
+					dataService.getMeta().addEntityType(entityType);
+					if (!entityType.isAbstract())
 					{
 						report.addNewEntity(name);
 					}
 				}
-				else if (!entityMetaData.isAbstract())
+				else if (!entityType.isAbstract())
 				{
 					// inject identifiers
 					Map<String, String> attrNameIdentifierMap = stream(
-							existingEntityMeta.getOwnAllAttributes().spliterator(), false)
-							.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
-					entityMetaData.getOwnAllAttributes().forEach(attr ->
+							existingEntityType.getOwnAllAttributes().spliterator(), false)
+							.collect(toMap(Attribute::getName, Attribute::getIdentifier));
+					entityType.getOwnAllAttributes().forEach(attr ->
 					{
 						String identifier = attrNameIdentifierMap.get(attr.getName());
 						if (identifier != null)
@@ -399,7 +396,7 @@ public class ImportWriter
 						}
 					});
 
-					dataService.getMeta().updateEntityMeta(entityMetaData);
+					dataService.getMeta().updateEntityType(entityType);
 				}
 			}
 		}
@@ -476,9 +473,8 @@ public class ImportWriter
 			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
 					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
 		}
-		String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
-		AttributeType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
-		FieldType idFieldType = MolgenisFieldTypes.getType(AttributeType.getValueString(dataType));
+		String idAttributeName = repo.getEntityType().getIdAttribute().getName();
+		AttributeType dataType = repo.getEntityType().getIdAttribute().getDataType();
 		HugeSet<Object> existingIds = new HugeSet<>();
 		HugeSet<Object> ids = new HugeSet<>();
 		try
@@ -561,7 +557,7 @@ public class ImportWriter
 					{
 						E entity = it.next();
 						count++;
-						Object id = idFieldType.convert(entity.get(idAttributeName));
+						Object id = entity.get(idAttributeName);
 						if (!existingIds.contains(id))
 						{
 							newEntities.add(entity);
@@ -591,7 +587,7 @@ public class ImportWriter
 					{
 						E entity = it.next();
 						count++;
-						Object id = idFieldType.convert(entity.get(idAttributeName));
+						Object id = entity.get(idAttributeName);
 						if (existingIds.contains(id))
 						{
 							existingEntitiesRowIndex.add(count);
@@ -629,7 +625,7 @@ public class ImportWriter
 					for (Entity entity : entities)
 					{
 						count++;
-						Object id = idFieldType.convert(entity.get(idAttributeName));
+						Object id = entity.get(idAttributeName);
 						if (!existingIds.contains(id))
 						{
 							if (++errorCount == 6)
