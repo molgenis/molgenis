@@ -737,6 +737,11 @@ class PostgreSqlQueryGenerator
 					result.append(predicate);
 					break;
 				case EQUALS:
+					if (attr == null)
+					{
+						throw new MolgenisDataException("Missing attribute field in EQUALS query rule");
+					}
+
 					if (isPersistedInOtherTable(attr))
 					{
 						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
@@ -769,6 +774,7 @@ class PostgreSqlQueryGenerator
 						if (attr.getDataType() == BOOL)
 						{
 							Boolean bool = (Boolean) postgreSqlVal;
+							//noinspection ConstantConditions (getPostgreSqlQueryValue() != null if r.getValue() != null)
 							if (bool) predicate.append(" IS TRUE");
 							else predicate.append(" IS FALSE");
 						}

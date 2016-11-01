@@ -22,9 +22,9 @@ import static org.molgenis.AttributeType.*;
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions
  */
-public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
+class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
 {
-	public PostgreSqlExceptionTranslator(DataSource dataSource)
+	PostgreSqlExceptionTranslator(DataSource dataSource)
 	{
 		super(requireNonNull(dataSource));
 	}
