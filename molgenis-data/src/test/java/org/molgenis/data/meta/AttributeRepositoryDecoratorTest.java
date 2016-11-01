@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
@@ -46,20 +47,49 @@ import static org.testng.Assert.assertNull;
 public class AttributeRepositoryDecoratorTest
 {
 	private AttributeRepositoryDecorator repo;
+	@Mock
 	private Repository<Attribute> decoratedRepo;
+	@Mock
 	private DataService dataService;
+	@Mock
+	private MetaDataService metadataService;
+	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	@Mock
 	private MolgenisPermissionService permissionService;
+	@Mock
+	private Attribute attribute;
+	@Mock
+	private EntityType abstractEntityType;
+	@Mock
+	private EntityType concreteEntityType1;
+	@Mock
+	private EntityType concreteEntityType2;
+	@Mock
+	private RepositoryCollection backend1;
+	@Mock
+	private RepositoryCollection backend2;
+	private String attributeId = "SDFSADFSDAF";
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
-		dataService = mock(DataService.class);
-		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
-		permissionService = mock(MolgenisPermissionService.class);
-		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityTypeRegistry, dataService,
-				permissionService);
+		MockitoAnnotations.initMocks(this);
+		when(attribute.getEntity()).thenReturn(abstractEntityType);
+		when(attribute.getName()).thenReturn("attributeName");
+		when(dataService.getMeta()).thenReturn(metadataService);
+		when(metadataService.getConcreteChildren(abstractEntityType))
+				.thenReturn(Stream.of(concreteEntityType1, concreteEntityType2));
+		when(metadataService.getBackend(concreteEntityType1)).thenReturn(backend1);
+		when(metadataService.getBackend(concreteEntityType2)).thenReturn(backend2);
+		when(attribute.getIdentifier()).thenReturn(attributeId);
+		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityTypeRegistry, dataService, permissionService)
+		{
+			@Override
+			protected void validateUpdate(Attribute currentAttr, Attribute newAttr)
+			{
+			}
+		};
 	}
 
 	@Test
@@ -776,5 +806,35 @@ public class AttributeRepositoryDecoratorTest
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", null, "ROLE_USER");
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
+	@Test
+	public void updateNonSystemAbstractEntity()
+	{
+		setSuAuthentication();
+
+		Attribute currentAttribute = mock(Attribute.class);
+		when(systemEntityTypeRegistry.getSystemAttribute(attributeId)).thenReturn(null);
+		when(decoratedRepo.findOneById(attributeId)).thenReturn(currentAttribute);
+		when(currentAttribute.getEntity()).thenReturn(abstractEntityType);
+
+		repo.update(attribute);
+
+		verify(decoratedRepo).update(attribute);
+		verify(backend1).updateAttribute(concreteEntityType1, currentAttribute, attribute);
+		verify(backend2).updateAttribute(concreteEntityType2, currentAttribute, attribute);
+	}
+
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Updating system entity attribute \\[attributeName\\] is not allowed")
+	public void updateSystemEntity()
+	{
+		setSuAuthentication();
+
+		Attribute currentAttribute = mock(Attribute.class);
+		when(systemEntityTypeRegistry.getSystemAttribute(attributeId)).thenReturn(currentAttribute);
+
+		repo.update(attribute);
+
 	}
 }

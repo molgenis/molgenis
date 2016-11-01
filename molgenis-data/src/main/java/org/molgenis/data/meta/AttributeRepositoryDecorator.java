@@ -341,7 +341,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
 
-	private void validateUpdate(Attribute currentAttr, Attribute newAttr)
+	protected void validateUpdate(Attribute currentAttr, Attribute newAttr)
 	{
 		if (!Objects.equals(currentAttr.getEntity().getIdValue(), newAttr.getEntity().getIdValue()))
 		{
