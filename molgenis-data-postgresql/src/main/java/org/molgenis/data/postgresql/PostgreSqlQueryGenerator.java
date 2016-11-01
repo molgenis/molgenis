@@ -31,7 +31,6 @@ class PostgreSqlQueryGenerator
 {
 	private PostgreSqlQueryGenerator()
 	{
-
 	}
 
 	private static String getSqlConstraintPrimaryKey(EntityType entityType, Attribute attr)
@@ -737,55 +736,7 @@ class PostgreSqlQueryGenerator
 					result.append(predicate);
 					break;
 				case EQUALS:
-					if (isPersistedInOtherTable(attr))
-					{
-						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
-					}
-					else
-					{
-						predicate.append("this");
-					}
-
-					String attrName;
-					if (attr.isMappedBy())
-					{
-						attrName = attr.getRefEntity().getIdAttribute().getName();
-					}
-					else
-					{
-						attrName = r.getField();
-					}
-					predicate.append('.').append(getColumnName(attrName));
-					if (r.getValue() == null)
-					{
-						// expression = null is not valid, use IS NULL
-						predicate.append(" IS NULL ");
-					}
-					else
-					{
-						Object postgreSqlVal = PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr);
-						//Postgres does not return the rows with an empty value in a boolean field when queried with for example "... NOT abstract = TRUE"
-						//It does however return those rows when queried with "... NOT abstract IS TRUE"
-						if (attr.getDataType() == BOOL)
-						{
-							Boolean bool = (Boolean) postgreSqlVal;
-							if (bool) predicate.append(" IS TRUE");
-							else predicate.append(" IS FALSE");
-						}
-						else
-						{
-							predicate.append(" =");
-							predicate.append(" ? ");
-
-							parameters.add(postgreSqlVal);
-						}
-					}
-					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
-							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
-					{
-						result.append(" AND ");
-					}
-					result.append(predicate);
+					getSqlWhereEqualsClause(parameters, mrefFilterIndex, result, r, attr, predicate);
 					break;
 				case GREATER:
 				case GREATER_EQUAL:
@@ -844,6 +795,67 @@ class PostgreSqlQueryGenerator
 		}
 
 		return result.toString().trim();
+	}
+
+	private static void getSqlWhereEqualsClause(List<Object> parameters, int mrefFilterIndex, StringBuilder result,
+			QueryRule r, Attribute attr, StringBuilder predicate)
+	{
+		if (attr == null)
+		{
+			throw new MolgenisDataException(
+					format("Equals operator requires an attribute, attribute [%s] does not exist", r.getField()));
+		}
+
+		if (isPersistedInOtherTable(attr))
+		{
+			predicate.append(getFilterColumnName(attr, mrefFilterIndex));
+		}
+		else
+		{
+			predicate.append("this");
+		}
+
+		String attrName;
+		if (attr.isMappedBy())
+		{
+			attrName = attr.getRefEntity().getIdAttribute().getName();
+		}
+		else
+		{
+			attrName = r.getField();
+		}
+		predicate.append('.').append(getColumnName(attrName));
+		if (r.getValue() == null)
+		{
+			// expression = null is not valid, use IS NULL
+			predicate.append(" IS NULL ");
+		}
+		else
+		{
+			Object postgreSqlVal = PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr);
+			//Postgres does not return the rows with an empty value in a boolean field when queried with for example "... NOT abstract = TRUE"
+			//It does however return those rows when queried with "... NOT abstract IS TRUE"
+			if (attr.getDataType() == BOOL)
+			{
+				Boolean bool = (Boolean) postgreSqlVal;
+				//noinspection ConstantConditions
+				if (bool) predicate.append(" IS TRUE");
+				else predicate.append(" IS FALSE");
+			}
+			else
+			{
+				predicate.append(" =");
+				predicate.append(" ? ");
+
+				parameters.add(postgreSqlVal);
+			}
+		}
+		if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString().endsWith(" AND ")
+				&& !result.toString().endsWith(" NOT "))
+		{
+			result.append(" AND ");
+		}
+		result.append(predicate);
 	}
 
 	private static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
