@@ -381,7 +381,7 @@ public class ImportWriter
 						report.addNewEntity(name);
 					}
 				}
-				else if (!entityType.isAbstract())
+				else
 				{
 					// inject identifiers
 					Map<String, String> attrNameIdentifierMap = stream(

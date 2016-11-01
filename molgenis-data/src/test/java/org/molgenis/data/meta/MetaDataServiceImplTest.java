@@ -462,15 +462,12 @@ public class MetaDataServiceImplTest
 	}
 
 	@Test
-	public void addEntityTypesEmpty()
-	{
-		metaDataServiceImpl.addEntityType(emptyList());
-		verifyZeroInteractions(dataService);
-	}
-
-	@Test
 	public void addEntityTypesNoMappedByAttrs()
 	{
+		//noinspection unchecked
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+				eq(EntityType.class))).thenReturn(Stream.empty());
+
 		EntityType entityType0 = mock(EntityType.class);
 		when(entityType0.hasMappedByAttributes()).thenReturn(false);
 		Attribute entity0Attr0 = mock(Attribute.class);
@@ -485,9 +482,14 @@ public class MetaDataServiceImplTest
 
 		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
 				.thenReturn(newArrayList(entityType1, entityType0));
-		metaDataServiceImpl.addEntityType(newArrayList(entityType0, entityType1));
+		metaDataServiceImpl.upsertEntityTypes(newArrayList(entityType0, entityType1));
 
 		InOrder inOrder = inOrder(dataService);
+
+		//noinspection unchecked
+		inOrder.verify(dataService)
+				.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+						eq(EntityType.class));
 
 		//noinspection unchecked
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
@@ -536,11 +538,20 @@ public class MetaDataServiceImplTest
 		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
+		//noinspection unchecked
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+				eq(EntityType.class))).thenReturn(Stream.empty());
+
 		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
 				.thenReturn(newArrayList(entityType1, entityType0));
-		metaDataServiceImpl.addEntityType(newArrayList(entityType0, entityType1));
+		metaDataServiceImpl.upsertEntityTypes(newArrayList(entityType0, entityType1));
 
 		InOrder inOrder = inOrder(dataService);
+
+		//noinspection unchecked
+		inOrder.verify(dataService)
+				.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+						eq(EntityType.class));
 
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
 		//noinspection unchecked
@@ -755,7 +766,7 @@ public class MetaDataServiceImplTest
 	@Test
 	public void updateEntityTypeCollectionEmpty()
 	{
-		metaDataServiceImpl.updateEntityType(emptyList());
+		metaDataServiceImpl.upsertEntityTypes(emptyList());
 		verifyNoMoreInteractions(dataService);
 	}
 
@@ -835,10 +846,11 @@ public class MetaDataServiceImplTest
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
 		//noinspection unchecked
-		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), eq(EntityType.class)))
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+				eq(EntityType.class)))
 				.thenReturn(Stream.of(existingEntityType));
 
-		metaDataServiceImpl.updateEntityType(singletonList(entityType));
+		metaDataServiceImpl.upsertEntityTypes(singletonList(entityType));
 
 		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -933,10 +945,11 @@ public class MetaDataServiceImplTest
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
 		//noinspection unchecked
-		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), eq(EntityType.class)))
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+				eq(EntityType.class)))
 				.thenReturn(Stream.of(existingEntityType));
 
-		metaDataServiceImpl.updateEntityType(singletonList(entityType));
+		metaDataServiceImpl.upsertEntityTypes(singletonList(entityType));
 
 		InOrder inOrder = inOrder(dataService);
 
@@ -1040,12 +1053,13 @@ public class MetaDataServiceImplTest
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
 		//noinspection unchecked
-		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), eq(EntityType.class)))
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
+				eq(EntityType.class)))
 				.thenReturn(Stream.of(existingEntityType));
 
 		InOrder inOrder = inOrder(dataService);
 
-		metaDataServiceImpl.updateEntityType(singletonList(entityType));
+		metaDataServiceImpl.upsertEntityTypes(singletonList(entityType));
 
 		inOrder.verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 
@@ -1071,16 +1085,31 @@ public class MetaDataServiceImplTest
 	public void addAttribute()
 	{
 		Attribute attr = mock(Attribute.class);
+		EntityType entityType = mock(EntityType.class);
+		EntityType currentEntityType = mock(EntityType.class);
+		when(attr.getEntity()).thenReturn(entityType);
+		when(entityType.getName()).thenReturn("EntityTypeName");
+		when(dataService.getEntityType("EntityTypeName")).thenReturn(currentEntityType);
+
 		metaDataServiceImpl.addAttribute(attr);
+		verify(dataService).update(ENTITY_TYPE_META_DATA, currentEntityType);
 		verify(dataService).add(ATTRIBUTE_META_DATA, attr);
+		verify(currentEntityType).addAttribute(attr);
 	}
 
 	@Test
 	public void deleteAttributeById()
 	{
 		Object attrId = "attr0";
+		Attribute attribute = mock(Attribute.class);
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.findOneById(ATTRIBUTE_META_DATA, attrId, Attribute.class)).thenReturn(attribute);
+		when(attribute.getEntity()).thenReturn(entityType);
+
 		metaDataServiceImpl.deleteAttributeById(attrId);
-		verify(dataService).deleteById(ATTRIBUTE_META_DATA, attrId);
+		verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
+		verify(dataService).delete(ATTRIBUTE_META_DATA, attribute);
+		verify(entityType).removeAttribute(attribute);
 	}
 
 	@DataProvider(name = "isMetaEntityTypeProvider")
@@ -1101,7 +1130,7 @@ public class MetaDataServiceImplTest
 	@Test
 	public void upsertEntityTypeCollectionEmpty()
 	{
-		metaDataServiceImpl.upsertEntityType(emptyList());
+		metaDataServiceImpl.upsertEntityTypes(emptyList());
 		verifyZeroInteractions(dataService);
 	}
 }
