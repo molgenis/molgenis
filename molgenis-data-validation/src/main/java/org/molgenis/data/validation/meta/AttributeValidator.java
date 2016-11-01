@@ -6,6 +6,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,10 @@ import java.util.Objects;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.MetaValidationUtils.validateName;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
@@ -33,7 +38,21 @@ public class AttributeValidator
 		this.dataService = requireNonNull(dataService);
 	}
 
-	void validateAdd(Attribute newAttr)
+	public void validate(Attribute attr)
+	{
+		validateAttributeName(attr);
+		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+		if (currentAttr == null)
+		{
+			validateAdd(attr);
+		}
+		else
+		{
+			validateUpdate(attr, currentAttr);
+		}
+	}
+
+	private void validateAdd(Attribute newAttr)
 	{
 		// mappedBy
 		validateMappedBy(newAttr, newAttr.getMappedBy());
@@ -42,10 +61,8 @@ public class AttributeValidator
 		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
 
-	void validateUpdate(Attribute newAttr)
+	private void validateUpdate(Attribute newAttr, Attribute currentAttr)
 	{
-		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class);
-
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
 		AttributeType newDataType = newAttr.getDataType();
@@ -94,6 +111,23 @@ public class AttributeValidator
 		}
 
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
+	}
+
+	private static void validateAttributeName(Attribute attr)
+	{
+		// validate entity name (e.g. illegal characters, length)
+		String name = attr.getName();
+		if (!name.equals(ATTRIBUTE_META_DATA) && !name.equals(ENTITY_TYPE_META_DATA) && !name.equals(PACKAGE))
+		{
+			try
+			{
+				validateName(attr.getName());
+			}
+			catch (MolgenisDataException e)
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
+			}
+		}
 	}
 
 	/**
@@ -146,8 +180,8 @@ public class AttributeValidator
 					{
 						throw new MolgenisDataException(
 								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getName(), refAttrName, attr.getEntityType().getName(), attr.getName(),
-										orderBy.toSortString()));
+										refEntity.getName(), refAttrName, attr.getEntityType().getName(),
+										attr.getName(), orderBy.toSortString()));
 					}
 				}
 			}

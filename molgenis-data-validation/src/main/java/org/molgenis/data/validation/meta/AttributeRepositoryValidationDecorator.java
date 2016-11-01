@@ -29,7 +29,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void update(Attribute attr)
 	{
-		attributeValidator.validateUpdate(attr);
+		attributeValidator.validate(attr);
 	}
 
 	@Override
@@ -37,8 +37,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		decoratedRepo.update(attrs.filter(attr ->
 		{
-			Attribute currentAttr = findOneById(attr.getIdentifier());
-			attributeValidator.validateUpdate(attr);
+			attributeValidator.validate(attr);
 			return true;
 		}));
 	}
@@ -46,7 +45,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void add(Attribute attr)
 	{
-		attributeValidator.validateAdd(attr);
+		attributeValidator.validate(attr);
 		decoratedRepo.add(attr);
 	}
 
@@ -55,7 +54,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		return decoratedRepo.add(attrs.filter(attr ->
 		{
-			attributeValidator.validateAdd(attr);
+			attributeValidator.validate(attr);
 			return true;
 		}));
 	}
