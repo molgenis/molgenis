@@ -838,12 +838,7 @@ class PostgreSqlQueryGenerator
 			if (attr.getDataType() == BOOL)
 			{
 				Boolean bool = (Boolean) postgreSqlVal;
-				if (bool == null)
-				{
-					throw new MolgenisDataException(
-							format("EQUALS value for boolean attribute should be TRUE or FALSE for attribute [%s]",
-									attrName));
-				}
+				//noinspection ConstantConditions
 				if (bool) predicate.append(" IS TRUE");
 				else predicate.append(" IS FALSE");
 			}
