@@ -368,7 +368,6 @@ public class AttributeRepositoryDecoratorTest
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
 	}
 
-	// TODO implement forEachBatchedUser unit test, but how?
 	@Test
 	public void forEachBatchedUser() throws Exception
 	{
