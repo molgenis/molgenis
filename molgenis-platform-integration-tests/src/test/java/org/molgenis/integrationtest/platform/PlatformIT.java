@@ -1370,7 +1370,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(entityTypeDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
-
 			indexActionRegisterService.register(entityTypeDynamic.getName(), "1");
 			indexActionRegisterService.register(entityTypeDynamic.getName(), null);
 

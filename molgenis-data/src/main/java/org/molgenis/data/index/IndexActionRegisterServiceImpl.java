@@ -122,40 +122,23 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 *
 	 * @return
 	 */
-	Set<IndexAction>  filterUnnecessaryIndexActions(){
-		Set<String> entityFullNames = Sets.newHashSet();
-
-		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
-				.filter(indexAction ->
-				{
-					if (excludedEntities.contains(indexAction.getEntityFullName()))
-					{
-						return false;
-					}
-
-					if (null != indexAction.getEntityFullName() && null == indexAction.getEntityId())
-					{
-						entityFullNames.add(indexAction.getEntityFullName());
-					}
-
-					return true;
-				})
+	Set<IndexAction> filterUnnecessaryIndexActions()
+	{
+		// 1. add all referencing entities
+		Set<IndexAction> allIndexAction = getIndexActionsForCurrentTransaction().stream()
 				.flatMap(this::addReferencingEntities).collect(toSet());
 
-		Set<IndexAction> indexActionSetToRemove = Sets.newHashSet();
-		entityFullNames.forEach(entityFullName ->
-		{
-			indexActionSet.stream().forEach(indexAction ->
-			{
-				if(null != indexAction.getEntityId() && indexAction.getEntityFullName().equals(entityFullName)){
-					indexActionSetToRemove.add(indexAction);
-					//LOG.info("remove index actions of row when entity will already be indexed: [{}].[{}]", indexAction.getEntityFullName(), indexAction.getEntityId());
-				}
-			});
-		});
+		// 2. Filter excluded entities
+		Set<IndexAction> indexActionWithoutExcluded = allIndexAction.stream()
+				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName())).collect(toSet());
 
-		indexActionSet.removeAll(indexActionSetToRemove);
-		return indexActionSet;
+		// 3. Find all entities names of actions where no row is specified
+		Set<String> entityFullNames = indexActionWithoutExcluded.stream().filter(indexAction -> indexAction.getEntityId() == null)
+				.map(IndexAction::getEntityFullName).collect(toSet());
+
+		// 4. Filter all row index actions from list
+		return indexActionWithoutExcluded.stream().filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullNames
+				.contains(indexAction.getEntityFullName())).collect(toSet());
 	}
 
 	/**
