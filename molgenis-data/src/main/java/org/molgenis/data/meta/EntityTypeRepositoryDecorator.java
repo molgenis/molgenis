@@ -354,10 +354,11 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	}
 
 	/**
-	 * Add and remove entity attributes in the backend.
-	 * Updates are handled by the {@link AttributeRepositoryDecorator}.
+	 * Add and remove entity attributes in the backend for an {@link EntityType}.
+	 * If the {@link EntityType} is abstract, will update all concrete extending {@link EntityType}s.
+	 * Attribute updates are handled by the {@link AttributeRepositoryDecorator}.
 	 *
-	 * @param entityType {@link EntityType} containing the desired situation
+	 * @param entityType {@link EntityType} containing the desired situation.
 	 */
 	private void addAndRemoveAttributesInBackend(EntityType entityType)
 	{
@@ -369,12 +370,13 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		dataService.getMeta().forEachConcreteChild(entityType, concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
+			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());
 			// add added attributes in backend
 			difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
-					.forEach(addedAttribute -> backend.addAttribute(existingEntityType, addedAttribute));
+					.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
 			// remove removed attributes in backend
-			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(attrsMap::get)
-					.forEach(removedAttribute -> backend.deleteAttribute(existingEntityType, removedAttribute));
+			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(existingAttrsMap::get)
+					.forEach(removedAttribute -> backend.deleteAttribute(concreteExistingEntityType, removedAttribute));
 		});
 	}
 
@@ -391,6 +393,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
+		//FIXME: should only be possible to update system entities during bootstrap!
 		if (systemEntityType != null && !currentUserisSystem())
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));

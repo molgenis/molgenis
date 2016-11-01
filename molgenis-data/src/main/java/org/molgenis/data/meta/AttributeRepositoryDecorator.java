@@ -358,6 +358,13 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		}
 	}
 
+	/**
+	 * Updates an attribute's representation in the backend for each concrete {@link EntityType} that
+	 * has the {@link Attribute}.
+	 *
+	 * @param attr        current version of the attribute
+	 * @param updatedAttr new version of the attribute
+	 */
 	private void updateAttributeInBackend(Attribute attr, Attribute updatedAttr)
 	{
 		MetaDataService meta = dataService.getMeta();

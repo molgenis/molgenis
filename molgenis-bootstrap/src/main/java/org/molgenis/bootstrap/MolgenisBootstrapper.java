@@ -2,7 +2,6 @@ package org.molgenis.bootstrap;
 
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
-import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.file.ingest.FileIngesterJobRegistrar;
@@ -32,7 +31,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final RepositoryPopulator repositoryPopulator;
 	private final FileIngesterJobRegistrar fileIngesterJobRegistrar;
 	private final JobBootstrapper jobBootstrapper;
-	private final IdCardBootstrapper idCardBootstrapper;
 	private final AnnotatorBootstrapper annotatorBootstrapper;
 	private final IndexBootstrapper indexBootstrapper;
 
@@ -41,7 +39,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			RegistryBootstrapper registryBootstrapper,
 			SystemEntityTypeBootstrapper systemEntityTypeBootstrapper, RepositoryPopulator repositoryPopulator,
 			FileIngesterJobRegistrar fileIngesterJobRegistrar, JobBootstrapper jobBootstrapper,
-			IdCardBootstrapper idCardBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
+			AnnotatorBootstrapper annotatorBootstrapper,
 			IndexBootstrapper indexBootstrapper)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
@@ -50,7 +48,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
 		this.fileIngesterJobRegistrar = requireNonNull(fileIngesterJobRegistrar);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
-		this.idCardBootstrapper = requireNonNull(idCardBootstrapper);
 		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
 	}
@@ -86,10 +83,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Scheduling file ingest jobs ...");
 		fileIngesterJobRegistrar.scheduleJobs();
 		LOG.debug("Scheduled file ingest jobs");
-
-		LOG.trace("Bootstrapping ID Card scheduler ...");
-		idCardBootstrapper.bootstrap();
-		LOG.debug("Bootstrapped ID Card scheduler");
 
 		LOG.trace("Bootstrapping annotators ...");
 		annotatorBootstrapper.bootstrap(event);

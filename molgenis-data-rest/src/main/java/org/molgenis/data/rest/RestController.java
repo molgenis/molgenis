@@ -44,6 +44,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -738,7 +739,14 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
-		dataService.deleteById(entityName, id);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().deleteAttributeById(id);
+		}
+		else
+		{
+			dataService.deleteById(entityName, id);
+		}
 	}
 
 	/**
@@ -1037,6 +1045,7 @@ public class RestController
 		}
 	}
 
+	@Transactional
 	private void updateInternal(String entityName, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityName);
@@ -1059,10 +1068,11 @@ public class RestController
 		restService.updateMappedByEntities(entity, existing);
 	}
 
+	@Transactional
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
 	{
-		EntityType meta = dataService.getEntityType(entityName);
-		Entity entity = this.restService.toEntity(meta, entityMap);
+		EntityType entityType = dataService.getEntityType(entityName);
+		Entity entity = this.restService.toEntity(entityType, entityMap);
 
 		if (ATTRIBUTE_META_DATA.equals(entityName))
 		{
