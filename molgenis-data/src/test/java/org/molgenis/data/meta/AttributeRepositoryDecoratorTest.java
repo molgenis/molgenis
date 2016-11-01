@@ -1,6 +1,8 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.AttributeType;
@@ -70,6 +72,8 @@ public class AttributeRepositoryDecoratorTest
 	@Mock
 	private RepositoryCollection backend2;
 	private String attributeId = "SDFSADFSDAF";
+	@Captor
+	private ArgumentCaptor<Consumer<List<Attribute>>> consumerCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -364,12 +368,47 @@ public class AttributeRepositoryDecoratorTest
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
 	}
 
-	//	// TODO implement forEachBatchedUser unit test, but how?
-	//	//	@Test
-	//	//	public void forEachBatchedUser() throws Exception
-	//	//	{
-	//	//
-	//	//	}
+	// TODO implement forEachBatchedUser unit test, but how?
+	@Test
+	public void forEachBatchedUser() throws Exception
+	{
+		setUserAuthentication();
+
+		List<Attribute> attributes = newArrayList();
+		Attribute attribute1 = mock(Attribute.class);
+		Attribute attribute2 = mock(Attribute.class);
+		Attribute attribute3 = mock(Attribute.class);
+		Attribute attribute4 = mock(Attribute.class);
+
+		EntityType entityType1 = mock(EntityType.class);
+		EntityType entityType2 = mock(EntityType.class);
+		EntityType entityType3 = mock(EntityType.class);
+		EntityType entityType4 = mock(EntityType.class);
+
+		when(attribute1.getEntity()).thenReturn(entityType1);
+		when(attribute2.getEntity()).thenReturn(entityType2);
+		when(attribute3.getEntity()).thenReturn(entityType3);
+		when(attribute4.getEntity()).thenReturn(entityType4);
+
+		when(entityType1.getName()).thenReturn("EntityType1");
+		when(entityType2.getName()).thenReturn("EntityType2");
+		when(entityType3.getName()).thenReturn("EntityType3");
+		when(entityType4.getName()).thenReturn("EntityType4");
+
+		repo.forEachBatched(attributes::addAll, 2);
+
+		when(permissionService.hasPermissionOnEntity("EntityType1", READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity("EntityType2", READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity("EntityType3", READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity("EntityType4", READ)).thenReturn(true);
+
+		// Decorated repo returns two batches of two entityTypes
+		verify(decoratedRepo).forEachBatched(eq(null), consumerCaptor.capture(), eq(2));
+		consumerCaptor.getValue().accept(Lists.newArrayList(attribute1, attribute2));
+		consumerCaptor.getValue().accept(Lists.newArrayList(attribute3, attribute4));
+
+		assertEquals(attributes, newArrayList(attribute1, attribute4));
+	}
 
 	@Test
 	public void findOneQuerySu() throws Exception
