@@ -172,7 +172,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		when(metaDataService.getBackend(entityType)).thenReturn(repoCollection);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		repo.add(entityType);
 		verify(decoratedRepo).add(entityType);
@@ -883,53 +883,6 @@ public class EntityTypeRepositoryDecoratorTest
 		verify(backend2).deleteAttribute(currentEntityType2, attributeRemoved);
 		verify(backend3).addAttribute(currentEntityType3, attributeAdded);
 		verify(backend3).deleteAttribute(currentEntityType3, attributeRemoved);
-	}
-
-	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Unknown backend \\[BackendName\\]")
-	public void addEntityTypeUnknownBackend()
-	{
-		when(entityType1.getIdValue()).thenReturn(entityName1);
-
-		when(systemEntityTypeRegistry.getSystemEntityType(entityName1)).thenReturn(null);
-		when(decoratedRepo.findOneById(entityName1)).thenReturn(null);
-
-		Attribute attribute1 = mock(Attribute.class);
-		when(attribute1.getName()).thenReturn("attribute1");
-		Attribute attribute2 = mock(Attribute.class);
-		when(attribute2.getName()).thenReturn("attribute2");
-
-		when(entityType1.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attribute1, attribute2));
-		when(entityType1.getBackend()).thenReturn("BackendName");
-		when(metaDataService.getBackend(entityType1)).thenReturn(null);
-
-		setSuAuthentication();
-		repo.add(entityType1);
-	}
-
-	@Test
-	public void addEntityType()
-	{
-		when(entityType1.getIdValue()).thenReturn(entityName1);
-
-		when(systemEntityTypeRegistry.getSystemEntityType(entityName1)).thenReturn(null);
-		when(decoratedRepo.findOneById(entityName1)).thenReturn(null);
-
-		Attribute attribute1 = mock(Attribute.class);
-		when(attribute1.getName()).thenReturn("attribute1");
-		Attribute attribute2 = mock(Attribute.class);
-		when(attribute2.getName()).thenReturn("attribute2");
-
-		RepositoryCollection backend = mock(RepositoryCollection.class);
-
-		when(entityType1.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attribute1, attribute2));
-		when(metaDataService.getBackend(entityType1)).thenReturn(backend);
-
-		setSuAuthentication();
-		repo.add(entityType1);
-
-		// verify that attributes got added and deleted in concrete extending entities
-		verify(backend).createRepository(entityType1);
 	}
 
 	private static void setSuAuthentication()
