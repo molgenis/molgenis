@@ -158,7 +158,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		return runAsSystem(() -> thankYouTextService.getThankYouText(questionnaireName));
 	}
 
-	private static class Questionnaire
+	public static class Questionnaire
 	{
 		private String name;
 		private String label;
