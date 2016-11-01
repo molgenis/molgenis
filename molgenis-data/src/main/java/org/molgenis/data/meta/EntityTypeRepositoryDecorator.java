@@ -367,7 +367,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 				.collect(toMap(Attribute::getName, Function.identity()));
 		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
-		dataService.getMeta().forEachConcreteChild(entityType, concreteEntityType ->
+		dataService.getMeta().getConcreteChildren(entityType).forEach(concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
 			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());

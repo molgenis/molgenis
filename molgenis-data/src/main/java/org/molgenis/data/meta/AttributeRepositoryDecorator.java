@@ -562,8 +562,8 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	private void updateAttributeInBackend(Attribute attr, Attribute updatedAttr)
 	{
 		MetaDataService meta = dataService.getMeta();
-		meta.forEachConcreteChild(attr.getEntity(),
-				entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
+		meta.getConcreteChildren(attr.getEntity())
+				.forEach(entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
 	}
 
 	private void validateAndUpdate(Attribute attr)
