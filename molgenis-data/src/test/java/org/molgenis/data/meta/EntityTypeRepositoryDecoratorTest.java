@@ -834,6 +834,57 @@ public class EntityTypeRepositoryDecoratorTest
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating system entity meta data \\[EntityType1\\] is not allowed")
+	public void updateSystemEntityType()
+	{
+		SystemEntityType systemEntityType = mock(SystemEntityType.class);
+		when(systemEntityTypeRegistry.getSystemEntityType(entityName1)).thenReturn(systemEntityType);
+
+		setSuAuthentication();
+		repo.update(entityType1);
+	}
+
+	@Test
+	public void updateEntityType()
+	{
+		when(entityType1.getIdValue()).thenReturn(entityName1);
+		when(entityType2.getIdValue()).thenReturn(entityName2);
+		when(entityType3.getIdValue()).thenReturn(entityName3);
+		when(entityType4.getIdValue()).thenReturn(entityName4);
+
+		EntityType currentEntityType = mock(EntityType.class);
+		EntityType currentEntityType2 = mock(EntityType.class);
+		EntityType currentEntityType3 = mock(EntityType.class);
+		when(systemEntityTypeRegistry.getSystemEntityType(entityName1)).thenReturn(null);
+		when(decoratedRepo.findOneById(entityName1)).thenReturn(currentEntityType);
+		when(decoratedRepo.findOneById(entityName2)).thenReturn(currentEntityType2);
+		when(decoratedRepo.findOneById(entityName3)).thenReturn(currentEntityType3);
+
+		Attribute attributeStays = mock(Attribute.class);
+		when(attributeStays.getName()).thenReturn("attributeStays");
+		Attribute attributeRemoved = mock(Attribute.class);
+		when(attributeRemoved.getName()).thenReturn("attributeRemoved");
+		Attribute attributeAdded = mock(Attribute.class);
+		when(attributeAdded.getName()).thenReturn("attributeAdded");
+
+		when(currentEntityType.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attributeStays, attributeRemoved));
+		when(entityType1.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attributeStays, attributeAdded));
+		when(metaDataService.getConcreteChildren(entityType1)).thenReturn(Stream.of(entityType2, entityType3));
+		RepositoryCollection backend2 = mock(RepositoryCollection.class);
+		RepositoryCollection backend3 = mock(RepositoryCollection.class);
+		when(metaDataService.getBackend(entityType2)).thenReturn(backend2);
+		when(metaDataService.getBackend(entityType3)).thenReturn(backend3);
+
+		setSuAuthentication();
+		repo.update(entityType1);
+
+		// verify that attributes got added and deleted in concrete extending entities
+		verify(backend2).addAttribute(currentEntityType2, attributeAdded);
+		verify(backend2).deleteAttribute(currentEntityType2, attributeRemoved);
+		verify(backend3).addAttribute(currentEntityType3, attributeAdded);
+		verify(backend3).deleteAttribute(currentEntityType3, attributeRemoved);
+	}
+
 	private static void setSuAuthentication()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("su", null, AUTHORITY_SU);
