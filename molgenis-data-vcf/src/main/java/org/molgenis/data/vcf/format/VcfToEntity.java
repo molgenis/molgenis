@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -97,7 +97,7 @@ public class VcfToEntity
 			}
 
 			String name = info.getId();
-			if (MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS
+			if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS
 					.contains(name.toUpperCase()))
 			{
 				name = name + "_";
@@ -136,7 +136,7 @@ public class VcfToEntity
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				String name = meta.getId();
-				if (MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS
+				if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS
 						.contains(name.toUpperCase()))
 				{
 					name = name + "_";

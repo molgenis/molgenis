@@ -10,7 +10,7 @@ import static com.google.common.collect.Sets.newHashSet;
 /**
  * Validates if metadata is internally consistent and correct.
  */
-public class MetaValidationUtils
+public class NameValidator
 {
 	private static final int MAX_ATTRIBUTE_LENGTH = 30;
 
