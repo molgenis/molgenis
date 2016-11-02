@@ -2,6 +2,7 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -11,6 +12,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.*;
 import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.AttributeType.XREF;
+import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
 public class AttributeValidatorTest
@@ -25,7 +27,7 @@ public class AttributeValidatorTest
 		attributeValidator = new AttributeValidator(dataService);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[3attr.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")
 	public void validateAttributeInvalidName()
 	{
 		Attribute attr = makeMockAttribute("invalid.name");
@@ -76,6 +78,43 @@ public class AttributeValidatorTest
 		when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
+		attributeValidator.validate(attr);
+		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+	}
+
+	@Test
+	public void validateOrderByValid()
+	{
+		String entityName = "entityName";
+		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		Attribute attr = makeMockAttribute("attrName");
+		when(attr.getRefEntity()).thenReturn(refEntity);
+		String mappedByAttrName = "mappedByAttrName";
+		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
+		when(mappedByAttr.getDataType()).thenReturn(XREF);
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
+		when(attr.getOrderBy()).thenReturn(new Sort(mappedByAttrName, ASC));
+		attributeValidator.validate(attr);
+		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown entity \\[entityName\\] attribute \\[fail\\] referred to by entity \\[test\\] attribute \\[attrName\\] sortBy \\[fail,ASC\\]")
+	public void validateOrderByInvalidRefAttribute()
+	{
+		String entityName = "entityName";
+		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		Attribute attr = makeMockAttribute("attrName");
+		EntityType entity = mock(EntityType.class);
+		when(entity.getName()).thenReturn("test");
+		when(attr.getEntityType()).thenReturn(entity);
+		when(attr.getRefEntity()).thenReturn(refEntity);
+		String mappedByAttrName = "mappedByAttrName";
+		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
+		when(mappedByAttr.getDataType()).thenReturn(XREF);
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
+		when(attr.getOrderBy()).thenReturn(new Sort("fail", ASC));
 		attributeValidator.validate(attr);
 		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 	}
