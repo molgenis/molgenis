@@ -130,6 +130,8 @@ public class AttributeValidator
 		}
 	}
 
+
+
 	/**
 	 * Validate whether the mappedBy attribute is part of the referenced entity.
 	 *

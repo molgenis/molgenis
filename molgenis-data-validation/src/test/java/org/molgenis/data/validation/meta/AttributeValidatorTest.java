@@ -7,11 +7,11 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
+import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
@@ -119,11 +119,66 @@ public class AttributeValidatorTest
 		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 	}
 
+	@Test(dataProvider = "disallowedTransitionProvider", expectedExceptions = MolgenisDataException.class)
+	public void testDisallowedTransition(Attribute currentAttr, Attribute newAttr)
+	{
+		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
+				.thenReturn(currentAttr);
+		attributeValidator.validate(newAttr);
+	}
+
+	@Test(dataProvider = "allowedTransitionProvider")
+	public void testAllowedTransition(Attribute currentAttr, Attribute newAttr)
+	{
+		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
+				.thenReturn(currentAttr);
+	}
+
+	@DataProvider(name = "allowedTransitionProvider")
+	private Object[][] allowedTransitionProvider()
+	{
+		Attribute currentAttr1 = makeMockAttribute("attr1");
+		Attribute currentAttr2 = makeMockAttribute("attr2");
+		Attribute currentAttr3 = makeMockAttribute("attr3");
+		when(currentAttr1.getDataType()).thenReturn(BOOL);
+		when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
+		when(currentAttr3.getDataType()).thenReturn(COMPOUND);
+
+		Attribute newAttr1 = makeMockAttribute("attr1");
+		Attribute newAttr2 = makeMockAttribute("attr2");
+		Attribute newAttr3 = makeMockAttribute("attr3");
+		when(newAttr1.getDataType()).thenReturn(INT);
+		when(newAttr2.getDataType()).thenReturn(INT);
+		when(newAttr3.getDataType()).thenReturn(INT);
+
+		return new Object[][] { { currentAttr1, newAttr1 }, { currentAttr2, newAttr2 }, { currentAttr3, newAttr3 } };
+	}
+
+	@DataProvider(name = "disallowedTransitionProvider")
+	private Object[][] disallowedTransitionProvider()
+	{
+		Attribute currentAttr1 = makeMockAttribute("attr1");
+		Attribute currentAttr2 = makeMockAttribute("attr2");
+		Attribute currentAttr3 = makeMockAttribute("attr3");
+		when(currentAttr1.getDataType()).thenReturn(BOOL);
+		when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
+		when(currentAttr3.getDataType()).thenReturn(COMPOUND);
+
+		Attribute newAttr1 = makeMockAttribute("attr1");
+		Attribute newAttr2 = makeMockAttribute("attr2");
+		Attribute newAttr3 = makeMockAttribute("attr3");
+		when(newAttr1.getDataType()).thenReturn(ONE_TO_MANY);
+		when(newAttr2.getDataType()).thenReturn(HYPERLINK);
+		when(newAttr3.getDataType()).thenReturn(FILE);
+
+		return new Object[][] { { currentAttr1, newAttr1 }, { currentAttr2, newAttr2 }, { currentAttr3, newAttr3 } };
+	}
+
 	private Attribute makeMockAttribute(String name)
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getName()).thenReturn(name);
-		when(attr.getIdentifier()).thenReturn("1");
+		when(attr.getIdentifier()).thenReturn(name);
 		return attr;
 	}
 }
