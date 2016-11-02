@@ -1,8 +1,14 @@
 package org.molgenis.bbmri.directory.controller;
 
+import com.google.api.client.util.Maps;
 import com.google.gson.Gson;
-import org.molgenis.bbmri.directory.model.Query;
+import org.molgenis.bbmri.directory.model.NegotiatorQuery;
 import org.molgenis.bbmri.directory.settings.DirectorySettings;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
@@ -15,12 +21,15 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
@@ -53,9 +62,38 @@ public class DirectoryController extends MolgenisPluginController
 	@Autowired
 	DirectorySettings settings;
 
+	@Autowired
+	MolgenisRSQL molgenisRSQL;
+
+	@Autowired
+	MetaDataService metaDataService;
+
 	@RequestMapping()
-	public String init(HttpServletRequest request, Model model)
+	public String init(@RequestParam(required = false) String rSql, HttpServletRequest request, Model model)
 	{
+		if (rSql != null)
+		{
+			Query<Entity> query = molgenisRSQL
+					.createQuery(rSql, metaDataService.getEntityType("eu_bbmri_eric_collections"));
+
+			List<QueryRule> rules = query.getRules().get(0).getNestedRules();
+			Map<String, Object> filters = Maps.newHashMap();
+
+			for (QueryRule rule : rules)
+			{
+				// We only parse the booleans
+				if (rule.getField() != null)
+				{
+					filters.put(rule.getField(), rule.getValue());
+				}
+			}
+
+			// Use a hard coded mref for demo effect
+			String materials = "[{operator : 'AND',value : [{id:'PLASMA',label:'Plasma'}, {id:'TISSUE_FROZEN',label:'Cryo tissue'}]},'OR',{value : { id : 'NAV', label : 'Not available' }}]";
+			filters.put("materials", gson.fromJson(materials, List.class));
+			model.addAttribute("filters", gson.toJson(filters));
+		}
+
 		model.addAttribute("username", getCurrentUsername());
 		model.addAttribute("apiUrl", getApiUrl(request));
 		model.addAttribute("baseUrl", getBaseUrl());
@@ -64,9 +102,9 @@ public class DirectoryController extends MolgenisPluginController
 
 	@RequestMapping("/query")
 	@ResponseBody
-	public String postQuery(@RequestBody Query query) throws Exception
+	public String postQuery(@RequestBody NegotiatorQuery query) throws Exception
 	{
-		LOG.info("Query " + query + " received, sending request");
+		LOG.info("NegotiatorQuery " + query + " received, sending request");
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 

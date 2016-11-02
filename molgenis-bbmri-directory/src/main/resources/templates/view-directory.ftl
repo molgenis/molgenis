@@ -20,6 +20,9 @@
             'username' : '${username}'
         },
         'Directory' : {
+            <#if filters??>
+            'filters' : ${filters}
+            <#else>
             'filters' : {
                 materials : [
                     {
@@ -37,11 +40,13 @@
                 ],
                 sample_access_fee : true
             }
+            </#if>
         }
     }
 </script>
-<script src="/js/vendor.4a7b0055b4cf8587abe0.js"></script>
-<script src="/js/app.b08a2f39c6e590e737e1.js"></script>
+<script src="/js/vendor.7a5dd707c180f58732e5.js"></script>
+<script src="/js/app.a1ac993f16ec1fceb8fc.js"></script>
+
 </body>
 </html>
 
