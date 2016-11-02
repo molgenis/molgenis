@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.AttributeType;
-import org.molgenis.ReservedKeywords;
+import org.molgenis.MolgenisReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -26,11 +26,8 @@ public class MetaValidationUtils
 
 	static
 	{
-		// we can generate java(script) files with freemarker, so prevent use of reserved words
-		KEYWORDS.addAll(ReservedKeywords.JAVASCRIPT_KEYWORDS);
-
 		// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
-		KEYWORDS.addAll(ReservedKeywords.MOLGENIS_KEYWORDS);
+		KEYWORDS.addAll(MolgenisReservedKeywords.MOLGENIS_KEYWORDS);
 	}
 
 	/**
