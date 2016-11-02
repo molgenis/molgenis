@@ -8,6 +8,8 @@ import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.data.validation.meta.AttributeValidator;
+import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,12 @@ public class ImporterConfiguration
 	@Autowired
 	private EntityManager entityManager;
 
+	@Autowired
+	private EntityTypeValidator entityTypeValidator;
+
+	@Autowired
+	private AttributeValidator attributeValidator;
+
 	@Bean
 	public ImportService emxImportService()
 	{
@@ -76,6 +84,6 @@ public class ImporterConfiguration
 	public MetaDataParser emxMetaDataParser()
 	{
 		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
-				languageFactory, i18nStringFactory);
+				languageFactory, i18nStringFactory, entityTypeValidator, attributeValidator);
 	}
 }

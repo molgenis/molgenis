@@ -249,6 +249,7 @@ public class AttributeValidator
 	private void validateUpdateExpression(String currentExpression, String newExpression)
 	{
 		// TODO validate with script evaluator
+
 		// how to get access to expression validator here since it is located in molgenis-data-validation?
 	}
 }
