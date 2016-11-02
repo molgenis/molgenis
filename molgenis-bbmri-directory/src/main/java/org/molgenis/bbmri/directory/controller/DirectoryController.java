@@ -1,6 +1,5 @@
 package org.molgenis.bbmri.directory.controller;
 
-import com.google.api.client.util.Maps;
 import com.google.gson.Gson;
 import org.molgenis.bbmri.directory.model.NegotiatorQuery;
 import org.molgenis.bbmri.directory.settings.DirectorySettings;
@@ -31,6 +30,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.api.client.util.Lists.newArrayList;
+import static com.google.api.client.util.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -77,14 +78,17 @@ public class DirectoryController extends MolgenisPluginController
 					.createQuery(rSql, metaDataService.getEntityType("eu_bbmri_eric_collections"));
 
 			List<QueryRule> rules = query.getRules().get(0).getNestedRules();
-			Map<String, Object> filters = Maps.newHashMap();
-
+			Map<String, Object> filters = newHashMap();
+			List<Object> list = newArrayList();
 			for (QueryRule rule : rules)
 			{
+
+				String field = rule.getField();
 				// We only parse the booleans
-				if (rule.getField() != null)
+				if (field != null)
 				{
-					filters.put(rule.getField(), rule.getValue());
+					list.add(rule.getValue());
+					filters.put(field, list);
 				}
 			}
 
