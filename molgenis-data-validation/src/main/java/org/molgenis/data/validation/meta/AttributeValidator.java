@@ -41,6 +41,8 @@ public class AttributeValidator
 	public void validate(Attribute attr)
 	{
 		validateAttributeName(attr);
+		validateAttributeDefaultValue(attr);
+
 		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 		if (currentAttr == null)
 		{
@@ -49,6 +51,29 @@ public class AttributeValidator
 		else
 		{
 			validateUpdate(attr, currentAttr);
+		}
+	}
+
+	private static void validateAttributeDefaultValue(Attribute attr)
+	{
+		if (attr.getDefaultValue() != null)
+		{
+			if (attr.isUnique())
+			{
+				throw new MolgenisDataException("Unique attribute " + attr.getName() + " cannot have default value");
+			}
+
+			if (attr.getExpression() != null)
+			{
+				throw new MolgenisDataException("Computed attribute " + attr.getName() + " cannot have default value");
+			}
+
+			AttributeType fieldType = attr.getDataType();
+			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
+			{
+				throw new MolgenisDataException("Attribute " + attr.getName()
+						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
+			}
 		}
 	}
 
