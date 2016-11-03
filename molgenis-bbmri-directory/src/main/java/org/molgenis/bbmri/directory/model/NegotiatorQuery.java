@@ -6,8 +6,8 @@ import org.molgenis.gson.AutoGson;
 import java.util.List;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_Query.class)
-public abstract class Query
+@AutoGson(autoValueClass = AutoValue_NegotiatorQuery.class)
+public abstract class NegotiatorQuery
 {
 	public abstract String getURL();
 
@@ -17,8 +17,8 @@ public abstract class Query
 
 	public abstract String getNToken();
 
-	public static Query createQuery(String url, List<Collection> collections, String humanReadable, String nToken)
+	public static NegotiatorQuery createQuery(String url, List<Collection> collections, String humanReadable, String nToken)
 	{
-		return new AutoValue_Query(url, collections, humanReadable, nToken);
+		return new AutoValue_NegotiatorQuery(url, collections, humanReadable, nToken);
 	}
 }
