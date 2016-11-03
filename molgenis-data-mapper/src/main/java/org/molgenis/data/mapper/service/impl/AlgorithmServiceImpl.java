@@ -2,7 +2,6 @@ package org.molgenis.data.mapper.service.impl;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
@@ -177,19 +176,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
-				Collection<Object> valueIds;
-				if (value instanceof List)
-				{
-					valueIds = (Collection<Object>) value;
-				}
-				else if (value instanceof ScriptObjectMirror)
-				{
-					valueIds = ((ScriptObjectMirror) value).values(); // TODO move to JsScriptEvaluator
-				}
-				else
-				{
-					throw new RuntimeException("asdasdasdda"); // TODO better message
-				}
+				Collection<Object> valueIds = (Collection<Object>) value;
 
 				convertedValue = valueIds.stream().map(valueId -> entityManager
 						.getReference(attr.getRefEntity(), convert(valueId, attr.getRefEntity().getIdAttribute())))
