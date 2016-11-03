@@ -192,11 +192,11 @@ public class AttributeMetadata extends SystemEntityType
 	{
 		String isIdIsTrue = "$('" + IS_ID_ATTRIBUTE + "').eq(true)";
 		String isIdIsFalseOrNull = "$('" + IS_ID_ATTRIBUTE + "').eq(false).or($('" + IS_ID_ATTRIBUTE + "').isNull())";
-		String typeIsStringOrInt =
+		String typeIsStringOrIntOrLong =
 				"$('" + TYPE + "').eq('" + getValueString(STRING) + "').or($('" + TYPE + "').eq('" + getValueString(INT)
-						+ "'))";
+						+ "')).or($('" + TYPE + "').eq('" + getValueString(LONG) + "'))";
 
-		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsStringOrInt + ")).value()";
+		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsStringOrIntOrLong + ")).value()";
 	}
 
 	private static String getChildrenValidationExpression()
@@ -224,7 +224,8 @@ public class AttributeMetadata extends SystemEntityType
 		String isLabelAttributeIsFalseOrNull =
 				"$('" + IS_LABEL_ATTRIBUTE + "').eq(false).or($('" + IS_LABEL_ATTRIBUTE + "').isNull())";
 
-		return isLabelAttributeIsFalseOrNull + ".or($('" + IS_LABEL_ATTRIBUTE + "').isNull().not().and($('"
-				+ TYPE + "').matches(" + regex + ").not().or().and(" + nullableIsFalse + "))).value()";
+		return isLabelAttributeIsFalseOrNull + ".or($('" + IS_LABEL_ATTRIBUTE + "').eq(true).and($('" + TYPE
+				+ "').matches(" + regex + ").not().and(" + nullableIsFalse + "))).value()";
 	}
+
 }

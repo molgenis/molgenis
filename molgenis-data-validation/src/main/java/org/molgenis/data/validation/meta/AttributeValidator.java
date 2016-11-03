@@ -43,6 +43,7 @@ public class AttributeValidator
 	{
 		validateName(attr);
 		validateDefaultValue(attr);
+		validateParent(attr);
 
 		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 		if (currentAttr == null)
@@ -52,6 +53,19 @@ public class AttributeValidator
 		else
 		{
 			validateUpdate(attr, currentAttr);
+		}
+	}
+
+	private static void validateParent(Attribute attr)
+	{
+		if (attr.getParent() != null)
+		{
+			if (attr.getParent().getDataType() != COMPOUND)
+			{
+				throw new MolgenisDataException(
+						format("Parent attribute [%s] of attribute [%s] is not of type compound",
+								attr.getParent().getName(), attr.getName()));
+			}
 		}
 	}
 
