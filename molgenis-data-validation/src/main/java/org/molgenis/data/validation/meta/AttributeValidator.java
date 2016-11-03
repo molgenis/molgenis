@@ -4,10 +4,12 @@ import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.js.ScriptEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,6 @@ import java.util.Objects;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.AttributeType.*;
-import static org.molgenis.data.meta.NameValidator.validateName;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -40,8 +41,8 @@ public class AttributeValidator
 
 	public void validate(Attribute attr)
 	{
-		validateAttributeName(attr);
-		validateAttributeDefaultValue(attr);
+		validateName(attr);
+		validateDefaultValue(attr);
 
 		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 		if (currentAttr == null)
@@ -51,29 +52,6 @@ public class AttributeValidator
 		else
 		{
 			validateUpdate(attr, currentAttr);
-		}
-	}
-
-	private static void validateAttributeDefaultValue(Attribute attr)
-	{
-		if (attr.getDefaultValue() != null)
-		{
-			if (attr.isUnique())
-			{
-				throw new MolgenisDataException("Unique attribute " + attr.getName() + " cannot have default value");
-			}
-
-			if (attr.getExpression() != null)
-			{
-				throw new MolgenisDataException("Computed attribute " + attr.getName() + " cannot have default value");
-			}
-
-			AttributeType fieldType = attr.getDataType();
-			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
-			{
-				throw new MolgenisDataException("Attribute " + attr.getName()
-						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
-			}
 		}
 	}
 
@@ -108,7 +86,7 @@ public class AttributeValidator
 		String newExpression = newAttr.getExpression();
 		if (!Objects.equals(currentExpression, newExpression))
 		{
-			validateUpdateExpression(currentExpression, newExpression);
+			validateExpression(currentExpression, newExpression);
 		}
 
 		// validation expression
@@ -116,7 +94,7 @@ public class AttributeValidator
 		String newValidationExpression = newAttr.getValidationExpression();
 		if (!Objects.equals(currentValidationExpression, newValidationExpression))
 		{
-			validateUpdateExpression(currentValidationExpression, newValidationExpression);
+			validateExpression(currentValidationExpression, newValidationExpression);
 		}
 
 		// visible expression
@@ -124,7 +102,7 @@ public class AttributeValidator
 		String newVisibleExpression = newAttr.getVisibleExpression();
 		if (!Objects.equals(currentVisibleExpression, newVisibleExpression))
 		{
-			validateUpdateExpression(currentVisibleExpression, newVisibleExpression);
+			validateExpression(currentVisibleExpression, newVisibleExpression);
 		}
 
 		// orderBy
@@ -138,7 +116,30 @@ public class AttributeValidator
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
-	private static void validateAttributeName(Attribute attr)
+	private static void validateDefaultValue(Attribute attr)
+	{
+		if (attr.getDefaultValue() != null)
+		{
+			if (attr.isUnique())
+			{
+				throw new MolgenisDataException("Unique attribute " + attr.getName() + " cannot have default value");
+			}
+
+			if (attr.getExpression() != null)
+			{
+				throw new MolgenisDataException("Computed attribute " + attr.getName() + " cannot have default value");
+			}
+
+			AttributeType fieldType = attr.getDataType();
+			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
+			{
+				throw new MolgenisDataException("Attribute " + attr.getName()
+						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
+			}
+		}
+	}
+
+	private static void validateName(Attribute attr)
 	{
 		// validate entity name (e.g. illegal characters, length)
 		String name = attr.getName();
@@ -146,7 +147,7 @@ public class AttributeValidator
 		{
 			try
 			{
-				validateName(attr.getName());
+				NameValidator.validateName(attr.getName());
 			}
 			catch (MolgenisDataException e)
 			{
@@ -154,8 +155,6 @@ public class AttributeValidator
 			}
 		}
 	}
-
-
 
 	/**
 	 * Validate whether the mappedBy attribute is part of the referenced entity.
@@ -271,9 +270,10 @@ public class AttributeValidator
 				.put(XREF, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 	}
 
-	private void validateUpdateExpression(String currentExpression, String newExpression)
+	private void validateExpression(String expression, String newExpression)
 	{
 		// TODO validate with script evaluator
+		//ScriptEvaluator.eval();
 
 		// how to get access to expression validator here since it is located in molgenis-data-validation?
 	}
