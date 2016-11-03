@@ -86,8 +86,10 @@ public class AttributeMetadata extends SystemEntityType
 				.setLabel("Data type");
 		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute")
 				.setValidationExpression(getIdAttributeValidationExpression());
-		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute");
-		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index");
+		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute")
+				.setValidationExpression(getLabelAttributeValidationExpression());
+		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index")
+				.setValidationExpression(getLookupAttributeValidationExpression());
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
 		addAttribute(CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
 				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts")
@@ -201,6 +203,28 @@ public class AttributeMetadata extends SystemEntityType
 	{
 		String childrenIsNull = "$('" + CHILDREN + "').isNull()";
 		String typeIsCompound = "$('" + TYPE + "').eq('" + getValueString(COMPOUND) + "')";
+
 		return childrenIsNull + ".or(" + childrenIsNull + ".not().and(" + typeIsCompound + ")).value()";
+	}
+
+	private static String getLookupAttributeValidationExpression()
+	{
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+
+		return "$('" + LOOKUP_ATTRIBUTE_INDEX + "').isNull().or(" + "$('" + LOOKUP_ATTRIBUTE_INDEX
+				+ "').isNull().not().and($('" + TYPE + "').matches(" + regex + ").not())).value()";
+	}
+
+	private static String getLabelAttributeValidationExpression()
+	{
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String nullableIsFalse = "$('" + IS_NULLABLE + "').eq(false)";
+		String isLabelAttributeIsFalseOrNull =
+				"$('" + IS_LABEL_ATTRIBUTE + "').eq(false).or($('" + IS_LABEL_ATTRIBUTE + "').isNull())";
+
+		return isLabelAttributeIsFalseOrNull + ".or($('" + IS_LABEL_ATTRIBUTE + "').isNull().not().and($('"
+				+ TYPE + "').matches(" + regex + ").not().or().and(" + nullableIsFalse + "))).value()";
 	}
 }
