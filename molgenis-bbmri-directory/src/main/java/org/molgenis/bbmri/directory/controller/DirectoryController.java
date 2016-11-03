@@ -95,6 +95,8 @@ public class DirectoryController extends MolgenisPluginController
 			String materials = "[{operator : 'AND',value : [{id:'PLASMA',label:'Plasma'}, {id:'TISSUE_FROZEN',label:'Cryo tissue'}]},'OR',{value : { id : 'NAV', label : 'Not available' }}]";
 			filters.put("materials", gson.fromJson(materials, List.class));
 			model.addAttribute("filters", gson.toJson(filters));
+
+			LOG.info("Generated filters from RSQL:\n" + gson.toJson(filters));
 		}
 
 		model.addAttribute("username", getCurrentUsername());
@@ -107,7 +109,7 @@ public class DirectoryController extends MolgenisPluginController
 	@ResponseBody
 	public String postQuery(@RequestBody NegotiatorQuery query) throws Exception
 	{
-		LOG.info("NegotiatorQuery " + query + " received, sending request");
+		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 
