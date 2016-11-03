@@ -72,6 +72,7 @@ public class DirectoryController extends MolgenisPluginController
 	{
 		if (q != null)
 		{
+			LOG.info("Request received with an rsql query " + q + ", setting filter state");
 			Query<Entity> query = molgenisRSQL
 					.createQuery(q, metaDataService.getEntityType("eu_bbmri_eric_collections"));
 
@@ -94,6 +95,8 @@ public class DirectoryController extends MolgenisPluginController
 			String materials = "[{operator : 'AND',value : [{id:'PLASMA',label:'Plasma'}, {id:'TISSUE_FROZEN',label:'Cryo tissue'}]},'OR',{value : { id : 'NAV', label : 'Not available' }}]";
 			filters.put("materials", gson.fromJson(materials, List.class));
 			model.addAttribute("filters", gson.toJson(filters));
+
+			LOG.info("Generated filters from RSQL:\n" + gson.toJson(filters));
 		}
 
 		model.addAttribute("username", getCurrentUsername());
@@ -106,7 +109,7 @@ public class DirectoryController extends MolgenisPluginController
 	@ResponseBody
 	public String postQuery(@RequestBody NegotiatorQuery query) throws Exception
 	{
-		LOG.info("NegotiatorQuery " + query + " received, sending request");
+		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 
@@ -116,7 +119,7 @@ public class DirectoryController extends MolgenisPluginController
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-		return restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
+		return "redirect:" + restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
 				.toASCIIString();
 	}
 
