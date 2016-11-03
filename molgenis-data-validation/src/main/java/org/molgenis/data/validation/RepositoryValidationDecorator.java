@@ -420,7 +420,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 				}
 				// Do not validate if visibleExpression resolves to false
 				else if (nonNillableAttr.getVisibleExpression() != null && !expressionValidator
-						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity, getEntityType()))
+						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity))
 				{
 
 					isValid = true;

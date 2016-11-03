@@ -430,7 +430,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(false);
 
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
@@ -493,7 +493,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(true);
 
 		// actual tests
 		try
@@ -1164,7 +1164,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(false);
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
@@ -1241,7 +1241,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(true);
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
@@ -2136,7 +2136,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(false);
 
 		// actual tests
 		repositoryValidationDecorator.update(entity0);
@@ -2199,7 +2199,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(true);
 
 		// actual tests
 		try
@@ -3221,7 +3221,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(false);
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
@@ -3298,7 +3298,7 @@ public class RepositoryValidationDecoratorTest
 		// visible expression
 		String visibleExpression = "expr";
 		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
+		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0)).thenReturn(true);
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
