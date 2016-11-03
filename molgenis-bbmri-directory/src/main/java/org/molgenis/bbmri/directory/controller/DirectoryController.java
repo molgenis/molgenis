@@ -72,6 +72,7 @@ public class DirectoryController extends MolgenisPluginController
 	{
 		if (q != null)
 		{
+			LOG.info("Request received with an rsql query " + q + ", setting filter state");
 			Query<Entity> query = molgenisRSQL
 					.createQuery(q, metaDataService.getEntityType("eu_bbmri_eric_collections"));
 
@@ -114,7 +115,7 @@ public class DirectoryController extends MolgenisPluginController
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-		return restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
+		return "redirect:" + restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
 				.toASCIIString();
 	}
 
