@@ -834,7 +834,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						&& !emxIdAttrValue.equalsIgnoreCase(AUTO))
 				{
 					throw new IllegalArgumentException(
-							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'IS_AUTO'",
+							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
 									rowIndex));
 				}
 				if (emxIdAttrValue.equalsIgnoreCase("true"))

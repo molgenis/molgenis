@@ -28,7 +28,7 @@ public class NameValidatorTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testReservedKeyword()
 	{
-		NameValidator.validateName("implements");
+		NameValidator.validateName("base");
 	}
 
 	@Test
