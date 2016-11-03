@@ -26,8 +26,8 @@ public class ScriptEvaluator
 	/**
 	 * Evaluates a script for a single entity.
 	 *
-	 * @param source         {@link String} containing the script to evaluate
-	 * @param entity         the {@link Entity} to evaluate the script on
+	 * @param source     {@link String} containing the script to evaluate
+	 * @param entity     the {@link Entity} to evaluate the script on
 	 * @param entityType {@link EntityType} for the entity
 	 * @return result of the evaluation, or a {@link RuntimeException} if one was thrown
 	 * @throws EcmaError if there's a syntax error in the script
@@ -43,8 +43,7 @@ public class ScriptEvaluator
 		return result;
 	}
 
-	public static List<Object> eval(final String source, final Iterable<Entity> entities,
-			final EntityType entityType)
+	public static List<Object> eval(final String source, final Iterable<Entity> entities, final EntityType entityType)
 	{
 		List<Object> results = eval(Arrays.asList(source), entities, entityType);
 
@@ -55,8 +54,7 @@ public class ScriptEvaluator
 		return results;
 	}
 
-	public static List<Object> eval(final List<String> sources, final Entity entity,
-			final EntityType entityType)
+	public static List<Object> eval(final List<String> sources, final Entity entity, final EntityType entityType)
 	{
 		List<Object> results = eval(sources, Collections.singleton(entity), entityType);
 
@@ -70,8 +68,8 @@ public class ScriptEvaluator
 	/**
 	 * Evaluates a script on a batch of entities
 	 *
-	 * @param sources        the source of the script to run
-	 * @param entities       {@link Iterable} of {@link Entity}s to evaluate it for
+	 * @param sources    the source of the script to run
+	 * @param entities   {@link Iterable} of {@link Entity}s to evaluate it for
 	 * @param entityType
 	 * @return {@link List} of {@link Object} that contain the results of the evaluation, or the
 	 * {@link RuntimeException} if one was thrown
@@ -113,8 +111,16 @@ public class ScriptEvaluator
 
 						for (String source : sources)
 						{
-							result.add(evalScript.call(cx, scriptableObject, scriptableObject,
-									new Object[] { source, scriptableEntity }));
+							try
+							{
+								result.add(evalScript.call(cx, scriptableObject, scriptableObject,
+										new Object[] { source, scriptableEntity }));
+							}
+							catch (EcmaError e)
+							{
+								LOG.error("Failing script: " + source);
+								throw e;
+							}
 						}
 					}
 					catch (EcmaError error)
