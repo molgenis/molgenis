@@ -31,7 +31,7 @@ import static java.util.stream.StreamSupport.stream;
  * TODO Evaluate if script engine class filter is sufficient sand boxing and check if normal JavaScript script runner still works
  * TODO Evaluate current date and datetime conversion solution
  * TODO Extend unit tests
- * TODO Remove Rhino based ScriptEvaluator
+ * TODO Fix JsScriptExecutor
  * <p>
  * Creating and initializing a script engine is very expensive, ideally we have one instance system-wide
  */
