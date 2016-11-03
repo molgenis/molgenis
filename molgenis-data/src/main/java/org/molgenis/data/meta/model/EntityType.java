@@ -120,11 +120,11 @@ public class EntityType extends StaticEntity
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
-			entityTypeCopy.setOwnAttributes(ownAttrMap.values());
+			entityTypeCopy.setOwnAllAttributes(ownAttrMap.values());
 		}
 		else
 		{
-			entityTypeCopy.setOwnAttributes(newArrayList(entityType.getOwnAttributes()));
+			entityTypeCopy.setOwnAllAttributes(newArrayList(entityType.getOwnAllAttributes()));
 		}
 
 		entityTypeCopy.setAbstract(entityType.isAbstract());
@@ -494,7 +494,7 @@ public class EntityType extends StaticEntity
 				.collect(toList());
 	}
 
-	public EntityType setOwnAttributes(Iterable<Attribute> attrs)
+	public EntityType setOwnAllAttributes(Iterable<Attribute> attrs)
 	{
 		invalidateCachedOwnAttrs();
 		set(ATTRIBUTES, attrs);
