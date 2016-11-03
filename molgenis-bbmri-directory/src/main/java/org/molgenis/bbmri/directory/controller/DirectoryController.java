@@ -50,32 +50,30 @@ public class DirectoryController extends MolgenisPluginController
 
 	private static final String API_URI = "/api/";
 
+	private final Gson gson;
+	private final DirectorySettings settings;
+	private final MolgenisRSQL molgenisRSQL;
+	private final MetaDataService metaDataService;
+
 	@Autowired
-	public DirectoryController(MenuReaderService menuReaderService)
+	public DirectoryController(MenuReaderService menuReaderService, DirectorySettings settings,
+			MolgenisRSQL molgenisRSQL, Gson gson, MetaDataService metaDataService)
 	{
 		super(URI);
 		this.menuReaderService = menuReaderService;
+		this.settings = settings;
+		this.molgenisRSQL = molgenisRSQL;
+		this.gson = gson;
+		this.metaDataService = metaDataService;
 	}
 
-	@Autowired
-	Gson gson;
-
-	@Autowired
-	DirectorySettings settings;
-
-	@Autowired
-	MolgenisRSQL molgenisRSQL;
-
-	@Autowired
-	MetaDataService metaDataService;
-
 	@RequestMapping()
-	public String init(@RequestParam(required = false) String rSql, HttpServletRequest request, Model model)
+	public String init(@RequestParam(required = false) String q, HttpServletRequest request, Model model)
 	{
-		if (rSql != null)
+		if (q != null)
 		{
 			Query<Entity> query = molgenisRSQL
-					.createQuery(rSql, metaDataService.getEntityType("eu_bbmri_eric_collections"));
+					.createQuery(q, metaDataService.getEntityType("eu_bbmri_eric_collections"));
 
 			List<QueryRule> rules = query.getRules().get(0).getNestedRules();
 			Map<String, Object> filters = newHashMap();
