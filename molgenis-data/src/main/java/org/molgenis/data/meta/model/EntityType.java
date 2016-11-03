@@ -113,6 +113,7 @@ public class EntityType extends StaticEntity
 		// Own attributes (deep copy or shallow copy)
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
+			// step #1: deep copy attributes
 			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
 					.map(attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
 					.map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
@@ -120,6 +121,17 @@ public class EntityType extends StaticEntity
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
+
+			// step #2: update attribute.parent relations
+			ownAttrMap.forEach((attrName, ownAttr) ->
+			{
+				Attribute ownAttrParent = ownAttr.getParent();
+				if (ownAttrParent != null)
+				{
+					ownAttr.setParent(ownAttrMap.get(ownAttrParent.getName()));
+				}
+			});
+
 			entityTypeCopy.setOwnAllAttributes(ownAttrMap.values());
 		}
 		else
