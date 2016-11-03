@@ -84,12 +84,16 @@ public class AttributeMetadata extends SystemEntityType
 				.setDescription("Number that defines order of attributes in a entity").setNillable(false);
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
-		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute");
-		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute");
-		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index");
+		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute")
+				.setValidationExpression(getIdAttributeValidationExpression());
+		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute")
+				.setValidationExpression(getLabelAttributeValidationExpression());
+		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index")
+				.setValidationExpression(getLookupAttributeValidationExpression());
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
 		addAttribute(CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts");
+				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts")
+				.setValidationExpression(getChildrenValidationExpression());
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
@@ -181,7 +185,46 @@ public class AttributeMetadata extends SystemEntityType
 				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
 		String rangeIsNull = "$('" + attribute + "').isNull()";
 
-		return rangeIsNull + ".or(" + rangeIsNull + ".not().and($('" + TYPE + "').matches(" + regex + ")).value()";
+		return rangeIsNull + ".or(" + rangeIsNull + ".not().and($('" + TYPE + "').matches(" + regex + "))).value()";
 	}
 
+	private static String getIdAttributeValidationExpression()
+	{
+		String isIdIsTrue = "$('" + IS_ID_ATTRIBUTE + "').eq(true)";
+		String isIdIsFalseOrNull = "$('" + IS_ID_ATTRIBUTE + "').eq(false).or($('" + IS_ID_ATTRIBUTE + "').isNull())";
+		String typeIsStringOrInt =
+				"$('" + TYPE + "').eq('" + getValueString(STRING) + "').or($('" + TYPE + "').eq('" + getValueString(INT)
+						+ "'))";
+
+		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsStringOrInt + ")).value()";
+	}
+
+	private static String getChildrenValidationExpression()
+	{
+		String childrenIsNull = "$('" + CHILDREN + "').isNull()";
+		String typeIsCompound = "$('" + TYPE + "').eq('" + getValueString(COMPOUND) + "')";
+
+		return childrenIsNull + ".or(" + childrenIsNull + ".not().and(" + typeIsCompound + ")).value()";
+	}
+
+	private static String getLookupAttributeValidationExpression()
+	{
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+
+		return "$('" + LOOKUP_ATTRIBUTE_INDEX + "').isNull().or(" + "$('" + LOOKUP_ATTRIBUTE_INDEX
+				+ "').isNull().not().and($('" + TYPE + "').matches(" + regex + ").not())).value()";
+	}
+
+	private static String getLabelAttributeValidationExpression()
+	{
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String nullableIsFalse = "$('" + IS_NULLABLE + "').eq(false)";
+		String isLabelAttributeIsFalseOrNull =
+				"$('" + IS_LABEL_ATTRIBUTE + "').eq(false).or($('" + IS_LABEL_ATTRIBUTE + "').isNull())";
+
+		return isLabelAttributeIsFalseOrNull + ".or($('" + IS_LABEL_ATTRIBUTE + "').isNull().not().and($('"
+				+ TYPE + "').matches(" + regex + ").not().or().and(" + nullableIsFalse + "))).value()";
+	}
 }
