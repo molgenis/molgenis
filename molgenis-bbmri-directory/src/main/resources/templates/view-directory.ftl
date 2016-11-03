@@ -38,14 +38,16 @@
                         value : { id : 'NAV', label : 'Not available' }
                     }
                 ],
-                sample_access_fee : [true]
+                sample_access_fee : [
+                    true
+                ]
             }
             </#if>
         }
     }
 </script>
-<script src="/js/vendor.7a5dd707c180f58732e5.js"></script>
-<script src="/js/app.a1ac993f16ec1fceb8fc.js"></script>
+<script src="/js/vendor.dffca7b9f0159f34a157.js"></script>
+<script src="/js/app.f88829c32916f4e15cfa.js"></script>
 
 </body>
 </html>
