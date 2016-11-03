@@ -16,7 +16,6 @@ import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
-import org.molgenis.js.RhinoConfig;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
@@ -66,7 +65,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
 		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, RhinoConfig.class, UuidGenerator.class, ExpressionValidator.class,
+		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class,
 		PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })

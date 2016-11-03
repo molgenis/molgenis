@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.js.JsScriptEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +19,15 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class JsMagmaScriptExecutor
 {
+	private final JsScriptEvaluator jsScriptEvaluator;
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attributeFactory;
 
 	@Autowired
-	public JsMagmaScriptExecutor(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory)
+	public JsMagmaScriptExecutor(JsScriptEvaluator jsScriptEvaluator, EntityTypeFactory entityTypeFactory,
+			AttributeFactory attributeFactory)
 	{
+		this.jsScriptEvaluator = jsScriptEvaluator;
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
 	}
@@ -39,15 +42,9 @@ public class JsMagmaScriptExecutor
 	public Object executeScript(String jsScript, Map<String, Object> parameters)
 	{
 		EntityType entityType = entityTypeFactory.create().setSimpleName("entity");
-		parameters.keySet().stream().forEach(key ->
-		{
-			entityType.addAttribute(attributeFactory.create().setName(key));
-		});
+		parameters.keySet().stream().forEach(key -> entityType.addAttribute(attributeFactory.create().setName(key)));
 		Entity entity = new DynamicEntity(entityType);
-		parameters.entrySet().forEach(parameter ->
-		{
-			entity.set(parameter.getKey(), parameter.getValue());
-		});
-		return ScriptEvaluator.eval(jsScript, entity, entityType);
+		parameters.entrySet().forEach(parameter -> entity.set(parameter.getKey(), parameter.getValue()));
+		return jsScriptEvaluator.eval(jsScript, entity);
 	}
 }

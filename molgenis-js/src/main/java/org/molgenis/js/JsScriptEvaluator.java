@@ -40,7 +40,9 @@ public class JsScriptEvaluator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JsScriptEvaluator.class);
 
-	private static final String SCRIPT_EVALUATOR_RESOURCE_NAME = "js/molgenis-script-evaluator-nashorn.js";
+	private static final String MATH_RESOURCE_NAME = "js/math.min.js";
+	private static final String ES6_SHIMS_RESOURCE_NAME = "js/es6-shims.js";
+	private static final String SCRIPT_EVALUATOR_RESOURCE_NAME = "js/script-evaluator.js";
 
 	private ScriptEngine scriptEngine;
 
@@ -193,6 +195,8 @@ public class JsScriptEvaluator
 		scriptEngine = factory.getScriptEngine(s -> false); // create engine with class filter exposing no classes
 		try
 		{
+			scriptEngine.eval("load(\"classpath:" + ES6_SHIMS_RESOURCE_NAME + "\")");
+			scriptEngine.eval("load(\"classpath:" + MATH_RESOURCE_NAME + "\")");
 			scriptEngine.eval("load(\"classpath:" + SCRIPT_EVALUATOR_RESOURCE_NAME + "\")");
 		}
 		catch (ScriptException e)

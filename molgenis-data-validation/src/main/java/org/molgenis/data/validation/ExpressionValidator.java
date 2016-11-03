@@ -3,7 +3,6 @@ package org.molgenis.data.validation;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.js.JsScriptEvaluator;
-import org.mozilla.javascript.EcmaError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class ExpressionValidator
 {
+	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(ExpressionValidator.class);
 
 	private final JsScriptEvaluator jsScriptEvaluator;
@@ -62,15 +62,8 @@ public class ExpressionValidator
 		List<Boolean> validationResults = new ArrayList<>(expressions.size());
 		for (String expression : expressions)
 		{
-			try
-			{
-				Object value = jsScriptEvaluator.eval(expression, entity);
-				validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
-			}
-			catch (EcmaError e)
-			{
-				LOG.warn("Error evaluation validationExpression", e);
-			}
+			Object value = jsScriptEvaluator.eval(expression, entity);
+			validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
 		}
 		return validationResults;
 	}

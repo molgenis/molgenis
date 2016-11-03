@@ -1,22 +1,16 @@
 package org.molgenis.js;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
-import org.mozilla.javascript.EcmaError;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Date;
+import java.util.Locale;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -57,11 +51,11 @@ public class JsScriptEvaluatorTest
 		when(personWeightAndHeightEntityType.getAttribute("height")).thenReturn(heightAttr);
 		when(personWeightAndHeightEntityType.getAtomicAttributes()).thenReturn(asList(weightAttr, heightAttr));
 
-		Attribute birtDateAttr = when(mock(Attribute.class).getName()).thenReturn("birthdate").getMock();
-		when(birtDateAttr.getDataType()).thenReturn(DATE);
+		Attribute birthDateAttr = when(mock(Attribute.class).getName()).thenReturn("birthdate").getMock();
+		when(birthDateAttr.getDataType()).thenReturn(DATE);
 		personBirthDateMeta = when(mock(EntityType.class).getName()).thenReturn("person").getMock();
-		when(personBirthDateMeta.getAttribute("birthdate")).thenReturn(birtDateAttr);
-		when(personBirthDateMeta.getAtomicAttributes()).thenReturn(singletonList(birtDateAttr));
+		when(personBirthDateMeta.getAttribute("birthdate")).thenReturn(birthDateAttr);
+		when(personBirthDateMeta.getAtomicAttributes()).thenReturn(singletonList(birthDateAttr));
 
 		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
 		when(ageAttr.getDataType()).thenReturn(INT);
