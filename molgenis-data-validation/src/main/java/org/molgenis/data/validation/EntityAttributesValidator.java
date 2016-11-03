@@ -7,6 +7,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.js.JsScriptEvaluator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -29,6 +31,9 @@ import static org.molgenis.AttributeType.*;
 public class EntityAttributesValidator
 {
 	private EmailValidator emailValidator;
+
+	@Autowired
+	private JsScriptEvaluator jsScriptEvaluator;
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityType meta)
 	{
@@ -166,7 +171,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private static Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
+	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
 	{
 		List<String> validationExpressions = new ArrayList<>();
 		List<Attribute> expressionAttributes = new ArrayList<>();
@@ -185,7 +190,8 @@ public class EntityAttributesValidator
 
 		if (!validationExpressions.isEmpty())
 		{
-			List<Boolean> results = ValidationUtils.resolveBooleanExpressions(validationExpressions, entity, meta);
+			List<Boolean> results = ValidationUtils
+					.resolveBooleanExpressions(validationExpressions, entity, jsScriptEvaluator);
 			for (int i = 0; i < results.size(); i++)
 			{
 				if (!results.get(i))

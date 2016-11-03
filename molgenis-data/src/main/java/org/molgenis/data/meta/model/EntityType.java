@@ -113,7 +113,7 @@ public class EntityType extends StaticEntity
 		// Own attributes (deep copy or shallow copy)
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
-			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAttributes().spliterator(), false)
+			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
 					.map(attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
 					.map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
 					.collect(toMap(Attribute::getName, Function.identity(), (u, v) ->

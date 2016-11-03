@@ -166,6 +166,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	// TODO discuss: why isn't this method transactional?
+	@Transactional
 	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
@@ -304,21 +305,32 @@ public class MappingServiceImpl implements MappingService
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		sourceRepo.iterator().forEachRemaining(sourceEntity ->
+		if (targetRepo.count() == 0)
 		{
+			sourceRepo.forEachBatched(entities -> targetRepo.add(entities.stream()
+					.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute))), 1000);
+		}
+		else
+		{
+			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
+			sourceRepo.iterator().forEachRemaining(sourceEntity ->
 			{
-				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-						sourceMapping.getSourceEntityType(), addSourceAttribute);
-				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
 				{
-					targetRepo.add(mappedEntity);
+					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute);
+					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+					{
+						targetRepo.add(mappedEntity);
+					}
+					else
+					{
+						targetRepo.update(mappedEntity);
+					}
 				}
-				else
-				{
-					targetRepo.update(mappedEntity);
-				}
-			}
-		});
+			});
+		}
+
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData,

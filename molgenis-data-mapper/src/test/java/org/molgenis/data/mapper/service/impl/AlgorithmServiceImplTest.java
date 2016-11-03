@@ -11,6 +11,7 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -30,6 +31,7 @@ import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.js.JsScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -510,10 +512,22 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public EntityManager entityManager()
+		{
+			return mock(EntityManager.class);
+		}
+
+		@Bean
+		public JsScriptEvaluator jsScriptEvaluator()
+		{
+			return mock(JsScriptEvaluator.class);
+		}
+
+		@Bean
 		public AlgorithmService algorithmService()
 		{
-			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					algorithmGeneratorService());
+			return new AlgorithmServiceImpl(ontologyTagService(), semanticSearchService(), algorithmGeneratorService(),
+					entityManager(), jsScriptEvaluator());
 		}
 
 		@Bean
