@@ -78,8 +78,8 @@ public class AttributeMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity")
-				.setNillable(false).setReadOnly(true);
+		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false)
+				.setReadOnly(true);
 		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number")
 				.setDescription("Number that defines order of attributes in a entity").setNillable(false);
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
@@ -102,15 +102,17 @@ public class AttributeMetadata extends SystemEntityType
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(IS_NULLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
 		addAttribute(IS_AUTO).setDataType(BOOL).setNillable(false).setLabel("Auto")
-				.setDescription("Auto generated values");
+				.setDescription("Auto generated values").setValidationExpression(getAutoValidationExpression());
 		addAttribute(IS_VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		addAttribute(IS_AGGREGATABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable");
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM")
 				.setValidationExpression(getEnumOptionsValidationExpression());
-		addAttribute(RANGE_MIN).setDataType(LONG).setLabel("Range min");
-		addAttribute(RANGE_MAX).setDataType(LONG).setLabel("Range max");
+		addAttribute(RANGE_MIN).setDataType(LONG).setLabel("Range min")
+				.setValidationExpression(getRangeValidationExpression(RANGE_MIN));
+		addAttribute(RANGE_MAX).setDataType(LONG).setLabel("Range max")
+				.setValidationExpression(getRangeValidationExpression(RANGE_MAX));
 		addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
 		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
@@ -161,4 +163,25 @@ public class AttributeMetadata extends SystemEntityType
 		return "$('" + REF_ENTITY_TYPE + "').isNull().and($('" + TYPE + "').matches(" + regex + ").not()).or(" + "$('"
 				+ REF_ENTITY_TYPE + "').isNull().not().and($('" + TYPE + "').matches(" + regex + "))).value()";
 	}
+
+	private static String getAutoValidationExpression()
+	{
+		String autoIsTrue = "$('" + IS_AUTO + "').eq(true)";
+		String autoIsFalse = "$('" + IS_AUTO + "').eq(false)";
+		String isIdIsTrue = "$('" + IS_ID_ATTRIBUTE + "').eq(true)";
+		String typeIsNullOrFalse =
+				"$('" + TYPE + "').eq('" + getValueString(STRING) + "').or($('" + TYPE + "').isNull())";
+
+		return autoIsTrue + ".and(" + isIdIsTrue + ".and(" + typeIsNullOrFalse + ")).or(" + autoIsFalse + ").value()";
+	}
+
+	private static String getRangeValidationExpression(String attribute)
+	{
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isIntegerType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String rangeIsNull = "$('" + attribute + "').isNull()";
+
+		return rangeIsNull + ".or(" + rangeIsNull + ".not().and($('" + TYPE + "').matches(" + regex + ")).value()";
+	}
+
 }
