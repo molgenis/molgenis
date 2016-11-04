@@ -110,7 +110,8 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(IS_VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(IS_AGGREGATABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable");
+		addAttribute(IS_AGGREGATABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable")
+				.setValidationExpression(getAggregatableExpression());
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM")
 				.setValidationExpression(getEnumOptionsValidationExpression());
 		addAttribute(RANGE_MIN).setDataType(LONG).setLabel("Range min")
@@ -243,6 +244,17 @@ public class AttributeMetadata extends SystemEntityType
 		String isUniqueIsFalseOrNull = "$('" + IS_UNIQUE + "').eq(false).or($('" + IS_UNIQUE + "').isNull())";
 		return isUniqueIsFalseOrNull + ".or($('" + IS_UNIQUE + "').eq(true).and($('" + IS_NULLABLE
 				+ "').eq(false))).value()";
+	}
+
+	private String getAggregatableExpression()
+	{
+		String aggregatableIsNullOrFalse =
+				"$('" + IS_AGGREGATABLE + "').isNull().or($('" + IS_AGGREGATABLE + "').eq(false))";
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		return aggregatableIsNullOrFalse + ".or(" + "$('" + TYPE + "')" + ".matches(" + regex + ")" + ".and(" + "$('"
+				+ IS_NULLABLE + "')" + ".eq(false)" + ")" + ")" + ".or(" + "$('" + TYPE + "')"
+				+ ".matches(" + regex + ").not()).value()";
 	}
 
 }
