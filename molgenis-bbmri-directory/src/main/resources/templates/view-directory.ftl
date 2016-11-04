@@ -11,7 +11,7 @@
 <body>
 <div id="root" style="height: 100%"></div>
 <script type="text/javascript">
-    ___INITIAL_STATE__ = {
+    window.___INITIAL_STATE__ = {
         'baseUrl': '${baseUrl}',
         'session' : {
             'server' : {
@@ -26,8 +26,8 @@
         }
     }
 </script>
-<script src="/js/vendor.d79e035cbe87b20e5d4a.js"></script>
-<script src="/js/app.1582dfa4e36007881e62.js"></script>
+<script src="/js/vendor.ea74aa6b35d07834fd05.js"></script>
+<script src="/js/app.d1e0f9ac0d624a6eb218.js"></script>
 
 </body>
 </html>
