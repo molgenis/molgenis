@@ -104,7 +104,7 @@ public class AttributeMetadata extends SystemEntityType
 				.setValidationExpression(getOrderByValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
-		addAttribute(IS_NULLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
+		addAttribute(IS_NULLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable").setDefaultValue("true");
 		addAttribute(IS_AUTO).setDataType(BOOL).setNillable(false).setLabel("Auto")
 				.setDescription("Auto generated values").setValidationExpression(getAutoValidationExpression());
 		addAttribute(IS_VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");

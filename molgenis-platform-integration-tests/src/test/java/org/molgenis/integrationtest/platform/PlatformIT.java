@@ -1434,6 +1434,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		newAttr.setReadOnly(true);
 		newAttr.setUnique(true);
 		newAttr.setLabel("test");
+		newAttr.setNillable(false);
 		newAttr.setDescription("test");
 
 		// Update attribute

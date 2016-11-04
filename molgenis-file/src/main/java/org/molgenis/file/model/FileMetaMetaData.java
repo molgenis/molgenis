@@ -44,7 +44,8 @@ public class FileMetaMetaData extends SystemEntityType
 		addAttribute(FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false).setLabel("Filename");
 		addAttribute(CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");
 		addAttribute(SIZE).setDataType(LONG).setLabel("Size").setDescription("File size in bytes");
-		addAttribute(URL).setDataType(HYPERLINK).setLabel("URL").setDescription("File download URL").setUnique(true);
+		addAttribute(URL).setDataType(HYPERLINK).setLabel("URL").setDescription("File download URL").setUnique(true)
+				.setNillable(false);
 	}
 
 	@Override
