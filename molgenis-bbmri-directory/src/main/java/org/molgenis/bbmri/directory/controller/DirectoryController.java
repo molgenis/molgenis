@@ -72,7 +72,7 @@ public class DirectoryController extends MolgenisPluginController
 	{
 		if (q != null)
 		{
-			LOG.info("Request received with an rsql query " + q + ", setting filter state");
+			LOG.info("Request received with an rsql query\n\n" + q + "\n\nsetting filter state");
 			Query<Entity> query = molgenisRSQL
 					.createQuery(q, metaDataService.getEntityType("eu_bbmri_eric_collections"));
 
@@ -93,7 +93,7 @@ public class DirectoryController extends MolgenisPluginController
 			filters.put("materials", gson.fromJson(materials, List.class));
 			model.addAttribute("filters", gson.toJson(filters));
 
-			LOG.info("Generated filters from RSQL:\n" + gson.toJson(filters));
+			LOG.trace("Generated filters from RSQL:\n" + gson.toJson(filters));
 		}
 
 		model.addAttribute("username", getCurrentUsername());
@@ -117,7 +117,7 @@ public class DirectoryController extends MolgenisPluginController
 		String redirectURL = restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
 				.toASCIIString();
 
-		LOG.info("Redirecting to " + redirectURL);
+		LOG.trace("Redirecting to " + redirectURL);
 		return redirectURL;
 	}
 

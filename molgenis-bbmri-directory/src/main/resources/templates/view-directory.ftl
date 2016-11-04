@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
 </head>
 <body>
+<div>${filters}</div>
 <div id="root" style="height: 100%"></div>
 <script type="text/javascript">
     ___INITIAL_STATE__ = {
@@ -51,8 +52,8 @@
         }
     }
 </script>
-<script src="/js/vendor.da65257e29fdfa72e426.js"></script>
-<script src="/js/app.a8191e8d2d874b62dffa.js"></script>
+<script src="/js/vendor.6d3c402d0a7aa003159f.js"></script>
+<script src="/js/app.11ea8752792a54ac3009.js"></script>
 
 </body>
 </html>
