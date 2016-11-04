@@ -118,7 +118,8 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(RANGE_MAX).setDataType(LONG).setLabel("Range max")
 				.setValidationExpression(getRangeValidationExpression(RANGE_MAX));
 		addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
-		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
+		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique")
+				.setValidationExpression(getUniqueValidationExpression());
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Visible expression");
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Validation expression");
@@ -170,13 +171,20 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getAutoValidationExpression()
 	{
+		String dateTypeRegex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isDateType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+
 		String autoIsTrue = "$('" + IS_AUTO + "').eq(true)";
 		String autoIsFalse = "$('" + IS_AUTO + "').eq(false)";
-		String isIdIsTrue = "$('" + IS_ID_ATTRIBUTE + "').eq(true)";
-		String typeIsNullOrFalse =
-				"$('" + TYPE + "').eq('" + getValueString(STRING) + "').or($('" + TYPE + "').isNull())";
+		String autoIsTrueAndIsIdIsTrueAndTypeIsStringOrNull =
+				autoIsTrue + ".and($('" + IS_ID_ATTRIBUTE + "').eq(true).and($('" + TYPE + "').eq('" + getValueString(
+						STRING) + "').or($('" + TYPE + "').isNull())))";
+		String autoIsTrueAndIsIdIsFalseOrNullAndTypeIsDateType =
+				autoIsTrue + ".and($('" + IS_ID_ATTRIBUTE + "').eq(false).or($('" + IS_ID_ATTRIBUTE
+						+ "').isNull())).and($('" + TYPE + "').matches(" + dateTypeRegex + "))";
 
-		return autoIsTrue + ".and(" + isIdIsTrue + ".and(" + typeIsNullOrFalse + ")).or(" + autoIsFalse + ").value()";
+		return autoIsFalse + ".or(" + autoIsTrueAndIsIdIsTrueAndTypeIsStringOrNull + ").or("
+				+ autoIsTrueAndIsIdIsFalseOrNullAndTypeIsDateType + ").value()";
 	}
 
 	private static String getRangeValidationExpression(String attribute)
@@ -192,11 +200,13 @@ public class AttributeMetadata extends SystemEntityType
 	{
 		String isIdIsTrue = "$('" + IS_ID_ATTRIBUTE + "').eq(true)";
 		String isIdIsFalseOrNull = "$('" + IS_ID_ATTRIBUTE + "').eq(false).or($('" + IS_ID_ATTRIBUTE + "').isNull())";
-		String typeIsStringOrIntOrLong =
+		String typeIsNullOrStringOrIntOrLong =
 				"$('" + TYPE + "').eq('" + getValueString(STRING) + "').or($('" + TYPE + "').eq('" + getValueString(INT)
-						+ "')).or($('" + TYPE + "').eq('" + getValueString(LONG) + "'))";
+						+ "')).or($('" + TYPE + "').eq('" + getValueString(LONG) + "')).or($('" + TYPE + "').isNull())";
+		String nullableIsFalse = "$('" + IS_NULLABLE + "').eq(false)";
 
-		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsStringOrIntOrLong + ")).value()";
+		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsNullOrStringOrIntOrLong + ").and("
+				+ nullableIsFalse + ")).value()";
 	}
 
 	private static String getChildrenValidationExpression()
@@ -226,6 +236,13 @@ public class AttributeMetadata extends SystemEntityType
 
 		return isLabelAttributeIsFalseOrNull + ".or($('" + IS_LABEL_ATTRIBUTE + "').eq(true).and($('" + TYPE
 				+ "').matches(" + regex + ").not().and(" + nullableIsFalse + "))).value()";
+	}
+
+	private static String getUniqueValidationExpression()
+	{
+		String isUniqueIsFalseOrNull = "$('" + IS_UNIQUE + "').eq(false).or($('" + IS_UNIQUE + "').isNull())";
+		return isUniqueIsFalseOrNull + ".or($('" + IS_UNIQUE + "').eq(true).and($('" + IS_NULLABLE
+				+ "').eq(false))).value()";
 	}
 
 }
