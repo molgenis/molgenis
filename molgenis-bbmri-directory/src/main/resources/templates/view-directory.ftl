@@ -22,32 +22,12 @@
         'Directory' : {
             <#if filters??>
             'filters' : ${filters}
-            <#else>
-            'filters' : {
-                materials : [
-                    {
-                        operator : 'AND',
-                        value    : [{
-                            id    : 'PLASMA', label : 'Plasma'
-                        }, {
-                            id    : 'TISSUE_FROZEN', label : 'Cryo tissue'
-                        }]
-                    },
-                    'OR',
-                    {
-                        value : { id : 'NAV', label : 'Not available' }
-                    }
-                ],
-                sample_access_fee : [
-                    true
-                ]
-            }
             </#if>
         }
     }
 </script>
-<script src="/js/vendor.dffca7b9f0159f34a157.js"></script>
-<script src="/js/app.f88829c32916f4e15cfa.js"></script>
+<script src="/js/vendor.d79e035cbe87b20e5d4a.js"></script>
+<script src="/js/app.1582dfa4e36007881e62.js"></script>
 
 </body>
 </html>

@@ -30,8 +30,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.api.client.util.Maps.newHashMap;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -72,22 +72,19 @@ public class DirectoryController extends MolgenisPluginController
 	{
 		if (q != null)
 		{
-			LOG.info("Request received with an rsql query " + q + ", setting filter state");
+			LOG.info("Request received with an rsql query\n\n" + q + "\n\nsetting filter state");
 			Query<Entity> query = molgenisRSQL
 					.createQuery(q, metaDataService.getEntityType("eu_bbmri_eric_collections"));
 
 			List<QueryRule> rules = query.getRules().get(0).getNestedRules();
 			Map<String, Object> filters = newHashMap();
-			List<Object> list = newArrayList();
 			for (QueryRule rule : rules)
 			{
-
 				String field = rule.getField();
-				// We only parse the booleans
+				// For the demo, we only parse the boolean fields
 				if (field != null)
 				{
-					list.add(rule.getValue());
-					filters.put(field, list);
+					filters.put(field, singletonList(rule.getValue()));
 				}
 			}
 
@@ -96,7 +93,7 @@ public class DirectoryController extends MolgenisPluginController
 			filters.put("materials", gson.fromJson(materials, List.class));
 			model.addAttribute("filters", gson.toJson(filters));
 
-			LOG.info("Generated filters from RSQL:\n" + gson.toJson(filters));
+			LOG.trace("Generated filters from RSQL:\n" + gson.toJson(filters));
 		}
 
 		model.addAttribute("username", getCurrentUsername());
@@ -119,8 +116,11 @@ public class DirectoryController extends MolgenisPluginController
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-		return "redirect:" + restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
+		String redirectURL = restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
 				.toASCIIString();
+
+		LOG.trace("Redirecting to " + redirectURL);
+		return redirectURL;
 	}
 
 	/**
