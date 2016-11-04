@@ -22,6 +22,31 @@
         'Directory' : {
             <#if filters??>
             'filters' : ${filters}
+            <#else>
+            'filters' : {
+                'materials' : [
+                    {
+                        operator: 'AND',
+                        value : [
+                            {
+                                id: 'PLASMA',
+                                label: 'Plasma'
+                            },
+                            {
+                                id: 'TISSUE_FROZEN',
+                                label: 'Cryo tissue'
+                            }
+                        ]
+                    },
+                    'OR',
+                    {
+                        value : {
+                            id : 'NAV',
+                            label : 'Not available'
+                        }
+                    }
+                ]
+            }
             </#if>
         }
     }
