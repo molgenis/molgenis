@@ -1,5 +1,6 @@
 package org.molgenis.data.validation.meta;
 
+import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -9,12 +10,15 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -38,6 +42,9 @@ public class AttributeValidator
 	{
 		this.dataService = requireNonNull(dataService);
 	}
+
+	@Autowired
+	private static EmailValidator emailValidator;
 
 	public void validate(Attribute attr)
 	{
@@ -130,8 +137,9 @@ public class AttributeValidator
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
-	private static void validateDefaultValue(Attribute attr)
+	protected static void validateDefaultValue(Attribute attr)
 	{
+		String value = attr.getDefaultValue();
 		if (attr.getDefaultValue() != null)
 		{
 			if (attr.isUnique())
@@ -150,6 +158,73 @@ public class AttributeValidator
 				throw new MolgenisDataException("Attribute " + attr.getName()
 						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
 			}
+
+			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
+			{
+				throw new MolgenisDataException(
+						"Default value for attribute [" + attr.getName() + "]exceeds the maximum length for datatype "
+								+ attr.getDataType().name());
+			}
+
+			if (fieldType == AttributeType.EMAIL)
+			{
+				checkEmail(value);
+			}
+
+			if (fieldType == AttributeType.HYPERLINK)
+			{
+				checkHyperlink(value);
+			}
+
+			if (fieldType == AttributeType.ENUM)
+			{
+				checkEnum(attr, value);
+			}
+
+			//get typed valuto check if the value is of the right type.
+			try
+			{
+				EntityUtils.getTypedValue(value, attr);
+			}
+			catch (NumberFormatException e)
+			{
+				throw new MolgenisDataException(e.getClass().getSimpleName() + " " + e.getMessage());
+			}
+		}
+	}
+
+	private static void checkEmail(String value)
+	{
+		if (!emailValidator.isValid(value, null))
+		{
+			throw new MolgenisDataException("Default value [" + value + "] is not a valid email address");
+		}
+	}
+
+	private static void checkEnum(Attribute attr, String value)
+	{
+		if (value != null)
+		{
+			List<String> enumOptions = attr.getEnumOptions();
+
+			if (!enumOptions.contains(value))
+			{
+				throw new MolgenisDataException(
+						"Invalid default value [" + value + "] for enum [" + attr.getName() + "] value must be one of "
+								+ enumOptions.toString());
+			}
+		}
+	}
+
+	private static void checkHyperlink(String value)
+	{
+		try
+		{
+			new URI(value);
+		}
+		catch (URISyntaxException e)
+		{
+			throw new MolgenisDataException("Default value [" + value + "] is not a valid hyperlink.");
 		}
 	}
 
