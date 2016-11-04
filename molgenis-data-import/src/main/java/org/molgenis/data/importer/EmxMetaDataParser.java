@@ -315,51 +315,47 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		intermediateResults.getEntities().forEach(entityType ->
 		{
-			// skip abstract entities, because they do not require label or lookup attributes
-			if (!entityType.isAbstract())
+			// in case no label attribute was defined:
+			// try to set own id attribute or another own attribute as label attribute
+			if (entityType.getLabelAttribute() == null)
 			{
-				// in case no label attribute was defined:
-				// try to set own id attribute or another own attribute as label attribute
-				if (entityType.getLabelAttribute() == null)
+				Attribute ownIdAttr = entityType.getOwnIdAttribute();
+				if (ownIdAttr != null && ownIdAttr.isVisible())
 				{
-					Attribute ownIdAttr = entityType.getOwnIdAttribute();
-					if (ownIdAttr != null && ownIdAttr.isVisible())
+					ownIdAttr.setLabelAttribute(true);
+				}
+				else
+				{
+					// select the first required visible owned attribute as label attribute
+					for (Attribute ownAttr : entityType.getOwnAtomicAttributes())
 					{
-						ownIdAttr.setLabelAttribute(true);
-					}
-					else
-					{
-						// select the first required visible owned attribute as label attribute
-						for (Attribute ownAttr : entityType.getOwnAtomicAttributes())
+						if (!ownAttr.isNillable() && ownAttr.isVisible())
 						{
-							if (!ownAttr.isNillable() && ownAttr.isVisible())
-							{
-								ownAttr.setLabelAttribute(true);
-								break;
-							}
+							ownAttr.setLabelAttribute(true);
+							break;
 						}
 					}
 				}
+			}
 
-				// in case no lookup attributes were defined:
-				// try to set own id attribute and own label attribute as lookup attributes
-				if (Iterables.size(entityType.getLookupAttributes()) == 0)
+			// in case no lookup attributes were defined:
+			// try to set own id attribute and own label attribute as lookup attributes
+			if (Iterables.size(entityType.getLookupAttributes()) == 0)
+			{
+				int lookupAttrIdx = 0;
+
+				Attribute ownIdAttr = entityType.getOwnIdAttribute();
+				if (ownIdAttr != null && ownIdAttr.isVisible())
 				{
-					int lookupAttrIdx = 0;
+					ownIdAttr.setLookupAttributeIndex(lookupAttrIdx++);
+				}
 
-					Attribute ownIdAttr = entityType.getOwnIdAttribute();
-					if (ownIdAttr != null && ownIdAttr.isVisible())
+				Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
+				if (ownLabelAttr != null)
+				{
+					if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))
 					{
-						ownIdAttr.setLookupAttributeIndex(lookupAttrIdx++);
-					}
-
-					Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-					if (ownLabelAttr != null)
-					{
-						if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))
-						{
-							ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
-						}
+						ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
 					}
 				}
 			}
