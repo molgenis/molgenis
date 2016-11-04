@@ -30,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
@@ -41,6 +42,7 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.EmxMetaDataParser.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -85,7 +87,7 @@ public class ImportWriter
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
 		runAsSystem(() -> importTags(job.source));
 		runAsSystem(() -> importPackages(job.parsedMetaData));
-		runAsSystem(() -> addEntityType(job.parsedMetaData, job.report, job.metaDataChanges));
+		runAsSystem(() -> addEntityType(job.parsedMetaData, job.report));
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		Iterable<EntityType> existingMetaData = dataService.getMeta().getEntityTypes()::iterator;
@@ -351,55 +353,51 @@ public class ImportWriter
 
 	/**
 	 * Adds the parsed {@link ParsedMetaData}, creating new repositories where necessary.
+	 *
+	 * @param parsedMetaData meta data from import source
+	 * @param report         import report
 	 */
-	private void addEntityType(ParsedMetaData parsedMetaData, EntityImportReport report,
-			MetaDataChanges metaDataChanges)
+	private void addEntityType(ParsedMetaData parsedMetaData, EntityImportReport report)
 	{
-		Iterable<EntityType> existingMetaData = dataService.getMeta().getEntityTypes()::iterator;
-		Map<String, EntityType> allEntityTypeMap = new HashMap<>();
-		for (EntityType emd : parsedMetaData.getEntities())
-		{
-			allEntityTypeMap.put(emd.getName(), emd);
-		}
-		scanMetaDataForSystemEntityType(allEntityTypeMap, existingMetaData);
-		List<EntityType> resolve = DependencyResolver
-				.resolve(new HashSet<EntityType>(Sets.newLinkedHashSet(allEntityTypeMap.values())));
-		for (EntityType entityType : resolve)
-		{
-			String name = entityType.getName();
-			if (!EMX_ENTITIES.equals(name) && !EMX_ATTRIBUTES.equals(name) && !EMX_PACKAGES.equals(name) && !EMX_TAGS
-					.equals(name) && !EMX_LANGUAGES.equals(name) && !EMX_I18NSTRINGS.equals(name))
-			{
-				EntityType existingEntityType = dataService.getMeta().getEntityType(entityType.getName());
-				if (existingEntityType == null)
-				{
-					LOG.debug("trying to create: " + name);
-					metaDataChanges.addEntity(name);
-					dataService.getMeta().addEntityType(entityType);
-					if (!entityType.isAbstract())
-					{
-						report.addNewEntity(name);
-					}
-				}
-				else if (!entityType.isAbstract())
-				{
-					// inject identifiers
-					Map<String, String> attrNameIdentifierMap = stream(
-							existingEntityType.getOwnAllAttributes().spliterator(), false)
-							.collect(toMap(Attribute::getName, Attribute::getIdentifier));
-					entityType.getOwnAllAttributes().forEach(attr ->
-					{
-						String identifier = attrNameIdentifierMap.get(attr.getName());
-						if (identifier != null)
-						{
-							attr.setIdentifier(identifier);
-						}
-					});
+		Collection<EntityType> entityTypes = parsedMetaData.getEntities();
 
-					dataService.getMeta().updateEntityType(entityType);
-				}
+		// retrieve existing entity types
+		Fetch entityTypeFetch = new Fetch().field(EntityTypeMetadata.FULL_NAME).field(EntityTypeMetadata.ATTRIBUTES,
+				new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
+
+		Map<String, EntityType> existingEntityTypeMap = dataService
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), entityTypeFetch,
+						EntityType.class).collect(toMap(EntityType::getName, Function.identity()));
+
+		// inject attribute identifiers in entity types to import
+		entityTypes.forEach(entityType ->
+		{
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			if (existingEntityType != null)
+			{
+				entityType.getOwnAllAttributes().forEach(ownAttr ->
+				{
+					Attribute existingAttr = existingEntityType.getAttribute(ownAttr.getName());
+					if (existingAttr != null)
+					{
+						ownAttr.setIdentifier(existingAttr.getIdentifier());
+					}
+				});
 			}
-		}
+		});
+
+		// add or update entity types
+		dataService.getMeta().upsertEntityType(entityTypes);
+
+		// add new entities to import report
+		entityTypes.forEach(entityType ->
+		{
+			String entityTypeName = entityType.getName();
+			if (!existingEntityTypeMap.containsKey(entityTypeName))
+			{
+				report.addNewEntity(entityTypeName);
+			}
+		});
 	}
 
 	/**
