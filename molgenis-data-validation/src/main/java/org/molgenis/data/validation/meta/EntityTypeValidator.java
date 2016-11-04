@@ -1,6 +1,7 @@
 package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
@@ -48,6 +49,7 @@ public class EntityTypeValidator
 	public void validate(EntityType entityType)
 	{
 		validateEntityName(entityType);
+		validateExtends(entityType);
 		validateOwnAttributes(entityType);
 
 		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
@@ -208,6 +210,27 @@ public class EntityTypeValidator
 									attr.getName(), extendsEntityType.getName())));
 				}
 			});
+		}
+	}
+
+	/**
+	 * Validates if this entityType extends another entityType. If so, checks whether that parent entityType is abstract.
+	 *
+	 * @param entityType entity meta data
+	 * @throws MolgenisValidationException if the entity extends from a non-abstract entity
+	 */
+	private static void validateExtends(EntityType entityType)
+	{
+		if (entityType.getExtends() != null)
+		{
+			EntityType extendedEntityType = entityType.getExtends();
+			if (!extendedEntityType.isAbstract())
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("EntityType [%s] is not abstract; EntityType [%s] can't extend it",
+								entityType.getExtends().getName(), entityType.getName())
+				));
+			}
 		}
 	}
 
