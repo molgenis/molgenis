@@ -255,6 +255,43 @@ public class EntityTypeUtils
 	}
 
 	/**
+	 * Returns whether the attribute is a date type.
+	 *
+	 * @param attrType attribute type
+	 * @return true if the attribute is a date type.
+	 */
+	public static boolean isDateType(AttributeType attrType)
+	{
+		switch (attrType)
+		{
+			case DATE:
+			case DATE_TIME:
+				return true;
+			case LONG:
+			case INT:
+			case HTML:
+			case SCRIPT:
+			case TEXT:
+			case BOOL:
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case COMPOUND:
+			case ONE_TO_MANY:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case FILE:
+			case HYPERLINK:
+			case MREF:
+			case STRING:
+			case XREF:
+				return false;
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	/**
 	 * Returns attribute names for the given attributes
 	 *
 	 * @return attribute names
