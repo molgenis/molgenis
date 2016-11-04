@@ -26,28 +26,33 @@
             'filters' : {
                 materials : [
                     {
-                        operator : 'AND',
-                        value    : [{
-                            id    : 'PLASMA', label : 'Plasma'
-                        }, {
-                            id    : 'TISSUE_FROZEN', label : 'Cryo tissue'
-                        }]
+                        operator: 'AND',
+                        value : [
+                            {
+                                id: 'PLASMA',
+                                label: 'Plasma'
+                            },
+                            {
+                                id: 'TISSUE_FROZEN',
+                                label: 'Cryo tissue'
+                            }
+                        ]
                     },
                     'OR',
                     {
-                        value : { id : 'NAV', label : 'Not available' }
+                        value : {
+                            id : 'NAV',
+                            label : 'Not available'
+                        }
                     }
-                ],
-                sample_access_fee : [
-                    true
                 ]
             }
             </#if>
         }
     }
 </script>
-<script src="/js/vendor.dffca7b9f0159f34a157.js"></script>
-<script src="/js/app.f88829c32916f4e15cfa.js"></script>
+<script src="/js/vendor.da65257e29fdfa72e426.js"></script>
+<script src="/js/app.a8191e8d2d874b62dffa.js"></script>
 
 </body>
 </html>
