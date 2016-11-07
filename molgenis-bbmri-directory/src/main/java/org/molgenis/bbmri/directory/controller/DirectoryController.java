@@ -99,6 +99,7 @@ public class DirectoryController extends MolgenisPluginController
 
 		if (nToken != null)
 		{
+			LOG.info("Token received [%s", nToken);
 			model.addAttribute("nToken", nToken);
 		}
 
