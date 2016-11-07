@@ -54,8 +54,8 @@
         }
     }
 </script>
-<script src="/js/vendor.4c7f9ea304fb2662af46.js"></script>
-<script src="/js/app.b03cbb62092f9d90a56f.js"></script>
+<script src="/js/vendor.a010f79de2e1b9015a28.js"></script>
+<script src="/js/app.4dd721ee73a8506bebc0.js"></script>
 
 </body>
 </html>
