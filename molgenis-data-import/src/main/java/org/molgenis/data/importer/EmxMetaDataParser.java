@@ -723,6 +723,16 @@ public class EmxMetaDataParser implements MetaDataParser
 					attr.getName().startsWith(EMX_ATTRIBUTES_LABEL) || attr.getName()
 							.startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
 			{
+				// check if casing mismatch
+				SUPPORTED_ATTRIBUTE_ATTRIBUTES.forEach(emxAttrMetaAttr ->
+				{
+					if (emxAttrMetaAttr.equalsIgnoreCase(attr.getName()))
+					{
+						throw new IllegalArgumentException(String.format(
+								"Unsupported attribute metadata: attributes.%s, did you mean attributes.%s?",
+								attr.getName(), emxAttrMetaAttr));
+					}
+				});
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes." + attr.getName());
 			}
 		}
