@@ -1331,12 +1331,19 @@ public class EmxMetaDataParser implements MetaDataParser
 					for (Attribute att : sourceRepository.getEntityType().getAttributes())
 					{
 						Attribute attribute = target.getAttribute(att.getName());
-						boolean known = attribute != null && attribute.getExpression() == null;
+
+						// Bi-directional one-to-many attributes mapped by another attribute can only be imported
+						// through the owning side: one-to-many attribute 'books' of entity 'author' mapped by attribute
+						//  'author' of entity 'book' cannot be imported, only the owning attribute 'book' can be
+						// imported.
+						boolean known = attribute != null && attribute.getExpression() == null && !(
+								attribute.getDataType() == ONE_TO_MANY && attribute.isMappedBy());
 						report = report.addAttribute(att.getName(), known ? IMPORTABLE : UNKNOWN);
 					}
 					for (Attribute att : target.getAttributes())
 					{
-						if (!(att.getDataType() == COMPOUND))
+						// See comment above regarding import of bi-directional one-to-many data
+						if (att.getDataType() != COMPOUND && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy()))
 						{
 							if (!att.isAuto() && att.getExpression() == null && !report.getFieldsImportable().get(sheet)
 									.contains(att.getName()))
