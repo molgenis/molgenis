@@ -336,7 +336,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		decoratedRepo.add(entityType);
 		if (!entityType.isAbstract() && !dataService.getMeta().isMetaEntityType(entityType))
 		{
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType.getBackend());
 			if (repoCollection == null)
 			{
 				throw new MolgenisDataException(format("Unknown backend [%s]", entityType.getBackend()));
@@ -367,7 +367,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 				.collect(toMap(Attribute::getName, Function.identity()));
 		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
-		dataService.getMeta().getConcreteChildren(entityType).forEach(concreteEntityType ->
+		dataService.getMeta().forEachConcreteChild(entityType, concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
 			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());

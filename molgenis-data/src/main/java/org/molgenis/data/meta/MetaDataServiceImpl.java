@@ -3,10 +3,8 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -17,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
@@ -546,14 +547,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Stream<EntityType> getConcreteChildren(EntityType entityType)
+	public void forEachConcreteChild(EntityType entityType, Consumer<EntityType> consumer)
 	{
-		if (!entityType.isAbstract())
+		if (entityType.isAbstract())
 		{
-			return Stream.of(entityType);
+			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
+					.forEach(childEntityType -> forEachConcreteChild(childEntityType, consumer));
 		}
-		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-				.flatMap(this::getConcreteChildren);
+		else
+		{
+			consumer.accept(entityType);
+		}
 	}
 
 	/**
@@ -904,9 +908,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setOwnAllAttributes(Iterable<Attribute> attrs)
+		public EntityType setOwnAttributes(Iterable<Attribute> attrs)
 		{
-			return entityType.setOwnAllAttributes(attrs);
+			return entityType.setOwnAttributes(attrs);
 		}
 
 		@Override

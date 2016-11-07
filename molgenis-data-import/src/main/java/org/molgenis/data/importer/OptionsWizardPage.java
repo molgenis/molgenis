@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.ui.wizard.AbstractWizardPage;
@@ -71,7 +71,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 
 			try
 			{
-				MetaValidationUtils.validateName(userGivenName);
+				NameValidator.validateName(userGivenName);
 				if (dataService.hasRepository(userGivenName))
 				{
 					result.addError(new ObjectError("wizard", "An entity with this name already exists."));

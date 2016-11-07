@@ -32,6 +32,6 @@ public class TestRefEntityStaticMetaData extends SystemEntityType
 	{
 		setPackage(testPackage);
 		addAttribute(EntityTestHarness.ATTR_REF_ID, ROLE_ID);
-		addAttribute(EntityTestHarness.ATTR_REF_STRING, ROLE_LABEL);
+		addAttribute(EntityTestHarness.ATTR_REF_STRING, ROLE_LABEL).setNillable(false);
 	}
 }
