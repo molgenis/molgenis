@@ -1,9 +1,6 @@
 package org.molgenis.data.meta;
 
-import autovalue.shaded.com.google$.common.collect.$Lists;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GenericDependencyResolver;
 import org.slf4j.Logger;
