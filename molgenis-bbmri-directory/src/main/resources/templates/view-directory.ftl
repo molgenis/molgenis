@@ -12,13 +12,14 @@
 <div id="root" style="height: 100%"></div>
 <script type="text/javascript">
     ___INITIAL_STATE__ = {
-        session : {
-            server : {
-                apiUrl: '${apiUrl}',
+        'baseUrl': '${baseUrl}',
+        'session' : {
+            'server' : {
+                'apiUrl': '${apiUrl}'
             },
-            username : '${username}'
+            'username' : '${username}'
         },
-        Directory : {
+        'Directory' : {
             <#if nToken??>
             'nToken' : '${nToken}',
             </#if>
@@ -53,8 +54,8 @@
         }
     }
 </script>
-<script src="/js/vendor.3314456e224ab12c33f9.js"></script>
-<script src="/js/app.2a13bba86ca4ca5c6585.js"></script>
+<script src="/js/vendor.09a4ded76958dcc7a527.js"></script>
+<script src="/js/app.dad80036e92e5cbeeff3.js"></script>
 
 </body>
 </html>
