@@ -92,8 +92,7 @@ public class AttributeMetadata extends SystemEntityType
 				.setValidationExpression(getLookupAttributeValidationExpression());
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
 		addAttribute(CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts")
-				.setValidationExpression(getChildrenValidationExpression());
+				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
@@ -208,14 +207,6 @@ public class AttributeMetadata extends SystemEntityType
 
 		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsNullOrStringOrIntOrLong + ").and("
 				+ nullableIsFalse + ")).value()";
-	}
-
-	private static String getChildrenValidationExpression()
-	{
-		String childrenIsNull = "$('" + CHILDREN + "').isNull()";
-		String typeIsCompound = "$('" + TYPE + "').eq('" + getValueString(COMPOUND) + "')";
-
-		return childrenIsNull + ".or(" + childrenIsNull + ".not().and(" + typeIsCompound + ")).value()";
 	}
 
 	private static String getLookupAttributeValidationExpression()

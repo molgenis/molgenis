@@ -1,5 +1,6 @@
 package org.molgenis.data.validation.meta;
 
+import com.google.common.collect.Iterables;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
@@ -51,6 +52,7 @@ public class AttributeValidator
 		validateName(attr);
 		validateDefaultValue(attr);
 		validateParent(attr);
+		validateChildren(attr);
 
 		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 		if (currentAttr == null)
@@ -74,6 +76,19 @@ public class AttributeValidator
 								attr.getParent().getName(), attr.getName()));
 			}
 		}
+	}
+
+	private static void validateChildren(Attribute attr)
+	{
+		boolean childrenIsNullOrEmpty = attr.getChildren() == null || Iterables.isEmpty(attr.getChildren());
+
+		if (!childrenIsNullOrEmpty && attr.getDataType() != COMPOUND)
+		{
+			throw new MolgenisDataException(
+					format("Attribute [%s] is not of type COMPOUND and can therefor not have children",
+							attr.getName()));
+		}
+
 	}
 
 	private void validateAdd(Attribute newAttr)
