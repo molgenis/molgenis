@@ -20,6 +20,9 @@
             'username' : '${username}'
         },
         'Directory' : {
+            <#if nToken??>
+            'nToken' : '${nToken}',
+            </#if>
             <#if filters??>
             'filters' : ${filters}
             <#else>
