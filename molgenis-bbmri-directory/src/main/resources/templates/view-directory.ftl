@@ -53,8 +53,8 @@
         }
     }
 </script>
-<script src="/js/vendor.6d980603a2b934901ef8.js"></script>
-<script src="/js/app.b73a409467a8ac381441.js"></script>
+<script src="/js/vendor.3314456e224ab12c33f9.js"></script>
+<script src="/js/app.2a13bba86ca4ca5c6585.js"></script>
 
 </body>
 </html>
