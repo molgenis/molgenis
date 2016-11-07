@@ -68,7 +68,8 @@ public class DirectoryController extends MolgenisPluginController
 	}
 
 	@RequestMapping()
-	public String init(@RequestParam(required = false) String q, HttpServletRequest request, Model model)
+	public String init(@RequestParam(required = false) String q, @RequestParam(required = false) String nToken,
+			HttpServletRequest request, Model model)
 	{
 		if (q != null)
 		{
@@ -94,6 +95,11 @@ public class DirectoryController extends MolgenisPluginController
 			model.addAttribute("filters", gson.toJson(filters));
 
 			LOG.trace("Generated filters from RSQL:\n" + gson.toJson(filters));
+		}
+
+		if (nToken != null)
+		{
+			model.addAttribute("nToken", nToken);
 		}
 
 		model.addAttribute("username", getCurrentUsername());
