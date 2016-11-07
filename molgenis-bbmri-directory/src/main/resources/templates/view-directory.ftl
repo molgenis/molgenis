@@ -11,15 +11,14 @@
 <body>
 <div id="root" style="height: 100%"></div>
 <script type="text/javascript">
-    window.___INITIAL_STATE__ = {
-        'baseUrl': '${baseUrl}',
-        'session' : {
-            'server' : {
-                'apiUrl': '${apiUrl}'
+    ___INITIAL_STATE__ = {
+        session : {
+            server : {
+                apiUrl: '${apiUrl}',
             },
-            'username' : '${username}'
+            username : '${username}'
         },
-        'Directory' : {
+        Directory : {
             <#if nToken??>
             'nToken' : '${nToken}',
             </#if>
@@ -54,8 +53,8 @@
         }
     }
 </script>
-<script src="/js/vendor.a010f79de2e1b9015a28.js"></script>
-<script src="/js/app.4dd721ee73a8506bebc0.js"></script>
+<script src="/js/vendor.6d980603a2b934901ef8.js"></script>
+<script src="/js/app.b73a409467a8ac381441.js"></script>
 
 </body>
 </html>
