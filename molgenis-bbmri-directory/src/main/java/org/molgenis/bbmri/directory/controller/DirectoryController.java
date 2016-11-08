@@ -8,6 +8,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import static org.molgenis.bbmri.directory.controller.DirectoryController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 @Controller
-@RequestMapping(URI + "/**")
+@RequestMapping(URI)
 public class DirectoryController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DirectoryController.class);
@@ -99,7 +100,7 @@ public class DirectoryController extends MolgenisPluginController
 
 		if (nToken != null)
 		{
-			LOG.info("Token received [%s", nToken);
+			LOG.info("Token received {}", nToken);
 			model.addAttribute("nToken", nToken);
 		}
 
@@ -111,6 +112,7 @@ public class DirectoryController extends MolgenisPluginController
 
 	@RequestMapping(value = "/query", produces = "application/json")
 	@ResponseBody
+	@RunAsSystem
 	public String postQuery(@RequestBody NegotiatorQuery query) throws Exception
 	{
 		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
@@ -124,11 +126,19 @@ public class DirectoryController extends MolgenisPluginController
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-		String redirectURL = restTemplate.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
-				.toASCIIString();
 
-		LOG.trace("Redirecting to " + redirectURL);
-		return redirectURL;
+		try
+		{
+			String redirectURL = restTemplate
+					.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity).toASCIIString();
+			LOG.trace("Redirecting to " + redirectURL);
+			return redirectURL;
+		}
+		catch (Exception e)
+		{
+			LOG.error("Posting to the negotiator went wrong: ", e);
+			throw e;
+		}
 	}
 
 	/**
