@@ -377,7 +377,7 @@ function evalScript(script, entity) {
                 this.val = unit.toNumber(targetUnit);
                 return this;
             }
-        }
+        };
 
         function _isNull(value) {
             if (value === null || value === undefined)
