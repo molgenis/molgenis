@@ -117,7 +117,10 @@ public class DirectoryController extends MolgenisPluginController
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 
-		headers.set("Authorization", generateBase64Authentication());
+		String username = settings.getString(DirectorySettings.USERNAME);
+		String password = settings.getString(DirectorySettings.PASSWORD);
+		headers.set("Authorization", generateBase64Authentication(username, password));
+
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
@@ -133,10 +136,8 @@ public class DirectoryController extends MolgenisPluginController
 	 *
 	 * @return String
 	 */
-	private String generateBase64Authentication()
+	public static String generateBase64Authentication(String username, String password)
 	{
-		String username = settings.getString(DirectorySettings.USERNAME);
-		String password = settings.getString(DirectorySettings.PASSWORD);
 		requireNonNull(username, password);
 		String userPass = username + ":" + password;
 		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
