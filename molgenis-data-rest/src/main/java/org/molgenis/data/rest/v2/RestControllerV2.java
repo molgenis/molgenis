@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.sql.Date;
+import java.text.AttributedCharacterIterator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -205,7 +207,14 @@ class RestControllerV2
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
-		dataService.deleteById(entityName, id);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().deleteAttributeById(id);
+		}
+		else
+		{
+			dataService.deleteById(entityName, id);
+		}
 	}
 
 	/**
@@ -283,7 +292,14 @@ class RestControllerV2
 			final List<String> ids = new ArrayList<String>();
 
 			// Add all entities
-			this.dataService.add(entityName, entities.stream());
+			if (ATTRIBUTE_META_DATA.equals(entityName))
+			{
+				this.dataService.getMeta().addAttributes(entityName, entities.stream().map(a -> (Attribute) a));
+			}
+			else
+			{
+				this.dataService.add(entityName, entities.stream());
+			}
 
 			entities.forEach(entity ->
 			{

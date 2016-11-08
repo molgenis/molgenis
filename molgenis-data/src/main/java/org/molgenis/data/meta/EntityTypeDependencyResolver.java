@@ -1,7 +1,10 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GenericDependencyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +25,7 @@ import static java.util.stream.StreamSupport.stream;
 public class EntityTypeDependencyResolver
 {
 	private final GenericDependencyResolver genericDependencyResolver;
+	private static final Logger LOG = LoggerFactory.getLogger(EntityTypeDependencyResolver.class);
 
 	@Autowired
 	public EntityTypeDependencyResolver(GenericDependencyResolver genericDependencyResolver)
@@ -49,13 +53,12 @@ public class EntityTypeDependencyResolver
 		// EntityType doesn't have equals/hashcode methods, map to nodes first
 		// ensure that nodes exist for all dependencies
 		Set<EntityTypeNode> entityTypeNodes = entityTypes.stream().map(EntityTypeNode::new)
-				.flatMap(node -> Stream.concat(Stream.of(node), EntityTypeNode.getDependencies(node).stream()))
-				.collect(toSet());
+				.flatMap(node -> Stream.concat(Stream.of(node), expandEntityTypeDependencies(node).stream()))
+				.collect(toCollection(LinkedHashSet::new));
 
 		// Sort nodes based on dependencies
 		List<EntityTypeNode> resolvedEntityMetaNodes = genericDependencyResolver
-				.resolve(entityTypeNodes, EntityTypeNode::getDependencies);
-
+				.resolve(entityTypeNodes, getDependencies());
 		// Map nodes back to EntityType
 		List<EntityType> resolvedEntityMetas = resolvedEntityMetaNodes.stream().map(EntityTypeNode::getEntityType)
 				.collect(toList());
@@ -76,32 +79,62 @@ public class EntityTypeDependencyResolver
 	}
 
 	/**
-	 * EntityType wrapper with equals/hashcode
+	 * Returns dependencies of the given entity meta data.
+	 *
+	 * @return dependencies of the entity meta data node
 	 */
-	private static class EntityTypeNode
+	private static Function getDependencies()
 	{
-		private final EntityType entityType;
-
-		EntityTypeNode(EntityType entityType)
+		return new Function<EntityTypeNode, Set<EntityTypeNode>>()
 		{
-			this.entityType = requireNonNull(entityType);
+			@Override
+			public Set<EntityTypeNode> apply(EntityTypeNode entityTypeNode)
+			{
+				// get referenced entities excluding entities of mappedBy attributes
+				EntityType entityType = entityTypeNode.getEntityType();
+				Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
+						.flatMap(attr ->
+						{
+							EntityType refEntity = attr.getRefEntity();
+							if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
+									.equals(entityType.getName()))
+							{
+								return Stream.of(new EntityTypeNode(refEntity));
+							}
+							else
+							{
+								return Stream.empty();
+							}
+						}).collect(toCollection(LinkedHashSet::new));
+
+				EntityType extendsEntityMeta = entityType.getExtends();
+				if (extendsEntityMeta != null)
+				{
+					refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
+				}
+				return refEntityMetaSet;
+			}
+		};
+	}
+
+	/**
+	 * Returns whole tree dependencies of the given entity meta data.
+	 *
+	 * @param entityTypeNode entity meta data node
+	 * @return dependencies of the entity meta data node
+	 */
+	private static Set<EntityTypeNode> expandEntityTypeDependencies(EntityTypeNode entityTypeNode)
+	{
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("expandEntityTypeDependencies(EntityTypeNode entityTypeNode) --- entity: [{}], skip: [{}]",
+					entityTypeNode.getEntityType().getName(), entityTypeNode.isSkip());
 		}
 
-		public EntityType getEntityType()
-		{
-			return entityType;
-		}
-
-		/**
-		 * Returns dependencies of the given entity meta data.
-		 *
-		 * @param entityTypeNode entity meta data node
-		 * @return dependencies of the entity meta data node
-		 */
-		public static Set<EntityTypeNode> getDependencies(EntityTypeNode entityTypeNode)
+		if (!entityTypeNode.isSkip())
 		{
 			// get referenced entities excluding entities of mappedBy attributes
-			EntityType entityType = entityTypeNode.entityType;
+			EntityType entityType = entityTypeNode.getEntityType();
 			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
 					.flatMap(attr ->
 					{
@@ -109,13 +142,16 @@ public class EntityTypeDependencyResolver
 						if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
 								.equals(entityType.getName()))
 						{
-							return Stream.of(new EntityTypeNode(refEntity));
+							EntityTypeNode nodeRef = new EntityTypeNode(refEntity, entityTypeNode.getStack());
+							Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
+							dependenciesRef.add(nodeRef);
+							return dependenciesRef.stream();
 						}
 						else
 						{
 							return Stream.empty();
 						}
-					}).collect(toCollection(HashSet::new));
+					}).collect(toCollection(LinkedHashSet::new));
 
 			EntityType extendsEntityMeta = entityType.getExtends();
 			if (extendsEntityMeta != null)
@@ -123,6 +159,43 @@ public class EntityTypeDependencyResolver
 				refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
 			}
 			return refEntityMetaSet;
+		}
+		else
+		{
+			return Sets.newLinkedHashSet();
+		}
+	}
+
+	/**
+	 * EntityType wrapper with equals/hashcode
+	 */
+	private static class EntityTypeNode
+	{
+		private final EntityType entityType;
+		private LinkedHashSet<EntityTypeNode> stack = Sets.newLinkedHashSet();
+		private boolean skip = false;
+
+		private EntityTypeNode(EntityType entityType)
+		{
+			this.entityType = requireNonNull(entityType);
+		}
+
+		private EntityTypeNode(EntityType entityType, LinkedHashSet<EntityTypeNode> stack)
+		{
+			this.entityType = requireNonNull(entityType);
+			this.stack = requireNonNull(stack);
+
+			// Check if EntityTypeNod is already used
+			if (stack.contains(this))
+			{
+				skip = true;
+			}
+			this.stack.add(this);
+		}
+
+		private EntityType getEntityType()
+		{
+			return entityType;
 		}
 
 		@Override
@@ -145,6 +218,16 @@ public class EntityTypeDependencyResolver
 		public String toString()
 		{
 			return entityType.getName();
+		}
+
+		private LinkedHashSet<EntityTypeNode> getStack()
+		{
+			return stack;
+		}
+
+		private boolean isSkip()
+		{
+			return skip;
 		}
 	}
 }

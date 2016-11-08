@@ -30,7 +30,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem
 /**
  * Decorator for the attribute repository:
  * - filters requested entities based on the entity permissions of the current user.
- * - applies updates to the repository collection for attribute meta data adds/updates/deletes
+ * - applies attribute metadata updates to the backend
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
@@ -341,8 +341,14 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
 
-	private void validateUpdate(Attribute currentAttr, Attribute newAttr)
+	protected void validateUpdate(Attribute currentAttr, Attribute newAttr)
 	{
+		if (!Objects.equals(currentAttr.getEntity().getIdValue(), newAttr.getEntity().getIdValue()))
+		{
+			throw new MolgenisDataException(
+					format("Cannot move attribute [%s] to different EntityType", currentAttr.getName()));
+		}
+
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
 		AttributeType newDataType = newAttr.getDataType();
@@ -546,10 +552,18 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		}
 	}
 
-	private void updateEntity(Attribute attr, Attribute updatedAttr)
+	/**
+	 * Updates an attribute's representation in the backend for each concrete {@link EntityType} that
+	 * has the {@link Attribute}.
+	 *
+	 * @param attr        current version of the attribute
+	 * @param updatedAttr new version of the attribute
+	 */
+	private void updateAttributeInBackend(Attribute attr, Attribute updatedAttr)
 	{
-		EntityType entityType = attr.getEntity();
-		dataService.getMeta().getBackend(entityType.getBackend()).updateAttribute(entityType, attr, updatedAttr);
+		MetaDataService meta = dataService.getMeta();
+		meta.getConcreteChildren(attr.getEntity())
+				.forEach(entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
 	}
 
 	private void validateAndUpdate(Attribute attr)
@@ -557,7 +571,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		validateUpdateAllowed(attr);
 		Attribute currentAttr = findOneById(attr.getIdentifier());
 		validateUpdate(currentAttr, attr);
-		updateEntity(currentAttr, attr);
+		updateAttributeInBackend(currentAttr, attr);
 	}
 
 	private Stream<Attribute> filterCountPermission(Stream<Attribute> attrs)

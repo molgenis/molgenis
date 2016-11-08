@@ -101,10 +101,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()))
-				.flatMap(this::addReferencingEntities).collect(toSet());
-
+		Set<IndexAction> indexActionSet = filterUnnecessaryIndexActions();
 		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
 		for (int i = 0; i < indexActions1.size(); i++)
 		{
@@ -118,6 +115,32 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 					indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
 			dataService.add(INDEX_ACTION, indexActions.stream());
 		}
+	}
+
+	/**
+	 * Filter all unnecessary index actions
+	 *
+	 * @return
+	 */
+	Set<IndexAction> filterUnnecessaryIndexActions()
+	{
+		// 1. add all referencing entities
+		Set<IndexAction> allIndexAction = getIndexActionsForCurrentTransaction().stream()
+				.flatMap(this::addReferencingEntities).collect(toSet());
+
+		// 2. Filter excluded entities
+		Set<IndexAction> indexActionWithoutExcluded = allIndexAction.stream()
+				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName())).collect(toSet());
+
+		// 3. Find all entities names of actions where no row is specified
+		Set<String> entityFullNames = indexActionWithoutExcluded.stream()
+				.filter(indexAction -> indexAction.getEntityId() == null)
+				.map(IndexAction::getEntityFullName).collect(toSet());
+
+		// 4. Filter all row index actions from list
+		return indexActionWithoutExcluded.stream()
+				.filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullNames
+						.contains(indexAction.getEntityFullName())).collect(toSet());
 	}
 
 	/**
@@ -159,8 +182,9 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean isEntityDirty(EntityKey entityKey)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() != null && entityKey
-						.equals(EntityKey.create(indexAction.getEntityFullName(), indexAction.getEntityId())));
+				indexAction -> indexAction.getEntityId() != null
+						&& indexAction.getEntityFullName().equals(entityKey.getEntityName())
+						&& indexAction.getEntityId().equals(entityKey.getId().toString()));
 	}
 
 	@Override
@@ -181,7 +205,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<EntityKey> getDirtyEntities()
 	{
 		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() != null)
-				.map(indexAction -> EntityKey.create(indexAction.getEntityFullName(), indexAction.getEntityId()))
+				.map(indexAction -> createEntityKey(indexAction))
 				.collect(toSet());
 	}
 
@@ -196,6 +220,20 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<String> getDirtyRepositories()
 	{
 		return getIndexActionsForCurrentTransaction().stream().map(IndexAction::getEntityFullName).collect(toSet());
+	}
+
+	/**
+	 * Create an EntityKey
+	 * Attention! MOLGENIS supports multiple id object types and the Entity id from the index registry s always a String
+	 *
+	 * @param indexAction
+	 * @return EntityKey
+	 */
+	private EntityKey createEntityKey(IndexAction indexAction)
+	{
+		return EntityKey.create(indexAction.getEntityFullName(),
+				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
+						dataService.getEntityType(indexAction.getEntityFullName()).getIdAttribute()) : null);
 	}
 
 }

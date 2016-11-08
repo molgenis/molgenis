@@ -9,6 +9,7 @@ import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 
 /**
  * {@link Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
@@ -168,23 +170,28 @@ class IndexJob extends Job
 	/**
 	 * Indexes one single entity instance.
 	 *
-	 * @param entityFullName the fully qualified name of the entity's repository
-	 * @param entityId       the identifier of the entity to update
+	 * @param entityFullName  the fully qualified name of the entity's repository
+	 * @param untypedEntityId the identifier of the entity to update
 	 */
-	private void rebuildIndexOneEntity(String entityFullName, String entityId)
+	private void rebuildIndexOneEntity(String entityFullName, String untypedEntityId)
 	{
-		LOG.trace("Indexing [{}].[{}]... ", entityFullName, entityId);
+		LOG.trace("Indexing [{}].[{}]... ", entityFullName, untypedEntityId);
+
+		// convert entity id string to typed entity id
+		EntityType entityType = dataService.getEntityType(entityFullName);
+		Object entityId =
+				entityType != null ? getTypedValue(untypedEntityId, entityType.getIdAttribute()) : untypedEntityId;
+
 		Entity actualEntity = dataService.findOneById(entityFullName, entityId);
 
 		if (null == actualEntity)
 		{
 			// Delete
 			LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-			searchService.deleteById(entityId, dataService.getMeta().getEntityType(entityFullName));
+			searchService.deleteById(entityId.toString(), entityType);
 			return;
 		}
 
-		EntityType entityType = actualEntity.getEntityType();
 		boolean indexEntityExists = searchService.hasMapping(entityType);
 		if (!indexEntityExists)
 		{
