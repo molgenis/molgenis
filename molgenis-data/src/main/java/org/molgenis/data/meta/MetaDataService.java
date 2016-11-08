@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.Package;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public interface MetaDataService extends Iterable<RepositoryCollection>
@@ -265,11 +266,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	boolean isEntityTypeCompatible(EntityType entityTypeData);
 
 	/**
-	 * Returns all concrete {@link EntityType}s that directly or indirectly extend a given {@link EntityType}.
-	 * If the {@link EntityType} is concrete, will return a Stream containing only the given {@link EntityType}.
+	 * Performs an operation on each concrete child {@link EntityType} directly or indirectly extending a given
+	 * {@link EntityType}.
+	 * If the {@link EntityType} is concrete, will only perform the operation on the given {@link EntityType}.
 	 *
-	 * @param entityType the {@link EntityType} whose concrete child entity types will be returned
-	 * @return Stream containing all concrete children
+	 * @param entityType the {@link EntityType} whose concrete child entities will be consumed
+	 * @param consumer   the operation to perform
 	 */
-	Stream<EntityType> getConcreteChildren(EntityType entityType);
+	void forEachConcreteChild(EntityType entityType, Consumer<EntityType> consumer);
 }

@@ -224,16 +224,4 @@ public class PostgreSqlExceptionTranslatorTest
 				.translateCheckConstraintViolation(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Unknown enum value for attribute 'column' of entity 'entity'.");
 	}
-
-	@Test
-	public void translateUndefinedColumnException()
-	{
-		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
-		when(serverErrorMessage.getSQLState()).thenReturn("42703");
-		when(serverErrorMessage.getMessage()).thenReturn("Undefined column: 7 ERROR: column \"test\" does not exist");
-		//noinspection ThrowableResultOfMethodCallIgnored
-		MolgenisValidationException e = PostgreSqlExceptionTranslator
-				.translateUndefinedColumnException(new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Undefined column: 7 ERROR: column \"test\" does not exist");
-	}
 }

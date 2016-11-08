@@ -36,7 +36,7 @@ public class TestEntityStaticMetaData extends SystemEntityType
 	{
 		setPackage(testPackage);
 		addAttribute(EntityTestHarness.ATTR_ID, ROLE_ID).setAuto(true);
-		addAttribute(EntityTestHarness.ATTR_STRING, ROLE_LABEL);
+		addAttribute(EntityTestHarness.ATTR_STRING, ROLE_LABEL).setNillable(false);
 		addAttribute(EntityTestHarness.ATTR_BOOL).setDataType(BOOL);
 		addAttribute(EntityTestHarness.ATTR_CATEGORICAL).setDataType(CATEGORICAL)
 				.setRefEntity(testRefEntityStaticMetaData);

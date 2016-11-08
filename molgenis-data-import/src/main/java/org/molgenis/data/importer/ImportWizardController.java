@@ -2,7 +2,7 @@ package org.molgenis.data.importer;
 
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
@@ -478,7 +478,7 @@ public class ImportWizardController extends AbstractWizardController
 
 		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{
-			MetaValidationUtils.validateName(file.getName().replace("." + extension, ""));
+			NameValidator.validateName(file.getName().replace("." + extension, ""));
 			if (!DatabaseAction.ADD.equals(databaseAction))
 			{
 				throw new IllegalArgumentException(
