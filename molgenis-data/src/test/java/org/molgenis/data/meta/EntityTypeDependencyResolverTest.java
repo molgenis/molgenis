@@ -119,16 +119,20 @@ public class EntityTypeDependencyResolverTest
 		when(attr1.getMappedBy()).thenReturn(null);
 		when(attr2.getRefEntity()).thenReturn(null);
 
-		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2, entityType3)),
+		assertEquals(
+				entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2, entityType3)),
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 
-		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType1, entityType0, entityType2, entityType3)),
+		assertEquals(
+				entityTypeDependencyResolver.resolve(newArrayList(entityType1, entityType0, entityType2, entityType3)),
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 
-		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType1, entityType2, entityType0, entityType3)),
+		assertEquals(
+				entityTypeDependencyResolver.resolve(newArrayList(entityType1, entityType2, entityType0, entityType3)),
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 
-		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType1, entityType2, entityType3, entityType0)),
+		assertEquals(
+				entityTypeDependencyResolver.resolve(newArrayList(entityType1, entityType2, entityType3, entityType0)),
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 	}
 
@@ -146,7 +150,8 @@ public class EntityTypeDependencyResolverTest
 		when(attr1.getMappedBy()).thenReturn(attr2);
 		when(attr2.getRefEntity()).thenReturn(entityType1);
 
-		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType2, entityType3, entityType1)),
+		assertEquals(
+				entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType2, entityType3, entityType1)),
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 	}
 
