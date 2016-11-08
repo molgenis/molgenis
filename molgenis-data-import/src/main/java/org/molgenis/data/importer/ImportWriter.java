@@ -387,7 +387,7 @@ public class ImportWriter
 		});
 
 		// add or update entity types
-		dataService.getMeta().upsertEntityType(entityTypes);
+		dataService.getMeta().upsertEntityTypes(entityTypes);
 
 		// add new entities to import report
 		entityTypes.forEach(entityType ->

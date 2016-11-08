@@ -88,8 +88,7 @@ public class EntityTypeDependencyResolver
 		return new Function<EntityTypeNode, Set<EntityTypeNode>>()
 		{
 			@Override
-			public Set<EntityTypeNode> apply(
-					EntityTypeNode entityTypeNode)
+			public Set<EntityTypeNode> apply(EntityTypeNode entityTypeNode)
 			{
 				// get referenced entities excluding entities of mappedBy attributes
 				EntityType entityType = entityTypeNode.getEntityType();
@@ -97,8 +96,8 @@ public class EntityTypeDependencyResolver
 						.flatMap(attr ->
 						{
 							EntityType refEntity = attr.getRefEntity();
-							if (refEntity != null
-									&& !attr.isMappedBy() && !refEntity.getName().equals(entityType.getName()))
+							if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
+									.equals(entityType.getName()))
 							{
 								return Stream.of(new EntityTypeNode(refEntity));
 							}
@@ -126,7 +125,7 @@ public class EntityTypeDependencyResolver
 	 */
 	private static Set<EntityTypeNode> expandEntityTypeDependencies(EntityTypeNode entityTypeNode)
 	{
-		if(LOG.isTraceEnabled())
+		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("expandEntityTypeDependencies(EntityTypeNode entityTypeNode) --- entity: [{}], skip: [{}]",
 					entityTypeNode.getEntityType().getName(), entityTypeNode.isSkip());
@@ -140,8 +139,8 @@ public class EntityTypeDependencyResolver
 					.flatMap(attr ->
 					{
 						EntityType refEntity = attr.getRefEntity();
-						if (refEntity != null
-								&& !attr.isMappedBy() && !refEntity.getName().equals(entityType.getName()))
+						if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
+								.equals(entityType.getName()))
 						{
 							EntityTypeNode nodeRef = new EntityTypeNode(refEntity, entityTypeNode.getStack());
 							Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
