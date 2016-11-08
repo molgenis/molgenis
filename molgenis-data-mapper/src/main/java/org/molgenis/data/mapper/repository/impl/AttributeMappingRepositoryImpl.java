@@ -13,7 +13,6 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.HEAD;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -106,10 +105,10 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 			EntityType targetEntityType)
 	{
 		String identifier = attributeMappingEntity.getString(IDENTIFIER);
-		String targetAtributeName = attributeMappingEntity.getString(TARGETATTRIBUTEMETADATA);
+		String targetAtributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
 		Attribute targetAttribute = targetEntityType.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(ALGORITHM);
-		String algorithmState = attributeMappingEntity.getString(ALGORITHMSTATE);
+		String algorithmState = attributeMappingEntity.getString(ALGORITHM_STATE);
 		List<Attribute> sourceAttributes = retrieveAttributesFromAlgorithm(algorithm,
 				sourceEntityType);
 
@@ -121,14 +120,14 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	{
 		Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
 		attributeMappingEntity.set(IDENTIFIER, attributeMapping.getIdentifier());
-		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA,
+		attributeMappingEntity.set(TARGET_ATTRIBUTE,
 				attributeMapping.getTargetAttribute() != null ? attributeMapping.getTargetAttribute()
 						.getName() : null);
 		attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS,
+		attributeMappingEntity.set(SOURCE_ATTRIBUTES,
 				attributeMapping.getSourceAttributes().stream().map(Attribute::getName)
 						.collect(Collectors.joining(",")));
-		attributeMappingEntity.set(ALGORITHMSTATE, attributeMapping.getAlgorithmState().toString());
+		attributeMappingEntity.set(ALGORITHM_STATE, attributeMapping.getAlgorithmState().toString());
 		return attributeMappingEntity;
 	}
 

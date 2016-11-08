@@ -85,6 +85,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		testEntityType = harness.createDynamicRefEntityType();
 		when(mds.getEntityType("test")).thenReturn(testEntityType);
 		toIndexEntity = harness.createTestRefEntities(testEntityType, 1).get(0);
+		when(dataService.getEntityType("test")).thenReturn(testEntityType);
 		when(dataService.findOneById("test", "entityId")).thenReturn(toIndexEntity);
 	}
 

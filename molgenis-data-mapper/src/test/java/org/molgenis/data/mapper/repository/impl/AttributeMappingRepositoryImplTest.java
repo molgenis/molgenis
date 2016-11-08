@@ -69,8 +69,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
-		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS, "sourceAttributes");
+		attributeMappingEntity.set(TARGET_ATTRIBUTE, "targetAttribute");
+		attributeMappingEntity.set(SOURCE_ATTRIBUTES, "sourceAttributes");
 		attributeMappingEntity.set(ALGORITHM, "algorithm");
 
 		List<Entity> attributeMappingEntities = newArrayList();
@@ -99,10 +99,10 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		List<Entity> result = newArrayList();
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
-		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, targetAttribute.getName());
-		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS, "");
+		attributeMappingEntity.set(TARGET_ATTRIBUTE, targetAttribute.getName());
+		attributeMappingEntity.set(SOURCE_ATTRIBUTES, "");
 		attributeMappingEntity.set(ALGORITHM, "algorithm");
-		attributeMappingEntity.set(ALGORITHMSTATE, CURATED.toString());
+		attributeMappingEntity.set(ALGORITHM_STATE, CURATED.toString());
 
 		result.add(attributeMappingEntity);
 
@@ -129,10 +129,10 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		List<Entity> result = newArrayList();
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
-		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA, targetAttribute.getName());
-		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS, "");
+		attributeMappingEntity.set(TARGET_ATTRIBUTE, targetAttribute.getName());
+		attributeMappingEntity.set(SOURCE_ATTRIBUTES, "");
 		attributeMappingEntity.set(ALGORITHM, "algorithm");
-		attributeMappingEntity.set(ALGORITHMSTATE, CURATED.toString());
+		attributeMappingEntity.set(ALGORITHM_STATE, CURATED.toString());
 
 		result.add(attributeMappingEntity);
 

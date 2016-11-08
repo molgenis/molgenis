@@ -315,51 +315,47 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		intermediateResults.getEntities().forEach(entityType ->
 		{
-			// skip abstract entities, because they do not require label or lookup attributes
-			if (!entityType.isAbstract())
+			// in case no label attribute was defined:
+			// try to set own id attribute or another own attribute as label attribute
+			if (entityType.getLabelAttribute() == null)
 			{
-				// in case no label attribute was defined:
-				// try to set own id attribute or another own attribute as label attribute
-				if (entityType.getLabelAttribute() == null)
+				Attribute ownIdAttr = entityType.getOwnIdAttribute();
+				if (ownIdAttr != null && ownIdAttr.isVisible())
 				{
-					Attribute ownIdAttr = entityType.getOwnIdAttribute();
-					if (ownIdAttr != null && ownIdAttr.isVisible())
+					ownIdAttr.setLabelAttribute(true);
+				}
+				else
+				{
+					// select the first required visible owned attribute as label attribute
+					for (Attribute ownAttr : entityType.getOwnAtomicAttributes())
 					{
-						ownIdAttr.setLabelAttribute(true);
-					}
-					else
-					{
-						// select the first required visible owned attribute as label attribute
-						for (Attribute ownAttr : entityType.getOwnAtomicAttributes())
+						if (!ownAttr.isNillable() && ownAttr.isVisible())
 						{
-							if (!ownAttr.isNillable() && ownAttr.isVisible())
-							{
-								ownAttr.setLabelAttribute(true);
-								break;
-							}
+							ownAttr.setLabelAttribute(true);
+							break;
 						}
 					}
 				}
+			}
 
-				// in case no lookup attributes were defined:
-				// try to set own id attribute and own label attribute as lookup attributes
-				if (Iterables.size(entityType.getLookupAttributes()) == 0)
+			// in case no lookup attributes were defined:
+			// try to set own id attribute and own label attribute as lookup attributes
+			if (Iterables.size(entityType.getLookupAttributes()) == 0)
+			{
+				int lookupAttrIdx = 0;
+
+				Attribute ownIdAttr = entityType.getOwnIdAttribute();
+				if (ownIdAttr != null && ownIdAttr.isVisible())
 				{
-					int lookupAttrIdx = 0;
+					ownIdAttr.setLookupAttributeIndex(lookupAttrIdx++);
+				}
 
-					Attribute ownIdAttr = entityType.getOwnIdAttribute();
-					if (ownIdAttr != null && ownIdAttr.isVisible())
+				Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
+				if (ownLabelAttr != null)
+				{
+					if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))
 					{
-						ownIdAttr.setLookupAttributeIndex(lookupAttrIdx++);
-					}
-
-					Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-					if (ownLabelAttr != null)
-					{
-						if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))
-						{
-							ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
-						}
+						ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
 					}
 				}
 			}
@@ -727,6 +723,16 @@ public class EmxMetaDataParser implements MetaDataParser
 					attr.getName().startsWith(EMX_ATTRIBUTES_LABEL) || attr.getName()
 							.startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
 			{
+				// check if casing mismatch
+				SUPPORTED_ATTRIBUTE_ATTRIBUTES.forEach(emxAttrMetaAttr ->
+				{
+					if (emxAttrMetaAttr.equalsIgnoreCase(attr.getName()))
+					{
+						throw new IllegalArgumentException(String.format(
+								"Unsupported attribute metadata: attributes.%s, did you mean attributes.%s?",
+								attr.getName(), emxAttrMetaAttr));
+					}
+				});
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes." + attr.getName());
 			}
 		}
@@ -1331,12 +1337,19 @@ public class EmxMetaDataParser implements MetaDataParser
 					for (Attribute att : sourceRepository.getEntityType().getAttributes())
 					{
 						Attribute attribute = target.getAttribute(att.getName());
-						boolean known = attribute != null && attribute.getExpression() == null;
+
+						// Bi-directional one-to-many attributes mapped by another attribute can only be imported
+						// through the owning side: one-to-many attribute 'books' of entity 'author' mapped by attribute
+						//  'author' of entity 'book' cannot be imported, only the owning attribute 'book' can be
+						// imported.
+						boolean known = attribute != null && attribute.getExpression() == null && !(
+								attribute.getDataType() == ONE_TO_MANY && attribute.isMappedBy());
 						report = report.addAttribute(att.getName(), known ? IMPORTABLE : UNKNOWN);
 					}
 					for (Attribute att : target.getAttributes())
 					{
-						if (!(att.getDataType() == COMPOUND))
+						// See comment above regarding import of bi-directional one-to-many data
+						if (att.getDataType() != COMPOUND && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy()))
 						{
 							if (!att.isAuto() && att.getExpression() == null && !report.getFieldsImportable().get(sheet)
 									.contains(att.getName()))
