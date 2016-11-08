@@ -1,6 +1,5 @@
 package org.molgenis.bbmri.directory.controller;
 
-import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
