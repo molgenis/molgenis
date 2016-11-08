@@ -1321,9 +1321,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 			dataService.update(entityType.getName(),
-					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
-							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
-					));
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false)
+							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
@@ -1415,9 +1414,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 			dataService.update(entityType.getName(),
-					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
-							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
-					));
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false)
+							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
@@ -1486,9 +1484,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 			dataService.update(entityType.getName(),
-					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).peek(e ->
-							e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())
-					));
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false)
+							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 

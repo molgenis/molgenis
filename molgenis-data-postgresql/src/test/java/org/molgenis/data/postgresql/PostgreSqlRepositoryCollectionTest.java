@@ -345,8 +345,8 @@ public class PostgreSqlRepositoryCollectionTest
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
-	@Test(expectedExceptions = {MolgenisDataException.class},
-			expectedExceptionsMessageRegExp = "Cannot update attribute \\[attr\\] for abstract entity type \\[root\\]\\.")
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Cannot update attribute \\[attr\\] for abstract entity type \\[root\\]\\.")
 	public void updateAttributeAbstractEntity()
 	{
 		EntityType abstractEntityType = when(mock(EntityType.class).getName()).thenReturn("root").getMock();
@@ -513,8 +513,8 @@ public class PostgreSqlRepositoryCollectionTest
 				"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity_attr_key\" UNIQUE (\"attr\")");
 	}
 
-	@Test(expectedExceptions = {MolgenisDataException.class},
-			expectedExceptionsMessageRegExp = "Cannot add attribute \\[attr\\] to abstract entity type \\[root\\]\\.")
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Cannot add attribute \\[attr\\] to abstract entity type \\[root\\]\\.")
 	public void addAttributeAbstractEntity()
 	{
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
@@ -676,8 +676,8 @@ public class PostgreSqlRepositoryCollectionTest
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
-	@Test(expectedExceptions = {MolgenisDataException.class},
-			expectedExceptionsMessageRegExp = "Cannot delete attribute \\[attr\\] from abstract entity type \\[root\\]\\.")
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Cannot delete attribute \\[attr\\] from abstract entity type \\[root\\]\\.")
 	public void deleteAttributeAbstractEntity()
 	{
 		EntityType abstractEntityType = when(mock(EntityType.class).getName()).thenReturn("root").getMock();

@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.support.QueryImpl.EQ;
+import static org.molgenis.questionnaires.QuestionnaireMetaData.ATTR_STATUS;
+import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
 
@@ -89,11 +91,11 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		Entity entity = findQuestionnaireEntity(name);
 		if (entity == null)
 		{
-			entity = createQuestionnaireEntity(emd, QuestionnaireStatus.OPEN);
+			entity = createQuestionnaireEntity(emd, OPEN);
 		}
-		else if (entity.getString(QuestionnaireMetaData.ATTR_STATUS).equals(QuestionnaireStatus.NOT_STARTED.toString()))
+		else if (entity.getString(ATTR_STATUS).equals(QuestionnaireStatus.NOT_STARTED.toString()))
 		{
-			entity.set(QuestionnaireMetaData.ATTR_STATUS, QuestionnaireStatus.OPEN);
+			entity.set(ATTR_STATUS, OPEN.toString());
 			dataService.update(name, entity);
 		}
 
@@ -121,7 +123,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	{
 		Entity entity = entityManager.create(emd, POPULATE);
 		entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-		entity.set(QuestionnaireMetaData.ATTR_STATUS, status.toString());
+		entity.set(ATTR_STATUS, status.toString());
 		dataService.add(emd.getName(), entity);
 
 		return entity;
@@ -129,7 +131,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType emd)
 	{
-		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(QuestionnaireMetaData.ATTR_STATUS));
+		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
 		return new Questionnaire(emd.getName(), emd.getLabel(languageService.getCurrentUserLanguageCode()), status,
 				emd.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}
