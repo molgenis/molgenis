@@ -1,15 +1,11 @@
 package org.molgenis.integrationtest.platform;
 
-import org.elasticsearch.action.index.IndexAction;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
@@ -30,7 +26,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -104,8 +99,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private LanguageFactory languageFactory;
 	@Autowired
 	private AttributeFactory attributeFactory;
-	@Autowired
-	private IndexActionRegisterServiceImpl indexActionRegisterService;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -1529,31 +1522,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			entityType.removeAttribute(newAttr);
 			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
 			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
-			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		});
-	}
-
-	@Test(singleThreaded = true)
-	@Transactional
-	public void storeIndexActions()
-	{
-		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-		runAsSystem(() ->
-		{
-			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
-			dataService.add(entityTypeDynamic.getName(), entities.stream());
-			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-
-			indexActionRegisterService.register(entityTypeDynamic.getName(), "1");
-			indexActionRegisterService.register(entityTypeDynamic.getName(), null);
-
-			Query q = new QueryImpl();
-			q.eq(IndexActionMetaData.ENTITY_FULL_NAME, "sys_test_TypeTestDynamic");
-			Stream<org.molgenis.data.index.meta.IndexAction> all = dataService.findAll(IndexActionMetaData.INDEX_ACTION, q);
-			all.forEach(e -> {
-				LOG.info(e.getEntityFullName() + "." + e.getEntityId());
-			});
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}

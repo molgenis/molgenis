@@ -22,12 +22,9 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -48,10 +45,6 @@ public class VcfToEntity
 	private final AttributeFactory attrMetaFactory;
 	private final EntityType entityType;
 	private final EntityType sampleEntityType;
-
-	private static final Logger LOG = LoggerFactory.getLogger(VcfToEntity.class);
-
-	private static final String[] EMPTYFORMAT = { "." };
 
 	public VcfToEntity(String entityName, VcfMeta vcfMeta, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
@@ -304,26 +297,9 @@ public class VcfToEntity
 				{
 					String strValue = sample.getData(i);
 					Object value = null;
-					EntityType sampleEntityType = sampleEntity.getEntityType();
-					Attribute attr = sampleEntityType.getAttribute(format[i]);
-					if (attr != null)
+					if (strValue != null)
 					{
-						if (strValue != null)
-						{
-							value = getTypedValue(strValue, attr);
-						}
-					}
-					else
-					{
-						if (Arrays.equals(EMPTYFORMAT, format))
-						{
-							LOG.debug("Found a dot as format, assuming no samples present");
-						}
-						else
-						{
-							throw new MolgenisDataException("Sample entity contains an attribute [" + format[i]
-									+ "] which is not specified in vcf headers");
-						}
+						value = getTypedValue(strValue, sampleEntity.getEntityType().getAttribute(format[i]));
 					}
 					sampleEntity.set(format[i], value);
 				}
@@ -411,10 +387,6 @@ public class VcfToEntity
 			}
 			if (val != null)
 			{
-				if (val instanceof Character)
-				{
-					val = val.toString();
-				}
 				entity.set(vcfInfo.getKey() + postFix, val);
 			}
 		}

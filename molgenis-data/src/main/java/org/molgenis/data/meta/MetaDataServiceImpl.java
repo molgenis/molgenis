@@ -908,9 +908,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setOwnAllAttributes(Iterable<Attribute> attrs)
+		public EntityType setOwnAttributes(Iterable<Attribute> attrs)
 		{
-			return entityType.setOwnAllAttributes(attrs);
+			return entityType.setOwnAttributes(attrs);
 		}
 
 		@Override
