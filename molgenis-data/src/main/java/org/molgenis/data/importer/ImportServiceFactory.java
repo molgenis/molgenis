@@ -18,7 +18,7 @@ public class ImportServiceFactory
 {
 	private final List<ImportService> importServices = Lists.newArrayList();
 
-	public void addImportService(ImportService importService)
+	 void addImportService(ImportService importService)
 	{
 		importServices.add(importService);
 		Collections.sort(importServices, OrderComparator.INSTANCE);
@@ -29,23 +29,19 @@ public class ImportServiceFactory
 	 * <p>
 	 * Import of mixed backend types in one FileRepositoryCollection isn't supported.
 	 *
-	 * @param source
-	 * @return
+	 * @return ImportService
 	 * @throws MolgenisDataException if no suitable ImportService is found for the FileRepositoryCollection
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
 		final Map<String, ImportService> importServicesMappedToExtensions = Maps.newHashMap();
-		for (ImportService importService : importServices)
+		importServices.stream().filter(importService -> importService.canImport(file, source)).forEach(importService ->
 		{
-			if (importService.canImport(file, source))
+			for (String extension : importService.getSupportedFileExtensions())
 			{
-				for (String extension : importService.getSupportedFileExtensions())
-				{
-					importServicesMappedToExtensions.put(extension.toLowerCase(), importService);
-				}
+				importServicesMappedToExtensions.put(extension.toLowerCase(), importService);
 			}
-		}
+		});
 
 		String extension = FileExtensionUtils
 				.findExtensionFromPossibilities(file.getName(), importServicesMappedToExtensions.keySet());

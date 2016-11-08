@@ -44,7 +44,7 @@ public class SystemEntityTypeRegistry
 		return systemEntityTypeMap.containsKey(entityName);
 	}
 
-	public void addSystemEntityType(SystemEntityType systemEntityType)
+	void addSystemEntityType(SystemEntityType systemEntityType)
 	{
 		String systemEntityTypeName = systemEntityType.getName();
 		if (systemEntityTypeName == null)

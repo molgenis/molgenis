@@ -50,7 +50,7 @@ public class SystemEntityTypeInitializer
 		//TODO: doesn't this mean all attributes get added twice?
 
 		Map<String, SystemEntityType> systemEntityTypeMap = ctx.getBeansOfType(SystemEntityType.class);
-		genericDependencyResolver.resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies).stream()
+		genericDependencyResolver.resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
 				.forEach(systemEntityType -> initialize(systemEntityType, entityTypeMetaData));
 	}
 
