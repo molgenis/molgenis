@@ -200,7 +200,7 @@ public class ImportWriter
 		Entity entity = entityManager.create(entityType, POPULATE);
 		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			if (!attr.isAuto() && attr.getExpression() == null && !attr.isMappedBy())
+			if (attr.getExpression() == null && !attr.isMappedBy())
 			{
 				String attrName = attr.getName();
 				Object emxValue = emxEntity.get(attrName);
@@ -297,7 +297,12 @@ public class ImportWriter
 					default:
 						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 				}
-				entity.set(attrName, value);
+
+				// do not set generated auto value to null
+				if (!attr.isAuto() || value != null)
+				{
+					entity.set(attrName, value);
+				}
 			}
 		}
 		return entity;
