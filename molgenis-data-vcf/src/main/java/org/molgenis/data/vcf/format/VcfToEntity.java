@@ -39,6 +39,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 
 public class VcfToEntity
 {
@@ -134,7 +135,8 @@ public class VcfToEntity
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				String name = meta.getId();
-				if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS.contains(name.toUpperCase()))
+				if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS
+						.contains(name.toUpperCase()))
 				{
 					name = name + "_";
 				}
@@ -294,7 +296,16 @@ public class VcfToEntity
 				{
 					String strValue = sample.getData(i);
 					Object value = null;
-					if (strValue != null)
+					EntityType sampleEntityType = sampleEntity.getEntityType();
+					Attribute attr = sampleEntityType.getAttribute(format[i]);
+					if (attr != null)
+					{
+						if (strValue != null)
+						{
+							value = getTypedValue(strValue, attr);
+						}
+					}
+					else
 					{
 						if (Arrays.equals(EMPTY_FORMAT, format))
 						{
@@ -305,8 +316,10 @@ public class VcfToEntity
 							throw new MolgenisDataException("Sample entity contains an attribute [" + format[i]
 									+ "] which is not specified in vcf headers");
 						}
-					} sampleEntity.set(format[i], value);
-				} sampleEntity.set(ID, entityId + j);
+					}
+					sampleEntity.set(format[i], value);
+				}
+				sampleEntity.set(ID, entityId + j);
 
 				// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 				// jquery.molgenis.table.js line 152
@@ -315,7 +328,8 @@ public class VcfToEntity
 				sampleEntity.set(ORIGINAL_NAME, original_name);
 				samples.add(sampleEntity);
 			}
-		} return samples;
+		}
+		return samples;
 	}
 
 	private void writeInfoFieldsToEntity(VcfRecord vcfRecord, Entity entity)
@@ -368,10 +382,10 @@ public class VcfToEntity
 					val = vcfInfoVal.toString();
 				}
 				else
-			{
-				val = vcfInfoVal; // VCF value type matches type expected for this MOLGENIS attribute type
+				{
+					val = vcfInfoVal; // VCF value type matches type expected for this MOLGENIS attribute type
+				}
 			}
-		}
 
 			entity.set(toAttributeName(vcfInfo.getKey()), val);
 		}
