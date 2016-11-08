@@ -87,13 +87,7 @@ public class AttributeRepositoryDecoratorTest
 		when(metadataService.getBackend(concreteEntityType1)).thenReturn(backend1);
 		when(metadataService.getBackend(concreteEntityType2)).thenReturn(backend2);
 		when(attribute.getIdentifier()).thenReturn(attributeId);
-		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityTypeRegistry, dataService, permissionService)
-		{
-			@Override
-			protected void validateUpdate(Attribute currentAttr, Attribute newAttr)
-			{
-			}
-		};
+		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityTypeRegistry, dataService, permissionService);
 	}
 
 	@Test
