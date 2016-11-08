@@ -90,7 +90,7 @@ public class EntityTestHarness
 	{
 		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_REF_STRING, STRING), ROLE_LABEL);
+				.addAttribute(createAttribute(ATTR_REF_STRING, STRING).setNillable(false), ROLE_LABEL);
 	}
 
 	public EntityType createDynamicTestEntityType()
@@ -100,7 +100,7 @@ public class EntityTestHarness
 				.setBackend("PostgreSQL");
 		entityType
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
+				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL)
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityType))

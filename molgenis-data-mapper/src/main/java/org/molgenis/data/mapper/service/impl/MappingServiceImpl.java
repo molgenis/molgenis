@@ -67,7 +67,6 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
-	@Transactional
 	public MappingProject addMappingProject(String projectName, User owner, String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
@@ -78,7 +77,6 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
-	@Transactional
 	public void deleteMappingProject(String mappingProjectId)
 	{
 		mappingProjectRepository.delete(mappingProjectId);
@@ -150,7 +148,6 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
-	@Transactional
 	public void updateMappingProject(MappingProject mappingProject)
 	{
 		mappingProjectRepository.update(mappingProject);
@@ -168,8 +165,8 @@ public class MappingServiceImpl implements MappingService
 		return applyMappings(mappingTarget, entityName, true);
 	}
 
+	// TODO discuss: why isn't this method transactional?
 	@Override
-	@Transactional
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);

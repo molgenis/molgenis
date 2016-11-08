@@ -156,6 +156,7 @@ public class EntityTypeUtils
 			case HYPERLINK:
 			case STRING:
 				return true;
+			case ONE_TO_MANY:
 			case BOOL:
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -196,6 +197,7 @@ public class EntityTypeUtils
 			case BOOL:
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
+			case ONE_TO_MANY:
 			case COMPOUND:
 			case DATE:
 			case DATE_TIME:
@@ -206,6 +208,80 @@ public class EntityTypeUtils
 			case HYPERLINK:
 			case INT:
 			case LONG:
+			case MREF:
+			case STRING:
+			case XREF:
+				return false;
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	/**
+	 * Returns whether the attribute is an integer type.
+	 *
+	 * @param attrType attribute type
+	 * @return true if the attribute is an integer type.
+	 */
+	public static boolean isIntegerType(AttributeType attrType)
+	{
+		switch (attrType)
+		{
+			case INT:
+			case LONG:
+				return true;
+			case HTML:
+			case SCRIPT:
+			case TEXT:
+			case BOOL:
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case COMPOUND:
+			case ONE_TO_MANY:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case FILE:
+			case HYPERLINK:
+			case MREF:
+			case STRING:
+			case XREF:
+				return false;
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	/**
+	 * Returns whether the attribute is a date type.
+	 *
+	 * @param attrType attribute type
+	 * @return true if the attribute is a date type.
+	 */
+	public static boolean isDateType(AttributeType attrType)
+	{
+		switch (attrType)
+		{
+			case DATE:
+			case DATE_TIME:
+				return true;
+			case LONG:
+			case INT:
+			case HTML:
+			case SCRIPT:
+			case TEXT:
+			case BOOL:
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case COMPOUND:
+			case ONE_TO_MANY:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case FILE:
+			case HYPERLINK:
 			case MREF:
 			case STRING:
 			case XREF:
