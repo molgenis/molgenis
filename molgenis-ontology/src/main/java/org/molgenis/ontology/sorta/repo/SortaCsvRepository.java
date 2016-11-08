@@ -54,11 +54,14 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityType == null)
 		{
-			AttributeFactory attrMetaFactory = getApplicationContext().getBean(AttributeFactory.class);
+			AttributeFactory attrMetaFactory = getApplicationContext()
+					.getBean(AttributeFactory.class); // FIXME do not use application context
 
 			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS, attrMetaFactory);
 			entityType.setName(entityName);
+			entityType.setSimpleName(entityName);
 			entityType.setLabel(entityLabel);
+			entityType.setBackend("PostgreSQL"); // FIXME do not hardcode backend name
 			entityType.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
 			Attribute nameAttribute = entityType.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
@@ -88,11 +91,10 @@ public class SortaCsvRepository extends AbstractRepository
 				Entity entity = iterator.next();
 				if (isEmpty(entity.getString(ALLOWED_IDENTIFIER)))
 				{
-					DynamicEntity dynamicEntity = new DynamicEntity(
-							null); // FIXME pass entity meta data instead of null
+					DynamicEntity dynamicEntity = new DynamicEntity(getEntityType());
 					dynamicEntity.set(entity);
 					entity = dynamicEntity;
-					entity.set(ALLOWED_IDENTIFIER, count.incrementAndGet());
+					entity.set(ALLOWED_IDENTIFIER, String.valueOf(count.incrementAndGet()));
 				}
 				return entity;
 			}

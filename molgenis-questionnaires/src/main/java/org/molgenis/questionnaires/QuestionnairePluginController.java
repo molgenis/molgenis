@@ -102,7 +102,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		}
 		else if (entity.getString(ATTR_STATUS).equals(NOT_STARTED.toString()))
 		{
-			entity.set(ATTR_STATUS, OPEN);
+			entity.set(ATTR_STATUS, OPEN.toString());
 			dataService.update(name, entity);
 		}
 
