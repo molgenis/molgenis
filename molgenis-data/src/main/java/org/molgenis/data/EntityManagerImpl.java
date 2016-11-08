@@ -131,7 +131,6 @@ public class EntityManagerImpl implements EntityManager
 		// resolve lazy entity collections without references
 		if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
 		{
-			// TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
 			return () -> dataService.findAll(entityType.getName(), new EntityIdIterable(entities).stream(), fetch)
 					.iterator();
 		}
@@ -184,7 +183,6 @@ public class EntityManagerImpl implements EntityManager
 		// resolve lazy entity collections without references
 		if (entities instanceof EntityStream && ((EntityStream) entities).isLazy())
 		{
-			// TODO remove cast after updating DataService/Repository interfaces to return EntityStream
 			return dataService.findAll(entityType.getName(), entities.map(Entity::getIdValue), fetch);
 		}
 

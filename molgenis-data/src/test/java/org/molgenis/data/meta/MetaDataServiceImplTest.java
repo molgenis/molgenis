@@ -435,13 +435,6 @@ public class MetaDataServiceImplTest
 		assertNull(metaDataServiceImpl.getEntityType(entityName));
 	}
 
-	// TODO how to test forEach?
-	//	@Test
-	//	public void getEntityTypes()
-	//	{
-	//
-	//	}
-
 	@Test
 	public void addEntityType()
 	{
