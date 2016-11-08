@@ -99,6 +99,7 @@ public class DirectoryController extends MolgenisPluginController
 
 		if (nToken != null)
 		{
+			LOG.info("Token received [%s", nToken);
 			model.addAttribute("nToken", nToken);
 		}
 
@@ -108,7 +109,7 @@ public class DirectoryController extends MolgenisPluginController
 		return VIEW_DIRECTORY;
 	}
 
-	@RequestMapping("/query")
+	@RequestMapping(value = "/query", produces = "application/json")
 	@ResponseBody
 	public String postQuery(@RequestBody NegotiatorQuery query) throws Exception
 	{
@@ -118,7 +119,8 @@ public class DirectoryController extends MolgenisPluginController
 
 		String username = settings.getString(DirectorySettings.USERNAME);
 		String password = settings.getString(DirectorySettings.PASSWORD);
-		headers.set("Authorization", this.generateBase64Authentication(username, password));
+		headers.set("Authorization", generateBase64Authentication(username, password));
+
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));

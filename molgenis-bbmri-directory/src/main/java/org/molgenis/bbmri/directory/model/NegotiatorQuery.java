@@ -15,7 +15,7 @@ public abstract class NegotiatorQuery
 
 	public abstract String getHumanReadable();
 
-	public abstract String getNToken();
+	public abstract String getnToken();
 
 	public static NegotiatorQuery createQuery(String url, List<Collection> collections, String humanReadable, String nToken)
 	{

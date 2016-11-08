@@ -11,7 +11,7 @@
 <body>
 <div id="root" style="height: 100%"></div>
 <script type="text/javascript">
-    window.___INITIAL_STATE__ = {
+    ___INITIAL_STATE__ = {
         'baseUrl': '${baseUrl}',
         'session' : {
             'server' : {
@@ -54,8 +54,8 @@
         }
     }
 </script>
-<script src="/js/vendor.4c7f9ea304fb2662af46.js"></script>
-<script src="/js/app.b03cbb62092f9d90a56f.js"></script>
+<script src="/js/vendor.0d220dfc3748afcfc2db.js"></script>
+<script src="/js/app.83cd1a6a1d6a07483dda.js"></script>
 
 </body>
 </html>
