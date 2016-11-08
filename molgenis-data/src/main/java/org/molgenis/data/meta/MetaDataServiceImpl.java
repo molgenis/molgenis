@@ -266,7 +266,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), getEntityTypeFetch(), EntityType.class)
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), getEntityTypeFetch(),
+						EntityType.class)
 				.collect(toMap(EntityType::getName, Function.identity()));
 
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
