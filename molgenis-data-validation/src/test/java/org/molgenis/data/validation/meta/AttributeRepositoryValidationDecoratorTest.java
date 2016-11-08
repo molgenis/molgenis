@@ -47,6 +47,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		doNothing().when(attributeValidator).validate(attribute);
 		attributeRepoValidationDecorator.update(attribute);
 		verify(attributeValidator, times(1)).validate(attribute);
+		verify(decoratedRepo, times(1)).update(attribute);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)

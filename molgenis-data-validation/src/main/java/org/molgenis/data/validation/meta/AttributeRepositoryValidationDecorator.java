@@ -30,6 +30,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	public void update(Attribute attr)
 	{
 		attributeValidator.validate(attr);
+		decoratedRepo.update(attr);
 	}
 
 	@Override
