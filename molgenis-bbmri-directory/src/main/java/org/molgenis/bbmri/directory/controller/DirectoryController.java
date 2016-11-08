@@ -109,7 +109,7 @@ public class DirectoryController extends MolgenisPluginController
 		return VIEW_DIRECTORY;
 	}
 
-	@RequestMapping("/query")
+	@RequestMapping(value = "/query", produces = "application/json")
 	@ResponseBody
 	public String postQuery(@RequestBody NegotiatorQuery query) throws Exception
 	{
@@ -117,7 +117,7 @@ public class DirectoryController extends MolgenisPluginController
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 
-		headers.set("Authorization", this.generateBase64Authentication());
+		headers.set("Authorization", generateBase64Authentication());
 		HttpEntity entity = new HttpEntity(query, headers);
 
 		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
@@ -138,9 +138,9 @@ public class DirectoryController extends MolgenisPluginController
 		String username = settings.getString(DirectorySettings.USERNAME);
 		String password = settings.getString(DirectorySettings.PASSWORD);
 		requireNonNull(username, password);
-		String userPass = username + password;
+		String userPass = username + ":" + password;
 		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
-		return String.format("Base %s", userPassBase64);
+		return String.format("Basic %s", userPassBase64);
 	}
 
 	private static String getApiUrl(HttpServletRequest request)
