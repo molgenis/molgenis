@@ -65,7 +65,7 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	@Override
 	public Query<Entity> query()
 	{
-		return new QueryImpl<Entity>(this);
+		return new QueryImpl<>(this);
 	}
 
 	@Override

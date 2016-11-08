@@ -55,7 +55,7 @@ public class RepositoryCollectionRegistry
 		return repoCollectionDecoratorFactory.createDecoratedRepositoryCollection(defaultRepoCollection);
 	}
 
-	public void setDefaultRepoCollection(RepositoryCollection defaultRepoCollection)
+	void setDefaultRepoCollection(RepositoryCollection defaultRepoCollection)
 	{
 		this.defaultRepoCollection = requireNonNull(defaultRepoCollection);
 	}

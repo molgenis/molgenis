@@ -14,7 +14,7 @@ public class Sort implements Iterable<Sort.Order>
 
 	public Sort()
 	{
-		this(new ArrayList<Order>());
+		this(new ArrayList<>());
 	}
 
 	public Sort(String attr)
@@ -29,7 +29,7 @@ public class Sort implements Iterable<Sort.Order>
 
 	public Sort(List<Sort.Order> orders)
 	{
-		this.orders = orders != null ? new ArrayList<Order>(orders) : new ArrayList<Order>();
+		this.orders = orders != null ? new ArrayList<>(orders) : new ArrayList<>();
 	}
 
 	@Override
@@ -151,8 +151,7 @@ public class Sort implements Iterable<Sort.Order>
 				if (other.attr != null) return false;
 			}
 			else if (!attr.equals(other.attr)) return false;
-			if (direction != other.direction) return false;
-			return true;
+			return direction == other.direction;
 		}
 
 		@Override

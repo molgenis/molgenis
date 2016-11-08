@@ -24,7 +24,7 @@ public class RepositoryCollectionDecoratorFactory
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 	}
 
-	public RepositoryCollection createDecoratedRepositoryCollection(RepositoryCollection repositoryCollection)
+	RepositoryCollection createDecoratedRepositoryCollection(RepositoryCollection repositoryCollection)
 	{
 		RepositoryCollection repoCollectionDecorator = new RepositoryCollectionDecorator(repositoryCollection,
 				repositoryDecoratorFactory);
