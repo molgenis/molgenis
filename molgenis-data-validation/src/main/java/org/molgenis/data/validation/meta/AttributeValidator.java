@@ -37,15 +37,13 @@ import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 public class AttributeValidator
 {
 	private final DataService dataService;
+	private static EmailValidator emailValidator = new EmailValidator();
 
 	@Autowired
 	public AttributeValidator(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
 	}
-
-	@Autowired
-	private static EmailValidator emailValidator;
 
 	public void validate(Attribute attr)
 	{
