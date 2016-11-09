@@ -115,7 +115,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String detail = serverErrorMessage.getDetail();
-		Matcher matcher = Pattern.compile("constraint (.*?) on table \"(.*?)\" depends on table \"(.*?)\"")
+		Matcher matcher = Pattern.compile("constraint (.+) on table \"?([^\"]+)\"? depends on table \"?([^\"]+)\"?\n?")
 				.matcher(detail);
 
 		String table = null;
@@ -205,7 +205,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
 		String message = serverErrorMessage.getMessage();
-		Matcher matcher = Pattern.compile("null value in column \"(.*?)\" violates not-null constraint")
+		Matcher matcher = Pattern.compile("null value in column \"?(.*?)\"? violates not-null constraint")
 				.matcher(message);
 		boolean matches = matcher.matches();
 		if (matches)
