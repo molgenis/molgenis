@@ -1546,8 +1546,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 			Query q = new QueryImpl();
 			q.eq(IndexActionMetaData.ENTITY_FULL_NAME, "sys_test_TypeTestDynamic");
-			Stream<org.molgenis.data.index.meta.IndexAction> all = dataService.findAll(IndexActionMetaData.INDEX_ACTION, q);
-			all.forEach(e -> {
+			Stream<org.molgenis.data.index.meta.IndexAction> all = dataService
+					.findAll(IndexActionMetaData.INDEX_ACTION, q);
+			all.forEach(e ->
+			{
 				LOG.info(e.getEntityFullName() + "." + e.getEntityId());
 			});
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
