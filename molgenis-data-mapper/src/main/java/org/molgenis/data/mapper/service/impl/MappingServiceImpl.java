@@ -222,19 +222,9 @@ public class MappingServiceImpl implements MappingService
 		}
 		catch (RuntimeException ex)
 		{
-			if (targetRepo.getName().equals(mappingTarget.getName()))
-			{
-				// Mapping to the target model, if something goes wrong we do not want to delete it
-				LOG.error("Error applying mappings to the target", ex);
-				throw ex;
-			}
-			else
-			{
-				// A new repository was created for mapping, so we can drop it if something went wrong
-				LOG.error("Error applying mappings, dropping created repository.", ex);
-				dataService.getMeta().deleteEntityType(targetMetaData.getName());
-				throw ex;
-			}
+			// Mapping to the target model, if something goes wrong we do not want to delete it
+			LOG.error("Error applying mappings to the target", ex);
+			throw ex;
 		}
 	}
 
