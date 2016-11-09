@@ -16,15 +16,20 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Sets.difference;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
@@ -38,7 +43,8 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 /**
  * Decorator for the entity meta data repository:
  * - filters requested entities based on the permissions of the current user.
- * - applies updates to the repository collection for entity meta data adds/updates/deletes
+ * - applies updates to the repository collection for entity meta data adds/deletes
+ * - adds and removes attribute columns to the repository collection for entity meta data updates
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
@@ -330,7 +336,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		decoratedRepo.add(entityType);
 		if (!entityType.isAbstract() && !dataService.getMeta().isMetaEntityType(entityType))
 		{
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType.getBackend());
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
 			if (repoCollection == null)
 			{
 				throw new MolgenisDataException(format("Unknown backend [%s]", entityType.getBackend()));
@@ -339,12 +345,39 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		}
 	}
 
-	private void updateEntity(EntityType entityType)
+	private void updateEntity(EntityType newEntityType)
 	{
-		validateUpdateAllowed(entityType);
-
+		validateUpdateAllowed(newEntityType);
+		addAndRemoveAttributesInBackend(newEntityType);
 		// update entity
-		decoratedRepo.update(entityType);
+		decoratedRepo.update(newEntityType);
+	}
+
+	/**
+	 * Add and remove entity attributes in the backend for an {@link EntityType}.
+	 * If the {@link EntityType} is abstract, will update all concrete extending {@link EntityType}s.
+	 * Attribute updates are handled by the {@link AttributeRepositoryDecorator}.
+	 *
+	 * @param entityType {@link EntityType} containing the desired situation.
+	 */
+	private void addAndRemoveAttributesInBackend(EntityType entityType)
+	{
+		EntityType existingEntityType = decoratedRepo.findOneById(entityType.getIdValue());
+		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
+		dataService.getMeta().getConcreteChildren(entityType).forEach(concreteEntityType ->
+		{
+			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
+			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());
+			// add added attributes in backend
+			difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
+					.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
+			// remove removed attributes in backend
+			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(existingAttrsMap::get)
+					.forEach(removedAttribute -> backend.deleteAttribute(concreteExistingEntityType, removedAttribute));
+		});
 	}
 
 	/**
@@ -360,6 +393,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
+		//FIXME: should only be possible to update system entities during bootstrap!
 		if (systemEntityType != null && !currentUserisSystem())
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));

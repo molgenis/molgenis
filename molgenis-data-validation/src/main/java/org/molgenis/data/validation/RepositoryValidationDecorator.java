@@ -5,7 +5,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
@@ -395,8 +394,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		String idAttrName = getEntityType().getIdAttribute().getName();
 		List<Attribute> readonlyAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
-						.getName().equals(idAttrName))
-				.collect(toList());
+						.getName().equals(idAttrName)).collect(toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}
@@ -409,32 +407,10 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity
 					.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
 			{
-				boolean isValid = false;
-
-				// FIXME remove hack (see https://github.com/molgenis/molgenis/issues/4308)
-				// Do not validate if Questionnaire status is not SUBMITTED
-				if (EntityUtils.doesExtend(getEntityType(), "Questionnaire") && !"SUBMITTED"
-						.equals(entity.getString("status")))
-				{
-					isValid = true;
-				}
-				// Do not validate if visibleExpression resolves to false
-				else if (nonNillableAttr.getVisibleExpression() != null && !expressionValidator
-						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity))
-				{
-
-					isValid = true;
-				}
-
-				if (!isValid)
-				{
-					String message = format("The attribute '%s' of entity '%s' can not be null.",
-							nonNillableAttr.getName(), getName());
-
-					ConstraintViolation constraintViolation = new ConstraintViolation(message, nonNillableAttr,
-							Long.valueOf(validationResource.getRow()));
-					validationResource.addViolation(constraintViolation);
-				}
+				ConstraintViolation constraintViolation = new ConstraintViolation(
+						format("The attribute '%s' of entity '%s' can not be null.", nonNillableAttr.getName(),
+								getName()), nonNillableAttr, Integer.valueOf(validationResource.getRow()).longValue());
+				validationResource.addViolation(constraintViolation);
 			}
 		});
 	}

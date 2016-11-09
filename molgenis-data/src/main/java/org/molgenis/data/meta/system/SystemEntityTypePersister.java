@@ -56,7 +56,7 @@ public class SystemEntityTypePersister
 		injectExistingIdentifiers(metaEntityMetaSet);
 
 		// upsert entity types
-		dataService.getMeta().upsertEntityType(metaEntityMetaSet);
+		dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
 
 		// remove entity meta data
 		removeNonExistingSystemEntities();

@@ -11,20 +11,23 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import javax.sql.DataSource;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static org.molgenis.AttributeType.*;
 
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions
  */
-public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
+class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
 {
-	public PostgreSqlExceptionTranslator(DataSource dataSource)
+	PostgreSqlExceptionTranslator(DataSource dataSource)
 	{
 		super(requireNonNull(dataSource));
 	}
@@ -93,11 +96,54 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 				return translateUniqueKeyViolation(pSqlException);
 			case "23514": // check_violation
 				return translateCheckConstraintViolation(pSqlException);
+			case "2BP01":
+				return translateDependentObjectsStillExist(pSqlException);
 			case "42703":
 				return translateUndefinedColumnException(pSqlException);
 			default:
 				return null;
 		}
+	}
+
+	/**
+	 * Package private for testability
+	 *
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
+	 */
+	static MolgenisValidationException translateDependentObjectsStillExist(PSQLException pSqlException)
+	{
+		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
+		String detail = serverErrorMessage.getDetail();
+		Matcher matcher = Pattern.compile("constraint (.*?) on table \"(.*?)\" depends on table \"(.*?)\"")
+				.matcher(detail);
+
+		String table = null;
+		Set<String> dependentTables = new LinkedHashSet<>();
+		while (matcher.find())
+		{
+			table = matcher.group(2);
+			dependentTables.add(matcher.group(3));
+		}
+
+		if (table == null) // no matches
+		{
+			throw new RuntimeException("Error translating exception", pSqlException);
+		}
+
+		String message;
+		if (dependentTables.size() == 1)
+		{
+			message = format("Cannot delete entity '%s' because entity '%s' depends on it.", table,
+					dependentTables.iterator().next());
+		}
+		else
+		{
+			message = format("Cannot delete entity '%s' because entities '%s' depend on it.", table,
+					dependentTables.stream().collect(joining(", ")));
+		}
+		ConstraintViolation constraintViolation = new ConstraintViolation(message, null);
+		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
 	/**

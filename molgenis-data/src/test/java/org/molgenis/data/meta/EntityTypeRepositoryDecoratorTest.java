@@ -1,6 +1,10 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
@@ -43,22 +47,41 @@ import static org.testng.Assert.assertNull;
 
 public class EntityTypeRepositoryDecoratorTest
 {
+	private final String entityName1 = "EntityType1";
+	private final String entityName2 = "EntityType2";
+	private final String entityName3 = "EntityType3";
+	private final String entityName4 = "EntityType4";
 	private EntityTypeRepositoryDecorator repo;
+	@Mock
 	private Repository<EntityType> decoratedRepo;
+	@Mock
 	private DataService dataService;
+	@Mock
 	private MetaDataService metaDataService;
+	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	@Mock
 	private MolgenisPermissionService permissionService;
+	@Captor
+	private ArgumentCaptor<Consumer<List<EntityType>>> consumerCaptor;
+	@Mock
+	private EntityType entityType1;
+	@Mock
+	private EntityType entityType2;
+	@Mock
+	private EntityType entityType3;
+	@Mock
+	private EntityType entityType4;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
-		dataService = mock(DataService.class);
-		metaDataService = mock(MetaDataService.class);
+		MockitoAnnotations.initMocks(this);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
-		permissionService = mock(MolgenisPermissionService.class);
+		when(entityType1.getName()).thenReturn(entityName1);
+		when(entityType2.getName()).thenReturn(entityName2);
+		when(entityType3.getName()).thenReturn(entityName3);
+		when(entityType4.getName()).thenReturn(entityName4);
 		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, systemEntityTypeRegistry,
 				permissionService);
 	}
@@ -149,7 +172,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		when(metaDataService.getBackend(entityType)).thenReturn(repoCollection);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		repo.add(entityType);
 		verify(decoratedRepo).add(entityType);
@@ -350,12 +373,26 @@ public class EntityTypeRepositoryDecoratorTest
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
 	}
 
-	// TODO implement forEachBatchedUser unit test, but how?
-	//	@Test
-	//	public void forEachBatchedUser() throws Exception
-	//	{
-	//
-	//	}
+	@Test
+	public void forEachBatchedUser() throws Exception
+	{
+		setUserAuthentication();
+
+		List<Entity> entities = newArrayList();
+		repo.forEachBatched(entities::addAll, 2);
+
+		when(permissionService.hasPermissionOnEntity(entityName1, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityName2, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityName3, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityName4, READ)).thenReturn(true);
+
+		// Decorated repo returns two batches of two entityTypes
+		verify(decoratedRepo).forEachBatched(eq(null), consumerCaptor.capture(), eq(2));
+		consumerCaptor.getValue().accept(Lists.newArrayList(entityType1, entityType2));
+		consumerCaptor.getValue().accept(Lists.newArrayList(entityType3, entityType4));
+
+		assertEquals(entities, newArrayList(entityType1, entityType4));
+	}
 
 	@Test
 	public void findOneQuerySu() throws Exception
@@ -795,6 +832,57 @@ public class EntityTypeRepositoryDecoratorTest
 		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating system entity meta data \\[EntityType1\\] is not allowed")
+	public void updateSystemEntityType()
+	{
+		SystemEntityType systemEntityType = mock(SystemEntityType.class);
+		when(systemEntityTypeRegistry.getSystemEntityType(entityName1)).thenReturn(systemEntityType);
+
+		setSuAuthentication();
+		repo.update(entityType1);
+	}
+
+	@Test
+	public void update()
+	{
+		when(entityType1.getIdValue()).thenReturn(entityName1);
+		when(entityType2.getIdValue()).thenReturn(entityName2);
+		when(entityType3.getIdValue()).thenReturn(entityName3);
+		when(entityType4.getIdValue()).thenReturn(entityName4);
+
+		EntityType currentEntityType = mock(EntityType.class);
+		EntityType currentEntityType2 = mock(EntityType.class);
+		EntityType currentEntityType3 = mock(EntityType.class);
+		when(systemEntityTypeRegistry.getSystemEntityType(entityName1)).thenReturn(null);
+		when(decoratedRepo.findOneById(entityName1)).thenReturn(currentEntityType);
+		when(decoratedRepo.findOneById(entityName2)).thenReturn(currentEntityType2);
+		when(decoratedRepo.findOneById(entityName3)).thenReturn(currentEntityType3);
+
+		Attribute attributeStays = mock(Attribute.class);
+		when(attributeStays.getName()).thenReturn("attributeStays");
+		Attribute attributeRemoved = mock(Attribute.class);
+		when(attributeRemoved.getName()).thenReturn("attributeRemoved");
+		Attribute attributeAdded = mock(Attribute.class);
+		when(attributeAdded.getName()).thenReturn("attributeAdded");
+
+		when(currentEntityType.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attributeStays, attributeRemoved));
+		when(entityType1.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attributeStays, attributeAdded));
+		when(metaDataService.getConcreteChildren(entityType1)).thenReturn(Stream.of(entityType2, entityType3));
+		RepositoryCollection backend2 = mock(RepositoryCollection.class);
+		RepositoryCollection backend3 = mock(RepositoryCollection.class);
+		when(metaDataService.getBackend(entityType2)).thenReturn(backend2);
+		when(metaDataService.getBackend(entityType3)).thenReturn(backend3);
+
+		setSuAuthentication();
+		repo.update(entityType1);
+
+		// verify that attributes got added and deleted in concrete extending entities
+		verify(backend2).addAttribute(currentEntityType2, attributeAdded);
+		verify(backend2).deleteAttribute(currentEntityType2, attributeRemoved);
+		verify(backend3).addAttribute(currentEntityType3, attributeAdded);
+		verify(backend3).deleteAttribute(currentEntityType3, attributeRemoved);
 	}
 
 	private static void setSuAuthentication()

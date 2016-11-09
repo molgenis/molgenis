@@ -35,7 +35,8 @@ import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
@@ -47,7 +48,6 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -473,28 +473,27 @@ class PostgreSqlRepository extends AbstractRepository
 		{
 			for (Attribute attr : junctionTableAttrs)
 			{
-				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
-				if (entity.get(attr.getName()) != null)
-				{
-					Iterable<Entity> refEntities;
-					if (isSingleReferenceType(attr) && attr.isInversedBy())
-					{
-						refEntities = singletonList(entity.getEntity(attr.getName()));
-					}
-					else
-					{
-						refEntities = entity.getEntities(attr.getName());
-					}
+				Iterable<Entity> refEntities = entity.getEntities(attr.getName());
 
-					seqNr.set(0);
-					for (Entity val : refEntities)
-					{
-						Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
-						mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-						mref.put(idAttr.getName(), entity.get(idAttr.getName()));
-						mref.put(attr.getName(), val);
-						mrefs.get(attr.getName()).add(mref);
-					}
+				// Not-Null constraint doesn't exist for MREF attributes since they are stored in junction tables,
+				// so validate manually.
+				if (!attr.isNillable() && Iterables.isEmpty(refEntities))
+				{
+					throw new MolgenisValidationException(new ConstraintViolation(
+							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
+									attr.getName(), attr.getEntity().getName(), entity.getIdValue().toString())));
+				}
+
+				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
+
+				seqNr.set(0);
+				for (Entity val : refEntities)
+				{
+					Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
+					mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+					mref.put(idAttr.getName(), entity.get(idAttr.getName()));
+					mref.put(attr.getName(), val);
+					mrefs.get(attr.getName()).add(mref);
 				}
 			}
 		}

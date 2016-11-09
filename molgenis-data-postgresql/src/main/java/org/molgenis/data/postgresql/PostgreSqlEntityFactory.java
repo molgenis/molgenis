@@ -17,14 +17,13 @@ import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 @Component
-public class PostgreSqlEntityFactory
+class PostgreSqlEntityFactory
 {
 	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlEntityFactory.class);

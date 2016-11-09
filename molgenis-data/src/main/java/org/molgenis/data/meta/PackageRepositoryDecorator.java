@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.reverse;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -237,7 +238,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		// delete entities in package
 		Repository<EntityType> entityRepo = getEntityRepository();
 		List<EntityType> entityTypes = Lists.newArrayList(package_.getEntityTypes());
-		entityRepo.delete(entityTypeDependencyResolver.resolve(entityTypes).stream());
+		entityRepo.delete(reverse(entityTypeDependencyResolver.resolve(entityTypes)).stream());
 
 		// delete row from package table
 		decoratedRepo.delete(package_);

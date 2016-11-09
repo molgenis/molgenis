@@ -1,12 +1,15 @@
 package org.molgenis.integrationtest.platform;
 
+import org.elasticsearch.action.index.IndexAction;
 import org.molgenis.data.*;
-import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
@@ -21,13 +24,13 @@ import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -54,7 +57,6 @@ import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -87,11 +89,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private MetaDataServiceImpl metaDataService;
 	@Autowired
-	private ConfigurableApplicationContext applicationContext;
-	@Autowired
 	private EntityListenersService entityListenersService;
-	@Autowired
-	private L2Cache l2Cache;
 	@Autowired
 	private LanguageService languageService;
 	@Autowired
@@ -106,6 +104,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private LanguageFactory languageFactory;
 	@Autowired
 	private AttributeFactory attributeFactory;
+	@Autowired
+	private IndexActionRegisterServiceImpl indexActionRegisterService;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -1305,18 +1305,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(singleThreaded = true, enabled = false)
-	public void l3CacheTest()
+	/**
+	 * Test add and remove of a single attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void addAndDeleteSingleAttribute()
 	{
-		String COUNTRY = "Country";
-		final EntityType entityType = EntityType
-				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS, attributeFactory);
-		final Attribute newAttr = attributeFactory.create().setName(COUNTRY);
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
 
 		runAsSystem(() ->
 		{
-			entityType.addAttribute(newAttr);
-			dataService.getMeta().updateEntityType(entityType);
+			dataService.getMeta().addAttribute(newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
@@ -1326,29 +1328,229 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
 			dataService.update(entityType.getName(),
-					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).filter(e ->
-					{
-						e.set(COUNTRY, "NL" + e.getIdValue());
-						return true;
-					}));
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false)
+							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
 		});
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
-		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
+		// Tunnel via L3 flow
+		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
 		q0.pageSize(10); // L3 only caches queries with a page size
-		q0.sort(new Sort().on(COUNTRY));
+		q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-		Repository repoQ0 = dataService.getRepository(entityTypeDynamic.getName());
 		runAsSystem(() ->
 		{
-			List expected = dataService.findAll(repoQ0.getName(), q0).map(e -> e.getIdValue()).collect(toList());
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(Entity::getIdValue)
+					.collect(toList());
+			assertEquals(expected, Arrays.asList("0", "1"));
+
+			// Remove added attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		// verify attribute is deleted by adding and removing it again
+		runAsSystem(() ->
+		{
+			// Add attribute
+			dataService.getMeta().addAttribute(newAttr);
+
+			// Delete attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
+
+	/**
+	 * Test add stream attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void addStreamAttribute()
+	{
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+
+		runAsSystem(() ->
+		{
+			dataService.getMeta().addAttributes(entityType.getName(), Stream.of(newAttr));
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
+			assertNotNull(attribute);
+
+			// Tunnel via L3 flow
+			Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+					.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
+			q0.pageSize(10); // L3 only caches queries with a page size
+			q0.sort(new Sort().on(NEW_ATTRIBUTE));
+
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(Entity::getIdValue)
+					.collect(toList());
+			assertEquals(expected, Arrays.asList());
+
+			// Remove added attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
+
+	/**
+	 * Test update of a single attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void updateAttribute()
+	{
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+
+		// Add attribute
+		runAsSystem(() ->
+		{
+			dataService.getMeta().addAttribute(newAttr);
+
+			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
+			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
+
+			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
+			dataService.add(entityTypeDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			dataService.update(entityType.getName(),
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false)
+							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
+		});
+		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+		// Verify old values
+		assertNotEquals(newAttr.getSequenceNumber(), 0);
+		assertFalse(newAttr.isReadOnly());
+		assertFalse(newAttr.isUnique());
+		assertNotEquals(newAttr.getLabel(), "test");
+		assertNotEquals(newAttr.getDescription(), "test");
+		assertTrue(newAttr.isNillable());
+
+		// New values
+		newAttr.setSequenceNumber(0);
+		newAttr.setReadOnly(true);
+		newAttr.setUnique(true);
+		newAttr.setLabel("test");
+		newAttr.setDescription("test");
+
+		// Update attribute
+		runAsSystem(() ->
+		{
+			// Update added attribute
+			dataService.update(ATTRIBUTE_META_DATA, newAttr);
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		Attribute attr = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
+		assertEquals(attr.getSequenceNumber(), 0);
+		assertTrue(attr.isReadOnly());
+		assertTrue(attr.isUnique());
+		assertEquals(attr.getLabel(), "test");
+		assertEquals(attr.getDescription(), "test");
+
+		// Delete attribute
+		runAsSystem(() ->
+		{
+			// Remove added attribute
+			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
+
+	/*
+	 * Test add and remove of a single attribute of a dynamic entity
+	 */
+	@Test(singleThreaded = true)
+	public void addAndDeleteSingleAttributeStream()
+	{
+		final String NEW_ATTRIBUTE = "new_attribute";
+		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
+		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
+		newAttr.setEntity(entityType);
+		entityType.addAttribute(newAttr); // appends at the end and sets sequence number
+
+		runAsSystem(() ->
+		{
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType)); // Adds the column to the table
+			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+
+			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
+			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
+
+			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
+			dataService.add(entityTypeDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			dataService.update(entityType.getName(),
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false)
+							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
+		});
+		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+		// Tunnel via L3 flow
+		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
+				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
+		q0.pageSize(10); // L3 only caches queries with a page size
+		q0.sort(new Sort().on(NEW_ATTRIBUTE));
+
+		runAsSystem(() ->
+		{
+			List expected = dataService.findAll(entityTypeDynamic.getName(), q0).map(Entity::getIdValue)
+					.collect(toList());
 			assertEquals(expected, Arrays.asList("0", "1"));
 
 			// Remove added attribute
 			entityType.removeAttribute(newAttr);
-			dataService.getMeta().updateEntityType(entityType);
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
+			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+
+		// verify attribute is deleted by adding and removing it again
+		runAsSystem(() ->
+		{
+			entityType.addAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
+			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+
+			// Remove added attribute
+			entityType.removeAttribute(newAttr);
+			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
+			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
+	}
+
+	@Test(singleThreaded = true)
+	@Transactional
+	public void storeIndexActions()
+	{
+		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
+		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
+		runAsSystem(() ->
+		{
+			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
+			dataService.add(entityTypeDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			indexActionRegisterService.register(entityTypeDynamic.getName(), "1");
+			indexActionRegisterService.register(entityTypeDynamic.getName(), null);
+
+			Query q = new QueryImpl();
+			q.eq(IndexActionMetaData.ENTITY_FULL_NAME, "sys_test_TypeTestDynamic");
+			Stream<org.molgenis.data.index.meta.IndexAction> all = dataService.findAll(IndexActionMetaData.INDEX_ACTION, q);
+			all.forEach(e -> {
+				LOG.info(e.getEntityFullName() + "." + e.getEntityId());
+			});
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		});
 	}
 }
-

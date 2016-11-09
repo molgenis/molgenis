@@ -73,10 +73,7 @@ var FormControl = React.createClass({
         var labelClasses = this.props.formLayout === 'horizontal' ? 'col-md-' + this.props.colOffset + ' control-label' : 'control-label';
         var labelElement = label({className: labelClasses, htmlFor: id}, lbl);
 
-        // for bidirectional one-to-many attributes editing is not allowed if the XREF at the other side of the relation is required:
-        // - removing items would set the xref to null which is a constraint violation
-        // - only items with a null xref are available to add and these don't exist since xref is required
-        var disabled = this.props.mode === 'view' || (attr.mappedBy && attr.fieldType === 'ONE_TO_MANY' && attr.refEntity.attributes[attr.mappedBy].nillable === false);
+        var disabled = this.props.mode === 'view';
 
         var attributeControlProps = _.extend({}, this.props, {
             attr: attr,
@@ -102,6 +99,12 @@ var FormControl = React.createClass({
         }
         // show auto controls as readonly in edit mode
         if (this.props.mode === 'edit' && attr.auto === true) {
+            attributeControlProps.readOnly = true;
+        }
+        // for bidirectional one-to-many attributes editing is not allowed if the XREF at the other side of the relation is required:
+        // - removing items would set the xref to null which is a constraint violation
+        // - only items with a null xref are available to add and these don't exist since xref is required
+        if (attr.mappedBy && attr.fieldType === 'ONE_TO_MANY' && attr.refEntity.attributes[attr.mappedBy].nillable === false) {
             attributeControlProps.readOnly = true;
         }
 

@@ -79,8 +79,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "sourceAttributes");
+		attributeMappingEntity.set(AttributeMappingMetaData.TARGET_ATTRIBUTE, "targetAttribute");
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCE_ATTRIBUTES, "sourceAttributes");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
 
 		List<Entity> attributeMappingEntities = Lists.newArrayList();
@@ -120,10 +120,10 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "");
+		attributeMappingEntity.set(AttributeMappingMetaData.TARGET_ATTRIBUTE, "targetAttribute");
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCE_ATTRIBUTES, "");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, CURATED.toString());
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM_STATE, CURATED.toString());
 
 		List<Entity> attributeMappingEntities = Lists.newArrayList();
 		attributeMappingEntities.add(attributeMappingEntity);

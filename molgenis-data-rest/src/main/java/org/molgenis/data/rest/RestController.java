@@ -13,6 +13,8 @@ import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -42,6 +44,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -66,6 +69,7 @@ import static org.molgenis.AttributeType.*;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.RANGE;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -735,7 +739,14 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
-		dataService.deleteById(entityName, id);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().deleteAttributeById(id);
+		}
+		else
+		{
+			dataService.deleteById(entityName, id);
+		}
 	}
 
 	/**
@@ -1034,6 +1045,7 @@ public class RestController
 		}
 	}
 
+	@Transactional
 	private void updateInternal(String entityName, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityName);
@@ -1043,26 +1055,33 @@ public class RestController
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
-		Entity existing = dataService.findOneById(entityName, id, MetaUtils.getEntityTypeFetch());
+		Entity existing = dataService.findOneById(entityName, id, new Fetch().field(meta.getIdAttribute().getName()));
 		if (existing == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
 		Entity entity = this.restService.toEntity(meta, entityMap);
-		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
 		restService.updateMappedByEntities(entity, existing);
 	}
 
+	@Transactional
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
 	{
-		EntityType meta = dataService.getEntityType(entityName);
+		EntityType entityType = dataService.getEntityType(entityName);
+		Entity entity = this.restService.toEntity(entityType, entityMap);
 
-		Entity entity = this.restService.toEntity(meta, entityMap);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().addAttribute(new Attribute(entity));
+		}
+		else
+		{
+			dataService.add(entityName, entity);
+		}
 
-		dataService.add(entityName, entity);
 		restService.updateMappedByEntities(entity);
 
 		Object id = entity.getIdValue();
