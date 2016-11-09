@@ -32,6 +32,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -50,6 +51,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -77,6 +79,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@Autowired
 	private OntologyTagService ontologyTagService;
@@ -250,7 +255,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		targetAttribute.setRefEntity(entityTypeXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
-		when(dataService.findOneById("xrefEntity1", "1")).thenReturn(xref1a);
+		when(entityManager.getReference(entityTypeXref, 1)).thenReturn(xref1a);
 		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityTypeSource);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
 	}
@@ -289,22 +294,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
-		when(dataService.findAll(eq(refEntityName), argThat(new ArgumentMatcher<Stream<Object>>()
-		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean matches(Object argument)
-			{
-				return ((Stream<Object>) argument).collect(toList()).equals(Arrays.asList(refEntityId0, refEntityId1));
-			}
-		}))).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(refEntity0, refEntity1);
-			}
-		});
+		when(entityManager.getReference(refEntityType, refEntityId0)).thenReturn(refEntity0);
+		when(entityManager.getReference(refEntityType, refEntityId1)).thenReturn(refEntity1);
 
 		// source Entity
 		EntityType entityTypeSource = entityTypeFactory.create(sourceEntityName);
@@ -353,10 +344,10 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 						.setRefEntity(refEntityType));
 
 		Entity source = new DynamicEntity(entityTypeSource);
-		source.set(sourceEntityAttrName, null);
+		source.set(sourceEntityAttrName, emptyList());
 
 		Object result = algorithmService.apply(attributeMapping, source, entityTypeSource);
-		assertNull(result);
+		assertEquals(result, emptyList());
 	}
 
 	@Test
@@ -520,7 +511,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public JsMagmaScriptEvaluator jsScriptEvaluator()
 		{
-			return mock(JsMagmaScriptEvaluator.class);
+			return new JsMagmaScriptEvaluator(new NashornScriptEngine());
 		}
 
 		@Bean
