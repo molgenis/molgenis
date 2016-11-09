@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.NameValidator;
@@ -37,11 +38,13 @@ import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 public class AttributeValidator
 {
 	private final DataService dataService;
+	private static EntityManager entityManager;
 
 	@Autowired
-	public AttributeValidator(DataService dataService)
+	public AttributeValidator(DataService dataService, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.entityManager = requireNonNull(entityManager);
 	}
 
 	@Autowired
@@ -196,10 +199,10 @@ public class AttributeValidator
 				checkEnum(attr, value);
 			}
 
-			//get typed valuto check if the value is of the right type.
+			// Get typed value to check if the value is of the right type.
 			try
 			{
-				EntityUtils.getTypedValue(value, attr);
+				EntityUtils.getTypedValue(value, attr, entityManager);
 			}
 			catch (NumberFormatException e)
 			{
@@ -377,8 +380,7 @@ public class AttributeValidator
 	private void validateExpression(String expression, String newExpression)
 	{
 		// TODO validate with script evaluator
-		//ScriptEvaluator.eval();
-
+		// ScriptEvaluator.eval();
 		// how to get access to expression validator here since it is located in molgenis-data-validation?
 	}
 }

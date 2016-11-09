@@ -3,6 +3,7 @@ package org.molgenis.data.validation.meta;
 import junit.framework.Assert;
 import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.Attribute;
@@ -29,7 +30,9 @@ public class AttributeValidatorTest
 	public void beforeMethod()
 	{
 		dataService = mock(DataService.class);
-		attributeValidator = new AttributeValidator(dataService);
+		EntityManager entityManager = mock(EntityManager.class);;
+		attributeValidator = new AttributeValidator(dataService,
+				entityManager);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")
