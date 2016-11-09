@@ -118,8 +118,7 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(RANGE_MAX).setDataType(LONG).setLabel("Range max")
 				.setValidationExpression(getRangeValidationExpression(RANGE_MAX));
 		addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
-		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique")
-				.setValidationExpression(getUniqueValidationExpression());
+		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Visible expression");
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Validation expression");
@@ -230,13 +229,6 @@ public class AttributeMetadata extends SystemEntityType
 				+ "').matches(" + regex + ").not().and(" + nullableIsFalse + "))).value()";
 	}
 
-	private static String getUniqueValidationExpression()
-	{
-		String isUniqueIsFalseOrNull = "$('" + IS_UNIQUE + "').eq(false).or($('" + IS_UNIQUE + "').isNull())";
-		return isUniqueIsFalseOrNull + ".or($('" + IS_UNIQUE + "').eq(true).and($('" + IS_NULLABLE
-				+ "').eq(false))).value()";
-	}
-
 	private String getAggregatableExpression()
 	{
 		String aggregatableIsNullOrFalse =
@@ -244,8 +236,8 @@ public class AttributeMetadata extends SystemEntityType
 		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
 				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
 		return aggregatableIsNullOrFalse + ".or(" + "$('" + TYPE + "')" + ".matches(" + regex + ")" + ".and(" + "$('"
-				+ IS_NULLABLE + "')" + ".eq(false)" + ")" + ")" + ".or(" + "$('" + TYPE + "')"
-				+ ".matches(" + regex + ").not()).value()";
+				+ IS_NULLABLE + "')" + ".eq(false)" + ")" + ")" + ".or(" + "$('" + TYPE + "')" + ".matches(" + regex
+				+ ").not()).value()";
 	}
 
 }

@@ -39,16 +39,14 @@ public class AttributeValidator
 {
 	private final DataService dataService;
 	private static EntityManager entityManager;
+	private final static EmailValidator emailValidator = new EmailValidator();
 
 	@Autowired
 	public AttributeValidator(DataService dataService, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.entityManager = requireNonNull(entityManager);
+		AttributeValidator.entityManager = requireNonNull(entityManager);
 	}
-
-	@Autowired
-	private static EmailValidator emailValidator;
 
 	public void validate(Attribute attr)
 	{
@@ -125,7 +123,8 @@ public class AttributeValidator
 		String newExpression = newAttr.getExpression();
 		if (!Objects.equals(currentExpression, newExpression))
 		{
-			validateExpression(currentExpression, newExpression);
+			// TODO Implement
+			// validateExpression(currentExpression, newExpression);
 		}
 
 		// validation expression
@@ -133,7 +132,8 @@ public class AttributeValidator
 		String newValidationExpression = newAttr.getValidationExpression();
 		if (!Objects.equals(currentValidationExpression, newValidationExpression))
 		{
-			validateExpression(currentValidationExpression, newValidationExpression);
+			// TODO Implement
+			// validateExpression(currentValidationExpression, newValidationExpression);
 		}
 
 		// visible expression
@@ -141,7 +141,8 @@ public class AttributeValidator
 		String newVisibleExpression = newAttr.getVisibleExpression();
 		if (!Objects.equals(currentVisibleExpression, newVisibleExpression))
 		{
-			validateExpression(currentVisibleExpression, newVisibleExpression);
+			// TODO Implement
+			// validateExpression(currentVisibleExpression, newVisibleExpression);
 		}
 
 		// orderBy
@@ -155,7 +156,7 @@ public class AttributeValidator
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
-	protected static void validateDefaultValue(Attribute attr)
+	static void validateDefaultValue(Attribute attr)
 	{
 		String value = attr.getDefaultValue();
 		if (attr.getDefaultValue() != null)
@@ -377,10 +378,13 @@ public class AttributeValidator
 				.put(XREF, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 	}
 
-	private void validateExpression(String expression, String newExpression)
-	{
-		// TODO validate with script evaluator
-		// ScriptEvaluator.eval();
-		// how to get access to expression validator here since it is located in molgenis-data-validation?
-	}
+	/*
+	  TODO implement this
+	  	private void validateExpression(String expression, String newExpression)
+		{
+			// TODO validate with script evaluator
+			// ScriptEvaluator.eval();
+			// how to get access to expression validator here since it is located in molgenis-data-validation?
+		}
+	 */
 }
