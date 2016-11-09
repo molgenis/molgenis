@@ -3,7 +3,7 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.sql.Date;
-import java.text.AttributedCharacterIterator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -344,7 +343,7 @@ class RestControllerV2
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityName);
 
 		// Validate the new name
-		MetaValidationUtils.validateName(request.getNewEntityName());
+		NameValidator.validateName(request.getNewEntityName());
 
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils

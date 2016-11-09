@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -20,12 +21,11 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.AttributeType.*;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
+import static org.molgenis.AttributeType.*;
 
 /**
  * Decorator for the attribute repository:
@@ -253,7 +253,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	@Override
 	public void update(Attribute attr)
 	{
-		validateAndUpdate(attr);
+		validateUpdateAllowedAndUpdate(attr);
 		decoratedRepo.update(attr);
 	}
 
@@ -262,7 +262,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	{
 		decoratedRepo.update(attrs.filter(attr ->
 		{
-			validateAndUpdate(attr);
+			validateUpdateAllowedAndUpdate(attr);
 			return true;
 		}));
 	}
@@ -318,7 +318,6 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	@Override
 	public void add(Attribute attr)
 	{
-		validateAdd(attr);
 		decoratedRepo.add(attr);
 	}
 
@@ -408,7 +407,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 		// transitions to FILE not allowed because associated file in FileStore not created/removed
 		DATA_TYPE_DISALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
 		DATA_TYPE_DISALLOWED_TRANSITIONS
-				.put(BOOL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+				.put(AttributeType.BOOL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 		DATA_TYPE_DISALLOWED_TRANSITIONS
 				.put(CATEGORICAL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 		DATA_TYPE_DISALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.complementOf(EnumSet.of(MREF)));
@@ -474,7 +473,7 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	{
 		if (mappedByAttr != null)
 		{
-			if (!isSingleReferenceType(mappedByAttr))
+			if (!EntityTypeUtils.isSingleReferenceType(mappedByAttr))
 			{
 				throw new MolgenisDataException(
 						format("Invalid mappedBy attribute [%s] data type [%s].", mappedByAttr.getName(),
@@ -568,11 +567,10 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 				.forEach(entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
 	}
 
-	private void validateAndUpdate(Attribute attr)
+	private void validateUpdateAllowedAndUpdate(Attribute attr)
 	{
 		validateUpdateAllowed(attr);
 		Attribute currentAttr = findOneById(attr.getIdentifier());
-		validateUpdate(currentAttr, attr);
 		updateAttributeInBackend(currentAttr, attr);
 	}
 
