@@ -1,28 +1,24 @@
-package org.molgenis.js;
+package org.molgenis.js.magma;
 
 import com.google.api.client.util.Maps;
 import com.google.common.base.Stopwatch;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
-import org.molgenis.util.ResourceUtils;
+import org.molgenis.js.nashorn.NashornScriptEngine;
+import org.molgenis.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.script.*;
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -39,19 +35,17 @@ import static java.util.stream.StreamSupport.stream;
  * Creating and initializing a script engine is very expensive, ideally we have one instance system-wide
  */
 @Component
-public class JsScriptEvaluator
+public class JsMagmaScriptEvaluator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(JsScriptEvaluator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
 
-	private static final List<String> RESOURCE_NAMES;
+	private final NashornScriptEngine jsScriptEngine;
 
-	static
+	@Autowired
+	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
 	{
-		RESOURCE_NAMES = asList("/js/es6-shims.js", "/js/math.min.js", "/js/script-evaluator.js");
+		this.jsScriptEngine = requireNonNull(jsScriptEngine);
 	}
-
-	private ScriptEngine scriptEngine;
-	private ThreadLocal<Bindings> bindingsThreadLocal;
 
 	/**
 	 * Evaluate a expression for the given entity.
@@ -62,17 +56,6 @@ public class JsScriptEvaluator
 	 */
 	public Object eval(String expression, Entity entity)
 	{
-		// lazy load script engine
-		synchronized (this)
-		{
-			if (scriptEngine == null)
-			{
-				initScriptEngine();
-			}
-		}
-
-		Bindings bindings = bindingsThreadLocal.get();
-
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
 		{
@@ -80,8 +63,15 @@ public class JsScriptEvaluator
 		}
 
 		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity);
-		Object nashornValue = ((JSObject) bindings.get("evalScript")).call(this, expression, scriptEngineValueMap);
-		Object value = toEntityValue(nashornValue);
+		Object value;
+		try
+		{
+			value = jsScriptEngine.invokeFunction("evalScript", expression, scriptEngineValueMap);
+		}
+		catch (Throwable t)
+		{
+			return new ScriptException(t);
+		}
 
 		if (stopwatch != null)
 		{
@@ -164,82 +154,5 @@ public class JsScriptEvaluator
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 		return value;
-	}
-
-	private static Object toEntityValue(Object nashornValue)
-	{
-		if (nashornValue == null)
-		{
-			return null;
-		}
-
-		Object convertedValue;
-		if (nashornValue instanceof ScriptObjectMirror)
-		{
-			ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) nashornValue;
-			if (scriptObjectMirror.isArray())
-			{
-				convertedValue = scriptObjectMirror.values();
-			}
-			else
-			{
-				throw new RuntimeException("Unable to convert [ScriptObjectMirror]");
-			}
-		}
-		else
-		{
-			convertedValue = nashornValue;
-		}
-		return convertedValue;
-	}
-
-	private void initScriptEngine()
-	{
-		LOG.debug("Initializing Nashorn script engine ...");
-		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-		scriptEngine = factory.getScriptEngine(s -> false); // create engine with class filter exposing no classes
-
-		// construct common JavaScript content string from defined resources
-		StringBuilder commonJs = new StringBuilder(1000000);
-		RESOURCE_NAMES.forEach(resourceName ->
-		{
-			try
-			{
-				commonJs.append(ResourceUtils.getString(getClass(), resourceName)).append('\n');
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException("", e);
-			}
-		});
-
-		// pre-compile common JavaScript
-		CompiledScript compiledScript;
-		try
-		{
-			compiledScript = ((Compilable) scriptEngine).compile(commonJs.toString());
-		}
-		catch (ScriptException e)
-		{
-			throw new RuntimeException("", e);
-		}
-
-		// create bindings per thread resulting in a JavaScript global per thread
-		bindingsThreadLocal = ThreadLocal.withInitial(() ->
-		{
-			Bindings bindings = scriptEngine.createBindings();
-			try
-			{
-				// evaluate pre-compiled common JavaScript
-				compiledScript.eval(bindings);
-			}
-			catch (ScriptException e)
-			{
-				throw new RuntimeException("", e);
-			}
-			return bindings;
-		});
-
-		LOG.debug("Initialized Nashorn script engine");
 	}
 }

@@ -1,42 +1,43 @@
 package org.molgenis.js;
 
+import org.molgenis.js.nashorn.NashornScriptEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.script.ScriptException;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Executes a JavaScript
  */
 @Service
-public class JsScriptExecutor
+class JsScriptExecutor
 {
-	/**
-	 * Execute a JavaScript
-	 */
-	public Object executeScript(String jsScript)
-	{
-		throw new UnsupportedOperationException();
+	private final NashornScriptEngine jsScriptEngine;
 
-		// FIXME
-		//		String functionName = "executeScript";
-		//		String wrappedJsScript = String.format("function %s(){%s}", functionName, jsScript);
-		//		Object result = ContextFactory.getGlobal().call(new ContextAction()
-		//		{
-		//			@Override
-		//			public Object run(Context cx)
-		//			{
-		//				ScriptableObject scriptableObject = cx.initStandardObjects();
-		//				try
-		//				{
-		//					cx.evaluateReader(scriptableObject, new StringReader(wrappedJsScript), null, 1, null);
-		//				}
-		//				catch (IOException e)
-		//				{
-		//					throw new RuntimeException(e);
-		//				}
-		//				Function evalScript = (Function) scriptableObject.get("executeScript", scriptableObject);
-		//				return evalScript.call(cx, scriptableObject, scriptableObject, new Object[] {});
-		//			}
-		//
-		//		});
-		//		return result;
+	@Autowired
+	public JsScriptExecutor(NashornScriptEngine jsScriptEngine)
+	{
+		this.jsScriptEngine = requireNonNull(jsScriptEngine);
+	}
+
+	/**
+	 * Executes the given JavaScript, e.g. 'var product = 2 * 3; return product;'
+	 *
+	 * @param jsScript JavaScript
+	 * @return value of which the type depends on the JavaScript type of the returned variable
+	 */
+	Object executeScript(String jsScript)
+	{
+		String jsScriptWithFunction = "(function (){" + jsScript + "})();";
+		try
+		{
+			return jsScriptEngine.eval(jsScriptWithFunction);
+		}
+		catch (ScriptException e)
+		{
+			throw new org.molgenis.script.ScriptException(e);
+		}
 	}
 }

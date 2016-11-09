@@ -2,7 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.js.JsScriptEvaluator;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +24,12 @@ public class ExpressionValidator
 	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(ExpressionValidator.class);
 
-	private final JsScriptEvaluator jsScriptEvaluator;
+	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@Autowired
-	public ExpressionValidator(JsScriptEvaluator jsScriptEvaluator)
+	public ExpressionValidator(JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
-		this.jsScriptEvaluator = requireNonNull(jsScriptEvaluator);
+		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class ExpressionValidator
 		List<Boolean> validationResults = new ArrayList<>(expressions.size());
 		for (String expression : expressions)
 		{
-			Object value = jsScriptEvaluator.eval(expression, entity);
+			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
 			validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
 		}
 		return validationResults;

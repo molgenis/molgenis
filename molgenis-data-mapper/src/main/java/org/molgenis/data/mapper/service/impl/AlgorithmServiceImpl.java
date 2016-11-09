@@ -17,7 +17,7 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.js.JsScriptEvaluator;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -47,19 +47,19 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final OntologyTagService ontologyTagService;
 	private final SemanticSearchService semanticSearchService;
 	private final AlgorithmGeneratorService algorithmGeneratorService;
-	private final JsScriptEvaluator jsScriptEvaluator;
+	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 	private final EntityManager entityManager;
 
 	@Autowired
 	public AlgorithmServiceImpl(OntologyTagService ontologyTagService, SemanticSearchService semanticSearchService,
 			AlgorithmGeneratorService algorithmGeneratorService, EntityManager entityManager,
-			JsScriptEvaluator jsScriptEvaluator)
+			JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
 		this.ontologyTagService = requireNonNull(ontologyTagService);
 		this.semanticSearchService = requireNonNull(semanticSearchService);
 		this.algorithmGeneratorService = requireNonNull(algorithmGeneratorService);
 		this.entityManager = requireNonNull(entityManager);
-		this.jsScriptEvaluator = requireNonNull(jsScriptEvaluator);
+		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Object derivedValue;
 			try
 			{
-				Object result = derivedValue = jsScriptEvaluator.eval(algorithm, entity);
+				Object result = derivedValue = jsMagmaScriptEvaluator.eval(algorithm, entity);
 				derivedValue = convert(result, targetAttribute);
 			}
 			catch (RuntimeException e)
@@ -127,7 +127,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
-		Object value = jsScriptEvaluator.eval(algorithm, sourceEntity);
+		Object value = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity);
 		return convert(value, attributeMapping.getTargetAttribute());
 	}
 

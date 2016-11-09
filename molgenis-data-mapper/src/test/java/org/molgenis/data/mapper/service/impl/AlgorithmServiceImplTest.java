@@ -31,7 +31,7 @@ import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.js.JsScriptEvaluator;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -518,9 +518,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public JsScriptEvaluator jsScriptEvaluator()
+		public JsMagmaScriptEvaluator jsScriptEvaluator()
 		{
-			return mock(JsScriptEvaluator.class);
+			return mock(JsMagmaScriptEvaluator.class);
 		}
 
 		@Bean

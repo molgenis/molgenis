@@ -18,7 +18,7 @@ import org.molgenis.data.mapper.service.impl.*;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.js.JsScriptEvaluator;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -70,7 +70,7 @@ public class MappingConfig
 	EntityManager entityManager;
 
 	@Autowired
-	JsScriptEvaluator jsScriptEvaluator;
+	JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@Bean
 	public MappingService mappingService()
@@ -89,7 +89,7 @@ public class MappingConfig
 	public AlgorithmService algorithmServiceImpl()
 	{
 		return new AlgorithmServiceImpl(ontologyTagService, semanticSearchService, algorithmGeneratorService(),
-				entityManager, jsScriptEvaluator);
+				entityManager, jsMagmaScriptEvaluator);
 	}
 
 	@Bean
