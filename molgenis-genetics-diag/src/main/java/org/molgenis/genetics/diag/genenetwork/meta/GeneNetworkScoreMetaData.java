@@ -35,7 +35,7 @@ public class GeneNetworkScoreMetaData extends SystemEntityType
 		addAttribute(ENSEMBL_ID).setLabel("Gene").setDescription("The Ensembl identifier").setNillable(false)
 				.setAggregatable(true);
 		addAttribute(HUGO_SYMBOL).setLabel("HUGO Symbol").setDescription("The HGNC gene symbol").setAggregatable(true);
-		addAttribute(SCORE).setLabel("Gene Network Score").setDataType(DECIMAL).setDefaultValue("false")
-				.setAggregatable(true).setNillable(false);
+		addAttribute(SCORE).setLabel("Gene Network Score").setDataType(DECIMAL).setAggregatable(true)
+				.setNillable(false);
 	}
 }

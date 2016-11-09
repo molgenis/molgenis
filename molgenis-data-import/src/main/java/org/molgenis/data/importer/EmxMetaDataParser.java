@@ -10,11 +10,12 @@ import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
+import org.molgenis.data.validation.meta.AttributeValidator;
+import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.EntityUtils;
 
@@ -161,6 +162,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final TagFactory tagFactory;
 	private final LanguageFactory languageFactory;
 	private final I18nStringFactory i18nStringFactory;
+	private final EntityTypeValidator entityTypeValidator;
+	private final AttributeValidator attributeValidator;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory)
@@ -172,11 +175,14 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.tagFactory = null;
 		this.languageFactory = null;
 		this.i18nStringFactory = null;
+		this.entityTypeValidator = null;
+		this.attributeValidator = null;
 	}
 
-	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
+	EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
-			I18nStringFactory i18nStringFactory)
+			I18nStringFactory i18nStringFactory, EntityTypeValidator entityTypeValidator,
+			AttributeValidator attributeValidator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
@@ -185,6 +191,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.tagFactory = requireNonNull(tagFactory);
 		this.languageFactory = requireNonNull(languageFactory);
 		this.i18nStringFactory = requireNonNull(i18nStringFactory);
+		this.entityTypeValidator = requireNonNull(entityTypeValidator);
+		this.attributeValidator = requireNonNull(attributeValidator);
 	}
 
 	@Override
@@ -262,8 +270,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
 	{
-		// FIXME use EntityTypeValidator and validate attributes separately
-		metaDataMap.values().forEach(MetaValidationUtils::validateEntityType);
+		metaDataMap.values().forEach(entityTypeValidator::validate);
+		metaDataMap.values().stream().map(EntityType::getAllAttributes)
+				.forEach(attributes -> attributes.forEach(attributeValidator::validate));
+
 		report = generateEntityValidationReport(source, report, metaDataMap);
 
 		// Add entities without data
@@ -830,7 +840,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						&& !emxIdAttrValue.equalsIgnoreCase(AUTO))
 				{
 					throw new IllegalArgumentException(
-							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'IS_AUTO'",
+							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
 									rowIndex));
 				}
 				if (emxIdAttrValue.equalsIgnoreCase("true"))

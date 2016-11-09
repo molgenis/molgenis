@@ -34,6 +34,8 @@ import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.validation.meta.AttributeRepositoryValidationDecorator;
+import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -76,6 +78,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final L3Cache l3Cache;
 	private final LanguageService languageService;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final AttributeValidator attributeValidator;
 	private final PlatformTransactionManager transactionManager;
 
 	@Autowired
@@ -88,7 +91,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, L3Cache l3Cache,
 			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
-			PlatformTransactionManager transactionManager)
+			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -111,6 +114,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.l3Cache = requireNonNull(l3Cache);
 		this.languageService = requireNonNull(languageService);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.attributeValidator = requireNonNull(attributeValidator);
 		this.transactionManager = requireNonNull(transactionManager);
 	}
 
@@ -178,6 +182,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryValidationDecorator(
+					(Repository<Attribute>) (Repository<? extends Entity>) repo, attributeValidator);
+
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryDecorator(
 					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry, dataService,
 					permissionService);

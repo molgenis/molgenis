@@ -39,7 +39,7 @@ public class PersonMetaData3 extends SystemEntityType
 		setLabel("Person");
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
-		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
+		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setLabel("Label");
 		Attribute parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this);
 		addAttribute(ATTR_CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
 				.setOrderBy(new Sort(ID, ASC));

@@ -377,12 +377,6 @@ public class EntityAttributesValidator
 		{
 			List<String> enumOptions = attribute.getEnumOptions();
 
-			// Keep OMX/JPA happy
-			if (enumOptions == null)
-			{
-				return null;
-			}
-
 			if (!enumOptions.contains(value))
 			{
 				return createConstraintViolation(entity, attribute, entityType,
