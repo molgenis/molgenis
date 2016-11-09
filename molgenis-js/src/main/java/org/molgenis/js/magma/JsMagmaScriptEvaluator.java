@@ -25,14 +25,6 @@ import static java.util.stream.StreamSupport.stream;
 
 /**
  * JavaScript script evaluator using the Nashorn script engine.
- * <p>
- * TODO Decide on the best way to reuse Nashorn script engine, see: http://stackoverflow.com/a/30159424, http://stackoverflow.com/a/27712812, https://blogs.oracle.com/nashorn/entry/nashorn_multi_threading_and_mt
- * TODO Evaluate if script engine class filter is sufficient sand boxing and check if normal JavaScript script runner still works
- * TODO Evaluate current date and datetime conversion solution
- * TODO Extend unit tests
- * TODO Fix JsScriptExecutor
- * <p>
- * Creating and initializing a script engine is very expensive, ideally we have one instance system-wide
  */
 @Component
 public class JsMagmaScriptEvaluator
