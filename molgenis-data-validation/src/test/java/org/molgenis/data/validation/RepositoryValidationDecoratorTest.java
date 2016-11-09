@@ -2968,8 +2968,8 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
 		when(entity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrReadonlyMrefName)).thenReturn(null);
-		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(Collections.emptyList());
+		when(entity0.get(attrReadonlyMrefName)).thenReturn(emptyList());
+		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(emptyList());
 
 		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
