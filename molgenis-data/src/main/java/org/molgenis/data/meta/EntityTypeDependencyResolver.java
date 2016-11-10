@@ -156,7 +156,7 @@ public class EntityTypeDependencyResolver
 			EntityType extendsEntityMeta = entityType.getExtends();
 			if (extendsEntityMeta != null)
 			{
-				EntityTypeNode nodeRef = new EntityTypeNode(extendsEntityMeta);
+				EntityTypeNode nodeRef = new EntityTypeNode(extendsEntityMeta, entityTypeNode.getStack());
 
 				// Add extended entity to set
 				refEntityMetaSet.add(nodeRef);
@@ -179,12 +179,12 @@ public class EntityTypeDependencyResolver
 	private static class EntityTypeNode
 	{
 		private final EntityType entityType;
-		private Set<EntityTypeNode> stack = Sets.newHashSet();
+		private final Set<EntityTypeNode> stack ;
 		private boolean skip = false;
 
 		private EntityTypeNode(EntityType entityType)
 		{
-			this.entityType = requireNonNull(entityType);
+			this(entityType, Sets.newHashSet());
 		}
 
 		private EntityTypeNode(EntityType entityType, Set<EntityTypeNode> stack)
