@@ -4,6 +4,8 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.auth.UserDecorator;
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateAnonymizer;
+import org.molgenis.data.aggregation.AggregateAnonymizerRepositoryDecorator;
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;

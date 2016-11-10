@@ -1,9 +1,10 @@
 package org.molgenis.annotation.cmd;
 
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 
 import java.util.Iterator;
 import java.util.Set;

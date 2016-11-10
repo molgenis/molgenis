@@ -1,5 +1,8 @@
-package org.molgenis.data;
+package org.molgenis.data.aggregation;
 
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.settings.AppSettings;
 
 import static java.util.Objects.requireNonNull;

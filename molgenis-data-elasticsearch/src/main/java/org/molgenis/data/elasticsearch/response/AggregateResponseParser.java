@@ -9,7 +9,7 @@ import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
-import org.molgenis.data.AggregateResult;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;

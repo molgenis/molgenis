@@ -2,6 +2,8 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.meta.model.EntityType;
 
