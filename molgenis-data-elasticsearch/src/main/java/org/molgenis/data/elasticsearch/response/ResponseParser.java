@@ -7,7 +7,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
-import org.molgenis.data.AggregateResult;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;

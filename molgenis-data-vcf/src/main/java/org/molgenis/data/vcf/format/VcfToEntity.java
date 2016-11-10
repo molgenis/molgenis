@@ -127,7 +127,8 @@ public class VcfToEntity
 			result = entityTypeFactory.create().setSimpleName(entityName + "_Sample");
 
 			Attribute idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
-			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true).setNillable(false);
+			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true)
+					.setNillable(false);
 			Attribute originalNameAttr = attrMetaFactory.create().setName(ORIGINAL_NAME).setDataType(TEXT);
 
 			result.addAttribute(idAttr, ROLE_ID);

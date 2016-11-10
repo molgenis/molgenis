@@ -1,14 +1,14 @@
 package org.molgenis.data.meta;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.util.DependencyResolver;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
