@@ -138,7 +138,8 @@ public class IndexActionRegisterServiceTest
 	}
 
 	@Test
-	public void isEntityDirtyTrue(){
+	public void isEntityDirtyTrue()
+	{
 		String entityName = "org_test_Test";
 		String entityIdString = "123";
 		Integer entityIdInteger = Integer.valueOf("123");
@@ -160,7 +161,8 @@ public class IndexActionRegisterServiceTest
 	}
 
 	@Test
-	public void isEntityDirtyFalse(){
+	public void isEntityDirtyFalse()
+	{
 		String entityName = "org_test_Test";
 		String entityId1 = "123";
 		String entityId2 = "false";

@@ -1,6 +1,8 @@
 package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
@@ -17,6 +19,7 @@ import org.molgenis.data.mapper.service.impl.*;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -64,6 +67,12 @@ public class MappingConfig
 	@Autowired
 	MappingProjectMetaData mappingProjectMeta;
 
+	@Autowired
+	EntityManager entityManager;
+
+	@Autowired
+	JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+
 	@Bean
 	public MappingService mappingService()
 	{
@@ -80,8 +89,8 @@ public class MappingConfig
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService,
-				algorithmGeneratorService());
+		return new AlgorithmServiceImpl(ontologyTagService, semanticSearchService, algorithmGeneratorService(),
+				entityManager, jsMagmaScriptEvaluator);
 	}
 
 	@Bean

@@ -9,10 +9,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -2212,6 +2209,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
+	@Test
 	public void updateReadOnlyXrefAttrValidationError()
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
@@ -2344,6 +2342,74 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0Clone)); // read only, no
+		// changes
+		// actual tests
+		repositoryValidationDecorator.update(updatedEntity0);
+		verify(decoratedRepo, times(1)).update(updatedEntity0);
+		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
+	}
+
+	@Test
+	public void updateReadOnlyMrefAttrNull()
+	{
+		String attrReadonlyMrefName = "readonlyMrefAttr";
+
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
+		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
+		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
+		when(readonlyMrefAttr.isNillable()).thenReturn(true);
+
+		when(entityType.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyMrefAttr));
+
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityType()).thenReturn(entityType);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique1");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique1");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrReadonlyMrefName)).thenReturn(emptyList());
+		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(emptyList());
+
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+
+		Entity updatedEntity0 = mock(Entity.class);
+		when(updatedEntity0.getEntityType()).thenReturn(entityType);
+
+		when(updatedEntity0.getIdValue()).thenReturn("id0");
+		when(updatedEntity0.getEntity(attrXrefName)).thenReturn(refEntity0Clone);
+		when(updatedEntity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(updatedEntity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0Clone));
+		when(updatedEntity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(updatedEntity0.getString(attrUniqueStringName)).thenReturn("unique1");
+		when(updatedEntity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0Clone);
+		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(null);
+		when(updatedEntity0.getEntities(attrReadonlyMrefName)).thenReturn(emptyList()); // read only,
+		// no
+		// changes
+		when(updatedEntity0.get(attrIdName)).thenReturn("id0");
+		when(updatedEntity0.get(attrXrefName)).thenReturn(refEntity0Clone);
+		when(updatedEntity0.get(attrNillableXrefName)).thenReturn(null);
+		when(updatedEntity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0Clone));
+		when(updatedEntity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
+		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		// changes
 		// actual tests
 		repositoryValidationDecorator.update(updatedEntity0);

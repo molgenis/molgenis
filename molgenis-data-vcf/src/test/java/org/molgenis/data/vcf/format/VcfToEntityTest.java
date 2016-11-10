@@ -93,8 +93,8 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 				.setAggregatable(true).setParent(infoMetaData);
 		Attribute infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
 				.setDescription("Flag field 2").setAggregatable(true).setParent(infoMetaData);
-		Attribute infoChar2 = attrMetaFactory.create().setName("CHAR").setDataType(STRING)
-				.setDescription("char field").setAggregatable(true).setParent(infoMetaData);
+		Attribute infoChar2 = attrMetaFactory.create().setName("CHAR").setDataType(STRING).setDescription("char field")
+				.setAggregatable(true).setParent(infoMetaData);
 
 		expectedEntityType.addAttribute(infoMetaData);
 		expectedEntityType.addAttribute(infoNS);

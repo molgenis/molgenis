@@ -134,8 +134,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 		// 3. Find all entities names of actions where no row is specified
 		Set<String> entityFullNames = indexActionWithoutExcluded.stream()
-				.filter(indexAction -> indexAction.getEntityId() == null)
-				.map(IndexAction::getEntityFullName).collect(toSet());
+				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityFullName)
+				.collect(toSet());
 
 		// 4. Filter all row index actions from list
 		return indexActionWithoutExcluded.stream()
@@ -179,9 +179,9 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean isEntityDirty(EntityKey entityKey)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() != null
-						&& indexAction.getEntityFullName().equals(entityKey.getEntityName())
-						&& indexAction.getEntityId().equals(entityKey.getId().toString()));
+				indexAction -> indexAction.getEntityId() != null && indexAction.getEntityFullName()
+						.equals(entityKey.getEntityName()) && indexAction.getEntityId()
+						.equals(entityKey.getId().toString()));
 	}
 
 	@Override

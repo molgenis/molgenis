@@ -58,17 +58,30 @@ public class PostgreSqlExceptionTranslatorTest
 	}
 
 	@Test
+	public void translateDependentObjectsStillExistNoDoubleQuotes()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("2BP01");
+		when(serverErrorMessage.getDetail())
+				.thenReturn("constraint my_foreign_key_constraint on table xxx depends on table yyy");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = PostgreSqlExceptionTranslator
+				.translateDependentObjectsStillExist(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Cannot delete entity 'xxx' because entity 'yyy' depends on it.");
+	}
+
+	@Test
 	public void translateNotNullViolation()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23502");
-		when(serverErrorMessage.getTable()).thenReturn("mytable");
+		when(serverErrorMessage.getTable()).thenReturn("myTable");
 		when(serverErrorMessage.getMessage())
-				.thenReturn("null value in column \"mycolumn\" violates not-null constraint");
+				.thenReturn("null value in column \"myColumn\" violates not-null constraint");
 		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = PostgreSqlExceptionTranslator
 				.translateNotNullViolation(new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "The attribute 'mycolumn' of entity 'mytable' can not be null.");
+		assertEquals(e.getMessage(), "The attribute 'myColumn' of entity 'myTable' can not be null.");
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)
@@ -80,6 +93,19 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getMessage()).thenReturn("xxxyyyzzzz");
 		//noinspection ThrowableResultOfMethodCallIgnored
 		PostgreSqlExceptionTranslator.translateNotNullViolation(new PSQLException(serverErrorMessage));
+	}
+
+	@Test
+	public void translateNotNullViolationNoDoubleQuotes()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23502");
+		when(serverErrorMessage.getTable()).thenReturn("xxx");
+		when(serverErrorMessage.getMessage()).thenReturn("null value in column yyy violates not-null constraint");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = PostgreSqlExceptionTranslator
+				.translateNotNullViolation(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "The attribute 'yyy' of entity 'xxx' can not be null.");
 	}
 
 	@Test

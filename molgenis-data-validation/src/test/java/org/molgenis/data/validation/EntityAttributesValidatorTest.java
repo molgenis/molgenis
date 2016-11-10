@@ -30,7 +30,8 @@ public class EntityAttributesValidatorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityAttributesValidator = new EntityAttributesValidator();
+		ExpressionValidator expressionValidator = mock(ExpressionValidator.class);
+		entityAttributesValidator = new EntityAttributesValidator(expressionValidator);
 
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);

@@ -3,7 +3,6 @@ package org.molgenis.data.meta;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.ExpressionEvaluator;
 import org.molgenis.util.GenericDependencyResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -14,8 +13,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
 public class EntityTypeDependencyResolverTest
@@ -155,7 +152,7 @@ public class EntityTypeDependencyResolverTest
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Could not resolve dependencies of items \\[entity1, entity0, entity3\\]. Are there circular dependencies\\?")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Could not resolve dependencies of items \\[entity1, entity2, entity0, entity3\\]. Are there circular dependencies\\?")
 	public void resolveDependenciesEntityCircularExtends()
 	{
 		when(entityType0.getExtends()).thenReturn(entityType3);
@@ -188,6 +185,33 @@ public class EntityTypeDependencyResolverTest
 		when(entityType2.getExtends()).thenReturn(entityType1);
 		when(attr0.getRefEntity()).thenReturn(entityType3);
 		when(attr3.getRefEntity()).thenReturn(entityType4);
+
+		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)),
+				newArrayList(entityType0, entityType1, entityType2));
+	}
+
+	@Test()
+	public void resolveDependenciesEntityExtendedDependencies()
+	{
+		EntityType entityType4 = when(mock(EntityType.class).getName()).thenReturn("entity4").getMock();
+		Attribute attr4 = when(mock(Attribute.class).getName()).thenReturn("attr4").getMock();
+		when(entityType4.getOwnAllAttributes()).thenReturn(singleton(attr4));
+
+		EntityType entityType5 = when(mock(EntityType.class).getName()).thenReturn("entity5").getMock();
+		Attribute attr5 = when(mock(Attribute.class).getName()).thenReturn("attr5").getMock();
+		when(entityType5.getOwnAllAttributes()).thenReturn(singleton(attr5));
+
+		EntityType entityType6 = when(mock(EntityType.class).getName()).thenReturn("entity6").getMock();
+		Attribute attr6 = when(mock(Attribute.class).getName()).thenReturn("attr6").getMock();
+		when(entityType6.getOwnAllAttributes()).thenReturn(singleton(attr6));
+
+		when(entityType0.getExtends()).thenReturn(null);
+		when(entityType1.getExtends()).thenReturn(entityType0);
+		when(entityType2.getExtends()).thenReturn(entityType1);
+		when(attr0.getRefEntity()).thenReturn(entityType3);
+		when(attr3.getRefEntity()).thenReturn(entityType4);
+		when(entityType4.getExtends()).thenReturn(entityType5);
+		when(entityType5.getExtends()).thenReturn(entityType6);
 
 		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)),
 				newArrayList(entityType0, entityType1, entityType2));
