@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
+
 @Component
 public class DefaultEntityValidator implements EntityValidator
 {
@@ -26,12 +28,15 @@ public class DefaultEntityValidator implements EntityValidator
 
 	private final DataService dataService;
 	private final EntityAttributesValidator entityAttributesValidator;
+	private final ExpressionValidator expressionValidator;
 
 	@Autowired
-	public DefaultEntityValidator(DataService dataService, EntityAttributesValidator entityAttributesValidator)
+	public DefaultEntityValidator(DataService dataService, EntityAttributesValidator entityAttributesValidator,
+			ExpressionValidator expressionValidator)
 	{
 		this.dataService = dataService;
 		this.entityAttributesValidator = entityAttributesValidator;
+		this.expressionValidator = requireNonNull(expressionValidator);
 	}
 
 	@Override
@@ -90,8 +95,8 @@ public class DefaultEntityValidator implements EntityValidator
 	public boolean mustDoNotNullCheck(EntityType entityType, Attribute attr, Entity entity)
 	{
 		// Do not validate is visibleExpression resolves to false
-		if (StringUtils.isNotBlank(attr.getVisibleExpression()) && !ValidationUtils
-				.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityType)) return false;
+		if (StringUtils.isNotBlank(attr.getVisibleExpression()) && !expressionValidator
+				.resolveBooleanExpression(attr.getVisibleExpression(), entity)) return false;
 
 		return true;
 	}

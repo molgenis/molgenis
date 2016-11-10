@@ -228,8 +228,7 @@ public class EntityTypeValidator
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("EntityType [%s] is not abstract; EntityType [%s] can't extend it",
-								entityType.getExtends().getName(), entityType.getName())
-				));
+								entityType.getExtends().getName(), entityType.getName())));
 			}
 		}
 	}
