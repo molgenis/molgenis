@@ -61,6 +61,20 @@ public class EntityType extends StaticEntity
 		setDefaultValues();
 	}
 
+	/**
+	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityTypeFactory entity factory}.
+	 *
+	 * @param entityId   entity identifier (fully qualified entity name)
+ 	 * @param entityType entity meta data
+	*/
+	public EntityType(String entityId, EntityType entityType)
+	{
+		super(entityType);
+		setDefaultValues();
+		//FIXME: This is incorrect, the ID value is the fully qualified name, not the simple name!
+		setSimpleName(entityId);
+	}
+
 	public enum AttributeCopyMode
 	{
 		SHALLOW_COPY_ATTRS, DEEP_COPY_ATTRS
