@@ -97,10 +97,10 @@ public class EntityTypeValidatorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[abstract\\] is not allowed because it is a reserved keyword.")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[logout\\] is not allowed because it is a reserved keyword.")
 	public void testValidateNameIsReservedKeyword() throws Exception
 	{
-		when(entityType.getSimpleName()).thenReturn("abstract");
+		when(entityType.getSimpleName()).thenReturn("logout");
 		entityTypeValidator.validate(entityType);
 	}
 
@@ -172,6 +172,7 @@ public class EntityTypeValidatorTest
 	{
 		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
+		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		entityTypeValidator.validate(entityType); // should not throw an exception
 	}
@@ -181,6 +182,7 @@ public class EntityTypeValidatorTest
 	{
 		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("extendsEntity").getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(singletonList(idAttr));
+		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		entityTypeValidator.validate(entityType);
 	}
@@ -258,6 +260,28 @@ public class EntityTypeValidatorTest
 	public void testValidateBackend()
 	{
 		when(entityType.getBackend()).thenReturn("invalidBackend");
+		entityTypeValidator.validate(entityType);
+	}
+
+	@Test
+	public void testValidateExtendsFromAbstract()
+	{
+		EntityType extendsEntityType = mock(EntityType.class);
+		when(extendsEntityType.getName()).thenReturn("abstractEntity");
+		when(extendsEntityType.isAbstract()).thenReturn(true);
+		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
+		when(entityType.getExtends()).thenReturn(extendsEntityType);
+		entityTypeValidator.validate(entityType); // valid
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[concreteEntity\\] is not abstract; EntityType \\[package_name\\] can't extend it")
+	public void testValidateExtendsFromNonAbstract()
+	{
+		EntityType extendsEntityType = mock(EntityType.class);
+		when(extendsEntityType.getName()).thenReturn("concreteEntity");
+		when(extendsEntityType.isAbstract()).thenReturn(false);
+		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
+		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		entityTypeValidator.validate(entityType);
 	}
 }

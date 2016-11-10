@@ -37,6 +37,7 @@ public class EntityUtils
 	 */
 	public static Object getTypedValue(String valueStr, Attribute attr)
 	{
+		//Reference types cannot be processed because we lack an entityManager in this route.
 		if (EntityTypeUtils.isReferenceType(attr))
 		{
 			throw new MolgenisDataException(

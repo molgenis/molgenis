@@ -44,7 +44,7 @@ public class EntitySelfXrefTestHarness
 	{
 		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("SelfRef").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID).addAttribute(createAttribute(ATTR_XREF, XREF))
-				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
+				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL);
 	}
 
 	private Attribute createAttribute(String name, AttributeType dataType)
