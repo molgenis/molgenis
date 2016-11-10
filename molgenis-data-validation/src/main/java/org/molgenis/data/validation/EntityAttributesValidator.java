@@ -7,6 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -18,6 +19,7 @@ import java.util.Set;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.AttributeType.*;
 
 /**
@@ -28,7 +30,14 @@ import static org.molgenis.AttributeType.*;
 @Component
 public class EntityAttributesValidator
 {
+	private final ExpressionValidator expressionValidator;
 	private EmailValidator emailValidator;
+
+	@Autowired
+	public EntityAttributesValidator(ExpressionValidator expressionValidator)
+	{
+		this.expressionValidator = requireNonNull(expressionValidator);
+	}
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityType meta)
 	{
@@ -166,7 +175,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private static Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
+	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
 	{
 		List<String> validationExpressions = new ArrayList<>();
 		List<Attribute> expressionAttributes = new ArrayList<>();
@@ -185,7 +194,7 @@ public class EntityAttributesValidator
 
 		if (!validationExpressions.isEmpty())
 		{
-			List<Boolean> results = ValidationUtils.resolveBooleanExpressions(validationExpressions, entity, meta);
+			List<Boolean> results = expressionValidator.resolveBooleanExpressions(validationExpressions, entity);
 			for (int i = 0; i < results.size(); i++)
 			{
 				if (!results.get(i))

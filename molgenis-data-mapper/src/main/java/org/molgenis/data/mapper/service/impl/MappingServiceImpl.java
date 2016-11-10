@@ -222,19 +222,9 @@ public class MappingServiceImpl implements MappingService
 		}
 		catch (RuntimeException ex)
 		{
-			if (targetRepo.getName().equals(mappingTarget.getName()))
-			{
-				// Mapping to the target model, if something goes wrong we do not want to delete it
-				LOG.error("Error applying mappings to the target", ex);
-				throw ex;
-			}
-			else
-			{
-				// A new repository was created for mapping, so we can drop it if something went wrong
-				LOG.error("Error applying mappings, dropping created repository.", ex);
-				dataService.getMeta().deleteEntityType(targetMetaData.getName());
-				throw ex;
-			}
+			// Mapping to the target model, if something goes wrong we do not want to delete it
+			LOG.error("Error applying mappings to the target", ex);
+			throw ex;
 		}
 	}
 
@@ -307,21 +297,32 @@ public class MappingServiceImpl implements MappingService
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		sourceRepo.iterator().forEachRemaining(sourceEntity ->
+		if (targetRepo.count() == 0)
 		{
+			sourceRepo.forEachBatched(entities -> targetRepo.add(entities.stream()
+					.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute))), 1000);
+		}
+		else
+		{
+			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
+			sourceRepo.iterator().forEachRemaining(sourceEntity ->
 			{
-				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-						sourceMapping.getSourceEntityType(), addSourceAttribute);
-				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
 				{
-					targetRepo.add(mappedEntity);
+					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute);
+					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+					{
+						targetRepo.add(mappedEntity);
+					}
+					else
+					{
+						targetRepo.update(mappedEntity);
+					}
 				}
-				else
-				{
-					targetRepo.update(mappedEntity);
-				}
-			}
-		});
+			});
+		}
+
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData,

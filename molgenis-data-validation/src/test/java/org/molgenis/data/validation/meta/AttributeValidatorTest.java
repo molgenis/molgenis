@@ -30,9 +30,8 @@ public class AttributeValidatorTest
 	public void beforeMethod()
 	{
 		dataService = mock(DataService.class);
-		EntityManager entityManager = mock(EntityManager.class);;
-		attributeValidator = new AttributeValidator(dataService,
-				entityManager);
+		EntityManager entityManager = mock(EntityManager.class);
+		attributeValidator = new AttributeValidator(dataService, entityManager);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")

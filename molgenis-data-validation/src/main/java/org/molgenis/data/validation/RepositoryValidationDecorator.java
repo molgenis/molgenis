@@ -15,12 +15,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
@@ -279,8 +279,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT))
 		{
-			List<Attribute> requiredValueAttrs = StreamSupport
-					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			List<Attribute> requiredValueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
 			validationResource.setRequiredValueAttrs(requiredValueAttrs);
@@ -294,7 +293,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs
-			refAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
 		}
 		else
@@ -302,7 +301,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			// validate cross-repository collection reference constraints. the decorated repository takes care of
 			// validating other reference constraints
 			String backend = dataService.getMeta().getBackend(getEntityType()).getName();
-			refAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
 							attr)).collect(toList());
 		}
@@ -350,8 +349,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT))
 		{
 			// get unique attributes
-			List<Attribute> uniqueAttrs = StreamSupport
-					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			List<Attribute> uniqueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
 			// get existing values for each attributes
@@ -394,7 +392,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
 		String idAttrName = getEntityType().getIdAttribute().getName();
-		List<Attribute> readonlyAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+		List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
 						.getName().equals(idAttrName)).collect(toList());
 
@@ -541,19 +539,11 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			}
 			else if (isMultipleReferenceType(readonlyAttr))
 			{
-				List<Object> entityIds = new ArrayList<>();
-				((Iterable<Entity>) value).forEach(mrefEntity ->
-				{
-					entityIds.add(mrefEntity.getIdValue());
-				});
-				value = entityIds;
+				value = stream(entity.getEntities(readonlyAttr.getName()).spliterator(), false).map(Entity::getIdValue)
+						.collect(toList());
 
-				List<Object> existingEntityIds = new ArrayList<>();
-				((Iterable<Entity>) existingValue).forEach(mrefEntity ->
-				{
-					existingEntityIds.add(mrefEntity.getIdValue());
-				});
-				existingValue = existingEntityIds;
+				existingValue = stream(entityToUpdate.getEntities(readonlyAttr.getName()).spliterator(), false)
+						.map(Entity::getIdValue).collect(toList());
 			}
 
 			if (value != null && existingValue != null && !value.equals(existingValue))

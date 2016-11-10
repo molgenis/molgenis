@@ -5,7 +5,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.js.ScriptEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +18,15 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class JsMagmaScriptExecutor
 {
+	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attributeFactory;
 
 	@Autowired
-	public JsMagmaScriptExecutor(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory)
+	public JsMagmaScriptExecutor(JsMagmaScriptEvaluator jsMagmaScriptEvaluator, EntityTypeFactory entityTypeFactory,
+			AttributeFactory attributeFactory)
 	{
+		this.jsMagmaScriptEvaluator = jsMagmaScriptEvaluator;
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
 	}
@@ -36,18 +38,12 @@ public class JsMagmaScriptExecutor
 	 * @param parameters
 	 * @return
 	 */
-	public Object executeScript(String jsScript, Map<String, Object> parameters)
+	Object executeScript(String jsScript, Map<String, Object> parameters)
 	{
 		EntityType entityType = entityTypeFactory.create().setSimpleName("entity");
-		parameters.keySet().stream().forEach(key ->
-		{
-			entityType.addAttribute(attributeFactory.create().setName(key));
-		});
+		parameters.keySet().forEach(key -> entityType.addAttribute(attributeFactory.create().setName(key)));
 		Entity entity = new DynamicEntity(entityType);
-		parameters.entrySet().forEach(parameter ->
-		{
-			entity.set(parameter.getKey(), parameter.getValue());
-		});
-		return ScriptEvaluator.eval(jsScript, entity, entityType);
+		parameters.entrySet().forEach(parameter -> entity.set(parameter.getKey(), parameter.getValue()));
+		return jsMagmaScriptEvaluator.eval(jsScript, entity);
 	}
 }
