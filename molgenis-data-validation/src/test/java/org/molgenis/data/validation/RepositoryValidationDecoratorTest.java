@@ -2354,8 +2354,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
