@@ -54,7 +54,7 @@ public class EntityTypeDependencyResolver
 		// ensure that nodes exist for all dependencies
 		Set<EntityTypeNode> entityTypeNodes = entityTypes.stream().map(EntityTypeNode::new)
 				.flatMap(node -> Stream.concat(Stream.of(node), expandEntityTypeDependencies(node).stream()))
-				.collect(toCollection(LinkedHashSet::new));
+				.collect(toCollection(HashSet::new));
 
 		// Sort nodes based on dependencies
 		List<EntityTypeNode> resolvedEntityMetaNodes = genericDependencyResolver
@@ -105,7 +105,7 @@ public class EntityTypeDependencyResolver
 							{
 								return Stream.empty();
 							}
-						}).collect(toCollection(LinkedHashSet::new));
+						}).collect(toCollection(HashSet::new));
 
 				EntityType extendsEntityMeta = entityType.getExtends();
 				if (extendsEntityMeta != null)
@@ -151,7 +151,7 @@ public class EntityTypeDependencyResolver
 						{
 							return Stream.empty();
 						}
-					}).collect(toCollection(LinkedHashSet::new));
+					}).collect(toCollection(HashSet::new));
 
 			EntityType extendsEntityMeta = entityType.getExtends();
 			if (extendsEntityMeta != null)
@@ -169,7 +169,7 @@ public class EntityTypeDependencyResolver
 		}
 		else
 		{
-			return Sets.newLinkedHashSet();
+			return Sets.newHashSet();
 		}
 	}
 
@@ -179,7 +179,7 @@ public class EntityTypeDependencyResolver
 	private static class EntityTypeNode
 	{
 		private final EntityType entityType;
-		private LinkedHashSet<EntityTypeNode> stack = Sets.newLinkedHashSet();
+		private Set<EntityTypeNode> stack = Sets.newHashSet();
 		private boolean skip = false;
 
 		private EntityTypeNode(EntityType entityType)
@@ -187,7 +187,7 @@ public class EntityTypeDependencyResolver
 			this.entityType = requireNonNull(entityType);
 		}
 
-		private EntityTypeNode(EntityType entityType, LinkedHashSet<EntityTypeNode> stack)
+		private EntityTypeNode(EntityType entityType, Set<EntityTypeNode> stack)
 		{
 			this.entityType = requireNonNull(entityType);
 			this.stack = requireNonNull(stack);
@@ -227,7 +227,7 @@ public class EntityTypeDependencyResolver
 			return entityType.getName();
 		}
 
-		private LinkedHashSet<EntityTypeNode> getStack()
+		private Set<EntityTypeNode> getStack()
 		{
 			return stack;
 		}
