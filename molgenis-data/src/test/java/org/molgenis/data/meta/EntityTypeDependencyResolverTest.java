@@ -192,4 +192,31 @@ public class EntityTypeDependencyResolverTest
 		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)),
 				newArrayList(entityType0, entityType1, entityType2));
 	}
+
+	@Test()
+	public void resolveDependenciesEntityExtendedDependencies()
+	{
+		EntityType entityType4 = when(mock(EntityType.class).getName()).thenReturn("entity4").getMock();
+		Attribute attr4 = when(mock(Attribute.class).getName()).thenReturn("attr4").getMock();
+		when(entityType4.getOwnAllAttributes()).thenReturn(singleton(attr4));
+
+		EntityType entityType5 = when(mock(EntityType.class).getName()).thenReturn("entity5").getMock();
+		Attribute attr5 = when(mock(Attribute.class).getName()).thenReturn("attr5").getMock();
+		when(entityType5.getOwnAllAttributes()).thenReturn(singleton(attr5));
+
+		EntityType entityType6 = when(mock(EntityType.class).getName()).thenReturn("entity6").getMock();
+		Attribute attr6 = when(mock(Attribute.class).getName()).thenReturn("attr6").getMock();
+		when(entityType6.getOwnAllAttributes()).thenReturn(singleton(attr6));
+
+		when(entityType0.getExtends()).thenReturn(null);
+		when(entityType1.getExtends()).thenReturn(entityType0);
+		when(entityType2.getExtends()).thenReturn(entityType1);
+		when(attr0.getRefEntity()).thenReturn(entityType3);
+		when(attr3.getRefEntity()).thenReturn(entityType4);
+		when(entityType4.getExtends()).thenReturn(entityType5);
+		when(entityType5.getExtends()).thenReturn(entityType6);
+
+		assertEquals(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)),
+				newArrayList(entityType0, entityType1, entityType2));
+	}
 }

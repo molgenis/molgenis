@@ -156,7 +156,14 @@ public class EntityTypeDependencyResolver
 			EntityType extendsEntityMeta = entityType.getExtends();
 			if (extendsEntityMeta != null)
 			{
-				refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
+				EntityTypeNode nodeRef = new EntityTypeNode(extendsEntityMeta);
+
+				// Add extended entity to set
+				refEntityMetaSet.add(nodeRef);
+
+				// Add dependencies of extended entity to set
+				Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
+				refEntityMetaSet.addAll(dependenciesRef);
 			}
 			return refEntityMetaSet;
 		}
