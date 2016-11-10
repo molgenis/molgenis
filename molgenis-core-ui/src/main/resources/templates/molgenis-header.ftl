@@ -47,7 +47,7 @@
     <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
     <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
     <script src="<@resource_href "/js/molgenis.js"/>"></script>
-    <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
+    <script src="<@resource_href "/js/script-evaluator.js"/>"></script>
     <#if googleSignIn>
         <#if authenticated?? && authenticated>
         <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
