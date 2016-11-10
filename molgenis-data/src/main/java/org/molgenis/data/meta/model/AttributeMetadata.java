@@ -86,8 +86,7 @@ public class AttributeMetadata extends SystemEntityType
 				.setLabel("Data type");
 		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute")
 				.setValidationExpression(getIdAttributeValidationExpression());
-		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute")
-				.setValidationExpression(getLabelAttributeValidationExpression());
+		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index")
 				.setValidationExpression(getLookupAttributeValidationExpression());
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
@@ -217,19 +216,7 @@ public class AttributeMetadata extends SystemEntityType
 				+ "').isNull().not().and($('" + TYPE + "').matches(" + regex + ").not())).value()";
 	}
 
-	private static String getLabelAttributeValidationExpression()
-	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
-		String nullableIsFalse = "$('" + IS_NULLABLE + "').eq(false)";
-		String isLabelAttributeIsFalseOrNull =
-				"$('" + IS_LABEL_ATTRIBUTE + "').eq(false).or($('" + IS_LABEL_ATTRIBUTE + "').isNull())";
-
-		return isLabelAttributeIsFalseOrNull + ".or($('" + IS_LABEL_ATTRIBUTE + "').eq(true).and($('" + TYPE
-				+ "').matches(" + regex + ").not().and(" + nullableIsFalse + "))).value()";
-	}
-
-	private String getAggregatableExpression()
+	private static String getAggregatableExpression()
 	{
 		String aggregatableIsNullOrFalse =
 				"$('" + IS_AGGREGATABLE + "').isNull().or($('" + IS_AGGREGATABLE + "').eq(false))";
@@ -239,5 +226,4 @@ public class AttributeMetadata extends SystemEntityType
 				+ IS_NULLABLE + "')" + ".eq(false)" + ")" + ")" + ".or(" + "$('" + TYPE + "')" + ".matches(" + regex
 				+ ").not()).value()";
 	}
-
 }
