@@ -152,7 +152,7 @@ public class EntityTypeDependencyResolverTest
 				newArrayList(entityType0, entityType1, entityType2, entityType3));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Could not resolve dependencies of items \\[entity1, entity0, entity3\\]. Are there circular dependencies\\?")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Could not resolve dependencies of items \\[entity1, entity2, entity0, entity3\\]. Are there circular dependencies\\?")
 	public void resolveDependenciesEntityCircularExtends()
 	{
 		when(entityType0.getExtends()).thenReturn(entityType3);
