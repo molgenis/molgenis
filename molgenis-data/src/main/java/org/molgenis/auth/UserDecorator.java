@@ -3,6 +3,8 @@ package org.molgenis.auth;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

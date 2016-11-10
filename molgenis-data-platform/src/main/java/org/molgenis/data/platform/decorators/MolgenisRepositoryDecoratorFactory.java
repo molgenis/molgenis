@@ -4,6 +4,8 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.auth.UserDecorator;
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateAnonymizer;
+import org.molgenis.data.aggregation.AggregateAnonymizerRepositoryDecorator;
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
@@ -60,6 +62,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 {
 	private final EntityManager entityManager;
 	private final EntityAttributesValidator entityAttributesValidator;
+	private final AggregateAnonymizer aggregateAnonymizer;
 	private final AppSettings appSettings;
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
@@ -83,7 +86,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
-			EntityAttributesValidator entityAttributesValidator, AppSettings appSettings, DataService dataService,
+			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
+			AppSettings appSettings, DataService dataService,
 			ExpressionValidator expressionValidator, RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
@@ -96,6 +100,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
+		this.aggregateAnonymizer = requireNonNull(aggregateAnonymizer);
 		this.appSettings = requireNonNull(appSettings);
 		this.dataService = requireNonNull(dataService);
 		this.expressionValidator = requireNonNull(expressionValidator);
@@ -157,8 +162,12 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
 				entityAttributesValidator, expressionValidator);
 
+		// 2. aggregate anonymization decorator
+		decoratedRepository = new AggregateAnonymizerRepositoryDecorator<>(decoratedRepository, aggregateAnonymizer,
+				appSettings);
+
 		// 1. security decorator
-		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
+		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
 
 		// 0. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);

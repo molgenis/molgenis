@@ -1,6 +1,8 @@
 package org.molgenis.data;
 
 import com.google.common.collect.ForwardingObject;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
