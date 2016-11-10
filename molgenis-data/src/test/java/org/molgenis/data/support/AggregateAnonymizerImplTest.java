@@ -1,14 +1,15 @@
 package org.molgenis.data.support;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AnonymizedAggregateResult;
+import org.molgenis.data.aggregation.AggregateAnonymizerImpl;
+import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.aggregation.AnonymizedAggregateResult;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.molgenis.data.AggregateAnonymizer.AGGREGATE_ANONYMIZATION_VALUE;
+import static org.molgenis.data.aggregation.AggregateAnonymizer.AGGREGATE_ANONYMIZATION_VALUE;
 import static org.testng.Assert.assertEquals;
 
 public class AggregateAnonymizerImplTest

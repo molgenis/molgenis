@@ -1,6 +1,7 @@
 package org.molgenis.data.transaction;
 
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.testng.annotations.BeforeMethod;

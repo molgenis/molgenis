@@ -1,9 +1,9 @@
-package org.molgenis.data;
+package org.molgenis.data.aggregation;
 
 /**
  * Filter counts smaller the a threshold value
  *
- * @see org.molgenis.data.AggregateQuery
+ * @see AggregateQuery
  */
 public interface AggregateAnonymizer
 {

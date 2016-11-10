@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
@@ -17,17 +17,16 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
+/**
+ * Repository decorated that validates that current user has permission to perform an operation for an entity type.
+ */
 public class RepositorySecurityDecorator implements Repository<Entity>
 {
 	private final Repository<Entity> decoratedRepository;
-	private final AppSettings appSettings;
-	private final AggregateAnonymizer aggregateAnonymizer;
 
-	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository, AppSettings appSettings)
+	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		this.appSettings = requireNonNull(appSettings);
-		this.aggregateAnonymizer = new AggregateAnonymizerImpl();
 	}
 
 	@Override
@@ -191,15 +190,7 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
-
-		Integer threshold = appSettings.getAggregateThreshold();
-
-		AggregateResult result = decoratedRepository.aggregate(aggregateQuery);
-		if (threshold != null && threshold > 0)
-		{
-			result = aggregateAnonymizer.anonymize(result, threshold);
-		}
-		return result;
+		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
 	@Override

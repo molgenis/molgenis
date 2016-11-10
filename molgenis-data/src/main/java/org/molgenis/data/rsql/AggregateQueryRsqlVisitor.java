@@ -3,6 +3,7 @@ package org.molgenis.data.rsql;
 import cz.jirutka.rsql.parser.ast.*;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;

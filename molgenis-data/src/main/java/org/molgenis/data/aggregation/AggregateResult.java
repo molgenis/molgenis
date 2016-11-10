@@ -1,4 +1,4 @@
-package org.molgenis.data;
+package org.molgenis.data.aggregation;
 
 import java.util.List;
 
