@@ -5,9 +5,11 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AnonymizedAggregateResult;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class AggregateAnonymizerImpl implements AggregateAnonymizer
 {
 	@Override
