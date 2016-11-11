@@ -14,6 +14,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -339,7 +340,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					// select the first required visible owned attribute as label attribute
 					for (Attribute ownAttr : entityType.getOwnAtomicAttributes())
 					{
-						if (!ownAttr.isNillable() && ownAttr.isVisible())
+						if (!ownAttr.isNillable() && ownAttr.isVisible() && !EntityTypeUtils.isReferenceType(ownAttr))
 						{
 							ownAttr.setLabelAttribute(true);
 							break;
