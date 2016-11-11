@@ -187,7 +187,6 @@ public class EntityAttributesValidator
 				expressionAttributes.add(attribute);
 				validationExpressions.add(attribute.getValidationExpression());
 			}
-
 		}
 
 		Set<ConstraintViolation> violations = new LinkedHashSet<>();
@@ -199,7 +198,8 @@ public class EntityAttributesValidator
 			{
 				if (!results.get(i))
 				{
-					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), meta));
+					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), meta,
+							format("Offended expression: %s", validationExpressions.get(i))));
 				}
 			}
 		}
@@ -422,9 +422,10 @@ public class EntityAttributesValidator
 			String message)
 	{
 		String dataValue = getDataValuesForType(entity, attribute).toString();
-		String fullMessage = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
+		String fullMessage = format(
+				"Invalid [%s] value [%s] for attribute [%s] of entity [%s] with type [%s].",
 				attribute.getDataType().toString().toLowerCase(), dataValue, attribute.getLabel(),
-				entityType.getName());
+				entity.getLabelValue(), entityType.getName());
 		fullMessage += " " + message;
 
 		return new ConstraintViolation(fullMessage, dataValue, entity, attribute, entityType, null);
