@@ -184,17 +184,6 @@ public interface DataService extends Iterable<Repository<Entity>>
 	<E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz);
 
 	/**
-	 * Find one entity based on id. Returns null if not exists
-	 *
-	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
-	 *
-	 * @throws MolgenisDataAccessException
-	 *
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-
-	/**
 	 * Find one entity based on id.
 	 *
 	 * @param entityName entity name (case insensitive)

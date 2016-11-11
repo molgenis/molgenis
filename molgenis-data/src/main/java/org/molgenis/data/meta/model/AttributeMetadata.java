@@ -31,10 +31,12 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String IS_LABEL_ATTRIBUTE = "isLabelAttribute";
 	public static final String LOOKUP_ATTRIBUTE_INDEX = "lookupAttributeIndex";
 	public static final String REF_ENTITY_TYPE = "refEntityType";
+
 	/**
 	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
 	 */
 	public static final String MAPPED_BY = "mappedBy";
+
 	/**
 	 * For attributes with data type ONE_TO_MANY defines how to sort the entity collection.
 	 * Syntax: attribute_name,[ASC | DESC] [;attribute_name,[ASC | DESC]]*
@@ -42,16 +44,15 @@ public class AttributeMetadata extends SystemEntityType
 	 * - If the ordering element is not specified, ordering by the id attribute of the associated entity is assumed.
 	 */
 	public static final String ORDER_BY = "orderBy";
+
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
-
 	public static final String IS_NULLABLE = "isNullable";
 	public static final String IS_AUTO = "isAuto";
 	public static final String IS_VISIBLE = "isVisible";
 	public static final String IS_UNIQUE = "isUnique";
 	public static final String IS_READ_ONLY = "isReadOnly";
 	public static final String IS_AGGREGATABLE = "isAggregatable";
-
 	public static final String EXPRESSION = "expression";
 	public static final String ENUM_OPTIONS = "enumOptions";
 	public static final String RANGE_MIN = "rangeMin";

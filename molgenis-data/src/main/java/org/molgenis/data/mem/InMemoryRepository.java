@@ -17,14 +17,14 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.partition;
 
 /**
- * Repository that uses a hashmap as store.
+ * Repository that uses a hash map as store.
  * <p>
  * For testing purposes
  */
 public class InMemoryRepository implements Repository<Entity>
 {
 	private final EntityType metadata;
-	private final Map<Object, Entity> entities = new LinkedHashMap<Object, Entity>();
+	private final Map<Object, Entity> entities = new LinkedHashMap<>();
 
 	public InMemoryRepository(EntityType entityType)
 	{
@@ -78,7 +78,7 @@ public class InMemoryRepository implements Repository<Entity>
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		if (new QueryImpl<Entity>().equals(q))
+		if (new QueryImpl<>().equals(q))
 		{
 			return entities.values().stream();
 		}
@@ -128,13 +128,13 @@ public class InMemoryRepository implements Repository<Entity>
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		return ids.map(id -> entities.get(id)).filter(Objects::nonNull);
+		return ids.map(entities::get).filter(Objects::nonNull);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return ids.map(id -> entities.get(id)).filter(Objects::nonNull);
+		return ids.map(entities::get).filter(Objects::nonNull);
 	}
 
 	@Override

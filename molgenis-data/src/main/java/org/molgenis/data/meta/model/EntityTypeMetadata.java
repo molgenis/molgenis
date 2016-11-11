@@ -23,6 +23,10 @@ public class EntityTypeMetadata extends SystemEntityType
 	private static final String SIMPLE_NAME_ = "EntityType";
 	public static final String ENTITY_TYPE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
+	private AttributeMetadata attributeMetadata;
+	private PackageMetadata packageMetadata;
+	private TagMetadata tagMetadata;
+
 	public static final String FULL_NAME = "fullName";
 	public static final String SIMPLE_NAME = "simpleName";
 	public static final String PACKAGE = "package";
@@ -33,10 +37,6 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String EXTENDS = "extends";
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
-
-	private AttributeMetadata attributeMetadata;
-	private PackageMetadata packageMetadata;
-	private TagMetadata tagMetadata;
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -55,7 +55,6 @@ public class EntityTypeMetadata extends SystemEntityType
 
 		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
-		// TODO discuss whether package should be nillable
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
