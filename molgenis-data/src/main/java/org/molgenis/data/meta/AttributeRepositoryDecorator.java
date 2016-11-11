@@ -8,14 +8,15 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.EntityUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -27,7 +28,6 @@ import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
-import static org.molgenis.AttributeType.*;
 
 /**
  * Decorator for the attribute repository:
@@ -276,11 +276,14 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 
 		// If compound attribute is deleted then change the parent of children to null
 		// This will change the children attributes into regular attributes.
-		if(AttributeType.COMPOUND.equals(attr.getDataType()))
+		if (AttributeType.COMPOUND.equals(attr.getDataType()))
 		{
-			attr.getChildren().forEach(e -> {
-				if(null != e.getParent()){
-					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA).update(e.setParent(null));
+			attr.getChildren().forEach(e ->
+			{
+				if (null != e.getParent())
+				{
+					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)
+							.update(e.setParent(null));
 				}
 			});
 		}
