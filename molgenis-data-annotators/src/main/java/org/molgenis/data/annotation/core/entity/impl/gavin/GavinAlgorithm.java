@@ -55,14 +55,14 @@ public class GavinAlgorithm
 				case C2:
 					if (gavinThresholds.isAboveMeanPathogenicCADDScore(caddScaled))
 					{
-						return new Judgment(Pathogenic, calibrated, gene,
+						return Judgment.create(Pathogenic, calibrated, gene,
 								"Variant CADD score of " + caddScaled + " is greater than " + gavinThresholds
 										.getMeanPathogenicCADDScore()
 										+ " in a gene for which CADD scores are informative.");
 					}
 					if (gavinThresholds.isBelowMeanPopulationCADDScore(caddScaled))
 					{
-						return new Judgment(Benign, calibrated, gene,
+						return Judgment.create(Benign, calibrated, gene,
 								"Variant CADD score of " + caddScaled + " is less than " + gavinThresholds
 										.getMeanPopulationCADDScore()
 										+ " in a gene for which CADD scores are informative.");
@@ -74,13 +74,13 @@ public class GavinAlgorithm
 				case C5:
 					if (gavinThresholds.isAboveSpec95thPerCADDThreshold(caddScaled))
 					{
-						return new Judgment(Pathogenic, calibrated, gene,
+						return Judgment.create(Pathogenic, calibrated, gene,
 								"Variant CADD score of " + caddScaled + " is greater than " + gavinThresholds
 										.getSpec95thPerCADDThreshold() + " for this gene.");
 					}
 					if (gavinThresholds.isBelowSens95PerCADDThreshold(caddScaled))
 					{
-						return new Judgment(Benign, calibrated, gene,
+						return Judgment.create(Benign, calibrated, gene,
 								"Variant CADD score of " + caddScaled + " is less than " + gavinThresholds
 										.getSens95thPerCADDThreshold() + " for this gene.");
 					}
@@ -93,7 +93,7 @@ public class GavinAlgorithm
 		if (gavinThresholds.isAbovePathoMAFThreshold(exacMAF))
 
 		{
-			return new Judgment(Benign, calibrated, gene,
+			return Judgment.create(Benign, calibrated, gene,
 					"Variant MAF of " + exacMAF + " is greater than " + gavinThresholds.getPathoMAFThreshold() + ".");
 		}
 
@@ -107,25 +107,25 @@ public class GavinAlgorithm
 		{
 			if (gavinThresholds.getCategory() == I1 && impact == HIGH)
 			{
-				return new Judgment(Pathogenic, calibrated, gene,
+				return Judgment.create(Pathogenic, calibrated, gene,
 						"Variant is of high impact, while there are no known high impact variants in the population. Also, "
 								+ mafReason);
 			}
 			if (gavinThresholds.getCategory() == I2 && (impact == MODERATE || impact == HIGH))
 			{
-				return new Judgment(Pathogenic, calibrated, gene,
+				return Judgment.create(Pathogenic, calibrated, gene,
 						"Variant is of high/moderate impact, while there are no known high/moderate impact variants in the population. Also, "
 								+ mafReason);
 			}
 			if (gavinThresholds.getCategory() == I3 && (impact == LOW || impact == MODERATE || impact == HIGH))
 			{
-				return new Judgment(Pathogenic, calibrated, gene,
+				return Judgment.create(Pathogenic, calibrated, gene,
 						"Variant is of high/moderate/low impact, while there are no known high/moderate/low impact variants in the population. Also, "
 								+ mafReason);
 			}
 			if (impact == MODIFIER)
 			{
-				return new Judgment(Benign, calibrated, gene,
+				return Judgment.create(Benign, calibrated, gene,
 						"Variant is of 'modifier' impact, and therefore unlikely to be pathogenic. However, "
 								+ mafReason);
 			}
@@ -151,28 +151,28 @@ public class GavinAlgorithm
 
 		if (exacMAF > GENOMEWIDE_MAF_THRESHOLD)
 		{
-			return new Judgment(Benign, genomewide, gene,
+			return Judgment.create(Benign, genomewide, gene,
 					"Variant MAF of " + exacMAF + " is not rare enough to generally be considered pathogenic.");
 		}
 		if (impact == MODIFIER)
 		{
-			return new Judgment(Benign, genomewide, gene,
+			return Judgment.create(Benign, genomewide, gene,
 					"Variant is of 'modifier' impact, and therefore unlikely to be pathogenic.");
 		}
 		if (caddScaled != null && caddScaled > GENOMEWIDE_CADD_THRESHOLD)
 		{
-			return new Judgment(Pathogenic, genomewide, gene,
+			return Judgment.create(Pathogenic, genomewide, gene,
 					"Variant MAF of " + exacMAF + " is rare enough to be potentially pathogenic and its CADD score of "
 							+ caddScaled + " is greater than a global threshold of " + GENOMEWIDE_CADD_THRESHOLD + ".");
 		}
 		if (caddScaled != null && caddScaled <= GENOMEWIDE_CADD_THRESHOLD)
 		{
-			return new Judgment(Benign, genomewide, gene,
+			return Judgment.create(Benign, genomewide, gene,
 					"Variant CADD score of " + caddScaled + " is less than a global threshold of "
 							+ GENOMEWIDE_CADD_THRESHOLD + ", although the variant MAF of " + exacMAF
 							+ " is rare enough to be potentially pathogenic.");
 		}
-		return new Judgment(VOUS, genomewide, gene,
+		return Judgment.create(VOUS, genomewide, gene,
 				"Unable to classify variant as benign or pathogenic. The combination of " + impact
 						+ " impact, a CADD score of " + caddScaled + " and MAF of " + exacMAF + " in " + gene
 						+ " is inconclusive.");
