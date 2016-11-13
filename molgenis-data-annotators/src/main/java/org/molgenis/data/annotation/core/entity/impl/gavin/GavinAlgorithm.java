@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.core.entity.impl.gavin;
 
 import org.molgenis.data.annotation.core.entity.impl.snpeff.Impact;
 
-import static org.molgenis.data.annotation.core.entity.impl.gavin.GavinEntry.Category.*;
+import static org.molgenis.data.annotation.core.entity.impl.gavin.Category.*;
 import static org.molgenis.data.annotation.core.entity.impl.gavin.Judgment.Classification.*;
 import static org.molgenis.data.annotation.core.entity.impl.gavin.Judgment.Method.calibrated;
 import static org.molgenis.data.annotation.core.entity.impl.gavin.Judgment.Method.genomewide;

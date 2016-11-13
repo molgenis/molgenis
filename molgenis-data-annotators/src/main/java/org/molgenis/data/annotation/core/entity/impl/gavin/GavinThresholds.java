@@ -30,7 +30,7 @@ public abstract class GavinThresholds
 	@Nullable
 	abstract public Double getSens95thPerCADDThreshold();
 
-	abstract public GavinEntry.Category getCategory();
+	abstract public Category getCategory();
 
 	public GavinThresholds withExtraSensitivity(int extraSensitivityFactor)
 	{
@@ -86,7 +86,7 @@ public abstract class GavinThresholds
 				.valueOf(annotationSourceEntity.getString(SENS_95TH_PER_CADD_THRESHOLD)) : null;
 		return new AutoValue_GavinThresholds(pathoMAFThreshold, meanPathogenicCADDScore, meanPopulationCADDScore,
 				spec95thPerCADDThreshold, sens95thPerCADDThreshold,
-				GavinEntry.Category.valueOf(annotationSourceEntity.getString(CATEGORY)));
+				Category.valueOf(annotationSourceEntity.getString(CATEGORY)));
 	}
 
 	public boolean isAboveMeanPathogenicCADDScore(double caddScaled)
