@@ -63,6 +63,14 @@ public abstract class GavinThresholds
 				spec95thPerCADDThreshold, sens95thPerCADDThreshold, getCategory());
 	}
 
+	public static GavinThresholds create(Double pathoMAFThreshold, Double meanPathogenicCADDScore,
+			Double meanPopulationCADDScore, Double spec95thPerCADDThreshold, Double sens95thPerCADDThreshold,
+			Category category)
+	{
+		return new AutoValue_GavinThresholds(pathoMAFThreshold, meanPathogenicCADDScore, meanPopulationCADDScore,
+				spec95thPerCADDThreshold, sens95thPerCADDThreshold, category);
+	}
+
 	public static GavinThresholds fromEntry(GavinEntry gavinEntry)
 	{
 		return new AutoValue_GavinThresholds(gavinEntry.PathoMAFThreshold, gavinEntry.MeanPathogenicCADDScore,
