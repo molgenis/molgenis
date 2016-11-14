@@ -55,7 +55,6 @@ public class AttributeValidatorTest
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		attributeValidator.validate(attr, ValidationMode.ADD);
-		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "mappedBy attribute \\[mappedByAttrName\\] is not part of entity \\[entityName\\].")
@@ -102,7 +101,6 @@ public class AttributeValidatorTest
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		when(attr.getOrderBy()).thenReturn(new Sort(mappedByAttrName, ASC));
 		attributeValidator.validate(attr, ValidationMode.ADD);
-		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown entity \\[entityName\\] attribute \\[fail\\] referred to by entity \\[test\\] attribute \\[attrName\\] sortBy \\[fail,ASC\\]")
