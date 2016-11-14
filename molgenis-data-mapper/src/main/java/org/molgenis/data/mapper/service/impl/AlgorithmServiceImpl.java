@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.Double.parseDouble;
+import static java.lang.Long.parseLong;
 import static java.lang.Math.round;
 import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
@@ -183,10 +184,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 						.collect(Collectors.toList());
 				break;
 			case DATE:
-				convertedValue = value != null ? new Date(Long.valueOf(value.toString())) : null;
+				convertedValue = value != null ? new Date(parseLong(value.toString())) : null;
 				break;
 			case DATE_TIME:
-				convertedValue = value != null ? new Timestamp(Long.valueOf(value.toString())) : null;
+				convertedValue = value != null ? new Timestamp(parseLong(value.toString())) : null;
 				break;
 			case DECIMAL:
 				convertedValue = value != null ? parseDouble(value.toString()) : null;
