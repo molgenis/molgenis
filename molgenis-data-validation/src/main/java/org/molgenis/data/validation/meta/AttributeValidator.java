@@ -37,32 +37,42 @@ import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 @Component
 public class AttributeValidator
 {
+	public enum ValidationMode
+	{
+		ADD, UPDATE
+	}
+
 	private final DataService dataService;
-	private static EntityManager entityManager;
-	private final static EmailValidator emailValidator = new EmailValidator();
+	private final EntityManager entityManager;
+	private final EmailValidator emailValidator;
 
 	@Autowired
 	public AttributeValidator(DataService dataService, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
-		AttributeValidator.entityManager = requireNonNull(entityManager);
+		this.entityManager = requireNonNull(entityManager);
+		this.emailValidator = new EmailValidator();
 	}
 
-	public void validate(Attribute attr)
+	public void validate(Attribute attr, ValidationMode validationMode)
 	{
 		validateName(attr);
 		validateDefaultValue(attr);
 		validateParent(attr);
 		validateChildren(attr);
 
-		Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
-		if (currentAttr == null)
+		switch (validationMode)
 		{
-			validateAdd(attr);
-		}
-		else
-		{
-			validateUpdate(attr, currentAttr);
+			case ADD:
+				validateAdd(attr);
+				break;
+			case UPDATE:
+				Attribute currentAttr = dataService
+						.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+				validateUpdate(attr, currentAttr);
+				break;
+			default:
+				throw new RuntimeException(format("Unknown attribute validation mode [%s]", validationMode.toString()));
 		}
 	}
 
@@ -92,7 +102,7 @@ public class AttributeValidator
 
 	}
 
-	private void validateAdd(Attribute newAttr)
+	private static void validateAdd(Attribute newAttr)
 	{
 		// mappedBy
 		validateMappedBy(newAttr, newAttr.getMappedBy());
@@ -101,7 +111,7 @@ public class AttributeValidator
 		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
 
-	private void validateUpdate(Attribute newAttr, Attribute currentAttr)
+	private static void validateUpdate(Attribute newAttr, Attribute currentAttr)
 	{
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
@@ -118,33 +128,6 @@ public class AttributeValidator
 			}
 		}
 
-		// expression
-		String currentExpression = currentAttr.getExpression();
-		String newExpression = newAttr.getExpression();
-		if (!Objects.equals(currentExpression, newExpression))
-		{
-			// TODO Implement
-			// validateExpression(currentExpression, newExpression);
-		}
-
-		// validation expression
-		String currentValidationExpression = currentAttr.getValidationExpression();
-		String newValidationExpression = newAttr.getValidationExpression();
-		if (!Objects.equals(currentValidationExpression, newValidationExpression))
-		{
-			// TODO Implement
-			// validateExpression(currentValidationExpression, newValidationExpression);
-		}
-
-		// visible expression
-		String currentVisibleExpression = currentAttr.getVisibleExpression();
-		String newVisibleExpression = newAttr.getVisibleExpression();
-		if (!Objects.equals(currentVisibleExpression, newVisibleExpression))
-		{
-			// TODO Implement
-			// validateExpression(currentVisibleExpression, newVisibleExpression);
-		}
-
 		// orderBy
 		Sort currentOrderBy = currentAttr.getOrderBy();
 		Sort newOrderBy = newAttr.getOrderBy();
@@ -156,7 +139,7 @@ public class AttributeValidator
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
-	static void validateDefaultValue(Attribute attr)
+	void validateDefaultValue(Attribute attr)
 	{
 		String value = attr.getDefaultValue();
 		if (attr.getDefaultValue() != null)
@@ -181,7 +164,7 @@ public class AttributeValidator
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
 				throw new MolgenisDataException(
-						"Default value for attribute [" + attr.getName() + "]exceeds the maximum length for datatype "
+						"Default value for attribute [" + attr.getName() + "] exceeds the maximum length for datatype "
 								+ attr.getDataType().name());
 			}
 
@@ -207,12 +190,12 @@ public class AttributeValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new MolgenisDataException(e.getClass().getSimpleName() + " " + e.getMessage());
+				throw new MolgenisDataException(format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
 			}
 		}
 	}
 
-	private static void checkEmail(String value)
+	private void checkEmail(String value)
 	{
 		if (!emailValidator.isValid(value, null))
 		{
@@ -377,14 +360,4 @@ public class AttributeValidator
 		DATA_TYPE_DISALLOWED_TRANSITIONS
 				.put(XREF, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 	}
-
-	/*
-	  TODO implement this
-	  	private void validateExpression(String expression, String newExpression)
-		{
-			// TODO validate with script evaluator
-			// ScriptEvaluator.eval();
-			// how to get access to expression validator here since it is located in molgenis-data-validation?
-		}
-	 */
 }

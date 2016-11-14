@@ -9,6 +9,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ public class AttributeValidatorTest
 	public void validateAttributeInvalidName()
 	{
 		Attribute attr = makeMockAttribute("invalid.name");
-		attributeValidator.validate(attr);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
 	@Test
@@ -53,7 +54,7 @@ public class AttributeValidatorTest
 		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
-		attributeValidator.validate(attr);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 	}
 
@@ -69,8 +70,7 @@ public class AttributeValidatorTest
 		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-		attributeValidator.validate(attr);
-		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid mappedBy attribute \\[mappedByAttrName\\] data type \\[STRING\\].")
@@ -85,8 +85,7 @@ public class AttributeValidatorTest
 		when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-		attributeValidator.validate(attr);
-		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
 	@Test
@@ -102,7 +101,7 @@ public class AttributeValidatorTest
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		when(attr.getOrderBy()).thenReturn(new Sort(mappedByAttrName, ASC));
-		attributeValidator.validate(attr);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
 	}
 
@@ -122,8 +121,7 @@ public class AttributeValidatorTest
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		when(attr.getOrderBy()).thenReturn(new Sort("fail", ASC));
-		attributeValidator.validate(attr);
-		verify(dataService, times(1)).findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
 	@Test(dataProvider = "disallowedTransitionProvider", expectedExceptions = MolgenisDataException.class)
@@ -131,7 +129,7 @@ public class AttributeValidatorTest
 	{
 		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
 				.thenReturn(currentAttr);
-		attributeValidator.validate(newAttr);
+		attributeValidator.validate(newAttr, ValidationMode.UPDATE);
 	}
 
 	@Test(dataProvider = "allowedTransitionProvider")
@@ -319,7 +317,7 @@ public class AttributeValidatorTest
 	}
 
 	@DataProvider(name = "allowedTransitionProvider")
-	private Object[][] allowedTransitionProvider()
+	private static Object[][] allowedTransitionProvider()
 	{
 		Attribute currentAttr1 = makeMockAttribute("attr1");
 		Attribute currentAttr2 = makeMockAttribute("attr2");
@@ -339,7 +337,7 @@ public class AttributeValidatorTest
 	}
 
 	@DataProvider(name = "disallowedTransitionProvider")
-	private Object[][] disallowedTransitionProvider()
+	private static Object[][] disallowedTransitionProvider()
 	{
 		Attribute currentAttr1 = makeMockAttribute("attr1");
 		Attribute currentAttr2 = makeMockAttribute("attr2");
@@ -358,7 +356,7 @@ public class AttributeValidatorTest
 		return new Object[][] { { currentAttr1, newAttr1 }, { currentAttr2, newAttr2 }, { currentAttr3, newAttr3 } };
 	}
 
-	private Attribute makeMockAttribute(String name)
+	private static Attribute makeMockAttribute(String name)
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getName()).thenReturn(name);

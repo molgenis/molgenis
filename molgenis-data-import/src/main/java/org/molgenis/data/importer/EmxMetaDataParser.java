@@ -16,6 +16,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
+import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.EntityUtils;
@@ -272,8 +273,10 @@ public class EmxMetaDataParser implements MetaDataParser
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
 	{
 		metaDataMap.values().forEach(entityTypeValidator::validate);
-		metaDataMap.values().stream().map(EntityType::getAllAttributes)
-				.forEach(attributes -> attributes.forEach(attributeValidator::validate));
+		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
+		{
+			attributeValidator.validate(attr, ValidationMode.ADD);
+		}));
 
 		report = generateEntityValidationReport(source, report, metaDataMap);
 
