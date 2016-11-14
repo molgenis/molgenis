@@ -32,7 +32,7 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 		LabeledResource objectResource = new LabeledResource(tagEntity.getString(TagMetadata.OBJECT_IRI),
 				tagEntity.getString(TagMetadata.LABEL));
 
-		return new SemanticTag<SubjectType, LabeledResource, LabeledResource>(identifier, subjectType, relation,
+		return new SemanticTag<>(identifier, subjectType, relation,
 				objectResource, codeSystem);
 	}
 

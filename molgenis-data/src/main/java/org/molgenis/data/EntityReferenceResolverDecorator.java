@@ -94,7 +94,7 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		Stream<Entity> entities = decoratedRepo.findAll(new QueryImpl<Entity>());
+		Stream<Entity> entities = decoratedRepo.findAll(new QueryImpl<>());
 		return resolveEntityReferences(entities).iterator();
 	}
 

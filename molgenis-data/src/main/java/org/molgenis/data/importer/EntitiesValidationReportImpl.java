@@ -4,9 +4,6 @@ import org.molgenis.framework.db.EntitiesValidationReport;
 
 import java.util.*;
 
-/**
- * Created by mswertz on 03/05/14.
- */
 public class EntitiesValidationReportImpl implements EntitiesValidationReport
 {
 	/**
@@ -84,19 +81,17 @@ public class EntitiesValidationReportImpl implements EntitiesValidationReport
 
 	@Override
 	public boolean valid()
-	{// determine if validation succeeded
+	{
+		// determine if validation succeeded
 		boolean ok = true;
-		if (sheetsImportable != null)
+		for (Boolean b : sheetsImportable.values())
 		{
-			for (Boolean b : sheetsImportable.values())
-			{
-				ok = ok & b;
-			}
+			ok = ok & b;
+		}
 
-			for (Collection<String> fields : getFieldsRequired().values())
-			{
-				ok = ok & (fields == null || fields.isEmpty());
-			}
+		for (Collection<String> fields : getFieldsRequired().values())
+		{
+			ok = ok & (fields == null || fields.isEmpty());
 		}
 		return ok;
 	}

@@ -102,11 +102,7 @@ public class RepositoryTemplateLoader implements TemplateLoader
 			if (getClass() != obj.getClass()) return false;
 			TemplateSource other = (TemplateSource) obj;
 			if (!template.equals(other.template)) return false;
-			if (!template.getValue().equals(other.template.getValue()))
-			{
-				return false;
-			}
-			return true;
+			return template.getValue().equals(other.template.getValue());
 		}
 
 		private String getValue()

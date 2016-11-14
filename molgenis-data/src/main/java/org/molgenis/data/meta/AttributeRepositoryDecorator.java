@@ -14,7 +14,9 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.util.EntityUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -274,11 +276,14 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 
 		// If compound attribute is deleted then change the parent of children to null
 		// This will change the children attributes into regular attributes.
-		if(AttributeType.COMPOUND.equals(attr.getDataType()))
+		if (AttributeType.COMPOUND.equals(attr.getDataType()))
 		{
-			attr.getChildren().forEach(e -> {
-				if(null != e.getParent()){
-					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA).update(e.setParent(null));
+			attr.getChildren().forEach(e ->
+			{
+				if (null != e.getParent())
+				{
+					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)
+							.update(e.setParent(null));
 				}
 			});
 		}
