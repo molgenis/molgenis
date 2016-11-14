@@ -117,8 +117,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return;
 		}
 		LOG.debug("Store index actions for transaction {}", transactionId);
-		dataService.add(INDEX_ACTION_GROUP,
-				indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
+		dataService
+				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
 		dataService.add(INDEX_ACTION, indexActions1.stream());
 	}
 
@@ -222,8 +222,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<EntityKey> getDirtyEntities()
 	{
 		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() != null)
-				.map(this::createEntityKey)
-				.collect(toSet());
+				.map(this::createEntityKey).collect(toSet());
 	}
 
 	@Override

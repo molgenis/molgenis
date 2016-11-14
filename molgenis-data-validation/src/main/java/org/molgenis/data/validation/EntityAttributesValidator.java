@@ -422,8 +422,7 @@ public class EntityAttributesValidator
 			String message)
 	{
 		String dataValue = getDataValuesForType(entity, attribute).toString();
-		String fullMessage = format(
-				"Invalid [%s] value [%s] for attribute [%s] of entity [%s] with type [%s].",
+		String fullMessage = format("Invalid [%s] value [%s] for attribute [%s] of entity [%s] with type [%s].",
 				attribute.getDataType().toString().toLowerCase(), dataValue, attribute.getLabel(),
 				entity.getLabelValue(), entityType.getName());
 		fullMessage += " " + message;
