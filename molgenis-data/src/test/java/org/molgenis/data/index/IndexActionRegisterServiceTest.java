@@ -79,14 +79,12 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 		EntityType emd = mock(EntityType.class);
 
-		// To avoid addReferencingEntities(IndexAction indexAction)
 		when(dataService.getEntityType(indexAction.getEntityFullName())).thenReturn(emd);
 		//noinspection unchecked
 		Query<Attribute> query = mock(Query.class);
 		when(query.fetch(any(Fetch.class))).thenReturn(query);
 		when(query.eq(REF_ENTITY_TYPE, emd)).thenReturn(query);
 		when(query.findAll()).thenReturn(Stream.empty());
-
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(query);
 
 		indexActionRegisterServiceImpl.register("TestEntityName", "123");
