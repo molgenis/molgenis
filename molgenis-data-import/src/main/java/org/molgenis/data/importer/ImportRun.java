@@ -1,15 +1,16 @@
-package org.molgenis.data.system;
+package org.molgenis.data.importer;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.security.owned.OwnedEntityType;
 import org.molgenis.util.ValueLabel;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.molgenis.data.meta.system.ImportRunMetaData.*;
+import static org.molgenis.data.importer.ImportRunMetaData.*;
 
 public class ImportRun extends StaticEntity
 {
@@ -74,14 +75,24 @@ public class ImportRun extends StaticEntity
 		set(ENDDATE, endDate);
 	}
 
-	public String getUserName()
+	public String getUsername()
 	{
 		return getString(USERNAME);
 	}
 
-	public void setUserName(String userName)
+	public void setUsername(String username)
 	{
-		set(USERNAME, userName);
+		set(USERNAME, username);
+	}
+
+	public String getOwner()
+	{
+		return getString(OwnedEntityType.OWNER_USERNAME);
+	}
+
+	public void setOwner(String username)
+	{
+		set(OwnedEntityType.OWNER_USERNAME, username);
 	}
 
 	public String getStatus()

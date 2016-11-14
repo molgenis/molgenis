@@ -17,8 +17,6 @@ import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.system.ImportRun;
-import org.molgenis.data.system.ImportRunFactory;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -316,7 +314,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -347,7 +345,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -379,7 +377,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -411,7 +409,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -443,7 +441,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -475,7 +473,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -507,7 +505,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -539,7 +537,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 

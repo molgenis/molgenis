@@ -6,7 +6,6 @@ import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.system.ImportRun;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
