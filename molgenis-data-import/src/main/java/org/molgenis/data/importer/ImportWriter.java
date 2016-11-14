@@ -476,10 +476,120 @@ public class ImportWriter
 			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
 					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
 		}
+
+		int count = 0;
+		switch (dbAction)
+		{
+			case ADD:
+				count = repo.add(stream(entities.spliterator(), false));
+				break;
+			case ADD_IGNORE_EXISTING:
+			{
+				HugeSet<Object> existingIds = getExistingEntityIds(repo, entities);
+				try
+				{
+					String idAttributeName = repo.getEntityType().getIdAttribute().getName();
+					int batchSize = 1000;
+					List<E> newEntities = newArrayList();
+
+					Iterator<E> it = entities.iterator();
+					while (it.hasNext())
+					{
+						E entity = it.next();
+						count++;
+						Object id = entity.get(idAttributeName);
+						if (!existingIds.contains(id))
+						{
+							newEntities.add(entity);
+							if (newEntities.size() == batchSize)
+							{
+								repo.add(newEntities.stream());
+								newEntities.clear();
+							}
+						}
+					}
+
+					if (!newEntities.isEmpty())
+					{
+						repo.add(newEntities.stream());
+					}
+				}
+				finally
+				{
+					IOUtils.closeQuietly(existingIds);
+				}
+				break;
+			}
+			case ADD_UPDATE_EXISTING:
+			{
+				HugeSet<Object> existingIds = getExistingEntityIds(repo, entities);
+				try
+				{
+					String idAttributeName = repo.getEntityType().getIdAttribute().getName();
+					int batchSize = 1000;
+					List<E> existingEntities = new ArrayList<>(batchSize);
+					List<Integer> existingEntitiesRowIndex = new ArrayList<>(batchSize);
+					List<E> newEntities = new ArrayList<>(batchSize);
+					List<Integer> newEntitiesRowIndex = new ArrayList<>(batchSize);
+
+					Iterator<E> it = entities.iterator();
+					while (it.hasNext())
+					{
+						E entity = it.next();
+						count++;
+						Object id = entity.get(idAttributeName);
+						if (existingIds.contains(id))
+						{
+							existingEntitiesRowIndex.add(count);
+							existingEntities.add(entity);
+							if (existingEntities.size() == batchSize)
+							{
+								updateInRepo(repo, existingEntities, existingEntitiesRowIndex);
+							}
+						}
+						else
+						{
+							newEntitiesRowIndex.add(count);
+							newEntities.add(entity);
+							if (newEntities.size() == batchSize)
+							{
+								insertIntoRepo(repo, newEntities, newEntitiesRowIndex);
+							}
+						}
+					}
+
+					if (!existingEntities.isEmpty())
+					{
+						updateInRepo(repo, existingEntities, existingEntitiesRowIndex);
+					}
+					if (!newEntities.isEmpty())
+					{
+						insertIntoRepo(repo, newEntities, newEntitiesRowIndex);
+					}
+				}
+				finally
+				{
+					IOUtils.closeQuietly(existingIds);
+				}
+				break;
+			}
+			case UPDATE:
+				repo.update(stream(entities.spliterator(), false));
+				break;
+			default:
+				throw new RuntimeException(format("Unknown database action [%s]", dbAction.toString()));
+		}
+
+		return count;
+	}
+
+	private static <E extends Entity> HugeSet<Object> getExistingEntityIds(Repository<E> repo, Iterable<E> entities)
+	{
 		String idAttributeName = repo.getEntityType().getIdAttribute().getName();
-		AttributeType dataType = repo.getEntityType().getIdAttribute().getDataType();
-		HugeSet<Object> existingIds = new HugeSet<>();
+
 		HugeSet<Object> ids = new HugeSet<>();
+		HugeSet<Object> existingIds = new HugeSet<>();
+
 		try
 		{
 			for (Entity entity : entities)
@@ -518,155 +628,17 @@ public class ImportWriter
 					}
 				}
 			}
-
-			int count = 0;
-			switch (dbAction)
-			{
-				case ADD:
-					if (!existingIds.isEmpty())
-					{
-						StringBuilder msg = new StringBuilder();
-						msg.append("Trying to add existing ").append(repo.getName())
-								.append(" entities as new insert: ");
-
-						int i = 0;
-						Iterator<?> it = existingIds.iterator();
-						while (it.hasNext() && i < 5)
-						{
-							if (i > 0)
-							{
-								msg.append(",");
-							}
-							msg.append(it.next());
-							i++;
-						}
-
-						if (it.hasNext())
-						{
-							msg.append(" and more.");
-						}
-						throw new MolgenisDataException(msg.toString());
-					}
-
-					count = repo.add(stream(entities.spliterator(), false));
-					break;
-				case ADD_IGNORE_EXISTING:
-					int batchSize = 1000;
-					List<E> existingEntities;
-					List<E> newEntities = newArrayList();
-
-					Iterator<E> it = entities.iterator();
-					while (it.hasNext())
-					{
-						E entity = it.next();
-						count++;
-						Object id = entity.get(idAttributeName);
-						if (!existingIds.contains(id))
-						{
-							newEntities.add(entity);
-							if (newEntities.size() == batchSize)
-							{
-								repo.add(newEntities.stream());
-								newEntities.clear();
-							}
-						}
-					}
-
-					if (!newEntities.isEmpty())
-					{
-						repo.add(newEntities.stream());
-					}
-
-					break;
-				case ADD_UPDATE_EXISTING:
-					batchSize = 1000;
-					existingEntities = new ArrayList<>(batchSize);
-					List<Integer> existingEntitiesRowIndex = new ArrayList<>(batchSize);
-					newEntities = new ArrayList<>(batchSize);
-					List<Integer> newEntitiesRowIndex = new ArrayList<>(batchSize);
-
-					it = entities.iterator();
-					while (it.hasNext())
-					{
-						E entity = it.next();
-						count++;
-						Object id = entity.get(idAttributeName);
-						if (existingIds.contains(id))
-						{
-							existingEntitiesRowIndex.add(count);
-							existingEntities.add(entity);
-							if (existingEntities.size() == batchSize)
-							{
-								updateInRepo(repo, existingEntities, existingEntitiesRowIndex);
-							}
-						}
-						else
-						{
-							newEntitiesRowIndex.add(count);
-							newEntities.add(entity);
-							if (newEntities.size() == batchSize)
-							{
-								insertIntoRepo(repo, newEntities, newEntitiesRowIndex);
-							}
-						}
-					}
-
-					if (!existingEntities.isEmpty())
-					{
-						updateInRepo(repo, existingEntities, existingEntitiesRowIndex);
-					}
-					if (!newEntities.isEmpty())
-					{
-						insertIntoRepo(repo, newEntities, newEntitiesRowIndex);
-					}
-					break;
-				case UPDATE:
-					int errorCount = 0;
-					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to update non-existing ").append(repo.getName()).append(" entities:");
-
-					for (Entity entity : entities)
-					{
-						count++;
-						Object id = entity.get(idAttributeName);
-						if (!existingIds.contains(id))
-						{
-							if (++errorCount == 6)
-							{
-								break;
-							}
-
-							if (errorCount > 0)
-							{
-								msg.append(", ");
-							}
-							msg.append(id);
-						}
-					}
-
-					if (errorCount > 0)
-					{
-						if (errorCount == 6)
-						{
-							msg.append(" and more.");
-						}
-						throw new MolgenisDataException(msg.toString());
-					}
-					repo.update(stream(entities.spliterator(), false));
-					break;
-
-				default:
-					break;
-
-			}
-
-			return count;
+		}
+		catch (RuntimeException e)
+		{
+			IOUtils.closeQuietly(existingIds);
+			throw e;
 		}
 		finally
 		{
-			IOUtils.closeQuietly(existingIds);
 			IOUtils.closeQuietly(ids);
 		}
+		return existingIds;
 	}
 
 	private <E extends Entity> void updateInRepo(Repository<E> repo, List<E> existingEntities,

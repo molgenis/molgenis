@@ -5,9 +5,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
@@ -31,6 +34,8 @@ import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.FULL_NAME;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
@@ -112,8 +117,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return;
 		}
 		LOG.debug("Store index actions for transaction {}", transactionId);
-		dataService.add(INDEX_ACTION_GROUP,
-				indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
+		dataService
+				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
 		dataService.add(INDEX_ACTION, indexActions1.stream());
 	}
 
@@ -150,13 +155,28 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
 	{
-		if (indexAction.getEntityId() != null || !dataService.hasRepository(
-				indexAction.getEntityFullName())) // When entity is deleted the entityType cannot be retrieved
+		if (indexAction.getEntityId() != null)
+		{
 			return Stream.of(indexAction);
-		return Stream.concat(Stream.of(indexAction), EntityUtils
-				.getReferencingEntityType(dataService.getEntityType(indexAction.getEntityFullName()), dataService)
-				.stream().map(pair -> indexActionFactory.create().setEntityFullName(pair.getA().getName())
-						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING)));
+		}
+
+		EntityType entityType = dataService.getEntityType(indexAction.getEntityFullName());
+		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
+		{
+			return Stream.of(indexAction);
+		}
+
+		// get referencing entity names
+		Set<String> referencingEntityNames = dataService.query(ATTRIBUTE_META_DATA, Attribute.class)
+				.fetch(new Fetch().field(ID).field(ENTITY, new Fetch().field(FULL_NAME)))
+				.eq(REF_ENTITY_TYPE, entityType).findAll().map(attr -> attr.getEntity().getName()).collect(toSet());
+
+		// convert referencing entity names to index actions
+		Stream<IndexAction> referencingEntityIndexActions = referencingEntityNames.stream()
+				.map(referencingEntityName -> indexActionFactory.create().setEntityFullName(referencingEntityName)
+						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
+
+		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
 	}
 
 	@Override
@@ -202,8 +222,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<EntityKey> getDirtyEntities()
 	{
 		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() != null)
-				.map(this::createEntityKey)
-				.collect(toSet());
+				.map(this::createEntityKey).collect(toSet());
 	}
 
 	@Override

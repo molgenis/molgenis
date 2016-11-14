@@ -4,10 +4,13 @@ import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -24,6 +27,8 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -74,9 +79,13 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 		EntityType emd = mock(EntityType.class);
 
-		// To avoid addReferencingEntities(IndexAction indexAction)
 		when(dataService.getEntityType(indexAction.getEntityFullName())).thenReturn(emd);
-		when(dataService.getEntityNames()).thenReturn(Stream.empty());
+		//noinspection unchecked
+		Query<Attribute> query = mock(Query.class);
+		when(query.fetch(any(Fetch.class))).thenReturn(query);
+		when(query.eq(REF_ENTITY_TYPE, emd)).thenReturn(query);
+		when(query.findAll()).thenReturn(Stream.empty());
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(query);
 
 		indexActionRegisterServiceImpl.register("TestEntityName", "123");
 
