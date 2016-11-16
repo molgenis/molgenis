@@ -1,3 +1,4 @@
+# @formatter:off
 import requests
 import json
 import urllib
@@ -187,3 +188,4 @@ class Session():
 		z = x.copy()
 		z.update(y)
 		return z
+# @formatter:on
