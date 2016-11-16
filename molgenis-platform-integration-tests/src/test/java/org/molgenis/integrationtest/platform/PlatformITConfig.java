@@ -10,9 +10,9 @@ import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
@@ -60,14 +60,14 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
  in org.molgenis.data and subpackages from included modules
   */
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
-		"org.molgenis.data.jobs", "org.molgenis.js",
-		"org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.test.data", "org.molgenis.data.platform",
-		"org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.cache",
-		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
-		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation" })
+		"org.molgenis.data.jobs", "org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
+		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
+		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
+		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
+		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class,
-		PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
+		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class, PlatformConfig.class,
+		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
