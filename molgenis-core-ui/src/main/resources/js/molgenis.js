@@ -292,6 +292,7 @@ function createInput(attr, attrs, val, lbl) {
             var $input = createBasicInput('radio', attrs, val);
             return label.append($input).append(val ? 'True' : 'False');
         case 'CATEGORICAL':
+        case 'CATEGORICAL_MREF':
             var label = $('<label>');
             var $input = createBasicInput('checkbox', attrs, val);
             return $('<div class="checkbox">').append(label.append($input).append(lbl));
@@ -340,7 +341,6 @@ function createInput(attr, attrs, val, lbl) {
         case 'ENUM':
         case 'SCRIPT':
             return createBasicInput('text', attrs, val).addClass('form-control');
-        case 'CATEGORICAL_MREF':
         case 'MREF':
         case 'XREF':
         case 'FILE':

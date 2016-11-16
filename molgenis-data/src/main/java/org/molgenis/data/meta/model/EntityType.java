@@ -65,8 +65,8 @@ public class EntityType extends StaticEntity
 	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityTypeFactory entity factory}.
 	 *
 	 * @param entityId   entity identifier (fully qualified entity name)
- 	 * @param entityType entity meta data
-	*/
+	 * @param entityType entity meta data
+	 */
 	public EntityType(String entityId, EntityType entityType)
 	{
 		super(entityType);

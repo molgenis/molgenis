@@ -18,7 +18,7 @@ public class ImportServiceFactory
 {
 	private final List<ImportService> importServices = Lists.newArrayList();
 
-	 void addImportService(ImportService importService)
+	void addImportService(ImportService importService)
 	{
 		importServices.add(importService);
 		Collections.sort(importServices, OrderComparator.INSTANCE);

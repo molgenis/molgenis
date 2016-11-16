@@ -3,6 +3,7 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 
 import java.util.stream.Stream;
 
@@ -29,7 +30,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void update(Attribute attr)
 	{
-		attributeValidator.validate(attr);
+		attributeValidator.validate(attr, ValidationMode.UPDATE);
 		decoratedRepo.update(attr);
 	}
 
@@ -38,7 +39,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		decoratedRepo.update(attrs.filter(attr ->
 		{
-			attributeValidator.validate(attr);
+			attributeValidator.validate(attr, ValidationMode.UPDATE);
 			return true;
 		}));
 	}
@@ -46,7 +47,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void add(Attribute attr)
 	{
-		attributeValidator.validate(attr);
+		attributeValidator.validate(attr, ValidationMode.ADD);
 		decoratedRepo.add(attr);
 	}
 
@@ -55,7 +56,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		return decoratedRepo.add(attrs.filter(attr ->
 		{
-			attributeValidator.validate(attr);
+			attributeValidator.validate(attr, ValidationMode.ADD);
 			return true;
 		}));
 	}

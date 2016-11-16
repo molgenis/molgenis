@@ -191,21 +191,19 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryValidationDecorator(
-					(Repository<Attribute>) (Repository<? extends Entity>) repo, attributeValidator);
-
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryDecorator(
 					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry, dataService,
 					permissionService);
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryValidationDecorator(
+					(Repository<Attribute>) (Repository<? extends Entity>) repo, attributeValidator);
 		}
 		else if (repo.getName().equals(ENTITY_TYPE_META_DATA))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
-					(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
-
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
 					(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService, systemEntityTypeRegistry,
 					permissionService);
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
+					(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
 		}
 		else if (repo.getName().equals(PACKAGE))
 		{
