@@ -1,12 +1,13 @@
 package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -33,11 +34,13 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 public class EntityTypeValidator
 {
 	private final DataService dataService;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	@Autowired
-	public EntityTypeValidator(DataService dataService)
+	public EntityTypeValidator(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 	}
 
 	/**
@@ -49,6 +52,7 @@ public class EntityTypeValidator
 	public void validate(EntityType entityType)
 	{
 		validateEntityName(entityType);
+		validatePackage(entityType);
 		validateExtends(entityType);
 		validateOwnAttributes(entityType);
 
@@ -275,6 +279,26 @@ public class EntityTypeValidator
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Qualified entity name [%s] not equal to entity name [%s]", entityType.getName(),
 								entityType.getSimpleName())));
+			}
+		}
+	}
+
+	/**
+	 * Validate that non-system entities are not assigned to a system package
+	 *
+	 * @param entityType entity type
+	 */
+	private void validatePackage(EntityType entityType)
+	{
+		Package package_ = entityType.getPackage();
+		if (package_ != null)
+		{
+			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry
+					.hasSystemEntityType(entityType.getName()))
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getName(),
+								entityType.getPackage().getName())));
 			}
 		}
 	}
