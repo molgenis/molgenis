@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -12,7 +12,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.importer.ImportWizardControllerTest.Config;
+import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.FileRepositoryCollection;
@@ -24,11 +25,13 @@ import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.PermissionManagerServiceImpl;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
@@ -551,9 +554,17 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.system", "org.molgenis.auth", "org.molgenis.data.meta.system" })
+	@ComponentScan(value = { "org.molgenis.data.system", "org.molgenis.auth", "org.molgenis.data.meta.system",
+			"org.molgenis.security.owned",
+			"org.molgenis.data.importer" }, excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.molgenis.data.importer.(.*?)\\..*"))
 	static class Config
 	{
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserService.class);
+		}
+
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
