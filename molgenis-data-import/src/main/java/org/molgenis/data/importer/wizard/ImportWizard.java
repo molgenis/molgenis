@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.molgenis.auth.Group;
 import org.molgenis.data.DatabaseAction;
