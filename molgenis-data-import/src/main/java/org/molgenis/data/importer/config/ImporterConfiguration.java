@@ -1,10 +1,16 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetaDataParser;
+import org.molgenis.data.importer.emx.EmxImportService;
+import org.molgenis.data.importer.emx.EmxMetaDataParser;
+import org.molgenis.data.importer.emx.ImportWriter;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.semantic.LabeledResource;
