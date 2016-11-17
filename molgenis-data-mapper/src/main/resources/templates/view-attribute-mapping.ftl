@@ -104,7 +104,7 @@
             <tr>
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
-                <#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical" && (categories)?has_content>
+                <#if attributeMapping.targetAttribute.dataType == "XREF" || attributeMapping.targetAttribute.dataType == "CATEGORICAL" && (categories)?has_content>
                     <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
                     <#list categories as category>
                         <#list refEntityType.attributes as attribute>
@@ -112,10 +112,10 @@
                             <#if (category[attributeName])??>
                                 <#assign value = category[attributeName] />
                                 <#assign dataType = attribute.dataType />
-                                <#if dataType == "datetime">
+                                <#if dataType == "DATE_TIME">
                                 ${value?datetime}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
                                     =</#if>
-                                <#elseif dataType == "date">
+                                <#elseif dataType == "DATE">
                                 ${value?date}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
                                     =</#if>
                                 <#else>
@@ -183,8 +183,8 @@
                         Mapping
                         <i class="glyphicon glyphicon-question-sign" rel="tooltip" title="Use one of the methods below to map the values of the
 						selected attribute(s) to the target attribute. The script editor offers large control over your algorithm, but javascript knowledge is needed.
-						<#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical" ||
-                        attributeMapping.targetAttribute.dataType == "string">
+						<#if attributeMapping.targetAttribute.dataType == "XREF" || attributeMapping.targetAttribute.dataType == "CATEGORICAL" ||
+                        attributeMapping.targetAttribute.dataType == "STRING">
 				    		The Map tab allows you to map the various categorical values or strings to the categorical values of the target attribute.
 				    	</#if>"></i>
                     </legend>
@@ -198,7 +198,7 @@
                                                                                   role="tab"
                                                                                   data-toggle="tab">Script</a></li>
 
-                    <#if attributeMapping.targetAttribute.dataType == "xref" || attributeMapping.targetAttribute.dataType == "categorical">
+                    <#if attributeMapping.targetAttribute.dataType == "XREF" || attributeMapping.targetAttribute.dataType == "CATEGORICAL">
                         <li id="map-tab" role="presentation"><a href="#map" aria-controls="map" role="tab"
                                                                 data-toggle="tab">Map</a></li>
                     </#if>
