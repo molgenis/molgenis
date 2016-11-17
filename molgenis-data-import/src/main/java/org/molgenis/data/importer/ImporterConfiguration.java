@@ -5,6 +5,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -67,6 +68,9 @@ public class ImporterConfiguration
 	@Autowired
 	private AttributeValidator attributeValidator;
 
+	@Autowired
+	private EntityTypeDependencyResolver entityTypeDependencyResolver;
+
 	@Bean
 	public ImportService emxImportService()
 	{
@@ -77,7 +81,7 @@ public class ImporterConfiguration
 	public ImportWriter importWriter()
 	{
 		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService, tagFactory,
-				entityManager);
+				entityManager, entityTypeDependencyResolver);
 	}
 
 	@Bean
