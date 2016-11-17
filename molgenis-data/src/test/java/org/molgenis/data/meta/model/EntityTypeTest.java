@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -194,6 +195,17 @@ public class EntityTypeTest
 		assertSame(tagsCopy.get(0), tag0);
 		assertSame(tagsCopy.get(1), tag1);
 		assertEquals(entityTypeCopy.getBackend(), "backend");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed")
+	public void addAttributeWithDuplicateName()
+	{
+		EntityType entityType = new EntityType(createEntityTypeMeta());
+		entityType.setName("myEntity");
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		entityType.addAttribute(attr0);
+		entityType.addAttribute(attr1);
 	}
 
 	private static EntityType createEntityTypeMeta()

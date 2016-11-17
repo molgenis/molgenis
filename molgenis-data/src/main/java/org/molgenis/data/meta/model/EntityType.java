@@ -3,6 +3,7 @@ package org.molgenis.data.meta.model;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.ArrayList;
@@ -594,10 +595,22 @@ public class EntityType extends StaticEntity
 	{
 		invalidateCachedOwnAttrs();
 
-		attr.setEntity(this);
 		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
+		// validate that no other attribute exists with the same name
+		attrs.forEach(existingAttr ->
+		{
+			if (existingAttr.getName().equals(attr.getName()))
+			{
+				throw new MolgenisDataException(
+						format("Entity [%s] already contains attribute with name [%s], duplicate attribute names are not allowed",
+								this.getName(), attr.getName()));
+			}
+		});
+
+		attr.setEntity(this);
 		attr.setSequenceNumber(Iterables.size(attrs));
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+
 		setAttributeRoles(attr, attrTypes);
 		return this;
 	}

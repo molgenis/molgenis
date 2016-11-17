@@ -203,10 +203,10 @@ public class EntityUtils
 	/**
 	 * Get an Iterable of entities as a stream of entities
 	 *
-	 * @param entities
-	 * @return
+	 * @param entities entities iterable
+	 * @return entities stream
 	 */
-	public static Stream<Entity> asStream(Iterable<Entity> entities)
+	public static <E extends Entity> Stream<E> asStream(Iterable<E> entities)
 	{
 		return stream(entities.spliterator(), false);
 	}
