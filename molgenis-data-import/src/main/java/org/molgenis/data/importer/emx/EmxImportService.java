@@ -1,9 +1,12 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.emx;
 
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.MetaDataParser;
+import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -25,7 +28,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.importer.EmxMetaDataParser.*;
 
 @Component
 public class EmxImportService implements ImportService
@@ -52,9 +54,9 @@ public class EmxImportService implements ImportService
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (entityName.equalsIgnoreCase(EMX_ATTRIBUTES)) return true;
-				if (entityName.equalsIgnoreCase(EMX_LANGUAGES)) return true;
-				if (entityName.equalsIgnoreCase(EMX_I18NSTRINGS)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_I18NSTRINGS)) return true;
 				if (dataService.getMeta().getEntityType(entityName) != null) return true;
 			}
 		}
@@ -125,7 +127,8 @@ public class EmxImportService implements ImportService
 	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String selectedPackage)
 	{
-		List<String> skipEntities = newArrayList(EMX_ATTRIBUTES, EMX_PACKAGES, EMX_ENTITIES, EMX_TAGS);
+		List<String> skipEntities = newArrayList(EmxMetaDataParser.EMX_ATTRIBUTES, EmxMetaDataParser.EMX_PACKAGES,
+				EmxMetaDataParser.EMX_ENTITIES, EmxMetaDataParser.EMX_TAGS);
 		ImmutableMap<String, EntityType> EntityTypeMap = parser.parse(repositoryCollection, selectedPackage)
 				.getEntityMap();
 
