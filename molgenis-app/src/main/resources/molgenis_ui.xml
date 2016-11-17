@@ -9,6 +9,7 @@
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
 			<plugin id="sortaservice" name="SORTA" url="sortaservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
+            <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
         <menu label="Plugins" name="plugins">
             <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
