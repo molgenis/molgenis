@@ -190,7 +190,9 @@ public class AttributeValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new MolgenisDataException(format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Invalid default value [%s] for data type [%s]", value, attr.getDataType())
+				));
 			}
 		}
 	}
