@@ -1,5 +1,7 @@
 package org.molgenis.data.meta.model;
 
+import com.google.common.collect.Lists;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -9,6 +11,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
@@ -42,6 +45,42 @@ public class EntityTypeTest
 
 		Attribute nestedCompoundParent = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(nestedCompoundParent.getChildren()).thenReturn(nestedAttributeParts);
+	}
+
+	@Test
+	public void addSequenceNumberNull(){
+		EntityType entityType = mock(EntityType.class);
+
+		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+
+		when(attr1.getSequenceNumber()).thenReturn(0);
+		when(attr2.getSequenceNumber()).thenReturn(1);
+		when(attr3.getSequenceNumber()).thenReturn(2);
+		when(attribute.getSequenceNumber()).thenReturn(null);
+
+		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		verify(attribute).setSequenceNumber(3);
+	}
+
+	@Test
+	public void addSequenceNumberNullAndOtherNull(){
+		EntityType entityType = mock(EntityType.class);
+
+		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+
+		when(attr1.getSequenceNumber()).thenReturn(null);
+		when(attr2.getSequenceNumber()).thenReturn(null);
+		when(attr3.getSequenceNumber()).thenReturn(null);
+		when(attribute.getSequenceNumber()).thenReturn(null);
+
+		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		verify(attribute).setSequenceNumber(0);
 	}
 
 	@Test
