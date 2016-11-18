@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.core.utils;
 
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -172,15 +173,16 @@ public class AnnotatorUtils
 		addAnnotatorAttributesToInfoAttribute(annotator, vcfRepo);
 		Iterable<Entity> entitiesToAnnotate;
 
+		// Check if annotator is annotator that annotates effects (for example Gavin)
 		if (annotator instanceof EffectsAnnotator)
 		{
 			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityType(), EFFECT,
 					StreamSupport.stream(vcfRepo.spliterator(), false));
 
 			// Add metadata to repository that will be annotated, instead of repository with variants
-			for (Entity entity : entitiesToAnnotate)
+			if (entitiesToAnnotate.iterator().hasNext())
 			{
-				entity.getEntityType().addAttributes(annotator.getOutputAttributes());
+				entitiesToAnnotate.iterator().next().getEntityType().addAttributes(annotator.getOutputAttributes());
 			}
 		}
 		else
