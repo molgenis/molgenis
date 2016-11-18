@@ -376,6 +376,9 @@ public class EntityUtils
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
 		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
+		if (!Objects.equals(attr.isIdAttribute(), otherAttr.isIdAttribute())) return false;
+		if (!Objects.equals(attr.isLabelAttribute(), otherAttr.isLabelAttribute())) return false;
+		if (!Objects.equals(attr.getLookupAttributeIndex(), otherAttr.getLookupAttributeIndex())) return false;
 
 		// recursively compare attribute parts
 		if (!EntityUtils.equals(attr.getChildren(), otherAttr.getChildren())) return false;

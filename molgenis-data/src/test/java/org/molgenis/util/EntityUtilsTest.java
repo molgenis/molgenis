@@ -5,7 +5,11 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Iterator;
+import java.util.List;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
@@ -98,5 +102,93 @@ public class EntityUtilsTest
 		EntityManager entityManager = mock(EntityManager.class);
 		when(entityManager.getReference(refEntityType, valueStr)).thenReturn(entity);
 		assertEquals(EntityUtils.getTypedValue(valueStr, attr, entityManager), entity);
+	}
+
+	@Test(dataProvider = "attributeProvider")
+	public void attributeEquals(Attribute attr, Attribute otherAttr, boolean shouldEqual)
+	{
+		assertEquals(EntityUtils.equals(attr, otherAttr, true), shouldEqual);
+	}
+
+	@DataProvider(name = "attributeProvider")
+	public Iterator<Object[]> attributeProvider()
+	{
+		List<Object[]> testCases = newArrayList();
+
+		{ // isIdAttribute equals
+			Attribute attr = getMockAttr("isIdAttrTrue");
+			Attribute otherAttr = getMockAttr("isIdAttrTrue");
+			when(attr.isIdAttribute()).thenReturn(true);
+			when(otherAttr.isIdAttribute()).thenReturn(true);
+
+			testCases.add(new Object[]{attr, otherAttr, true});
+		}
+
+		{ // isIdAttribute not equals
+			Attribute attr = getMockAttr("isIdAttrTrue");
+			Attribute otherAttr = getMockAttr("isIdAttrFalse");
+			when(attr.isIdAttribute()).thenReturn(true);
+			when(otherAttr.isIdAttribute()).thenReturn(false);
+
+			testCases.add(new Object[]{attr, otherAttr, false});
+		}
+
+		{ // getLookupAttributeIndex equals
+			Attribute attr = getMockAttr("lookupIndex10");
+			Attribute otherAttr = getMockAttr("lookupIndex10");
+			when(attr.getLookupAttributeIndex()).thenReturn(10);
+			when(otherAttr.getLookupAttributeIndex()).thenReturn(10);
+
+			testCases.add(new Object[]{attr, otherAttr, true});
+		}
+
+		{ // getLookupAttributeIndex not equals
+			Attribute attr = getMockAttr("lookupIndex10");
+			Attribute otherAttr = getMockAttr("lookupIndex34");
+			when(attr.getLookupAttributeIndex()).thenReturn(10);
+			when(otherAttr.getLookupAttributeIndex()).thenReturn(34);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		{ // getLookupAttributeIndex not equals
+			Attribute attr = getMockAttr("lookupIndex10");
+			Attribute otherAttr = getMockAttr("lookupIndexNull");
+			when(attr.getLookupAttributeIndex()).thenReturn(10);
+			when(otherAttr.getLookupAttributeIndex()).thenReturn(null);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		{ // isLabelAttribute equals
+			Attribute attr = getMockAttr("isLabelAttrTrue");
+			Attribute otherAttr = getMockAttr("isLabelAttrTrue");
+			when(attr.isLabelAttribute()).thenReturn(true);
+			when(otherAttr.isLabelAttribute()).thenReturn(true);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // isLabelAttribute not equals
+			Attribute attr = getMockAttr("isLabelAttrTrue");
+			Attribute otherAttr = getMockAttr("isLabelAttrFalse");
+			when(attr.isLabelAttribute()).thenReturn(true);
+			when(otherAttr.isLabelAttribute()).thenReturn(false);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		return testCases.iterator();
+	}
+
+	private Attribute getMockAttr(String toString)
+	{
+		Attribute attr = mock(Attribute.class);
+		when(attr.toString()).thenReturn(toString);
+		when(attr.getIdentifier()).thenReturn("1");
+		when(attr.getName()).thenReturn("name");
+		when(attr.getChildren()).thenReturn(emptyList());
+		when(attr.getTags()).thenReturn(emptyList());
+		return attr;
 	}
 }
