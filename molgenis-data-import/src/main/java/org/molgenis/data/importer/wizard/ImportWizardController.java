@@ -1,12 +1,12 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
+import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.system.ImportRun;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
@@ -48,7 +48,7 @@ import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.data.importer.wizard.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.Permission.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN;

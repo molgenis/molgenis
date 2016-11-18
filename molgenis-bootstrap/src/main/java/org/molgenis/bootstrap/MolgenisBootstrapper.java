@@ -4,6 +4,7 @@ import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
+import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
 import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -20,12 +21,14 @@ import static java.util.Objects.requireNonNull;
 /**
  * Application bootstrapper
  */
+@SuppressWarnings("unused")
 @Component
 class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>, PriorityOrdered
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisBootstrapper.class);
 
 	private final MolgenisUpgradeBootstrapper upgradeBootstrapper;
+	private final TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar;
 	private final RegistryBootstrapper registryBootstrapper;
 	private final SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 	private final RepositoryPopulator repositoryPopulator;
@@ -36,6 +39,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 
 	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
+			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper,
 			SystemEntityTypeBootstrapper systemEntityTypeBootstrapper, RepositoryPopulator repositoryPopulator,
 			FileIngesterJobRegistrar fileIngesterJobRegistrar, JobBootstrapper jobBootstrapper,
@@ -43,6 +47,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			IndexBootstrapper indexBootstrapper)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
+		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
 		this.systemEntityTypeBootstrapper = requireNonNull(systemEntityTypeBootstrapper);
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
@@ -63,6 +68,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Updating MOLGENIS ...");
 		upgradeBootstrapper.bootstrap();
 		LOG.debug("Updated MOLGENIS");
+
+		LOG.trace("Bootstrapping transaction exception translators ...");
+		transactionExceptionTranslatorRegistrar.register(event.getApplicationContext());
+		LOG.debug("Bootstrapped transaction exception translators");
 
 		LOG.trace("Bootstrapping registries ...");
 		registryBootstrapper.bootstrap(event);

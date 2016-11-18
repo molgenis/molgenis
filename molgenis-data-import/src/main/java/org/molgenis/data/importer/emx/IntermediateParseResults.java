@@ -1,10 +1,10 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.emx;
 
 import com.google.common.collect.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
+import org.molgenis.data.importer.emx.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;

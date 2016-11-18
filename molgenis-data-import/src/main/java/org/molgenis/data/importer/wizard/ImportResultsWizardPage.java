@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
