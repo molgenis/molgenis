@@ -1451,7 +1451,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 
 		Attribute attr = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
-		assertEquals(attr.getSequenceNumber(), 0);
+		assertEquals(attr.getSequenceNumber(), Integer.valueOf(0));
 		assertTrue(attr.isReadOnly());
 		assertTrue(attr.isUnique());
 		assertEquals(attr.getLabel(), "test");
@@ -1476,7 +1476,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
 		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
 		newAttr.setEntity(entityType);
-		entityType.addAttribute(newAttr); // appends at the end and sets sequence number
+		newAttr.setSequenceNumber(2);
+		entityType.addAttribute(newAttr);
+
+		assertEquals(newAttr.getSequenceNumber(), Integer.valueOf(2)); // Test if sequence number is 2
 
 		runAsSystem(() ->
 		{
