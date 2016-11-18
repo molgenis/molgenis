@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface RepositoryAnnotator
 {
-	String ANNOTATOR_PREFIX = "annotated_";
+	String ANNOTATOR_PREFIX = "mgs_ann_";
 
 	AnnotatorInfo getInfo();
 
