@@ -225,58 +225,93 @@ public class VcfUtils
 		};
 	}
 
-	public List<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
-			Stream<Entity> inputStream)
+	//FIXME: is this still used?
+	public Stream<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
+			Stream<Entity> inputStream, EntityType newEntityType)
 	{
-		return createEntityStructureForVcf(entityType, attributeName, inputStream, Collections.emptyList());
+		return createEntityStructureForVcf(entityType, attributeName, inputStream, Collections.emptyList(),
+				newEntityType);
 	}
 
-	private List<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
-			Stream<Entity> inputStream, List<Attribute> annotatorAttributes)
+	public Stream<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
+			Stream<Entity> inputStream, List<Attribute> annotatorAttributes, EntityType newEntityType)
 	{
 		Attribute attributeToParse = entityType.getAttribute(attributeName);
-		String description = attributeToParse.getDescription();
-		//Parse the description of, for example, this line:
-		//##INFO=<ID=EFFECT,Number=.,Type=String,Description="EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'">
-		if (description.indexOf(':') == -1)
-		{
-			throw new RuntimeException(
-					"Unable to create entitystructure, missing semicolon in description of [" + attributeName + "]");
-		}
-
+		String description = getDescription(attributeToParse);
 		String[] step1 = description.split(":");
 		String entityName = StringUtils.deleteWhitespace(step1[0]);
 		String value = step1[1].replaceAll("^\\s'|'$", "");
 
 		Map<Integer, Attribute> metadataMap = parseDescription(value, annotatorAttributes);
-		EntityType xrefMetaData = getXrefEntityType(metadataMap, entityName);
+		EntityType xrefMetaData = getXrefEntityType(metadataMap, entityName, annotatorAttributes);
 
-		List<Entity> results = new ArrayList<>();
-		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
-		{
-			EntityType newEntityType = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
-			Entity originalEntity = new DynamicEntity(newEntityType);
-			originalEntity.set(inputEntity);
-
-			results.addAll(parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
-					originalEntity));
-		}
-		return results;
+		return inputStream.flatMap(
+				entity -> createEntityStructureForSingleEntity(attributeToParse, metadataMap, xrefMetaData, entity,
+						newEntityType));
 	}
 
-	private EntityType getXrefEntityType(Map<Integer, Attribute> metadataMap, String entityName)
+	private Stream<Entity> createEntityStructureForSingleEntity(Attribute attributeToParse,
+			Map<Integer, Attribute> metadataMap, EntityType xrefMetaData, Entity inputEntity, EntityType newEntityType)
+	{
+		List<Entity> results = new ArrayList<>();
+		Entity variantEntity = new DynamicEntity(newEntityType);
+
+		for (String attr : variantEntity.getAttributeNames())
+		{
+			if (inputEntity.getEntityType().getAttribute(attr) != null)
+			{
+				variantEntity.set(attr, inputEntity.get(attr));
+			}
+		}
+
+		List<Entity> result = parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
+				variantEntity).collect(Collectors.toList());
+		results.addAll(result);
+		return results.stream();
+	}
+
+	//Get the description of the field that needs to be parsed to determine the attributes of the Entity based on the attribute
+	//for example, this line:
+	//##INFO=<ID=EFFECT,Number=.,Type=String,Description="EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'">
+	public String getDescription(Attribute attributeToParse)
+	{
+		String description = attributeToParse.getDescription();
+		if (description.indexOf(':') == -1)
+		{
+			throw new RuntimeException(
+					"Unable to create entitystructure, missing semicolon in description of [" + attributeToParse
+							.getName() + "]");
+		}
+		return description;
+	}
+
+	private EntityType getXrefEntityType(Map<Integer, Attribute> metadataMap, String entityName,
+			List<Attribute> annotatorAttributes)
 	{
 		EntityType xrefMetaData = entityTypeFactory.create().setName(entityName);
 		xrefMetaData.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityType.AttributeRole.ROLE_ID);
 		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
+
+		//if annotator attributes not present add them
+		//check if needed for annotators running on an already annotated file
+		for (Attribute attr : annotatorAttributes)
+		{
+			if (xrefMetaData.getAttribute(attr.getName()) == null)
+			{
+				xrefMetaData.addAttribute(attr);
+			}
+		}
+
 		xrefMetaData.addAttribute(attributeFactory.create().setName(VARIANT).setDataType(XREF));
+
 		return xrefMetaData;
 	}
 
-	private static EntityType removeRefFieldFromInfoMetadata(Attribute attributeToParse, Entity inputEntity)
+	public EntityType removeRefFieldFromInfoMetadata(Attribute attributeToParse, EntityType inputEntityType)
 	{
-		EntityType newMeta = inputEntity.getEntityType();
+		EntityType newMeta = entityTypeFactory.create();
+		newMeta.set(inputEntityType);
 		newMeta.removeAttribute(attributeToParse);
 		return newMeta;
 	}
@@ -300,11 +335,11 @@ public class VcfUtils
 		return attributeMap;
 	}
 
-	private static List<Entity> parseValue(EntityType metadata, Map<Integer, Attribute> attributesMap, String value,
+	private static Stream<Entity> parseValue(EntityType metadata, Map<Integer, Attribute> attributesMap, String value,
 			Entity originalEntity)
 	{
 		List<Entity> result = new ArrayList<>();
-		if (value == null) return result;
+		if (value == null) return result.stream();
 		String[] valuesPerEntity = value.split(",");
 
 		for (String aValuesPerEntity : valuesPerEntity)
@@ -321,7 +356,7 @@ public class VcfUtils
 			singleResult.set(VARIANT, originalEntity);
 			result.add(singleResult);
 		}
-		return result;
+		return result.stream();
 	}
 
 	/**

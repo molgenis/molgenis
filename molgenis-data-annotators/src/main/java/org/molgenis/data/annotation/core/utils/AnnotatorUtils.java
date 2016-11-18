@@ -20,6 +20,7 @@ import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -171,26 +172,22 @@ public class AnnotatorUtils
 			AttributeFactory attributeFactory, VcfUtils vcfUtils, VcfRepository vcfRepo)
 	{
 		addAnnotatorAttributesToInfoAttribute(annotator, vcfRepo);
-		Iterable<Entity> entitiesToAnnotate;
+		Stream<Entity> entitiesToAnnotate;
 
 		// Check if annotator is annotator that annotates effects (for example Gavin)
 		if (annotator instanceof EffectsAnnotator)
 		{
+			EntityType newEntityType = vcfUtils.removeRefFieldFromInfoMetadata(vcfRepo.getEntityType().getAttribute(EFFECT), vcfRepo.getEntityType());
 			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityType(), EFFECT,
-					StreamSupport.stream(vcfRepo.spliterator(), false));
-
-			// Add metadata to repository that will be annotated, instead of repository with variants
-			if (entitiesToAnnotate.iterator().hasNext())
-			{
-				entitiesToAnnotate.iterator().next().getEntityType().addAttributes(annotator.getOutputAttributes());
-			}
+					StreamSupport.stream(vcfRepo.spliterator(), false), annotator.getOutputAttributes(), newEntityType);
 		}
 		else
 		{
 			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityType(), attributeFactory, annotator);
-			entitiesToAnnotate = vcfRepo;
+			return vcfRepo;
 		}
-		return entitiesToAnnotate;
+		//FIXME not cool
+		return entitiesToAnnotate.collect(Collectors.toList());
 	}
 
 	private static void writeAnnotationResultToVcfFile(List<String> attributesToInclude, BufferedWriter outputVCFWriter,

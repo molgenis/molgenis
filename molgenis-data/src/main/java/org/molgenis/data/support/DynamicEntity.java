@@ -196,7 +196,7 @@ public class DynamicEntity implements Entity
 	@Override
 	public void set(Entity values)
 	{
-		values.getAttributeNames().forEach(attrName -> set(attrName, values.get(attrName)));
+		values.getEntityType().getAttributeNames().forEach(attrName -> set(attrName, values.get(attrName)));
 	}
 
 	/**
