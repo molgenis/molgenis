@@ -219,7 +219,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 
 	private static void validateUpdateAllowed(Package package_)
 	{
-		if (isSystemPackage(package_))
+		if (MetaUtils.isSystemPackage(package_))
 		{
 			throw new MolgenisDataException(format("Updating system package [%s] is not allowed", package_.getName()));
 		}
@@ -260,7 +260,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	private static void validateDeleteAllowed(Package package_)
 	{
 		// This package and descending packages do not contain a system package
-		if (isSystemPackage(package_))
+		if (MetaUtils.isSystemPackage(package_))
 		{
 			throw new MolgenisDataException(format("Deleting system package [%s] is not allowed", package_.getName()));
 		}
@@ -269,12 +269,6 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	private static Stream<Package> getPackageTreeTraversal(Package package_)
 	{
 		return StreamSupport.stream(new PackageTreeTraverser().postOrderTraversal(package_).spliterator(), false);
-	}
-
-	private static boolean isSystemPackage(Package package_)
-	{
-		return package_.getName().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null && package_
-				.getRootPackage().getName().equals(PACKAGE_SYSTEM));
 	}
 
 	private Repository<EntityType> getEntityRepository()
