@@ -27,6 +27,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
 
 public class AnnotatorUtils
 {
@@ -74,7 +75,7 @@ public class AnnotatorUtils
 		}
 		else
 		{
-			throw new MolgenisDataException(VcfAttributes.ALT + " differs in length from the provided annotations.");
+			throw new MolgenisDataException(ALT + " differs in length from the provided annotations.");
 		}
 		return result;
 	}
