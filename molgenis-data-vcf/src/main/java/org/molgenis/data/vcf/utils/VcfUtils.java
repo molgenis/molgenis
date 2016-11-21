@@ -225,16 +225,8 @@ public class VcfUtils
 		};
 	}
 
-	//FIXME: is this still used?
 	public Stream<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
-			Stream<Entity> inputStream, EntityType newEntityType)
-	{
-		return createEntityStructureForVcf(entityType, attributeName, inputStream, Collections.emptyList(),
-				newEntityType);
-	}
-
-	public Stream<Entity> createEntityStructureForVcf(EntityType entityType, String attributeName,
-			Stream<Entity> inputStream, List<Attribute> annotatorAttributes, EntityType newEntityType)
+			Stream<Entity> inputStream, List<Attribute> annotatorAttributes, EntityType variantEntityType)
 	{
 		Attribute attributeToParse = entityType.getAttribute(attributeName);
 		String description = getDescription(attributeToParse);
@@ -242,29 +234,29 @@ public class VcfUtils
 		String entityName = StringUtils.deleteWhitespace(step1[0]);
 		String value = step1[1].replaceAll("^\\s'|'$", "");
 
-		Map<Integer, Attribute> metadataMap = parseDescription(value, annotatorAttributes);
-		EntityType xrefMetaData = getXrefEntityType(metadataMap, entityName, annotatorAttributes);
+		Map<Integer, Attribute> effectFieldAttributeMap = parseDescription(value, annotatorAttributes);
+		EntityType effectsEntityType = getEffectsEntityType(effectFieldAttributeMap, entityName, annotatorAttributes);
 
 		return inputStream.flatMap(
-				entity -> createEntityStructureForSingleEntity(attributeToParse, metadataMap, xrefMetaData, entity,
-						newEntityType));
+				entity -> createEntityStructureForSingleEntity(attributeToParse, effectFieldAttributeMap, effectsEntityType, entity,
+						variantEntityType));
 	}
 
 	private Stream<Entity> createEntityStructureForSingleEntity(Attribute attributeToParse,
-			Map<Integer, Attribute> metadataMap, EntityType xrefMetaData, Entity inputEntity, EntityType newEntityType)
+			Map<Integer, Attribute> effectFieldAttributeMap, EntityType effectsEntityType, Entity vcfInputEntity, EntityType variantEntityType)
 	{
 		List<Entity> results = new ArrayList<>();
-		Entity variantEntity = new DynamicEntity(newEntityType);
+		Entity variantEntity = new DynamicEntity(variantEntityType);
 
 		for (String attr : variantEntity.getAttributeNames())
 		{
-			if (inputEntity.getEntityType().getAttribute(attr) != null)
+			if (vcfInputEntity.getEntityType().getAttribute(attr) != null)
 			{
-				variantEntity.set(attr, inputEntity.get(attr));
+				variantEntity.set(attr, vcfInputEntity.get(attr));
 			}
 		}
 
-		List<Entity> result = parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
+		List<Entity> result = createEffectsEntitiesForSingleVariant(effectsEntityType, effectFieldAttributeMap, vcfInputEntity.getString(attributeToParse.getName()),
 				variantEntity).collect(Collectors.toList());
 		results.addAll(result);
 		return results.stream();
@@ -285,27 +277,27 @@ public class VcfUtils
 		return description;
 	}
 
-	private EntityType getXrefEntityType(Map<Integer, Attribute> metadataMap, String entityName,
+	private EntityType getEffectsEntityType(Map<Integer, Attribute> metadataMap, String entityName,
 			List<Attribute> annotatorAttributes)
 	{
-		EntityType xrefMetaData = entityTypeFactory.create().setName(entityName);
-		xrefMetaData.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
+		EntityType effectsEntityType = entityTypeFactory.create().setName(entityName);
+		effectsEntityType.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityType.AttributeRole.ROLE_ID);
-		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
+		effectsEntityType.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 
 		//if annotator attributes not present add them
 		//check if needed for annotators running on an already annotated file
 		for (Attribute attr : annotatorAttributes)
 		{
-			if (xrefMetaData.getAttribute(attr.getName()) == null)
+			if (effectsEntityType.getAttribute(attr.getName()) == null)
 			{
-				xrefMetaData.addAttribute(attr);
+				effectsEntityType.addAttribute(attr);
 			}
 		}
 
-		xrefMetaData.addAttribute(attributeFactory.create().setName(VARIANT).setDataType(XREF));
+		effectsEntityType.addAttribute(attributeFactory.create().setName(VARIANT).setDataType(XREF));
 
-		return xrefMetaData;
+		return effectsEntityType;
 	}
 
 	public EntityType removeRefFieldFromInfoMetadata(Attribute attributeToParse, EntityType inputEntityType)
@@ -335,28 +327,28 @@ public class VcfUtils
 		return attributeMap;
 	}
 
-	private static Stream<Entity> parseValue(EntityType metadata, Map<Integer, Attribute> attributesMap, String value,
-			Entity originalEntity)
+	private static Stream<Entity> createEffectsEntitiesForSingleVariant(EntityType effectsEntityType, Map<Integer, Attribute> effectFieldAttributeMap, String descriptionFieldsString,
+			Entity variantEntity)
 	{
-		List<Entity> result = new ArrayList<>();
-		if (value == null) return result.stream();
-		String[] valuesPerEntity = value.split(",");
+		List<Entity> listOfEffectsEntities = new ArrayList<>();
+		if (descriptionFieldsString == null) return listOfEffectsEntities.stream();
+		String[] descriptionFieldValues = descriptionFieldsString.split(",");
 
-		for (String aValuesPerEntity : valuesPerEntity)
+		for (String descriptionFieldValue : descriptionFieldValues)
 		{
-			String[] values = aValuesPerEntity.split("\\|");
+			String[] descriptionFieldPartValues = descriptionFieldValue.split("\\|");
 
-			DynamicEntity singleResult = new DynamicEntity(metadata);
-			for (Integer j = 0; j < values.length; j++)
+			DynamicEntity singleEffectsEntity = new DynamicEntity(effectsEntityType);
+			for (Integer descriptionFieldIndex = 0; descriptionFieldIndex < descriptionFieldPartValues.length; descriptionFieldIndex++)
 			{
-				String attributeName = attributesMap.get(j).getName().replaceAll("^\'|\'$", "");
-				String attributeValue = values[j];
-				singleResult.set(attributeName, attributeValue);
+				String attributeName = effectFieldAttributeMap.get(descriptionFieldIndex).getName().replaceAll("^\'|\'$", "");
+				String attributeValue = descriptionFieldPartValues[descriptionFieldIndex];
+				singleEffectsEntity.set(attributeName, attributeValue);
 			}
-			singleResult.set(VARIANT, originalEntity);
-			result.add(singleResult);
+			singleEffectsEntity.set(VARIANT, variantEntity);
+			listOfEffectsEntities.add(singleEffectsEntity);
 		}
-		return result.stream();
+		return listOfEffectsEntities.stream();
 	}
 
 	/**

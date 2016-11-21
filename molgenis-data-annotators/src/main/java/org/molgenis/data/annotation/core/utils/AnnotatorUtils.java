@@ -177,9 +177,9 @@ public class AnnotatorUtils
 		// Check if annotator is annotator that annotates effects (for example Gavin)
 		if (annotator instanceof EffectsAnnotator)
 		{
-			EntityType newEntityType = vcfUtils.removeRefFieldFromInfoMetadata(vcfRepo.getEntityType().getAttribute(EFFECT), vcfRepo.getEntityType());
+			EntityType variantEntityType = vcfUtils.removeRefFieldFromInfoMetadata(vcfRepo.getEntityType().getAttribute(EFFECT), vcfRepo.getEntityType());
 			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityType(), EFFECT,
-					StreamSupport.stream(vcfRepo.spliterator(), false), annotator.getOutputAttributes(), newEntityType);
+					StreamSupport.stream(vcfRepo.spliterator(), false), annotator.getOutputAttributes(), variantEntityType);
 		}
 		else
 		{
