@@ -3,6 +3,7 @@ package org.molgenis;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,9 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 
 	@Autowired
 	private IdGenerator idGenerator;
+
+	@Autowired
+	private TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
 
 	@Bean
 	public DataSource dataSource()
@@ -66,7 +70,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	@Bean
 	public MolgenisTransactionManager transactionManager()
 	{
-		return new MolgenisTransactionManager(idGenerator, dataSource());
+		return new MolgenisTransactionManager(idGenerator, dataSource(), transactionExceptionTranslatorRegistry);
 	}
 
 	@Override
