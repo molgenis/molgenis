@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
@@ -93,6 +94,7 @@ public class EntityTypeValidatorTest
 		when(entityType.getName()).thenReturn(packageName + '_' + name);
 		when(entityType.getSimpleName()).thenReturn(name);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
+		when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
 		when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
 		when(entityType.getOwnLookupAttributes()).thenReturn(singletonList(labelAttr));
@@ -288,7 +290,7 @@ public class EntityTypeValidatorTest
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		entityTypeValidator.validate(entityType);
 	}
-
+	
 	@Test
 	public void testValidateSystemPackageValid()
 	{
@@ -320,6 +322,13 @@ public class EntityTypeValidatorTest
 		when(entityType.getPackage()).thenReturn(rootSystemPackage);
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(qualifiedEntityName)).thenReturn(false);
+		entityTypeValidator.validate(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] contains multiple attributes with name \\[idAttr\\]")
+	public void testValidateAttributeWithDuplicateName()
+	{
+		when(entityType.getAllAttributes()).thenReturn(asList(idAttr, idAttr));
 		entityTypeValidator.validate(entityType);
 	}
 }

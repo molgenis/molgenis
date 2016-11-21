@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import com.google.common.collect.Lists;
-import org.testng.Assert;
+import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -10,9 +10,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.testng.Assert.assertEquals;
@@ -48,7 +46,8 @@ public class EntityTypeTest
 	}
 
 	@Test
-	public void addSequenceNumberNull(){
+	public void addSequenceNumberNull()
+	{
 		EntityType entityType = mock(EntityType.class);
 
 		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
@@ -66,7 +65,8 @@ public class EntityTypeTest
 	}
 
 	@Test
-	public void addSequenceNumberNullAndOtherNull(){
+	public void addSequenceNumberNullAndOtherNull()
+	{
 		EntityType entityType = mock(EntityType.class);
 
 		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
@@ -233,6 +233,17 @@ public class EntityTypeTest
 		assertSame(tagsCopy.get(0), tag0);
 		assertSame(tagsCopy.get(1), tag1);
 		assertEquals(entityTypeCopy.getBackend(), "backend");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed")
+	public void addAttributeWithDuplicateName()
+	{
+		EntityType entityType = new EntityType(createEntityTypeMeta());
+		entityType.setName("myEntity");
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		entityType.addAttribute(attr0);
+		entityType.addAttribute(attr1);
 	}
 
 	private static EntityType createEntityTypeMeta()
