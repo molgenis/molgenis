@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -82,7 +83,14 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		}
 		else
 		{
-			annotatationSourceEntities = () -> dataService.findAll(sourceRepositoryName, q).iterator();
+			annotatationSourceEntities = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(sourceRepositoryName, q).iterator();
+				}
+			};
 		}
 		processQueryResults(entity, annotatationSourceEntities, updateMode);
 		return Collections.singletonList(entity);

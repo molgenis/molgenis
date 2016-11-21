@@ -1,14 +1,9 @@
 package org.molgenis.data.annotation.core.entity.impl.gavin;
 
-import com.google.auto.value.AutoValue;
-
-import javax.annotation.Nullable;
-
 /**
  * Judgment result of the gavin method
  */
-@AutoValue
-public abstract class Judgment
+public class Judgment
 {
 	public enum Classification
 	{
@@ -20,18 +15,43 @@ public abstract class Judgment
 		calibrated, genomewide
 	}
 
-	public abstract Classification getClassification();
+	String reason;
+	Classification classification;
+	Method method;
+	String gene;
 
-	public abstract Method getConfidence();
-
-	@Nullable
-	public abstract String getGene();
-
-	public abstract String getReason();
-
-	public static Judgment create(Classification classification, Method method, String gene, String reason)
+	public Judgment(Classification classification, Method method, String gene, String reason)
 	{
-		return new AutoValue_Judgment(classification, method, gene, reason);
+		this.reason = reason;
+		this.classification = classification;
+		this.method = method;
+		this.gene = gene;
+	}
+
+	public String getReason()
+	{
+		return reason;
+	}
+
+	public Classification getClassification()
+	{
+		return classification;
+	}
+
+	public Method getConfidence()
+	{
+		return method;
+	}
+
+	public String getGene()
+	{
+		return gene;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Judgment [reason=" + reason + ", classification=" + classification + ", method=" + method + "]";
 	}
 
 }

@@ -8,6 +8,7 @@ import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.QueryAnnotatorImpl;
@@ -36,8 +37,6 @@ import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
-import static org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status.READY;
-import static org.molgenis.data.annotation.core.entity.AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE;
 import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;
 import static org.molgenis.data.annotation.core.entity.impl.ExacAnnotator.EXAC_AF;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
@@ -47,8 +46,8 @@ import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 public class GavinAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "Gavin";
-	private static final String RESOURCE = "gavin";
-	private static final String RESOURCE_ENTITY_NAME = "gavin";
+	public static final String RESOURCE = "gavin";
+	public static final String RESOURCE_ENTITY_NAME = "gavin";
 
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";
@@ -86,17 +85,19 @@ public class GavinAnnotator implements AnnotatorConfig
 	@Bean
 	Resource GavinResource()
 	{
-		return new EmxResourceImpl(RESOURCE,
+		Resource gavinResource = new EmxResourceImpl(RESOURCE,
 				new SingleResourceConfig(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, gavinAnnotatorSettings))
 		{
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory), entityTypeFactory,
-						attributeFactory);
+						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory),
+						entityTypeFactory, attributeFactory);
 			}
 		};
+
+		return gavinResource;
 	}
 
 	private EffectsAnnotator annotator;
@@ -115,8 +116,8 @@ public class GavinAnnotator implements AnnotatorConfig
 				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
 		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
 				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING).setDescription(REASON)
-				.setLabel(REASON);
+		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING)
+				.setDescription(REASON).setLabel(REASON);
 
 		attributes.add(classification);
 		attributes.add(confidence);
@@ -124,103 +125,103 @@ public class GavinAnnotator implements AnnotatorConfig
 
 		String description = "Please note that this annotator processes the results from a SnpEff annotation\nTherefor it should be used on the result entity rather than the variant entity itself.\nThe corresponding variant entity should also be annotated with CADD and EXaC";
 
-		annotator.init(new GavinEntityAnnotator(
-				AnnotatorInfo.create(READY, PATHOGENICITY_ESTIMATE, NAME, description, attributes),
-				geneNameQueryCreator, dataService, resources));
-	}
-
-	public class GavinEntityAnnotator extends QueryAnnotatorImpl
-	{
-		GavinEntityAnnotator(AnnotatorInfo gavinInfo, GeneNameQueryCreator geneNameQueryCreator,
-				DataService dataService, Resources resources)
+		AnnotatorInfo gavinInfo = AnnotatorInfo
+				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description,
+						attributes);
+		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, geneNameQueryCreator, dataService,
+				resources, (annotationSourceFileName) ->
 		{
-			super(RESOURCE, gavinInfo, geneNameQueryCreator, dataService, resources,
-					(annotationSourceFileName) -> GavinAnnotator.this.gavinAnnotatorSettings
-							.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName));
-		}
-
-		@Override
-		public List<Attribute> getRequiredAttributes()
+			gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
+		})
 		{
-			List<Attribute> requiredAttributes = new ArrayList<>();
-			EntityType entityType = entityTypeFactory.create().setName(VARIANT);
-			List<Attribute> refAttributesList = Arrays.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
-					ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
-			entityType.addAttributes(refAttributesList);
-			Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF).setRefEntity(entityType)
-					.setDescription("This annotator needs a references to an entity containing: " + StreamSupport
-							.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
-							.collect(Collectors.joining(", ")));
-
-			requiredAttributes.addAll(Arrays
-					.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
-							effectsMetaData.getAltAttr()));
-			return requiredAttributes;
-		}
-
-		@Override
-		protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities, boolean updateMode)
-		{
-			if (updateMode)
+			@Override
+			public List<Attribute> getRequiredAttributes()
 			{
-				throw new MolgenisDataException("This annotator/filter does not support updating of values");
-			}
-			String alt = entity.getString(EffectsMetaData.ALT);
-			if (alt == null)
-			{
-				entity.set(CLASSIFICATION, "");
-				entity.set(CONFIDENCE, "");
-				entity.set(REASON, "Missing ALT allele no judgment could be determined.");
-				return;
-			}
-			if (alt.contains(","))
-			{
-				throw new MolgenisDataException(
-						"The gavin annotator only accepts single allele input ('effect entities').");
-			}
-			int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
+				List<Attribute> requiredAttributes = new ArrayList<>();
+				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
+				List<Attribute> refAttributesList = Arrays
+						.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
+								ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
+				entityType.addAttributes(refAttributesList);
+				Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF)
+						.setRefEntity(entityType).setDescription(
+								"This annotator needs a references to an entity containing: " + StreamSupport
+										.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
+										.collect(Collectors.joining(", ")));
 
-			Entity variantEntity = entity.getEntity(VARIANT);
-
-			Map<String, Double> caddMap = AnnotatorUtils
-					.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(CADD_SCALED));
-			Map<String, Double> exacMap = AnnotatorUtils
-					.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(EXAC_AF));
-
-			Impact impact = Impact.valueOf(entity.getString(PUTATIVE_IMPACT));
-			Double exacMAF = exacMap.get(alt);
-			Double caddScaled = caddMap.get(alt);
-			String gene = entity.getString(GENE_NAME);
-			if (exacMAF == null)
-			{
-				exacMAF = 0.0;
+				requiredAttributes.addAll(Arrays
+						.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
+								effectsMetaData.getAltAttr()));
+				return requiredAttributes;
 			}
 
-			if (sourceEntitiesSize == 1)
+			@Override
+			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
+					boolean updateMode)
 			{
-				Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
-				Judgment judgment = gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, gene,
-						GavinThresholds.fromEntity(annotationSourceEntity));
-				entity.set(CLASSIFICATION, judgment.getClassification().toString());
-				entity.set(CONFIDENCE, judgment.getConfidence().toString());
-				entity.set(REASON, judgment.getReason());
-			}
-			else if (sourceEntitiesSize == 0)
-			{
-				// if we have no data for this gene, immediately fall back to the naive method
-				Judgment judgment = gavinAlgorithm.genomewideClassifyVariant(impact, caddScaled, exacMAF, gene);
-				entity.set(CLASSIFICATION, judgment.getClassification().toString());
-				entity.set(CONFIDENCE, judgment.getConfidence().toString());
-				entity.set(REASON, judgment.getReason());
-			}
-			else
-			{
-				String message =
-						"invalid number [" + sourceEntitiesSize + "] of results for this gene in annotation resource";
-				entity.set(REASON, message);
-				throw new MolgenisDataException(message);
-			}
-		}
+				if (updateMode == true)
+				{
+					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+				}
+				String alt = entity.getString(EffectsMetaData.ALT);
+				if (alt == null)
+				{
+					entity.set(CLASSIFICATION, "");
+					entity.set(CONFIDENCE, "");
+					entity.set(REASON, "Missing ALT allele no judgment could be determined.");
+					return;
+				}
+				if (alt.contains(","))
+				{
+					throw new MolgenisDataException(
+							"The gavin annotator only accepts single allele input ('effect entities').");
+				}
+				int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
 
+				Entity variantEntity = entity.getEntity(VARIANT);
+
+				Map<String, Double> caddMap = AnnotatorUtils
+						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(CADD_SCALED));
+				Map<String, Double> exacMap = AnnotatorUtils
+						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(EXAC_AF));
+
+				Impact impact = Impact.valueOf(entity.getString(PUTATIVE_IMPACT));
+				Double exacMAF = exacMap.get(alt);
+				Double caddScaled = caddMap.get(alt);
+				String gene = entity.getString(GENE_NAME);
+				if (exacMAF == null)
+				{
+					exacMAF = 0.0;
+				}
+
+				if (sourceEntitiesSize == 1)
+				{
+					Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
+
+					Judgment judgment = gavinAlgorithm
+							.classifyVariant(impact, caddScaled, exacMAF, gene, annotationSourceEntity, null);
+					entity.set(CLASSIFICATION, judgment.getClassification().toString());
+					entity.set(CONFIDENCE, judgment.getConfidence().toString());
+					entity.set(REASON, judgment.getReason());
+				}
+				else if (sourceEntitiesSize == 0)
+				{
+					// if we have no data for this gene, immediately fall back to the naive method
+					Judgment judgment = gavinAlgorithm.genomewideClassifyVariant(impact, caddScaled, exacMAF, gene);
+					entity.set(CLASSIFICATION, judgment.getClassification().toString());
+					entity.set(CONFIDENCE, judgment.getConfidence().toString());
+					entity.set(REASON, judgment.getReason());
+				}
+				else
+				{
+					String message = "invalid number [" + sourceEntitiesSize
+							+ "] of results for this gene in annotation resource";
+					entity.set(REASON, message);
+					throw new MolgenisDataException(message);
+				}
+			}
+
+		};
+		annotator.init(entityAnnotator);
 	}
 }
