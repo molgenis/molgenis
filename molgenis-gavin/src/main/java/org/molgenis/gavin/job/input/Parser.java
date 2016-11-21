@@ -7,11 +7,11 @@ import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.gavin.job.input.model.Variant;
 import org.molgenis.gavin.job.input.model.VcfVariant;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +25,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Parses input lines.
  */
+@Component
 public class Parser
 {
 	private static final Logger LOG = getLogger(Parser.class);
@@ -47,23 +48,23 @@ public class Parser
 	private static Pattern ALT_PATTERN = Pattern.compile("[ACTG]+|\\.");
 
 	/**
-	 * Transforms a file
+	 * Transforms gavin input file.
 	 *
-	 * @param inputFilename the file to transform
-	 * @param output        the file to output parsed variants to
-	 * @param error         the file to output error lines to
+	 * @param inputFile the file to transform
+	 * @param output    the file to output parsed variants to
+	 * @param error     the file to output error lines to
 	 * @return Multiset counting the {@link LineType}s of the input file's lines
 	 * @throws IOException if the file interaction fails
 	 */
-	public Multiset<LineType> tryTransform(String inputFilename, File output, File error) throws IOException
+	public Multiset<LineType> tryTransform(File inputFile, File output, File error) throws IOException
 	{
-		LOG.debug("Parsing {}...", inputFilename);
-		try (Stream<String> lines = getLines(Paths.get(inputFilename), StandardCharsets.UTF_8);
+		LOG.debug("Parsing {}...", inputFile.getAbsolutePath());
+		try (Stream<String> lines = getLines(inputFile.toPath(), StandardCharsets.UTF_8);
 				LineSink outputSink = new LineSink(output);
 				LineSink errorSink = new LineSink(error))
 		{
 			Multiset<LineType> lineTypes = transformLines(lines, outputSink, errorSink);
-			LOG.info("Parsed {}. LineTypes: {}", inputFilename, lineTypes);
+			LOG.info("Parsed {}. LineTypes: {}", inputFile.getAbsolutePath(), lineTypes);
 			return lineTypes;
 		}
 	}
@@ -265,7 +266,7 @@ public class Parser
 	public static void main(String[] args) throws IOException
 	{
 		Parser p = new Parser();
-		System.out.println(p.tryTransform("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.gz",
+		System.out.println(p.tryTransform(new File("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.gz"),
 				new File("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.out"),
 				new File("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.err")));
 	}

@@ -9,12 +9,12 @@ public class VcfVariantTest
 	public void testToString()
 	{
 		Assert.assertEquals(VcfVariant.create("20", 14370, "rs6054257", "G", "A").toString(),
-				"20\t14370\trs6054257\tG\tA");
+				"20\t14370\trs6054257\tG\tA\t.\t.\t.");
 	}
 
 	@Test
 	public void testToStringDotId()
 	{
-		Assert.assertEquals(VcfVariant.create("20", 14370, ".", "G", "A").toString(), "20\t14370\t.\tG\tA");
+		Assert.assertEquals(VcfVariant.create("20", 14370, ".", "G", "A").toString(), "20\t14370\t.\tG\tA\t.\t.\t.");
 	}
 }

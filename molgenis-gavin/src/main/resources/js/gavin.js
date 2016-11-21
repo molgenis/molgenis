@@ -3,20 +3,20 @@ $(function () {
 
     if (form.length) {
         React.render(molgenis.ui.UploadContainer({
-            'id': 'gavin-fileupload',
-            'url': '/plugin/gavin-app/annotate-file',
-            'type': 'file',
-            'name': 'gavin-uploader',
-            'width': '12',
-            onCompletion: function (job) {
+            'id' : 'gavin-fileupload',
+            'url' : '/plugin/gavin-app/annotate-file',
+            'type' : 'file',
+            'name' : 'gavin-uploader',
+            'width' : '12',
+            onCompletion : function (job) {
                 if (job.resultUrl) {
-                    molgenis.createAlert([{message: 'Annotated ' + job.filename}], 'success');
+                    molgenis.createAlert([{ message : 'Annotated ' + job.filename }], 'success');
                     document.location = job.resultUrl;
                 } else {
-                    molgenis.createAlert([{message: 'Failed to annotate file.'}], 'error')
+                    molgenis.createAlert([{ message : 'Failed to annotate file.' }], 'error')
                 }
             },
-            validExtensions: ['.vcf', '.vcf.gz']
+            validExtensions : ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz']
         }), form[0]);
     } else {
         $('#gavin-view').on('click', '.glyphicon-cog', function (e) {
@@ -24,13 +24,13 @@ $(function () {
             var annotator = $(e.target).data('name');
             React.unmountComponentAtNode(formNode);
             React.render(molgenis.ui.Form({
-                entity: 'sys_set_' + annotator,
-                entityInstance: annotator,
-                mode: 'edit',
-                modal: true,
-                enableOptionalFilter: false,
-                enableFormIndex: false,
-                onSubmitSuccess: function () {
+                entity : 'sys_set_' + annotator,
+                entityInstance : annotator,
+                mode : 'edit',
+                modal : true,
+                enableOptionalFilter : false,
+                enableFormIndex : false,
+                onSubmitSuccess : function () {
                     location.reload();
                 }
             }), formNode);

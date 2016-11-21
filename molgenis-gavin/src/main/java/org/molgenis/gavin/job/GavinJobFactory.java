@@ -3,14 +3,10 @@ package org.molgenis.gavin.job;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,32 +26,26 @@ import static java.util.stream.Stream.of;
 @Component
 public class GavinJobFactory
 {
-	CrudRepositoryAnnotator crudRepositoryAnnotator;
-	DataService dataService;
+	private final Parser parser;
+	private DataService dataService;
 	private PlatformTransactionManager transactionManager;
 	private UserDetailsService userDetailsService;
 	private JobExecutionUpdater jobExecutionUpdater;
 	private MailSender mailSender;
-	FileStore fileStore;
+	private FileStore fileStore;
 	private RepositoryAnnotator cadd;
 	private RepositoryAnnotator exac;
 	private RepositoryAnnotator snpEff;
 	private EffectsAnnotator gavin;
 	private MenuReaderService menuReaderService;
-	private VcfAttributes vcfAttributes;
-	private VcfUtils vcfUtils;
-	private AttributeFactory attributeFactory;
-	private EntityTypeFactory entityTypeFactory;
+	private AnnotatorRunner annotatorRunner;
 
 	@Autowired
-	public GavinJobFactory(CrudRepositoryAnnotator crudRepositoryAnnotator, DataService dataService,
-			PlatformTransactionManager transactionManager, UserDetailsService userDetailsService,
-			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
-			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
-			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, VcfUtils vcfUtils,
-			AttributeFactory attributeFactory, EntityTypeFactory entityTypeFactory)
+	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
+			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
+			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
+			EffectsAnnotator gavin, MenuReaderService menuReaderService, Parser parser, AnnotatorRunner annotatorRunner)
 	{
-		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
 		this.dataService = requireNonNull(dataService);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.userDetailsService = requireNonNull(userDetailsService);
@@ -67,10 +57,8 @@ public class GavinJobFactory
 		this.snpEff = requireNonNull(snpEff);
 		this.gavin = requireNonNull(gavin);
 		this.menuReaderService = requireNonNull(menuReaderService);
-		this.vcfAttributes = requireNonNull(vcfAttributes);
-		this.vcfUtils = requireNonNull(vcfUtils);
-		this.attributeFactory = requireNonNull(attributeFactory);
-		this.entityTypeFactory = requireNonNull(entityTypeFactory);
+		this.parser = requireNonNull(parser);
+		this.annotatorRunner = requireNonNull(annotatorRunner);
 	}
 
 	@RunAsSystem
@@ -85,8 +73,7 @@ public class GavinJobFactory
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityTypeFactory,
-				attributeFactory);
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()
