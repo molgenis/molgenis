@@ -89,8 +89,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 						.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
 						.collect(Collectors.joining(", ")));
 
-		emd.addAttributes(
-				Arrays.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
+		emd.addAttributes(Arrays.asList(refAttr,
 						vcfAttributes.getAltAttribute()));
 
 		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true).setIdAttribute(true);

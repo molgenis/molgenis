@@ -2,6 +2,7 @@ package org.molgenis.data.meta.model;
 
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.ArrayList;
@@ -593,10 +594,23 @@ public class EntityType extends StaticEntity
 	public EntityType addAttribute(Attribute attr, AttributeRole... attrTypes)
 	{
 		invalidateCachedOwnAttrs();
-		attr.setEntity(this);
+
 		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
+		// validate that no other attribute exists with the same name
+		attrs.forEach(existingAttr ->
+		{
+			if (existingAttr.getName().equals(attr.getName()))
+			{
+				throw new MolgenisDataException(
+						format("Entity [%s] already contains attribute with name [%s], duplicate attribute names are not allowed",
+								this.getName(), attr.getName()));
+			}
+		});
+
+		attr.setEntity(this);
 		this.addSequenceNumber(attr, attrs);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+
 		setAttributeRoles(attr, attrTypes);
 		return this;
 	}
@@ -615,8 +629,8 @@ public class EntityType extends StaticEntity
 		Integer sequenceNumber = attr.getSequenceNumber();
 		if (null == sequenceNumber)
 		{
-			int i = StreamSupport.stream(attrs.spliterator(), false)
-					.filter(a -> null != a.getSequenceNumber()).mapToInt(a -> a.getSequenceNumber()).max().orElse(-1);
+			int i = StreamSupport.stream(attrs.spliterator(), false).filter(a -> null != a.getSequenceNumber())
+					.mapToInt(a -> a.getSequenceNumber()).max().orElse(-1);
 			if (i == -1) attr.setSequenceNumber(0);
 			else attr.setSequenceNumber(++i);
 		}
