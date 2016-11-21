@@ -111,7 +111,7 @@ public abstract class StaticEntity implements Entity
 	@Override
 	public Integer getInt(String attributeName)
 	{
-		if(null == entity) return null;
+		if (null == entity) return null;
 		return entity.getInt(attributeName);
 	}
 

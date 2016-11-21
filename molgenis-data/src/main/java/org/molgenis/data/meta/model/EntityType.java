@@ -629,8 +629,8 @@ public class EntityType extends StaticEntity
 		Integer sequenceNumber = attr.getSequenceNumber();
 		if (null == sequenceNumber)
 		{
-			int i = StreamSupport.stream(attrs.spliterator(), false)
-					.filter(a -> null != a.getSequenceNumber()).mapToInt(a -> a.getSequenceNumber()).max().orElse(-1);
+			int i = StreamSupport.stream(attrs.spliterator(), false).filter(a -> null != a.getSequenceNumber())
+					.mapToInt(a -> a.getSequenceNumber()).max().orElse(-1);
 			if (i == -1) attr.setSequenceNumber(0);
 			else attr.setSequenceNumber(++i);
 		}

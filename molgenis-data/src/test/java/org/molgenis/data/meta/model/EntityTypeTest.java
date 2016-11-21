@@ -1,4 +1,5 @@
 package org.molgenis.data.meta.model;
+
 import com.google.common.collect.Lists;
 import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.BeforeMethod;
@@ -9,9 +10,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.testng.Assert.assertEquals;
@@ -47,7 +46,8 @@ public class EntityTypeTest
 	}
 
 	@Test
-	public void addSequenceNumberNull(){
+	public void addSequenceNumberNull()
+	{
 		EntityType entityType = mock(EntityType.class);
 
 		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
@@ -65,7 +65,8 @@ public class EntityTypeTest
 	}
 
 	@Test
-	public void addSequenceNumberNullAndOtherNull(){
+	public void addSequenceNumberNullAndOtherNull()
+	{
 		EntityType entityType = mock(EntityType.class);
 
 		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
