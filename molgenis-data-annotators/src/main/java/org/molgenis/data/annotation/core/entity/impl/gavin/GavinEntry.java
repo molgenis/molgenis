@@ -33,11 +33,6 @@ public class GavinEntry
 	public Double Sens95thPerCADDThreshold;
 	public Double Spec95thPerCADDThreshold;
 
-	public enum Category
-	{
-		N1, N2, T1, T2, I1, I2, I3, C1, C2, C3, C4, C5
-	}
-
 	public GavinEntry(String lineFromFile) throws Exception
 	{
 		String[] split = lineFromFile.split("\t", -1);
