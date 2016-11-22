@@ -143,26 +143,26 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		group1.setActive(true);
 		group1.setName("TestGroup");
 
-		Entity entity1 = groupAuthorityFactory.create("Entity1");
-		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
+		Entity entity1 = groupAuthorityFactory.create("entity1");
+		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity1");
 		entity1.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority1 = groupAuthorityFactory.create();
 		authority1.set(entity1);
 
-		Entity entity2 = groupAuthorityFactory.create("Entity2");
-		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
+		Entity entity2 = groupAuthorityFactory.create("entity2");
+		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity2");
 		entity2.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority2 = groupAuthorityFactory.create();
 		authority2.set(entity2);
 
-		Entity entity3 = groupAuthorityFactory.create("Entity3");
-		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
+		Entity entity3 = groupAuthorityFactory.create("entity3");
+		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity3");
 		entity3.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority3 = groupAuthorityFactory.create();
 		authority3.set(entity3);
 
-		Entity entity4 = groupAuthorityFactory.create("Entity4");
-		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
+		Entity entity4 = groupAuthorityFactory.create("entity4");
+		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity4");
 		entity4.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority4 = groupAuthorityFactory.create();
 		authority4.set(entity4);
@@ -251,7 +251,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		GroupAuthority authority = groupAuthorityFactory.create();
 		authority.setGroup(dataService.findOneById(GROUP, "ID", Group.class));
-		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3".toUpperCase());
+		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3");
 
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
@@ -288,12 +288,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
 		verify(dataService).update(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_ENTITY3");
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_entity3");
 		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
 				dataService.findOneById(GROUP, "ID", Group.class));
 
 		verify(dataService).add(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_ENTITY5");
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_entity5");
 		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
 				dataService.findOneById(GROUP, "ID", Group.class));
 	}
