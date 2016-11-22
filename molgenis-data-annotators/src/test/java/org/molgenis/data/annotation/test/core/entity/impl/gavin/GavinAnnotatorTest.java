@@ -42,9 +42,9 @@ import java.util.stream.StreamSupport;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.entity.impl.gavin.GavinAnnotator.*;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { GavinAnnotatorTest.Config.class, GavinAnnotator.class })

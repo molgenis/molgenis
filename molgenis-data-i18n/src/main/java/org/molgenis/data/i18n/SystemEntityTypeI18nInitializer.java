@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 /**
  * Enriches system entity meta data with internationalization attributes.

@@ -24,7 +24,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions

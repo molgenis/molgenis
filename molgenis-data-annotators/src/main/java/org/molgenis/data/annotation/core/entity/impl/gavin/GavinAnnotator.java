@@ -33,12 +33,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
 import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;
 import static org.molgenis.data.annotation.core.entity.impl.ExacAnnotator.EXAC_AF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 

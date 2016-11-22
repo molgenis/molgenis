@@ -1,11 +1,11 @@
 package org.molgenis.data.validation.meta;
 
 import junit.framework.Assert;
-import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -16,9 +16,10 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.Sort.Direction.ASC;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 

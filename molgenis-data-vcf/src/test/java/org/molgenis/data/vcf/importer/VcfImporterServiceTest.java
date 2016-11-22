@@ -30,7 +30,7 @@ import static java.util.Collections.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.testng.Assert.*;
 
 public class VcfImporterServiceTest

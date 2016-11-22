@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.AttributeType;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 import static java.lang.String.format;

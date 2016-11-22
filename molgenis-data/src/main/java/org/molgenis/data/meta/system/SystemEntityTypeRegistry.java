@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 
 /**
  * Registry containing all {@link SystemEntityType}.

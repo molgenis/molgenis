@@ -1,11 +1,11 @@
 package org.molgenis.charts;
 
-import org.molgenis.AttributeType;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeType;
 
 import java.util.List;
 

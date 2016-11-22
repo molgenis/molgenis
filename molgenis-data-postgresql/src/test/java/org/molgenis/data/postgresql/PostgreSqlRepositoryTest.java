@@ -18,8 +18,8 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlRepositoryTest

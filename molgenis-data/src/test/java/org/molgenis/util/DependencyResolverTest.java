@@ -16,7 +16,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class DependencyResolverTest

@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.AttributeType.INT;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
+import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
