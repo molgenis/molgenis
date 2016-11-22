@@ -8,13 +8,8 @@ $(function () {
             'type' : 'file',
             'name' : 'gavin-uploader',
             'width' : '12',
-            onCompletion : function (job) {
-                if (job.resultUrl) {
-                    molgenis.createAlert([{ message : 'Annotated ' + job.filename }], 'success');
-                    document.location = job.resultUrl;
-                } else {
-                    molgenis.createAlert([{ message : 'Failed to annotate file.' }], 'error')
-                }
+            onSubmit : function (jobExecutionID) {
+                location = "gavin-app/job/" + jobExecutionID;
             },
             validExtensions : ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz']
         }), form[0]);

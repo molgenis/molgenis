@@ -70,6 +70,8 @@ public class GavinController extends MolgenisPluginController
 
 	/**
 	 * Shows the gavin page.
+	 * This page shows the configuration wheels if the annotation resources are not yet properly configured.
+	 * If the annotation resources are fine, it shows the upload control.
 	 *
 	 * @return the view name
 	 */
@@ -88,10 +90,10 @@ public class GavinController extends MolgenisPluginController
 	/**
 	 * Starts a job to annotate a VCF file
 	 *
-	 * @param inputFile  the input file, should be VCF
-	 * @param entityName the name of the file, the download will be
-	 * @return the URL where the job progress can be monitored
-	 * @throws IOException
+	 * @param inputFile  the uploaded input file
+	 * @param entityName the name of the file
+	 * @return the ID of the created {@link GavinJobExecution}
+	 * @throws IOException if interaction with the file store fails
 	 */
 	@RequestMapping(value = "/annotate-file", method = POST)
 	@ResponseBody
@@ -112,7 +114,21 @@ public class GavinController extends MolgenisPluginController
 
 		executorService.submit(gavinJob);
 
-		return "/api/v2/" + gavinJobExecution.getEntityType().getName() + "/" + gavinJobIdentifier;
+		return gavinJobIdentifier;
+	}
+
+	/**
+	 * Shows result page for a job. The job may still be running.
+	 *
+	 * @param jobIdentifier identifier of the annotation job
+	 * @return {@link FileSystemResource} with the annotated file
+	 */
+	@RequestMapping(value = "/job/{jobIdentifier}", method = GET)
+	public String job(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model)
+	{
+		model.addAttribute("jobExecution",
+				dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class));
+		return "view-gavin-result";
 	}
 
 	/**
@@ -122,9 +138,9 @@ public class GavinController extends MolgenisPluginController
 	 * @param jobIdentifier GAVIN_APP of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/result/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@RequestMapping(value = "/download/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
-	public FileSystemResource result(HttpServletResponse response,
+	public FileSystemResource download(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier)
 	{
 		GavinJobExecution jobExecution = dataService
@@ -136,6 +152,31 @@ public class GavinController extends MolgenisPluginController
 			throw new MolgenisDataException("No output file found for this job.");
 		}
 		response.setHeader("Content-Disposition", format("inline; filename=\"{0}\"", jobExecution.getFilename()));
+		return new FileSystemResource(file);
+	}
+
+	/**
+	 * Downloads the result of a gavin annotation job.
+	 *
+	 * @param response      {@link HttpServletResponse} to write the Content-Disposition header to with the filename
+	 * @param jobIdentifier GAVIN_APP of the annotation job
+	 * @return {@link FileSystemResource} with the annotated file
+	 */
+	@RequestMapping(value = "/error/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@ResponseBody
+	public FileSystemResource downloadErrorReport(HttpServletResponse response,
+			@PathVariable(value = "jobIdentifier") String jobIdentifier)
+	{
+		GavinJobExecution jobExecution = dataService
+				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		File file = fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "error.txt");
+		if (!file.exists())
+		{
+			LOG.warn(format("File {0} not found for job {1}", file.getName(), jobIdentifier));
+			throw new MolgenisDataException("No output file found for this job.");
+		}
+		response.setHeader("Content-Disposition",
+				format("inline; filename=\"{0}-error.txt\"", jobExecution.getFilename()));
 		return new FileSystemResource(file);
 	}
 
