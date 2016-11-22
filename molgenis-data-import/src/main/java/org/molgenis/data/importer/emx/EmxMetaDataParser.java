@@ -14,6 +14,7 @@ import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -30,7 +31,6 @@ import static com.google.common.collect.ImmutableMap.builder;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
@@ -52,7 +52,7 @@ import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isStringType;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.util.DependencyResolver.resolve;
+//import static org.molgenis.util.DependencyResolver.resolve;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
@@ -169,6 +169,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final I18nStringFactory i18nStringFactory;
 	private final EntityTypeValidator entityTypeValidator;
 	private final AttributeValidator attributeValidator;
+	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory)
@@ -182,12 +183,13 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.i18nStringFactory = null;
 		this.entityTypeValidator = null;
 		this.attributeValidator = null;
+		this.entityTypeDependencyResolver = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
 			I18nStringFactory i18nStringFactory, EntityTypeValidator entityTypeValidator,
-			AttributeValidator attributeValidator)
+			AttributeValidator attributeValidator, EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
@@ -198,6 +200,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.i18nStringFactory = requireNonNull(i18nStringFactory);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 		this.attributeValidator = requireNonNull(attributeValidator);
+		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
 
 	@Override
@@ -217,7 +220,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				entities = putEntitiesInDefaultPackage(intermediateResults, defaultPackage);
 			}
 
-			return new ParsedMetaData(resolveEntityDependencies(entities), intermediateResults.getPackages(),
+			return new ParsedMetaData(entityTypeDependencyResolver.resolve(entities), intermediateResults.getPackages(),
 					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
 					intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
 		}
@@ -245,9 +248,10 @@ public class EmxMetaDataParser implements MetaDataParser
 					parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
 				}
 
-				return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
-						intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
-						intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
+				return new ParsedMetaData(entityTypeDependencyResolver.resolve(metadataList),
+						intermediateResults.getPackages(), intermediateResults.getAttributeTags(),
+						intermediateResults.getEntityTags(), intermediateResults.getLanguages(),
+						intermediateResults.getI18nStrings());
 			}
 			else
 			{
@@ -1209,33 +1213,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			builder.put(emxName, dataService.getRepository(repoName).getEntityType());
 		});
 		return builder.build();
-	}
-
-	/**
-	 * Puts EntityType in the right import order.
-	 *
-	 * @param metaDataList {@link EntityType} to put in the right order
-	 * @return List of {@link EntityType}, in the import order
-	 */
-	private List<EntityType> resolveEntityDependencies(List<? extends EntityType> metaDataList)
-	{
-		Map<String, EntityType> allEntityTypeMap = new HashMap<>();
-		Set<EntityType> allMetaData = newLinkedHashSet(metaDataList);
-		allMetaData.forEach(emd -> allEntityTypeMap.put(emd.getName(), emd));
-
-		if (dataService != null)
-		{
-			Iterable<EntityType> existingMetaData = dataService.getMeta().getEntityTypes()::iterator;
-			scanMetaDataForSystemEntityType(allEntityTypeMap, existingMetaData);
-		}
-
-		// Use all metadata for dependency resolving
-		List<EntityType> resolved = resolve(newLinkedHashSet(allEntityTypeMap.values()));
-
-		// Only import source
-		resolved.retainAll(metaDataList);
-
-		return resolved;
 	}
 
 	/**

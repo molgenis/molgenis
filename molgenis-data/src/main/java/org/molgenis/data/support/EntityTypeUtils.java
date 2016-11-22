@@ -5,6 +5,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.util.EntityUtils;
 
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
@@ -344,5 +345,20 @@ public class EntityTypeUtils
 			}
 		}
 		return fetch;
+	}
+
+	public static boolean hasSelfReferences(EntityType entityType)
+	{
+		for (Attribute attr : entityType.getAtomicAttributes())
+		{
+			if (attr.getRefEntity() != null)
+			{
+				if (EntityUtils.equals(attr.getRefEntity(), entityType))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
