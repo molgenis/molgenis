@@ -10,6 +10,7 @@ import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
@@ -21,7 +22,6 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
-import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.EntityUtils;
 
 import java.util.*;

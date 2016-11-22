@@ -2,7 +2,7 @@ package org.molgenis.data.importer.wizard;
 
 import org.molgenis.auth.Group;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.wizard.Wizard;
 

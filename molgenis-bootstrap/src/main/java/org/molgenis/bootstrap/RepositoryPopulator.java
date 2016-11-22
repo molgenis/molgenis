@@ -1,9 +1,9 @@
 package org.molgenis.bootstrap;
 
+import org.molgenis.bootstrap.i18n.I18nStringsPopulator;
 import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.script.ScriptTypePopulator;
-import org.molgenis.ui.I18nStringsPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
