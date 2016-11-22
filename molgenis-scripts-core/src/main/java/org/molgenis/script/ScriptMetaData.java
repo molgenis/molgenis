@@ -18,7 +18,7 @@ public class ScriptMetaData extends SystemEntityType
 	public static final String SCRIPT = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
-	public static final String TYPE = "type";// The ScriptType like r
+	public static final String TYPE = "scriptType";// The ScriptType like r
 	public static final String CONTENT = "content";// The freemarker code
 	public static final String GENERATE_TOKEN = "generateToken";// If true a security token is generated for the script
 	// (available as ${molgenisToken})

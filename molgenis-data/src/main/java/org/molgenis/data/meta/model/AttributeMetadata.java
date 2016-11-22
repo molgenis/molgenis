@@ -26,7 +26,7 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String NAME = "name";
 	public static final String ENTITY = "entity";
 	public static final String SEQUENCE_NR = "sequenceNr";
-	public static final String TYPE = "type";
+	public static final String TYPE = "dataType";
 	public static final String IS_ID_ATTRIBUTE = "isIdAttribute";
 	public static final String IS_LABEL_ATTRIBUTE = "isLabelAttribute";
 	public static final String LOOKUP_ATTRIBUTE_INDEX = "lookupAttributeIndex";

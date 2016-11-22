@@ -20,6 +20,7 @@ public class NameValidator
 	{
 		// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
 		KEYWORDS.addAll(MolgenisReservedKeywords.MOLGENIS_KEYWORDS);
+		KEYWORDS.addAll(MolgenisReservedKeywords.ELASTICSEARCH_1_7_3_KEYWORDS);
 	}
 
 	/**
