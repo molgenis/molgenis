@@ -24,6 +24,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Parses input lines.
+ * Two formats are supported, the output from the online CADD webtool and a VCF of which only the first five columns are read.
  */
 @Component
 public class Parser
@@ -262,13 +263,4 @@ public class Parser
 		}
 		return value;
 	}
-
-	public static void main(String[] args) throws IOException
-	{
-		Parser p = new Parser();
-		System.out.println(p.tryTransform(new File("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.gz"),
-				new File("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.out"),
-				new File("/Users/fkelpin/Downloads/gavin/fromCadd.tsv.err")));
-	}
-
 }
