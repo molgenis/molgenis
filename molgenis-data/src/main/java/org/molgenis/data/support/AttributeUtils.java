@@ -26,15 +26,7 @@ public class AttributeUtils
 	 */
 	public static boolean isIdAttributeTypeAllowed(Attribute attr)
 	{
-		AttributeType attrType = attr.getDataType();
-		if (getValidIdAttributeTypes().contains(attrType))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return getValidIdAttributeTypes().contains(attr.getDataType());
 	}
 
 	public static EnumSet<AttributeType> getValidIdAttributeTypes()

@@ -367,7 +367,6 @@ public class AttributeValidator
 
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(ENUM, EnumSet.of(STRING, INT, LONG, TEXT));
 
-		// FIXME Why let compound become something else?
 		// STRING only, because STRING can be converted to almost everything else
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(COMPOUND, EnumSet.of(STRING));
 
