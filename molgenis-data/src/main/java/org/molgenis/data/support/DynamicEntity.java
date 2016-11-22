@@ -225,7 +225,7 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof Boolean))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Boolean.class.getSimpleName(), attrName));
 				}
 				break;
@@ -236,7 +236,7 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof Entity))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Entity.class.getSimpleName(), attrName));
 				}
 				break;
@@ -246,18 +246,18 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof Iterable))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Iterable.class.getSimpleName(), attrName));
 				}
 				break;
 			case COMPOUND:
-				throw new IllegalArgumentException(format("Unexpected data type [%s] (attribute: [%s])", dataType.toString()));
+				throw new IllegalArgumentException(format("Unexpected data type [%s] for attribute: [%s]", dataType.toString()));
 			case DATE:
 			case DATE_TIME:
 				if (!(value instanceof java.util.Date))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), java.util.Date.class.getSimpleName(), attrName));
 				}
 				break;
@@ -265,7 +265,7 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof Double))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Double.class.getSimpleName(), attrName));
 				}
 				break;
@@ -279,7 +279,7 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof String))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), String.class.getSimpleName(), attrName));
 				}
 				break;
@@ -287,7 +287,7 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof Integer))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Integer.class.getSimpleName(), attrName));
 				}
 				break;
@@ -295,7 +295,7 @@ public class DynamicEntity implements Entity
 				if (!(value instanceof Long))
 				{
 					throw new MolgenisDataException(
-							format("Value [%s] is of type [%s] instead of [%s] (attribute: [%s])", value.toString(),
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Long.class.getSimpleName(), attrName));
 				}
 				break;
