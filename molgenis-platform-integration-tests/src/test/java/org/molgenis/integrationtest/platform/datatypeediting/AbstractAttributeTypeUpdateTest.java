@@ -34,9 +34,9 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
-public abstract class AbstractTypeEditing extends AbstractTestNGSpringContextTests
+public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpringContextTests
 {
-	private final Logger LOG = getLogger(AbstractTypeEditing.class);
+	private final Logger LOG = getLogger(AbstractAttributeTypeUpdateTest.class);
 
 	private static final List<AttributeType> referencingTypes = newArrayList(MREF, XREF, CATEGORICAL, CATEGORICAL_MREF,
 			FILE);
@@ -75,14 +75,14 @@ public abstract class AbstractTypeEditing extends AbstractTestNGSpringContextTes
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + ENTITY_TYPE_META_DATA.toUpperCase()));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA.toUpperCase()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + ENTITY_TYPE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + ATTRIBUTE_META_DATA.toUpperCase()));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA.toUpperCase()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + ATTRIBUTE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + PACKAGE.toUpperCase()));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE.toUpperCase()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + PACKAGE));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE));
 
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + "sys_sec_UserAuthority"));
 
