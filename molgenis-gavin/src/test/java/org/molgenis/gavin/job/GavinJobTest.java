@@ -12,6 +12,7 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
+import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -92,6 +93,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	private File gavinResult;
 	@Mock
 	private AnnotatorRunner annotatorRunner;
+	@Mock
+	private GavinJobExecution gavinJobExecution;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -119,14 +122,14 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(vcfUtils.reverseXrefMrefRelation(anyObject())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
-				exac, snpeff, gavin, parser, annotatorRunner);
+				exac, snpeff, gavin, parser, annotatorRunner, gavinJobExecution);
 	}
 
 	@Test
 	public void testRunHappyPathVcf() throws Exception
 	{
-		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
-				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, VCF, VCF));
+		final ImmutableMultiset<LineType> lineTypes = ImmutableMultiset.of(COMMENT, COMMENT, VCF, VCF);
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(lineTypes);
 
 		job.call(progress);
 
@@ -147,6 +150,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).progress(5, "Result is ready for download.");
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
+
+		verify(gavinJobExecution).setLineTypes(lineTypes);
 	}
 
 	@Test

@@ -73,7 +73,7 @@ public class GavinJobFactory
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner);
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner, gavinJobExecution);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()

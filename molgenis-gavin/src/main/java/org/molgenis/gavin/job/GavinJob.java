@@ -41,11 +41,12 @@ public class GavinJob extends Job<Void>
 
 	private final Parser parser;
 	private final AnnotatorRunner annotatorRunner;
+	private final GavinJobExecution gavinJobExecution;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
 			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin, Parser parser,
-			AnnotatorRunner annotatorRunner)
+			AnnotatorRunner annotatorRunner, GavinJobExecution gavinJobExecution)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.fileStore = fileStore;
@@ -57,6 +58,7 @@ public class GavinJob extends Job<Void>
 		this.gavin = gavin;
 		this.annotatorRunner = annotatorRunner;
 		this.parser = parser;
+		this.gavinJobExecution = gavinJobExecution;
 
 		inputFile = getFile("input");
 		processedInputFile = getFile("temp-processed-input");
@@ -91,6 +93,7 @@ public class GavinJob extends Job<Void>
 				format("Parsed input file. Found {0} lines ({1} comments, {2} valid VCF, {3} valid CADD, {4} errors, {5} skipped)",
 						lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
 						lineTypes.count(ERROR), lineTypes.count(SKIPPED)));
+		gavinJobExecution.setLineTypes(lineTypes);
 		if (lineTypes.contains(SKIPPED))
 		{
 			throw new MolgenisDataException(
@@ -101,6 +104,10 @@ public class GavinJob extends Job<Void>
 			throw new MolgenisDataException(
 					"Input file contains mixed line types. Please use one type only, either VCF or CADD.");
 		}
+
+		if (!lineTypes.contains(CADD) && !lineTypes.contains(VCF))
+		{
+			throw new MolgenisDataException("Not a single valid variant line found.");
 		}
 
 		File exacInputFile = processedInputFile;
