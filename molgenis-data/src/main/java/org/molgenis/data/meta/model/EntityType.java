@@ -1,8 +1,8 @@
 package org.molgenis.data.meta.model;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
@@ -594,12 +595,45 @@ public class EntityType extends StaticEntity
 	{
 		invalidateCachedOwnAttrs();
 
-		attr.setEntity(this);
 		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
-		attr.setSequenceNumber(Iterables.size(attrs));
+		// validate that no other attribute exists with the same name
+		attrs.forEach(existingAttr ->
+		{
+			if (existingAttr.getName().equals(attr.getName()))
+			{
+				throw new MolgenisDataException(
+						format("Entity [%s] already contains attribute with name [%s], duplicate attribute names are not allowed",
+								this.getName(), attr.getName()));
+			}
+		});
+
+		attr.setEntity(this);
+		this.addSequenceNumber(attr, attrs);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+
 		setAttributeRoles(attr, attrTypes);
 		return this;
+	}
+
+	/**
+	 * Add a sequence number to the attribute.
+	 * If the sequence number exists add it ot the attribute.
+	 * If the sequence number does not exists then find the highest sequence number.
+	 * If Entity has not attributes with sequence numbers put 0.
+	 *
+	 * @param attr  the attribute to add
+	 * @param attrs existing attributes
+	 */
+	static void addSequenceNumber(Attribute attr, Iterable<Attribute> attrs)
+	{
+		Integer sequenceNumber = attr.getSequenceNumber();
+		if (null == sequenceNumber)
+		{
+			int i = StreamSupport.stream(attrs.spliterator(), false).filter(a -> null != a.getSequenceNumber())
+					.mapToInt(a -> a.getSequenceNumber()).max().orElse(-1);
+			if (i == -1) attr.setSequenceNumber(0);
+			else attr.setSequenceNumber(++i);
+		}
 	}
 
 	public void addAttributes(Iterable<Attribute> attrs)
@@ -797,8 +831,9 @@ public class EntityType extends StaticEntity
 	{
 		if (cachedOwnAttrs == null)
 		{
-			cachedOwnAttrs = Maps.newLinkedHashMap();
-			getEntities(ATTRIBUTES, Attribute.class).forEach(attr -> cachedOwnAttrs.put(attr.getName(), attr));
+			Map<String, Attribute> newCachedOwnAttrs = Maps.newLinkedHashMap();
+			getEntities(ATTRIBUTES, Attribute.class).forEach(attr -> newCachedOwnAttrs.put(attr.getName(), attr));
+			cachedOwnAttrs = newCachedOwnAttrs;
 		}
 		return cachedOwnAttrs;
 	}

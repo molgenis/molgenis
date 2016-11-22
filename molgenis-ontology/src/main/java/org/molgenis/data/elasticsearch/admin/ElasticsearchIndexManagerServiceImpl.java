@@ -30,7 +30,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_INDEXMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_indexmanager')")
 	public List<EntityType> getIndexedEntities()
 	{
 		// collect indexed repos

@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -12,13 +12,12 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.importer.ImportWizardControllerTest.Config;
+import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.system.ImportRun;
-import org.molgenis.data.system.ImportRunFactory;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -26,11 +25,13 @@ import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.PermissionManagerServiceImpl;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
@@ -142,26 +143,26 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		group1.setActive(true);
 		group1.setName("TestGroup");
 
-		Entity entity1 = groupAuthorityFactory.create("Entity1");
-		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
+		Entity entity1 = groupAuthorityFactory.create("entity1");
+		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity1");
 		entity1.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority1 = groupAuthorityFactory.create();
 		authority1.set(entity1);
 
-		Entity entity2 = groupAuthorityFactory.create("Entity2");
-		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
+		Entity entity2 = groupAuthorityFactory.create("entity2");
+		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity2");
 		entity2.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority2 = groupAuthorityFactory.create();
 		authority2.set(entity2);
 
-		Entity entity3 = groupAuthorityFactory.create("Entity3");
-		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
+		Entity entity3 = groupAuthorityFactory.create("entity3");
+		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity3");
 		entity3.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority3 = groupAuthorityFactory.create();
 		authority3.set(entity3);
 
-		Entity entity4 = groupAuthorityFactory.create("Entity4");
-		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
+		Entity entity4 = groupAuthorityFactory.create("entity4");
+		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity4");
 		entity4.set(GroupAuthorityMetaData.GROUP, group1);
 		GroupAuthority authority4 = groupAuthorityFactory.create();
 		authority4.set(entity4);
@@ -250,7 +251,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		GroupAuthority authority = groupAuthorityFactory.create();
 		authority.setGroup(dataService.findOneById(GROUP, "ID", Group.class));
-		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3".toUpperCase());
+		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3");
 
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
@@ -287,12 +288,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
 		verify(dataService).update(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_ENTITY3");
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_entity3");
 		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
 				dataService.findOneById(GROUP, "ID", Group.class));
 
 		verify(dataService).add(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_ENTITY5");
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_entity5");
 		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
 				dataService.findOneById(GROUP, "ID", Group.class));
 	}
@@ -316,7 +317,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -347,7 +348,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -379,7 +380,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -411,7 +412,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -443,7 +444,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -475,7 +476,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -507,7 +508,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -539,7 +540,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName("Harry");
+		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -553,9 +554,17 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.system", "org.molgenis.auth", "org.molgenis.data.meta.system" })
+	@ComponentScan(value = { "org.molgenis.data.system", "org.molgenis.auth", "org.molgenis.data.meta.system",
+			"org.molgenis.security.owned",
+			"org.molgenis.data.importer" }, excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.molgenis.data.importer.(.*?)\\..*"))
 	static class Config
 	{
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserService.class);
+		}
+
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{

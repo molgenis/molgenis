@@ -33,7 +33,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_USERACCOUNT')")
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_useraccount')")
 	@Transactional
 	public void updateCurrentUser(User updatedCurrentUser)
 	{
@@ -52,7 +52,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_useraccount')")
 	@Transactional
 	public boolean validateCurrentUserPassword(String password)
 	{

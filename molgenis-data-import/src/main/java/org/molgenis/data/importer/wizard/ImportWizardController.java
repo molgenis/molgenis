@@ -1,12 +1,12 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
+import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.system.ImportRun;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
@@ -48,7 +48,7 @@ import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.data.importer.wizard.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.Permission.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
@@ -202,15 +202,14 @@ public class ImportWizardController extends AbstractWizardController
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value != null && (SecurityUtils
-					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId.toUpperCase())
+					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
 					|| userAccountService.getCurrentUser().isSuperuser()))
 			{
 				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
 						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
-					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
-							.toUpperCase());
+					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
 					if (newGroupAuthority)
 					{
 						authority.setId(UUID.randomUUID().toString());
@@ -335,7 +334,7 @@ public class ImportWizardController extends AbstractWizardController
 			{
 				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
 			}
-			if (entity.equals(entityClassId.toUpperCase()))
+			if (entity.equals(entityClassId))
 			{
 				existingGroupAuthority = groupAuthority;
 			}

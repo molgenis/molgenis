@@ -1,10 +1,12 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.framework.db.EntitiesValidationReport;

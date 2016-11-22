@@ -1,7 +1,8 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.emx;
 
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.Entity;
+import org.molgenis.data.importer.emx.ImportWriter;
 import org.molgenis.framework.db.EntityImportReport;
 
 import java.util.ArrayList;
