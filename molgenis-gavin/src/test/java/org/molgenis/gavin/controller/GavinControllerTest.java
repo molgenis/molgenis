@@ -34,7 +34,6 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletResponse;
@@ -147,7 +146,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		assertEquals(gavinController.result(response, "ABCDE"), new FileSystemResource(resultFile));
+		assertEquals(gavinController.download(response, "ABCDE"), new FileSystemResource(resultFile));
 
 		verify(response).setHeader("Content-Disposition", "inline; filename=\"annotate-file-gavin.vcf\"");
 	}
@@ -166,7 +165,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		try
 		{
-			gavinController.result(mock(HttpServletResponse.class), "ABCDE");
+			gavinController.download(mock(HttpServletResponse.class), "ABCDE");
 			Assert.fail("Should throw exception cause file doesn't exist.");
 		}
 		catch (MolgenisDataException expected)

@@ -149,7 +149,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(annotatorRunner).runAnnotator(gavin, snpEffResult, gavinResult, false);
 
 		verify(progress).progress(5, "Result is ready for download.");
-		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
+		verify(progress).setResultUrl("/menu/plugins/gavin-app/job/ABCDE");
 
 		verify(gavinJobExecution).setLineTypes(lineTypes);
 	}
@@ -179,7 +179,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(annotatorRunner).runAnnotator(gavin, snpEffResult, gavinResult, false);
 
 		verify(progress).progress(5, "Result is ready for download.");
-		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
+		verify(progress).setResultUrl("/menu/plugins/gavin-app/job/ABCDE");
 	}
 
 	@Test(expectedExceptions = {
