@@ -322,7 +322,7 @@ public class AttributeValidator
 
 	static
 	{
-		// transitions to EMAIL and HYPERLINK not allowed because existing values not checked by PostgreSQL
+		// transitions to EMAIL and HYPERLINK not allowed because existing values can not be validated
 		// transitions to CATEGORICAL_MREF and MREF not allowed because junction tables updated not implemented
 		// transitions to FILE not allowed because associated file in FileStore not created/removed
 		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
