@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
@@ -22,7 +22,7 @@ import org.molgenis.data.annotation.core.resources.impl.emx.EmxResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
-import org.molgenis.data.importer.EmxMetaDataParser;
+import org.molgenis.data.importer.emx.EmxMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,12 +98,12 @@ public class GavinAnnotator implements AnnotatorConfig
 		};
 	}
 
-	private EffectsAnnotator annotator;
+	private EffectBasedAnnotator annotator;
 
 	@Bean
-	public EffectsAnnotator gavin()
+	public EffectBasedAnnotator gavin()
 	{
-		annotator = new EffectsAnnotator(NAME);
+		annotator = new EffectBasedAnnotator(NAME);
 		return annotator;
 	}
 

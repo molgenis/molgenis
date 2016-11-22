@@ -117,9 +117,8 @@ public class SecurityUtilsTest
 	{
 		String pluginId = "plugin1";
 		String[] defaultPluginAuthorities = SecurityUtils.defaultPluginAuthorities(pluginId);
-		assertEquals(defaultPluginAuthorities,
-				new String[] { AUTHORITY_SU, AUTHORITY_PLUGIN_READ_PREFIX + pluginId.toUpperCase(),
-						AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase() });
+		assertEquals(defaultPluginAuthorities, new String[] { AUTHORITY_SU, AUTHORITY_PLUGIN_READ_PREFIX + pluginId,
+				AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId });
 	}
 
 	@Test
@@ -143,8 +142,8 @@ public class SecurityUtilsTest
 	{
 		List<String> authorities = SecurityUtils.getEntityAuthorities("test");
 		List<String> expected = Arrays
-				.asList("ROLE_ENTITY_READ_TEST", "ROLE_ENTITY_WRITE_TEST", "ROLE_ENTITY_COUNT_TEST",
-						"ROLE_ENTITY_NONE_TEST", "ROLE_ENTITY_WRITEMETA_TEST");
+				.asList("ROLE_ENTITY_READ_test", "ROLE_ENTITY_WRITE_test", "ROLE_ENTITY_COUNT_test",
+						"ROLE_ENTITY_NONE_test", "ROLE_ENTITY_WRITEMETA_test");
 
 		Assert.assertEqualsNoOrder(authorities.toArray(), expected.toArray());
 	}

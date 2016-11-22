@@ -2,6 +2,7 @@ package org.molgenis.gavin.job;
 
 import com.google.common.collect.ImmutableMultiset;
 import org.mockito.Mock;
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
@@ -9,7 +10,6 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
@@ -75,7 +75,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	@Mock
 	private Menu menu;
 	@Mock
-	VcfUtils vcfUtils;
+	EffectStructureConverter effectStructureConverter;
 
 	@Mock
 	private File inputFile;
@@ -119,7 +119,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
 		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
-		when(vcfUtils.reverseXrefMrefRelation(anyObject())).thenReturn(iterator);
+		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
 				exac, snpeff, gavin, parser, annotatorRunner, gavinJobExecution);
