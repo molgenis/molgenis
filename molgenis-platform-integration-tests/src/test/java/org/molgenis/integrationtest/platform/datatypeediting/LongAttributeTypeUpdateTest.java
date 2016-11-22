@@ -10,7 +10,7 @@ import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class LongTypeEditing extends AbstractTypeEditing
+public class LongAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 {
 	@BeforeClass
 	private void setup()

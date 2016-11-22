@@ -10,7 +10,7 @@ import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class CompoundTypeEditing extends AbstractTypeEditing
+public class CompoundAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 {
 	@BeforeClass
 	public void setup()

@@ -10,7 +10,7 @@ import static org.molgenis.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class HyperlinkTypeEditing extends AbstractTypeEditing
+public class HyperlinkAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 {
 	@BeforeClass
 	private void setup()
