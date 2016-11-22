@@ -1,31 +1,30 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.data.MolgenisInvalidFormatException;
+import com.google.common.collect.Multiset;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.job.input.Parser;
+import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Arrays;
 
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
-import static java.util.Collections.emptyList;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
+import static org.molgenis.gavin.job.input.model.LineType.*;
 
 public class GavinJob extends Job<Void>
 {
 	private final String jobIdentifier;
 	private final MenuReaderService menuReaderService;
+	private final FileStore fileStore;
 
 	private final RepositoryAnnotator cadd;
 	private final RepositoryAnnotator exac;
@@ -33,74 +32,102 @@ public class GavinJob extends Job<Void>
 	private final RepositoryAnnotator gavin;
 
 	private final File inputFile;
+	private final File processedInputFile;
+	private final File errorFile;
 	private final File caddOutputFile;
 	private final File exacOutputFile;
 	private final File snpeffOutputFile;
 	private final File gavinOutputFile;
 
-	private final VcfAttributes vcfAttributes;
-	private final VcfUtils vcfUtils;
-	private final EntityTypeFactory entityTypeFactory;
-	private final AttributeFactory attributeFactory;
+	private final Parser parser;
+	private final AnnotatorRunner annotatorRunner;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
 			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
-			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin,
-			VcfAttributes vcfAttributes, VcfUtils vcfUtils, EntityTypeFactory entityTypeFactory,
-			AttributeFactory attributeFactory)
+			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin, Parser parser,
+			AnnotatorRunner annotatorRunner)
 	{
 		super(progress, transactionTemplate, authentication);
+		this.fileStore = fileStore;
 		this.jobIdentifier = jobIdentifier;
 		this.menuReaderService = menuReaderService;
 		this.cadd = cadd;
 		this.exac = exac;
 		this.snpeff = snpeff;
 		this.gavin = gavin;
-		this.vcfAttributes = vcfAttributes;
-		this.vcfUtils = vcfUtils;
-		this.entityTypeFactory = entityTypeFactory;
-		this.attributeFactory = attributeFactory;
+		this.annotatorRunner = annotatorRunner;
+		this.parser = parser;
 
-		this.inputFile = fileStore
-				.getFile(format("{0}{1}{2}{3}input.vcf", GAVIN_APP, separator, jobIdentifier, separator));
-		this.caddOutputFile = fileStore
-				.getFile(format("{0}{1}{2}{3}temp-cadd.vcf", GAVIN_APP, separator, jobIdentifier, separator));
-		this.exacOutputFile = fileStore
-				.getFile(format("{0}{1}{2}{3}temp-exac.vcf", GAVIN_APP, separator, jobIdentifier, separator));
-		this.snpeffOutputFile = fileStore
-				.getFile(format("{0}{1}{2}{3}temp-snpeff.vcf", GAVIN_APP, separator, jobIdentifier, separator));
-		this.gavinOutputFile = fileStore
-				.getFile(format("{0}{1}{2}{3}gavin-result.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		inputFile = getFile("input");
+		processedInputFile = getFile("temp-processed-input");
+		errorFile = getFile("error", "txt");
+		caddOutputFile = getFile("temp-cadd");
+		exacOutputFile = getFile("temp-exac");
+		snpeffOutputFile = getFile("temp-snpeff");
+		gavinOutputFile = getFile("gavin-result");
+	}
+
+	private File getFile(String name)
+	{
+		return getFile(name, "vcf");
+	}
+
+	private File getFile(String name, String extension)
+	{
+		return fileStore.getFile(
+				format("{0}{1}{2}{3}{4}.{5}", GAVIN_APP, separator, jobIdentifier, separator, name, extension));
 	}
 
 	@Override
 	public Void call(Progress progress) throws Exception
 	{
-		progress.setProgressMax(4);
+		progress.setProgressMax(5);
 
-		progress.progress(0, "Annotating with cadd...");
-		runAnnotator(cadd, inputFile, caddOutputFile, true);
+		progress.progress(0, "Preprocessing input file...");
+		Multiset<LineType> lineTypes = parser.tryTransform(inputFile, processedInputFile, errorFile);
+		progress.status(
+				String.format("Parsed input file. Found %d lines (%d comments, %d VCF, %d CADD output, %d skipped)",
+						lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
+						lineTypes.count(SKIPPED)));
+		if (lineTypes.contains(SKIPPED))
+		{
+			final String message = String
+					.format("Input file contains too many lines. Maximum is %d.", Parser.MAX_LINES);
+			progress.status(message);
+			throw new MolgenisDataException(message);
+		}
+		if (lineTypes.containsAll(Arrays.asList(CADD, VCF)))
+		{
+			progress.status("Input file contains mixed line types. Please use one type only, either VCF or CADD.");
+			throw new MolgenisDataException("Input file contains mixed line types.");
+		}
 
-		progress.progress(1, "Annotating with exac...");
-		runAnnotator(exac, caddOutputFile, exacOutputFile, true);
+		File exacInputFile = processedInputFile;
+		if (!lineTypes.contains(CADD))
+		{
+			progress.progress(1, "Annotating with cadd...");
+			annotatorRunner.runAnnotator(cadd, processedInputFile, caddOutputFile, true);
+			exacInputFile = caddOutputFile;
+		}
+		else
+		{
+			progress.progress(1, "File already annotated by cadd, skipping cadd annotation.");
+		}
 
-		progress.progress(2, "Annotating with snpEff...");
-		runAnnotator(snpeff, exacOutputFile, snpeffOutputFile, false);
+		progress.progress(2, "Annotating with exac...");
+		annotatorRunner.runAnnotator(exac, exacInputFile, exacOutputFile, true);
 
-		progress.progress(3, "Annotating with gavin...");
-		runAnnotator(gavin, snpeffOutputFile, gavinOutputFile, false);
+		progress.progress(3, "Annotating with snpEff...");
+		annotatorRunner.runAnnotator(snpeff, exacOutputFile, snpeffOutputFile, false);
 
-		progress.progress(4, "Result is ready for download.");
+		progress.progress(4, "Annotating with gavin...");
+		annotatorRunner.runAnnotator(gavin, snpeffOutputFile, gavinOutputFile, false);
+
+		progress.progress(5, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
 		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
 
 		return null;
 	}
 
-	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
-			throws IOException, MolgenisInvalidFormatException
-	{
-		AnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils, inputFile,
-				outputFile, emptyList(), update);
-	}
 }
