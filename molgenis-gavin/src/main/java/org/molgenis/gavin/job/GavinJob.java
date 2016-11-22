@@ -1,14 +1,14 @@
 package org.molgenis.gavin.job;
 
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
+import org.molgenis.annotation.cmd.utils.CmdLineAnnotatorUtils;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.security.core.Authentication;
@@ -39,15 +39,15 @@ public class GavinJob extends Job<Void>
 	private final File gavinOutputFile;
 
 	private final VcfAttributes vcfAttributes;
-	private final VcfUtils vcfUtils;
+	private final EffectStructureConverter effectStructureConverter;
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attributeFactory;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
 			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin,
-			VcfAttributes vcfAttributes, VcfUtils vcfUtils, EntityTypeFactory entityTypeFactory,
-			AttributeFactory attributeFactory)
+			VcfAttributes vcfAttributes, EffectStructureConverter effectStructureConverter,
+			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.jobIdentifier = jobIdentifier;
@@ -57,7 +57,7 @@ public class GavinJob extends Job<Void>
 		this.snpeff = snpeff;
 		this.gavin = gavin;
 		this.vcfAttributes = vcfAttributes;
-		this.vcfUtils = vcfUtils;
+		this.effectStructureConverter = effectStructureConverter;
 		this.entityTypeFactory = entityTypeFactory;
 		this.attributeFactory = attributeFactory;
 
@@ -100,7 +100,8 @@ public class GavinJob extends Job<Void>
 	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
 			throws IOException, MolgenisInvalidFormatException
 	{
-		AnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils, inputFile,
-				outputFile, emptyList(), update);
+		CmdLineAnnotatorUtils
+				.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, effectStructureConverter,
+						inputFile, outputFile, emptyList(), update);
 	}
 }

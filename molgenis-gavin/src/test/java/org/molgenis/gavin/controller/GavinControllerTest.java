@@ -6,7 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.index.meta.IndexPackage;
@@ -289,9 +289,9 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		EffectsAnnotator gavin()
+		EffectBasedAnnotator gavin()
 		{
-			return mock(EffectsAnnotator.class);
+			return mock(EffectBasedAnnotator.class);
 		}
 
 		@Bean

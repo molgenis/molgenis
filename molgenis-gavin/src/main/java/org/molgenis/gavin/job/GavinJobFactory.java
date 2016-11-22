@@ -1,7 +1,8 @@
 package org.molgenis.gavin.job;
 
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.DataService;
-import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
@@ -40,10 +41,10 @@ public class GavinJobFactory
 	private RepositoryAnnotator cadd;
 	private RepositoryAnnotator exac;
 	private RepositoryAnnotator snpEff;
-	private EffectsAnnotator gavin;
+	private EffectBasedAnnotator gavin;
 	private MenuReaderService menuReaderService;
 	private VcfAttributes vcfAttributes;
-	private VcfUtils vcfUtils;
+	private EffectStructureConverter effectStructureConverter;
 	private AttributeFactory attributeFactory;
 	private EntityTypeFactory entityTypeFactory;
 
@@ -51,8 +52,8 @@ public class GavinJobFactory
 	public GavinJobFactory(CrudRepositoryAnnotator crudRepositoryAnnotator, DataService dataService,
 			PlatformTransactionManager transactionManager, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
-			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
-			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, VcfUtils vcfUtils,
+			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectBasedAnnotator gavin,
+			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, EffectStructureConverter effectStructureConverter,
 			AttributeFactory attributeFactory, EntityTypeFactory entityTypeFactory)
 	{
 		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
@@ -68,7 +69,7 @@ public class GavinJobFactory
 		this.gavin = requireNonNull(gavin);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
-		this.vcfUtils = requireNonNull(vcfUtils);
+		this.effectStructureConverter = requireNonNull(effectStructureConverter);
 		this.attributeFactory = requireNonNull(attributeFactory);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
@@ -85,7 +86,7 @@ public class GavinJobFactory
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityTypeFactory,
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, effectStructureConverter, entityTypeFactory,
 				attributeFactory);
 	}
 
