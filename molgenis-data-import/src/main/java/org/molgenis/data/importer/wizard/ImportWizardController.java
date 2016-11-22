@@ -202,15 +202,14 @@ public class ImportWizardController extends AbstractWizardController
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value != null && (SecurityUtils
-					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId.toUpperCase())
+					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
 					|| userAccountService.getCurrentUser().isSuperuser()))
 			{
 				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
 						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
-					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
-							.toUpperCase());
+					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
 					if (newGroupAuthority)
 					{
 						authority.setId(UUID.randomUUID().toString());
@@ -335,7 +334,7 @@ public class ImportWizardController extends AbstractWizardController
 			{
 				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
 			}
-			if (entity.equals(entityClassId.toUpperCase()))
+			if (entity.equals(entityClassId))
 			{
 				existingGroupAuthority = groupAuthority;
 			}
