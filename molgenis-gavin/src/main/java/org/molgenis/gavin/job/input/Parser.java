@@ -44,7 +44,8 @@ public class Parser
 	private static final int VCF_NR_OF_COLUMNS = 5;
 	public static final int MAX_LINES = 100000;
 
-	private static Pattern CHROM_PATTERN = Pattern.compile("([Cc][Hh][Rr])?(?<chrom>([1-9])|(1[0-9])|(2[0-2])|[xX])");
+	private static Pattern CHROM_PATTERN = Pattern
+			.compile("([Cc][Hh][Rr])?(?<chrom>([1-9])|(1[0-9])|(2[0-2])|[xX]|[yY])");
 	private static Pattern REF_PATTERN = Pattern.compile("[ACTG]+");
 	private static Pattern ALT_PATTERN = Pattern.compile("[ACTG]+|\\.");
 
