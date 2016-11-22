@@ -324,7 +324,7 @@ public class AttributeValidator
 	{
 		// transitions to EMAIL and HYPERLINK not allowed because existing values can not be validated
 		// transitions to CATEGORICAL_MREF and MREF not allowed because junction tables updated not implemented
-		// transitions to FILE not allowed because associated file in FileStore not created/removed
+		// transitions to FILE not allowed because associated file in FileStore not created/removed, see github issue https://github.com/molgenis/molgenis/issues/3217
 		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
 		EnumSet<AttributeType> allowedIdAttributeTypes = getValidIdAttributeTypes();
 
