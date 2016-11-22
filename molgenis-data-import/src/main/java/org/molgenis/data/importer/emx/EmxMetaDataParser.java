@@ -52,7 +52,6 @@ import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isStringType;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-//import static org.molgenis.util.DependencyResolver.resolve;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
