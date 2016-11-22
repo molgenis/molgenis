@@ -1,4 +1,4 @@
-package org.molgenis.annotation.test.cmd;
+package org.molgenis.annotation.test.cmd.integration;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.annotation.cmd.CmdLineAnnotator;

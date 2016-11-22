@@ -9,15 +9,16 @@ import ch.qos.logback.core.ConsoleAppender;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
+import org.molgenis.annotation.cmd.utils.CmdLineAnnotatorUtils;
+import org.molgenis.annotation.cmd.utils.VcfValidator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -60,7 +61,7 @@ public class CmdLineAnnotator
 	VcfAttributes vcfAttributes;
 
 	@Autowired
-	VcfUtils vcfUtils;
+	EffectStructureConverter effectStructureConverter;
 
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -167,7 +168,7 @@ public class CmdLineAnnotator
 		}
 
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
-		annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils, inputVcfFile,
+		annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, effectStructureConverter, inputVcfFile,
 				outputVCFFile, options);
 	}
 
@@ -182,12 +183,14 @@ public class CmdLineAnnotator
 	 */
 	private void annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
-			VcfUtils vcfUtils, File inputVcfFile, File outputVCFFile, OptionSet options) throws Exception
+			EffectStructureConverter effectStructureConverter, File inputVcfFile, File outputVCFFile, OptionSet options)
+			throws Exception
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
-		AnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, vcfUtils,
-				inputVcfFile, outputVCFFile, attributesToInclude, options.has("u"));
+		CmdLineAnnotatorUtils
+				.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, effectStructureConverter,
+						inputVcfFile, outputVCFFile, attributesToInclude, options.has("u"));
 		if (options.has(VALIDATE))
 		{
 			System.out.println("Validating produced VCF file...");
