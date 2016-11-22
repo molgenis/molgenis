@@ -87,19 +87,20 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(0, "Preprocessing input file...");
 		Multiset<LineType> lineTypes = parser.tryTransform(inputFile, processedInputFile, errorFile);
-		progress.status(format("Parsed input file. Found %d lines (%d comments, %d VCF, %d CADD output, %d skipped)",
-				lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
-				lineTypes.count(SKIPPED)));
+		progress.status(
+				format("Parsed input file. Found {0} lines ({1} comments, {2} valid VCF, {3} valid CADD, {4} errors, {5} skipped)",
+						lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
+						lineTypes.count(ERROR), lineTypes.count(SKIPPED)));
 		if (lineTypes.contains(SKIPPED))
 		{
-			final String message = format("Input file contains too many lines. Maximum is %d.", Parser.MAX_LINES);
-			progress.status(message);
-			throw new MolgenisDataException(message);
+			throw new MolgenisDataException(
+					format("Input file contains too many lines. Maximum is {0}.", Parser.MAX_LINES));
 		}
 		if (lineTypes.containsAll(Arrays.asList(CADD, VCF)))
 		{
-			progress.status("Input file contains mixed line types. Please use one type only, either VCF or CADD.");
-			throw new MolgenisDataException("Input file contains mixed line types.");
+			throw new MolgenisDataException(
+					"Input file contains mixed line types. Please use one type only, either VCF or CADD.");
+		}
 		}
 
 		File exacInputFile = processedInputFile;

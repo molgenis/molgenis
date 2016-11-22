@@ -159,6 +159,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).setProgressMax(5);
 		verify(progress).progress(0, "Preprocessing input file...");
+		verify(progress)
+				.status("Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 skipped)");
 
 		verify(progress).progress(1, "File already annotated by cadd, skipping cadd annotation.");
 
@@ -176,7 +178,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100000\\.")
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100,000\\.")
 	public void testSkippedThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
@@ -186,7 +188,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\.")
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\. Please use one type only, either VCF or CADD.")
 	public void testMixedInputsThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
