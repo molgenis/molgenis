@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.importer.ImportWizardController;
+import org.molgenis.data.importer.wizard.ImportWizardController;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.*;

@@ -21,11 +21,14 @@ public class PostgreSqlConfiguration
 	@Autowired
 	private DataService dataService;
 
+	@Autowired
+	private PostgreSqlExceptionTranslator postgreSqlExceptionTranslator;
+
 	@Bean
 	public JdbcTemplate jdbcTemplate()
 	{
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		jdbcTemplate.setExceptionTranslator(new PostgreSqlExceptionTranslator(dataSource));
+		jdbcTemplate.setExceptionTranslator(postgreSqlExceptionTranslator);
 		return jdbcTemplate;
 	}
 

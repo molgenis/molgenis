@@ -1,6 +1,7 @@
-import requests;
-import json;
-import urllib;
+<#-- @formatter:off -->
+import requests
+import json
+import urllib
 
 try:
 from urllib.parse import quote_plus
@@ -16,6 +17,7 @@ Usage:
 >>> session.login('user', 'password')
 >>> session.get('Person')
 '''
+
 def __init__(self, url<#if api_url??>="${api_url}"</#if>):
 '''Constructs a new Session.
 Args:
@@ -188,3 +190,4 @@ url -- URL of the REST API. Should be of form 'http[s]://
     z = x.copy()
     z.update(y)
     return z
+<#-- @formatter:on -->

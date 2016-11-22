@@ -1,7 +1,8 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.emx;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.framework.db.EntityImportReport;
 
 /**

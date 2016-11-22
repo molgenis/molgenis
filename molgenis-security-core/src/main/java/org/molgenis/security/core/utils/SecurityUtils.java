@@ -150,12 +150,12 @@ public class SecurityUtils
 
 	public static String getPluginReadAuthority(String pluginId)
 	{
-		return AUTHORITY_PLUGIN_READ_PREFIX + pluginId.toUpperCase();
+		return AUTHORITY_PLUGIN_READ_PREFIX + pluginId;
 	}
 
 	public static String getPluginWriteAuthority(String pluginId)
 	{
-		return AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase();
+		return AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId;
 	}
 
 	/**
@@ -169,8 +169,7 @@ public class SecurityUtils
 		List<String> authorities = new ArrayList<>();
 		for (Permission permission : Permission.values())
 		{
-			String authority = String
-					.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(), entityName.toUpperCase());
+			String authority = String.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(), entityName);
 			authorities.add(authority);
 		}
 

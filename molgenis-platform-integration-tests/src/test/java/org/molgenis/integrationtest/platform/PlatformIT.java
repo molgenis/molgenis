@@ -1,16 +1,14 @@
 package org.molgenis.integrationtest.platform;
 
-import org.elasticsearch.action.index.IndexAction;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -169,9 +167,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	static List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
-		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName.toUpperCase()));
-		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityName.toUpperCase()));
-		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName));
+		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityName));
+		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityName));
 		return authorities;
 	}
 
@@ -179,9 +177,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA.toUpperCase()));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA.toUpperCase()));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE.toUpperCase()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE));
 		authorities.addAll(makeAuthorities(refEntityTypeStatic.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(entityTypeStatic.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(entityTypeDynamic.getName(), true, true, true));
@@ -1451,7 +1449,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 
 		Attribute attr = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
-		assertEquals(attr.getSequenceNumber(), 0);
+		assertEquals(attr.getSequenceNumber(), Integer.valueOf(0));
 		assertTrue(attr.isReadOnly());
 		assertTrue(attr.isUnique());
 		assertEquals(attr.getLabel(), "test");
@@ -1476,7 +1474,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
 		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
 		newAttr.setEntity(entityType);
-		entityType.addAttribute(newAttr); // appends at the end and sets sequence number
+		newAttr.setSequenceNumber(2);
+		entityType.addAttribute(newAttr);
+
+		assertEquals(newAttr.getSequenceNumber(), Integer.valueOf(2)); // Test if sequence number is 2
 
 		runAsSystem(() ->
 		{
