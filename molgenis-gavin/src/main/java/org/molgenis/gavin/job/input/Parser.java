@@ -42,7 +42,7 @@ public class Parser
 	private static final int VCF_ALT_INDEX = 4;
 	private static final int CADD_NR_OF_COLS = 6;
 	private static final int VCF_NR_OF_COLUMNS = 5;
-	private static final int MAX_LINES = 100000;
+	public static final int MAX_LINES = 100000;
 
 	private static Pattern CHROM_PATTERN = Pattern.compile("([Cc][Hh][Rr])?(?<chrom>([1-9])|(1[0-9])|(2[0-2])|[xX])");
 	private static Pattern REF_PATTERN = Pattern.compile("[ACTG]+");

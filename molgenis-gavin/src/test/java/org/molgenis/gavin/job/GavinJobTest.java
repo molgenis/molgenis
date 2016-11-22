@@ -176,6 +176,16 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100000\\.")
+	public void testSkippedThrowsException() throws Exception
+	{
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
+				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF, SKIPPED));
+
+		job.call(progress);
+	}
+
+	@Test(expectedExceptions = {
 			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\.")
 	public void testMixedInputsThrowsException() throws Exception
 	{

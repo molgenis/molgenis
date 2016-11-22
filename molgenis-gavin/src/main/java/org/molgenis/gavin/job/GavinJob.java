@@ -89,6 +89,13 @@ public class GavinJob extends Job<Void>
 				String.format("Parsed input file. Found %d lines (%d comments, %d VCF, %d CADD output, %d skipped)",
 						lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
 						lineTypes.count(SKIPPED)));
+		if (lineTypes.contains(SKIPPED))
+		{
+			final String message = String
+					.format("Input file contains too many lines. Maximum is %d.", Parser.MAX_LINES);
+			progress.status(message);
+			throw new MolgenisDataException(message);
+		}
 		if (lineTypes.containsAll(Arrays.asList(CADD, VCF)))
 		{
 			progress.status("Input file contains mixed line types. Please use one type only, either VCF or CADD.");
