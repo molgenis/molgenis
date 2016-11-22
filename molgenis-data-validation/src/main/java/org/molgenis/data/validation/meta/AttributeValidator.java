@@ -381,14 +381,4 @@ public class AttributeValidator
 		DATA_TYPE_ALLOWED_TRANSITIONS.keySet().stream().filter(type -> allowedIdAttributeTypes.contains(type))
 				.forEach(type -> DATA_TYPE_ALLOWED_TRANSITIONS.get(type).addAll(referenceTypes));
 	}
-
-	/*
-	  TODO implement this
-	  	private void validateExpression(String expression, String newExpression)
-		{
-			// TODO validate with script evaluator
-			// ScriptEvaluator.eval();
-			// how to get access to expression validator here since it is located in molgenis-data-validation?
-		}
-	 */
 }
