@@ -82,8 +82,14 @@ public class Parser
 	{
 		Multiset<LineType> lineTypes = EnumMultiset.create(LineType.class);
 		writeVcfHeader(outputSink);
-		lines.map(line -> transformLine(line, lineTypes.size(), outputSink, errorSink)).forEach(lineTypes::add);
+		lines.map(line -> transformLine(line, countValidLines(lineTypes), outputSink, errorSink))
+				.forEach(lineTypes::add);
 		return lineTypes;
+	}
+
+	private int countValidLines(Multiset<LineType> lineTypes)
+	{
+		return lineTypes.count(VCF) + lineTypes.count(CADD);
 	}
 
 	private void writeVcfHeader(LineSink outputSink)
@@ -97,7 +103,7 @@ public class Parser
 	 * Transforms a single line.
 	 *
 	 * @param line       the line to parse
-	 * @param numLines   the current number of lines
+	 * @param numLines   the number of valid lines already parsed
 	 * @param outputSink {@link LineSink} to write parsed variants to
 	 * @param errorSink  {@link LineSink} to write lines to that we cannot parse
 	 * @return LineType of the parsed line
