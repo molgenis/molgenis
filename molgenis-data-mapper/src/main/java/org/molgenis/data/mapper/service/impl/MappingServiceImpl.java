@@ -85,7 +85,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_menumanager')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId)
 	{
@@ -120,7 +120,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_menumanager')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
 	{

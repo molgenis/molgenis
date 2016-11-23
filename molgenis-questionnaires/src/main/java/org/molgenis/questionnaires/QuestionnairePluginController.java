@@ -67,8 +67,8 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 		questionnaires = questionnaireMeta.stream()
 				.map(entityType -> entityType.getString(EntityTypeMetadata.FULL_NAME))
-				.filter(name -> currentUserIsSu() || currentUserHasRole(
-						AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name ->
+				.filter(name -> currentUserIsSu() || currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name))
+				.map(name ->
 				{
 					// Create entity if not yet exists for current user
 					EntityType entityType = dataService.getMeta().getEntityType(name);
