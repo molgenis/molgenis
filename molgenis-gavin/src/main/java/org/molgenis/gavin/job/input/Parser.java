@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -166,7 +167,7 @@ public class Parser
 	 */
 	private boolean anyNull(Object... values)
 	{
-		return Arrays.stream(values).anyMatch(v -> v == null);
+		return Arrays.stream(values).anyMatch(Objects::isNull);
 	}
 
 	/**
