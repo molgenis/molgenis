@@ -129,6 +129,8 @@ public class GavinController extends MolgenisPluginController
 	{
 		model.addAttribute("jobExecution",
 				dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class));
+		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
+		model.addAttribute("errorFileExists", getErrorFileForJob(jobIdentifier).exists());
 		return "view-gavin-result";
 	}
 
@@ -146,7 +148,7 @@ public class GavinController extends MolgenisPluginController
 	{
 		GavinJobExecution jobExecution = dataService
 				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
-		File file = fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "gavin-result.vcf");
+		File file = getDownloadFileForJob(jobIdentifier);
 		if (!file.exists())
 		{
 			LOG.warn("No result file found for job {}", jobIdentifier);
@@ -154,6 +156,16 @@ public class GavinController extends MolgenisPluginController
 		}
 		response.setHeader("Content-Disposition", format("inline; filename=\"{0}\"", jobExecution.getFilename()));
 		return new FileSystemResource(file);
+	}
+
+	private File getDownloadFileForJob(String jobIdentifier)
+	{
+		return fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "gavin-result.vcf");
+	}
+
+	private File getErrorFileForJob(String jobIdentifier)
+	{
+		return fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "error.txt");
 	}
 
 	/**
@@ -172,7 +184,7 @@ public class GavinController extends MolgenisPluginController
 				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
 		response.setHeader("Content-Disposition",
 				format("inline; filename=\"{0}-error.txt\"", jobExecution.getFilename()));
-		final File file = fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "error.txt");
+		final File file = getErrorFileForJob(jobIdentifier);
 		if (!file.exists())
 		{
 			LOG.warn("No error file found for job {}", jobIdentifier);
