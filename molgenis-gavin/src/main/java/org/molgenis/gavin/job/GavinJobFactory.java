@@ -66,13 +66,12 @@ public class GavinJobFactory
 	{
 		dataService.add(gavinJobExecution.getEntityType().getName(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
-
 		// create an authentication to run as the user that is listed as the owner of the job
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
-				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
+				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution,
 				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner);
 	}
 

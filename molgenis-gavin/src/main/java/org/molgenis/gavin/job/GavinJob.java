@@ -22,7 +22,7 @@ import static org.molgenis.gavin.job.input.model.LineType.*;
 
 public class GavinJob extends Job<Void>
 {
-	private final String jobIdentifier;
+	private final GavinJobExecution gavinJobExecution;
 	private final MenuReaderService menuReaderService;
 	private final FileStore fileStore;
 
@@ -43,13 +43,13 @@ public class GavinJob extends Job<Void>
 	private final AnnotatorRunner annotatorRunner;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
+			GavinJobExecution gavinJobExecution, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin, Parser parser,
 			AnnotatorRunner annotatorRunner)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.fileStore = fileStore;
-		this.jobIdentifier = jobIdentifier;
+		this.gavinJobExecution = gavinJobExecution;
 		this.menuReaderService = menuReaderService;
 		this.cadd = cadd;
 		this.exac = exac;
@@ -58,7 +58,7 @@ public class GavinJob extends Job<Void>
 		this.annotatorRunner = annotatorRunner;
 		this.parser = parser;
 
-		inputFile = getFile("input");
+		inputFile = getFile("input", gavinJobExecution.getInputFileExtension());
 		processedInputFile = getFile("temp-processed-input");
 		errorFile = getFile("error", "txt");
 		caddOutputFile = getFile("temp-cadd");
@@ -75,7 +75,7 @@ public class GavinJob extends Job<Void>
 	private File getFile(String name, String extension)
 	{
 		return fileStore.getFile(
-				format("{0}{1}{2}{3}{4}.{5}", GAVIN_APP, separator, jobIdentifier, separator, name, extension));
+				format("{0}{1}{2}{3}{4}.{5}", GAVIN_APP, separator, gavinJobExecution.getIdentifier(), separator, name, extension));
 	}
 
 	@Override
@@ -125,7 +125,7 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(5, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
-		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
+		progress.setResultUrl(format("{0}/result/{1}", path, gavinJobExecution.getIdentifier()));
 
 		return null;
 	}

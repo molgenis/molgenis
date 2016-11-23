@@ -5,6 +5,7 @@ import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.FILENAME;
+import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.INPUT_FILE_EXTENSION;
 
 public class GavinJobExecution extends JobExecution
 {
@@ -37,5 +38,15 @@ public class GavinJobExecution extends JobExecution
 	public void setFilename(String fileName)
 	{
 		set(FILENAME, fileName);
+	}
+
+	public String getInputFileExtension()
+	{
+		return getString(INPUT_FILE_EXTENSION);
+	}
+
+	public void setInputFileExtension(String extension)
+	{
+		set(INPUT_FILE_EXTENSION, extension);
 	}
 }
