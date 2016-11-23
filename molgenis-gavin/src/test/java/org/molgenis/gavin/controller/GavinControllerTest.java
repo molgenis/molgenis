@@ -117,6 +117,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}).when(gavinJobFactory).createJob(captor.capture());
 
 		when(inputFile.getParentFile()).thenReturn(parentDir);
+		when(vcf.getOriginalFilename()).thenReturn(".vcf");
 
 		assertEquals(gavinController.annotateFile(vcf, "annotate-file"), "/api/v2/" + GAVIN_JOB_EXECUTION + "/ABCDE");
 

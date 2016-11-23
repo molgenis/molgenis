@@ -92,6 +92,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	private File gavinResult;
 	@Mock
 	private AnnotatorRunner annotatorRunner;
+	@Mock
+	private GavinJobExecution jobExecution;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -116,9 +118,10 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
 		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
+		when(jobExecution.getIdentifier()).thenReturn("ABCDE");
 		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
 
-		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
+		job = new GavinJob(progress, transactionTemplate, authentication, jobExecution, fileStore, menuReaderService, cadd,
 				exac, snpeff, gavin, parser, annotatorRunner);
 	}
 
