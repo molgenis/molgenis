@@ -83,7 +83,6 @@ public class GavinJob extends Job<Void>
 	@Override
 	public Void call(Progress progress) throws Exception
 	{
-		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
 		progress.setProgressMax(5);
 
 		progress.progress(0, "Preprocessing input file...");
@@ -131,6 +130,7 @@ public class GavinJob extends Job<Void>
 		annotatorRunner.runAnnotator(gavin, snpeffOutputFile, gavinOutputFile, false);
 
 		progress.progress(5, "Result is ready for download.");
+		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
 		progress.setResultUrl(format("{0}/job/{1}", path, jobIdentifier));
 
 		return null;
