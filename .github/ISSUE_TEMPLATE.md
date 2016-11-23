@@ -1,7 +1,7 @@
-#### Reproduce
+### How to Reproduce
 
 
-#### Expected
+### Expected behavior
 
 
-#### Observed
+### Observed behavior
