@@ -193,6 +193,15 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Not a single valid variant line found\\.")
+	public void testNoValidLinesThrowsException() throws Exception
+	{
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(ImmutableMultiset.of());
+
+		job.call(progress);
+	}
+
+	@Test(expectedExceptions = {
 			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\. Please use one type only, either VCF or CADD.")
 	public void testMixedInputsThrowsException() throws Exception
 	{
