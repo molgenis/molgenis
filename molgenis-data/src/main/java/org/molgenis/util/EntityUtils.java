@@ -203,10 +203,10 @@ public class EntityUtils
 	/**
 	 * Get an Iterable of entities as a stream of entities
 	 *
-	 * @param entities
-	 * @return
+	 * @param entities entities iterable
+	 * @return entities stream
 	 */
-	public static Stream<Entity> asStream(Iterable<Entity> entities)
+	public static <E extends Entity> Stream<E> asStream(Iterable<E> entities)
 	{
 		return stream(entities.spliterator(), false);
 	}
@@ -376,6 +376,9 @@ public class EntityUtils
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
 		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
+		if (!Objects.equals(attr.isIdAttribute(), otherAttr.isIdAttribute())) return false;
+		if (!Objects.equals(attr.isLabelAttribute(), otherAttr.isLabelAttribute())) return false;
+		if (!Objects.equals(attr.getLookupAttributeIndex(), otherAttr.getLookupAttributeIndex())) return false;
 
 		// recursively compare attribute parts
 		if (!EntityUtils.equals(attr.getChildren(), otherAttr.getChildren())) return false;

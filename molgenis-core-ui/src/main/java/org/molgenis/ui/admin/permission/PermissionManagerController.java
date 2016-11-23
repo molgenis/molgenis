@@ -110,8 +110,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				GroupAuthority authority = groupAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId()
-						.toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId());
 				authorities.add(authority);
 			}
 		}
@@ -133,8 +132,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				GroupAuthority authority = groupAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
-						.toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
 				authorities.add(authority);
 			}
 		}
@@ -156,8 +154,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				UserAuthority authority = userAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId()
-						.toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId());
 				authorities.add(authority);
 			}
 		}
@@ -179,8 +176,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				UserAuthority authority = userAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
-						.toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
 				authorities.add(authority);
 			}
 		}

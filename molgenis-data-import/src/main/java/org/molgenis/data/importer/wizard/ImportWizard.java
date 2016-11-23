@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.molgenis.auth.Group;
 import org.molgenis.data.DatabaseAction;
@@ -208,10 +208,8 @@ public class ImportWizard extends Wizard
 
 	public boolean getAllowPermissions()
 	{
-		allowPermissions = SecurityUtils
-				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP.toUpperCase())
-				&& SecurityUtils
-				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY.toUpperCase());
+		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP)
+				&& SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY);
 		return allowPermissions || SecurityUtils.currentUserIsSu();
 	}
 }

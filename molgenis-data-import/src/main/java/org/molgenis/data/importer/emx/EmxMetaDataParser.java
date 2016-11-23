@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.emx;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -10,6 +10,9 @@ import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.importer.MetaDataParser;
+import org.molgenis.data.importer.MyEntitiesValidationReport;
+import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -181,7 +184,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = null;
 	}
 
-	EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
+	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
 			I18nStringFactory i18nStringFactory, EntityTypeValidator entityTypeValidator,
 			AttributeValidator attributeValidator)

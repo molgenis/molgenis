@@ -1,8 +1,10 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.importer.wizard;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -19,8 +21,6 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.importer.ImportWizardUtil.handleException;
-import static org.molgenis.data.importer.ImportWizardUtil.toDatabaseAction;
 
 @Component
 public class PackageWizardPage extends AbstractWizardPage
@@ -63,7 +63,7 @@ public class PackageWizardPage extends AbstractWizardPage
 			try
 			{
 				// convert input to database action
-				DatabaseAction entityDbAction = toDatabaseAction(entityImportOption);
+				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
@@ -98,11 +98,11 @@ public class PackageWizardPage extends AbstractWizardPage
 			}
 			catch (RuntimeException e)
 			{
-				handleException(e, importWizard, result, LOG, entityImportOption);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 			catch (IOException e)
 			{
-				handleException(e, importWizard, result, LOG, entityImportOption);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 		}
 		return null;
