@@ -171,7 +171,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
-			EntityTypeFactory entityTypeFactory)
+			EntityTypeFactory entityTypeFactory, EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = null;
 		this.packageFactory = requireNonNull(packageFactory);
@@ -182,7 +182,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.i18nStringFactory = null;
 		this.entityTypeValidator = null;
 		this.attributeValidator = null;
-		this.entityTypeDependencyResolver = null;
+		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
