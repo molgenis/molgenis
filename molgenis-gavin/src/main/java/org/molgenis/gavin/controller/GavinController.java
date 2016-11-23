@@ -174,7 +174,7 @@ public class GavinController extends MolgenisPluginController
 	 * @param jobIdentifier GAVIN_APP of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/error/{jobIdentifier}", method = GET)
+	@RequestMapping(value = "/error/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public Resource downloadErrorReport(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
