@@ -60,7 +60,7 @@ public class GavinJob extends Job<Void>
 		this.parser = parser;
 		this.gavinJobExecution = gavinJobExecution;
 
-		inputFile = getFile("input");
+		inputFile = getFile("input", gavinJobExecution.getInputFileExtension());
 		processedInputFile = getFile("temp-processed-input");
 		errorFile = getFile("error", "txt");
 		caddOutputFile = getFile("temp-cadd");

@@ -198,16 +198,6 @@ public class SnpEffRunner
 	{
 		String[] annotations = snpEffEntity.getString(SnpEffRunner.ANN).split(Pattern.quote(","), -1);
 
-		// LOF and NMD fields can't be associated with a single allele-gene combination so we log them instead
-		String lof = snpEffEntity.getString(SnpEffRunner.LOF);
-		String nmd = snpEffEntity.getString(SnpEffRunner.NMD);
-		if (lof != null || nmd != null)
-		{
-			LOG.info("LOF / NMD found for CHROM:{} POS:{} ANN:{} LOF:{} NMD:{} ",
-					snpEffEntity.getString(VcfAttributes.CHROM), snpEffEntity.getInt(VcfAttributes.POS),
-					snpEffEntity.getString(SnpEffRunner.ANN), lof, nmd);
-		}
-
 		List<Entity> effects = Lists.newArrayList();
 		for (String annotation : annotations)
 		{

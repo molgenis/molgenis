@@ -103,7 +103,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.vcf")).thenReturn(inputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.tsv")).thenReturn(inputFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-processed-input.vcf"))
 				.thenReturn(processedInputFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "error.txt")).thenReturn(errorFile);
@@ -119,6 +119,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
 		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
+		when(gavinJobExecution.getIdentifier()).thenReturn("ABCDE");
+		when(gavinJobExecution.getInputFileExtension()).thenReturn("tsv");
 		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,

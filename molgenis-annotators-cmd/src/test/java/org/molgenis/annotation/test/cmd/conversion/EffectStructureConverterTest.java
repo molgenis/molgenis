@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.EFFECT;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 import static org.testng.Assert.*;
@@ -70,6 +71,14 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
+		Attribute identifier = attributeFactory.create().setName("identifier").setDataType(STRING).setIdAttribute(true)
+				.setVisible(false);
+		Attribute INFO = attributeFactory.create().setName("INFO").setDataType(COMPOUND);
+		Attribute AC = attributeFactory.create().setName("AC").setDataType(STRING).setParent(INFO);
+		Attribute AN = attributeFactory.create().setName("AN").setDataType(STRING).setParent(INFO);
+		Attribute GTC = attributeFactory.create().setName("GTC").setDataType(STRING).setParent(INFO);
+		Attribute annoAttr = attributeFactory.create().setName("ANNO").setDataType(STRING).setParent(INFO);
+
 		annotatedEntityType = entityTypeFactory.create().setName("test");
 		vcfInputEntityType = entityTypeFactory.create().setName("test");
 		variantEntityType = entityTypeFactory.create().setName("test");
@@ -81,18 +90,6 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		attributeAlt = attributeFactory.create().setName(ALT).setDataType(STRING);
 
 		attributeCantAnnotateChrom = attributeFactory.create().setName(CHROM).setDataType(LONG);
-	}
-
-	@BeforeMethod
-	public void beforeMethod() throws IOException
-	{
-		Attribute identifier = attributeFactory.create().setName("identifier").setDataType(STRING).setIdAttribute(true)
-				.setVisible(false);
-		Attribute INFO = attributeFactory.create().setName("INFO").setDataType(COMPOUND);
-		Attribute AC = attributeFactory.create().setName("AC").setDataType(STRING).setParent(INFO);
-		Attribute AN = attributeFactory.create().setName("AN").setDataType(STRING).setParent(INFO);
-		Attribute GTC = attributeFactory.create().setName("GTC").setDataType(STRING).setParent(INFO);
-		Attribute annoAttr = attributeFactory.create().setName("ANNO").setDataType(STRING).setParent(INFO);
 
 		vcfInputEntityType.addAttribute(identifier);
 		vcfInputEntityType.addAttribute(attributeChrom);
@@ -109,10 +106,6 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		vcfInputEntityType.addAttribute(AN);
 		vcfInputEntityType.addAttribute(GTC);
 		vcfInputEntityType.addAttribute(annoAttr);
-
-		entity1 = new DynamicEntity(vcfInputEntityType);
-		entity2 = new DynamicEntity(vcfInputEntityType);
-		entity3 = new DynamicEntity(vcfInputEntityType);
 
 		annotatedEntityType.addAttribute(identifier);
 		annotatedEntityType.addAttribute(attributeChrom);
@@ -143,7 +136,6 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		variantEntityType.addAttribute(AN);
 		variantEntityType.addAttribute(GTC);
 		variantEntityType.addAttribute(annoAttr);
-		variantEntityType.addAttribute(annoAttr);
 
 		effectEntityType.addAttribute(
 				attributeFactory.create().setName("identifier").setDataType(STRING).setIdAttribute(true).setAuto(true)
@@ -157,8 +149,16 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		effectEntityType.addAttribute(attributeFactory.create().setName("Feature_ID").setDataType(STRING));
 		effectEntityType.addAttribute(attributeFactory.create().setName("Transcript_biotype").setDataType(STRING));
 		effectEntityType.addAttribute(attributeFactory.create().setName("Rank_total").setDataType(STRING));
+	}
 
-		entity1.set(identifier.getName(), "variant_ID1");
+	@BeforeMethod
+	public void beforeMethod() throws IOException
+	{
+		entity1 = new DynamicEntity(vcfInputEntityType);
+		entity2 = new DynamicEntity(vcfInputEntityType);
+		entity3 = new DynamicEntity(vcfInputEntityType);
+
+		entity1.set("identifier", "variant_ID1");
 		entity1.set(VcfAttributes.CHROM, "1");
 		entity1.set(VcfAttributes.POS, 10050000);
 		entity1.set(VcfAttributes.ID, "test21");
@@ -172,7 +172,7 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		entity1.set(EFFECT,
 				"A|GEN1|missense_variant|MODERATE|GEN1|transcript|NM_123456.7|Coding|4/4|c.1234C>T|p.Thr123Met|1234/5678|2345/6789|111/222||");
 
-		entity2.set(identifier.getName(), "variant_ID2");
+		entity2.set("identifier", "variant_ID2");
 		entity2.set(VcfAttributes.CHROM, "1");
 		entity2.set(VcfAttributes.POS, 10050001);
 		entity2.set(VcfAttributes.ID, "test22");
@@ -183,7 +183,7 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		entity2.set(EFFECT,
 				"A|GEN1|missense_variant|MODERATE|GEN1|transcript|NM_123456.7|Coding|4/4|c.1234C>T|p.Thr123Met|1234/5678|2345/6789|111/222||,A|GEN2|missense_variant|MODERATE|GEN2|transcript|NM_123456.7|Coding|4/4|c.1234C>T|p.Thr123Met|1234/5678|2345/6789|111/222||");
 
-		entity3.set(identifier.getName(), "variant_ID3");
+		entity3.set("identifier", "variant_ID3");
 		entity3.set(VcfAttributes.CHROM, "1");
 		entity3.set(VcfAttributes.POS, 10050002);
 		entity3.set(VcfAttributes.ID, "test23");
@@ -195,7 +195,7 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		variant1 = new DynamicEntity(variantEntityType);
 		variant2 = new DynamicEntity(variantEntityType);
 
-		variant1.set(identifier.getName(), "variant_ID1");
+		variant1.set("identifier", "variant_ID1");
 		variant1.set(VcfAttributes.CHROM, "1");
 		variant1.set(VcfAttributes.POS, 10050000);
 		variant1.set(VcfAttributes.ID, "test21");
@@ -207,7 +207,7 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		variant1.set("AN", "22");
 		variant1.set("GTC", "0,1,10");
 
-		variant2.set(identifier.getName(), "variant_ID2");
+		variant2.set("identifier", "variant_ID2");
 		variant2.set(VcfAttributes.CHROM, "1");
 		variant2.set(VcfAttributes.POS, 10050001);
 		variant2.set(VcfAttributes.ID, "test22");

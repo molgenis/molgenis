@@ -43,6 +43,15 @@ public class GavinJobExecution extends JobExecution
 		set(FILENAME, filename);
 	}
 
+	public String getInputFileExtension()
+	{
+		return getString(INPUT_FILE_EXTENSION);
+	}
+
+	public void setInputFileExtension(String extension)
+	{
+		set(INPUT_FILE_EXTENSION, extension);
+	}
 	public void setLineTypes(Multiset<LineType> lineTypes)
 	{
 		set(COMMENTS, lineTypes.count(COMMENT));
