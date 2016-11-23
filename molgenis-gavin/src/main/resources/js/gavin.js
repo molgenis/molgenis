@@ -1,5 +1,6 @@
 $(function () {
     var form = $('#gavin-form');
+    var jobHrefRegex = /.+\/([^\/]+)/;
 
     if (form.length) {
         React.render(molgenis.ui.UploadContainer({
@@ -8,8 +9,10 @@ $(function () {
             'type' : 'file',
             'name' : 'gavin-uploader',
             'width' : '12',
-            onSubmit : function (jobExecutionID) {
-                location = "gavin-app/job/" + jobExecutionID;
+            onSubmit : function (jobHref) {
+                if ((match = jobHrefRegex.exec(jobHref)) !== null) {
+                    location.replace("gavin-app/job/" + match[1]);
+                }
             },
             validExtensions : ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz']
         }), form[0]);
