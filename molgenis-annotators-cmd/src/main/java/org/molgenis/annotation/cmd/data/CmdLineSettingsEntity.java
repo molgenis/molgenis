@@ -1,4 +1,4 @@
-package org.molgenis.annotation.cmd;
+package org.molgenis.annotation.cmd.data;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;

@@ -19,6 +19,7 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 	private static final String SIMPLE_NAME = "GavinJobExecution";
 	public static final String GAVIN_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 	public static final String FILENAME = "filename";
+	public static final String INPUT_FILE_EXTENSION = "extension";
 
 	private final IndexPackage indexPackage;
 
@@ -38,5 +39,6 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 
 		setExtends(jobExecutionMetaData);
 		addAttribute(FILENAME).setDataType(STRING).setNillable(false);
+		addAttribute(INPUT_FILE_EXTENSION).setDataType(STRING).setNillable(false);
 	}
 }

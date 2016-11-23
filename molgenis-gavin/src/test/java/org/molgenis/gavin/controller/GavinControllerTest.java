@@ -6,7 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.index.meta.IndexPackage;
@@ -117,13 +117,14 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}).when(gavinJobFactory).createJob(captor.capture());
 
 		when(inputFile.getParentFile()).thenReturn(parentDir);
+		when(vcf.getOriginalFilename()).thenReturn(".vcf");
 
 		assertEquals(gavinController.annotateFile(vcf, "annotate-file"), "/api/v2/" + GAVIN_JOB_EXECUTION + "/ABCDE");
 
 		verify(fileStore).createDirectory("gavin-app");
 		verify(fileStore).createDirectory("gavin-app" + separator + "ABCDE");
 		verify(fileStore).writeToFile(Mockito.any(InputStream.class),
-				Mockito.eq("gavin-app" + separator + "ABCDE" + separator + "input.vcf"));
+				Mockito.eq("gavin-app" + separator + "ABCDE" + separator + "input.tsv"));
 
 		verify(executorService).submit(job);
 		GavinJobExecution jobExecution = captor.getValue();
@@ -283,9 +284,9 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		EffectsAnnotator gavin()
+		EffectBasedAnnotator gavin()
 		{
-			return mock(EffectsAnnotator.class);
+			return mock(EffectBasedAnnotator.class);
 		}
 
 		@Bean

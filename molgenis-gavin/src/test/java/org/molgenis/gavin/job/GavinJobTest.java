@@ -2,6 +2,7 @@ package org.molgenis.gavin.job;
 
 import com.google.common.collect.ImmutableMultiset;
 import org.mockito.Mock;
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
@@ -9,7 +10,6 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -74,7 +74,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	@Mock
 	private Menu menu;
 	@Mock
-	VcfUtils vcfUtils;
+	EffectStructureConverter effectStructureConverter;
 
 	@Mock
 	private File inputFile;
@@ -92,6 +92,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	private File gavinResult;
 	@Mock
 	private AnnotatorRunner annotatorRunner;
+	@Mock
+	private GavinJobExecution jobExecution;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -100,7 +102,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.vcf")).thenReturn(inputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.tsv")).thenReturn(inputFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-processed-input.vcf"))
 				.thenReturn(processedInputFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "error.txt")).thenReturn(errorFile);
@@ -116,9 +118,11 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
 		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
-		when(vcfUtils.reverseXrefMrefRelation(anyObject())).thenReturn(iterator);
+		when(jobExecution.getIdentifier()).thenReturn("ABCDE");
+		when(jobExecution.getInputFileExtension()).thenReturn("tsv");
+		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
 
-		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
+		job = new GavinJob(progress, transactionTemplate, authentication, jobExecution, fileStore, menuReaderService, cadd,
 				exac, snpeff, gavin, parser, annotatorRunner);
 	}
 

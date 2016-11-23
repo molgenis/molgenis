@@ -1,4 +1,4 @@
-package org.molgenis.annotation.cmd;
+package org.molgenis.annotation.cmd.utils;
 
 import java.io.*;
 import java.util.Date;

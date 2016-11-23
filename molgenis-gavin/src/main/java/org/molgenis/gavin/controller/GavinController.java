@@ -46,6 +46,9 @@ public class GavinController extends MolgenisPluginController
 
 	public static final String GAVIN_APP = "gavin-app";
 	public static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
+	public static final String TSV_GZ = "tsv.gz";
+	public static final String TSV = "tsv";
+	public static final String GZ = "gz";
 
 	private DataService dataService;
 	private ExecutorService executorService;
@@ -98,19 +101,27 @@ public class GavinController extends MolgenisPluginController
 	public String annotateFile(@RequestParam(value = "file") MultipartFile inputFile, @RequestParam String entityName)
 			throws IOException
 	{
+		String extension = TSV;
+		if(inputFile.getOriginalFilename().endsWith(GZ)){
+			extension = TSV_GZ;
+		}
+
 		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create();
 		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
+		gavinJobExecution.setInputFileExtension(extension);
 		final GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
 
 		final String gavinJobIdentifier = gavinJobExecution.getIdentifier();
 		fileStore.createDirectory(GAVIN_APP);
 		final String jobDir = format("{0}{1}{2}", GAVIN_APP, separator, gavinJobIdentifier);
 		fileStore.createDirectory(jobDir);
-		final String fileName = format("{0}{1}input.vcf", jobDir, separator);
+
+		final String fileName = format("{0}{1}input.{2}", jobDir, separator, extension);
 		fileStore.writeToFile(inputFile.getInputStream(), fileName);
 
 		executorService.submit(gavinJob);
+		gavinJobExecution.setInputFileExtension(extension);
 
 		return "/api/v2/" + gavinJobExecution.getEntityType().getName() + "/" + gavinJobIdentifier;
 	}

@@ -1,7 +1,7 @@
 package org.molgenis.gavin.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
@@ -36,7 +36,7 @@ public class GavinJobFactory
 	private RepositoryAnnotator cadd;
 	private RepositoryAnnotator exac;
 	private RepositoryAnnotator snpEff;
-	private EffectsAnnotator gavin;
+	private EffectBasedAnnotator gavin;
 	private MenuReaderService menuReaderService;
 	private AnnotatorRunner annotatorRunner;
 
@@ -44,7 +44,7 @@ public class GavinJobFactory
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
 			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
-			EffectsAnnotator gavin, MenuReaderService menuReaderService, Parser parser, AnnotatorRunner annotatorRunner)
+			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser, AnnotatorRunner annotatorRunner)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.transactionManager = requireNonNull(transactionManager);
@@ -66,13 +66,12 @@ public class GavinJobFactory
 	{
 		dataService.add(gavinJobExecution.getEntityType().getName(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
-
 		// create an authentication to run as the user that is listed as the owner of the job
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
-				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
+				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution,
 				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner);
 	}
 

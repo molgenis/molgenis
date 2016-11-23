@@ -1,7 +1,7 @@
-package org.molgenis.annotation.test.cmd;
+package org.molgenis.annotation.test.cmd.integration;
 
 import org.molgenis.annotation.cmd.CommandLineAnnotatorConfig;
-import org.molgenis.annotation.cmd.VcfValidator;
+import org.molgenis.annotation.cmd.utils.VcfValidator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
