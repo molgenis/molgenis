@@ -44,7 +44,8 @@ public class GavinJobFactory
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
 			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
-			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser, AnnotatorRunner annotatorRunner)
+			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser,
+			AnnotatorRunner annotatorRunner)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.transactionManager = requireNonNull(transactionManager);

@@ -104,7 +104,8 @@ public class GavinController extends MolgenisPluginController
 			throws IOException
 	{
 		String extension = TSV;
-		if(inputFile.getOriginalFilename().endsWith(GZ)){
+		if (inputFile.getOriginalFilename().endsWith(GZ))
+		{
 			extension = TSV_GZ;
 		}
 

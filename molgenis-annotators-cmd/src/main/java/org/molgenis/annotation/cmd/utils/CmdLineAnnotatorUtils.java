@@ -17,7 +17,8 @@ import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 
 import java.io.*;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,23 +33,23 @@ public class CmdLineAnnotatorUtils
 	/**
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
-	 * @param annotator           		the annotator to be runned
-	 * @param vcfAttributes       		utility class for vcf metadata
-	 * @param entityTypeFactory   		factory for molgenis entityType
-	 * @param attributeFactory    		factory for molgenis entityType
-	 * @param effectStructureConverter	utility class for converting a vcfRepo from and to the molgenis entity structure for "effects" annotations
-	 * @param inputVcfFile        		the vcf file to be annotated
-	 * @param outputVCFFile       		the resulting, annotated vcf file
-	 * @param attributesToInclude 		the attributes of the annotator that should be written to the result
-	 * @param update              		boolean indicating if values already present for the annotator attributes should be updated(true) or overwritten (false)
+	 * @param annotator                the annotator to be runned
+	 * @param vcfAttributes            utility class for vcf metadata
+	 * @param entityTypeFactory        factory for molgenis entityType
+	 * @param attributeFactory         factory for molgenis entityType
+	 * @param effectStructureConverter utility class for converting a vcfRepo from and to the molgenis entity structure for "effects" annotations
+	 * @param inputVcfFile             the vcf file to be annotated
+	 * @param outputVCFFile            the resulting, annotated vcf file
+	 * @param attributesToInclude      the attributes of the annotator that should be written to the result
+	 * @param update                   boolean indicating if values already present for the annotator attributes should be updated(true) or overwritten (false)
 	 * @return the path of the result vcf file
 	 * @throws IOException,
 	 * @throws MolgenisInvalidFormatException
 	 */
 	public static String annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
-			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory, EffectStructureConverter effectStructureConverter,
-			File inputVcfFile, File outputVCFFile, List<String> attributesToInclude, boolean update)
-			throws IOException, MolgenisInvalidFormatException
+			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
+			EffectStructureConverter effectStructureConverter, File inputVcfFile, File outputVCFFile,
+			List<String> attributesToInclude, boolean update) throws IOException, MolgenisInvalidFormatException
 	{
 
 		try (BufferedWriter outputVCFWriter = new BufferedWriter(
@@ -67,7 +68,8 @@ public class CmdLineAnnotatorUtils
 			Iterable<Entity> entitiesToAnnotate = addAnnotatorMetaDataToRepository(annotator, attributeFactory,
 					effectStructureConverter, vcfRepo);
 
-			Iterator<Entity> annotatedRecords = annotateRepo(annotator, effectStructureConverter, update, entitiesToAnnotate);
+			Iterator<Entity> annotatedRecords = annotateRepo(annotator, effectStructureConverter, update,
+					entitiesToAnnotate);
 
 			writeAnnotationResultToVcfFile(attributesToInclude, outputVCFWriter, outputMetaData, annotatedRecords);
 		}
@@ -94,16 +96,16 @@ public class CmdLineAnnotatorUtils
 		// Check if annotator is annotator that annotates effects (for example Gavin)
 		if (annotator instanceof EffectBasedAnnotator)
 		{
-			entitiesToAnnotate = effectStructureConverter.createVariantEffectStructure(EFFECT, annotator.getOutputAttributes(), vcfRepo);
+			entitiesToAnnotate = effectStructureConverter
+					.createVariantEffectStructure(EFFECT, annotator.getOutputAttributes(), vcfRepo);
 		}
 		else
 		{
-			AnnotatorUtils
-					.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityType(), attributeFactory, annotator);
+			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityType(), attributeFactory, annotator);
 			return vcfRepo;
 		}
 
-		return () -> entitiesToAnnotate.iterator();
+		return entitiesToAnnotate::iterator;
 	}
 
 	private static void writeAnnotationResultToVcfFile(List<String> attributesToInclude, BufferedWriter outputVCFWriter,
