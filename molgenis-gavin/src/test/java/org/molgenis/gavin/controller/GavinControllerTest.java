@@ -124,7 +124,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		verify(fileStore).createDirectory("gavin-app");
 		verify(fileStore).createDirectory("gavin-app" + separator + "ABCDE");
 		verify(fileStore).writeToFile(Mockito.any(InputStream.class),
-				Mockito.eq("gavin-app" + separator + "ABCDE" + separator + "input.vcf"));
+				Mockito.eq("gavin-app" + separator + "ABCDE" + separator + "input.tsv"));
 
 		verify(executorService).submit(job);
 		GavinJobExecution jobExecution = captor.getValue();
