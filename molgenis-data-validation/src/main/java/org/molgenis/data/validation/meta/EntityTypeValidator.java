@@ -1,15 +1,18 @@
 package org.molgenis.data.validation.meta;
 
+import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.util.stream.MultimapCollectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +28,7 @@ import static org.molgenis.data.meta.NameValidator.validateName;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.util.EntityUtils.asStream;
 
 /**
  * Entity metadata validator
@@ -33,11 +37,13 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 public class EntityTypeValidator
 {
 	private final DataService dataService;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	@Autowired
-	public EntityTypeValidator(DataService dataService)
+	public EntityTypeValidator(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 	}
 
 	/**
@@ -49,6 +55,7 @@ public class EntityTypeValidator
 	public void validate(EntityType entityType)
 	{
 		validateEntityName(entityType);
+		validatePackage(entityType);
 		validateExtends(entityType);
 		validateOwnAttributes(entityType);
 
@@ -184,13 +191,27 @@ public class EntityTypeValidator
 
 	/**
 	 * Validates the attributes owned by this entity:
-	 * 1) validates that the parent entity doesn't have entities with the same name
+	 * 1) validates that the parent entity doesn't have attributes with the same name
+	 * 2) validates that this entity doesn't have attributes with the same name
 	 *
 	 * @param entityType entity meta data
 	 * @throws MolgenisValidationException if an attribute is owned by another entity or a parent attribute has the same name
 	 */
 	private static void validateOwnAttributes(EntityType entityType)
 	{
+		// Validate that entity does not contain multiple attributes with the same name
+		Multimap<String, Attribute> attrMultiMap = asStream(entityType.getAllAttributes())
+				.collect(MultimapCollectors.toArrayListMultimap(Attribute::getName, Function.identity()));
+		attrMultiMap.keySet().forEach(attrName ->
+		{
+			if (attrMultiMap.get(attrName).size() > 1)
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Entity [%s] contains multiple attributes with name [%s]", entityType.getName(),
+								attrName)));
+			}
+		});
+
 		// Validate that entity attributes with same name do no exist in parent entity
 		EntityType extendsEntityType = entityType.getExtends();
 		if (extendsEntityType != null)
@@ -275,6 +296,26 @@ public class EntityTypeValidator
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Qualified entity name [%s] not equal to entity name [%s]", entityType.getName(),
 								entityType.getSimpleName())));
+			}
+		}
+	}
+
+	/**
+	 * Validate that non-system entities are not assigned to a system package
+	 *
+	 * @param entityType entity type
+	 */
+	private void validatePackage(EntityType entityType)
+	{
+		Package package_ = entityType.getPackage();
+		if (package_ != null)
+		{
+			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry
+					.hasSystemEntityType(entityType.getName()))
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getName(),
+								entityType.getPackage().getName())));
 			}
 		}
 	}

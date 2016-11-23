@@ -684,8 +684,8 @@ public class EntityTypeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
-						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(userAuthorityQ);
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
 		UserAuthority userAuthority = mock(UserAuthority.class);
 		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
 		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
@@ -693,8 +693,8 @@ public class EntityTypeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
 		when(groupAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
-						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(groupAuthorityQ);
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
 		GroupAuthority groupAuthority = mock(GroupAuthority.class);
 		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
 		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
@@ -745,8 +745,8 @@ public class EntityTypeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
-						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(userAuthorityQ);
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
 		UserAuthority userAuthority = mock(UserAuthority.class);
 		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
 		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
@@ -754,8 +754,8 @@ public class EntityTypeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
 		when(groupAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
-						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(groupAuthorityQ);
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
 		GroupAuthority groupAuthority = mock(GroupAuthority.class);
 		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
 		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
@@ -800,8 +800,8 @@ public class EntityTypeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
-						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(userAuthorityQ);
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
 		UserAuthority userAuthority = mock(UserAuthority.class);
 		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
 		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
@@ -809,8 +809,8 @@ public class EntityTypeRepositoryDecoratorTest
 		//noinspection unchecked
 		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
 		when(groupAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
-						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(groupAuthorityQ);
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
 		GroupAuthority groupAuthority = mock(GroupAuthority.class);
 		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
 		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);

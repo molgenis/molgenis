@@ -74,12 +74,6 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	@Autowired
 	GavinJobExecutionMetaData gavinJobExecutionMetaData;
 
-	@BeforeClass
-	public void init()
-	{
-		gavinJobExecutionMetaData.init();
-	}
-
 	@Test
 	public void testInitResourcesPresent() throws Exception
 	{

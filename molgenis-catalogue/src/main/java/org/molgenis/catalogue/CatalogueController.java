@@ -41,7 +41,7 @@ public class CatalogueController extends MolgenisPluginController
 		List<EntityType> emds = Lists.newArrayList();
 		dataService.getEntityNames().forEach(entityName ->
 		{
-			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase()))
+			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName))
 			{
 				emds.add(dataService.getEntityType(entityName));
 				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))

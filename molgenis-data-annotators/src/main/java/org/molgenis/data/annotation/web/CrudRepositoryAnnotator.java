@@ -75,9 +75,8 @@ public class CrudRepositoryAnnotator
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
-					RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityType(AnnotatorUtils
-							.addAnnotatorMetaDataToRepositories(externalRepository.getEntityType(), attributeFactory,
-									annotator)));
+					RunAsSystemProxy.runAsSystem(
+							() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
 				}
