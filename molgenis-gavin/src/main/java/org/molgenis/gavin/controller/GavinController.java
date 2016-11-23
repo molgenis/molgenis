@@ -46,7 +46,7 @@ public class GavinController extends MolgenisPluginController
 	private static final Logger LOG = LoggerFactory.getLogger(GavinController.class);
 
 	public static final String GAVIN_APP = "gavin-app";
-	public static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
+	static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
 
 	private DataService dataService;
 	private ExecutorService executorService;
@@ -76,7 +76,6 @@ public class GavinController extends MolgenisPluginController
 	 *
 	 * @return the view name
 	 */
-	@SuppressWarnings({ "SameReturnValue", "UnusedReturnValue" })
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
