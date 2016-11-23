@@ -43,6 +43,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
+	/**
+	 * Configures Freemarker
+	 * @return
+	 * @throws IOException
+	 * @throws TemplateException
+	 */
 	@Override
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
