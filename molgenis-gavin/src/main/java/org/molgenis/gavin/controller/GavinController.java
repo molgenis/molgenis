@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
+import static java.time.ZonedDateTime.now;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.gavin.controller.GavinController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -241,16 +242,25 @@ public class GavinController extends AbstractStaticContentController
 	}
 
 	/**
-	 * Removes the working directory from the file store.
+	 * Removes old files in the gavin working directory from the file store.
 	 */
-	@Scheduled(cron = "0 0 0 * * *")
+	@Scheduled(cron = "0 0 * * * *")
 	public void cleanUp()
 	{
-		LOG.info("Clean up working directory in the file store...");
+		LOG.debug("Clean up old jobs in the file store...");
 		try
 		{
-			fileStore.deleteDirectory(GAVIN_APP);
-			LOG.info("Done.");
+			final File[] oldFiles = fileStore.getFile(GAVIN_APP)
+					.listFiles(file -> file.lastModified() / 1000 < now().minusHours(24).toEpochSecond());
+			if (oldFiles != null)
+			{
+				for (File file : oldFiles)
+				{
+					LOG.info("Deleting job directory {}", file.getName());
+					fileStore.deleteDirectory(GAVIN_APP + separator + file.getName());
+				}
+			}
+			LOG.debug("Done.");
 		}
 		catch (IOException e)
 		{

@@ -36,16 +36,17 @@ import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.io.File.separator;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { GavinControllerTest.Config.class, GavinController.class })
 public class GavinControllerTest extends AbstractMolgenisSpringTest
@@ -163,8 +164,24 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCleanUp() throws Exception
 	{
+		File gavinAppDir = Mockito.mock(File.class);
+
+		File oldJobDir = Mockito.mock(File.class);
+		File newJobDir = Mockito.mock(File.class);
+
+		when(fileStore.getFile("gavin-app")).thenReturn(gavinAppDir);
+		when(newJobDir.lastModified()).thenReturn(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(23));
+		when(oldJobDir.lastModified()).thenReturn(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(24) - 1000);
+		ArgumentCaptor<FileFilter> fileFilterCaptor = ArgumentCaptor.forClass(FileFilter.class);
+		when(gavinAppDir.listFiles(fileFilterCaptor.capture())).thenReturn(new File[] { oldJobDir });
+		when(oldJobDir.getName()).thenReturn("ASDFASDFASDF");
+
 		gavinController.cleanUp();
-		verify(fileStore).deleteDirectory("gavin-app");
+		verify(fileStore).deleteDirectory("gavin-app/ASDFASDFASDF");
+		assertTrue(fileFilterCaptor.getValue().accept(oldJobDir),
+				"cleanUp should remove files that are more than 24 hours old");
+		assertFalse(fileFilterCaptor.getValue().accept(newJobDir),
+				"cleanUp should leave files that are less than 24 hours old");
 	}
 
 	@Configuration
