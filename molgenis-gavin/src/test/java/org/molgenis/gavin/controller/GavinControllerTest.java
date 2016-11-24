@@ -5,7 +5,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
@@ -33,12 +32,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -148,12 +146,12 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		assertEquals(gavinController.result(response, "ABCDE"), new FileSystemResource(resultFile));
+		assertEquals(gavinController.download(response, "ABCDE"), new FileSystemResource(resultFile));
 
 		verify(response).setHeader("Content-Disposition", "inline; filename=\"annotate-file-gavin.vcf\"");
 	}
 
-	@Test
+	@Test(expectedExceptions = FileNotFoundException.class, expectedExceptionsMessageRegExp = "No result file found for this job\\. Results are removed every night\\.")
 	public void testResultNotFound() throws Exception
 	{
 		GavinJobExecution gavinJobExecution = mock(GavinJobExecution.class);
@@ -165,15 +163,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf")).thenReturn(file);
 		when(file.exists()).thenReturn(false);
 
-		try
-		{
-			gavinController.result(mock(HttpServletResponse.class), "ABCDE");
-			Assert.fail("Should throw exception cause file doesn't exist.");
-		}
-		catch (MolgenisDataException expected)
-		{
-			assertEquals(expected.getMessage(), "No output file found for this job.");
-		}
+		gavinController.download(mock(HttpServletResponse.class), "ABCDE");
 	}
 
 	@Test

@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
+import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -93,7 +94,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	@Mock
 	private AnnotatorRunner annotatorRunner;
 	@Mock
-	private GavinJobExecution jobExecution;
+	private GavinJobExecution gavinJobExecution;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -118,19 +119,19 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
 		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
-		when(jobExecution.getIdentifier()).thenReturn("ABCDE");
-		when(jobExecution.getInputFileExtension()).thenReturn("tsv");
+		when(gavinJobExecution.getIdentifier()).thenReturn("ABCDE");
+		when(gavinJobExecution.getInputFileExtension()).thenReturn("tsv");
 		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
 
-		job = new GavinJob(progress, transactionTemplate, authentication, jobExecution, fileStore, menuReaderService, cadd,
-				exac, snpeff, gavin, parser, annotatorRunner);
+		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
+				exac, snpeff, gavin, parser, annotatorRunner, gavinJobExecution);
 	}
 
 	@Test
 	public void testRunHappyPathVcf() throws Exception
 	{
-		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
-				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, VCF, VCF));
+		final ImmutableMultiset<LineType> lineTypes = ImmutableMultiset.of(COMMENT, COMMENT, VCF, VCF);
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(lineTypes);
 
 		job.call(progress);
 
@@ -150,7 +151,9 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(annotatorRunner).runAnnotator(gavin, snpEffResult, gavinResult, false);
 
 		verify(progress).progress(5, "Result is ready for download.");
-		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
+		verify(progress).setResultUrl("/menu/plugins/gavin-app/job/ABCDE");
+
+		verify(gavinJobExecution).setLineTypes(lineTypes);
 	}
 
 	@Test
@@ -163,6 +166,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).setProgressMax(5);
 		verify(progress).progress(0, "Preprocessing input file...");
+		verify(progress)
+				.status("Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 skipped)");
 
 		verify(progress).progress(1, "File already annotated by cadd, skipping cadd annotation.");
 
@@ -176,11 +181,11 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(annotatorRunner).runAnnotator(gavin, snpEffResult, gavinResult, false);
 
 		verify(progress).progress(5, "Result is ready for download.");
-		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
+		verify(progress).setResultUrl("/menu/plugins/gavin-app/job/ABCDE");
 	}
 
 	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100000\\.")
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100,000\\.")
 	public void testSkippedThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
@@ -190,7 +195,16 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\.")
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Not a single valid variant line found\\.")
+	public void testNoValidLinesThrowsException() throws Exception
+	{
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(ImmutableMultiset.of());
+
+		job.call(progress);
+	}
+
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\. Please use one type only, either VCF or CADD.")
 	public void testMixedInputsThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile))

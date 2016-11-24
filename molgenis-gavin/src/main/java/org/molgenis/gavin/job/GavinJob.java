@@ -22,7 +22,7 @@ import static org.molgenis.gavin.job.input.model.LineType.*;
 
 public class GavinJob extends Job<Void>
 {
-	private final GavinJobExecution gavinJobExecution;
+	private final String jobIdentifier;
 	private final MenuReaderService menuReaderService;
 	private final FileStore fileStore;
 
@@ -41,15 +41,16 @@ public class GavinJob extends Job<Void>
 
 	private final Parser parser;
 	private final AnnotatorRunner annotatorRunner;
+	private final GavinJobExecution gavinJobExecution;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			GavinJobExecution gavinJobExecution, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
+			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin, Parser parser,
-			AnnotatorRunner annotatorRunner)
+			AnnotatorRunner annotatorRunner, GavinJobExecution gavinJobExecution)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.fileStore = fileStore;
-		this.gavinJobExecution = gavinJobExecution;
+		this.jobIdentifier = jobIdentifier;
 		this.menuReaderService = menuReaderService;
 		this.cadd = cadd;
 		this.exac = exac;
@@ -57,6 +58,7 @@ public class GavinJob extends Job<Void>
 		this.gavin = gavin;
 		this.annotatorRunner = annotatorRunner;
 		this.parser = parser;
+		this.gavinJobExecution = gavinJobExecution;
 
 		inputFile = getFile("input", gavinJobExecution.getInputFileExtension());
 		processedInputFile = getFile("temp-processed-input");
@@ -75,7 +77,7 @@ public class GavinJob extends Job<Void>
 	private File getFile(String name, String extension)
 	{
 		return fileStore.getFile(
-				format("{0}{1}{2}{3}{4}.{5}", GAVIN_APP, separator, gavinJobExecution.getIdentifier(), separator, name, extension));
+				format("{0}{1}{2}{3}{4}.{5}", GAVIN_APP, separator, jobIdentifier, separator, name, extension));
 	}
 
 	@Override
@@ -86,20 +88,24 @@ public class GavinJob extends Job<Void>
 		progress.progress(0, "Preprocessing input file...");
 		Multiset<LineType> lineTypes = parser.tryTransform(inputFile, processedInputFile, errorFile);
 		progress.status(
-				String.format("Parsed input file. Found %d lines (%d comments, %d VCF, %d CADD output, %d skipped)",
+				format("Parsed input file. Found {0} lines ({1} comments, {2} valid VCF, {3} valid CADD, {4} errors, {5} skipped)",
 						lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
-						lineTypes.count(SKIPPED)));
+						lineTypes.count(ERROR), lineTypes.count(SKIPPED)));
+		gavinJobExecution.setLineTypes(lineTypes);
 		if (lineTypes.contains(SKIPPED))
 		{
-			final String message = String
-					.format("Input file contains too many lines. Maximum is %d.", Parser.MAX_LINES);
-			progress.status(message);
-			throw new MolgenisDataException(message);
+			throw new MolgenisDataException(
+					format("Input file contains too many lines. Maximum is {0}.", Parser.MAX_LINES));
 		}
 		if (lineTypes.containsAll(Arrays.asList(CADD, VCF)))
 		{
-			progress.status("Input file contains mixed line types. Please use one type only, either VCF or CADD.");
-			throw new MolgenisDataException("Input file contains mixed line types.");
+			throw new MolgenisDataException(
+					"Input file contains mixed line types. Please use one type only, either VCF or CADD.");
+		}
+
+		if (!lineTypes.contains(CADD) && !lineTypes.contains(VCF))
+		{
+			throw new MolgenisDataException("Not a single valid variant line found.");
 		}
 
 		File exacInputFile = processedInputFile;
@@ -125,7 +131,7 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(5, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
-		progress.setResultUrl(format("{0}/result/{1}", path, gavinJobExecution.getIdentifier()));
+		progress.setResultUrl(format("{0}/job/{1}", path, jobIdentifier));
 
 		return null;
 	}

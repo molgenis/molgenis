@@ -13,10 +13,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.gavin.job.input.Files.getLines;
 import static org.molgenis.gavin.job.input.model.LineType.*;
@@ -44,7 +46,8 @@ public class Parser
 	private static final int VCF_NR_OF_COLUMNS = 5;
 	public static final int MAX_LINES = 100000;
 
-	private static Pattern CHROM_PATTERN = Pattern.compile("([Cc][Hh][Rr])?(?<chrom>([1-9])|(1[0-9])|(2[0-2])|[xX])");
+	private static Pattern CHROM_PATTERN = Pattern
+			.compile("([Cc][Hh][Rr])?(?<chrom>([1-9])|(1[0-9])|(2[0-2])|[xX]|[yY])");
 	private static Pattern REF_PATTERN = Pattern.compile("[ACTG]+");
 	private static Pattern ALT_PATTERN = Pattern.compile("[ACTG]+|\\.");
 
@@ -82,8 +85,14 @@ public class Parser
 	{
 		Multiset<LineType> lineTypes = EnumMultiset.create(LineType.class);
 		writeVcfHeader(outputSink);
-		lines.map(line -> transformLine(line, lineTypes.size(), outputSink, errorSink)).forEach(lineTypes::add);
+		lines.map(line -> transformLine(line, lineTypes.size(), countValidLines(lineTypes), outputSink, errorSink))
+				.forEach(lineTypes::add);
 		return lineTypes;
+	}
+
+	private int countValidLines(Multiset<LineType> lineTypes)
+	{
+		return lineTypes.count(VCF) + lineTypes.count(CADD);
 	}
 
 	private void writeVcfHeader(LineSink outputSink)
@@ -96,15 +105,15 @@ public class Parser
 	/**
 	 * Transforms a single line.
 	 *
-	 * @param line       the line to parse
-	 * @param numLines   the current number of lines
-	 * @param outputSink {@link LineSink} to write parsed variants to
-	 * @param errorSink  {@link LineSink} to write lines to that we cannot parse
+	 * @param line          the line to parse
+	 * @param numValidLines the number of valid lines already parsed
+	 * @param outputSink    {@link LineSink} to write parsed variants to
+	 * @param errorSink     {@link LineSink} to write lines to that we cannot parse
 	 * @return LineType of the parsed line
 	 */
-	public LineType transformLine(String line, int numLines, LineSink outputSink, LineSink errorSink)
+	public LineType transformLine(String line, int numLines, int numValidLines, LineSink outputSink, LineSink errorSink)
 	{
-		if (numLines >= MAX_LINES)
+		if (numValidLines >= MAX_LINES)
 		{
 			return SKIPPED;
 		}
@@ -115,7 +124,7 @@ public class Parser
 		Variant variant = parseVariant(line);
 		if (variant == null)
 		{
-			errorSink.accept(line);
+			errorSink.accept(format("Line %d:\t%s", numLines + 1, line));
 			return ERROR;
 		}
 		outputSink.accept(variant.toString());
@@ -158,7 +167,7 @@ public class Parser
 	 */
 	private boolean anyNull(Object... values)
 	{
-		return Arrays.stream(values).anyMatch(v -> v == null);
+		return Arrays.stream(values).anyMatch(Objects::isNull);
 	}
 
 	/**

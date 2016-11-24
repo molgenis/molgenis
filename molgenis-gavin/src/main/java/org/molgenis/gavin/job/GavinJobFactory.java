@@ -44,7 +44,8 @@ public class GavinJobFactory
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
 			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
-			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser, AnnotatorRunner annotatorRunner)
+			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser,
+			AnnotatorRunner annotatorRunner)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.transactionManager = requireNonNull(transactionManager);
@@ -71,8 +72,8 @@ public class GavinJobFactory
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
-				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution,
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner);
+				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, parser, annotatorRunner, gavinJobExecution);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()

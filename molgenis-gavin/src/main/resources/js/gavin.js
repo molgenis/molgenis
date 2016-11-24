@@ -1,5 +1,6 @@
 $(function () {
     var form = $('#gavin-form');
+    var jobHrefRegex = /.+\/([^\/]+)/;
 
     if (form.length) {
         React.render(molgenis.ui.UploadContainer({
@@ -8,12 +9,9 @@ $(function () {
             'type' : 'file',
             'name' : 'gavin-uploader',
             'width' : '12',
-            onCompletion : function (job) {
-                if (job.resultUrl) {
-                    molgenis.createAlert([{ message : 'Annotated ' + job.filename }], 'success');
-                    document.location = job.resultUrl;
-                } else {
-                    molgenis.createAlert([{ message : 'Failed to annotate file.' }], 'error')
+            onSubmit : function (jobHref) {
+                if ((match = jobHrefRegex.exec(jobHref)) !== null) {
+                    location.replace("gavin-app/job/" + match[1]);
                 }
             },
             validExtensions : ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz']
