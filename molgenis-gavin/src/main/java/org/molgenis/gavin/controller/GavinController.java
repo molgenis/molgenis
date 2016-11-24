@@ -1,6 +1,5 @@
 package org.molgenis.gavin.controller;
 
-import org.molgenis.data.DataService;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
@@ -33,7 +32,7 @@ import static java.io.File.separator;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.gavin.controller.GavinController.URI;
-import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -51,25 +50,25 @@ public class GavinController extends AbstractStaticContentController
 	public static final String TSV = "tsv";
 	public static final String GZ = "gz";
 
-	private DataService dataService;
 	private ExecutorService executorService;
 	private GavinJobFactory gavinJobFactory;
 	private GavinJobExecutionFactory gavinJobExecutionFactory;
 	private FileStore fileStore;
 	private UserAccountService userAccountService;
+	private SecureIdGenerator secureIdGenerator;
 
 	@Autowired
-	public GavinController(DataService dataService, ExecutorService executorService, GavinJobFactory gavinJobFactory,
+	public GavinController(ExecutorService executorService, GavinJobFactory gavinJobFactory,
 			GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
 			UserAccountService userAccountService)
 	{
 		super(GAVIN_APP, URI);
-		this.dataService = requireNonNull(dataService);
 		this.executorService = requireNonNull(executorService);
 		this.gavinJobFactory = requireNonNull(gavinJobFactory);
 		this.gavinJobExecutionFactory = requireNonNull(gavinJobExecutionFactory);
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
+		secureIdGenerator = new SecureIdGenerator();
 	}
 
 	/**
@@ -110,7 +109,7 @@ public class GavinController extends AbstractStaticContentController
 			extension = TSV_GZ;
 		}
 
-		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create();
+		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(secureIdGenerator.generateId());
 		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		gavinJobExecution.setInputFileExtension(extension);
@@ -125,9 +124,23 @@ public class GavinController extends AbstractStaticContentController
 		fileStore.writeToFile(inputFile.getInputStream(), fileName);
 
 		executorService.submit(gavinJob);
-		gavinJobExecution.setInputFileExtension(extension);
 
-		return "/api/v2/" + gavinJobExecution.getEntityType().getName() + "/" + gavinJobIdentifier;
+		return "/plugin/gavin-app/job/" + gavinJobIdentifier;
+	}
+
+	/**
+	 * Retrieves {@link GavinJobExecution} job.
+	 * May be called by anyone who has the identifier.
+	 *
+	 * @param jobIdentifier identifier of the annotation job
+	 * @return GavinJobExecution, or null if no GavinJobExecution exists with this ID.
+	 */
+	@RequestMapping(value = "/job/{jobIdentifier}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public
+	@ResponseBody
+	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
+	{
+		return gavinJobFactory.findGavinJobExecution(jobIdentifier);
 	}
 
 	/**
@@ -136,11 +149,10 @@ public class GavinController extends AbstractStaticContentController
 	 * @param jobIdentifier identifier of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/job/{jobIdentifier}", method = GET)
-	public String job(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model)
+	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
+	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model)
 	{
-		model.addAttribute("jobExecution",
-				dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class));
+		model.addAttribute("jobExecution", gavinJobFactory.findGavinJobExecution(jobIdentifier));
 		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
 		model.addAttribute("errorFileExists", getErrorFileForJob(jobIdentifier).exists());
 		return "view-gavin-result";
@@ -158,8 +170,12 @@ public class GavinController extends AbstractStaticContentController
 	public FileSystemResource download(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
-		GavinJobExecution jobExecution = dataService
-				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
+		if (jobExecution == null)
+		{
+			LOG.warn("GavinJobExecution with identifier {} not found.", jobIdentifier);
+			throw new FileNotFoundException("Job not found.");
+		}
 		File file = getDownloadFileForJob(jobIdentifier);
 		if (!file.exists())
 		{
@@ -192,8 +208,12 @@ public class GavinController extends AbstractStaticContentController
 	public Resource downloadErrorReport(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
-		GavinJobExecution jobExecution = dataService
-				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
+		if (jobExecution == null)
+		{
+			LOG.warn("GavinJobExecution with identifier {} not found.", jobIdentifier);
+			throw new FileNotFoundException("Job not found.");
+		}
 		response.setHeader("Content-Disposition",
 				format("inline; filename=\"{0}-error.txt\"", jobExecution.getFilename()));
 		final File file = getErrorFileForJob(jobIdentifier);
