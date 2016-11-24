@@ -7,6 +7,7 @@ import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +19,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,11 +60,12 @@ public class GavinController extends AbstractStaticContentController
 	private FileStore fileStore;
 	private UserAccountService userAccountService;
 	private SecureIdGenerator secureIdGenerator;
+	private final MenuReaderService menuReaderService;
 
 	@Autowired
 	public GavinController(ExecutorService executorService, GavinJobFactory gavinJobFactory,
 			GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
-			UserAccountService userAccountService)
+			UserAccountService userAccountService, MenuReaderService menuReaderService)
 	{
 		super(GAVIN_APP, URI);
 		this.executorService = requireNonNull(executorService);
@@ -69,6 +73,7 @@ public class GavinController extends AbstractStaticContentController
 		this.gavinJobExecutionFactory = requireNonNull(gavinJobExecutionFactory);
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
+		this.menuReaderService = menuReaderService;
 		secureIdGenerator = new SecureIdGenerator();
 	}
 
@@ -151,12 +156,29 @@ public class GavinController extends AbstractStaticContentController
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
 	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
-	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model)
+	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model,
+			HttpServletRequest request)
 	{
 		model.addAttribute("jobExecution", gavinJobFactory.findGavinJobExecution(jobIdentifier));
 		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
 		model.addAttribute("errorFileExists", getErrorFileForJob(jobIdentifier).exists());
+		model.addAttribute("pageUrl", getPageUrl(jobIdentifier, request));
 		return "view-gavin-result";
+	}
+
+	private String getPageUrl(String jobIdentifier, HttpServletRequest request)
+	{
+		String host;
+		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+		{
+			host = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort();
+		}
+		else
+		{
+			host = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host");
+		}
+		return format("{0}{1}/result/{2}", host, menuReaderService.getMenu().findMenuItemPath(GAVIN_APP),
+				jobIdentifier);
 	}
 
 	/**
@@ -198,7 +220,7 @@ public class GavinController extends AbstractStaticContentController
 	}
 
 	/**
-	 * Downloads the result of a gavin annotation job.
+	 * Downloads the error report of a gavin annotation job.
 	 *
 	 * @param response      {@link HttpServletResponse} to write the Content-Disposition header to with the filename
 	 * @param jobIdentifier GAVIN_APP of the annotation job

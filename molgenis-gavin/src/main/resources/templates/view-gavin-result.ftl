@@ -49,7 +49,17 @@
                     <h4>Execution log</h4>
                     <pre class="pre-scrollable">${jobExecution.log?html}</pre>
                 </#if>
+
+                <a class="btn btn-info" type="button" href="..">All done! Return to Gavin Upload page</a>
             </#if>
+                <button class="btn btn-info" type="button" data-toggle="collapse" data-target="#link">Show link to this
+                    page
+                </button>
+                <div class="collapse well" id="link">
+                    <p>Make sure to keep this link if you want to view your results later.
+                        They will remain available for 24 hours.</p>
+                    <a href="${pageUrl}">${pageUrl}</a>
+                </div>
             </div>
         </div>
     </div>
