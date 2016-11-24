@@ -131,7 +131,7 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(5, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
-		progress.setResultUrl(format("{0}/job/{1}", path, jobIdentifier));
+		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
 
 		return null;
 	}
