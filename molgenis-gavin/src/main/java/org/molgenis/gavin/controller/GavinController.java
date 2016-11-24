@@ -54,12 +54,12 @@ public class GavinController extends AbstractStaticContentController
 	public static final String TSV = "tsv";
 	public static final String GZ = "gz";
 
-	private ExecutorService executorService;
-	private GavinJobFactory gavinJobFactory;
-	private GavinJobExecutionFactory gavinJobExecutionFactory;
-	private FileStore fileStore;
-	private UserAccountService userAccountService;
-	private SecureIdGenerator secureIdGenerator;
+	private final ExecutorService executorService;
+	private final GavinJobFactory gavinJobFactory;
+	private final GavinJobExecutionFactory gavinJobExecutionFactory;
+	private final FileStore fileStore;
+	private final UserAccountService userAccountService;
+	private final SecureIdGenerator secureIdGenerator;
 	private final MenuReaderService menuReaderService;
 
 	@Autowired
