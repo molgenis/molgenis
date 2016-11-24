@@ -7,7 +7,7 @@ import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 @RequestMapping(URI)
 @EnableScheduling
-public class GavinController extends MolgenisPluginController
+public class GavinController extends AbstractStaticContentController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GavinController.class);
 
@@ -63,7 +63,7 @@ public class GavinController extends MolgenisPluginController
 			GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
 			UserAccountService userAccountService)
 	{
-		super(URI);
+		super(GAVIN_APP, URI);
 		this.dataService = requireNonNull(dataService);
 		this.executorService = requireNonNull(executorService);
 		this.gavinJobFactory = requireNonNull(gavinJobFactory);
@@ -82,6 +82,7 @@ public class GavinController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
+		super.init(model);
 		List<String> annotatorsWithMissingResources = gavinJobFactory.getAnnotatorsWithMissingResources();
 		if (!annotatorsWithMissingResources.isEmpty())
 		{
