@@ -98,8 +98,9 @@ public class Parser
 	private void writeVcfHeader(LineSink outputSink)
 	{
 		outputSink.accept("##fileformat=VCFv4.0");
+		outputSink.accept("##INFO=<ID=CADD,Number=.,Type=String,Description=\"Raw CADD score\">");
+		outputSink.accept("##INFO=<ID=CADD_SCALED,Number=.,Type=String,Description=\"Scaled CADD score\">");
 		outputSink.accept("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO");
-		//TODO: add cadd info metadata
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class Parser
 		{
 			return COMMENT;
 		}
-		Variant variant = parseVariant(line);
+		Variant variant = tryParseVariant(line);
 		if (variant == null)
 		{
 			errorSink.accept(format("Line %d:\t%s", numLines + 1, line));
@@ -148,15 +149,24 @@ public class Parser
 	 * @param line the line to parse
 	 * @return parsed Variant, or null if the line could not be parsed
 	 */
-	public Variant parseVariant(String line)
+	public Variant tryParseVariant(String line)
+	{
+		try
+		{
+			return parseVariant(line);
+		}
+		catch (Exception ex)
+		{
+			LOG.debug("Error parsing line {}", line, ex);
+			return null;
+		}
+	}
+
+	private Variant parseVariant(String line)
 	{
 		String[] columns = line.split("\t");
 		Variant caddVariant = parseCaddLine(columns);
-		if (caddVariant != null)
-		{
-			return caddVariant;
-		}
-		return parseVcfLine(columns);
+		return caddVariant != null ? caddVariant : parseVcfLine(columns);
 	}
 
 	/**
