@@ -47,7 +47,7 @@
                 </#if>
                 <#if jobExecution.log??>
                     <h4>Execution log</h4>
-                    <pre>${jobExecution.log}</pre>
+                    <pre class="pre-scrollable">${jobExecution.log?html}</pre>
                 </#if>
             </#if>
             </div>
