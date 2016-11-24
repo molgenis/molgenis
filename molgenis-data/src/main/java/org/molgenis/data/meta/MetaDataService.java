@@ -4,9 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 
 import java.util.Collection;
@@ -148,6 +146,13 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param packages packages
 	 */
 	void upsertPackages(Stream<Package> packages);
+
+	/**
+	 * Add or update tags
+	 *
+	 * @param tags tags
+	 */
+	void upsertTags(Collection<Tag> tags);
 
 	/**
 	 * Gets the entity type for a given entity.
