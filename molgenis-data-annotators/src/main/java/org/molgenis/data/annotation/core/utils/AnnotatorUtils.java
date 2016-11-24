@@ -106,7 +106,13 @@ public class AnnotatorUtils
 				.setDataType(COMPOUND).setLabel(annotator.getSimpleName());
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
 				.forEachOrdered(part -> part.setParent(compound));
+
 		entityType.addAttribute(compound);
+		// Only add attributes that do not already exist. We assume existing attributes are added in a previous annotation run.
+		// This is a potential risk if an attribute with that name already exist that was not added by the annotator.
+		// This risk is relatively low since annotator attributes are prefixed.
+		attributes = attributes.stream().filter(attribute -> entityType.getAttribute(attribute.getName()) == null)
+				.collect(Collectors.toList());
 		entityType.addAttributes(attributes);
 	}
 
