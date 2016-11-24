@@ -3,13 +3,14 @@ import {Button} from "./Button";
 import {Input} from "./Input";
 import {RadioGroup} from "./RadioGroup";
 
-var UploadForm = React.createClass({
+const UploadForm = React.createClass({
     displayName: 'UploadForm',
     propTypes: {
         width: React.PropTypes.oneOf(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']),
         showAction: React.PropTypes.bool,
         onSubmit: React.PropTypes.func.isRequired,
-        validExtensions: React.PropTypes.array
+        validExtensions: React.PropTypes.array,
+        showNameFieldExtensions: React.PropTypes.array
     },
     getInitialState: function () {
         return {
@@ -22,12 +23,13 @@ var UploadForm = React.createClass({
     getDefaultProps: function () {
         return {
             width: '6',
-            showAction: false
+            showAction: false,
+            showNameFieldExtensions: ['.vcf', '.vcf.gz']
         };
     },
     render: function () {
-        var gridWidth = this.props.width ? 'col-md-' + this.props.width : 'col-md-12';
-        var actions = [{value: 'ADD', label: 'ADD'}, {
+        const gridWidth = this.props.width ? 'col-md-' + this.props.width : 'col-md-12';
+        const actions = [{value: 'ADD', label: 'ADD'}, {
             value: 'ADD_UPDATE_EXISTING',
             label: 'ADD/UPDATE'
         }, {value: 'UPDATE', label: 'UPDATE'}];
@@ -35,7 +37,7 @@ var UploadForm = React.createClass({
             <div className={gridWidth}>
                 <div className='form-group'>
                     <input type="file" onChange={this._setFile}/>
-                    {this.state.warning && <span id="helpBlock" class="help-block">{this.state.warning}</span>}
+                    {this.state.warning && <span id="helpBlock" className="help-block">{this.state.warning}</span>}
                 </div>
 
                 {this.state.showNameField &&
@@ -61,20 +63,20 @@ var UploadForm = React.createClass({
     },
     _setFile: function (event) {
         const file = event.target.files[0];
-        var fileName = file.name.toLowerCase();
-        var showNameField = fileName.endsWith('.vcf') || fileName.endsWith('.vcf.gz');
+        let fileName = file.name.toLowerCase();
+        const showNameField = this.props.showNameFieldExtensions.some(extension => fileName.endsWith(extension));
         if (this.props.validExtensions && !this.props.validExtensions.find((extension) => fileName.endsWith(extension))) {
             this.setState({warning: 'Invalid file name, extension must be ' + this.props.validExtensions})
         } else {
             if (showNameField) {
                 // Remove extension
-                fileName = fileName.replace(/\.vcf|\.vcf\.gz/, '');
+                fileName = fileName.replace(/\.[^.]*$/, '');
                 // Maximum length is 30 chars, but we need to take into account that the samples are post fixed "_SAMPLES"
                 fileName = fileName.substring(0, 21);
                 // Remove illegal chars
                 fileName = fileName.replace(/\-|\.|\*|\$|\&|\%|\^|\(|\)|\#|\!|\@|\?/g, '_');
                 // Don't allow entitynames starting with a number
-                fileName = fileName.replace(/^[0-9]/g, '_');
+                fileName = fileName.replace(/^[0-9 ]/g, '_');
                 this.setState({fileName});
             }
             this.setState({file, showNameField, warning: undefined});
