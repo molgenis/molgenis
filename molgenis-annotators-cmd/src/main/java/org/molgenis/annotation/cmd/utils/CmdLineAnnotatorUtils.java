@@ -176,7 +176,7 @@ public class CmdLineAnnotatorUtils
 				.getAtomicAttributesFromList(vcfRepo.getEntityType().getAtomicAttributes()).stream()
 				.map(Attribute::getName).collect(Collectors.toList());
 
-		for (Object attrName : attributesToInclude)
+		for (String attrName : attributesToInclude)
 		{
 			if (!outputAttributeNames.contains(attrName))
 			{
