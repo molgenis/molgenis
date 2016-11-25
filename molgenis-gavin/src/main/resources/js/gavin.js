@@ -11,7 +11,7 @@ $(function () {
             'width': '12',
             onSubmit: function (jobHref) {
                 if ((match = jobHrefRegex.exec(jobHref)) !== null) {
-                    location.replace("gavin-app/job/" + match[1]);
+                    location.replace(molgenis.getContextUrl() + "/result/" + match[1]);
                 }
             },
             validExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz'],
