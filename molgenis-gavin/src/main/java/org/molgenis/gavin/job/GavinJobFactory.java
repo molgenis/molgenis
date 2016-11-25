@@ -9,6 +9,8 @@ import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
@@ -27,6 +29,8 @@ import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EX
 @Component
 public class GavinJobFactory
 {
+	private static final Logger LOG = LoggerFactory.getLogger(GavinJobFactory.class);
+
 	private final Parser parser;
 	private DataService dataService;
 	private PlatformTransactionManager transactionManager;
@@ -87,11 +91,19 @@ public class GavinJobFactory
 	 * Retrieves a {@link GavinJobExecution} for anyone who has the identifier, without checking their permissions.
 	 *
 	 * @param jobIdentifier the identifier of the {@link GavinJobExecution}
-	 * @return GavinJobExecution with the specified identifier, if it exists, or else null
+	 * @return GavinJobExecution with the specified identifier, if it exists
+	 * @throws JobNotFoundException if no GavinJobExecution with the specified identifier exists.
 	 */
 	@RunAsSystem
-	public GavinJobExecution findGavinJobExecution(String jobIdentifier)
+	public GavinJobExecution findGavinJobExecution(String jobIdentifier) throws JobNotFoundException
 	{
-		return dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		GavinJobExecution result = dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		if (result == null)
+		{
+
+			throw new JobNotFoundException("Job not found.");
+		}
+		return result;
 	}
+
 }
