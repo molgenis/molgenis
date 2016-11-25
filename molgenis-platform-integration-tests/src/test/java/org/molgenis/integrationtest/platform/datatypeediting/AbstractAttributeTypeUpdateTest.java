@@ -1,10 +1,10 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
