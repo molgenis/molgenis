@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 

@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.DannAnnotatorSettings.Meta.DANN_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class DannAnnotator implements AnnotatorConfig

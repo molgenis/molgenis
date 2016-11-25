@@ -1,4 +1,4 @@
-package org.molgenis.ui;
+package org.molgenis.bootstrap.i18n;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;

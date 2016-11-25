@@ -94,6 +94,7 @@ public class ImporterConfiguration
 	public MetaDataParser emxMetaDataParser()
 	{
 		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
-				languageFactory, i18nStringFactory, entityTypeValidator, attributeValidator);
+				languageFactory, i18nStringFactory, entityTypeValidator, attributeValidator,
+				entityTypeDependencyResolver);
 	}
 }

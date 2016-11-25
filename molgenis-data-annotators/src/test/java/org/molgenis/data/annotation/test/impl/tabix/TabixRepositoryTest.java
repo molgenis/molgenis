@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

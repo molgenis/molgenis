@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;

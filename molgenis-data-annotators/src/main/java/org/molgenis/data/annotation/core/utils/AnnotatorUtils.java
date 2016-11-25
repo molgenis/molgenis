@@ -1,6 +1,5 @@
 package org.molgenis.data.annotation.core.utils;
 
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -24,8 +23,8 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.AttributeType.COMPOUND;
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.MREF;
 
 public class AnnotatorUtils
 {

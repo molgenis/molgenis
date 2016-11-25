@@ -31,10 +31,10 @@ import java.util.Iterator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.*;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.*;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.testng.Assert.*;
 
 /***

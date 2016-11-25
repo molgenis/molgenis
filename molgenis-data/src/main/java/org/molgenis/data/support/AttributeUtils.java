@@ -1,11 +1,11 @@
 package org.molgenis.data.support;
 
-import org.molgenis.AttributeType;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.util.EnumSet;
 
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 
 public class AttributeUtils
 {
