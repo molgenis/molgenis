@@ -67,7 +67,7 @@ public class ParserTest
 	@Test(dataProvider = "line")
 	public void testParseVariant(String input, Variant expected)
 	{
-		Assert.assertEquals(lineParser.parseVariant(input), expected);
+		Assert.assertEquals(lineParser.tryParseVariant(input), expected);
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
+import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
 
 @Component
 public class GavinJobFactory
@@ -80,5 +81,17 @@ public class GavinJobFactory
 	{
 		return of(cadd, exac, snpEff, gavin).filter(annotator -> !annotator.annotationDataExists())
 				.map(RepositoryAnnotator::getSimpleName).collect(toList());
+	}
+
+	/**
+	 * Retrieves a {@link GavinJobExecution} for anyone who has the identifier, without checking their permissions.
+	 *
+	 * @param jobIdentifier the identifier of the {@link GavinJobExecution}
+	 * @return GavinJobExecution with the specified identifier, if it exists, or else null
+	 */
+	@RunAsSystem
+	public GavinJobExecution findGavinJobExecution(String jobIdentifier)
+	{
+		return dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
 	}
 }

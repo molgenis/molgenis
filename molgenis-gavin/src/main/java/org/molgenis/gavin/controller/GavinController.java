@@ -1,13 +1,13 @@
 package org.molgenis.gavin.controller;
 
-import org.molgenis.data.DataService;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.controller.AbstractStaticContentController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +19,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,9 +33,10 @@ import java.util.concurrent.ExecutorService;
 
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
+import static java.time.ZonedDateTime.now;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.gavin.controller.GavinController.URI;
-import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -41,7 +44,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 @RequestMapping(URI)
 @EnableScheduling
-public class GavinController extends MolgenisPluginController
+public class GavinController extends AbstractStaticContentController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GavinController.class);
 
@@ -51,25 +54,27 @@ public class GavinController extends MolgenisPluginController
 	public static final String TSV = "tsv";
 	public static final String GZ = "gz";
 
-	private DataService dataService;
-	private ExecutorService executorService;
-	private GavinJobFactory gavinJobFactory;
-	private GavinJobExecutionFactory gavinJobExecutionFactory;
-	private FileStore fileStore;
-	private UserAccountService userAccountService;
+	private final ExecutorService executorService;
+	private final GavinJobFactory gavinJobFactory;
+	private final GavinJobExecutionFactory gavinJobExecutionFactory;
+	private final FileStore fileStore;
+	private final UserAccountService userAccountService;
+	private final SecureIdGenerator secureIdGenerator;
+	private final MenuReaderService menuReaderService;
 
 	@Autowired
-	public GavinController(DataService dataService, ExecutorService executorService, GavinJobFactory gavinJobFactory,
+	public GavinController(ExecutorService executorService, GavinJobFactory gavinJobFactory,
 			GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
-			UserAccountService userAccountService)
+			UserAccountService userAccountService, MenuReaderService menuReaderService)
 	{
-		super(URI);
-		this.dataService = requireNonNull(dataService);
+		super(GAVIN_APP, URI);
 		this.executorService = requireNonNull(executorService);
 		this.gavinJobFactory = requireNonNull(gavinJobFactory);
 		this.gavinJobExecutionFactory = requireNonNull(gavinJobExecutionFactory);
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
+		this.menuReaderService = menuReaderService;
+		secureIdGenerator = new SecureIdGenerator();
 	}
 
 	/**
@@ -82,6 +87,7 @@ public class GavinController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
+		super.init(model);
 		List<String> annotatorsWithMissingResources = gavinJobFactory.getAnnotatorsWithMissingResources();
 		if (!annotatorsWithMissingResources.isEmpty())
 		{
@@ -109,7 +115,7 @@ public class GavinController extends MolgenisPluginController
 			extension = TSV_GZ;
 		}
 
-		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create();
+		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(secureIdGenerator.generateId());
 		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		gavinJobExecution.setInputFileExtension(extension);
@@ -124,9 +130,23 @@ public class GavinController extends MolgenisPluginController
 		fileStore.writeToFile(inputFile.getInputStream(), fileName);
 
 		executorService.submit(gavinJob);
-		gavinJobExecution.setInputFileExtension(extension);
 
-		return "/api/v2/" + gavinJobExecution.getEntityType().getName() + "/" + gavinJobIdentifier;
+		return "/plugin/gavin-app/job/" + gavinJobIdentifier;
+	}
+
+	/**
+	 * Retrieves {@link GavinJobExecution} job.
+	 * May be called by anyone who has the identifier.
+	 *
+	 * @param jobIdentifier identifier of the annotation job
+	 * @return GavinJobExecution, or null if no GavinJobExecution exists with this ID.
+	 */
+	@RequestMapping(value = "/job/{jobIdentifier}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public
+	@ResponseBody
+	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
+	{
+		return gavinJobFactory.findGavinJobExecution(jobIdentifier);
 	}
 
 	/**
@@ -135,14 +155,30 @@ public class GavinController extends MolgenisPluginController
 	 * @param jobIdentifier identifier of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/job/{jobIdentifier}", method = GET)
-	public String job(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model)
+	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
+	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model,
+			HttpServletRequest request)
 	{
-		model.addAttribute("jobExecution",
-				dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class));
+		model.addAttribute("jobExecution", gavinJobFactory.findGavinJobExecution(jobIdentifier));
 		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
 		model.addAttribute("errorFileExists", getErrorFileForJob(jobIdentifier).exists());
+		model.addAttribute("pageUrl", getPageUrl(jobIdentifier, request));
 		return "view-gavin-result";
+	}
+
+	private String getPageUrl(String jobIdentifier, HttpServletRequest request)
+	{
+		String host;
+		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+		{
+			host = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort();
+		}
+		else
+		{
+			host = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host");
+		}
+		return format("{0}{1}/result/{2}", host, menuReaderService.getMenu().findMenuItemPath(GAVIN_APP),
+				jobIdentifier);
 	}
 
 	/**
@@ -157,8 +193,12 @@ public class GavinController extends MolgenisPluginController
 	public FileSystemResource download(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
-		GavinJobExecution jobExecution = dataService
-				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
+		if (jobExecution == null)
+		{
+			LOG.warn("GavinJobExecution with identifier {} not found.", jobIdentifier);
+			throw new FileNotFoundException("Job not found.");
+		}
 		File file = getDownloadFileForJob(jobIdentifier);
 		if (!file.exists())
 		{
@@ -180,7 +220,7 @@ public class GavinController extends MolgenisPluginController
 	}
 
 	/**
-	 * Downloads the result of a gavin annotation job.
+	 * Downloads the error report of a gavin annotation job.
 	 *
 	 * @param response      {@link HttpServletResponse} to write the Content-Disposition header to with the filename
 	 * @param jobIdentifier GAVIN_APP of the annotation job
@@ -191,8 +231,12 @@ public class GavinController extends MolgenisPluginController
 	public Resource downloadErrorReport(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
-		GavinJobExecution jobExecution = dataService
-				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
+		if (jobExecution == null)
+		{
+			LOG.warn("GavinJobExecution with identifier {} not found.", jobIdentifier);
+			throw new FileNotFoundException("Job not found.");
+		}
 		response.setHeader("Content-Disposition",
 				format("inline; filename=\"{0}-error.txt\"", jobExecution.getFilename()));
 		final File file = getErrorFileForJob(jobIdentifier);
@@ -220,16 +264,25 @@ public class GavinController extends MolgenisPluginController
 	}
 
 	/**
-	 * Removes the working directory from the file store.
+	 * Removes old files in the gavin working directory from the file store.
 	 */
-	@Scheduled(cron = "0 0 0 * * *")
+	@Scheduled(cron = "0 0 * * * *")
 	public void cleanUp()
 	{
-		LOG.info("Clean up working directory in the file store...");
+		LOG.debug("Clean up old jobs in the file store...");
 		try
 		{
-			fileStore.deleteDirectory(GAVIN_APP);
-			LOG.info("Done.");
+			final File[] oldFiles = fileStore.getFile(GAVIN_APP)
+					.listFiles(file -> file.lastModified() / 1000 < now().minusHours(24).toEpochSecond());
+			if (oldFiles != null)
+			{
+				for (File file : oldFiles)
+				{
+					LOG.info("Deleting job directory {}", file.getName());
+					fileStore.deleteDirectory(GAVIN_APP + separator + file.getName());
+				}
+			}
+			LOG.debug("Done.");
 		}
 		catch (IOException e)
 		{
