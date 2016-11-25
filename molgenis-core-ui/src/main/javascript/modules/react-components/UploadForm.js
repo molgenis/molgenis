@@ -11,7 +11,7 @@ const UploadForm = React.createClass({
         onSubmit: React.PropTypes.func.isRequired,
         validExtensions: React.PropTypes.array,
         showNameFieldExtensions: React.PropTypes.array,
-        maxFileSize: React.PropTypes.number
+        maxFileSizeMB: React.PropTypes.number
     },
     getInitialState: function () {
         return {
@@ -26,7 +26,7 @@ const UploadForm = React.createClass({
             width: '6',
             showAction: false,
             showNameFieldExtensions: ['.vcf', '.vcf.gz'],
-            maxFileSize: 150 * 1024 * 1024
+            maxFileSizeMB: 150
         }
     },
     render: function () {
@@ -66,9 +66,9 @@ const UploadForm = React.createClass({
     _setFile: function (event) {
         const file = event.target.files[0];
         let fileName = file.name.toLowerCase();
-        if (file.size > this.props.maxFileSize) {
+        if (file.size > this.props.maxFileSizeMB * 1024 * 1024) {
             this.setState({
-                warning: 'File larger than max file size of ' + this.props.maxFileSize + ' bytes.',
+                warning: 'File is larger than maximum file size of ' + this.props.maxFileSizeMB + ' MB.',
                 file: undefined,
                 showNameField: false
             });
