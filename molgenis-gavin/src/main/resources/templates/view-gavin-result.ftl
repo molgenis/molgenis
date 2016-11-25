@@ -18,6 +18,9 @@
             <#if jobExecution.status == 'RUNNING' || jobExecution.status == 'PENDING'>
             <#-- Job running, show progress -->
                 <div id="gavin-job" data-execution-id="${jobExecution.identifier}"></div>
+                <p>Job running. Check back later at <a
+                        href="${pageUrl}">${pageUrl}</a>.
+                    Results will remain available for 24 hours.</p>
             <#else>
             <#-- Job finished -->
                 <h4>Input</h4>
@@ -30,21 +33,28 @@
                     <#if jobExecution.vcfs?? && jobExecution.vcfs gt 0 >
                         <li>${jobExecution.vcfs} valid VCF lines</li></#if>
                     <#if jobExecution.errors?? && jobExecution.errors gt 0 >
-                        <li>${jobExecution.errors} error lines.
-                            <#if errorFileExists> <a href="/plugin/gavin-app/error/${jobExecution.identifier}">These
-                                lines</a> couldn't be
-                                parsed.
-                            <#else>Error file no longer available. Job results are removed nightly.
+                        <li>${jobExecution.errors} error lines (could not be
+                            parsed
+                            <#if errorFileExists>, check <a
+                                    href="/plugin/gavin-app/error/${jobExecution.identifier}"><span
+                                    class="glyphicon glyphicon-file" aria-hidden="true"></span>failed lines</a> )
+                            <#else>. Error file no longer available. Results are removed after 24 hours.
                             </#if>
                         </li></#if>
+                    <#if jobExecution.skippeds?? && jobExecution.skippeds gt 0 >
+                        <li>${jobExecution.skippeds} skipped lines. Too much input.</li></#if>
                 </ul>
+                <h4>Results</h4>
                 <#if jobExecution.status == 'SUCCESS'>
-                    <h4>Download</h4>
-                    <#if downloadFileExists><a
-                            href="/plugin/gavin-app/download/${jobExecution.identifier}">Download ${jobExecution.filename}</a>
-                    <#else>Download file no longer available. Job results are removed nightly.
+                    <#if downloadFileExists>Download <a
+                            href="/plugin/gavin-app/download/${jobExecution.identifier}"><span
+                            class="glyphicon glyphicon-file" aria-hidden="true"></span>${jobExecution.filename}</a>
+                    <#else>Download file no longer available. Results are removed after 24 hours.
                     </#if>
+                <#else>
+                    There was a problem, no results available. Check execution log for details.
                 </#if>
+                <p>This page will remain available for 24 hours here on <a href="${pageUrl}">${pageUrl}</a>.</p>
                 <#if jobExecution.log??>
                     <h4>Execution log</h4>
                     <pre class="pre-scrollable">${jobExecution.log?html}</pre>
@@ -52,14 +62,6 @@
 
                 <a class="btn btn-info" type="button" href="..">All done! Return to Gavin Upload page</a>
             </#if>
-                <button class="btn btn-info" type="button" data-toggle="collapse" data-target="#link">Show link to this
-                    page
-                </button>
-                <div class="collapse well" id="link">
-                    <p>Make sure to keep this link if you want to view your results later.
-                        They will remain available for 24 hours.</p>
-                    <a href="${pageUrl}">${pageUrl}</a>
-                </div>
             </div>
         </div>
     </div>
