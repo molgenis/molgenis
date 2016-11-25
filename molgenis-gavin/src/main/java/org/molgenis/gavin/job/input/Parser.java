@@ -128,8 +128,20 @@ public class Parser
 			errorSink.accept(format("Line %d:\t%s", numLines + 1, line));
 			return ERROR;
 		}
+		//line is of a valid format, if it is not a cadd variant, check if it is not an indel
+		if (variant instanceof VcfVariant && isIndelWithoutCadd(variant))
+		{
+			errorSink.accept(format("Line %d:\t%s", numLines + 1, line));
+			return INDEL_NOCADD;
+		}
 		outputSink.accept(variant.toString());
 		return variant.getLineType();
+	}
+
+	private boolean isIndelWithoutCadd(Variant variant)
+	{
+		VcfVariant vcfVariant = (VcfVariant) variant;
+		return vcfVariant.getRef().length() > 1 || vcfVariant.getAlt().length() > 1;
 	}
 
 	/**
@@ -239,6 +251,7 @@ public class Parser
 		{
 			return null;
 		}
+		//FIXME Check indels
 		return VcfVariant.create(chrom, pos, id, ref, alt);
 	}
 

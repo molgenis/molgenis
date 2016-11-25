@@ -58,6 +58,7 @@ public class GavinJobExecution extends JobExecution
 		set(VCFS, lineTypes.count(VCF));
 		set(CADDS, lineTypes.count(CADD));
 		set(ERRORS, lineTypes.count(ERROR));
+		set(INDELS_NOCADD, lineTypes.count(INDEL_NOCADD));
 		set(SKIPPEDS, lineTypes.count(SKIPPED));
 	}
 
@@ -68,6 +69,7 @@ public class GavinJobExecution extends JobExecution
 		builder.addCopies(VCF, getInt(VCFS));
 		builder.addCopies(CADD, getInt(CADDS));
 		builder.addCopies(ERROR, getInt(ERRORS));
+		builder.addCopies(INDEL_NOCADD, getInt(INDELS_NOCADD));
 		builder.addCopies(SKIPPED, getInt(SKIPPEDS));
 		return builder.build();
 	}
