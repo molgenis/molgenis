@@ -145,7 +145,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return attribute sequence number
 	 */
-	public int getSequenceNumber()
+	public Integer getSequenceNumber()
 	{
 		return getInt(SEQUENCE_NR);
 	}

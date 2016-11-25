@@ -3,7 +3,9 @@ package org.molgenis.data.support;
 import org.molgenis.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
-import static java.lang.String.format;
+import java.util.EnumSet;
+
+import static org.molgenis.AttributeType.*;
 
 public class AttributeUtils
 {
@@ -24,32 +26,11 @@ public class AttributeUtils
 	 */
 	public static boolean isIdAttributeTypeAllowed(Attribute attr)
 	{
-		AttributeType attrType = attr.getDataType();
-		switch (attrType)
-		{
-			case BOOL:
-			case CATEGORICAL:
-			case CATEGORICAL_MREF:
-			case COMPOUND:
-			case DATE:
-			case DATE_TIME:
-			case DECIMAL:
-			case ENUM:
-			case FILE:
-			case HTML:
-			case MREF:
-			case SCRIPT:
-			case TEXT:
-			case XREF:
-				return false;
-			case EMAIL:
-			case HYPERLINK:
-			case INT:
-			case LONG:
-			case STRING:
-				return true;
-			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
-		}
+		return getValidIdAttributeTypes().contains(attr.getDataType());
+	}
+
+	public static EnumSet<AttributeType> getValidIdAttributeTypes()
+	{
+		return EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK);
 	}
 }

@@ -89,7 +89,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 
 		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
 		anonymousHomeAuthority.setUser(anonymousUser);
-		anonymousHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
+		anonymousHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId);
 
 		// create all users group
 		Group allUsersGroup = groupFactory.create();
@@ -98,12 +98,12 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		// allow all users to see the home plugin
 		GroupAuthority usersGroupHomeAuthority = groupAuthorityFactory.create();
 		usersGroupHomeAuthority.setGroup(allUsersGroup);
-		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
+		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId);
 
 		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
 		usersGroupUserAccountAuthority.setGroup(allUsersGroup);
-		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + userAccountControllerId.toUpperCase());
+		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + userAccountControllerId);
 
 		// allow all users to read meta data entities
 		List<String> entityNames = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, I18N_STRING);

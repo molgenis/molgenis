@@ -211,7 +211,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
-		public int getSequenceNumber()
+		public Integer getSequenceNumber()
 		{
 			return attr.getSequenceNumber();
 		}

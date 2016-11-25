@@ -2,9 +2,9 @@ package org.molgenis.security.permission;
 
 import com.google.common.collect.Lists;
 import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 
 @Component
 public class PermissionSystemService
@@ -59,8 +59,7 @@ public class PermissionSystemService
 					{
 						if (permission != Permission.NONE)
 						{
-							String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_" + entity
-									.toUpperCase();
+							String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_" + entity;
 							roles.add(new SimpleGrantedAuthority(role));
 							UserAuthority userAuthority = userAuthorityFactory.create();
 							userAuthority.setUser(user);
