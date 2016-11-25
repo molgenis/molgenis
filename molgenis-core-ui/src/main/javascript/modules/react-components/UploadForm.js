@@ -10,7 +10,8 @@ const UploadForm = React.createClass({
         showAction: React.PropTypes.bool,
         onSubmit: React.PropTypes.func.isRequired,
         validExtensions: React.PropTypes.array,
-        showNameFieldExtensions: React.PropTypes.array
+        showNameFieldExtensions: React.PropTypes.array,
+        maxFileSize: React.PropTypes.number
     },
     getInitialState: function () {
         return {
@@ -24,8 +25,9 @@ const UploadForm = React.createClass({
         return {
             width: '6',
             showAction: false,
-            showNameFieldExtensions: ['.vcf', '.vcf.gz']
-        };
+            showNameFieldExtensions: ['.vcf', '.vcf.gz'],
+            maxFileSize: 150 * 1024 * 1024
+        }
     },
     render: function () {
         const gridWidth = this.props.width ? 'col-md-' + this.props.width : 'col-md-12';
@@ -64,10 +66,22 @@ const UploadForm = React.createClass({
     _setFile: function (event) {
         const file = event.target.files[0];
         let fileName = file.name.toLowerCase();
-        const showNameField = this.props.showNameFieldExtensions.some(extension => fileName.endsWith(extension));
+        if (file.size > this.props.maxFileSize) {
+            this.setState({
+                warning: 'File larger than max file size of ' + this.props.maxFileSize + ' bytes.',
+                file: undefined,
+                showNameField: false
+            });
+            return;
+        }
         if (this.props.validExtensions && !this.props.validExtensions.find((extension) => fileName.endsWith(extension))) {
-            this.setState({warning: 'Invalid file name, extension must be ' + this.props.validExtensions})
+            this.setState({
+                warning: 'Invalid file name, extension must be ' + this.props.validExtensions,
+                file: undefined,
+                showNameField: false
+            })
         } else {
+            const showNameField = this.props.showNameFieldExtensions.some(extension => fileName.endsWith(extension));
             if (showNameField) {
                 // Remove extension
                 fileName = fileName.replace(/\.[^.]*$/, '');

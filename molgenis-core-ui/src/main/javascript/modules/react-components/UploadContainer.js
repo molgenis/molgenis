@@ -11,11 +11,13 @@ var UploadContainer = React.createClass({
         onSubmit: React.PropTypes.func,
         onCompletion: React.PropTypes.func,
         validExtensions: React.PropTypes.array,
-        showNameFieldExtensions: React.PropTypes.array
+        showNameFieldExtensions: React.PropTypes.array,
+        maxFileSize: React.PropTypes.number
     },
     getDefaultProps: function () {
         return {
-            showNameFieldExtensions: ['.vcf', '.vcf.gz']
+            showNameFieldExtensions: ['.vcf', '.vcf.gz'],
+            maxFileSize: 150 * 1024 * 1024
         }
     },
     getInitialState: function () {
@@ -57,6 +59,7 @@ var UploadContainer = React.createClass({
                 onSubmit={this._onSubmit}
                 validExtensions={this.props.validExtensions}
                 showNameFieldExtensions={this.props.showNameFieldExtensions}
+                maxFileSize={this.props.maxFileSize}
             />}
         </div>
     },
