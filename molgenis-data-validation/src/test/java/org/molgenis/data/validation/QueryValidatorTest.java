@@ -198,6 +198,8 @@ public class QueryValidatorTest
 		EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM, XREF, MREF, CATEGORICAL, CATEGORICAL_MREF).forEach(
 				attrType -> queries
 						.add(new Object[] { new QueryImpl().eq("attr", new Object()), createEntityType(attrType) }));
+		queries.add(new Object[] { new QueryImpl().eq("unknownAttr", "str"), createEntityType(STRING) });
+		queries.add(new Object[] { new QueryImpl().eq("attr", "str"), createEntityType(COMPOUND) });
 		return queries.iterator();
 	}
 

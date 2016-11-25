@@ -189,7 +189,8 @@ public class QueryValidator
 				value = convertLong(attr, queryRuleValue);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Attribute [%s] type [%s] is not allowed", attr.getName(), attrType.toString())));
 			default:
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
