@@ -30,7 +30,7 @@ public class GavinAlgorithmTest
 	}
 
 	@DataProvider(name = "classifyVariant")
-	public Object[][] createData1()
+	public Object[][] classifyVariant()
 	{
 		return new Object[][] {
 				{ MODERATE, 33.0, 0.0, "MTOR", 0.0, 31.04, 22.49, 34.45, 26.64, C1, Pathogenic, calibrated,
@@ -124,7 +124,4 @@ public class GavinAlgorithmTest
 						.classifyVariant(HIGH, 80.0, 1e-5, "ABCD1", GavinThresholds.create(0.0, null, null, null, null, I1)),
 				Judgment.create(Benign, calibrated, "ABCD1", "Variant MAF of 1.0E-5 is greater than 0.0."));
 	}
-
-	//TODO: Add more unit tests for GavinAlgorithm, now that we easily can!
-
 }
