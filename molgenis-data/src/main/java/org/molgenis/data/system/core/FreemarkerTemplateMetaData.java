@@ -3,7 +3,7 @@ package org.molgenis.data.system.core;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.AttributeType.SCRIPT;
+import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;

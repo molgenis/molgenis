@@ -9,7 +9,10 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +20,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class RepositoryValidationDecoratorTest

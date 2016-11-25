@@ -16,7 +16,7 @@ import org.molgenis.security.core.Permission;
 
 import java.util.List;
 
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 

@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import static freemarker.template.utility.Collections12.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.*;
 
 public class EntityManagerImplTest

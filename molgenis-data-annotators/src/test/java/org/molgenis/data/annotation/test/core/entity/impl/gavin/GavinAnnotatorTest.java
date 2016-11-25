@@ -14,6 +14,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -22,6 +23,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.GenericDependencyResolver;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -42,9 +44,9 @@ import java.util.stream.StreamSupport;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.entity.impl.gavin.GavinAnnotator.*;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { GavinAnnotatorTest.Config.class, GavinAnnotator.class })
@@ -89,8 +91,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 						.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
 						.collect(Collectors.joining(", ")));
 
-		emd.addAttributes(Arrays.asList(refAttr,
-						vcfAttributes.getAltAttribute()));
+		emd.addAttributes(Arrays.asList(refAttr, vcfAttributes.getAltAttribute()));
 
 		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true).setIdAttribute(true);
 		emd.addAttribute(idAttr);
@@ -282,6 +283,18 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		public EntityListenersService entityListenersService()
 		{
 			return new EntityListenersService();
+		}
+
+		@Bean
+		public EntityTypeDependencyResolver entityTypeDependencyResolver()
+		{
+			return new EntityTypeDependencyResolver(genericDependencyResolver());
+		}
+
+		@Bean
+		public GenericDependencyResolver genericDependencyResolver()
+		{
+			return new GenericDependencyResolver();
 		}
 	}
 }

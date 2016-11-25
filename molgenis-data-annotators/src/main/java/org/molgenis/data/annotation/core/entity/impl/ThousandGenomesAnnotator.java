@@ -28,9 +28,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Collections;
 
-import static org.molgenis.AttributeType.DECIMAL;
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.*;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class ThousandGenomesAnnotator implements AnnotatorConfig

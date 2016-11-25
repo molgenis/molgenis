@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import com.google.common.collect.Lists;
-import org.molgenis.AttributeType;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.testng.annotations.DataProvider;
@@ -14,7 +14,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.testng.Assert.assertEquals;
 

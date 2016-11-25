@@ -1,10 +1,10 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;

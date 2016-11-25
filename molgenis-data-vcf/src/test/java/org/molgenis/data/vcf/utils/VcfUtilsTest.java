@@ -19,7 +19,7 @@ import org.testng.annotations.BeforeMethod;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;

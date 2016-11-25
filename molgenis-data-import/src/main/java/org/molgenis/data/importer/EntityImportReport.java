@@ -1,4 +1,4 @@
-package org.molgenis.framework.db;
+package org.molgenis.data.importer;
 
 import com.google.common.collect.Lists;
 

@@ -2,15 +2,15 @@ package org.molgenis.data.vcf.importer;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
+import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
+import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

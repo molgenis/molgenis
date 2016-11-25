@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class ExacAnnotator implements AnnotatorConfig

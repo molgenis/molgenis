@@ -23,8 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import static org.molgenis.AttributeType.COMPOUND;
-import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertFalse;

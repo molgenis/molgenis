@@ -25,8 +25,8 @@ import java.util.Arrays;
 import java.util.Queue;
 
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { AnnotatorDependencyOrderResolverTest.Config.class })

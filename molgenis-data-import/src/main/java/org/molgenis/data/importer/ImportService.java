@@ -3,8 +3,6 @@ package org.molgenis.data.importer;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.core.Ordered;
 
 import java.io.File;

@@ -3,7 +3,6 @@ package org.molgenis.data.annotation.core.entity.impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.*;
@@ -27,18 +26,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.*;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.GeneralizedInheritance.*;
 import static org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 /**
  * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an EntityType that has a attribute named 'GENE'

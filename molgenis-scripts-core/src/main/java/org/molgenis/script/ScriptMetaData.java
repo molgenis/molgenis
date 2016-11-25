@@ -1,12 +1,12 @@
 package org.molgenis.script;
 
-import org.molgenis.AttributeType;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;

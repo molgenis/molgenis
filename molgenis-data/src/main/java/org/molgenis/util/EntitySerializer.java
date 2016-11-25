@@ -1,8 +1,8 @@
 package org.molgenis.util;
 
 import com.google.gson.*;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.lang.reflect.Type;

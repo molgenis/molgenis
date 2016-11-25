@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class FitConAnnotator implements AnnotatorConfig

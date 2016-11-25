@@ -1,7 +1,6 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.framework.db.EntitiesValidationReport;
 
 public interface MetaDataParser
 {

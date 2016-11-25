@@ -7,8 +7,8 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.molgenis.AttributeType;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.util.ArrayList;

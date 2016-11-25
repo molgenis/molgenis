@@ -1,4 +1,4 @@
-package org.molgenis;
+package org.molgenis.data.meta;
 
 import org.apache.commons.lang3.StringUtils;
 

@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 

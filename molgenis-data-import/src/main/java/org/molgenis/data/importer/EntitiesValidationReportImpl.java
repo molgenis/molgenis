@@ -1,7 +1,5 @@
 package org.molgenis.data.importer;
 
-import org.molgenis.framework.db.EntitiesValidationReport;
-
 import java.util.*;
 
 public class EntitiesValidationReportImpl implements EntitiesValidationReport
