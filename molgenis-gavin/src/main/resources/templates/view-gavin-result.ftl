@@ -34,11 +34,10 @@
                         <li>${jobExecution.vcfs} valid VCF lines</li></#if>
                     <#if jobExecution.errors?? && jobExecution.errors gt 0 >
                         <li>${jobExecution.errors} error lines (could not be
-                            parsed
-                            <#if errorFileExists>, check <a
+                            parsed<#if errorFileExists>, check <a
                                     href="/plugin/gavin-app/error/${jobExecution.identifier}"><span
                                     class="glyphicon glyphicon-file" aria-hidden="true"></span>failed lines</a> )
-                            <#else>. Error file no longer available. Results are removed after 24 hours.
+                            <#else>) Error file no longer available. Results are removed after 24 hours.
                             </#if>
                         </li></#if>
                     <#if jobExecution.skippeds?? && jobExecution.skippeds gt 0 >
@@ -54,7 +53,7 @@
                 <#else>
                     There was a problem, no results available. Check execution log for details.
                 </#if>
-                <p>This page will remain available for 24 hours here on <a href="${pageUrl}">${pageUrl}</a>.</p>
+                <p>This page will remain available on <a href="${pageUrl}">${pageUrl}</a>.</p>
                 <#if jobExecution.log??>
                     <h4>Execution log</h4>
                     <pre class="pre-scrollable">${jobExecution.log?html}</pre>
