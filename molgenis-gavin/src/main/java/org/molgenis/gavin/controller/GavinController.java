@@ -117,7 +117,7 @@ public class GavinController extends AbstractStaticContentController
 		}
 
 		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(secureIdGenerator.generateId());
-		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
+		gavinJobExecution.setFilename(entityName);
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		gavinJobExecution.setInputFileExtension(extension);
 		final GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
@@ -203,7 +203,8 @@ public class GavinController extends AbstractStaticContentController
 			LOG.warn("No result file found for job {}", jobIdentifier);
 			throw new FileNotFoundException("No result file found for this job. Results are removed every night.");
 		}
-		response.setHeader("Content-Disposition", format("inline; filename=\"{0}\"", jobExecution.getFilename()));
+		response.setHeader("Content-Disposition",
+				format("inline; filename=\"{0}-gavin.vcf\"", jobExecution.getFilename()));
 		return new FileSystemResource(file);
 	}
 

@@ -123,7 +123,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		verify(executorService).submit(job);
 		GavinJobExecution jobExecution = captor.getValue();
-		assertEquals(jobExecution.getFilename(), "annotate-file-gavin.vcf");
+		assertEquals(jobExecution.getFilename(), "annotate-file");
 		assertEquals(jobExecution.getUser(), "tommy");
 	}
 
@@ -135,7 +135,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 				.createTempFile("gavin", ".vcf", new File(ResourceUtils.getFile(getClass(), "/").getPath()));
 		resultFile.deleteOnExit();
 
-		when(gavinJobExecution.getFilename()).thenReturn("annotate-file-gavin.vcf");
+		when(gavinJobExecution.getFilename()).thenReturn("annotate-file");
 		when(gavinJobFactory.findGavinJobExecution("ABCDE")).thenReturn(gavinJobExecution);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
 				.thenReturn(resultFile);
