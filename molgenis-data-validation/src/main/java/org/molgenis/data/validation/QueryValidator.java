@@ -8,7 +8,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
-import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,6 @@ import java.util.List;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -75,7 +73,7 @@ public class QueryValidator
 			case LIKE:
 			{
 				Attribute attr = getQueryRuleAttribute(queryRule, entityType);
-				Object value = toEntityValue(queryRule.getValue(), attr);
+				Object value = toQueryRuleValue(queryRule.getValue(), attr);
 				queryRule.setValue(value);
 				break;
 			}
@@ -106,7 +104,7 @@ public class QueryValidator
 					// fix value types
 					Iterable<?> queryRuleValues = (Iterable<?>) queryRuleValue;
 					List<Object> values = stream(queryRuleValues.spliterator(), false)
-							.map(value -> toEntityValue(value, attr)).collect(toList());
+							.map(value -> toQueryRuleValue(value, attr)).collect(toList());
 					queryRule.setValue(values);
 				}
 				break;
@@ -141,7 +139,7 @@ public class QueryValidator
 		return attr;
 	}
 
-	private Object toEntityValue(Object queryRuleValue, Attribute attr)
+	private Object toQueryRuleValue(Object queryRuleValue, Attribute attr)
 	{
 		Object value;
 		AttributeType attrType = attr.getDataType();
@@ -163,12 +161,10 @@ public class QueryValidator
 				break;
 			case CATEGORICAL:
 			case XREF:
-				value = convertRef(attr, queryRuleValue);
-				break;
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
-				value = convertMref(attr, queryRuleValue);
+				value = convertRef(attr, queryRuleValue);
 				break;
 			case DATE:
 				value = convertDate(attr, queryRuleValue);
@@ -444,37 +440,6 @@ public class QueryValidator
 		return dateValue;
 	}
 
-	private List<?> convertMref(Attribute attr, Object value)
-	{
-		if (value == null)
-		{
-			return emptyList();
-		}
-
-		Iterable<?> values;
-		if (value instanceof Iterable<?>)
-		{
-			values = (Iterable<?>) value;
-		}
-		else if (value instanceof String)
-		{
-			values = ListEscapeUtils.toList((String) value);
-		}
-		else
-		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Iterable.class.getSimpleName())));
-		}
-
-		// convert values
-		EntityType mrefEntity = attr.getRefEntity();
-		Attribute mrefEntityIdAttr = mrefEntity.getIdAttribute();
-		return stream(values.spliterator(), false).map(mrefValue -> toEntityValue(mrefValue, mrefEntityIdAttr))
-				.map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue)).collect(toList());
-	}
-
 	private Entity convertRef(Attribute attr, Object value)
 	{
 		if (value instanceof Entity)
@@ -488,7 +453,7 @@ public class QueryValidator
 		}
 
 		// try to convert value
-		Object idValue = toEntityValue(value, attr.getRefEntity().getIdAttribute());
+		Object idValue = toQueryRuleValue(value, attr.getRefEntity().getIdAttribute());
 		return entityManager.getReference(attr.getRefEntity(), idValue);
 	}
 

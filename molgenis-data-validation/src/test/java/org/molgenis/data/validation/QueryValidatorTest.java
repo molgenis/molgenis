@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.*;
@@ -51,32 +50,18 @@ public class QueryValidatorTest
 			asList(Boolean.TRUE, Boolean.FALSE, null, "true", "false", "True", "False").forEach(
 					value -> queries.add(new Object[] { boolEntityType, new QueryImpl<>().eq("attr", value) }));
 
-			// CATEGORICAL, XREF
-			EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK)
-					.forEach(refIdAttrType -> EnumSet.of(CATEGORICAL, XREF).forEach(refAttrType ->
-					{
-						Entity refEntityType = createEntityType(refAttrType, refIdAttrType);
-						asList("1", 1, 1L, null).forEach(idValue -> queries
-								.add(new Object[] { refEntityType, new QueryImpl<>().eq("attr", idValue) }));
-
-						Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("1").getMock();
-						queries.add(new Object[] { refEntityType, new QueryImpl<>().eq("attr", refEntity) });
-					}));
-
-			// CATEGORICAL_MREF, MREF, ONE_TO_MANY
-			EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK)
-					.forEach(refIdAttrType -> EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY).forEach(refAttrType ->
-					{
-						Entity refEntityType = createEntityType(refAttrType, refIdAttrType);
-						asList(asList("1", "2"), asList(1, 2), asList(1L, 2L), emptyList(), null).forEach(
-								idValue -> queries
+			// CATEGORICAL, XREF, CATEGORICAL_MREF, MREF, ONE_TO_MANY
+			EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK).forEach(
+					refIdAttrType -> EnumSet.of(CATEGORICAL, XREF, CATEGORICAL_MREF, MREF, ONE_TO_MANY)
+							.forEach(refAttrType ->
+							{
+								Entity refEntityType = createEntityType(refAttrType, refIdAttrType);
+								asList("1", 1, 1L, null).forEach(idValue -> queries
 										.add(new Object[] { refEntityType, new QueryImpl<>().eq("attr", idValue) }));
 
-						Entity refEntity1 = when(mock(Entity.class).getIdValue()).thenReturn("1").getMock();
-						Entity refEntity2 = when(mock(Entity.class).getIdValue()).thenReturn("2").getMock();
-						queries.add(new Object[] { refEntityType,
-								new QueryImpl<>().eq("attr", asList(refEntity1, refEntity2)) });
-					}));
+								Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("1").getMock();
+								queries.add(new Object[] { refEntityType, new QueryImpl<>().eq("attr", refEntity) });
+							}));
 
 			// DATE
 			Entity dateEntityType = createEntityType(DATE);
