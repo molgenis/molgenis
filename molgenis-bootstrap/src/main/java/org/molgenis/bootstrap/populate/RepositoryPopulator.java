@@ -48,6 +48,10 @@ public class RepositoryPopulator
 			usersGroupsAuthoritiesPopulator.populate();
 			LOG.trace("Populated database with users, groups and authorities");
 
+			LOG.trace("Populating database with I18N strings ...");
+			i18nPopulator.populateLanguages();
+			LOG.trace("Populated database with I18N strings");
+
 			// populate repositories with application-specific entities
 			LOG.trace("Populating database with application entities ...");
 			systemEntityPopulator.populate(event);
@@ -59,7 +63,7 @@ public class RepositoryPopulator
 		LOG.trace("Populated settings entities");
 
 		LOG.trace("Populating database with I18N strings ...");
-		i18nPopulator.populate();
+		i18nPopulator.populateI18nStrings();
 		LOG.trace("Populated database with I18N strings");
 
 		LOG.trace("Populating script type entities ...");

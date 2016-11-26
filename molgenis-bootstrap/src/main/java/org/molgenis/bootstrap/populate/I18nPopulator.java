@@ -54,18 +54,9 @@ public class I18nPopulator
 	}
 
 	/**
-	 * Populate data store with languages and internationalization strings
-	 */
-	void populate()
-	{
-		populateLanguages();
-		populateI18nStrings();
-	}
-
-	/**
 	 * Populate data store with internationalization strings
 	 */
-	private void populateI18nStrings()
+	public void populateI18nStrings()
 	{
 		final String i18nFileName = "i18n.xlsx";
 
@@ -99,7 +90,7 @@ public class I18nPopulator
 	/**
 	 * Populate data store with default languages
 	 */
-	private void populateLanguages()
+	public void populateLanguages()
 	{
 		dataService.add(LANGUAGE, languageFactory
 				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
