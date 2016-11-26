@@ -1,10 +1,10 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -19,8 +19,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.QueryRule.Operator.*;
+import static org.molgenis.data.meta.AttributeType.*;
 
 public class QueryValidatorTest
 {
