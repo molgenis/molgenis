@@ -288,7 +288,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		}));
 
 		// validate package/entity/attribute tags
-		metaDataMap.values().stream().map(EntityType::getPackage)
+		metaDataMap.values().stream().map(EntityType::getPackage).filter(Objects::nonNull)
 				.forEach(package_ -> package_.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
