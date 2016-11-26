@@ -198,7 +198,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		ExecutorService executorService()
+		ExecutorService gavinExecutors()
 		{
 			return mock(ExecutorService.class);
 		}

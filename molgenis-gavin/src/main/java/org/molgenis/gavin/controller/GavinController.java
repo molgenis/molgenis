@@ -13,6 +13,7 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -66,8 +67,8 @@ public class GavinController extends AbstractStaticContentController
 	private final MenuReaderService menuReaderService;
 
 	@Autowired
-	public GavinController(ExecutorService executorService, GavinJobFactory gavinJobFactory,
-			GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
+	public GavinController(@Qualifier("gavinExecutors") ExecutorService executorService,
+			GavinJobFactory gavinJobFactory, GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
 			UserAccountService userAccountService, MenuReaderService menuReaderService)
 	{
 		super(GAVIN_APP, URI);
