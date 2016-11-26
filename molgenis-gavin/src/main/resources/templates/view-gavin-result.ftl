@@ -18,7 +18,7 @@
             <#if jobExecution.status == 'RUNNING' || jobExecution.status == 'PENDING'>
             <#-- Job running, show progress -->
                 <div id="gavin-job" data-execution-id="${jobExecution.identifier}"></div>
-                <p>Job running. Check back later at <a
+                <p>No results yet. Check back later at <a
                         href="${pageUrl}">${pageUrl}</a>.
                     Results will remain available for 24 hours.</p>
             <#else>
