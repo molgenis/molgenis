@@ -74,16 +74,19 @@ public class ParserTest
 	public void testTransform()
 	{
 		List<String> lines = Arrays
-				.asList("#Comment line", "#Another comment line", "11\t47359281\t.\tC\tCC\t.\t.\tCADD_SCALED=33.0",
-						"11\t47359281\tC\tCC\t2.3\t33.0");
+				.asList("#Comment line", "#Another comment line", "11\t47359281\t.\tC\tG\t.\t.\tCADD_SCALED=33.0",
+						"11\t47359281\tC\tCC\t2.3\t33.0", "11\t47359281\t.\tC\tCG\t.\t.\tCADD_SCALED=33.0",
+						"11\t47359281\t.\tCG\tC\t.\t.\tCADD_SCALED=33.0");
 
-		Multiset<LineType> expected = ImmutableMultiset.of(COMMENT, COMMENT, VCF, CADD);
+		Multiset<LineType> expected = ImmutableMultiset.of(COMMENT, COMMENT, VCF, CADD, INDEL_NOCADD, INDEL_NOCADD);
 		Assert.assertEquals(lineParser.transformLines(lines.stream(), output, error), expected);
 
 		verify(output).accept("##fileformat=VCFv4.0");
 		verify(output).accept("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO");
-		verify(output).accept("11\t47359281\t.\tC\tCC\t.\t.\t.");
+		verify(output).accept("11\t47359281\t.\tC\tG\t.\t.\t.");
 		verify(output).accept("11\t47359281\t.\tC\tCC\t.\t.\tCADD=2.3;CADD_SCALED=33.0");
+		verify(error).accept("Line 5:\t11\t47359281\t.\tC\tCG\t.\t.\tCADD_SCALED=33.0");
+		verify(error).accept("Line 6:\t11\t47359281\t.\tCG\tC\t.\t.\tCADD_SCALED=33.0");
 	}
 
 	@Test
