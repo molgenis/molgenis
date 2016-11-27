@@ -5,5 +5,5 @@ package org.molgenis.gavin.job.input.model;
  */
 public enum LineType
 {
-	COMMENT, VCF, CADD, ERROR, SKIPPED
+	COMMENT, VCF, CADD, ERROR, SKIPPED, INDEL_NOCADD
 }

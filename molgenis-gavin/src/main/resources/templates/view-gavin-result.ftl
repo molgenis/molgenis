@@ -32,7 +32,8 @@
                         <li>${jobExecution.cadds} valid CADD lines</li></#if>
                     <#if jobExecution.vcfs?? && jobExecution.vcfs gt 0 >
                         <li>${jobExecution.vcfs} valid VCF lines</li></#if>
-                    <#if jobExecution.errors?? && jobExecution.errors gt 0 >
+                    <#if (jobExecution.errors?? && jobExecution.errors gt 0) || (jobExecution.indels?? && jobExecution.indels gt 0)>
+                        <li>${jobExecution.indels} lines contained insertions or deletions without a cadd score.</li>
                         <li>${jobExecution.errors} error lines (could not be
                             parsed<#if errorFileExists>, check <a
                                     href="/plugin/gavin-app/error/${jobExecution.identifier}"><span

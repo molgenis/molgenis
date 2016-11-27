@@ -26,6 +26,7 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 	public static final String VCFS = "vcfs";
 	public static final String ERRORS = "errors";
 	public static final String SKIPPEDS = "skippeds";
+	public static final String INDELS_NOCADD = "indels";
 
 	private final IndexPackage indexPackage;
 
@@ -49,6 +50,7 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 		addAttribute(CADDS).setDataType(INT).setNillable(true);
 		addAttribute(VCFS).setDataType(INT).setNillable(true);
 		addAttribute(ERRORS).setDataType(INT).setNillable(true);
+		addAttribute(INDELS_NOCADD).setDataType(INT).setNillable(true);
 		addAttribute(SKIPPEDS).setDataType(INT).setNillable(true);
 	}
 }
