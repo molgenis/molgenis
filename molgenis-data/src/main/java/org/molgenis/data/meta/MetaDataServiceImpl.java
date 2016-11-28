@@ -426,6 +426,25 @@ public class MetaDataServiceImpl implements MetaDataService
 		return dataService.query(PACKAGE, Package.class).eq(PARENT, null).findAll().collect(toList());
 	}
 
+	@Transactional
+	@Override
+	public void upsertTags(Collection<Tag> tags)
+	{
+		// TODO replace with dataService.upsert once available in Repository
+		tags.forEach(tag ->
+		{
+			Tag existingTag = dataService.findOneById(TAG, tag.getId(), Tag.class);
+			if (existingTag == null)
+			{
+				dataService.add(TAG, tag);
+			}
+			else
+			{
+				dataService.update(TAG, tag);
+			}
+		});
+	}
+
 	@Override
 	public Stream<EntityType> getEntityTypes()
 	{

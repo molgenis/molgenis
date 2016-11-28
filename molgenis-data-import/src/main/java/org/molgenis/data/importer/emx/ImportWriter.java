@@ -2,7 +2,6 @@ package org.molgenis.data.importer.emx;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
@@ -14,9 +13,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -42,7 +38,6 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -54,9 +49,7 @@ public class ImportWriter
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final TagService<LabeledResource, LabeledResource> tagService;
 	private final MolgenisPermissionService molgenisPermissionService;
-	private final TagFactory tagFactory;
 	private final EntityManager entityManager;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
@@ -65,20 +58,16 @@ public class ImportWriter
 	 *
 	 * @param dataService                  {@link DataService} to query existing repositories and transform entities
 	 * @param permissionSystemService      {@link PermissionSystemService} to give permissions on uploaded entities
-	 * @param tagFactory                   {@link TagFactory} to create new tags
 	 * @param entityManager                entity manager to create new entities
 	 * @param entityTypeDependencyResolver entity type dependency resolver
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			TagService<LabeledResource, LabeledResource> tagService,
-			MolgenisPermissionService molgenisPermissionService, TagFactory tagFactory, EntityManager entityManager,
+			MolgenisPermissionService molgenisPermissionService, EntityManager entityManager,
 			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
-		this.tagService = requireNonNull(tagService);
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
-		this.tagFactory = requireNonNull(tagFactory);
 		this.entityManager = requireNonNull(entityManager);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
@@ -90,12 +79,11 @@ public class ImportWriter
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
 		runAsSystem(() ->
 		{
-			importTags(job.source);
+			importTags(job.parsedMetaData);
 			importPackages(job.parsedMetaData);
 			addEntityType(job.parsedMetaData, job.report);
 		});
 		addEntityPermissions(job.metaDataChanges);
-		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(job.parsedMetaData.getEntities());
 		importData(job.report, resolvedEntityTypes, job.source, job.dbAction, job.defaultPackage);
 		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
@@ -132,23 +120,6 @@ public class ImportWriter
 			Repository<I18nString> repo = dataService.getRepository(I18N_STRING, I18nString.class);
 			int count = update(repo, i18nStrings.values(), dbAction);
 			report.addEntityCount(I18N_STRING, count);
-		}
-	}
-
-	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
-	{
-		for (SemanticTag<EntityType, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
-		{
-			tagService.addEntityTag(tag);
-		}
-
-		for (EntityType emd : parsedMetaData.getAttributeTags().keySet())
-		{
-			for (SemanticTag<Attribute, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
-					.get(emd))
-			{
-				tagService.addAttributeTag(emd, tag);
-			}
 		}
 	}
 
@@ -310,39 +281,6 @@ public class ImportWriter
 	}
 
 	/**
-	 * Keeps the entities that have: 1. A reference to themselves. 2. Minimal one value.
-	 *
-	 * @param entities
-	 * @return Iterable<Entity> - filtered entities;
-	 */
-	private Iterable<Entity> keepSelfReferencedEntities(Iterable<Entity> entities)
-	{
-		return Iterables.filter(entities, entity ->
-		{
-			Iterator<Attribute> attributes = entity.getEntityType().getAttributes().iterator();
-			while (attributes.hasNext())
-			{
-				Attribute attribute = attributes.next();
-				if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
-						.equals(entity.getEntityType().getName()))
-				{
-					List<String> ids = DataConverter.toList(entity.get(attribute.getName()));
-					Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
-					if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
-					{
-						throw new UnknownEntityException(
-								"One or more values [" + ids + "] from " + attribute.getDataType().toString()
-										+ " field " + attribute.getName() + " could not be resolved");
-					}
-					return true;
-				}
-			}
-
-			return false;
-		});
-	}
-
-	/**
 	 * Gives the user permission to see and edit his imported entities, unless the user is admin since admins can do
 	 * that anyways.
 	 */
@@ -410,53 +348,17 @@ public class ImportWriter
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
 		ImmutableCollection<Package> packages = parsedMetaData.getPackages().values();
-		dataService.getMeta().upsertPackages(packages.stream().filter(package_ -> package_ != null));
+		dataService.getMeta().upsertPackages(packages.stream().filter(Objects::nonNull));
 	}
 
 	/**
 	 * Imports the tags from the tag sheet.
 	 */
 	// FIXME: can everybody always update a tag?
-	private void importTags(RepositoryCollection source)
+	private void importTags(ParsedMetaData parsedMetaData)
 	{
-		Repository<Entity> tagRepository = source.getRepository(EmxMetaDataParser.EMX_TAGS);
-		if (tagRepository != null)
-		{
-			for (Entity tagEntity : tagRepository)
-			{
-				Entity existingTag = dataService
-						.findOneById(TAG, tagEntity.getString(EmxMetaDataParser.EMX_TAG_IDENTIFIER));
-				if (existingTag == null)
-				{
-					Tag tag = entityToTag(tagEntity.getString(EmxMetaDataParser.EMX_TAG_IDENTIFIER), tagEntity);
-					dataService.add(TAG, tag);
-				}
-				else
-				{
-					dataService.update(TAG, existingTag);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Transforms an {@link Entity} to a {@link Tag}
-	 *
-	 * @param id
-	 * @param tagEntity
-	 * @return
-	 */
-	// FIXME: Duplicated with EmxMetaDataParser
-	public Tag entityToTag(String id, Entity tagEntity)
-	{
-		Tag tag = tagFactory.create(id);
-		tag.setObjectIri(tagEntity.getString(EmxMetaDataParser.EMX_TAG_OBJECT_IRI));
-		tag.setLabel(tagEntity.getString(EmxMetaDataParser.EMX_TAG_LABEL));
-		tag.setRelationLabel(tagEntity.getString(EmxMetaDataParser.EMX_TAG_RELATION_LABEL));
-		tag.setCodeSystem(tagEntity.getString(EmxMetaDataParser.EMX_TAG_CODE_SYSTEM));
-		tag.setRelationIri(tagEntity.getString(EmxMetaDataParser.EMX_TAG_RELATION_IRI));
-
-		return tag;
+		ImmutableCollection<Tag> tags = parsedMetaData.getTags().values();
+		dataService.getMeta().upsertTags(tags);
 	}
 
 	/**

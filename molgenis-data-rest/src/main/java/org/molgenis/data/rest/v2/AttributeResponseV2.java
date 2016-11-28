@@ -11,8 +11,8 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.support.Href;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.List;

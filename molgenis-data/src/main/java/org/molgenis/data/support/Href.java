@@ -1,4 +1,4 @@
-package org.molgenis.data.rest;
+package org.molgenis.data.support;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.MolgenisDataException;
