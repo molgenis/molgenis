@@ -1189,7 +1189,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			String defaultPackageName)
 	{
 		Package p = getPackage(intermediateResults, defaultPackageName);
-		if (p == null)
+		if (p == null && dataService != null)
 		{
 			throw new IllegalArgumentException(format("Unknown package [%s]", defaultPackageName));
 		}
@@ -1216,7 +1216,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private Package getPackage(IntermediateParseResults intermediateResults, String packageName)
 	{
 		Package package_ = intermediateResults.getPackage(packageName);
-		if (package_ == null)
+		if (package_ == null && dataService != null)
 		{
 			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageName, Package.class);
 		}
