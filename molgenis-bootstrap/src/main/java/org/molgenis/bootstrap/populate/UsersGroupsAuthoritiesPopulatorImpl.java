@@ -27,6 +27,7 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Service
 public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoritiesPopulator
@@ -102,7 +103,7 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 
 		// allow all users to read meta data entities
 		List<String> entityNames = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
-				I18N_STRING, FILE_META);
+				I18N_STRING, FILE_META, OWNED);
 		Stream<GroupAuthority> entityGroupAuthorities = entityNames.stream().map(entityName ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
