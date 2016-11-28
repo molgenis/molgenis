@@ -48,11 +48,15 @@
                 <#if jobExecution.status == 'SUCCESS'>
                     <#if downloadFileExists>Download <a
                             href="/plugin/gavin-app/download/${jobExecution.identifier}"><span
-                            class="glyphicon glyphicon-file" aria-hidden="true"></span>${jobExecution.filename}</a>
+                            class="glyphicon glyphicon-file" aria-hidden="true"></span>${jobExecution.filename?html}</a>
                     <#else>Download file no longer available. Results are removed after 24 hours.
                     </#if>
                 <#else>
-                    There was a problem, no results available. Check execution log for details.
+                    <#if downloadFileExists>Download <a
+                            href="/plugin/gavin-app/download/${jobExecution.identifier}"><span
+                            class="glyphicon glyphicon-file" aria-hidden="true"></span>${jobExecution.filename?html}</a>
+                    <#else>There was a problem, no results available. Check execution log for details.
+                    </#if>
                 </#if>
                 <p>This page will remain available for 24 hours on <a href="${pageUrl}">${pageUrl}</a>.</p>
                 <#if jobExecution.log??>
