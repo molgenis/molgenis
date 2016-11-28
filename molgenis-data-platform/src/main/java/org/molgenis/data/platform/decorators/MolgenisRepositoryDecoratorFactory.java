@@ -36,6 +36,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
+import org.molgenis.data.validation.QueryValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.*;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -83,6 +84,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final AttributeValidator attributeValidator;
 	private final PlatformTransactionManager transactionManager;
+	private final QueryValidator queryValidator;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -92,10 +94,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			UserAuthorityFactory userAuthorityFactory, IndexActionRegisterService indexActionRegisterService,
 			SearchService searchService, PasswordEncoder passwordEncoder, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator,
-			TagValidator tagValidator, L3Cache l3Cache, LanguageService languageService,
-			EntityTypeDependencyResolver entityTypeDependencyResolver,
-			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager)
+			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, TagValidator tagValidator, L3Cache l3Cache,
+			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
+			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager, QueryValidator queryValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -122,6 +123,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.transactionManager = requireNonNull(transactionManager);
+		this.queryValidator = requireNonNull(queryValidator);
 	}
 
 	@Override
@@ -172,6 +174,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 0. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);
+
+		// -1. query validation decorator
+		decoratedRepository = new QueryValidationRepositoryDecorator<>(decoratedRepository, queryValidator);
 
 		return decoratedRepository;
 	}
