@@ -60,11 +60,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -300,7 +296,6 @@ public class RestController
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -328,7 +323,6 @@ public class RestController
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(request.getAttributes());
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
@@ -354,7 +348,6 @@ public class RestController
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -377,7 +370,6 @@ public class RestController
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(request.getAttributes());
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
@@ -1009,37 +1001,6 @@ public class RestController
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	private void validateAndConvertQueryValues(List<QueryRule> queryRules, EntityType entityType)
-	{
-		if (queryRules != null)
-		{
-			for (QueryRule queryRule : queryRules)
-			{
-				if (!queryRule.getNestedRules().isEmpty())
-				{
-					validateAndConvertQueryValues(queryRule.getNestedRules(), entityType);
-				}
-				else
-				{
-					if (queryRule.getValue() != null)
-					{
-						Attribute attribute = entityType.getAttribute(queryRule.getField());
-						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
-						{
-							//noinspection unchecked
-							queryRule.setValue(stream(((Iterable<Object>) queryRule.getValue()).spliterator(), false)
-									.map(val -> restService.toEntityValue(attribute, val)).collect(toList()));
-						}
-						else
-						{
-							queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
-						}
-					}
-				}
-			}
-		}
 	}
 
 	@Transactional
