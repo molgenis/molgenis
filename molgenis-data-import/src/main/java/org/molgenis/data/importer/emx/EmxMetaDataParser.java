@@ -42,7 +42,6 @@ import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -204,19 +203,19 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	@Override
 	//FIXME The source is parsed twice!!! Once by dermineImportableEntities and once by doImport
-	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackage)
+	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackageName)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
 		{
 			IntermediateParseResults intermediateResults = getEntityTypeFromSource(source);
 			List<EntityType> entities;
-			if ((defaultPackage == null) || PACKAGE_DEFAULT.equalsIgnoreCase(defaultPackage))
+			if (defaultPackageName == null)
 			{
 				entities = intermediateResults.getEntities();
 			}
 			else
 			{
-				entities = putEntitiesInDefaultPackage(intermediateResults, defaultPackage);
+				entities = putEntitiesInDefaultPackage(intermediateResults, defaultPackageName);
 			}
 
 			return new ParsedMetaData(entityTypeDependencyResolver.resolve(entities), intermediateResults.getPackages(),
@@ -543,7 +542,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 
 				String entityName;
-				if (emxEntityPackage != null && !PACKAGE_DEFAULT.equals(emxEntityPackage))
+				if (emxEntityPackage != null)
 				{
 					entityName = emxEntityPackage + PACKAGE_SEPARATOR + emxEntityName;
 				}
@@ -1186,19 +1185,42 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param defaultPackageName
 	 * @return
 	 */
-	private static List<EntityType> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
+	private List<EntityType> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
 			String defaultPackageName)
 	{
-		Package p = intermediateResults.getPackage(defaultPackageName);
-		if (p == null) throw new IllegalArgumentException("Unknown package '" + defaultPackageName + '\'');
+		Package p = getPackage(intermediateResults, defaultPackageName);
+		if (p == null && dataService != null)
+		{
+			throw new IllegalArgumentException(format("Unknown package [%s]", defaultPackageName));
+		}
 
 		List<EntityType> entities = newArrayList();
 		for (EntityType entityType : intermediateResults.getEntities())
 		{
-			if (entityType.getPackage() == null) entityType.setPackage(p);
+			if (entityType.getPackage() == null)
+			{
+				entityType.setPackage(p);
+			}
 			entities.add(entityType);
 		}
 		return entities;
+	}
+
+	/**
+	 * Retrieves a {@link Package} by name from parsed data or existing data.
+	 *
+	 * @param intermediateResults parsed data
+	 * @param packageName         package name
+	 * @return package or <code>null</code> if no package with the given name exists in parsed or existing data
+	 */
+	private Package getPackage(IntermediateParseResults intermediateResults, String packageName)
+	{
+		Package package_ = intermediateResults.getPackage(packageName);
+		if (package_ == null && dataService != null)
+		{
+			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageName, Package.class);
+		}
+		return package_;
 	}
 
 	private static ImmutableMap<String, EntityType> getEntityTypeFromDataService(DataService dataService,

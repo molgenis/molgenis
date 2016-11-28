@@ -9,7 +9,6 @@ import org.molgenis.util.EntityUtils;
 
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 public class EntityTypeUtils
@@ -311,7 +310,7 @@ public class EntityTypeUtils
 	 */
 	public static String buildFullName(Package package_, String simpleName)
 	{
-		if (package_ != null && !PACKAGE_DEFAULT.equals(package_.getName()))
+		if (package_ != null)
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append(package_.getName());

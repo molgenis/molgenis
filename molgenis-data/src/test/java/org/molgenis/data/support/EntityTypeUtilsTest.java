@@ -95,17 +95,22 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void buildFullName()
+	public void buildFullNamePackage()
+	{
+		Package package_ = when(mock(Package.class).getName()).thenReturn("my_first_package").getMock();
+		assertEquals(EntityTypeUtils.buildFullName(package_, "simpleName"), "my_first_package_simpleName");
+	}
+
+	@Test
+	public void buildFullNamePackageDefault()
 	{
 		Package defaultPackage = when(mock(Package.class).getName()).thenReturn(PACKAGE_DEFAULT).getMock();
-		assertEquals(EntityTypeUtils.buildFullName(defaultPackage, "simpleName"), "simpleName");
+		assertEquals(EntityTypeUtils.buildFullName(defaultPackage, "simpleName"), PACKAGE_DEFAULT + "_simpleName");
+	}
 
+	@Test
+	public void buildFullNameNoPackage()
+	{
 		assertEquals(EntityTypeUtils.buildFullName(null, "simpleName"), "simpleName");
-
-		Package package_1 = when(mock(Package.class).getName()).thenReturn("base").getMock();
-		assertEquals(EntityTypeUtils.buildFullName(package_1, "simpleName"), "simpleName");
-
-		Package package_2 = when(mock(Package.class).getName()).thenReturn("my_first_package").getMock();
-		assertEquals(EntityTypeUtils.buildFullName(package_2, "simpleName"), "my_first_package_simpleName");
 	}
 }
