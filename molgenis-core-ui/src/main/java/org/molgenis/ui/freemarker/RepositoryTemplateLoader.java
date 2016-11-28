@@ -1,4 +1,4 @@
-package org.molgenis.data.system;
+package org.molgenis.ui.freemarker;
 
 import freemarker.cache.TemplateLoader;
 import org.molgenis.data.DataService;

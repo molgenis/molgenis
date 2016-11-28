@@ -1,4 +1,4 @@
-package org.molgenis.data.system;
+package org.molgenis.ui.freemarker;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
