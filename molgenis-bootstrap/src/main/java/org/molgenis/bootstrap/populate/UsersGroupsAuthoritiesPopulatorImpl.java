@@ -1,9 +1,10 @@
-package org.molgenis.security;
+package org.molgenis.bootstrap.populate;
 
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.ui.admin.user.UserAccountController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,16 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Service
-public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
-		implements MolgenisSecurityWebAppDatabasePopulatorService
+public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoritiesPopulator
 {
 	private static final String USERNAME_ADMIN = "admin";
+
+	private final DataService dataService;
 	private final UserFactory userFactory;
 	private final GroupFactory groupFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
@@ -44,9 +48,10 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	private String anonymousEmail;
 
 	@Autowired
-	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(UserFactory userFactory, GroupFactory groupFactory,
+	UsersGroupsAuthoritiesPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory,
 			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory)
 	{
+		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
 		this.groupFactory = requireNonNull(groupFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
@@ -56,7 +61,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	@Override
 	@Transactional
 	@RunAsSystem
-	public void populateDatabase(DataService dataService, String homeControllerId, String userAccountControllerId)
+	public void populate()
 	{
 		if (adminPassword == null)
 		{
@@ -87,26 +92,18 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		anonymousAuthority.setUser(anonymousUser);
 		anonymousAuthority.setRole(AUTHORITY_ANONYMOUS);
 
-		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
-		anonymousHomeAuthority.setUser(anonymousUser);
-		anonymousHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId);
-
 		// create all users group
 		Group allUsersGroup = groupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
-		// allow all users to see the home plugin
-		GroupAuthority usersGroupHomeAuthority = groupAuthorityFactory.create();
-		usersGroupHomeAuthority.setGroup(allUsersGroup);
-		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId);
-
 		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
 		usersGroupUserAccountAuthority.setGroup(allUsersGroup);
-		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + userAccountControllerId);
+		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + UserAccountController.ID);
 
 		// allow all users to read meta data entities
-		List<String> entityNames = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, I18N_STRING);
+		List<String> entityNames = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
+				I18N_STRING, FILE_META, OWNED);
 		Stream<GroupAuthority> entityGroupAuthorities = entityNames.stream().map(entityName ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
@@ -117,11 +114,9 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		dataService.add(USER_AUTHORITY, Stream.of(anonymousAuthority, anonymousHomeAuthority));
+		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
-		dataService.add(GROUP_AUTHORITY,
-				Stream.concat(Stream.of(usersGroupHomeAuthority, usersGroupUserAccountAuthority),
-						entityGroupAuthorities));
+		dataService
+				.add(GROUP_AUTHORITY, Stream.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupAuthorities));
 	}
-
 }
