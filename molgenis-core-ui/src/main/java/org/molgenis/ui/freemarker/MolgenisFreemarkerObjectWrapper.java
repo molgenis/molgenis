@@ -1,4 +1,4 @@
-package org.molgenis.ui;
+package org.molgenis.ui.freemarker;
 
 import com.google.common.collect.Lists;
 import freemarker.template.DefaultObjectWrapper;
