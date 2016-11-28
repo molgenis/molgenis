@@ -34,10 +34,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
-import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.ExpressionValidator;
-import org.molgenis.data.validation.QueryValidator;
-import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.validation.*;
 import org.molgenis.data.validation.meta.*;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
@@ -94,9 +91,10 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			UserAuthorityFactory userAuthorityFactory, IndexActionRegisterService indexActionRegisterService,
 			SearchService searchService, PasswordEncoder passwordEncoder, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, TagValidator tagValidator, L3Cache l3Cache,
-			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
-			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager, QueryValidator queryValidator)
+			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator,
+			TagValidator tagValidator, L3Cache l3Cache, LanguageService languageService,
+			EntityTypeDependencyResolver entityTypeDependencyResolver, AttributeValidator attributeValidator,
+			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
