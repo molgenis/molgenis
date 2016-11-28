@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -114,7 +116,8 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		when(inputFile.getParentFile()).thenReturn(parentDir);
 		when(vcf.getOriginalFilename()).thenReturn(".vcf");
 
-		assertEquals(gavinController.annotateFile(vcf, "annotate-file"), "/plugin/gavin-app/job/ABCDE");
+		assertEquals(gavinController.annotateFile(vcf, "annotate-file"),
+				ResponseEntity.created(URI.create("/plugin/gavin-app/job/ABCDE")).body("/plugin/gavin-app/job/ABCDE"));
 
 		verify(fileStore).createDirectory("gavin-app");
 		verify(fileStore).createDirectory("gavin-app" + separator + "ABCDE");
@@ -171,7 +174,9 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		when(fileStore.getFile("gavin-app")).thenReturn(gavinAppDir);
 		when(newJobDir.lastModified()).thenReturn(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(23));
+		when(newJobDir.isDirectory()).thenReturn(true);
 		when(oldJobDir.lastModified()).thenReturn(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(24) - 1000);
+		when(oldJobDir.isDirectory()).thenReturn(true);
 		ArgumentCaptor<FileFilter> fileFilterCaptor = ArgumentCaptor.forClass(FileFilter.class);
 		when(gavinAppDir.listFiles(fileFilterCaptor.capture())).thenReturn(new File[] { oldJobDir });
 		when(oldJobDir.getName()).thenReturn("ASDFASDFASDF");
@@ -195,7 +200,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		ExecutorService executorService()
+		ExecutorService gavinExecutors()
 		{
 			return mock(ExecutorService.class);
 		}

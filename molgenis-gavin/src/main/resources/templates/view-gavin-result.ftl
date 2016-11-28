@@ -18,7 +18,7 @@
             <#if jobExecution.status == 'RUNNING' || jobExecution.status == 'PENDING'>
             <#-- Job running, show progress -->
                 <div id="gavin-job" data-execution-id="${jobExecution.identifier}"></div>
-                <p>Job running. Check back later at <a
+                <p>No results yet. Check back later at <a
                         href="${pageUrl}">${pageUrl}</a>.
                     Results will remain available for 24 hours.</p>
             <#else>
@@ -54,7 +54,7 @@
                 <#else>
                     There was a problem, no results available. Check execution log for details.
                 </#if>
-                <p>This page will remain available on <a href="${pageUrl}">${pageUrl}</a>.</p>
+                <p>This page will remain available for 24 hours on <a href="${pageUrl}">${pageUrl}</a>.</p>
                 <#if jobExecution.log??>
                     <h4>Execution log</h4>
                     <pre class="pre-scrollable">${jobExecution.log?html}</pre>

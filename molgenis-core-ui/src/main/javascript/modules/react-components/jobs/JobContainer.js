@@ -13,21 +13,27 @@ import {Job} from "./Job";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import SetIntervalMixin from "../mixin/SetIntervalMixin";
 
-var JobContainer = React.createClass({
+const JobContainer = React.createClass({
     mixins: [DeepPureRenderMixin, SetIntervalMixin],
     displayName: 'JobContainer',
     propTypes: {
         jobHref: React.PropTypes.string,
-        onCompletion: React.PropTypes.func
+        onCompletion: React.PropTypes.func,
+        refreshTimeoutMillis: React.PropTypes.number
     },
     getInitialState: function () {
         return {
             job: null
         }
     },
+    getDefaultProps: function () {
+        return {
+            refreshTimeoutMillis: 1000
+        }
+    },
     componentDidMount: function () {
         this.retrieveJob();
-        this.setInterval(this.retrieveJob, 1000);
+        this.setInterval(this.retrieveJob, this.props.refreshTimeoutMillis);
     },
     render: function () {
         if (this.state.job) {
