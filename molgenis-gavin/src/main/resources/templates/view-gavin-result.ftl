@@ -54,7 +54,7 @@
                 <#else>
                     There was a problem, no results available. Check execution log for details.
                 </#if>
-                <p>This page will remain available on <a href="${pageUrl}">${pageUrl}</a>.</p>
+                <p>This page will remain available for 24 hours on <a href="${pageUrl}">${pageUrl}</a>.</p>
                 <#if jobExecution.log??>
                     <h4>Execution log</h4>
                     <pre class="pre-scrollable">${jobExecution.log?html}</pre>
