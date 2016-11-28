@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * Bootstraps the scheduling framework
@@ -36,13 +37,22 @@ public class JobBootstrapper
 
 	private void bootstrap(SystemEntityType systemEntityType)
 	{
-		dataService.query(systemEntityType.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll().forEach(this::setFailed);
+		dataService.query(systemEntityType.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll()
+				.forEach(this::setFailed);
 	}
 
 	private void setFailed(Entity jobExecutionEntity)
 	{
 		jobExecutionEntity.set(STATUS, FAILED.toString());
 		jobExecutionEntity.set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
+		StringBuilder log = new StringBuilder();
+		if (!isEmpty(jobExecutionEntity.get(LOG)))
+		{
+			log.append(jobExecutionEntity.get(LOG));
+			log.append('\n');
+		}
+		log.append("FAILED - Application terminated unexpectedly");
+		jobExecutionEntity.set(LOG, log.toString());
 		dataService.update(jobExecutionEntity.getEntityType().getName(), jobExecutionEntity);
 	}
 
