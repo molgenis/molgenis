@@ -174,7 +174,9 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		when(fileStore.getFile("gavin-app")).thenReturn(gavinAppDir);
 		when(newJobDir.lastModified()).thenReturn(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(23));
+		when(newJobDir.isDirectory()).thenReturn(true);
 		when(oldJobDir.lastModified()).thenReturn(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(24) - 1000);
+		when(oldJobDir.isDirectory()).thenReturn(true);
 		ArgumentCaptor<FileFilter> fileFilterCaptor = ArgumentCaptor.forClass(FileFilter.class);
 		when(gavinAppDir.listFiles(fileFilterCaptor.capture())).thenReturn(new File[] { oldJobDir });
 		when(oldJobDir.getName()).thenReturn("ASDFASDFASDF");
