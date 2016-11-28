@@ -214,22 +214,19 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@Override
 	public void addEntityTag(SemanticTag<EntityType, OntologyTerm, Ontology> tag)
 	{
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void removeEntityTag(SemanticTag<EntityType, OntologyTerm, Ontology> tag)
 	{
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(EntityType entityType)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	/**
