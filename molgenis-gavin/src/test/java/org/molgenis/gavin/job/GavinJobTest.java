@@ -167,7 +167,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(progress).setProgressMax(5);
 		verify(progress).progress(0, "Preprocessing input file...");
 		verify(progress)
-				.status("Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 skipped)");
+				.status("Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 indels without CADD score, 0 skipped)");
 
 		verify(progress).progress(1, "File already annotated by cadd, skipping cadd annotation.");
 
