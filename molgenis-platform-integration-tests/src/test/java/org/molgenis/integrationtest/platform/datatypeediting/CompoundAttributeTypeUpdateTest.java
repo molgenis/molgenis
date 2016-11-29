@@ -30,30 +30,6 @@ public class CompoundAttributeTypeUpdateTest extends AbstractAttributeTypeUpdate
 		super.afterClass();
 	}
 
-	@DataProvider(name = "validConversionData")
-	public Object[][] validConversionData()
-	{
-		return new Object[][] { { null, STRING, null } };
-	}
-
-	/**
-	 * Valid conversion cases for COMPOUND to:
-	 * STRING
-	 *
-	 * @param valueToConvert  The value that will be converted
-	 * @param typeToConvertTo The type to convert to
-	 * @param convertedValue  The expected value after converting the type
-	 */
-	@Test(dataProvider = "validConversionData")
-	public void testValidConversion(String valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
-	{
-		testTypeConversion(valueToConvert, typeToConvertTo);
-
-		// Assert if conversion was successful
-		assertEquals(getActualDataType(), typeToConvertTo);
-		assertEquals(getActualValue(), convertedValue);
-	}
-
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
