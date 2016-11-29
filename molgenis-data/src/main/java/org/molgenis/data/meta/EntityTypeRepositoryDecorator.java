@@ -15,11 +15,9 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,7 +48,7 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
-public class EntityTypeRepositoryDecorator implements Repository<EntityType>
+public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<EntityType>
 {
 	private final Repository<EntityType> decoratedRepo;
 	private final DataService dataService;
@@ -67,32 +65,9 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	}
 
 	@Override
-	public Set<RepositoryCapability> getCapabilities()
+	protected Repository<EntityType> delegate()
 	{
-		return decoratedRepo.getCapabilities();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepo.close();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepo.getName();
-	}
-
-	@Override
-	public Set<QueryRule.Operator> getQueryOperators()
-	{
-		return decoratedRepo.getQueryOperators();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepo.getEntityType();
+		return decoratedRepo;
 	}
 
 	@Override
@@ -112,7 +87,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 	@Override
 	public Query<EntityType> query()
 	{
-		return decoratedRepo.query();
+		return new QueryImpl<>(this);
 	}
 
 	@Override
