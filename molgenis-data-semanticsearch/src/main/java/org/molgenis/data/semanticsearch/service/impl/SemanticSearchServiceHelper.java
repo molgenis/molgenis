@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 public class SemanticSearchServiceHelper

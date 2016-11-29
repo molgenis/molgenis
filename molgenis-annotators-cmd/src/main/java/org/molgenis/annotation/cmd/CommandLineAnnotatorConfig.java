@@ -5,6 +5,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -12,6 +13,7 @@ import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -109,6 +111,18 @@ public class CommandLineAnnotatorConfig
 	public EntityPopulator entityPopulator()
 	{
 		return new EntityPopulator(uuidGenerator());
+	}
+
+	@Bean
+	public EntityTypeDependencyResolver entityTypeDependencyResolver()
+	{
+		return new EntityTypeDependencyResolver(genericDependencyResolver());
+	}
+
+	@Bean
+	public GenericDependencyResolver genericDependencyResolver()
+	{
+		return new GenericDependencyResolver();
 	}
 
 	@Bean

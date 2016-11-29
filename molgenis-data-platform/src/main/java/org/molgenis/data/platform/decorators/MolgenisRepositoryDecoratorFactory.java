@@ -29,17 +29,13 @@ import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
-import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.ExpressionValidator;
-import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.data.validation.meta.AttributeRepositoryValidationDecorator;
-import org.molgenis.data.validation.meta.AttributeValidator;
-import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
-import org.molgenis.data.validation.meta.EntityTypeValidator;
+import org.molgenis.data.validation.*;
+import org.molgenis.data.validation.meta.*;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
@@ -55,6 +51,7 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Component
@@ -78,24 +75,26 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final TransactionInformation transactionInformation;
 	private final MolgenisPermissionService permissionService;
 	private final EntityTypeValidator entityTypeValidator;
+	private final TagValidator tagValidator;
 	private final L3Cache l3Cache;
 	private final LanguageService languageService;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final AttributeValidator attributeValidator;
 	private final PlatformTransactionManager transactionManager;
+	private final QueryValidator queryValidator;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
-			AppSettings appSettings, DataService dataService,
-			ExpressionValidator expressionValidator, RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, UserAuthorityFactory userAuthorityFactory,
-			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
-			PasswordEncoder passwordEncoder, L1Cache l1Cache, L2Cache l2Cache,
+			AppSettings appSettings, DataService dataService, ExpressionValidator expressionValidator,
+			RepositoryDecoratorRegistry repositoryDecoratorRegistry, SystemEntityTypeRegistry systemEntityTypeRegistry,
+			UserAuthorityFactory userAuthorityFactory, IndexActionRegisterService indexActionRegisterService,
+			SearchService searchService, PasswordEncoder passwordEncoder, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, L3Cache l3Cache,
-			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
-			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager)
+			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator,
+			TagValidator tagValidator, L3Cache l3Cache, LanguageService languageService,
+			EntityTypeDependencyResolver entityTypeDependencyResolver, AttributeValidator attributeValidator,
+			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -116,11 +115,13 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionInformation = requireNonNull(transactionInformation);
 		this.permissionService = requireNonNull(permissionService);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
+		this.tagValidator = requireNonNull(tagValidator);
 		this.l3Cache = requireNonNull(l3Cache);
 		this.languageService = requireNonNull(languageService);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.transactionManager = requireNonNull(transactionManager);
+		this.queryValidator = requireNonNull(queryValidator);
 	}
 
 	@Override
@@ -172,6 +173,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 0. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);
 
+		// -1. query validation decorator
+		decoratedRepository = new QueryValidationRepositoryDecorator<>(decoratedRepository, queryValidator);
+
 		return decoratedRepository;
 	}
 
@@ -211,10 +215,14 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 					(Repository<Package>) (Repository<? extends Entity>) repo, dataService,
 					entityTypeDependencyResolver);
 		}
+		else if (repo.getName().equals(TAG))
+		{
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new TagRepositoryValidationDecorator(
+					(Repository<Tag>) (Repository<? extends Entity>) repo, tagValidator);
+		}
 		else if (repo.getName().equals(LANGUAGE))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
-					(Repository<Language>) (Repository<? extends Entity>) repo, languageService);
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator((Repository<Language>) (Repository<? extends Entity>) repo, languageService);
 		}
 		else if (repo.getName().equals(I18N_STRING))
 		{

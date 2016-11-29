@@ -32,8 +32,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.AttributeType.ONE_TO_MANY;
-import static org.molgenis.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -106,7 +106,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		assertTrue(EntityUtils.equals(actualHydratedEntity, hydratedEntity));
 		// check that it has retrieved references of type TypeTestRef
 		assertTrue(entityTypeArgumentCaptor.getAllValues().stream()
-				.allMatch(emd -> emd.getName().equals("test_TypeTestRefDynamic")));
+				.allMatch(emd -> emd.getName().equals("TypeTestRefDynamic")));
 	}
 
 	@Test

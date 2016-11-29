@@ -10,8 +10,8 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.Sort.Direction.ASC;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;

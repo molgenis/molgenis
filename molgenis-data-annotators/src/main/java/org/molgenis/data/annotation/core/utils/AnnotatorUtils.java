@@ -23,8 +23,8 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.AttributeType.COMPOUND;
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
 
 public class AnnotatorUtils
@@ -107,7 +107,13 @@ public class AnnotatorUtils
 				.setDataType(COMPOUND).setLabel(annotator.getSimpleName());
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
 				.forEachOrdered(part -> part.setParent(compound));
+
 		entityType.addAttribute(compound);
+		// Only add attributes that do not already exist. We assume existing attributes are added in a previous annotation run.
+		// This is a potential risk if an attribute with that name already exist that was not added by the annotator.
+		// This risk is relatively low since annotator attributes are prefixed.
+		attributes = attributes.stream().filter(attribute -> entityType.getAttribute(attribute.getName()) == null)
+				.collect(Collectors.toList());
 		entityType.addAttributes(attributes);
 	}
 
@@ -173,15 +179,16 @@ public class AnnotatorUtils
 		addAnnotatorAttributesToInfoAttribute(annotator, vcfRepo);
 		Iterable<Entity> entitiesToAnnotate;
 
+		// Check if annotator is annotator that annotates effects (for example Gavin)
 		if (annotator instanceof EffectsAnnotator)
 		{
 			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityType(), EFFECT,
 					StreamSupport.stream(vcfRepo.spliterator(), false));
 
 			// Add metadata to repository that will be annotated, instead of repository with variants
-			for (Entity entity : entitiesToAnnotate)
+			if (entitiesToAnnotate.iterator().hasNext())
 			{
-				entity.getEntityType().addAttributes(annotator.getOutputAttributes());
+				entitiesToAnnotate.iterator().next().getEntityType().addAttributes(annotator.getOutputAttributes());
 			}
 		}
 		else

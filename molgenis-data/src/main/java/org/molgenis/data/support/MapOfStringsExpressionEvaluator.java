@@ -2,10 +2,10 @@ package org.molgenis.data.support;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
@@ -211,7 +211,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
-		public int getSequenceNumber()
+		public Integer getSequenceNumber()
 		{
 			return attr.getSequenceNumber();
 		}

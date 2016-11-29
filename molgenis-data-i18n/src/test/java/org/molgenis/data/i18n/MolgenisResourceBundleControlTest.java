@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.*;
 
 public class MolgenisResourceBundleControlTest

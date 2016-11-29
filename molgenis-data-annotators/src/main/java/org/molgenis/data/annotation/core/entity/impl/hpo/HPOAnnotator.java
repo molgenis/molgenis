@@ -25,8 +25,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.web.settings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 /**
  * Typical HPO terms for a gene dataType (already present via SnpEff) Source:

@@ -32,7 +32,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

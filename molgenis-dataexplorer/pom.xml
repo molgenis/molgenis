@@ -27,11 +27,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-system</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-csv</artifactId>
             <version>${project.version}</version>
         </dependency>

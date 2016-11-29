@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;

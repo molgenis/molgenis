@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
@@ -43,15 +42,13 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerConfig.class, GsonConfig.class })
@@ -342,24 +339,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void retrieveEntityCollectionConvertValue() throws Exception
-	{
-		//noinspection unchecked
-		ArgumentCaptor<Query<Entity>> captor = ArgumentCaptor.forClass((Class) Query.class);
-		Entity entity = mock(Entity.class);
-		when(dataService.findAll(eq(ENTITY_NAME), captor.capture())).thenReturn(Stream.of(entity));
-
-		mockMvc.perform(get(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
-				.param("q[0].field", "int").param("q[0].value", "2")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON));
-
-		for (QueryRule queryRule : captor.getValue().getRules())
-		{
-			assertEquals(queryRule.getValue(), Integer.valueOf(2));
-		}
-	}
-
-	@Test
 	public void retrieveEntityCollectionPost() throws Exception
 	{
 		String json = "{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}";
@@ -367,24 +346,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
-	}
-
-	@Test
-	public void retrieveEntityCollectionPostConvertValue() throws Exception
-	{
-		ArgumentCaptor<QueryImpl> captor = ArgumentCaptor.forClass(QueryImpl.class);
-		Entity e = new DynamicEntity(mock(EntityType.class));
-		when(dataService.findAll(eq(ENTITY_NAME), captor.capture())).thenReturn(Stream.of(e));
-
-		String json = "{start:5, num:10, q:[{operator:EQUALS,field:int,value:2.0}]}";
-
-		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON));
-
-		for (Object qr : captor.getValue().getRules())
-		{
-			assertEquals(((QueryRule) qr).getValue(), Integer.valueOf(2));
-		}
 	}
 
 	@Test

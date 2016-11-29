@@ -1,7 +1,7 @@
 package org.molgenis.data.rsql;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Service;

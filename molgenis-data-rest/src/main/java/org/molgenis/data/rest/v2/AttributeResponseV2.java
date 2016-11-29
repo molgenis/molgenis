@@ -4,20 +4,20 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.support.Href;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.List;
 
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 
 class AttributeResponseV2
 {

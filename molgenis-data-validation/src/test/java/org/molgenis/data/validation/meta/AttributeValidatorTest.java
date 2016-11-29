@@ -1,11 +1,11 @@
 package org.molgenis.data.validation.meta;
 
 import junit.framework.Assert;
-import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -16,9 +16,10 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.Sort.Direction.ASC;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -245,38 +246,24 @@ public class AttributeValidatorTest
 
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid default value \\[test\\] for data type \\[INT\\]")
 	public void testDefaultValueInt1()
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(), "NumberFormatException For input string: \"test\"");
-		}
+		attributeValidator.validateDefaultValue(attr);
+		Assert.fail();
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid default value \\[1.0\\] for data type \\[INT\\]")
 	public void testDefaultValueInt2()
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDefaultValue()).thenReturn("1.0");
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(), "NumberFormatException For input string: \"1.0\"");
-		}
+		attributeValidator.validateDefaultValue(attr);
+		Assert.fail();
 	}
 
 	@Test
@@ -288,21 +275,13 @@ public class AttributeValidatorTest
 		attributeValidator.validateDefaultValue(attr);
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid default value \\[test\\] for data type \\[LONG\\]")
 	public void testDefaultValueLong()
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.LONG);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(), "NumberFormatException For input string: \"test\"");
-		}
+		attributeValidator.validateDefaultValue(attr);
 	}
 
 	@Test

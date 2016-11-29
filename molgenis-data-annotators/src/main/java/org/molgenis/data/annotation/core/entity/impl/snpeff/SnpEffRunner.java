@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterators.peekingIterator;
 import static java.io.File.createTempFile;
-import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
+import static org.molgenis.data.meta.AttributeType.XREF;
 
 @Component
 public class SnpEffRunner
@@ -175,7 +175,7 @@ public class SnpEffRunner
 		{
 			Entity entityCandidate = snpEffResultIterator.peek();
 			if (chromosome.equals(entityCandidate.getString(VcfAttributes.CHROM)) && position == entityCandidate
-					.getInt(VcfAttributes.POS))
+					.getInt(VcfAttributes.POS) && entityCandidate.getString(SnpEffRunner.ANN) != null)
 			{
 				snpEffResultIterator.next();
 				return entityCandidate;
@@ -332,7 +332,8 @@ public class SnpEffRunner
 				.setSimpleName(sourceEntityType.getSimpleName() + ENTITY_NAME_SUFFIX)
 				.setPackage(sourceEntityType.getPackage());
 		entityType.setBackend(sourceEntityType.getBackend());
-		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false).setIdAttribute(true);
+		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false)
+				.setIdAttribute(true);
 		entityType.addAttribute(id);
 		for (Attribute attr : effectsMetaData.getOrderedAttributes())
 		{

@@ -1,9 +1,6 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.aggregation.AggregateQuery;
-import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -13,7 +10,6 @@ import org.molgenis.util.HugeSet;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -24,7 +20,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
-public class RepositoryValidationDecorator implements Repository<Entity>
+public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private enum ValidationMode
 	{
@@ -43,6 +39,12 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		this.decoratedRepository = requireNonNull(repository);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
 		this.expressionValidator = requireNonNull(expressionValidator);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	@Override
@@ -66,12 +68,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void delete(Entity entity)
-	{
-		decoratedRepository.delete(entity);
-	}
-
-	@Override
 	public void add(Entity entity)
 	{
 		try (ValidationResource validationResource = new ValidationResource())
@@ -89,131 +85,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			entities = validate(entities, validationResource, ValidationMode.ADD);
 			return decoratedRepository.add(entities);
 		}
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepository.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepository.getEntityType();
-	}
-
-	@Override
-	public Iterator<Entity> iterator()
-	{
-		return decoratedRepository.iterator();
-	}
-
-	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
-	{
-		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepository.close();
-	}
-
-	@Override
-	public long count()
-	{
-		return decoratedRepository.count();
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return decoratedRepository.query();
-	}
-
-	@Override
-	public long count(Query<Entity> q)
-	{
-		return decoratedRepository.count(q);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
-	{
-		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Entity findOne(Query<Entity> q)
-	{
-		return decoratedRepository.findOne(q);
-	}
-
-	@Override
-	public Entity findOneById(Object id)
-	{
-		return decoratedRepository.findOneById(id);
-	}
-
-	@Override
-	public Entity findOneById(Object id, Fetch fetch)
-	{
-		return decoratedRepository.findOneById(id, fetch);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
-	}
-
-	@Override
-	public void delete(Stream<Entity> entities)
-	{
-		decoratedRepository.delete(entities);
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		decoratedRepository.deleteById(id);
-	}
-
-	@Override
-	public void deleteAll(Stream<Object> ids)
-	{
-		decoratedRepository.deleteAll(ids);
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		decoratedRepository.deleteAll();
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decoratedRepository.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decoratedRepository.getQueryOperators();
 	}
 
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,

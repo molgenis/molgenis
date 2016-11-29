@@ -7,21 +7,24 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class EntityTypeValidatorTest
 {
@@ -33,6 +36,7 @@ public class EntityTypeValidatorTest
 	private Attribute labelAttr;
 	private Query<EntityType> entityQ;
 	private Query<Attribute> attrQ;
+	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -40,7 +44,8 @@ public class EntityTypeValidatorTest
 		dataService = mock(DataService.class);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		entityTypeValidator = new EntityTypeValidator(dataService);
+		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
+		entityTypeValidator = new EntityTypeValidator(dataService, systemEntityTypeRegistry);
 
 		String backendName = "backend";
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
@@ -89,6 +94,7 @@ public class EntityTypeValidatorTest
 		when(entityType.getName()).thenReturn(packageName + '_' + name);
 		when(entityType.getSimpleName()).thenReturn(name);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
+		when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
 		when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
 		when(entityType.getOwnLookupAttributes()).thenReturn(singletonList(labelAttr));
@@ -282,6 +288,47 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.isAbstract()).thenReturn(false);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
+		entityTypeValidator.validate(entityType);
+	}
+	
+	@Test
+	public void testValidateSystemPackageValid()
+	{
+		String packageName = PACKAGE_SYSTEM;
+		Package rootSystemPackage = mock(Package.class);
+		when(rootSystemPackage.getName()).thenReturn(packageName);
+
+		String entityName = "entity";
+		String qualifiedEntityName = packageName + '_' + entityName;
+		when(entityType.getName()).thenReturn(qualifiedEntityName);
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.getPackage()).thenReturn(rootSystemPackage);
+
+		when(systemEntityTypeRegistry.hasSystemEntityType(qualifiedEntityName)).thenReturn(true);
+		entityTypeValidator.validate(entityType); // valid
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Adding entity \\[sys_myEntity\\] to system package \\[sys\\] is not allowed")
+	public void testValidateSystemPackageInvalid()
+	{
+		String packageName = PACKAGE_SYSTEM;
+		Package rootSystemPackage = mock(Package.class);
+		when(rootSystemPackage.getName()).thenReturn(packageName);
+
+		String entityName = "myEntity";
+		String qualifiedEntityName = packageName + '_' + entityName;
+		when(entityType.getName()).thenReturn(qualifiedEntityName);
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.getPackage()).thenReturn(rootSystemPackage);
+
+		when(systemEntityTypeRegistry.hasSystemEntityType(qualifiedEntityName)).thenReturn(false);
+		entityTypeValidator.validate(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] contains multiple attributes with name \\[idAttr\\]")
+	public void testValidateAttributeWithDuplicateName()
+	{
+		when(entityType.getAllAttributes()).thenReturn(asList(idAttr, idAttr));
 		entityTypeValidator.validate(entityType);
 	}
 }

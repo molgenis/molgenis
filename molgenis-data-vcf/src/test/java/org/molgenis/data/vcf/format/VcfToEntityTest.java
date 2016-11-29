@@ -22,7 +22,7 @@ import java.io.StringReader;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
 import static org.molgenis.data.vcf.model.VcfAttributes.INTERNAL_ID;
