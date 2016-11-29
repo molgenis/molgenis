@@ -63,7 +63,7 @@ public class VcfImporterService implements ImportService
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				report = runAsSystem(() -> importVcf(repo, addedEntities));
+				report = importVcf(repo, addedEntities);
 			}
 			catch (IOException e)
 			{
@@ -139,10 +139,10 @@ public class VcfImporterService implements ImportService
 			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
-		Repository<Entity> sampleRepository = null;
+		Repository<Entity> sampleRepository;
 		String entityName = inRepository.getName();
 
-		if (dataService.hasRepository(entityName))
+		if (runAsSystem(() -> dataService.hasRepository(entityName)))
 		{
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
@@ -155,16 +155,19 @@ public class VcfImporterService implements ImportService
 		{
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
-			sampleRepository = dataService.getMeta().createRepository(samplesEntityType);
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(samplesEntityType.getName()));
+			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), Collections.singletonList(samplesEntityType.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
+		}
+		else
+		{
+			sampleRepository = null;
 		}
 
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int sampleEntityCount = 0;
 		List<Entity> sampleEntities = new ArrayList<>();
-		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityType))
+		try (Repository<Entity> outRepository = runAsSystem(() -> dataService.getMeta().createRepository(entityType)))
 		{
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(entityType.getName()));
@@ -198,7 +201,7 @@ public class VcfImporterService implements ImportService
 
 				if (!sampleEntities.isEmpty())
 				{
-					sampleRepository.add(sampleEntities.stream());
+					runAsSystem(() -> sampleRepository.add(sampleEntities.stream()));
 					sampleEntityCount += sampleEntities.size();
 				}
 
@@ -210,11 +213,11 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
+			runAsSystem(() -> outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
 			{
 				vcfEntityCount.incrementAndGet();
 				return true;
-			}));
+			})));
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityName, vcfEntityCount.get());
