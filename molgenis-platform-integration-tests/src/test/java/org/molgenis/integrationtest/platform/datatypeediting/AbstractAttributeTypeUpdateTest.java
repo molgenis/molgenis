@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,14 +112,14 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 
 		entityType = entityTypeFactory.create("1");
 		entityType.setName(MAIN_ENTITY);
-		entityType.setBackend("PostgreSQL");
+		entityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		referenceEntityType = entityTypeFactory.create("2");
 		referenceEntityType.setName(REFERENCE_ENTITY);
-		referenceEntityType.setBackend("PostgreSQL");
+		referenceEntityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		Attribute mainIdAttribute = attributeFactory.create().setName(mainId).setIdAttribute(true);
-		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute);
+		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute).setNillable(false);
 
 		if (referencingTypes.contains(type))
 		{
@@ -165,7 +166,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 		refEntity_3.set(refLabel, "hyperlink label");
 
 		dataService.add(REFERENCE_ENTITY, Stream.of(refEntity_1, refEntity_2, refEntity_3));
-		waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	void testTypeConversion(Object valueToConvert, AttributeType typeToConvertTo) throws MolgenisValidationException
@@ -177,7 +177,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 
 		// Add one entity row
 		dataService.add(MAIN_ENTITY, entity);
-		waitForIndexToBeStable(MAIN_ENTITY, indexService, LOG);
 
 		// Update EntityType
 		convert(typeToConvertTo);
@@ -196,8 +195,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 
 		attribute.setDataType(typeToConvertTo);
 		metaDataService.updateEntityType(entityType);
-
-		waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	Object getActualValue()
@@ -216,13 +213,11 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	{
 		// Delete rows of data
 		dataService.deleteAll(MAIN_ENTITY);
-		waitForWorkToBeFinished(indexService, LOG);
 
 		// Remove attribute, some conversions back to the main attribute are not allowed
 		Attribute attribute = entityType.getAttribute(mainAttribute);
 		entityType.removeAttribute(attribute);
 		metaDataService.updateEntityType(entityType);
-		waitForWorkToBeFinished(indexService, LOG);
 
 		// Add the main attribute again, with the original type
 		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute);
@@ -232,7 +227,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 		entityType.addAttribute(mainAttributeAttribute);
 
 		metaDataService.updateEntityType(entityType);
-		waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	void afterClass()
