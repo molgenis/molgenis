@@ -29,8 +29,6 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
-import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
-import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
@@ -108,7 +106,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	{
 		List<GrantedAuthority> authorities = setAuthorities();
 		getContext().setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
-		waitForWorkToBeFinished(indexService, LOG);
 
 		entityType = entityTypeFactory.create("1");
 		entityType.setName(MAIN_ENTITY);
@@ -119,7 +116,8 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 		referenceEntityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		Attribute mainIdAttribute = attributeFactory.create().setName(mainId).setIdAttribute(true);
-		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute).setNillable(false);
+		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute)
+				.setNillable(false);
 
 		if (referencingTypes.contains(type))
 		{
@@ -238,6 +236,5 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 			metaDataService.deleteEntityType(MAIN_ENTITY);
 			metaDataService.deleteEntityType(REFERENCE_ENTITY);
 		});
-		waitForWorkToBeFinished(indexService, LOG);
 	}
 }

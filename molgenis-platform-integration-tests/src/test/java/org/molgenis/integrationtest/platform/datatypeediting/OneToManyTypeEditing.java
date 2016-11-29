@@ -64,7 +64,6 @@ public class OneToManyTypeEditing extends AbstractTestNGSpringContextTests
 		{
 			metaDataService.addEntityType(entityType);
 			metaDataService.addEntityType(refEntity);
-			waitForWorkToBeFinished(indexService, LOG);
 
 			entityType.getAttribute("oneToMany").setDataType(STRING);
 			entityType.getAttribute("oneToMany").setRefEntity(null);
