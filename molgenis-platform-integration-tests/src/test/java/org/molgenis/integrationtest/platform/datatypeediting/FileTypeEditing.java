@@ -60,7 +60,6 @@ public class FileTypeEditing extends AbstractTestNGSpringContextTests
 		runAsSystem(() ->
 		{
 			metaDataService.addEntityType(entityType);
-			waitForWorkToBeFinished(indexService, LOG);
 
 			entityType.getAttribute("fileRef").setDataType(STRING);
 			entityType.getAttribute("fileRef").setRefEntity(null);

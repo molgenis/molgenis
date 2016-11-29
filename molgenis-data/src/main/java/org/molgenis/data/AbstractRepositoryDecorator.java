@@ -46,6 +46,7 @@ public abstract class AbstractRepositoryDecorator<E extends Entity> extends Forw
 		return delegate().getName();
 	}
 
+	@Override
 	public EntityType getEntityType()
 	{
 		return delegate().getEntityType();

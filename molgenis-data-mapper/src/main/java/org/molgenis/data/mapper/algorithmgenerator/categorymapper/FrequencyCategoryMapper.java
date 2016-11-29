@@ -47,8 +47,7 @@ public class FrequencyCategoryMapper extends CategoryMapper
 
 	public CategoryMatchQuality<?> applyCustomRules(Category sourceCategory, Category targetCategory)
 	{
-		// TODO
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	Double convert(AmountWrapper sourceAmountWrapper, AmountWrapper targetAmountWrapper)
