@@ -4,6 +4,7 @@ import com.google.common.collect.ForwardingObject;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -60,7 +61,8 @@ public abstract class AbstractRepositoryDecorator<E extends Entity> extends Forw
 	@Override
 	public Query<E> query()
 	{
-		return delegate().query();
+		// do not forward to delegate, since we want for example query.findAll() to be called on this repository
+		return new QueryImpl<>(this);
 	}
 
 	@Override

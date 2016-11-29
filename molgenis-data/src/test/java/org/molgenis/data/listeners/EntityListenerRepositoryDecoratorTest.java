@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.testng.Assert.assertEquals;
+
 public class EntityListenerRepositoryDecoratorTest
 {
 	private Repository<Entity> decoratedRepository;
@@ -44,6 +46,18 @@ public class EntityListenerRepositoryDecoratorTest
 	public void EntityListenerRepositoryDecorator()
 	{
 		new EntityListenerRepositoryDecorator(null, entityListenersService);
+	}
+
+	@Test
+	public void delegate() throws Exception
+	{
+		assertEquals(entityListenerRepositoryDecorator.delegate(), decoratedRepository);
+	}
+
+	@Test
+	public void testQuery() throws Exception
+	{
+		assertEquals(entityListenerRepositoryDecorator.query().getRepository(), entityListenerRepositoryDecorator);
 	}
 
 	@Test

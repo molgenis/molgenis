@@ -334,8 +334,7 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void query()
 	{
-		indexedRepositoryDecorator.query();
-		verify(decoratedRepo, times(1)).query();
+		assertEquals(indexedRepositoryDecorator.query().getRepository(), indexedRepositoryDecorator);
 		verifyZeroInteractions(searchService);
 	}
 

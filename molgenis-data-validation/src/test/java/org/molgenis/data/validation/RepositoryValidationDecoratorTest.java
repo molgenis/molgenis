@@ -184,6 +184,12 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
+	public void query() throws Exception
+	{
+		assertEquals(repositoryValidationDecorator.query().getRepository(), repositoryValidationDecorator);
+	}
+
+	@Test
 	public void add()
 	{
 		// entities

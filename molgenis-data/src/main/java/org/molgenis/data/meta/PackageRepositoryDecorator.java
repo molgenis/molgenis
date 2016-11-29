@@ -3,20 +3,13 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
-import org.molgenis.data.aggregation.AggregateQuery;
-import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -24,9 +17,8 @@ import static com.google.common.collect.Lists.reverse;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
-public class PackageRepositoryDecorator implements Repository<Package>
+public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Package>
 {
 	private final Repository<Package> decoratedRepo;
 	private final DataService dataService;
@@ -41,104 +33,9 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	}
 
 	@Override
-	public Set<RepositoryCapability> getCapabilities()
+	protected Repository<Package> delegate()
 	{
-		return decoratedRepo.getCapabilities();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepo.close();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepo.getName();
-	}
-
-	@Override
-	public Set<QueryRule.Operator> getQueryOperators()
-	{
-		return decoratedRepo.getQueryOperators();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepo.getEntityType();
-	}
-
-	@Override
-	public long count()
-	{
-		return decoratedRepo.count();
-	}
-
-	@Override
-	public Query<Package> query()
-	{
-		return decoratedRepo.query();
-	}
-
-	@Override
-	public long count(Query<Package> q)
-	{
-		return decoratedRepo.count(q);
-	}
-
-	@Override
-	public Stream<Package> findAll(Query<Package> q)
-	{
-		return decoratedRepo.findAll(q);
-	}
-
-	@Override
-	public Iterator<Package> iterator()
-	{
-		return decoratedRepo.iterator();
-	}
-
-	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Package>> consumer, int batchSize)
-	{
-		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public Package findOne(Query<Package> q)
-	{
-		return decoratedRepo.findOne(q);
-	}
-
-	@Override
-	public Package findOneById(Object id)
-	{
-		return decoratedRepo.findOneById(id);
-	}
-
-	@Override
-	public Package findOneById(Object id, Fetch fetch)
-	{
-		return decoratedRepo.findOneById(id, fetch);
-	}
-
-	@Override
-	public Stream<Package> findAll(Stream<Object> ids)
-	{
-		return decoratedRepo.findAll(ids);
-	}
-
-	@Override
-	public Stream<Package> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decoratedRepo.findAll(ids, fetch);
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decoratedRepo.aggregate(aggregateQuery);
+		return decoratedRepo;
 	}
 
 	@Override
@@ -158,14 +55,12 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		}));
 	}
 
-	@Transactional
 	@Override
 	public void delete(Package entity)
 	{
 		deletePackage(entity);
 	}
 
-	@Transactional
 	@Override
 	public void delete(Stream<Package> entities)
 	{

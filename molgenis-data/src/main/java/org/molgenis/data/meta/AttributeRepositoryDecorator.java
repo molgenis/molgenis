@@ -12,10 +12,8 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.EntityUtils;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -35,7 +33,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
-public class AttributeRepositoryDecorator implements Repository<Attribute>
+public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final Repository<Attribute> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
@@ -53,32 +51,9 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 	}
 
 	@Override
-	public Set<RepositoryCapability> getCapabilities()
+	protected Repository<Attribute> delegate()
 	{
-		return decoratedRepo.getCapabilities();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepo.close();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepo.getName();
-	}
-
-	@Override
-	public Set<QueryRule.Operator> getQueryOperators()
-	{
-		return decoratedRepo.getQueryOperators();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepo.getEntityType();
+		return decoratedRepo;
 	}
 
 	@Override
@@ -93,12 +68,6 @@ public class AttributeRepositoryDecorator implements Repository<Attribute>
 			Stream<Attribute> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
 			return filterCountPermission(attrs).count();
 		}
-	}
-
-	@Override
-	public Query<Attribute> query()
-	{
-		return decoratedRepo.query();
 	}
 
 	@Override

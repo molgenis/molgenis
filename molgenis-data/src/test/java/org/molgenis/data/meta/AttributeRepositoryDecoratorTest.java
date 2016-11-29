@@ -174,9 +174,7 @@ public class AttributeRepositoryDecoratorTest
 	@Test
 	public void query() throws Exception
 	{
-		Query q = mock(Query.class);
-		when(decoratedRepo.query()).thenReturn(q);
-		assertEquals(repo.query(), q);
+		assertEquals(repo.query().getRepository(), repo);
 	}
 
 	@Test
