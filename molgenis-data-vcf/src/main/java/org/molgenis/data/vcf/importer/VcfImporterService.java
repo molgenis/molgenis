@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Service
 public class VcfImporterService implements ImportService
@@ -62,7 +63,7 @@ public class VcfImporterService implements ImportService
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				report = importVcf(repo, addedEntities);
+				report = runAsSystem(() -> importVcf(repo, addedEntities));
 			}
 			catch (IOException e)
 			{
@@ -88,7 +89,7 @@ public class VcfImporterService implements ImportService
 			EntityType emd = source.getRepository(entityName).getEntityType();
 
 			// Vcf entity
-			boolean entityExists = dataService.hasRepository(entityName);
+			boolean entityExists = runAsSystem(() -> dataService.hasRepository(entityName));
 			report.getSheetsImportable().put(entityName, !entityExists);
 
 			// Available Attributes
@@ -104,7 +105,7 @@ public class VcfImporterService implements ImportService
 			if (sampleAttribute != null)
 			{
 				String sampleEntityName = sampleAttribute.getRefEntity().getName();
-				boolean sampleEntityExists = dataService.hasRepository(sampleEntityName);
+				boolean sampleEntityExists = runAsSystem(() -> dataService.hasRepository(sampleEntityName));
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
 				List<String> availableSampleAttributeNames = Lists.newArrayList();
