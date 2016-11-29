@@ -87,10 +87,10 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(0, "Preprocessing input file...");
 		Multiset<LineType> lineTypes = parser.tryTransform(inputFile, processedInputFile, errorFile);
-		progress.status(
-				format("Parsed input file. Found {0} lines ({1} comments, {2} valid VCF, {3} valid CADD, {4} errors, {5} skipped)",
-						lineTypes.size(), lineTypes.count(COMMENT), lineTypes.count(VCF), lineTypes.count(CADD),
-						lineTypes.count(ERROR), lineTypes.count(SKIPPED)));
+		progress.status(format("Parsed input file. Found {0} lines ({1} comments, {2} valid VCF, {3} valid CADD, "
+						+ "{4} errors, {5} indels without CADD score, {6} skipped)", lineTypes.size(), lineTypes.count(COMMENT),
+				lineTypes.count(VCF), lineTypes.count(CADD), lineTypes.count(ERROR), lineTypes.count(INDEL_NOCADD),
+				lineTypes.count(SKIPPED)));
 		gavinJobExecution.setLineTypes(lineTypes);
 		if (lineTypes.contains(SKIPPED))
 		{
