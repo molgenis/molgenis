@@ -4,7 +4,10 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 
 import java.text.ParseException;
 
@@ -126,11 +129,5 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}
-	}
-
-	@Test
-	public void test()
-	{
-		return;
 	}
 }
