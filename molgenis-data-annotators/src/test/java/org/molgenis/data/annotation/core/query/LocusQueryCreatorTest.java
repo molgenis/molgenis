@@ -2,7 +2,10 @@ package org.molgenis.data.annotation.core.query;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.model.VcfAttributes;

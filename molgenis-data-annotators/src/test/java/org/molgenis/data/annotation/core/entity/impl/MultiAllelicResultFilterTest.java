@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.test.core.entity.impl;
+package org.molgenis.data.annotation.core.entity.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

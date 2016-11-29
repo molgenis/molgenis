@@ -1,12 +1,10 @@
-package org.molgenis.data.annotation.core.entity.test.snpeff;
+package org.molgenis.data.annotation.core.entity.impl.snpeff;
 
 import com.google.common.collect.Iterators;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
-import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.snpeff.SnpEffRunner;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.meta.model.*;
