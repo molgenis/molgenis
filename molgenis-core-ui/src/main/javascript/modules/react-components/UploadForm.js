@@ -66,6 +66,15 @@ const UploadForm = React.createClass({
     _setFile: function (event) {
         const file = event.target.files[0];
         let fileName = file.name.toLowerCase();
+        if (!file) {
+            this.setState({
+                warning: undefined,
+                file: undefined,
+                showNameField: false,
+                fileName: undefined
+            });
+            return;
+        }
         if (file.size > this.props.maxFileSizeMB * 1024 * 1024) {
             this.setState({
                 warning: 'File is larger than maximum file size of ' + this.props.maxFileSizeMB + ' MB.',
