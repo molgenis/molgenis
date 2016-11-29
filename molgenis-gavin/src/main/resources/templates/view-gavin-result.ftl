@@ -9,7 +9,8 @@
         <div class="panel panel-primary" id="instant-import">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    Gavin annotation ${jobExecution.filename}
+                    GAVIN annotation job ${jobExecution.filename?html} submitted
+                    on ${jobExecution.submissionDate?datetime}
                 </h4>
             </div>
             <div class="panel-body">
@@ -24,7 +25,7 @@
             <#else>
             <#-- Job finished -->
                 <h4>Input</h4>
-                <p>Input contained:</p>
+                <p>Input file contained:</p>
                 <ul>
                     <#if jobExecution.comments?? && jobExecution.comments gt 0 >
                         <li>${jobExecution.comments} comment lines</li></#if>
@@ -32,31 +33,36 @@
                         <li>${jobExecution.cadds} valid CADD lines</li></#if>
                     <#if jobExecution.vcfs?? && jobExecution.vcfs gt 0 >
                         <li>${jobExecution.vcfs} valid VCF lines</li></#if>
-                    <#if (jobExecution.errors?? && jobExecution.errors gt 0) || (jobExecution.indels?? && jobExecution.indels gt 0)>
-                        <li>${jobExecution.indels} lines contained insertions or deletions without a cadd score.</li>
-                        <li>${jobExecution.errors} error lines (could not be
-                            parsed<#if errorFileExists>, check <a
-                                    href="/plugin/gavin-app/error/${jobExecution.identifier}"><span
-                                    class="glyphicon glyphicon-file" aria-hidden="true"></span>failed lines</a> )
-                            <#else>) Error file no longer available. Results are removed after 24 hours.
-                            </#if>
+                    <#if (jobExecution.indels?? && jobExecution.indels gt 0)>
+                        <li>${jobExecution.indels} lines contained insertions or deletions without a cadd score.
+                            Please pre-score these variants using the <a href="http://cadd.gs.washington.edu/score">CADD
+                                service</a>.
                         </li></#if>
+                    <#if (jobExecution.errors?? && jobExecution.errors gt 0)>
+                        <li>${jobExecution.errors} error lines (could not be parsed)</li></#if>
                     <#if jobExecution.skippeds?? && jobExecution.skippeds gt 0 >
                         <li>${jobExecution.skippeds} skipped lines. Too much input.</li></#if>
                 </ul>
                 <h4>Results</h4>
-                <#if jobExecution.status == 'SUCCESS'>
-                    <#if downloadFileExists>Download <a
-                            href="/plugin/gavin-app/download/${jobExecution.identifier}"><span
-                            class="glyphicon glyphicon-file" aria-hidden="true"></span>${jobExecution.filename?html}</a>
-                    <#else>Download file no longer available. Results are removed after 24 hours.
-                    </#if>
+                <#if downloadFileExists>
+                    <a class="btn btn-primary" href="/plugin/gavin-app/download/${jobExecution.identifier}">
+                        <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+                        Download GAVIN-annotated ${jobExecution.filename?html}</a>
                 <#else>
-                    <#if downloadFileExists>Download <a
-                            href="/plugin/gavin-app/download/${jobExecution.identifier}"><span
-                            class="glyphicon glyphicon-file" aria-hidden="true"></span>${jobExecution.filename?html}</a>
+                    <#if jobExecution.status == 'SUCCESS'>Download file no longer available. Results are removed after
+                        24 hours.
                     <#else>There was a problem, no results available. Check execution log for details.
                     </#if>
+                    <br/>
+                </#if>
+                <#if (jobExecution.errors?? && jobExecution.errors gt 0) || (jobExecution.indels?? && jobExecution.indels gt 0)>
+                    <#if errorFileExists>
+                        <a href="/plugin/gavin-app/error/${jobExecution.identifier}" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-file" aria-hidden="true"></span>Download failed lines
+                        </a>
+                    <#else>Error file no longer available. Results are removed after 24 hours.
+                    </#if>
+                    <br/>
                 </#if>
                 <p>This page will remain available for 24 hours on <a href="${pageUrl}">${pageUrl}</a>.</p>
                 <#if jobExecution.log??>
