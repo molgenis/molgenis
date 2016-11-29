@@ -2,9 +2,7 @@ package org.molgenis.data.listeners;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.QueryImpl;
 
 import java.util.stream.Stream;
 
@@ -27,12 +25,6 @@ public class EntityListenerRepositoryDecorator extends AbstractRepositoryDecorat
 	protected Repository<Entity> delegate()
 	{
 		return decoratedRepository;
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override

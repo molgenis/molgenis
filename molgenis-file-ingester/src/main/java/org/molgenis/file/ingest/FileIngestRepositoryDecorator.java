@@ -1,7 +1,6 @@
 package org.molgenis.file.ingest;
 
 import org.molgenis.data.*;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
@@ -27,12 +26,6 @@ public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<E
 	protected Repository<Entity> delegate()
 	{
 		return decorated;
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override

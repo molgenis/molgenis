@@ -4,7 +4,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,12 +106,6 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	public Set<Operator> getQueryOperators()
 	{
 		return EnumSet.allOf(Operator.class);
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override

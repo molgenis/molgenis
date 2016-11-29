@@ -87,12 +87,6 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		}
 	}
 
-	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
-	}
-
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,
 			ValidationMode validationMode)
 	{

@@ -85,12 +85,6 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	@Override
-	public Query<EntityType> query()
-	{
-		return new QueryImpl<>(this);
-	}
-
-	@Override
 	public long count(Query<EntityType> q)
 	{
 		if (currentUserIsSu() || currentUserisSystem())

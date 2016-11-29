@@ -2,10 +2,8 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.support.QueryImpl;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -28,12 +26,6 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 	protected Repository<Language> delegate()
 	{
 		return decorated;
-	}
-
-	@Override
-	public Query<Language> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override

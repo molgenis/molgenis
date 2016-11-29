@@ -6,7 +6,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
@@ -45,12 +44,6 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 	protected Repository<User> delegate()
 	{
 		return decoratedRepository;
-	}
-
-	@Override
-	public Query<User> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override

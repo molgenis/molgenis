@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.support.QueryImpl;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -37,12 +36,6 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
 	protected Repository<Package> delegate()
 	{
 		return decoratedRepo;
-	}
-
-	@Override
-	public Query<Package> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override

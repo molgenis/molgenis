@@ -27,12 +27,6 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 		return decoratedRepo;
 	}
 
-	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
-	}
-
 	// Resolve entity references based on given fetch
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)

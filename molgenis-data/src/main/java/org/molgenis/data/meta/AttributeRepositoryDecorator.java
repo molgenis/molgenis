@@ -71,12 +71,6 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	}
 
 	@Override
-	public Query<Attribute> query()
-	{
-		return new QueryImpl<>(this);
-	}
-
-	@Override
 	public long count(Query<Attribute> q)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
