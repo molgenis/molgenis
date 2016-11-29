@@ -1,12 +1,16 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionException;
 
 import javax.sql.DataSource;
 import java.sql.BatchUpdateException;
@@ -25,8 +29,10 @@ import static org.molgenis.AttributeType.*;
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions
  */
-class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
+@Component
+class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator implements TransactionExceptionTranslator
 {
+	@Autowired
 	PostgreSqlExceptionTranslator(DataSource dataSource)
 	{
 		super(requireNonNull(dataSource));
@@ -351,5 +357,18 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
 		String message = serverErrorMessage.getMessage();
 		ConstraintViolation constraintViolation = new ConstraintViolation(message);
 		return new MolgenisValidationException(singleton(constraintViolation));
+	}
+
+	@Override
+	public MolgenisDataException doTranslate(TransactionException transactionException)
+	{
+		Throwable cause = transactionException.getCause();
+		if (!(cause instanceof PSQLException))
+		{
+			return null;
+		}
+
+		PSQLException pSqlException = (PSQLException) cause;
+		return doTranslate(pSqlException);
 	}
 }

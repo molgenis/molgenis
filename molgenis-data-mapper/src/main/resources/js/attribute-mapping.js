@@ -212,13 +212,13 @@
 
                 var attributeInfo = [];
                 attributeInfo.push('<td><div class="checkbox"><label><input data-attribute-name="' + attribute.name + '" type="checkbox"></label></div></td>');
-                attributeInfo.push('<td class="source-attribute-information"><b>' + attribute.label + '</b> (' + attribute.dataType + ')');
+                attributeInfo.push('<td class="source-attribute-information"><b>' + attribute.label + '</b> (' + attribute.type + ')');
 
-                if (attribute.nillable) {
+                if (attribute.isNullable) {
                     attributeInfo.push('<span class="label label-warning">nillable</span>');
                 }
 
-                if (attribute.unique) {
+                if (attribute.isUnique) {
                     attributeInfo.push('<span class="label label-default">unique</span>');
                 }
 
@@ -226,8 +226,8 @@
                     attributeInfo.push('<br />' + attribute.description);
                 }
 
-                if (attribute.dataType === 'xref' || attribute.dataType === 'categorical' || attribute.dataType === 'mref') {
-                    attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntity + '" target="_blank">category look up</a>');
+                if (attribute.type === 'XREF' || attribute.type === 'CATEGORICAL' || attribute.type === 'MREF' || attribute.type === 'CATEGORICAL_MREF') {
+                    attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntityType + '" target="_blank">category look up</a>');
                 }
 
                 attributeInfo.push('</td><td>' + attribute.name + '</td>');

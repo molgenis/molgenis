@@ -2,6 +2,7 @@ package org.molgenis.ontology.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.FileDocumentSource;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
@@ -55,16 +56,18 @@ public class OntologyLoader
 		this.manager = OWLManager.createOWLOntologyManager();
 		this.factory = manager.getOWLDataFactory();
 		this.ontologyName = ontologyName;
-		this.ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
+		this.ontology = loadOwlOntology();
 		this.ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
 	}
 
-	public void loadOntology(String ontologyName, File ontologyFile) throws OWLOntologyCreationException
+	private OWLOntology loadOwlOntology() throws OWLOntologyCreationException
 	{
-		this.ontologyName = ontologyName;
-		this.ontologyFile = ontologyFile;
-		this.ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
-		this.ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
+		FileDocumentSource fileDocumentSource = new FileDocumentSource(ontologyFile);
+		// use silent import handling strategy to enable ontology loading without internet access
+		// see: https://github.com/molgenis/molgenis/issues/5301
+		OWLOntologyLoaderConfiguration owlOntologyLoaderConfiguration = new OWLOntologyLoaderConfiguration()
+				.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
+		return manager.loadOntologyFromOntologyDocument(fileDocumentSource, owlOntologyLoaderConfiguration);
 	}
 
 	public void preProcessing()

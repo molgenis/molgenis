@@ -9,6 +9,7 @@
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
 			<plugin id="sortaservice" name="SORTA" url="sortaservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
+            <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
         <menu label="Plugins" name="plugins">
             <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
@@ -21,6 +22,9 @@
             <plugin id="scripts" name="Scripts" url="scripts" />
             <plugin id="jobs" name="Jobs" url="jobs" />
             <plugin id="fileingest" name="Automatic imports" url="fileingest" />
+            <plugin id="gavin-app" name="Gavin" url="gavin-app"/>
+            <plugin id="genenetwork" name="Gene network" url="genenetwork"/>
+            <plugin id="genetics-diag-app" name="Genetics diagnostics" url="genetics-diag-app"/>
 	    </menu>
         <menu label="Admin" name="admin">
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
