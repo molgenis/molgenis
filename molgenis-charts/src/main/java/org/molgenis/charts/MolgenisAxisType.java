@@ -1,6 +1,6 @@
 package org.molgenis.charts;
 
-import org.molgenis.AttributeType;
+import org.molgenis.data.meta.AttributeType;
 
 public enum MolgenisAxisType
 {

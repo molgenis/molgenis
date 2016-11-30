@@ -72,7 +72,7 @@ public class SystemEntityTypeTest
 		@Override
 		protected void init()
 		{
-			Attribute compoundAttr1 = mock(Attribute.class);
+			Attribute compoundAttr1 = when(mock(Attribute.class).getName()).thenReturn("compound2").getMock();
 			when(compoundAttr1.getLookupAttributeIndex()).thenReturn(null);
 			addAttribute(compoundAttr1);
 			addAttribute("compoundAttr2").setParent(compoundAttr1);
@@ -95,7 +95,7 @@ public class SystemEntityTypeTest
 		@Override
 		protected void init()
 		{
-			Attribute compoundAttr = mock(Attribute.class);
+			Attribute compoundAttr = when(mock(Attribute.class).getName()).thenReturn("compound").getMock();
 			when(compoundAttr.getLookupAttributeIndex()).thenReturn(null);
 			addAttribute(compoundAttr);
 			addAttribute("idAttr", ROLE_ID).setParent(compoundAttr);

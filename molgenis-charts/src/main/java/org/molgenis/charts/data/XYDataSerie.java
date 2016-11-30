@@ -1,7 +1,7 @@
 package org.molgenis.charts.data;
 
-import org.molgenis.AttributeType;
 import org.molgenis.charts.MolgenisSerieType;
+import org.molgenis.data.meta.AttributeType;
 
 import java.util.ArrayList;
 import java.util.List;

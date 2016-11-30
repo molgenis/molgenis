@@ -5,9 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
@@ -156,8 +156,8 @@ public class VcfUtils
 				{
 					effectsEMD = effect.getEntityType();
 					resultEMD = entityTypeFactory.create(variantEMD);
-					resultEMD.addAttribute(attributeFactory.create().setName(VcfWriterUtils.EFFECT)
-							.setDataType(MREF).setRefEntity(effectsEMD));
+					resultEMD.addAttribute(attributeFactory.create().setName(VcfWriterUtils.EFFECT).setDataType(MREF)
+							.setRefEntity(effectsEMD));
 				}
 			}
 
@@ -236,6 +236,8 @@ public class VcfUtils
 	{
 		Attribute attributeToParse = entityType.getAttribute(attributeName);
 		String description = attributeToParse.getDescription();
+		//Parse the description of, for example, this line:
+		//##INFO=<ID=EFFECT,Number=.,Type=String,Description="EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'">
 		if (description.indexOf(':') == -1)
 		{
 			throw new RuntimeException(
@@ -268,8 +270,7 @@ public class VcfUtils
 		xrefMetaData.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityType.AttributeRole.ROLE_ID);
 		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
-		xrefMetaData.addAttribute(
-				attributeFactory.create().setName(VARIANT).setDataType(XREF));
+		xrefMetaData.addAttribute(attributeFactory.create().setName(VARIANT).setDataType(XREF));
 		return xrefMetaData;
 	}
 
@@ -290,8 +291,8 @@ public class VcfUtils
 		for (int i = 0; i < attributeStrings.length; i++)
 		{
 			String attribute = attributeStrings[i];
-			AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap
-					.get(attribute).getDataType() : STRING;
+			AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap.get(attribute)
+					.getDataType() : STRING;
 			Attribute attr = attributeFactory.create().setName(StringUtils.deleteWhitespace(attribute))
 					.setDataType(type).setLabel(attribute);
 			attributeMap.put(i, attr);
@@ -303,6 +304,7 @@ public class VcfUtils
 			Entity originalEntity)
 	{
 		List<Entity> result = new ArrayList<>();
+		if (value == null) return result;
 		String[] valuesPerEntity = value.split(",");
 
 		for (String aValuesPerEntity : valuesPerEntity)

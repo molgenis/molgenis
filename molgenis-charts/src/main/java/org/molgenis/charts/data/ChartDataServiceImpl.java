@@ -1,10 +1,10 @@
 package org.molgenis.charts.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.AttributeType;
 import org.molgenis.charts.*;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
 import org.molgenis.data.*;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;

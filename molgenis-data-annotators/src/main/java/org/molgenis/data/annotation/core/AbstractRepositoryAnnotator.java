@@ -1,8 +1,8 @@
 package org.molgenis.data.annotation.core;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 

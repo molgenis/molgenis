@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 @Configuration
 public class OmimAnnotator implements AnnotatorConfig

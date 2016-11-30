@@ -2,8 +2,6 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.system.ImportRun;
-import org.molgenis.data.system.ImportRunFactory;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
@@ -17,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORT_RUN;
+import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
 
 @Component
 public class ImportRunService
@@ -46,7 +44,8 @@ public class ImportRunService
 		importRun.setStartDate(new Date());
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setUserName(userName);
+		importRun.setUsername(userName); // required and visible
+		importRun.setOwner(userName); // not required and not visible
 		importRun.setNotify(notify);
 		dataService.add(IMPORT_RUN, importRun);
 
@@ -80,7 +79,7 @@ public class ImportRunService
 		try
 		{
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(userService.getUser(importRun.getUserName()).getEmail());
+			mailMessage.setTo(userService.getUser(importRun.getUsername()).getEmail());
 			mailMessage.setSubject(createMailTitle(importRun));
 			mailMessage.setText(createMailText(importRun));
 			mailSender.send(mailMessage);

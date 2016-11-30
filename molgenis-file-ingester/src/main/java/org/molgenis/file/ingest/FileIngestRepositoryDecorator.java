@@ -1,23 +1,14 @@
 package org.molgenis.file.ingest;
 
 import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.aggregation.AggregateQuery;
-import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 
-public class FileIngestRepositoryDecorator implements Repository<Entity>
+public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decorated;
 	private final FileIngesterJobScheduler scheduler;
@@ -32,98 +23,9 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Iterator<Entity> iterator()
+	protected Repository<Entity> delegate()
 	{
-		return decorated.iterator();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decorated.close();
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decorated.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decorated.getQueryOperators();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decorated.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decorated.getEntityType();
-	}
-
-	@Override
-	public long count()
-	{
-		return decorated.count();
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return decorated.query();
-	}
-
-	@Override
-	public long count(Query<Entity> q)
-	{
-		return decorated.count(q);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
-	{
-		return decorated.findAll(q);
-	}
-
-	@Override
-	public Entity findOne(Query<Entity> q)
-	{
-		return decorated.findOne(q);
-	}
-
-	@Override
-	public Entity findOneById(Object id)
-	{
-		return decorated.findOneById(id);
-	}
-
-	@Override
-	public Entity findOneById(Object id, Fetch fetch)
-	{
-		return decorated.findOneById(id, fetch);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decorated.aggregate(aggregateQuery);
+		return decorated;
 	}
 
 	@Override
@@ -141,13 +43,6 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 			scheduler.schedule(e);
 			return true;
 		}));
-	}
-
-	private void removeJobExecutions(String entityId)
-	{
-		Query<Entity> query = dataService.query(FILE_INGEST_JOB_EXECUTION)
-				.eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
-		dataService.delete(FILE_INGEST_JOB_EXECUTION, dataService.findAll(FILE_INGEST_JOB_EXECUTION, query));
 	}
 
 	@Override
@@ -227,10 +122,10 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 		}));
 	}
 
-	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
+	private void removeJobExecutions(String entityId)
 	{
-		decorated.forEachBatched(fetch, consumer, 1000);
+		Query<Entity> query = dataService.query(FILE_INGEST_JOB_EXECUTION)
+				.eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
+		dataService.delete(FILE_INGEST_JOB_EXECUTION, dataService.findAll(FILE_INGEST_JOB_EXECUTION, query));
 	}
-
 }

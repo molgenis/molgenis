@@ -1,7 +1,7 @@
 package org.molgenis.test.data;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 
@@ -88,7 +88,7 @@ public class EntityTestHarness
 
 	public EntityType createDynamicRefEntityType()
 	{
-		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
+		return entityTypeFactory.create().setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_REF_STRING, STRING).setNillable(false), ROLE_LABEL);
 	}
@@ -96,7 +96,7 @@ public class EntityTestHarness
 	public EntityType createDynamicTestEntityType()
 	{
 		EntityType refEntityType = createDynamicRefEntityType();
-		EntityType entityType = entityTypeFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic")
+		EntityType entityType = entityTypeFactory.create().setSimpleName("TypeTestDynamic")
 				.setBackend("PostgreSQL");
 		entityType
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)

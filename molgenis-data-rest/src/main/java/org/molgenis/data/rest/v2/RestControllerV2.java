@@ -1,18 +1,18 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
-import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -113,9 +113,10 @@ class RestControllerV2
 		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
 	}
 
-	static UnknownEntityException createUnknownEntityExceptionNotValidId(String id)
+	static UnknownEntityException createUnknownEntityExceptionNotValidId(Object id)
 	{
-		return new UnknownEntityException("The entity you are trying to update [" + id + "] does not exist.");
+		return new UnknownEntityException(
+				"The entity you are trying to update [" + id.toString() + "] does not exist.");
 	}
 
 	@Autowired
@@ -461,7 +462,7 @@ class RestControllerV2
 			int count = 0;
 			for (Entity entity : entities)
 			{
-				String id = checkForEntityId(entity, count);
+				Object id = checkForEntityId(entity, count);
 
 				Entity originalEntity = dataService.findOneById(entityName, id);
 				if (originalEntity == null)
@@ -511,14 +512,14 @@ class RestControllerV2
 	 * @param count
 	 * @return
 	 */
-	private String checkForEntityId(Entity entity, int count)
+	private static Object checkForEntityId(Entity entity, int count)
 	{
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
 			throw createMolgenisDataExceptionUnknownIdentifier(count);
 		}
-		return id.toString();
+		return id;
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

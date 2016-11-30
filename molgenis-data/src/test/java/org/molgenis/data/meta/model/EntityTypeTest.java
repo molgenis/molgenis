@@ -1,5 +1,7 @@
 package org.molgenis.data.meta.model;
 
+import com.google.common.collect.Lists;
+import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -8,9 +10,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
@@ -42,6 +43,44 @@ public class EntityTypeTest
 
 		Attribute nestedCompoundParent = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(nestedCompoundParent.getChildren()).thenReturn(nestedAttributeParts);
+	}
+
+	@Test
+	public void addSequenceNumberNull()
+	{
+		EntityType entityType = mock(EntityType.class);
+
+		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+
+		when(attr1.getSequenceNumber()).thenReturn(0);
+		when(attr2.getSequenceNumber()).thenReturn(1);
+		when(attr3.getSequenceNumber()).thenReturn(2);
+		when(attribute.getSequenceNumber()).thenReturn(null);
+
+		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		verify(attribute).setSequenceNumber(3);
+	}
+
+	@Test
+	public void addSequenceNumberNullAndOtherNull()
+	{
+		EntityType entityType = mock(EntityType.class);
+
+		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+
+		when(attr1.getSequenceNumber()).thenReturn(null);
+		when(attr2.getSequenceNumber()).thenReturn(null);
+		when(attr3.getSequenceNumber()).thenReturn(null);
+		when(attribute.getSequenceNumber()).thenReturn(null);
+
+		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		verify(attribute).setSequenceNumber(0);
 	}
 
 	@Test
@@ -194,6 +233,17 @@ public class EntityTypeTest
 		assertSame(tagsCopy.get(0), tag0);
 		assertSame(tagsCopy.get(1), tag1);
 		assertEquals(entityTypeCopy.getBackend(), "backend");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed")
+	public void addAttributeWithDuplicateName()
+	{
+		EntityType entityType = new EntityType(createEntityTypeMeta());
+		entityType.setName("myEntity");
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		entityType.addAttribute(attr0);
+		entityType.addAttribute(attr1);
 	}
 
 	private static EntityType createEntityTypeMeta()

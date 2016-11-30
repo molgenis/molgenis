@@ -124,15 +124,9 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
-		public StaticContentMeta staticContentMeta()
-		{
-			return null; // new StaticContentMeta(); // FIXME
-		}
-
-		@Bean
 		public StaticContentFactory staticContentFactory()
 		{
-			return new StaticContentFactory(staticContentMeta(), mock(EntityPopulator.class));
+			return new StaticContentFactory(mock(StaticContentMeta.class), mock(EntityPopulator.class));
 		}
 
 		@Bean

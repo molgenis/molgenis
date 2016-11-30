@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 @Component
 public class EffectsMetaData implements AnnotatorEntityType

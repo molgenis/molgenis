@@ -8,8 +8,8 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.BOOL;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 

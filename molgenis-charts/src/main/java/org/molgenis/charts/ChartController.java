@@ -21,7 +21,6 @@ import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.xml.stream.FactoryConfigurationError;
@@ -60,13 +59,6 @@ public class ChartController
 		this.chartDataService = chartDataService;
 		this.chartVisualizationServiceFactory = chartVisualizationServiceFactory;
 		this.fileStore = fileStore;
-	}
-
-	@RequestMapping("/test")
-	public String test(HttpServletRequest request, Model model)
-	{
-		model.addAttribute("queryString", request.getQueryString());
-		return "test"; // TODO
 	}
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

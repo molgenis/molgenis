@@ -1,40 +1,34 @@
 package org.molgenis.app;
 
-import org.molgenis.app.controller.HomeController;
-import org.molgenis.auth.UserAuthorityFactory;
+import org.molgenis.bootstrap.populate.UsersGroupsAuthoritiesPopulator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.ui.admin.user.UserAccountController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Locale;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.i18n.model.LanguageMetadata.*;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 
 @Service
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService
 {
 	private final DataService dataService;
-	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
-	private final UserAuthorityFactory userAuthorityFactory;
+	private final UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator;
 	private final LanguageFactory languageFactory;
 
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
-			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService,
-			UserAuthorityFactory userAuthorityFactory, LanguageFactory languageFactory)
+			UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator, LanguageFactory languageFactory)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.molgenisSecurityWebAppDatabasePopulatorService = requireNonNull(
-				molgenisSecurityWebAppDatabasePopulatorService);
-		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
+		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
 		this.languageFactory = requireNonNull(languageFactory);
 	}
 
@@ -43,8 +37,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public void populateDatabase()
 	{
-		molgenisSecurityWebAppDatabasePopulatorService
-				.populateDatabase(this.dataService, HomeController.ID, UserAccountController.ID);
+		usersGroupsAuthoritiesPopulator.populate();
 
 		dataService.add(LANGUAGE, languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
 		dataService

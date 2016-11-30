@@ -30,6 +30,18 @@ public class I18nStringDecoratorTest
 	}
 
 	@Test
+	public void testDelegate() throws Exception
+	{
+		assertEquals(i18nStringDecorator.delegate(), decoratedRepo);
+	}
+
+	@Test
+	public void testQuery() throws Exception
+	{
+		assertEquals(i18nStringDecorator.query().getRepository(), i18nStringDecorator);
+	}
+
+	@Test
 	public void addStream()
 	{
 		Stream<Entity> entities = Stream.empty();

@@ -43,7 +43,7 @@ public class RepositorySecurityDecoratorTest
 	public void addStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityName.toUpperCase());
+				"ROLE_ENTITY_WRITE_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -56,7 +56,7 @@ public class RepositorySecurityDecoratorTest
 	public void addStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -77,7 +77,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -95,7 +95,7 @@ public class RepositorySecurityDecoratorTest
 	public void deleteStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityName.toUpperCase());
+				"ROLE_ENTITY_WRITE_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -108,7 +108,7 @@ public class RepositorySecurityDecoratorTest
 	public void deleteStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -130,7 +130,7 @@ public class RepositorySecurityDecoratorTest
 	public void updateStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityName.toUpperCase());
+				"ROLE_ENTITY_WRITE_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -146,7 +146,7 @@ public class RepositorySecurityDecoratorTest
 	public void updateStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -167,7 +167,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -201,7 +201,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllStreamFetch()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -251,7 +251,7 @@ public class RepositorySecurityDecoratorTest
 	public void findOnePermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -281,7 +281,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllAsStreamPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -312,7 +312,7 @@ public class RepositorySecurityDecoratorTest
 	public void streamFetch()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+				"ROLE_ENTITY_READ_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -343,7 +343,7 @@ public class RepositorySecurityDecoratorTest
 	public void aggregate()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_COUNT_" + entityName.toUpperCase());
+				"ROLE_ENTITY_COUNT_" + entityName);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 

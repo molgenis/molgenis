@@ -1,20 +1,22 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
 
 @Component
 public class AttributeMetadata extends SystemEntityType
@@ -195,13 +197,31 @@ public class AttributeMetadata extends SystemEntityType
 		return rangeIsNull + ".or(" + rangeIsNull + ".not().and($('" + TYPE + "').matches(" + regex + "))).value()";
 	}
 
-	private static String getIdAttributeValidationExpression()
+	// Package private for testability
+	static String getIdAttributeValidationExpression()
 	{
 		String isIdIsTrue = "$('" + IS_ID_ATTRIBUTE + "').eq(true)";
 		String isIdIsFalseOrNull = "$('" + IS_ID_ATTRIBUTE + "').eq(false).or($('" + IS_ID_ATTRIBUTE + "').isNull())";
-		String typeIsNullOrStringOrIntOrLong =
-				"$('" + TYPE + "').eq('" + getValueString(STRING) + "').or($('" + TYPE + "').eq('" + getValueString(INT)
-						+ "')).or($('" + TYPE + "').eq('" + getValueString(LONG) + "')).or($('" + TYPE + "').isNull())";
+
+		// Use the valid ID attribute types to constuct the validation expression
+		List<String> typeExpressions = getValidIdAttributeTypes().stream()
+				.map(attributeType -> "$('" + TYPE + "').eq('" + getValueString(attributeType) + "')")
+				.collect(Collectors.toList());
+
+		boolean first = true;
+		String typeIsNullOrStringOrIntOrLong = "";
+		for (String expression : typeExpressions)
+		{
+			if (first)
+			{
+				typeIsNullOrStringOrIntOrLong += expression;
+				first = false;
+				continue;
+			}
+			typeIsNullOrStringOrIntOrLong += ".or(" + expression + ")";
+		}
+		typeIsNullOrStringOrIntOrLong += ".or($('" + TYPE + "').isNull())";
+
 		String nullableIsFalse = "$('" + IS_NULLABLE + "').eq(false)";
 
 		return isIdIsFalseOrNull + ".or(" + isIdIsTrue + ".and(" + typeIsNullOrStringOrIntOrLong + ").and("
