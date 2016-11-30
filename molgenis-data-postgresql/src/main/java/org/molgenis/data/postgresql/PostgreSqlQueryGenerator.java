@@ -181,6 +181,53 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
+	private static String getSqlFunctionValidateUpdateName(EntityType entityType)
+	{
+		return '"' + "validate_update_" + getTableName(entityType, false) + '"';
+	}
+
+	static String getSqlCreateFunctionValidateUpdate(EntityType entityType, List<Attribute> readonlyTableAttrs)
+	{
+		StringBuilder strBuilder = new StringBuilder(512).append("CREATE FUNCTION ")
+				.append(getSqlFunctionValidateUpdateName(entityType)).append("() RETURNS TRIGGER AS $$\nBEGIN\n");
+
+		String tableName = getTableName(entityType);
+		readonlyTableAttrs.forEach(attr ->
+		{
+			String colName = getColumnName(attr);
+
+			strBuilder.append("  IF OLD.").append(colName).append(" <> NEW.").append(colName).append(" THEN\n");
+			strBuilder.append("    RAISE EXCEPTION 'Updating readonly column ").append(colName).append(" of table ")
+					.append(tableName).append(" is not allowed' USING ERRCODE = '23506';\n");
+			strBuilder.append("  END IF;\n");
+		});
+		strBuilder.append("  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;");
+
+		return strBuilder.toString();
+	}
+
+	static String getSqlDropFunctionValidateUpdate(EntityType entityType)
+	{
+		return "DROP FUNCTION " + getSqlFunctionValidateUpdateName(entityType) + "();";
+	}
+
+	private static String getSqlUpdateTriggerName(EntityType entityType)
+	{
+		return '"' + "update_trigger_" + getTableName(entityType, false) + '"';
+	}
+
+	static String getSqlCreateUpdateTrigger(EntityType entityType, List<Attribute> readonlyTableAttrs)
+	{
+		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
+				.append(getSqlUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
+				.append(getTableName(entityType)).append(" FOR EACH ROW WHEN (");
+		strBuilder.append(readonlyTableAttrs.stream()
+				.map(attr -> "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW." + getColumnName(attr))
+				.collect(joining(" OR ")));
+		strBuilder.append(") EXECUTE PROCEDURE ").append(getSqlFunctionValidateUpdateName(entityType)).append("();");
+		return strBuilder.toString();
+	}
+
 	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)
 	{
 		Attribute idAttr = entityType.getIdAttribute();
