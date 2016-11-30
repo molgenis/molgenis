@@ -70,7 +70,7 @@ class PostgreSqlRepository extends AbstractRepository
 	 */
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
 			EnumSet.of(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
-					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE));
+					VALIDATE_NOTNULL_CONSTRAINT, VALIDATE_READONLY_CONSTRAINT, CACHEABLE));
 
 	/**
 	 * Supported query operators
