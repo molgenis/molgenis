@@ -1,5 +1,7 @@
 package org.molgenis.data.cache.l2;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.molgenis.data.Entity;
@@ -26,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
@@ -161,8 +162,8 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	 */
 	private LoadingCache<Object, Optional<Map<String, Object>>> createEntityCache(Repository<Entity> repository)
 	{
-		return newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_ENTITY).expireAfterAccess(10, MINUTES)
-				.build(createCacheLoader(repository));
+		return CaffeinatedGuava.build(Caffeine.newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_ENTITY)
+				.expireAfterAccess(10, MINUTES), createCacheLoader(repository));
 	}
 
 	/**
