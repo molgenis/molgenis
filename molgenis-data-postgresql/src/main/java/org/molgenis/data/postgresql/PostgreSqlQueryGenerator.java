@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -186,7 +187,7 @@ class PostgreSqlQueryGenerator
 		return '"' + "validate_update_" + getTableName(entityType, false) + '"';
 	}
 
-	static String getSqlCreateFunctionValidateUpdate(EntityType entityType, List<Attribute> readonlyTableAttrs)
+	static String getSqlCreateFunctionValidateUpdate(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
 	{
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE FUNCTION ")
 				.append(getSqlFunctionValidateUpdateName(entityType)).append("() RETURNS TRIGGER AS $$\nBEGIN\n");
@@ -216,7 +217,7 @@ class PostgreSqlQueryGenerator
 		return '"' + "update_trigger_" + getTableName(entityType, false) + '"';
 	}
 
-	static String getSqlCreateUpdateTrigger(EntityType entityType, List<Attribute> readonlyTableAttrs)
+	static String getSqlCreateUpdateTrigger(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
 	{
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
 				.append(getSqlUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
@@ -226,6 +227,11 @@ class PostgreSqlQueryGenerator
 				.collect(joining(" OR ")));
 		strBuilder.append(") EXECUTE PROCEDURE ").append(getSqlFunctionValidateUpdateName(entityType)).append("();");
 		return strBuilder.toString();
+	}
+
+	static String getSqlDropUpdateTrigger(EntityType entityType)
+	{
+		return "DROP TRIGGER " + getSqlUpdateTriggerName(entityType) + " ON " + getTableName(entityType);
 	}
 
 	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)

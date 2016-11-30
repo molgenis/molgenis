@@ -163,6 +163,14 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
+	public void getSqlDropUpdateTrigger()
+	{
+		String expectedSql = "DROP TRIGGER \"update_trigger_entity\" ON \"entity\"";
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropUpdateTrigger(entityType), expectedSql);
+	}
+
+	@Test
 	public void getSqlCreateForeignKey()
 	{
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
