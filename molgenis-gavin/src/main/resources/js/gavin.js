@@ -14,8 +14,8 @@ $(function () {
                     location.replace(molgenis.getContextUrl() + "/result/" + match[1]);
                 }
             },
-            validExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz'],
-            showNameFieldExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz'],
+            validExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz', '.txt', '.txt.gz', '.tab', 'tab.gz'],
+            showNameFieldExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz', '.txt', '.txt.gz', '.tab', 'tab.gz'],
             maxFileSizeMB: 3
         }), form[0]);
     } else {
