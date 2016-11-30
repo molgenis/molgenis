@@ -129,6 +129,40 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
+	public void getSqlCreateFunctionValidateUpdate()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
+		String expectedSql = "CREATE FUNCTION \"validate_update_entity\"() RETURNS TRIGGER AS $$\n" + "BEGIN\n"
+				+ "  IF OLD.\"attr0\" <> NEW.\"attr0\" THEN\n"
+				+ "    RAISE EXCEPTION 'Updating readonly column \"attr0\" of table \"entity\" is not allowed' USING ERRCODE = '23506';\n"
+				+ "  END IF;\n" + "  IF OLD.\"attr1\" <> NEW.\"attr1\" THEN\n"
+				+ "    RAISE EXCEPTION 'Updating readonly column \"attr1\" of table \"entity\" is not allowed' USING ERRCODE = '23506';\n"
+				+ "  END IF;\n" + "  RETURN NEW;\n" + "END;\n" + "$$ LANGUAGE plpgsql;";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateFunctionValidateUpdate(entityType, asList(attr0, attr1)),
+				expectedSql);
+	}
+
+	@Test
+	public void getSqlDropFunctionValidateUpdate()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		String expectedSql = "DROP FUNCTION \"validate_update_entity\"();";
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropFunctionValidateUpdate(entityType), expectedSql);
+	}
+
+	@Test
+	public void getSqlCreateUpdateTrigger()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
+		String expectedSql = "CREATE TRIGGER \"update_trigger_entity\" AFTER UPDATE ON \"entity\" FOR EACH ROW WHEN (OLD.\"attr0\" IS DISTINCT FROM NEW.\"attr0\" OR OLD.\"attr1\" IS DISTINCT FROM NEW.\"attr1\") EXECUTE PROCEDURE \"validate_update_entity\"();";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateUpdateTrigger(entityType, asList(attr0, attr1)), expectedSql);
+	}
+
+	@Test
 	public void getSqlCreateForeignKey()
 	{
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
