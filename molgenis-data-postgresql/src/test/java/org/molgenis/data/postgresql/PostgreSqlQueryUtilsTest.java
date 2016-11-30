@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 public class PostgreSqlQueryUtilsTest
 {
@@ -104,6 +104,20 @@ public class PostgreSqlQueryUtilsTest
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
 		List<Attribute> junctionTableAttrs = newArrayList(stringAttr, xrefAttr, xrefAttrInversedBy);
 		assertEquals(PostgreSqlQueryUtils.getTableAttributes(entityType).collect(toList()), junctionTableAttrs);
+	}
+
+	@Test
+	public void isTableAttributeStringAttr() throws Exception
+	{
+		Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		assertTrue(PostgreSqlQueryUtils.isTableAttribute(attr));
+	}
+
+	@Test
+	public void isTableAttributeMrefAttr() throws Exception
+	{
+		Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
+		assertFalse(PostgreSqlQueryUtils.isTableAttribute(attr));
 	}
 
 	@Test
