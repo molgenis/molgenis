@@ -49,8 +49,7 @@
                         <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
                         Download GAVIN-annotated ${jobExecution.filename?html}</a>
                 <#else>
-                    <#if jobExecution.status == 'SUCCESS'>Download file no longer available. Results are removed after
-                        24 hours.
+                    <#if jobExecution.status == 'SUCCESS'>Download file no longer available.
                     <#else>There was a problem, no results available. Check execution log for details.
                     </#if>
                     <br/>
@@ -60,11 +59,12 @@
                         <a href="/plugin/gavin-app/error/${jobExecution.identifier}" class="btn btn-warning">
                             <span class="glyphicon glyphicon-file" aria-hidden="true"></span>Download failed lines
                         </a>
-                    <#else>Error file no longer available. Results are removed after 24 hours.
+                    <#else>Error file no longer available.
                     </#if>
                     <br/>
                 </#if>
-                <p>This page will remain available for 24 hours on <a href="${pageUrl}">${pageUrl}</a>.</p>
+                <p>This page will remain available on <a href="${pageUrl}">${pageUrl}</a>, but result files are removed
+                    after 24 hours.</p>
                 <#if jobExecution.log??>
                     <h4>Execution log</h4>
                     <pre class="pre-scrollable">${jobExecution.log?html}</pre>
