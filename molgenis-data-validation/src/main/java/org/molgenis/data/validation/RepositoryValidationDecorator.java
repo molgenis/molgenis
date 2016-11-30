@@ -95,6 +95,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT);
 		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
+		boolean validateReadonly = !getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT);
 
 		// add validation operation to stream
 		return entities.filter(entity ->
@@ -121,7 +122,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 			validateEntityValueReferences(entity, validationResource);
 
-			if (validationMode == ValidationMode.UPDATE)
+			if (validateReadonly && validationMode == ValidationMode.UPDATE)
 			{
 				validateEntityValueReadOnly(entity, validationResource);
 			}
@@ -262,12 +263,15 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
-		String idAttrName = getEntityType().getIdAttribute().getName();
-		List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
-						.getName().equals(idAttrName)).collect(toList());
+		if (!getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT))
+		{
+			String idAttrName = getEntityType().getIdAttribute().getName();
+			List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
+							.getName().equals(idAttrName)).collect(toList());
 
-		validationResource.setReadonlyAttrs(readonlyAttrs);
+			validationResource.setReadonlyAttrs(readonlyAttrs);
+		}
 	}
 
 	private void validateEntityValueRequired(Entity entity, ValidationResource validationResource)
