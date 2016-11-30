@@ -46,8 +46,8 @@ import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 public class GavinAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "Gavin";
-	public static final String RESOURCE = "gavin";
-	public static final String RESOURCE_ENTITY_NAME = "gavin";
+	private static final String RESOURCE = "gavin";
+	private static final String RESOURCE_ENTITY_NAME = "gavin";
 
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";
@@ -85,19 +85,17 @@ public class GavinAnnotator implements AnnotatorConfig
 	@Bean
 	Resource GavinResource()
 	{
-		Resource gavinResource = new EmxResourceImpl(RESOURCE,
+		return new EmxResourceImpl(RESOURCE,
 				new SingleResourceConfig(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, gavinAnnotatorSettings))
 		{
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory),
-						entityTypeFactory, attributeFactory);
+						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory), entityTypeFactory,
+						attributeFactory);
 			}
 		};
-
-		return gavinResource;
 	}
 
 	private EffectsAnnotator annotator;
@@ -116,8 +114,8 @@ public class GavinAnnotator implements AnnotatorConfig
 				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
 		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
 				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING)
-				.setDescription(REASON).setLabel(REASON);
+		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING).setDescription(REASON)
+				.setLabel(REASON);
 
 		attributes.add(classification);
 		attributes.add(confidence);
@@ -139,9 +137,8 @@ public class GavinAnnotator implements AnnotatorConfig
 			{
 				List<Attribute> requiredAttributes = new ArrayList<>();
 				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
-				List<Attribute> refAttributesList = Arrays
-						.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
-								ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
+				List<Attribute> refAttributesList = Arrays.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
+						ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
 				entityType.addAttributes(refAttributesList);
 				Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF)
 						.setRefEntity(entityType).setDescription(
@@ -159,7 +156,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
 					boolean updateMode)
 			{
-				if (updateMode == true)
+				if (updateMode)
 				{
 					throw new MolgenisDataException("This annotator/filter does not support updating of values");
 				}
@@ -197,9 +194,8 @@ public class GavinAnnotator implements AnnotatorConfig
 				if (sourceEntitiesSize == 1)
 				{
 					Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
-
-					Judgment judgment = gavinAlgorithm
-							.classifyVariant(impact, caddScaled, exacMAF, gene, annotationSourceEntity, null);
+					Judgment judgment = gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, gene,
+							GavinThresholds.fromEntity(annotationSourceEntity));
 					entity.set(CLASSIFICATION, judgment.getClassification().toString());
 					entity.set(CONFIDENCE, judgment.getConfidence().toString());
 					entity.set(REASON, judgment.getReason());
