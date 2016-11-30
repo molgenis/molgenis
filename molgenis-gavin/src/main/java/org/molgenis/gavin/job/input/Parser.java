@@ -240,10 +240,14 @@ public class Parser
 		String chrom = parseChrom(columns[CHROM_INDEX].trim());
 		Long pos = parsePos(columns[POS_INDEX].trim());
 		String id = columns[VCF_ID_INDEX].trim();
+		if (isEmpty(id))
+		{
+			id = ".";
+		}
 		String ref = parseRef(columns[VCF_REF_INDEX].trim());
 		String alt = parseAlt(columns[VCF_ALT_INDEX].trim());
 
-		if (anyNull(chrom, pos, ref, alt) || isEmpty(id))
+		if (anyNull(chrom, pos, ref, alt))
 		{
 			return null;
 		}
