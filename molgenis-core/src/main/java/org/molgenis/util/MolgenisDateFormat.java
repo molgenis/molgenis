@@ -1,7 +1,11 @@
 package org.molgenis.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
+
+import static java.lang.String.format;
 
 public class MolgenisDateFormat
 {
@@ -30,5 +34,47 @@ public class MolgenisDateFormat
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATEFORMAT_DATETIME_SIMPLE);
 		simpleDateFormat.setTimeZone(TimeZone.getTimeZone(DEFAULT_TIMEZONE_ID));
 		return simpleDateFormat;
+	}
+
+	/**
+	 * Format a date to a MOLGENIS date
+	 *
+	 * @param date
+	 * @return Date
+	 */
+	public static Date formatDate(Date date)
+	{
+		if (null == date) return date;
+		SimpleDateFormat format = MolgenisDateFormat.getDateFormat();
+		try
+		{
+			return format.parse(format.format(date));
+		}
+		catch (ParseException pe)
+		{
+			throw new RuntimeException(format("Value [%s] does not match date format [%s]", format.format(date),
+					MolgenisDateFormat.DATEFORMAT_DATE));
+		}
+	}
+
+	/**
+	 * Format a date to a MOLGENIS dateTime
+	 *
+	 * @param date
+	 * @return Date
+	 */
+	public static Date formatDateTime(Date date)
+	{
+		if (null == date) return date;
+		SimpleDateFormat format = MolgenisDateFormat.getDateTimeFormat();
+		try
+		{
+			return format.parse(format.format(date));
+		}
+		catch (ParseException pe)
+		{
+			throw new RuntimeException(format("Value [%s] does not match date time format [%s]", format.format(date),
+					MolgenisDateFormat.DATEFORMAT_DATETIME));
+		}
 	}
 }
