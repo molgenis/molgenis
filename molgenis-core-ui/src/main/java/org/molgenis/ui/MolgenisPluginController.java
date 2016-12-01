@@ -63,15 +63,11 @@ public abstract class MolgenisPluginController
 	}
 
 	/**
-	 * Returns the list of associated setting entities required to use the plugin as a normal user
-	 *
-	 * @return
+	 * Set a {@link Map} of entity name and permission key value pairs.
+	 * <p>
+	 * This allows every plugin to register which entities should be allowed access to when a user
+	 * is granted permission on a plugin
 	 */
-	public Map<String, String> getRequiredSettingEntities()
-	{
-		return requiredSettingEntities;
-	}
-
 	public void setRequiredSettingEntities(Map<String, String> requiredSettingEntities)
 	{
 		this.requiredSettingEntities = requiredSettingEntities;
