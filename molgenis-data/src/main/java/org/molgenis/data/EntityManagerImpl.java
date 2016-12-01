@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.*;
-import org.molgenis.util.BatchingIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -253,7 +252,7 @@ public class EntityManagerImpl implements EntityManager
 							// replace lazy entity with real entity
 							Object refEntityId = lazyRefEntity.getIdValue();
 							return refEntitiesIdMap.get(refEntityId);
-						}).collect(Collectors.toList());
+						}).filter(Objects::nonNull).collect(Collectors.toList());
 						entity.set(attrName, mrefEntities);
 					}
 				}
