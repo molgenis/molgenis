@@ -548,6 +548,11 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	public boolean hasDefaultValue()
+	{
+		return getDefaultValue() != null;
+	}
+
 	/**
 	 * Default value expression
 	 *

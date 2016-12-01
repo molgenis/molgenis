@@ -254,7 +254,6 @@ public class ImportWriter
 				String attrName = attr.getName();
 				Object emxValue = emxEntity.get(attrName);
 
-				Object value;
 				AttributeType attrType = attr.getDataType();
 				switch (attrType)
 				{
@@ -271,32 +270,44 @@ public class ImportWriter
 					case SCRIPT:
 					case STRING:
 					case TEXT:
-						value = emxValue != null ? DataConverter.convert(emxValue, attr) : null;
+						Object value = emxValue != null ? DataConverter.convert(emxValue, attr) : null;
+						if ((!attr.isAuto() || value != null) && (!attr.hasDefaultValue() || value != null))
+						{
+							entity.set(attrName, value);
+						}
 						break;
 					case CATEGORICAL:
 					case FILE:
 					case XREF:
 						// DataConverter.convert performs no conversion for reference types
+						Entity refEntity;
 						if (emxValue != null)
 						{
 							if (emxValue instanceof Entity)
 							{
-								value = toEntity(attr.getRefEntity(), (Entity) emxValue);
+								refEntity = toEntity(attr.getRefEntity(), (Entity) emxValue);
 							}
 							else
 							{
 								EntityType xrefEntity = attr.getRefEntity();
 								Object entityId = DataConverter.convert(emxValue, xrefEntity.getIdAttribute());
-								value = entityManager.getReference(xrefEntity, entityId);
+								refEntity = entityManager.getReference(xrefEntity, entityId);
 							}
 						}
 						else
 						{
-							value = null;
+							refEntity = null;
+						}
+
+						// do not set generated auto refEntities to null
+						if ((!attr.isAuto() || refEntity != null) && (!attr.hasDefaultValue() || refEntity != null))
+						{
+							entity.set(attrName, refEntity);
 						}
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
+						List<Entity> refEntities;
 						// DataConverter.convert performs no conversion for reference types
 						if (emxValue != null)
 						{
@@ -319,7 +330,7 @@ public class ImportWriter
 									}
 									mrefEntities.add(entityValue);
 								}
-								value = mrefEntities;
+								refEntities = mrefEntities;
 							}
 							else
 							{
@@ -333,24 +344,25 @@ public class ImportWriter
 									Object entityId = DataConverter.convert(token.trim(), refIdAttr);
 									mrefEntities.add(entityManager.getReference(mrefEntity, entityId));
 								}
-								value = mrefEntities;
+								refEntities = mrefEntities;
 							}
 						}
 						else
 						{
-							value = emptyList();
+							refEntities = emptyList();
+						}
+
+						// do not set generated auto refEntities to null
+						if ((!attr.isAuto() || !refEntities.isEmpty()) && (!attr.hasDefaultValue() || refEntities
+								.isEmpty()))
+						{
+							entity.set(attrName, refEntities);
 						}
 						break;
 					case COMPOUND:
 						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 					default:
 						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
-				}
-
-				// do not set generated auto value to null
-				if (!attr.isAuto() || value != null)
-				{
-					entity.set(attrName, value);
 				}
 			}
 		}

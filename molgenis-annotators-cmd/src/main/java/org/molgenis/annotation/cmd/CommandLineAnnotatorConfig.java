@@ -10,6 +10,8 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.TagMetadata;
+import org.molgenis.data.populate.AutoValuePopulator;
+import org.molgenis.data.populate.DefaultValuePopulator;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -108,9 +110,21 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public AutoValuePopulator autoValuePopulator()
+	{
+		return new AutoValuePopulator(uuidGenerator());
+	}
+
+	@Bean
+	public DefaultValuePopulator defaultValuePopulator()
+	{
+		return new DefaultValuePopulator(entityManager());
+	}
+
+	@Bean
 	public EntityPopulator entityPopulator()
 	{
-		return new EntityPopulator(uuidGenerator());
+		return new EntityPopulator(autoValuePopulator(), defaultValuePopulator());
 	}
 
 	@Bean
