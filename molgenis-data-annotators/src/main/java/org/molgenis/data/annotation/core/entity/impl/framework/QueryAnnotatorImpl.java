@@ -12,7 +12,6 @@ import org.molgenis.data.meta.model.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -22,7 +21,7 @@ import static java.util.Objects.requireNonNull;
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
  * {@link #processQueryResults(Entity, Iterable, boolean)}.
  * <p>
- * See {@link AnnotatorImpl} for the most standard implementation of
+ * See {@link AbstractAnnotator} for the most standard implementation of
  * {@link #processQueryResults(Entity, Iterable, boolean)}.
  */
 public abstract class QueryAnnotatorImpl implements EntityAnnotator
@@ -53,7 +52,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Attribute> getAnnotationAttributeMetadatas()
+	public List<Attribute> getAnnotatorAttributes()
 	{
 		return getInfo().getOutputAttributes();
 	}
@@ -83,14 +82,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		}
 		else
 		{
-			annotatationSourceEntities = new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return dataService.findAll(sourceRepositoryName, q).iterator();
-				}
-			};
+			annotatationSourceEntities = () -> dataService.findAll(sourceRepositoryName, q).iterator();
 		}
 		processQueryResults(entity, annotatationSourceEntities, updateMode);
 		return Collections.singletonList(entity);
