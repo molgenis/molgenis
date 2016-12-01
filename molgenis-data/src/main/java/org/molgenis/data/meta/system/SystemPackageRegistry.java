@@ -17,6 +17,7 @@ public class SystemPackageRegistry
 {
 	private final Logger LOG = LoggerFactory.getLogger(SystemPackageRegistry.class);
 
+	// note: a list instead of map is used since system packages might not be initialized when added to the registry
 	private final List<SystemPackage> systemPackages;
 
 	public SystemPackageRegistry()
