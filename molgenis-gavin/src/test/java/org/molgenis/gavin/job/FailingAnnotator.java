@@ -5,11 +5,13 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 public class FailingAnnotator implements RepositoryAnnotator
 {
@@ -52,7 +54,7 @@ public class FailingAnnotator implements RepositoryAnnotator
 			@Override
 			public List<Attribute> getOutputAttributes()
 			{
-				return Collections.emptyList();
+				return emptyList();
 			}
 		};
 	}
@@ -84,13 +86,13 @@ public class FailingAnnotator implements RepositoryAnnotator
 	@Override
 	public List<Attribute> getOutputAttributes()
 	{
-		return Collections.emptyList();
+		return emptyList();
 	}
 
 	@Override
 	public List<Attribute> getRequiredAttributes()
 	{
-		return Collections.emptyList();
+		return emptyList();
 	}
 
 	@Override
@@ -114,13 +116,14 @@ public class FailingAnnotator implements RepositoryAnnotator
 	@Override
 	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
 	{
-		return new CmdLineAnnotatorSettingsConfigurer()
+		return annotationSourceFileName ->
 		{
-			@Override
-			public void addSettings(String annotationSourceFileName)
-			{
-
-			}
 		};
+	}
+
+	@Override
+	public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+	{
+		return emptyList();
 	}
 }

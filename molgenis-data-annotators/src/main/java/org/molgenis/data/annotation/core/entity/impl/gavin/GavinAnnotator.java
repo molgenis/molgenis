@@ -9,8 +9,6 @@ import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.CaddAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.QueryAnnotatorImpl;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.Impact;
 import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
@@ -21,7 +19,6 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.emx.EmxResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
-import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.importer.emx.EmxMetaDataParser;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
@@ -36,8 +33,13 @@ import java.util.stream.StreamSupport;
 
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
+import static org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status.READY;
+import static org.molgenis.data.annotation.core.entity.AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE;
 import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;
+import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.createCaddScaledAttr;
 import static org.molgenis.data.annotation.core.entity.impl.ExacAnnotator.EXAC_AF;
+import static org.molgenis.data.annotation.core.entity.impl.ExacAnnotator.getExacAFAttr;
+import static org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
@@ -89,20 +91,16 @@ public class GavinAnnotator implements AnnotatorConfig
 	@Bean
 	Resource GavinResource()
 	{
-		Resource gavinResource = new EmxResourceImpl(RESOURCE,
-				new SingleResourceConfig(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, gavinAnnotatorSettings))
+		return new EmxResourceImpl(RESOURCE, new SingleResourceConfig(VARIANT_FILE_LOCATION, gavinAnnotatorSettings))
 		{
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
 						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory,
-								entityTypeDependencyResolver),
-						entityTypeFactory, attributeFactory);
+								entityTypeDependencyResolver), entityTypeFactory, attributeFactory);
 			}
 		};
-
-		return gavinResource;
 	}
 
 	private EffectsAnnotator annotator;
@@ -116,37 +114,29 @@ public class GavinAnnotator implements AnnotatorConfig
 
 	public void init()
 	{
-		LinkedList<Attribute> attributes = new LinkedList<>();
-		Attribute classification = attributeFactory.create().setName(CLASSIFICATION).setDataType(STRING)
-				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
-				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING)
-				.setDescription(REASON).setLabel(REASON);
-
-		attributes.add(classification);
-		attributes.add(confidence);
-		attributes.add(reason);
+		LinkedList<Attribute> attributes = createGavinOutputAttributes();
 
 		String description = "Please note that this annotator processes the results from a SnpEff annotation\nTherefor it should be used on the result entity rather than the variant entity itself.\nThe corresponding variant entity should also be annotated with CADD and EXaC";
 
-		AnnotatorInfo gavinInfo = AnnotatorInfo
-				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description,
-						attributes);
+		AnnotatorInfo gavinInfo = AnnotatorInfo.create(READY, PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, geneNameQueryCreator, dataService,
-				resources, (annotationSourceFileName) ->
+				resources, (annotationSourceFileName) -> gavinAnnotatorSettings
+				.set(VARIANT_FILE_LOCATION, annotationSourceFileName))
 		{
-			gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
-		})
-		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createGavinOutputAttributes();
+			}
+
 			@Override
 			public List<Attribute> getRequiredAttributes()
 			{
 				List<Attribute> requiredAttributes = new ArrayList<>();
 				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
 				List<Attribute> refAttributesList = Arrays
-						.asList(CaddAnnotator.getCaddScaledAttr(attributeFactory),
-								ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
+						.asList(createCaddScaledAttr(attributeFactory), getExacAFAttr(attributeFactory),
+								vcfAttributes.getAltAttribute());
 				entityType.addAttributes(refAttributesList);
 				Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF)
 						.setRefEntity(entityType).setDescription(
@@ -164,7 +154,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
 					boolean updateMode)
 			{
-				if (updateMode == true)
+				if (updateMode)
 				{
 					throw new MolgenisDataException("This annotator/filter does not support updating of values");
 				}
@@ -228,5 +218,21 @@ public class GavinAnnotator implements AnnotatorConfig
 
 		};
 		annotator.init(entityAnnotator);
+	}
+
+	private LinkedList<Attribute> createGavinOutputAttributes()
+	{
+		LinkedList<Attribute> attributes = new LinkedList<>();
+		Attribute classification = attributeFactory.create().setName(CLASSIFICATION).setDataType(STRING)
+				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
+		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
+				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
+		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING).setDescription(REASON)
+				.setLabel(REASON);
+
+		attributes.add(classification);
+		attributes.add(confidence);
+		attributes.add(reason);
+		return attributes;
 	}
 }
