@@ -10,6 +10,8 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.TagMetadata;
+import org.molgenis.data.populate.AutoValuePopulator;
+import org.molgenis.data.populate.DefaultValuePopulator;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -96,9 +98,22 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	EntityFactoryRegistry entityFactoryRegistry()
+	{
+		return new EntityFactoryRegistry();
+	}
+
+	@Bean
+	EntityReferenceCreator entityReferenceCreator()
+	{
+		return new EntityReferenceCreatorImpl(dataService(), entityFactoryRegistry());
+	}
+
+	@Bean
 	EntityManager entityManager()
 	{
-		return new EntityManagerImpl(dataService(), new EntityFactoryRegistry(), entityPopulator());
+		return new EntityManagerImpl(dataService(), entityFactoryRegistry(), entityPopulator(),
+				entityReferenceCreator());
 	}
 
 	@Bean
@@ -108,9 +123,21 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public AutoValuePopulator autoValuePopulator()
+	{
+		return new AutoValuePopulator(uuidGenerator());
+	}
+
+	@Bean
+	public DefaultValuePopulator defaultValuePopulator()
+	{
+		return new DefaultValuePopulator(entityReferenceCreator());
+	}
+
+	@Bean
 	public EntityPopulator entityPopulator()
 	{
-		return new EntityPopulator(uuidGenerator());
+		return new EntityPopulator(autoValuePopulator(), defaultValuePopulator());
 	}
 
 	@Bean

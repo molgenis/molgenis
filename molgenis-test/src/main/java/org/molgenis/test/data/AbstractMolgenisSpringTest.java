@@ -1,8 +1,13 @@
 package org.molgenis.test.data;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityFactoryRegistry;
+import org.molgenis.data.EntityReferenceCreator;
+import org.molgenis.data.EntityReferenceCreatorImpl;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -40,6 +45,24 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 		public GenericDependencyResolver genericDependencyResolver()
 		{
 			return new GenericDependencyResolver();
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return new DataServiceImpl();
+		}
+
+		@Bean
+		public EntityFactoryRegistry entityFactoryRegistry()
+		{
+			return new EntityFactoryRegistry();
+		}
+
+		@Bean
+		public EntityReferenceCreator entityReferenceCreator()
+		{
+			return new EntityReferenceCreatorImpl(dataService(), entityFactoryRegistry());
 		}
 	}
 }
