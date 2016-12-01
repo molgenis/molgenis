@@ -42,11 +42,13 @@ import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.google.api.client.util.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -100,6 +102,14 @@ public class DataExplorerController extends MolgenisPluginController
 	public DataExplorerController()
 	{
 		super(URI);
+
+		Map<String, String> requiredSettingEntities = newHashMap();
+
+		// TODO Use DataExplorerSettings and GenomicDataSettings to retrieve these names
+		requiredSettingEntities.put("sys_set_dataexplorer", AUTHORITY_ENTITY_READ_PREFIX);
+		requiredSettingEntities.put("sys_set_genomicdata", AUTHORITY_ENTITY_READ_PREFIX);
+
+		setRequiredSettingEntities(requiredSettingEntities);
 	}
 
 	/**
@@ -150,31 +160,31 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
 			Model model)
 	{
-		if (moduleId.equals(MOD_DATA))
+		switch (moduleId)
 		{
-			model.addAttribute("genomicDataSettings", genomicDataSettings);
-			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-		}
-		else if (moduleId.equals(MOD_ENTITIESREPORT))
-		{
-			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
-		}
-		else if (moduleId.equals(MOD_ANNOTATORS))
-		{
-			// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
-			// self-explanatory
-			if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
-			{
-				throw new MolgenisDataAccessException(
-						"No " + Permission.WRITEMETA + " permission on entity [" + entityName
-								+ "], this permission is necessary run the annotators.");
-			}
-			Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
-					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
-							.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
-			model.addAttribute("annotationRun", annotationRun);
-			model.addAttribute("entityName", entityName);
+			case MOD_DATA:
+				model.addAttribute("genomicDataSettings", genomicDataSettings);
+				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				break;
+			case MOD_ENTITIESREPORT:
+				model.addAttribute("datasetRepository", dataService.getRepository(entityName));
+				model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
+				break;
+			case MOD_ANNOTATORS:
+				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
+				// self-explanatory
+				if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+				{
+					throw new MolgenisDataAccessException(
+							"No " + Permission.WRITEMETA + " permission on entity [" + entityName
+									+ "], this permission is necessary run the annotators.");
+				}
+				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
+						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
+								.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
+				model.addAttribute("annotationRun", annotationRun);
+				model.addAttribute("entityName", entityName);
+				break;
 		}
 
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -184,9 +194,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityName)
 	{
-		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
+		return molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
 				.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
-		return showCopy;
 	}
 
 	/**
@@ -310,8 +319,8 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
-		String fileName = "";
-		ServletOutputStream outputStream = null;
+		String fileName;
+		ServletOutputStream outputStream;
 
 		switch (dataRequest.getDownloadType())
 		{

@@ -6,10 +6,13 @@ import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginFactory;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.Map;
+
+import static com.google.api.client.util.Maps.newHashMap;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
  * Abstract base class for all MOLGENIS plugin controllers
@@ -28,6 +31,8 @@ public abstract class MolgenisPluginController
 	 * Base URI for a plugin
 	 */
 	private final String uri;
+
+	private Map<String, String> requiredSettingEntities = newHashMap();
 
 	private final MolgenisPluginFactory molgenisPluginFactory;
 
@@ -58,6 +63,21 @@ public abstract class MolgenisPluginController
 	}
 
 	/**
+	 * Returns the list of associated setting entities required to use the plugin as a normal user
+	 *
+	 * @return
+	 */
+	public Map<String, String> getRequiredSettingEntities()
+	{
+		return requiredSettingEntities;
+	}
+
+	public void setRequiredSettingEntities(Map<String, String> requiredSettingEntities)
+	{
+		this.requiredSettingEntities = requiredSettingEntities;
+	}
+
+	/**
 	 * Returns the unique id of the plugin
 	 */
 	public String getId()
@@ -73,7 +93,7 @@ public abstract class MolgenisPluginController
 	public Entity getPluginSettings()
 	{
 		String entityName = DefaultSettingsEntityType.getSettingsEntityName(getId());
-		return RunAsSystemProxy.runAsSystem(() -> getPluginSettings(entityName));
+		return runAsSystem(() -> getPluginSettings(entityName));
 	}
 
 	private Entity getPluginSettings(String entityName)
@@ -84,7 +104,8 @@ public abstract class MolgenisPluginController
 	@PostConstruct
 	private void registerPlugin()
 	{
-		molgenisPluginRegistry.registerPlugin(new MolgenisPlugin(getId(), getId(), "", "")); // FIXME
+		molgenisPluginRegistry
+				.registerPlugin(new MolgenisPlugin(getId(), getId(), "", "", requiredSettingEntities)); // FIXME
 		if (molgenisPluginFactory != null)
 		{
 			molgenisPluginRegistry.registerPluginFactory(molgenisPluginFactory);
