@@ -214,6 +214,5 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		{
 			return mock(EntityReferenceCreator.class);
 		}
-
 	}
 }
