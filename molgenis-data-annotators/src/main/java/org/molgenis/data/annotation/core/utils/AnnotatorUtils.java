@@ -18,13 +18,15 @@ import org.molgenis.data.vcf.utils.VcfWriterUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.vcf.utils.VcfUtils.getAtomicAttributesFromList;
+import static org.molgenis.data.vcf.utils.VcfWriterUtils.writeToVcf;
 
 public class AnnotatorUtils
 {
@@ -104,15 +106,18 @@ public class AnnotatorUtils
 		Attribute compound;
 		compound = attributeFactory.create().setName(compoundName).setLabel(annotator.getFullName())
 				.setDataType(COMPOUND).setLabel(annotator.getSimpleName());
+
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
 				.forEachOrdered(part -> part.setParent(compound));
 
 		entityType.addAttribute(compound);
+
 		// Only add attributes that do not already exist. We assume existing attributes are added in a previous annotation run.
 		// This is a potential risk if an attribute with that name already exist that was not added by the annotator.
 		// This risk is relatively low since annotator attributes are prefixed.
 		attributes = attributes.stream().filter(attribute -> entityType.getAttribute(attribute.getName()) == null)
-				.collect(Collectors.toList());
+				.collect(toList());
+
 		entityType.addAttributes(attributes);
 	}
 
@@ -148,7 +153,7 @@ public class AnnotatorUtils
 					attributeFactory, attributesToInclude, vcfRepo);
 
 			VcfWriterUtils
-					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+					.writeVcfHeader(inputVcfFile, outputVCFWriter, getAtomicAttributesFromList(outputMetaData),
 							attributesToInclude);
 
 			Iterable<Entity> entitiesToAnnotate = addAnnotatorMetaDataToRepository(annotator, attributeFactory,
@@ -182,7 +187,7 @@ public class AnnotatorUtils
 		if (annotator instanceof EffectsAnnotator)
 		{
 			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityType(), EFFECT,
-					StreamSupport.stream(vcfRepo.spliterator(), false));
+					stream(vcfRepo.spliterator(), false));
 
 			// Add metadata to repository that will be annotated, instead of repository with variants
 			if (entitiesToAnnotate.iterator().hasNext())
@@ -205,7 +210,7 @@ public class AnnotatorUtils
 		{
 			// annotation starts here
 			Entity annotatedRecord = annotatedRecords.next();
-			VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+			writeToVcf(annotatedRecord, getAtomicAttributesFromList(outputMetaData),
 					attributesToInclude, outputVCFWriter);
 			outputVCFWriter.newLine();
 		}
@@ -259,12 +264,11 @@ public class AnnotatorUtils
 			List<String> attributesToInclude, VcfRepository vcfRepo)
 	{
 		// Check attribute names
-		List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputAttributes())
-				.stream().map(Attribute::getName).collect(Collectors.toList());
+		List<String> outputAttributeNames = getAtomicAttributesFromList(annotator.getOutputAttributes())
+				.stream().map(Attribute::getName).collect(toList());
 
-		List<String> inputAttributeNames = VcfUtils
-				.getAtomicAttributesFromList(vcfRepo.getEntityType().getAtomicAttributes()).stream()
-				.map(Attribute::getName).collect(Collectors.toList());
+		List<String> inputAttributeNames = getAtomicAttributesFromList(vcfRepo.getEntityType().getAtomicAttributes()).stream()
+				.map(Attribute::getName).collect(toList());
 
 		for (Object attrName : attributesToInclude)
 		{
