@@ -124,8 +124,8 @@ public class ExacAnnotator implements AnnotatorConfig
 
 	public List<Attribute> createExacOutputAttributes()
 	{
-		return newArrayList(getExacAcHetAttr(attributeFactory), getExacAcHomAttr(attributeFactory),
-				getExacAFAttr(attributeFactory));
+		return newArrayList(getExacAFAttr(attributeFactory), getExacAcHomAttr(attributeFactory),
+				getExacAcHetAttr(attributeFactory));
 	}
 
 	public static Attribute getExacAcHetAttr(AttributeFactory attributeFactory)
