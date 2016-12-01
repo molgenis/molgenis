@@ -98,9 +98,22 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	EntityFactoryRegistry entityFactoryRegistry()
+	{
+		return new EntityFactoryRegistry();
+	}
+
+	@Bean
+	EntityReferenceCreator entityReferenceCreator()
+	{
+		return new EntityReferenceCreatorImpl(dataService(), entityFactoryRegistry());
+	}
+
+	@Bean
 	EntityManager entityManager()
 	{
-		return new EntityManagerImpl(dataService(), new EntityFactoryRegistry(), entityPopulator());
+		return new EntityManagerImpl(dataService(), entityFactoryRegistry(), entityPopulator(),
+				entityReferenceCreator());
 	}
 
 	@Bean
@@ -118,7 +131,7 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public DefaultValuePopulator defaultValuePopulator()
 	{
-		return new DefaultValuePopulator(entityManager());
+		return new DefaultValuePopulator(entityReferenceCreator());
 	}
 
 	@Bean

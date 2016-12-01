@@ -1,7 +1,7 @@
 package org.molgenis.data.populate;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -29,12 +29,12 @@ import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 @Component
 public class DefaultValuePopulator
 {
-	private final EntityManager entityManager;
+	private final EntityReferenceCreator entityReferenceCreator;
 
 	@Autowired
-	public DefaultValuePopulator(EntityManager entityManager)
+	public DefaultValuePopulator(EntityReferenceCreator entityReferenceCreator)
 	{
-		this.entityManager = requireNonNull(entityManager);
+		this.entityReferenceCreator = requireNonNull(entityReferenceCreator);
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class DefaultValuePopulator
 	{
 		EntityType refEntityType = attr.getRefEntity();
 		Object idValue = convertToTypedValue(refEntityType.getIdAttribute(), idValueAsString);
-		return entityManager.getReference(refEntityType, idValue);
+		return entityReferenceCreator.getReference(refEntityType, idValue);
 	}
 
 	private List<Entity> convertMref(Attribute attr, String idValuesAsString)

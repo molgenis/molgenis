@@ -6,7 +6,10 @@ import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
-import org.molgenis.data.support.*;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.support.EntityWithComputedAttributes;
+import org.molgenis.data.support.PartialEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,14 +39,16 @@ public class EntityManagerImpl implements EntityManager
 	private final DataService dataService;
 	private final EntityFactoryRegistry entityFactoryRegistry;
 	private final EntityPopulator entityPopulator;
+	private final EntityReferenceCreator entityReferenceCreator;
 
 	@Autowired
 	public EntityManagerImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry,
-			EntityPopulator entityPopulator)
+			EntityPopulator entityPopulator, EntityReferenceCreator entityReferenceCreator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
 		this.entityPopulator = requireNonNull(entityPopulator);
+		this.entityReferenceCreator = requireNonNull(entityReferenceCreator);
 	}
 
 	@Override
@@ -90,32 +95,13 @@ public class EntityManagerImpl implements EntityManager
 	@Override
 	public Entity getReference(EntityType entityType, Object id)
 	{
-		Entity lazyEntity = new LazyEntity(entityType, dataService, id);
-
-		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
-		if (entityFactory != null)
-		{
-			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
-			lazyEntity = entityFactory.create(lazyEntity);
-		}
-
-		return lazyEntity;
+		return entityReferenceCreator.getReference(entityType, id);
 	}
 
 	@Override
 	public Iterable<Entity> getReferences(EntityType entityType, Iterable<?> ids)
 	{
-		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
-		return () -> stream(ids.spliterator(), false).map(id ->
-		{
-			Entity lazyEntity = getReference(entityType, id);
-			if (entityFactory != null)
-			{
-				// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
-				lazyEntity = entityFactory.create(lazyEntity);
-			}
-			return lazyEntity;
-		}).iterator();
+		return entityReferenceCreator.getReferences(entityType, ids);
 	}
 
 	@Override

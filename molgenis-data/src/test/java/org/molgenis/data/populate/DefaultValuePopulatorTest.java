@@ -1,7 +1,7 @@
 package org.molgenis.data.populate;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -43,11 +43,11 @@ public class DefaultValuePopulatorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		EntityManager entityManager = mock(EntityManager.class);
-		when(entityManager.getReference(any(EntityType.class), eq(1))).thenReturn(entity1);
-		when(entityManager.getReference(any(EntityType.class), eq("a"))).thenReturn(entityA);
-		when(entityManager.getReference(any(EntityType.class), eq("b"))).thenReturn(entityB);
-		this.defaultValuePopulator = new DefaultValuePopulator(entityManager);
+		EntityReferenceCreator entityReferenceCreator = mock(EntityReferenceCreator.class);
+		when(entityReferenceCreator.getReference(any(EntityType.class), eq(1))).thenReturn(entity1);
+		when(entityReferenceCreator.getReference(any(EntityType.class), eq("a"))).thenReturn(entityA);
+		when(entityReferenceCreator.getReference(any(EntityType.class), eq("b"))).thenReturn(entityB);
+		this.defaultValuePopulator = new DefaultValuePopulator(entityReferenceCreator);
 	}
 
 	@DataProvider(name = "testPopulateProvider")
