@@ -5,9 +5,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
@@ -27,9 +26,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status.READY;
+import static org.molgenis.data.annotation.core.entity.AnnotatorInfo.Type.POPULATION_REFERENCE;
 import static org.molgenis.data.annotation.web.settings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
@@ -79,37 +81,34 @@ public class ExacAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
+		List<Attribute> attributes = createExacOutputAttributes();
 
-		Attribute outputAttribute_AF = getExacAFAttr(attributeFactory);
-		Attribute outputAttribute_AC_HOM = getExacAcHomAttr(attributeFactory);
-		Attribute outputAttribute_AC_HET = getExacAcHetAttr(attributeFactory);
+		List<Attribute> resourceMetaData = new ArrayList<>(asList(new Attribute[] {
+				attributeFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
+				attributeFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(STRING),
+				attributeFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(STRING) }));
 
-		List<Attribute> outputMetaData = new ArrayList<Attribute>(Arrays.asList(
-				new Attribute[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
-
-		List<Attribute> resourceMetaData = new ArrayList<Attribute>(Arrays.asList(
-				new Attribute[] {
-						attributeFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
-						attributeFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(
-								STRING),
-						attributeFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(
-								STRING) }));
-
-		AnnotatorInfo exacInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, "exac",
+		AnnotatorInfo exacInfo = AnnotatorInfo.create(READY, POPULATION_REFERENCE, "exac",
 				" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
 						+ " and harmonize exome sequencing data from a wide variety of large-scale sequencing projects"
 						+ ", and to make summary data available for the wider scientific community.The data set provided"
 						+ " on this website spans 60,706 unrelated individuals sequenced as part of various "
-						+ "disease-specific and population genetic studies. ", outputMetaData);
+						+ "disease-specific and population genetic studies. ", attributes);
 
 		// TODO: properly test multiAllelicFresultFilter
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData,
 				vcfAttributes);
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
 				multiAllelicResultFilter, dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_LOCATION, exacAnnotatorSettings))
 		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createExacOutputAttributes();
+			}
+
 			@Override
 			protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 			{
@@ -121,6 +120,12 @@ public class ExacAnnotator implements AnnotatorConfig
 		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	public List<Attribute> createExacOutputAttributes()
+	{
+		return newArrayList(getExacAcHetAttr(attributeFactory), getExacAcHomAttr(attributeFactory),
+				getExacAFAttr(attributeFactory));
 	}
 
 	public static Attribute getExacAcHetAttr(AttributeFactory attributeFactory)

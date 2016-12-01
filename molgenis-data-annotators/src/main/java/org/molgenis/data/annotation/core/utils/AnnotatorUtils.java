@@ -89,7 +89,8 @@ public class AnnotatorUtils
 	public static EntityType addAnnotatorMetaDataToRepositories(EntityType entityType,
 			AttributeFactory attributeFactory, RepositoryAnnotator annotator)
 	{
-		List<Attribute> attributes = annotator.getOutputAttributes();
+
+		List<Attribute> attributes = annotator.createAnnotatorAttributes(attributeFactory);
 		Attribute compound;
 		String compoundName = annotator.getFullName();
 		compound = entityType.getAttribute(compoundName);

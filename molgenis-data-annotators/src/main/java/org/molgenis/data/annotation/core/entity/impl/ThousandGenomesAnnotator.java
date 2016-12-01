@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
@@ -26,8 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Collections;
+import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.*;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -59,6 +60,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 
 	@Autowired
 	private AttributeFactory attributeFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -71,10 +73,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		Attribute outputAttribute = attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING)
-				.setDescription(
-						"The allele frequency for variants seen in the population used for the thousand genomes project")
-				.setLabel(THOUSAND_GENOME_AF_LABEL);
+		List<Attribute> attributes = createThousandGenomesOutputAttributes();
 
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, NAME,
@@ -87,15 +86,15 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 								+ "The results of the study will be freely and publicly accessible to researchers worldwide. "
 								+ "Further information about the project is available in the About tab. Information about downloading, "
 								+ "browsing or using the 1000 Genomes data is available at: http://www.1000genomes.org/ ",
-						Collections.singletonList(outputAttribute));
+						attributes);
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 
-		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(Collections.singletonList(
+		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(singletonList(
 				attributeFactory.create().setName(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME).setDataType(DECIMAL)),
 				vcfAttributes);
 
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) ->
 		{
 			thousendGenomesAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
@@ -106,6 +105,12 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		})
 		{
 			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createThousandGenomesOutputAttributes();
+			}
+
+			@Override
 			protected Object getResourceAttributeValue(Attribute attr, Entity entityType)
 			{
 				String attrName = THOUSAND_GENOME_AF
@@ -115,6 +120,13 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	private List<Attribute> createThousandGenomesOutputAttributes()
+	{
+		return singletonList(attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING).setDescription(
+				"The allele frequency for variants seen in the population used for the thousand genomes project")
+				.setLabel(THOUSAND_GENOME_AF_LABEL));
 	}
 
 	@Bean
