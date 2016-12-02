@@ -25,15 +25,15 @@ public class PackageRepositoryDecoratorTest
 				entityTypeDependencyResolver);
 	}
 
-	@Test
-	public void delegate() throws Exception
+	@Test(expectedExceptions = NullPointerException.class)
+	public void testPackageRepositoryDecorator() throws Exception
 	{
-		assertEquals(packageRepositoryDecorator.delegate(), decoratedRepo);
+		new PackageRepositoryDecorator(null, null, null);
 	}
 
 	@Test
-	public void testQuery() throws Exception
+	public void testDelegate() throws Exception
 	{
-		assertEquals(packageRepositoryDecorator.query().getRepository(), packageRepositoryDecorator);
+		assertEquals(packageRepositoryDecorator.delegate(), decoratedRepo);
 	}
 }
