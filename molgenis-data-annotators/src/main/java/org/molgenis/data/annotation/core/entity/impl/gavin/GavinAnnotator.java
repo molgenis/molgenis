@@ -192,9 +192,8 @@ public class GavinAnnotator implements AnnotatorConfig
 				if (sourceEntitiesSize == 1)
 				{
 					Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
-
-					Judgment judgment = gavinAlgorithm
-							.classifyVariant(impact, caddScaled, exacMAF, gene, annotationSourceEntity, null);
+					Judgment judgment = gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, gene,
+							GavinThresholds.fromEntity(annotationSourceEntity));
 					entity.set(CLASSIFICATION, judgment.getClassification().toString());
 					entity.set(CONFIDENCE, judgment.getConfidence().toString());
 					entity.set(REASON, judgment.getReason());
