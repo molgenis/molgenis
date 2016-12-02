@@ -61,7 +61,7 @@ public class ParserTest
 						VcfVariant.create("20", 14370, ".", "G", "A") }, { "", null },
 				{ "X\t123\tA\tC\t213.23\tblah", null }, { "X\t123\tA\tC\t213.23", null },
 				{ " X \t 123 \t rsblah \t A \t C \t 213.23", VcfVariant.create("X", 123, "rsblah", "A", "C") },
-				{ "20\t14370\tG\t.\t2.2\t3.234", CaddVariant.create("20", 14370, "G", ".", 2.2, 3.234) },
+				{ "20\t14370\tG\t.\t2.2\t3.234", null },
 				{ "X\t123\t\tA\tC\t213.23", VcfVariant.create("X", 123, ".", "A", "C") } };
 	}
 
