@@ -132,12 +132,17 @@ public class ImportWriter
 	{
 		return runAsSystem(() ->
 		{
+			Map<String, EntityType> existingEntityTypeMap = dataService
+					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entities.stream().map(EntityType::getName),
+							new Fetch().field(EntityTypeMetadata.FULL_NAME), EntityType.class)
+					.collect(toMap(EntityType::getName, Function.identity()));
+
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
-					.filter(entityType -> !dataService.hasRepository(entityType.getName()))
+					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getName()))
 					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
 			ImmutableCollection<EntityType> existingEntityTypes = entities.stream()
-					.filter(entityType -> dataService.hasRepository(entityType.getName()))
+					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getName()))
 					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
 			return new GroupedEntityTypes(newEntityTypes, existingEntityTypes);
