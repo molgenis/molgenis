@@ -49,7 +49,7 @@ public class Parser
 	private static Pattern CHROM_PATTERN = Pattern
 			.compile("([Cc][Hh][Rr])?(?<chrom>([1-9])|(1[0-9])|(2[0-2])|[xX]|[yY])");
 	private static Pattern REF_PATTERN = Pattern.compile("[ACTG]+");
-	private static Pattern ALT_PATTERN = Pattern.compile("[ACTG]+|\\.");
+	private static Pattern ALT_PATTERN = Pattern.compile("[ACTG]+");
 
 	/**
 	 * Transforms gavin input file.
@@ -217,6 +217,10 @@ public class Parser
 			{
 				return null;
 			}
+			if (ref.equals(alt))
+			{
+				return null;
+			}
 			return CaddVariant.create(chrom, pos, ref, alt, rawScore, phred);
 		}
 		catch (NumberFormatException e)
@@ -248,6 +252,10 @@ public class Parser
 		String alt = parseAlt(columns[VCF_ALT_INDEX].trim());
 
 		if (anyNull(chrom, pos, ref, alt))
+		{
+			return null;
+		}
+		if (ref.equals(alt))
 		{
 			return null;
 		}
