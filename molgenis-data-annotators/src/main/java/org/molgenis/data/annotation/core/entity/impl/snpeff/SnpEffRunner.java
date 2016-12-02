@@ -49,8 +49,6 @@ public class SnpEffRunner
 	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
 
 	public static final String NAME = "snpEff";
-	public static final String LOF = "LOF";
-	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
 
 	private EffectsMetaData effectsMetaData = new EffectsMetaData();
@@ -130,7 +128,7 @@ public class SnpEffRunner
 						if (chromosome != null && position != null)
 						{
 							Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator, chromosome, position);
-							if (snpEffEntity != null)
+							if (snpEffEntity != null && snpEffEntity.getString(SnpEffRunner.ANN) != null)
 							{
 								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
 										getTargetEntityType(sourceEMD)));
@@ -175,7 +173,7 @@ public class SnpEffRunner
 		{
 			Entity entityCandidate = snpEffResultIterator.peek();
 			if (chromosome.equals(entityCandidate.getString(VcfAttributes.CHROM)) && position == entityCandidate
-					.getInt(VcfAttributes.POS) && entityCandidate.getString(SnpEffRunner.ANN) != null)
+					.getInt(VcfAttributes.POS))
 			{
 				snpEffResultIterator.next();
 				return entityCandidate;
