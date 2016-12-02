@@ -5,6 +5,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
+import org.molgenis.util.MolgenisDateFormat;
 
 import java.util.Date;
 
@@ -50,9 +51,11 @@ class PostgreSqlUtils
 						mrefEntity.getEntityType().getIdAttribute())).collect(toList());
 			case DATE:
 				Date date = entity.getUtilDate(attrName);
+				date = MolgenisDateFormat.formatDate(date);
 				return date != null ? new java.sql.Date(date.getTime()) : null;
 			case DATE_TIME:
 				Date dateTime = entity.getUtilDate(attrName);
+				dateTime = MolgenisDateFormat.formatDateTime(dateTime);
 				return dateTime != null ? new java.sql.Timestamp(dateTime.getTime()) : null;
 			case DECIMAL:
 				return entity.getDouble(attrName);

@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.*;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Type;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.FirstResultFilter;
 import org.molgenis.data.annotation.core.query.AttributeEqualsQueryCreator;
@@ -196,7 +196,7 @@ public class CGDAnnotator implements AnnotatorConfig
 		return attributes;
 	}
 
-	private class CGDEntityAnnotator extends AnnotatorImpl
+	private class CGDEntityAnnotator extends AbstractAnnotator
 	{
 		public CGDEntityAnnotator(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 				ResultFilter resultFilter, DataService dataService, Resources resources)
@@ -244,6 +244,12 @@ public class CGDAnnotator implements AnnotatorConfig
 			}
 
 			return inherMode.toString();
+		}
+
+		@Override
+		public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+		{
+			return getOutputAttributes();
 		}
 	}
 

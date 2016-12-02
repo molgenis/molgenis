@@ -1,5 +1,7 @@
 package org.molgenis.data.cache.l3;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.molgenis.data.Entity;
@@ -20,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -77,8 +78,8 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 	private LoadingCache<Query<Entity>, List<Object>> createQueryCache(Repository<Entity> repository)
 	{
 		LOG.trace("Creating Query cache for repository {}", repository.getName());
-		return newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_QUERY).expireAfterAccess(10, MINUTES)
-				.build(createCacheLoader(repository));
+		return CaffeinatedGuava.build(Caffeine.newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_QUERY)
+				.expireAfterAccess(10, MINUTES), createCacheLoader(repository));
 	}
 
 	/**

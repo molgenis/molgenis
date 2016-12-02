@@ -8,14 +8,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static freemarker.template.utility.Collections12.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 public class EntityManagerImplTest
 {
@@ -23,6 +22,7 @@ public class EntityManagerImplTest
 	private EntityManagerImpl entityManagerImpl;
 	private EntityFactoryRegistry entityFactoryRegistry;
 	private EntityPopulator entityPopulator;
+	private EntityReferenceCreator entityReferenceCreator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -30,75 +30,33 @@ public class EntityManagerImplTest
 		dataService = mock(DataService.class);
 		entityFactoryRegistry = mock(EntityFactoryRegistry.class);
 		entityPopulator = mock(EntityPopulator.class);
-		entityManagerImpl = new EntityManagerImpl(dataService, entityFactoryRegistry, entityPopulator);
+		entityReferenceCreator = mock(EntityReferenceCreator.class);
+		entityManagerImpl = new EntityManagerImpl(dataService, entityFactoryRegistry, entityPopulator,
+				entityReferenceCreator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void EntityManagerImpl()
 	{
-		new EntityManagerImpl(null, null, null);
+		new EntityManagerImpl(null, null, null, null);
 	}
 
 	@Test
 	public void getReference()
 	{
-		String entityName = "entity";
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
-		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getLabelAttribute()).thenReturn(lblAttr);
-
-		String label = "label";
-		Integer id = Integer.valueOf(0);
-		Entity entity = when(mock(Entity.class).getLabelValue()).thenReturn(label).getMock();
-		when(dataService.findOneById(entityName, id)).thenReturn(entity);
-
-		Entity entityReference = entityManagerImpl.getReference(entityType, id);
-		assertEquals(entityReference.getIdValue(), id);
-		verifyNoMoreInteractions(dataService);
-		assertEquals(label, entityReference.getLabelValue());
-		verify(dataService, times(1)).findOneById(entityName, id);
+		EntityType entityType = mock(EntityType.class);
+		Object id = mock(Object.class);
+		entityManagerImpl.getReference(entityType, id);
+		verify(entityReferenceCreator).getReference(entityType, id);
 	}
 
 	@Test
 	public void getReferences()
 	{
-		String entityName = "entity";
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
-		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getLabelAttribute()).thenReturn(lblAttr);
-
-		String label0 = "label0";
-		Integer id0 = Integer.valueOf(0);
-		Entity entity0 = when(mock(Entity.class).getLabelValue()).thenReturn(label0).getMock();
-		when(dataService.findOneById(entityName, id0)).thenReturn(entity0);
-
-		String label1 = "label1";
-		Integer id1 = Integer.valueOf(1);
-		Entity entity1 = when(mock(Entity.class).getLabelValue()).thenReturn(label1).getMock();
-		when(dataService.findOneById(entityName, id1)).thenReturn(entity1);
-
-		Iterable<Entity> entityReferences = entityManagerImpl.getReferences(entityType, Arrays.asList(id0, id1));
-		Iterator<Entity> it = entityReferences.iterator();
-		assertTrue(it.hasNext());
-
-		Entity entityReference0 = it.next();
-		assertEquals(entityReference0.getIdValue(), id0);
-		verifyNoMoreInteractions(dataService);
-		assertEquals(entityReference0.getLabelValue(), label0);
-		verify(dataService, times(1)).findOneById(entityName, id0);
-
-		assertTrue(it.hasNext());
-		Entity entityReference1 = it.next();
-		assertEquals(entityReference1.getIdValue(), id1);
-		verifyNoMoreInteractions(dataService);
-		assertEquals(entityReference1.getLabelValue(), label1);
-		verify(dataService, times(1)).findOneById(entityName, id1);
-
-		assertFalse(it.hasNext());
+		EntityType entityType = mock(EntityType.class);
+		Iterable<?> ids = mock(Iterable.class);
+		entityManagerImpl.getReferences(entityType, ids);
+		verify(entityReferenceCreator).getReferences(entityType, ids);
 	}
 
 	@Test

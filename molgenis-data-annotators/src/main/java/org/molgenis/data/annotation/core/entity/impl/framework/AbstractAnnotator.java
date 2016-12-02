@@ -18,11 +18,11 @@ import java.util.List;
  * filters the results using a {@link ResultFilter} and then copies the resulting attributes to the annotated
  * {@link Entity}.
  */
-public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
+public abstract class AbstractAnnotator extends QueryAnnotatorImpl implements EntityAnnotator
 {
 	private final ResultFilter resultFilter;
 
-	public AnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
+	public AbstractAnnotator(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 			ResultFilter resultFilter, DataService dataService, Resources resources,
 			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer)
 	{
@@ -72,5 +72,4 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 		sourceMetaData.addAll(resultFilter.getRequiredAttributes());
 		return sourceMetaData;
 	}
-
 }

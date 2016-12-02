@@ -94,8 +94,8 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributePos);
 		metaDataCanAnnotate.addAttribute(attributeRef);
 		metaDataCanAnnotate.addAttribute(attributeAlt);
-		metaDataCanAnnotate.addAttribute(caddAnnotator.getCaddAbsAttr(attributeFactory));
-		metaDataCanAnnotate.addAttribute(caddAnnotator.getCaddScaledAttr(attributeFactory));
+		metaDataCanAnnotate.addAttribute(caddAnnotator.createCaddAbsAttr(attributeFactory));
+		metaDataCanAnnotate.addAttribute(caddAnnotator.createCaddScaledAttr(attributeFactory));
 
 		metaDataCantAnnotate.addAttribute(attributeCantAnnotateChrom);
 		metaDataCantAnnotate.addAttribute(attributePos);
