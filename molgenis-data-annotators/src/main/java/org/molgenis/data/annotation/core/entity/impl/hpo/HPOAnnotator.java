@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resource;
@@ -84,9 +84,7 @@ public class HPOAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> attributes = new ArrayList<>();
-		attributes.add(getIdsAttr());
-		attributes.add(getTermsAttr());
+		List<Attribute> attributes = createHpoOutputAttributes();
 
 		AnnotatorInfo info = AnnotatorInfo
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
@@ -95,11 +93,26 @@ public class HPOAnnotator implements AnnotatorConfig
 								+ "Please note that if SnpEff was used to annotate in order to add the gene symbols to the variants, than this annotator should be used on the result entity rather than the variant entity itself.",
 						attributes);
 
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(HPO_RESOURCE, info, geneNameQueryCreator,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(HPO_RESOURCE, info, geneNameQueryCreator,
 				new HpoResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings))
+		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createHpoOutputAttributes();
+			}
+		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	private List<Attribute> createHpoOutputAttributes()
+	{
+		List<Attribute> attributes = new ArrayList<>();
+		attributes.add(getIdsAttr());
+		attributes.add(getTermsAttr());
+		return attributes;
 	}
 
 	@Bean

@@ -10,6 +10,7 @@ import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfi
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -115,6 +116,12 @@ public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator imple
 
 	@Override
 	public List<Attribute> getOutputAttributes()
+	{
+		return effectsMetaData.getOrderedAttributes();
+	}
+
+	@Override
+	public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
 	{
 		return effectsMetaData.getOrderedAttributes();
 	}

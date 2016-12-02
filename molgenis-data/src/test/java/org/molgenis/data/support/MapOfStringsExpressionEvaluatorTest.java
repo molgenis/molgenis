@@ -2,10 +2,12 @@ package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -207,5 +209,10 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate" })
 	public static class Config
 	{
+		@Bean
+		public EntityReferenceCreator entityReferenceCreator()
+		{
+			return mock(EntityReferenceCreator.class);
+		}
 	}
 }

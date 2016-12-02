@@ -15,7 +15,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-public class EntityPopulatorTest
+public class AutoValuePopulatorTest
 {
 	private static final String ATTR_ID = "id";
 	private static final String ATTR_DATE_AUTO_DEFAULT = "date_auto-default";
@@ -26,7 +26,7 @@ public class EntityPopulatorTest
 	private static final String ATTR_DATETIME_AUTO_TRUE = "datetime_auto-true";
 
 	private EntityType entityType;
-	private EntityPopulator entityPopulator;
+	private AutoValuePopulator autoValuePopulator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -71,14 +71,14 @@ public class EntityPopulatorTest
 		when(entityType.getAttribute(ATTR_DATETIME_AUTO_TRUE)).thenReturn(attrDateTimeAutoTrue);
 		IdGenerator idGenerator = mock(IdGenerator.class);
 		Mockito.when(idGenerator.generateId()).thenReturn("ID1").thenReturn("ID2");
-		entityPopulator = new EntityPopulator(idGenerator);
+		autoValuePopulator = new AutoValuePopulator(idGenerator);
 	}
 
 	@Test
 	public void populateAutoValues()
 	{
 		Entity entity = new DynamicEntity(entityType);
-		entityPopulator.populate(entity);
+		autoValuePopulator.populate(entity);
 
 		assertNotNull(entity.getIdValue());
 		assertNull(entity.getDate(ATTR_DATE_AUTO_DEFAULT));

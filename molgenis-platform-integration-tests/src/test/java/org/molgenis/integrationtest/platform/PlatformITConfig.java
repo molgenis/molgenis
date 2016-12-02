@@ -8,6 +8,7 @@ import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
+import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.populate.UuidGenerator;
@@ -85,6 +86,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private RepositoryCollectionBootstrapper repoCollectionBootstrapper;
 	@Autowired
 	private SystemEntityTypeRegistrar systemEntityTypeRegistrar;
+	@Autowired
+	private SystemPackageRegistrar systemPackageRegistrar;
 	@Autowired
 	private EntityFactoryRegistrar entityFactoryRegistrar;
 	@Autowired
@@ -186,14 +189,18 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					systemEntityTypeRegistrar.register(event);
 					LOG.trace("Registered system entity meta data");
 
+					LOG.trace("Registering system packages ...");
+					systemPackageRegistrar.register(event);
+					LOG.trace("Registered system packages");
+
 					LOG.trace("Registering entity factories ...");
 					entityFactoryRegistrar.register(event);
 					LOG.trace("Registered entity factories");
 					LOG.debug("Bootstrapped registries");
 
-					LOG.trace("Bootstrapping system entity meta data ...");
+					LOG.trace("Bootstrapping system entity types ...");
 					systemEntityTypeBootstrapper.bootstrap(event);
-					LOG.debug("Bootstrapped system entity meta data");
+					LOG.debug("Bootstrapped system entity types");
 				});
 			}
 			catch (Exception unexpected)

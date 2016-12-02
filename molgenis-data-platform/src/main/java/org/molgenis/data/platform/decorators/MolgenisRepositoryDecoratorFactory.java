@@ -75,6 +75,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final TransactionInformation transactionInformation;
 	private final MolgenisPermissionService permissionService;
 	private final EntityTypeValidator entityTypeValidator;
+	private final PackageValidator packageValidator;
 	private final TagValidator tagValidator;
 	private final L3Cache l3Cache;
 	private final LanguageService languageService;
@@ -92,7 +93,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			SearchService searchService, PasswordEncoder passwordEncoder, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator,
-			TagValidator tagValidator, L3Cache l3Cache, LanguageService languageService,
+			PackageValidator packageValidator, TagValidator tagValidator, L3Cache l3Cache,
+			LanguageService languageService,
 			EntityTypeDependencyResolver entityTypeDependencyResolver, AttributeValidator attributeValidator,
 			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
 
@@ -115,6 +117,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionInformation = requireNonNull(transactionInformation);
 		this.permissionService = requireNonNull(permissionService);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
+		this.packageValidator = requireNonNull(packageValidator);
 		this.tagValidator = requireNonNull(tagValidator);
 		this.l3Cache = requireNonNull(l3Cache);
 		this.languageService = requireNonNull(languageService);
@@ -214,6 +217,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryDecorator(
 					(Repository<Package>) (Repository<? extends Entity>) repo, dataService,
 					entityTypeDependencyResolver);
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryValidationDecorator(
+					(Repository<Package>) (Repository<? extends Entity>) repo, packageValidator);
 		}
 		else if (repo.getName().equals(TAG))
 		{

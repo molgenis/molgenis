@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
@@ -73,12 +73,7 @@ public class CaddAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> attributes = new ArrayList<>();
-		Attribute cadd_abs = getCaddAbsAttr(attributeFactory);
-		Attribute cadd_scaled = getCaddScaledAttr(attributeFactory);
-
-		attributes.add(cadd_abs);
-		attributes.add(cadd_scaled);
+		List<Attribute> attributes = createCaddAnnotatorAttributes();
 
 		AnnotatorInfo caddInfo = AnnotatorInfo
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME,
@@ -96,15 +91,33 @@ public class CaddAnnotator implements AnnotatorConfig
 								+ "effect sizes and genetic architectures and can be used prioritize "
 								+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
 						attributes);
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(CADD_TABIX_RESOURCE, caddInfo,
 				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, true, vcfAttributes),
 				dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
-						caddAnnotatorSettings));
+						caddAnnotatorSettings))
+		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createCaddAnnotatorAttributes();
+			}
+		};
 		annotator.init(entityAnnotator);
 	}
 
-	public static Attribute getCaddScaledAttr(AttributeFactory attributeFactory)
+	private List<Attribute> createCaddAnnotatorAttributes()
+	{
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute cadd_abs = createCaddAbsAttr(attributeFactory);
+		Attribute cadd_scaled = createCaddScaledAttr(attributeFactory);
+
+		attributes.add(cadd_abs);
+		attributes.add(cadd_scaled);
+		return attributes;
+	}
+
+	public static Attribute createCaddScaledAttr(AttributeFactory attributeFactory)
 	{
 		return attributeFactory.create().setName(CADD_SCALED).setDataType(STRING).setDescription(
 				"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
@@ -115,7 +128,7 @@ public class CaddAnnotator implements AnnotatorConfig
 				.setLabel(CADD_SCALED_LABEL);
 	}
 
-	public static Attribute getCaddAbsAttr(AttributeFactory attributeFactory)
+	static Attribute createCaddAbsAttr(AttributeFactory attributeFactory)
 	{
 		return attributeFactory.create().setName(CADD_ABS).setDataType(STRING).setDescription(
 				"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
@@ -142,8 +155,8 @@ public class CaddAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 				repoMetaData.addAttribute(attributeFactory.create().setName(CADD_ABS).setDataType(STRING));
 				repoMetaData.addAttribute(attributeFactory.create().setName(CADD_SCALED).setDataType(STRING));
-				Attribute idAttribute = attributeFactory.create().setName(idAttrName)
-						.setVisible(false).setIdAttribute(true);
+				Attribute idAttribute = attributeFactory.create().setName(idAttrName).setVisible(false)
+						.setIdAttribute(true);
 				repoMetaData.addAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}
