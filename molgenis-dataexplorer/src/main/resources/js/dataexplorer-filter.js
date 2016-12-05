@@ -16,6 +16,7 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 			case 'CATEGORICAL':
+            case 'CATEGORICAL_MREF':
 				return self.createSimpleFilter(attribute, filter, wizard, false);
 			case 'XREF':
 			case 'FILE':
@@ -34,7 +35,6 @@
 			case 'SCRIPT':
 				return self.createComplexFilter(attribute, filter, wizard, 'OR');
 				break;
-			case 'CATEGORICAL_MREF':	
 			case 'MREF':
 				return self.createComplexFilter(attribute, filter, wizard, null);
 				break;
@@ -460,6 +460,7 @@
 				$controls.append($('<div class="filter-radio-inline-container">').append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline')));
 				break;
 			case 'CATEGORICAL':
+            case 'CATEGORICAL_MREF':
 				var restApi = new molgenis.RestClient();
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ''); // TODO do not manipulate uri
@@ -532,7 +533,6 @@
 				break;
 			case 'XREF':
 			case 'MREF':
-			case 'CATEGORICAL_MREF':
 			case 'FILE':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
 				var container = $('<div class="xrefmrefsearch">');
@@ -648,15 +648,15 @@
 				
 				if(value) {
 					// Add values
-					if(attribute.fieldType === 'MREF' || attribute.fieldType == 'CATEGORICAL_MREF' || attribute.fieldType === 'XREF'){
+                    if (attribute.fieldType === 'MREF' || attribute.fieldType === 'XREF') {
 						var mrefValues = value.split(',');
 						$(mrefValues).each(function(i){
 							values.push(mrefValues[i]);
 						});
 						
 						labels = $(this).data('labels');
-					} 
-					else if(attribute.fieldType == 'CATEGORICAL') {
+                    }
+                    else if (attribute.fieldType == 'CATEGORICAL' || attribute.fieldType == 'CATEGORICAL_MREF') {
 						labels.push($(this).parent().text());
 						values[values.length] = value;
 					}
