@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.22.2-ROW-LEVEL-SECURITY</version>
+    <version>1.22.3-ROW-LEVEL-SECURITY</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
