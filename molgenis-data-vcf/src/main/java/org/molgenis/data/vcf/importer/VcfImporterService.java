@@ -156,7 +156,8 @@ public class VcfImporterService implements ImportService
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
 			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), Collections.singletonList(samplesEntityType.getName()));
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(samplesEntityType.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 		else

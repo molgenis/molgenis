@@ -3,8 +3,6 @@ package org.molgenis.data.meta;
 import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-
 public class NameValidatorTest
 {
 	@Test(expectedExceptions = MolgenisDataException.class)

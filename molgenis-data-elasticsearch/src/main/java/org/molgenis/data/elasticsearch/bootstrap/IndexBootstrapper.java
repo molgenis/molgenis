@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
 
 @Component
 public class IndexBootstrapper

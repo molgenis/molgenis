@@ -1,15 +1,14 @@
 package org.molgenis.data.annotation.web;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.core.RefEntityAnnotator;
+import org.molgenis.data.*;
+import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.exception.UiAnnotationException;
+import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +19,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.DatabaseAction.UPDATE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.annotation.core.utils.AnnotatorUtils.addAnnotatorMetaDataToRepositories;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -54,7 +48,7 @@ public class CrudRepositoryAnnotator
 	 */
 	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
-		annotate(annotator, repository, UPDATE);
+		annotate(annotator, repository, DatabaseAction.UPDATE);
 	}
 
 	/**
@@ -64,7 +58,7 @@ public class CrudRepositoryAnnotator
 	 */
 	private void annotate(RepositoryAnnotator annotator, Repository<Entity> repository, DatabaseAction action)
 	{
-		if (!repository.getCapabilities().contains(WRITABLE))
+		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
 		{
 			throw new UnsupportedOperationException("Currently only writable repositories can be annotated");
 		}
@@ -72,16 +66,17 @@ public class CrudRepositoryAnnotator
 		{
 			EntityType entityType = dataService.getMeta().getEntityType(repository.getName());
 
-			if (annotator instanceof RefEntityAnnotator)
+			if (annotator instanceof EffectCreatingAnnotator)
 			{
-				targetMetaData = ((RefEntityAnnotator) annotator).getTargetEntityType(entityType);
+				targetMetaData = ((EffectCreatingAnnotator) annotator).getTargetEntityType(entityType);
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
-					runAsSystem(() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
+					RunAsSystemProxy.runAsSystem(
+							() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
 				}
@@ -93,8 +88,8 @@ public class CrudRepositoryAnnotator
 			}
 			else
 			{
-				runAsSystem(() -> dataService.getMeta()
-						.updateEntityType(addAnnotatorMetaDataToRepositories(entityType, attributeFactory, annotator)));
+				RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityType(
+						AnnotatorUtils.addAnnotatorMetaDataToRepositories(entityType, attributeFactory, annotator)));
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
@@ -115,9 +110,9 @@ public class CrudRepositoryAnnotator
 	{
 		try
 		{
-			if (annotator instanceof RefEntityAnnotator && targetMetaData != null)
+			if (annotator instanceof EffectCreatingAnnotator && targetMetaData != null)
 			{
-				runAsSystem(() ->
+				RunAsSystemProxy.runAsSystem(() ->
 				{
 					dataService.deleteAll(targetMetaData.getName());
 					dataService.getMeta().deleteEntityType(targetMetaData.getName());
@@ -140,9 +135,9 @@ public class CrudRepositoryAnnotator
 		Iterator<Entity> it = annotator.annotate(repository);
 
 		String entityName;
-		if (annotator instanceof RefEntityAnnotator)
+		if (annotator instanceof EffectCreatingAnnotator)
 		{
-			entityName = ((RefEntityAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getName();
+			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getName();
 		}
 		else
 		{
@@ -151,10 +146,12 @@ public class CrudRepositoryAnnotator
 		switch (action)
 		{
 			case UPDATE:
-				dataService.update(entityName, stream(spliteratorUnknownSize(it, ORDERED), false));
+				dataService.update(entityName,
+						StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false));
 				break;
 			case ADD:
-				dataService.add(entityName, stream(spliteratorUnknownSize(it, ORDERED), false));
+				dataService.add(entityName,
+						StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false));
 				break;
 			default:
 				throw new UnsupportedOperationException();

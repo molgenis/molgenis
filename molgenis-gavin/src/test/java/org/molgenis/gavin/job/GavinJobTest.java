@@ -1,17 +1,21 @@
 package org.molgenis.gavin.job;
 
+import com.google.common.collect.ImmutableMultiset;
 import org.mockito.Mock;
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.job.input.Parser;
+import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.fail;
+import static org.molgenis.gavin.job.input.model.LineType.*;
 
 @ContextConfiguration(classes = { GavinJobTest.Config.class })
 public class GavinJobTest extends AbstractMolgenisSpringTest
@@ -68,15 +71,30 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	@Mock
 	private RepositoryAnnotator gavin;
 	@Mock
+	private Parser parser;
+	@Mock
 	private Menu menu;
 	@Mock
-	VcfUtils vcfUtils;
+	EffectStructureConverter effectStructureConverter;
 
+	@Mock
 	private File inputFile;
+	@Mock
+	private File processedInputFile;
+	@Mock
+	private File errorFile;
+	@Mock
 	private File caddResult;
+	@Mock
 	private File exacResult;
+	@Mock
 	private File snpEffResult;
+	@Mock
 	private File gavinResult;
+	@Mock
+	private AnnotatorRunner annotatorRunner;
+	@Mock
+	private GavinJobExecution gavinJobExecution;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -85,65 +103,114 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
-		inputFile = ResourceUtils.getFile(getClass(), "/input.vcf");
-		caddResult = ResourceUtils.getFile(getClass(), "/cadd.vcf");
-		;
-		exacResult = ResourceUtils.getFile(getClass(), "/exac.vcf");
-		;
-		snpEffResult = ResourceUtils.getFile(getClass(), "/snpeff.vcf");
-		;
-		gavinResult = ResourceUtils.getFile(getClass(), "/gavin.vcf");
-		;
-
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.vcf")).thenReturn(inputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.tsv")).thenReturn(inputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-processed-input.vcf"))
+				.thenReturn(processedInputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "error.txt")).thenReturn(errorFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-cadd.vcf")).thenReturn(caddResult);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-exac.vcf")).thenReturn(exacResult);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-snpeff.vcf"))
 				.thenReturn(snpEffResult);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
 				.thenReturn(gavinResult);
-		Iterator iterator = Collections.emptyList().iterator();
+
+		Iterator<Entity> iterator = Collections.<Entity>emptyList().iterator();
 		when(cadd.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
 		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
 		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
-		when(vcfUtils.reverseXrefMrefRelation(anyObject())).thenReturn(iterator);
+		when(gavinJobExecution.getIdentifier()).thenReturn("ABCDE");
+		when(gavinJobExecution.getInputFileExtension()).thenReturn("tsv");
+		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
-				exac, snpeff, gavin, vcfAttributes, vcfUtils, entityTypeFactory, attributeFactory);
+				exac, snpeff, gavin, parser, annotatorRunner, gavinJobExecution);
 	}
 
 	@Test
-	public void testRunHappyPath() throws Exception
+	public void testRunHappyPathVcf() throws Exception
 	{
+		final ImmutableMultiset<LineType> lineTypes = ImmutableMultiset.of(COMMENT, COMMENT, VCF, VCF);
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(lineTypes);
+
 		job.call(progress);
 
-		verify(progress).setProgressMax(4);
-		verify(progress).progress(0, "Annotating with cadd...");
-		verify(cadd).annotate(anyObject(), eq(true));
-		verify(progress).progress(1, "Annotating with exac...");
-		verify(exac).annotate(anyObject(), eq(true));
-		verify(progress).progress(2, "Annotating with snpEff...");
-		verify(snpeff).annotate(anyObject(), eq(false));
-		verify(progress).progress(3, "Annotating with gavin...");
-		verify(gavin).annotate(anyObject(), eq(false));
-		verify(progress).progress(4, "Result is ready for download.");
+		verify(progress).setProgressMax(5);
+		verify(progress).progress(0, "Preprocessing input file...");
+
+		verify(progress).progress(1, "Annotating with cadd...");
+		verify(annotatorRunner).runAnnotator(cadd, processedInputFile, caddResult, true);
+
+		verify(progress).progress(2, "Annotating with exac...");
+		verify(annotatorRunner).runAnnotator(exac, caddResult, exacResult, true);
+
+		verify(progress).progress(3, "Annotating with snpEff...");
+		verify(annotatorRunner).runAnnotator(snpeff, exacResult, snpEffResult, false);
+
+		verify(progress).progress(4, "Annotating with gavin...");
+		verify(annotatorRunner).runAnnotator(gavin, snpEffResult, gavinResult, false);
+
+		verify(progress).progress(5, "Result is ready for download.");
+		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
+
+		verify(gavinJobExecution).setLineTypes(lineTypes);
+	}
+
+	@Test
+	public void testRunHappyPathCadd() throws Exception
+	{
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
+				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, CADD));
+
+		job.call(progress);
+
+		verify(progress).setProgressMax(5);
+		verify(progress).progress(0, "Preprocessing input file...");
+		verify(progress)
+				.status("Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 indels without CADD score, 0 skipped)");
+
+		verify(progress).progress(1, "File already annotated by cadd, skipping cadd annotation.");
+
+		verify(progress).progress(2, "Annotating with exac...");
+		verify(annotatorRunner).runAnnotator(exac, processedInputFile, exacResult, true);
+
+		verify(progress).progress(3, "Annotating with snpEff...");
+		verify(annotatorRunner).runAnnotator(snpeff, exacResult, snpEffResult, false);
+
+		verify(progress).progress(4, "Annotating with gavin...");
+		verify(annotatorRunner).runAnnotator(gavin, snpEffResult, gavinResult, false);
+
+		verify(progress).progress(5, "Result is ready for download.");
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
 	}
 
-	@Test
-	public void testRunCaddFails() throws Exception
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100,000\\.")
+	public void testSkippedThrowsException() throws Exception
 	{
-		RuntimeException expected = new RuntimeException();
-		try
-		{
-			job.runAnnotator(new FailingAnnotator(expected), inputFile, caddResult, true);
-			fail("Should throw exception if the annotator fails");
-		}
-		catch (Exception actual)
-		{
-			assertSame(actual, expected);
-		}
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
+				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF, SKIPPED));
+
+		job.call(progress);
+	}
+
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Not a single valid variant line found\\.")
+	public void testNoValidLinesThrowsException() throws Exception
+	{
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(ImmutableMultiset.of());
+
+		job.call(progress);
+	}
+
+	@Test(expectedExceptions = {
+			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\. Please use one type only, either VCF or CADD.")
+	public void testMixedInputsThrowsException() throws Exception
+	{
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
+				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF));
+
+		job.call(progress);
 	}
 
 	@Configuration

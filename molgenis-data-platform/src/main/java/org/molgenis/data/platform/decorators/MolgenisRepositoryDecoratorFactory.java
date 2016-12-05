@@ -94,9 +94,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator,
 			PackageValidator packageValidator, TagValidator tagValidator, L3Cache l3Cache,
-			LanguageService languageService,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, AttributeValidator attributeValidator,
-			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
+			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
+			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager,
+			QueryValidator queryValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);

@@ -831,9 +831,8 @@ public class EntityType extends StaticEntity
 	{
 		if (cachedOwnAttrs == null)
 		{
-			Map<String, Attribute> newCachedOwnAttrs = Maps.newLinkedHashMap();
-			getEntities(ATTRIBUTES, Attribute.class).forEach(attr -> newCachedOwnAttrs.put(attr.getName(), attr));
-			cachedOwnAttrs = newCachedOwnAttrs;
+			cachedOwnAttrs = Maps.newLinkedHashMap();
+			getEntities(ATTRIBUTES, Attribute.class).forEach(attr -> cachedOwnAttrs.put(attr.getName(), attr));
 		}
 		return cachedOwnAttrs;
 	}

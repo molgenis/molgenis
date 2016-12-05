@@ -1,6 +1,8 @@
 package org.molgenis.data.elasticsearch;
 
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;

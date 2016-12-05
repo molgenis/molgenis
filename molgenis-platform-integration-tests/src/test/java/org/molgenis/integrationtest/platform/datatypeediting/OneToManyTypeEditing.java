@@ -15,7 +15,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 

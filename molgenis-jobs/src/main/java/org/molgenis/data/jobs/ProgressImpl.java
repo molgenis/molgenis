@@ -91,7 +91,7 @@ public class ProgressImpl implements Progress
 	@Override
 	public void failed(Exception ex)
 	{
-		JOB_EXECUTION_LOG.error("Failed", ex);
+		JOB_EXECUTION_LOG.error("Failed. " + ex.getMessage(), ex);
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(FAILED);
 		jobExecution.setProgressMessage(ex.getMessage());

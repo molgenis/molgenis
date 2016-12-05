@@ -72,9 +72,9 @@ var Job = React.createClass({
         return calculatedWidth;
     },
     _formatProgressMessage: function () {
-        const {progressInt, progressMax} = this.props.job;
+        const {progressInt, progressMax, status} = this.props.job;
         if (progressInt === undefined) {
-            return undefined;
+            return status;
         }
         if (progressMax === undefined) {
             return "" + progressInt

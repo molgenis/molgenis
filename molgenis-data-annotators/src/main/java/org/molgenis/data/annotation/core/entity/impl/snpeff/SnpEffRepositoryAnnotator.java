@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.core.entity.impl.snpeff;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.AbstractRepositoryAnnotator;
-import org.molgenis.data.annotation.core.RefEntityAnnotator;
+import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator implements RefEntityAnnotator
+public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator implements EffectCreatingAnnotator
 {
 	private final String name;
 	private VcfAttributes vcfAttributes;

@@ -49,8 +49,6 @@ public class SnpEffRunner
 	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
 
 	public static final String NAME = "snpEff";
-	public static final String LOF = "LOF";
-	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
 
 	private EffectsMetaData effectsMetaData = new EffectsMetaData();
@@ -130,7 +128,7 @@ public class SnpEffRunner
 						if (chromosome != null && position != null)
 						{
 							Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator, chromosome, position);
-							if (snpEffEntity != null)
+							if (snpEffEntity != null && snpEffEntity.getString(SnpEffRunner.ANN) != null)
 							{
 								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
 										getTargetEntityType(sourceEMD)));
@@ -175,7 +173,7 @@ public class SnpEffRunner
 		{
 			Entity entityCandidate = snpEffResultIterator.peek();
 			if (chromosome.equals(entityCandidate.getString(VcfAttributes.CHROM)) && position == entityCandidate
-					.getInt(VcfAttributes.POS) && entityCandidate.getString(SnpEffRunner.ANN) != null)
+					.getInt(VcfAttributes.POS))
 			{
 				snpEffResultIterator.next();
 				return entityCandidate;
@@ -197,16 +195,6 @@ public class SnpEffRunner
 	private List<Entity> getSnpEffectsFromSnpEffEntity(Entity sourceEntity, Entity snpEffEntity, EntityType effectsEMD)
 	{
 		String[] annotations = snpEffEntity.getString(SnpEffRunner.ANN).split(Pattern.quote(","), -1);
-
-		// LOF and NMD fields can't be associated with a single allele-gene combination so we log them instead
-		String lof = snpEffEntity.getString(SnpEffRunner.LOF);
-		String nmd = snpEffEntity.getString(SnpEffRunner.NMD);
-		if (lof != null || nmd != null)
-		{
-			LOG.info("LOF / NMD found for CHROM:{} POS:{} ANN:{} LOF:{} NMD:{} ",
-					snpEffEntity.getString(VcfAttributes.CHROM), snpEffEntity.getInt(VcfAttributes.POS),
-					snpEffEntity.getString(SnpEffRunner.ANN), lof, nmd);
-		}
 
 		List<Entity> effects = Lists.newArrayList();
 		for (String annotation : annotations)

@@ -1,7 +1,7 @@
 package org.molgenis.ui.admin.permission;
 
-import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.Group;
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;

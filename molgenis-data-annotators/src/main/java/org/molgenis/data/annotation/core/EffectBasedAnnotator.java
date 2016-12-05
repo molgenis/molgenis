@@ -3,9 +3,12 @@ package org.molgenis.data.annotation.core;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 
-public class EffectsAnnotator extends RepositoryAnnotatorImpl
+/**
+ * Annotator that annotates the "effects" entities rather than the variants themself
+ */
+public class EffectBasedAnnotator extends RepositoryAnnotatorImpl
 {
-	public EffectsAnnotator(String NAME)
+	public EffectBasedAnnotator(String NAME)
 	{
 		super(NAME);
 	}
