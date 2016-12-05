@@ -1,9 +1,9 @@
 package org.molgenis.ontology.sorta.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;

@@ -1,13 +1,8 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Sort;
-import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -25,20 +20,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableIndexName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isStringType;
-import static org.molgenis.data.support.EntityTypeUtils.isTextType;
+import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}

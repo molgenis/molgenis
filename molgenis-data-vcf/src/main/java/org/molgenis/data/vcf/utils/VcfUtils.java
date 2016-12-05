@@ -19,21 +19,10 @@ import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
-import static org.molgenis.data.vcf.model.VcfAttributes.ID;
-import static org.molgenis.data.vcf.model.VcfAttributes.POS;
-import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
-import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 @Component
 public class VcfUtils

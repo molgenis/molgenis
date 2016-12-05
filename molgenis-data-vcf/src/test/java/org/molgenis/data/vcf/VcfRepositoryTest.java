@@ -22,13 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.AttributeType.INT;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.molgenis.data.meta.AttributeType.*;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { VcfRepositoryTest.Config.class })
 public class VcfRepositoryTest extends AbstractMolgenisSpringTest

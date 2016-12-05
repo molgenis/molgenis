@@ -10,11 +10,7 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.DATE_TIME;
-import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.INT;
-import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;

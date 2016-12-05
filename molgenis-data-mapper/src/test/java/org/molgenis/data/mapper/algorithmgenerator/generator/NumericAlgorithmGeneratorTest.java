@@ -21,9 +21,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = NumericAlgorithmGeneratorTest.Config.class)
 public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest

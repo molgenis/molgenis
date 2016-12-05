@@ -10,12 +10,7 @@ import org.molgenis.charts.highcharts.basic.SeriesType;
 import org.molgenis.data.meta.AttributeType;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * This data util is made for converting the Molgenis charts structure to the Highchart structure

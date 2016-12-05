@@ -1,31 +1,16 @@
 package org.molgenis.charts.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.charts.BoxPlotChart;
-import org.molgenis.charts.ChartDataService;
-import org.molgenis.charts.MolgenisAxisType;
-import org.molgenis.charts.MolgenisChartException;
-import org.molgenis.charts.MolgenisSerieType;
-import org.molgenis.charts.XYDataChart;
+import org.molgenis.charts.*;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Sort;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 @Component

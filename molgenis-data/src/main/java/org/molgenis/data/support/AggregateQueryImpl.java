@@ -1,8 +1,8 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.Attribute;
 
 public class AggregateQueryImpl implements AggregateQuery

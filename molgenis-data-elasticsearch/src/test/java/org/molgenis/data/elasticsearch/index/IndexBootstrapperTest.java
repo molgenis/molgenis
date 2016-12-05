@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
 
 @ContextConfiguration(classes = { IndexBootstrapperTest.Config.class })
 public class IndexBootstrapperTest extends AbstractMolgenisSpringTest

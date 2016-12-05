@@ -13,11 +13,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.AttributeType.HYPERLINK;
-import static org.molgenis.data.meta.AttributeType.INT;
-import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.*;
 
 @Component
 public class DataExplorerSettings extends DefaultSettingsEntity

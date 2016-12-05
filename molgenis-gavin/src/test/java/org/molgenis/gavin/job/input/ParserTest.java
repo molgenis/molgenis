@@ -5,7 +5,6 @@ import com.google.common.collect.Multiset;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.gavin.job.input.model.CaddVariant;
 import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.gavin.job.input.model.Variant;
 import org.molgenis.gavin.job.input.model.VcfVariant;

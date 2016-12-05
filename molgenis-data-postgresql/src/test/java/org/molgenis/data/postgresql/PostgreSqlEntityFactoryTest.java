@@ -12,12 +12,8 @@ import java.sql.ResultSet;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlEntityFactoryTest

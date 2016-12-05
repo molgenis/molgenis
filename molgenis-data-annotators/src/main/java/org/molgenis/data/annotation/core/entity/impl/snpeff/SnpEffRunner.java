@@ -22,12 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,24 +31,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterators.peekingIterator;
 import static java.io.File.createTempFile;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.ALT;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.ANNOTATION;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.CDS_POSITION;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.C_DNA_POSITION;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.DISTANCE_TO_FEATURE;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.ERRORS;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.FEATURE_ID;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.FEATURE_TYPE;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_ID;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.HGVS_C;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.HGVS_P;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.ID;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PROTEIN_POSITION;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.RANK_TOTAL;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.TRANSCRIPT_BIOTYPE;
-import static org.molgenis.data.annotation.core.effects.EffectsMetaData.VARIANT;
+import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 import static org.molgenis.data.meta.AttributeType.XREF;
 
 @Component

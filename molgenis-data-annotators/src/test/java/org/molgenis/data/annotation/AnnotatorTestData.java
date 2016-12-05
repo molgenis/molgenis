@@ -16,10 +16,7 @@ import java.util.ArrayList;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.model.VcfAttributes.POS;
-import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 {

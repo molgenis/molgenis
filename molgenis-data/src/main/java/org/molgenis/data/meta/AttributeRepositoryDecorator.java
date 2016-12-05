@@ -1,12 +1,6 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;

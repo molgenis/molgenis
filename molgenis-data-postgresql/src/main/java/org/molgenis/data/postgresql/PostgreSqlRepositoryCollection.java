@@ -1,12 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownRepositoryException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepositoryCollection;
@@ -26,38 +20,14 @@ import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCollectionCapability.META_DATA_PERSISTABLE;
-import static org.molgenis.data.RepositoryCollectionCapability.UPDATABLE;
-import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.RepositoryCollectionCapability.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.FULL_NAME;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlAddColumn;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateCheckConstraint;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateForeignKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateJunctionTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateJunctionTableIndex;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateUniqueKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropCheckConstraint;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropColumn;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropForeignKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropJunctionTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropNotNull;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropUniqueKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetDataType;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetNotNull;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 {

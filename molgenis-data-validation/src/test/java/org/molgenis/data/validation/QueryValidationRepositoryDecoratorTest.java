@@ -9,10 +9,7 @@ import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 public class QueryValidationRepositoryDecoratorTest

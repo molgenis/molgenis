@@ -11,16 +11,9 @@ import java.util.Set;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.MREF;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.SEQUENCE_NR;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 

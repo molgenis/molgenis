@@ -34,10 +34,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.model.VcfAttributes.POS;
-import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { ClinvarAnnotatorTest.Config.class, ClinvarAnnotator.class })

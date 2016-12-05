@@ -3,27 +3,10 @@ package org.molgenis.data.meta.model;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_AGGREGATABLE;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_AUTO;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_ID_ATTRIBUTE;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_NULLABLE;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_READ_ONLY;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_UNIQUE;
-import static org.molgenis.data.meta.model.AttributeMetadata.IS_VISIBLE;
-import static org.molgenis.data.meta.model.AttributeMetadata.PARENT;
-import static org.molgenis.data.meta.model.AttributeMetadata.TYPE;
-import static org.molgenis.data.meta.model.AttributeMetadata.getIdAttributeValidationExpression;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.testng.Assert.*;
 
 public class AttributeTest
 {

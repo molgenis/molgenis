@@ -21,9 +21,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class MultiFileResourceTest
 {

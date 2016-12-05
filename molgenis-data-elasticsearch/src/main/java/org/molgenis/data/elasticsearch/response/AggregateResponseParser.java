@@ -16,17 +16,10 @@ import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_DISTINCT_POSTFIX;
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_MISSING_POSTFIX;
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_TERMS_POSTFIX;
+import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.*;
 
 public class AggregateResponseParser
 {

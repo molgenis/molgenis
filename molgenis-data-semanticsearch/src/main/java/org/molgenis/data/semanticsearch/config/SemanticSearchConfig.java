@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetadata;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServiceImpl;

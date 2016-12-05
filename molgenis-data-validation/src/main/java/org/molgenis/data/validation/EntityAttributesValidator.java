@@ -20,12 +20,7 @@ import java.util.Set;
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.EMAIL;
-import static org.molgenis.data.meta.AttributeType.HTML;
-import static org.molgenis.data.meta.AttributeType.HYPERLINK;
-import static org.molgenis.data.meta.AttributeType.SCRIPT;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.*;
 
 /**
  * Attribute data type validator.

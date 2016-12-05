@@ -16,14 +16,10 @@ import org.molgenis.test.data.EntityTestHarness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.molgenis.data.meta.AttributeType.EMAIL;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.getValueString;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class IndexMetadataCUDOperationsPlatformIT
 {

@@ -30,28 +30,11 @@ import java.util.Iterator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.AGE_GROUP_LABEL;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.CONDITION;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.ENTREZ_GENE_ID;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.GENE;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.GENERALIZED_INHERITANCE;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.HGNC_ID;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.INHERITANCE;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_CATEGORIES;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.REFERENCES;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CONDITION_LABEL;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.GENERALIZED_INHERITANCE_LABEL;
-import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.INHERITANCE_LABEL;
+import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.*;
+import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /***
  * Clinical Genomics Database Test

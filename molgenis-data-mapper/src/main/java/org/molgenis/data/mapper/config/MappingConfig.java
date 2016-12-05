@@ -2,8 +2,6 @@ package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
@@ -17,6 +15,7 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.*;
 import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
