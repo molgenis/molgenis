@@ -9,7 +9,9 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component

@@ -26,7 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
@@ -34,11 +39,28 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
-import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.model.VcfAttributes.ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
+import static org.molgenis.data.vcf.model.VcfAttributes.INTERNAL_ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.SAMPLES;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
 public class VcfToEntity

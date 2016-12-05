@@ -60,7 +60,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import static freemarker.template.Configuration.VERSION_2_3_23;
-import static org.molgenis.framework.ui.ResourcePathPatterns.*;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
 
 @Import(PlatformConfig.class)
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter

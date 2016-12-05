@@ -13,7 +13,14 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -23,7 +30,16 @@ import static com.google.common.collect.Iterables.transform;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
-import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.model.VcfAttributes.FORMAT_GT;
+import static org.molgenis.data.vcf.model.VcfAttributes.ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.SAMPLES;
 
 public class VcfWriterUtils
 {

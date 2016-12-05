@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.core.entity.impl;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -33,7 +32,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
+import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
+import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
+import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration

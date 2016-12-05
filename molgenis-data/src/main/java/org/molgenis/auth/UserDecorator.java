@@ -1,8 +1,13 @@
 package org.molgenis.auth;
 
 import com.google.common.collect.Iterators;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;

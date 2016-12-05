@@ -1,7 +1,12 @@
 package org.molgenis.data.vcf.importer;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.EntityImportReport;
@@ -21,7 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.StreamSupport;
 
@@ -156,7 +166,8 @@ public class VcfImporterService implements ImportService
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
 			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), Collections.singletonList(samplesEntityType.getName()));
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(samplesEntityType.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 		else

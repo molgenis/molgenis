@@ -23,7 +23,10 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
-import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.*;
+import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HPO_DISEASE_ID_COL_NAME;
+import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HPO_GENE_SYMBOL_COL_NAME;
+import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HPO_ID_COL_NAME;
+import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HPO_TERM_COL_NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

@@ -16,7 +16,11 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +28,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.MREF;
 
 public class CmdLineAnnotatorUtils
 {

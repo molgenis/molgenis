@@ -1,6 +1,12 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -8,17 +14,32 @@ import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.support.EntityTypeUtils.*;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<Entity>
 {

@@ -29,7 +29,10 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES;
+import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN;
+import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
+import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.AttributeType.STRING;
 

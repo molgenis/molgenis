@@ -5,7 +5,11 @@ import org.molgenis.data.meta.model.Attribute;
 
 import java.util.EnumSet;
 
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 public class AttributeUtils
 {

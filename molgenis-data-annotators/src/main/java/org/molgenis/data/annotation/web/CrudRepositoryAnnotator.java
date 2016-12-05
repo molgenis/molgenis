@@ -1,17 +1,18 @@
 package org.molgenis.data.annotation.web;
 
-import org.molgenis.data.*;
-import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.core.RefEntityAnnotator;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.exception.UiAnnotationException;
+import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +23,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.DatabaseAction.UPDATE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.annotation.core.utils.AnnotatorUtils.addAnnotatorMetaDataToRepositories;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 @Component
 public class CrudRepositoryAnnotator

@@ -1,6 +1,10 @@
 package org.molgenis.data.importer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EntitiesValidationReportImpl implements EntitiesValidationReport
 {

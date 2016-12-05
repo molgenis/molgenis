@@ -2,7 +2,13 @@ package org.molgenis.ontology.importer;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;

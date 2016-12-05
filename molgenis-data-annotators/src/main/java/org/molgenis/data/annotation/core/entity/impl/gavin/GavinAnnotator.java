@@ -21,13 +21,21 @@ import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFa
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.importer.emx.EmxMetaDataParser;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 

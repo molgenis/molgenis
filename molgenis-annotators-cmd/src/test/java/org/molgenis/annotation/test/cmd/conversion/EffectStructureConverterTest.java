@@ -21,17 +21,31 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
-import static org.molgenis.data.vcf.model.VcfAttributes.*;
-import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.model.VcfAttributes.ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.EFFECT;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { EffectStructureConverterTest.Config.class })
 public class EffectStructureConverterTest extends AbstractMolgenisSpringTest

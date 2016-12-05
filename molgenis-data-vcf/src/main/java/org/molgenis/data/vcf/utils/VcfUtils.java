@@ -1,8 +1,5 @@
 package org.molgenis.data.vcf.utils;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -10,9 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
@@ -24,13 +19,21 @@ import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.vcf.model.VcfAttributes.*;
-import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.model.VcfAttributes.ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
 
 @Component
 public class VcfUtils

@@ -3,7 +3,14 @@ package org.molgenis.data.support;
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -19,9 +26,14 @@ import org.testng.annotations.Test;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 @ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
 public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringContextTests

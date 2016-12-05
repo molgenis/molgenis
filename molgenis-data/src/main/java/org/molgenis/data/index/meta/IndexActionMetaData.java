@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 

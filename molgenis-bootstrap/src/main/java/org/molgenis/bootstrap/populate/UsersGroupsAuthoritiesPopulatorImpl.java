@@ -1,6 +1,13 @@
 package org.molgenis.bootstrap.populate;
 
-import org.molgenis.auth.*;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.GroupAuthorityFactory;
+import org.molgenis.auth.GroupFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.UserAuthorityFactory;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -26,7 +33,10 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ANONYMOUS;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
 import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Service

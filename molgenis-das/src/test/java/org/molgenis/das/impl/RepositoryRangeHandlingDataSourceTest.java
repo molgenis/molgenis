@@ -27,11 +27,20 @@ import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
 import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
-import uk.ac.ebi.mydas.model.*;
+import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
+import uk.ac.ebi.mydas.model.DasFeature;
+import uk.ac.ebi.mydas.model.DasMethod;
+import uk.ac.ebi.mydas.model.DasPhase;
+import uk.ac.ebi.mydas.model.DasTarget;
+import uk.ac.ebi.mydas.model.DasType;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
@@ -39,7 +48,13 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.*;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_LINKOUT;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_NAME;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_POS;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_STOP;
 import static org.testng.Assert.assertEquals;
 import static uk.ac.ebi.mydas.model.DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE;
 

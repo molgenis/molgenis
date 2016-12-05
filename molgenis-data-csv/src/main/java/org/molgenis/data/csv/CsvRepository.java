@@ -13,7 +13,11 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.STRING;
