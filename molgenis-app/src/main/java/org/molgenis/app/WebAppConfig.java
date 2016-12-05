@@ -45,6 +45,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	/**
 	 * Configures Freemarker
+	 *
 	 * @return
 	 * @throws IOException
 	 * @throws TemplateException

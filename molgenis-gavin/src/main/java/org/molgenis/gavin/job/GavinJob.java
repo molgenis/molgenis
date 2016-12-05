@@ -131,6 +131,10 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(5, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
+		//TODO Filter
+		//TODO write to database
+		//TODO result -> GeneNetwork
+		//TODO VCF pipe aware import
 		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
 
 		return null;

@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.MREF;
 
 public class CmdLineAnnotatorUtils
 {

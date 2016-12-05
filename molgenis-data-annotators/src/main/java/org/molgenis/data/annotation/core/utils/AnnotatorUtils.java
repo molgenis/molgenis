@@ -6,26 +6,15 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.w3c.dom.Attr;
+import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.io.*;
-import java.util.*;
 
-import static org.molgenis.AttributeType.COMPOUND;
-import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.AttributeType.MREF;
-import static org.molgenis.data.vcf.utils.VcfUtils.getAtomicAttributesFromList;
-import static org.molgenis.data.vcf.utils.VcfWriterUtils.writeToVcf;
 
 public class AnnotatorUtils
 {
