@@ -10,6 +10,14 @@
     <artifactId>molgenis-das</artifactId>
     <packaging>jar</packaging>
 
+    <repositories>
+        <repository>
+            <id>corp1</id>
+            <name>Corporate Repository</name>
+            <url>https://molgenis26.gcc.rug.nl/downloads/repository/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -36,15 +44,11 @@
             <groupId>uk.ac.ebi.das</groupId>
             <artifactId>jdas</artifactId>
             <version>1.0.4</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/jdas-1.0.4.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>uk.ac.ebi.mydas</groupId>
             <artifactId>mydas</artifactId>
             <version>1.6.7</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/mydas-1.6.7.jar</systemPath>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
@@ -79,11 +83,6 @@
                     <artifactId>lucene-core</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>xpp3</groupId>
-            <artifactId>xpp3</artifactId>
-            <version>1.1.4c</version>
         </dependency>
     </dependencies>
 </project>
