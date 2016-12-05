@@ -3,12 +3,13 @@ package org.molgenis.data.rest;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.Href;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.Collections;
@@ -118,11 +119,8 @@ public class AttributeResponse
 			{
 				this.refEntity = refEntity != null ? new Href(
 						Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName()),
-						String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
-				// apply
-				// Href
-				// escaping
-				// fix
+						String.format("%s/%s", RestController.BASE_URI,
+								refEntity.getName())) : null; // FIXME apply Href escaping fix
 			}
 		}
 		else this.refEntity = null;

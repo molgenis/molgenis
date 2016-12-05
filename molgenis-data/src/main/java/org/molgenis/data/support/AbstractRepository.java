@@ -8,7 +8,6 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
@@ -98,14 +97,12 @@ public abstract class AbstractRepository implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return findAll(ids, null);
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);

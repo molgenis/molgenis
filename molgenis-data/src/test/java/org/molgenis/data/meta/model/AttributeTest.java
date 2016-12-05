@@ -4,7 +4,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.testng.Assert.*;
 
@@ -99,5 +99,16 @@ public class AttributeTest
 		assertFalse(attribute.isReadOnly());
 		assertFalse(attribute.isUnique());
 		assertTrue(attribute.isNillable());
+	}
+
+	@Test
+	public void testIdValidationExpression()
+	{
+		String expression = getIdAttributeValidationExpression();
+		assertEquals(expression,
+				"$('isIdAttribute').eq(false).or($('isIdAttribute').isNull()).or($('isIdAttribute').eq(true)" + ".and("
+						+ "$('type').eq('email')" + ".or($('type').eq('hyperlink'))" + ".or($('type').eq('int'))"
+						+ ".or($('type').eq('long'))" + ".or($('type').eq('string'))" + ".or($('type').isNull())" + ")"
+						+ ".and($('isNullable').eq(false))).value()");
 	}
 }

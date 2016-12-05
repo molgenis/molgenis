@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterators.peekingIterator;
 import static java.io.File.createTempFile;
-import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
+import static org.molgenis.data.meta.AttributeType.XREF;
 
 @Component
 public class SnpEffRunner

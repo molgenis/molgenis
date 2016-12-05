@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.core.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -13,9 +14,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.io.*;
+import java.util.*;
 
 import static org.molgenis.AttributeType.COMPOUND;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.vcf.utils.VcfUtils.getAtomicAttributesFromList;
+import static org.molgenis.data.vcf.utils.VcfWriterUtils.writeToVcf;
 
 public class AnnotatorUtils
 {
@@ -61,7 +72,7 @@ public class AnnotatorUtils
 		}
 		else
 		{
-			throw new MolgenisDataException(ALT + " differs in length from the provided annotations.");
+			throw new MolgenisDataException(VcfAttributes.ALT + " differs in length from the provided annotations.");
 		}
 		return result;
 	}
@@ -76,7 +87,8 @@ public class AnnotatorUtils
 	public static EntityType addAnnotatorMetaDataToRepositories(EntityType entityType,
 			AttributeFactory attributeFactory, RepositoryAnnotator annotator)
 	{
-		List<Attribute> attributes = annotator.getOutputAttributes();
+
+		List<Attribute> attributes = annotator.createAnnotatorAttributes(attributeFactory);
 		Attribute compound;
 		String compoundName = annotator.getFullName();
 		compound = entityType.getAttribute(compoundName);
@@ -92,11 +104,19 @@ public class AnnotatorUtils
 	{
 		Attribute compound;
 		compound = attributeFactory.create().setName(compoundName).setLabel(annotator.getFullName())
-				.setDataType(COMPOUND).setLabel(annotator.getSimpleName());
+				.setDataType(AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
+
 		attributes.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
 				.forEachOrdered(part -> part.setParent(compound));
 
 		entityType.addAttribute(compound);
+
+		// Only add attributes that do not already exist. We assume existing attributes are added in a previous annotation run.
+		// This is a potential risk if an attribute with that name already exist that was not added by the annotator.
+		// This risk is relatively low since annotator attributes are prefixed.
+		attributes = attributes.stream().filter(attribute -> entityType.getAttribute(attribute.getName()) == null)
+				.collect(toList());
+
 		// Only add attributes that do not already exist. We assume existing attributes are added in a previous annotation run.
 		// This is a potential risk if an attribute with that name already exist that was not added by the annotator.
 		// This risk is relatively low since annotator attributes are prefixed.

@@ -27,8 +27,6 @@ public interface EntityAnnotator extends Annotator
 	 */
 	List<Attribute> getRequiredAttributes();
 
-	// TODO: plus aanwijzing wat er ontbreekt
-
 	/**
 	 * @return Indication if the required source repository is present in the dataService
 	 */

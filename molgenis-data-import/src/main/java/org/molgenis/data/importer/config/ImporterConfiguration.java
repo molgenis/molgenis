@@ -13,10 +13,9 @@ import org.molgenis.data.importer.emx.EmxMetaDataParser;
 import org.molgenis.data.importer.emx.ImportWriter;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
-import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
+import org.molgenis.data.validation.meta.TagValidator;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,6 @@ public class ImporterConfiguration
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
-
-	@Autowired
-	private TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
@@ -75,6 +71,9 @@ public class ImporterConfiguration
 	private AttributeValidator attributeValidator;
 
 	@Autowired
+	private TagValidator tagValidator;
+
+	@Autowired
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	@Bean
@@ -86,14 +85,15 @@ public class ImporterConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService, tagFactory,
-				entityManager, entityTypeDependencyResolver);
+		return new ImportWriter(dataService, permissionSystemService, molgenisPermissionService, entityManager,
+				entityTypeDependencyResolver);
 	}
 
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
 		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
-				languageFactory, i18nStringFactory, entityTypeValidator, attributeValidator);
+				languageFactory, i18nStringFactory, entityTypeValidator, attributeValidator, tagValidator,
+				entityTypeDependencyResolver);
 	}
 }

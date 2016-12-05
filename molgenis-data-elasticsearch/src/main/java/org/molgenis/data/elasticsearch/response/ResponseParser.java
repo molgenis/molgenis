@@ -7,8 +7,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
-import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.DataService;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.MREF;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object

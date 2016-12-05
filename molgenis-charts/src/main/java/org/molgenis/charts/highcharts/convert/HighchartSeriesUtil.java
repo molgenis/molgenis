@@ -1,6 +1,5 @@
 package org.molgenis.charts.highcharts.convert;
 
-import org.molgenis.AttributeType;
 import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
@@ -8,6 +7,7 @@ import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.basic.Marker;
 import org.molgenis.charts.highcharts.basic.Series;
 import org.molgenis.charts.highcharts.basic.SeriesType;
+import org.molgenis.data.meta.AttributeType;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

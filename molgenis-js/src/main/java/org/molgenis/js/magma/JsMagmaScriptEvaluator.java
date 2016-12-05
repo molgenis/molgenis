@@ -2,8 +2,8 @@ package org.molgenis.js.magma;
 
 import com.google.api.client.util.Maps;
 import com.google.common.base.Stopwatch;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.js.nashorn.NashornScriptEngine;

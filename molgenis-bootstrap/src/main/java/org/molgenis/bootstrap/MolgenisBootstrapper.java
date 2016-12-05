@@ -1,5 +1,6 @@
 package org.molgenis.bootstrap;
 
+import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;

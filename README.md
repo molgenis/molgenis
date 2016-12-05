@@ -10,9 +10,9 @@ See http://molgenis.github.io for documentation.
 See [Getting Started Guide](http://molgenis.github.io/develop/start).
 
 ## Third-party software
-For some modules in Molgenis, third-party software is in use. It is important to know that some of these licenses are different than the Molgenis license.
+For some modules in MOLGENIS, third-party software is in use. It is important to know that some of these licenses are different than the MOLGENIS license.
 
-In this section you can find a list of remarks about third-party software in Molgenis modules.
+In this section you can find a list of remarks about third-party software in MOLGENIS modules.
 
 ### molgenis-charts module
 As a non-profit organisation we are using the Highsoft software 'highstock version 1.3.6', in the molgenis-charts module to build some charts.
