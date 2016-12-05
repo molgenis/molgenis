@@ -5,9 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 

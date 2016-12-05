@@ -338,8 +338,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void query()
 	{
-		entityReferenceResolverDecorator.query();
-		verify(decoratedRepo, times(1)).query();
+		assertEquals(entityReferenceResolverDecorator.query().getRepository(), entityReferenceResolverDecorator);
 		verifyZeroInteractions(entityManager);
 	}
 

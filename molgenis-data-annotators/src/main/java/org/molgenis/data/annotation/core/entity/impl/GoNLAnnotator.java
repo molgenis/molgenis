@@ -32,8 +32,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.molgenis.AttributeType.STRING;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.*;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class GoNLAnnotator implements AnnotatorConfig
@@ -80,18 +81,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> attributes = new ArrayList<>();
-		Attribute goNlAfAttribute = attributeFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
-				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
-				.setLabel(GONL_AF_LABEL);
-
-		Attribute goNlGtcAttribute = attributeFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING)
-				.setDescription(
-						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
-				.setLabel(GONL_GTC_LABEL);
-
-		attributes.add(goNlGtcAttribute);
-		attributes.add(goNlAfAttribute);
+		List<Attribute> attributes = createGoNlOutputAttributes();
 
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, NAME,
@@ -115,19 +105,25 @@ public class GoNLAnnotator implements AnnotatorConfig
 			goNLAnnotatorSettings.set(CHROMOSOMES, "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
 		})
 		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createGoNlOutputAttributes();
+			}
+
 			public String postFixResource = "";
 
 			@Override
 			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
 					boolean updateMode)
 			{
-				if (updateMode == true)
+				if (updateMode)
 				{
 					throw new MolgenisDataException("This annotator/filter does not support updating of values");
 				}
 				String afs = null;
 				String gtcs = null;
-				List<Entity> refMatches = com.google.common.collect.Lists.newArrayList();
+				List<Entity> refMatches = newArrayList();
 				for (Entity resourceEntity : annotationSourceEntities)
 				{
 					//situation example: input A, GoNL A
@@ -147,8 +143,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 						resourceEntity.set(vcfAttributes.getRefAttribute().getName(),
 								resourceEntity.getString(vcfAttributes.getRefAttribute().getName()) + postFixResource);
 						String newAltString = Arrays
-								.asList(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
-								.stream().map(alt -> alt + postFixResource).collect(Collectors.joining(","));
+								.stream(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
+								.map(alt -> alt + postFixResource).collect(Collectors.joining(","));
 						resourceEntity.set(vcfAttributes.getAltAttribute().getName(), newAltString);
 						refMatches.add(resourceEntity);
 					}
@@ -169,8 +165,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 										(resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).length()
 												- postFixInputLength)));
 						String newAltString = Arrays
-								.asList(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
-								.stream().map(alt -> alt.length() > postFixInputLength ? alt
+								.stream(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
+								.map(alt -> alt.length() > postFixInputLength ? alt
 										.substring(0, (alt.length() - postFixInputLength)) : "n/a")
 								.collect(Collectors.joining(","));
 						resourceEntity.set(vcfAttributes.getAltAttribute().getName(), newAltString);
@@ -179,15 +175,15 @@ public class GoNLAnnotator implements AnnotatorConfig
 				}
 				if (entity.getString(vcfAttributes.getAltAttribute().getName()) != null)
 				{
-					List<Entity> alleleMatches = com.google.common.collect.Lists.newArrayList();
+					List<Entity> alleleMatches = newArrayList();
 					for (String alt : entity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
 					{
-						alleleMatches.add(Iterables.find(refMatches,
-								gonl -> (alt).equals((gonl.getString(vcfAttributes.getAltAttribute().getName()))),
-								null));
+						alleleMatches.add(refMatches.stream().filter(gonl -> (alt)
+								.equals((gonl.getString(vcfAttributes.getAltAttribute().getName())))).findFirst()
+								.orElseGet(() -> null));
 					}
 
-					if (!Iterables.all(alleleMatches, Predicates.isNull()))
+					if (!alleleMatches.stream().allMatch(Predicates.isNull()::apply))
 					{
 						afs = alleleMatches.stream().map(gonl -> gonl == null ? "." : Double
 								.toString(Double.valueOf(gonl.getString(INFO_AC)) / gonl.getInt(INFO_AN)))
@@ -205,6 +201,23 @@ public class GoNLAnnotator implements AnnotatorConfig
 		};
 		annotator.init(entityAnnotator);
 
+	}
+
+	private List<Attribute> createGoNlOutputAttributes()
+	{
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute goNlAfAttribute = attributeFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
+				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
+				.setLabel(GONL_AF_LABEL);
+
+		Attribute goNlGtcAttribute = attributeFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING)
+				.setDescription(
+						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
+				.setLabel(GONL_GTC_LABEL);
+
+		attributes.add(goNlGtcAttribute);
+		attributes.add(goNlAfAttribute);
+		return attributes;
 	}
 
 	@Bean

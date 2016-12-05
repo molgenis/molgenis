@@ -22,6 +22,13 @@ import java.beans.PropertyVetoException;
 @EnableTransactionManagement(proxyTargetClass = true)
 public class DatabaseConfig implements TransactionManagementConfigurer
 {
+	/**
+	 * Max pool size must be <= the maximum number of connections of configured in the DBMS (e.g. PostgreSQL).
+	 * The magic number is based on PostgreSQL default max connections = 100 minus 5 connections for admin tools
+	 * communicating with the DBMS.
+	 */
+	private static final int MAX_POOL_SIZE = 95;
+
 	@Value("${db_driver:org.postgresql.Driver}")
 	private String dbDriverClass;
 	@Value("${db_uri:@null}")
@@ -61,9 +68,10 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 		dataSource.setPassword(dbPassword);
 		dataSource.setInitialPoolSize(5);
 		dataSource.setMinPoolSize(5);
-		dataSource.setMaxPoolSize(150);
+		dataSource.setMaxPoolSize(MAX_POOL_SIZE);
 		dataSource.setTestConnectionOnCheckin(true);
 		dataSource.setIdleConnectionTestPeriod(120);
+
 		return dataSource;
 	}
 

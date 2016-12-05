@@ -20,7 +20,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = NumericAlgorithmGeneratorTest.Config.class)

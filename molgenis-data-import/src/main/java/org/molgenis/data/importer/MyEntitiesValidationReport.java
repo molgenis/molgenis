@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import org.molgenis.framework.db.EntitiesValidationReport;
 
 import java.util.*;
 import java.util.Map.Entry;

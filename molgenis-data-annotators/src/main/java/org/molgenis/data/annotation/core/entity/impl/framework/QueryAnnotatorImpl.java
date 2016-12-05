@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
  * {@link #processQueryResults(Entity, Iterable, boolean)}.
  * <p>
- * See {@link AnnotatorImpl} for the most standard implementation of
+ * See {@link AbstractAnnotator} for the most standard implementation of
  * {@link #processQueryResults(Entity, Iterable, boolean)}.
  */
 public abstract class QueryAnnotatorImpl implements EntityAnnotator
@@ -52,7 +52,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Attribute> getAnnotationAttributeMetadatas()
+	public List<Attribute> getAnnotatorAttributes()
 	{
 		return getInfo().getOutputAttributes();
 	}

@@ -1,8 +1,8 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.assertEquals;

@@ -1,16 +1,12 @@
 package org.molgenis.data;
 
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -20,13 +16,19 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 /**
  * Repository decorated that validates that current user has permission to perform an operation for an entity type.
  */
-public class RepositorySecurityDecorator implements Repository<Entity>
+public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decoratedRepository;
 
 	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	@Override
@@ -48,23 +50,6 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.close();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepository.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepository.getEntityType();
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
 	}
 
 	@Override
@@ -191,17 +176,5 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decoratedRepository.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decoratedRepository.getQueryOperators();
 	}
 }

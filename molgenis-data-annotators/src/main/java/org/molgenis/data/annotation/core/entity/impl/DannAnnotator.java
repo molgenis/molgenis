@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.DannAnnotatorSettings.Meta.DANN_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class DannAnnotator implements AnnotatorConfig
@@ -70,12 +70,7 @@ public class DannAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> attributes = new ArrayList<>();
-		Attribute dann_score = attributeFactory.create().setName(DANN_SCORE).setDataType(STRING)
-				.setDescription("deleterious score of genetic variants using neural networks.")
-				.setLabel(DANN_SCORE_LABEL);
-
-		attributes.add(dann_score);
+		List<Attribute> attributes = createDannOutputAttributes();
 
 		AnnotatorInfo dannInfo = AnnotatorInfo
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME,
@@ -98,18 +93,36 @@ public class DannAnnotator implements AnnotatorConfig
 								+ "All data and source code are available at https://cbcl.ics.uci.edu/ public_data/DANN/.",
 						attributes);
 
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(DANN_TABIX_RESOURCE, dannInfo,
 				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, vcfAttributes),
 				dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings))
+		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createDannOutputAttributes();
+			}
+		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	private List<Attribute> createDannOutputAttributes()
+	{
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute dann_score = attributeFactory.create().setName(DANN_SCORE).setDataType(STRING)
+				.setDescription("deleterious score of genetic variants using neural networks.")
+				.setLabel(DANN_SCORE_LABEL);
+
+		attributes.add(dann_score);
+		return attributes;
 	}
 
 	@Bean
 	Resource dannResource()
 	{
-		Resource dannTabixResource = null;
+		Resource dannTabixResource;
 
 		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE,
 				new SingleResourceConfig(DANN_LOCATION, dannAnnotatorSettings))
@@ -125,8 +138,8 @@ public class DannAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 				repoMetaData.addAttribute(attributeFactory.create().setName("DANN_SCORE").setDataType(STRING));
-				Attribute idAttribute = attributeFactory.create().setName(idAttrName)
-						.setVisible(false).setIdAttribute(true);
+				Attribute idAttribute = attributeFactory.create().setName(idAttrName).setVisible(false)
+						.setIdAttribute(true);
 				repoMetaData.addAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}

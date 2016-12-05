@@ -1,7 +1,7 @@
 package org.molgenis.test.data;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,8 @@ import javax.annotation.PostConstruct;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.molgenis.AttributeType.STRING;
-import static org.molgenis.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 

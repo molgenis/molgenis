@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.framework.db.EntityImportReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;

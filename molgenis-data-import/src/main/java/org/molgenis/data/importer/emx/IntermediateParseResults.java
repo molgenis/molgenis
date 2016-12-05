@@ -1,25 +1,19 @@
 package org.molgenis.data.importer.emx;
 
-import com.google.common.collect.*;
-import org.molgenis.data.Entity;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.emx.EmxMetaDataParser.EmxAttribute;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.SemanticTag;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableMap.copyOf;
-import static com.google.common.collect.ImmutableSetMultimap.copyOf;
 
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
@@ -36,17 +30,9 @@ public final class IntermediateParseResults
 	 */
 	private final Map<String, Package> packages;
 	/**
-	 * Contains all Attribute tags
-	 */
-	private final SetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> attributeTags;
-	/**
-	 * Contains all {@link Entity} tags
-	 */
-	private final List<SemanticTag<EntityType, LabeledResource, LabeledResource>> entityTags;
-	/**
 	 * Contains all tag entities from the tag sheet
 	 */
-	private final Map<String, Entity> tags;
+	private final Map<String, Tag> tags;
 	/**
 	 * Contains all language enities from the languages sheet
 	 */
@@ -62,14 +48,12 @@ public final class IntermediateParseResults
 		this.tags = new LinkedHashMap<>();
 		this.entities = new LinkedHashMap<>();
 		this.packages = new LinkedHashMap<>();
-		this.attributeTags = LinkedHashMultimap.create();
-		this.entityTags = new ArrayList<>();
 		this.languages = new LinkedHashMap<>();
 		this.i18nStrings = new LinkedHashMap<>();
 		this.entityTypeFactory = entityTypeFactory;
 	}
 
-	public void addTag(String identifier, Entity tag)
+	public void addTag(String identifier, Tag tag)
 	{
 		tags.put(identifier, tag);
 	}
@@ -79,19 +63,9 @@ public final class IntermediateParseResults
 		return tags.containsKey(identifier);
 	}
 
-	public Entity getTagEntity(String tagIdentifier)
+	public Tag getTag(String tagIdentifier)
 	{
 		return tags.get(tagIdentifier);
-	}
-
-	public void addEntityTag(SemanticTag tag)
-	{
-		entityTags.add(tag);
-	}
-
-	public void addAttributeTag(String entityName, SemanticTag tag)
-	{
-		attributeTags.put(entityName, tag);
 	}
 
 	/**
@@ -184,14 +158,9 @@ public final class IntermediateParseResults
 		return copyOf(packages);
 	}
 
-	public ImmutableSetMultimap<String, SemanticTag<Attribute, LabeledResource, LabeledResource>> getAttributeTags()
+	public ImmutableMap<String, Tag> getTags()
 	{
-		return copyOf(attributeTags);
-	}
-
-	public ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> getEntityTags()
-	{
-		return copyOf(entityTags);
+		return copyOf(tags);
 	}
 
 	public ImmutableMap<String, Language> getLanguages()
@@ -207,8 +176,8 @@ public final class IntermediateParseResults
 	@Override
 	public String toString()
 	{
-		return "IntermediateParseResults [entities=" + entities + ", packages=" + packages + ", attributeTags="
-				+ attributeTags + ", entityTags=" + entityTags + ", tags=" + tags + ", languages=" + languages
+		return "IntermediateParseResults [entities=" + entities + ", packages=" + packages + ", tags=" + tags
+				+ ", languages=" + languages
 				+ ", i18nStrings=" + i18nStrings + "]";
 	}
 
@@ -217,9 +186,7 @@ public final class IntermediateParseResults
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((attributeTags == null) ? 0 : attributeTags.hashCode());
 		result = prime * result + ((entities == null) ? 0 : entities.hashCode());
-		result = prime * result + ((entityTags == null) ? 0 : entityTags.hashCode());
 		result = prime * result + ((i18nStrings == null) ? 0 : i18nStrings.hashCode());
 		result = prime * result + ((languages == null) ? 0 : languages.hashCode());
 		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
@@ -234,21 +201,11 @@ public final class IntermediateParseResults
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		IntermediateParseResults other = (IntermediateParseResults) obj;
-		if (attributeTags == null)
-		{
-			if (other.attributeTags != null) return false;
-		}
-		else if (!attributeTags.equals(other.attributeTags)) return false;
 		if (entities == null)
 		{
 			if (other.entities != null) return false;
 		}
 		else if (!entities.equals(other.entities)) return false;
-		if (entityTags == null)
-		{
-			if (other.entityTags != null) return false;
-		}
-		else if (!entityTags.equals(other.entityTags)) return false;
 		if (i18nStrings == null)
 		{
 			if (other.i18nStrings != null) return false;

@@ -1,11 +1,11 @@
 package org.molgenis.charts.highcharts.convert;
 
-import org.molgenis.AttributeType;
 import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.basic.Series;
+import org.molgenis.data.meta.AttributeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;

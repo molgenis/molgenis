@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resource;
@@ -18,7 +18,6 @@ import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnota
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.molgenis.AttributeType.TEXT;
 import static org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 @Configuration
 public class OmimAnnotator implements AnnotatorConfig
@@ -52,9 +51,6 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	@Autowired
 	private Resources resources;
-
-	@Autowired
-	private VcfAttributes vcfAttributes;
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -115,22 +111,35 @@ public class OmimAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> outputAttributes = new ArrayList<>();
-		outputAttributes.addAll(Arrays
-				.asList(getPhenotypeAttr(), getMimNumberAttr(), getOmimLocationAttr(), getEntryAttr(), getTypeAttr()));
+		List<Attribute> attributes = createOmimOutputAttributes();
 
 		AnnotatorInfo omimInfo = AnnotatorInfo
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
 						"OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes that is "
 								+ "freely available and updated daily. The full-text, referenced overviews in OMIM contain information on all "
 								+ "known mendelian disorders and over 15,000 genes. OMIM focuses on the relationship between phenotype and genotype.",
-						outputAttributes);
+						attributes);
 
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
 				new OmimResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings))
+		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createOmimOutputAttributes();
+			}
+		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	private List<Attribute> createOmimOutputAttributes()
+	{
+		List<Attribute> outputAttributes = new ArrayList<>();
+		outputAttributes.addAll(Arrays
+				.asList(getPhenotypeAttr(), getMimNumberAttr(), getOmimLocationAttr(), getEntryAttr(), getTypeAttr()));
+		return outputAttributes;
 	}
 
 	@Bean

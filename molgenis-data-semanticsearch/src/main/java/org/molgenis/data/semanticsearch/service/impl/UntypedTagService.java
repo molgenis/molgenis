@@ -186,7 +186,6 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	@Override
 	public void removeAllTagsFromEntity(String entityName)
 	{
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException();
 	}
 }

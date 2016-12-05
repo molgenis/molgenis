@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {

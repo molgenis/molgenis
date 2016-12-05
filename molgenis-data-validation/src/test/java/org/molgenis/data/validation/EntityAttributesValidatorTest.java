@@ -1,8 +1,8 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
@@ -17,7 +17,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

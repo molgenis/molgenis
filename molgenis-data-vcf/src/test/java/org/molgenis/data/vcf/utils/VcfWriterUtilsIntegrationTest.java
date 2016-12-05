@@ -31,7 +31,7 @@ import java.util.UUID;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.writeToVcf;
 import static org.testng.Assert.assertEquals;
