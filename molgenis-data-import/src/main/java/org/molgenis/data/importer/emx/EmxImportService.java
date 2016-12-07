@@ -11,6 +11,7 @@ import org.molgenis.data.support.GenericImporterExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,9 +26,10 @@ import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
-@Component
+@Component()
 public class EmxImportService implements ImportService
 {
+	public static final String QUALIFIER = "emxImportService";
 	private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
 
 	private final MetaDataParser parser;

@@ -29,8 +29,7 @@ class PostgreSqlDatabase
 
 		// remove the, not yet created, database name from the connection url
 		String adminDbUri = db_uri.substring(0, slashIndex + 1);
-		return DriverManager
-				.getConnection(adminDbUri, properties.getProperty("db_user"), properties.getProperty("db_password"));
+		return DriverManager.getConnection(adminDbUri, "postgres", "umcg2016");
 	}
 
 	static void dropDatabase() throws IOException, SQLException
