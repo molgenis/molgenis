@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
     </parent>
     <artifactId>molgenis-core-ui</artifactId>
     <packaging>jar</packaging>
