@@ -30,6 +30,8 @@ import static org.molgenis.data.support.EntityTypeUtils.*;
  */
 class PostgreSqlQueryGenerator
 {
+	final static String ERR_CODE_READONLY_VIOLATION = "23506";
+
 	private PostgreSqlQueryGenerator()
 	{
 
@@ -193,13 +195,15 @@ class PostgreSqlQueryGenerator
 				.append(getSqlFunctionValidateUpdateName(entityType)).append("() RETURNS TRIGGER AS $$\nBEGIN\n");
 
 		String tableName = getTableName(entityType);
+		String idColName = getColumnName(entityType.getIdAttribute());
 		readonlyTableAttrs.forEach(attr ->
 		{
 			String colName = getColumnName(attr);
 
 			strBuilder.append("  IF OLD.").append(colName).append(" <> NEW.").append(colName).append(" THEN\n");
-			strBuilder.append("    RAISE EXCEPTION 'Updating readonly column ").append(colName).append(" of table ")
-					.append(tableName).append(" is not allowed' USING ERRCODE = '23506';\n");
+			strBuilder.append("    RAISE EXCEPTION 'Updating read-only column ").append(colName).append(" of table ")
+					.append(tableName).append(" with id [%] is not allowed', OLD.").append(idColName)
+					.append(" USING ERRCODE = '").append(ERR_CODE_READONLY_VIOLATION).append("';\n");
 			strBuilder.append("  END IF;\n");
 		});
 		strBuilder.append("  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;");

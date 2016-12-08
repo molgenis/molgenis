@@ -132,13 +132,15 @@ public class PostgreSqlQueryGeneratorTest
 	public void getSqlCreateFunctionValidateUpdate()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		String expectedSql = "CREATE FUNCTION \"validate_update_entity\"() RETURNS TRIGGER AS $$\n" + "BEGIN\n"
 				+ "  IF OLD.\"attr0\" <> NEW.\"attr0\" THEN\n"
-				+ "    RAISE EXCEPTION 'Updating readonly column \"attr0\" of table \"entity\" is not allowed' USING ERRCODE = '23506';\n"
+				+ "    RAISE EXCEPTION 'Updating read-only column \"attr0\" of table \"entity\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
 				+ "  END IF;\n" + "  IF OLD.\"attr1\" <> NEW.\"attr1\" THEN\n"
-				+ "    RAISE EXCEPTION 'Updating readonly column \"attr1\" of table \"entity\" is not allowed' USING ERRCODE = '23506';\n"
+				+ "    RAISE EXCEPTION 'Updating read-only column \"attr1\" of table \"entity\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
 				+ "  END IF;\n" + "  RETURN NEW;\n" + "END;\n" + "$$ LANGUAGE plpgsql;";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateFunctionValidateUpdate(entityType, asList(attr0, attr1)),
 				expectedSql);
