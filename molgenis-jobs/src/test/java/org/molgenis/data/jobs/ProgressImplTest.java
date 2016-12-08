@@ -55,9 +55,9 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
-		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
-		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
+		assertTrue(jobExecution.getLog().contains("- Execution started." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("- Working...." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("- Execution successful. Time spent: "));
 	}
 
 	@Test
@@ -68,9 +68,9 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
-		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
-		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
+		assertTrue(jobExecution.getLog().contains("- Execution started." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("- Working...." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("- Execution successful. Time spent: "));
 
 		SimpleMailMessage mail = new SimpleMailMessage();
 		mail.setTo(new String[] { "a@b.c", "d@e.f" });
@@ -88,9 +88,9 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 		Exception ex = new IllegalArgumentException("blah");
 		progress.failed(ex);
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
-		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
-		assertTrue(jobExecution.getLog().contains("ERROR - Failed"));
+		assertTrue(jobExecution.getLog().contains("- Execution started." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("- Working...." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("- Failed"));
 		assertTrue(jobExecution.getLog().contains(ex.getMessage()));
 
 		SimpleMailMessage mail = new SimpleMailMessage();

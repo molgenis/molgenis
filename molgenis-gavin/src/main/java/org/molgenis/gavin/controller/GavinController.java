@@ -1,38 +1,46 @@
 package org.molgenis.gavin.controller;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
+import org.molgenis.gavin.job.JobNotFoundException;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.controller.AbstractStaticContentController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
+import static java.time.ZonedDateTime.now;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.molgenis.gavin.controller.GavinController.URI;
-import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -40,43 +48,50 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 @RequestMapping(URI)
 @EnableScheduling
-public class GavinController extends MolgenisPluginController
+public class GavinController extends AbstractStaticContentController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GavinController.class);
 
 	public static final String GAVIN_APP = "gavin-app";
-	public static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
+	static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
+	public static final String TSV_GZ = "tsv.gz";
+	public static final String TSV = "tsv";
+	public static final String GZ = "gz";
 
-	private DataService dataService;
-	private ExecutorService executorService;
-	private GavinJobFactory gavinJobFactory;
-	private GavinJobExecutionFactory gavinJobExecutionFactory;
-	private FileStore fileStore;
-	private UserAccountService userAccountService;
+	private final ExecutorService executorService;
+	private final GavinJobFactory gavinJobFactory;
+	private final GavinJobExecutionFactory gavinJobExecutionFactory;
+	private final FileStore fileStore;
+	private final UserAccountService userAccountService;
+	private final SecureIdGenerator secureIdGenerator;
+	private final MenuReaderService menuReaderService;
 
 	@Autowired
-	public GavinController(DataService dataService, ExecutorService executorService, GavinJobFactory gavinJobFactory,
-			GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
-			UserAccountService userAccountService)
+	public GavinController(@Qualifier("gavinExecutors") ExecutorService executorService,
+			GavinJobFactory gavinJobFactory, GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
+			UserAccountService userAccountService, MenuReaderService menuReaderService)
 	{
-		super(URI);
-		this.dataService = requireNonNull(dataService);
+		super(GAVIN_APP, URI);
 		this.executorService = requireNonNull(executorService);
 		this.gavinJobFactory = requireNonNull(gavinJobFactory);
 		this.gavinJobExecutionFactory = requireNonNull(gavinJobExecutionFactory);
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
+		this.menuReaderService = menuReaderService;
+		secureIdGenerator = new SecureIdGenerator();
 	}
 
 	/**
 	 * Shows the gavin page.
+	 * This page shows the configuration wheels if the annotation resources are not yet properly configured.
+	 * If the annotation resources are fine, it shows the upload control.
 	 *
 	 * @return the view name
 	 */
-	@SuppressWarnings({ "SameReturnValue", "UnusedReturnValue" })
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
+		super.init(model);
 		List<String> annotatorsWithMissingResources = gavinJobFactory.getAnnotatorsWithMissingResources();
 		if (!annotatorsWithMissingResources.isEmpty())
 		{
@@ -88,31 +103,87 @@ public class GavinController extends MolgenisPluginController
 	/**
 	 * Starts a job to annotate a VCF file
 	 *
-	 * @param inputFile  the input file, should be VCF
-	 * @param entityName the name of the file, the download will be
-	 * @return the URL where the job progress can be monitored
-	 * @throws IOException
+	 * @param inputFile  the uploaded input file
+	 * @param entityName the name of the file
+	 * @return the ID of the created {@link GavinJobExecution}
+	 * @throws IOException if interaction with the file store fails
 	 */
 	@RequestMapping(value = "/annotate-file", method = POST)
-	@ResponseBody
-	public String annotateFile(@RequestParam(value = "file") MultipartFile inputFile, @RequestParam String entityName)
-			throws IOException
+	public ResponseEntity<String> annotateFile(@RequestParam(value = "file") MultipartFile inputFile,
+			@RequestParam String entityName) throws IOException
 	{
-		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create();
-		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
+		String extension = TSV;
+		if (inputFile.getOriginalFilename().endsWith(GZ))
+		{
+			extension = TSV_GZ;
+		}
+
+		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(secureIdGenerator.generateId());
+		gavinJobExecution.setFilename(entityName);
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
+		gavinJobExecution.setInputFileExtension(extension);
 		final GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
 
 		final String gavinJobIdentifier = gavinJobExecution.getIdentifier();
 		fileStore.createDirectory(GAVIN_APP);
 		final String jobDir = format("{0}{1}{2}", GAVIN_APP, separator, gavinJobIdentifier);
 		fileStore.createDirectory(jobDir);
-		final String fileName = format("{0}{1}input.vcf", jobDir, separator);
+
+		final String fileName = format("{0}{1}input.{2}", jobDir, separator, extension);
 		fileStore.writeToFile(inputFile.getInputStream(), fileName);
 
 		executorService.submit(gavinJob);
 
-		return "/api/v2/" + gavinJobExecution.getEntityType().getName() + "/" + gavinJobIdentifier;
+		String location = "/plugin/gavin-app/job/" + gavinJobIdentifier;
+		return ResponseEntity.created(java.net.URI.create(location)).body(location);
+	}
+
+	/**
+	 * Retrieves {@link GavinJobExecution} job.
+	 * May be called by anyone who has the identifier.
+	 *
+	 * @param jobIdentifier identifier of the annotation job
+	 * @return GavinJobExecution, or null if no GavinJobExecution exists with this ID.
+	 */
+	@RequestMapping(value = "/job/{jobIdentifier}", method = GET, produces = APPLICATION_JSON_VALUE)
+	public
+	@ResponseBody
+	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
+			throws JobNotFoundException
+	{
+		return gavinJobFactory.findGavinJobExecution(jobIdentifier);
+	}
+
+	/**
+	 * Shows result page for a job. The job may still be running.
+	 *
+	 * @param jobIdentifier identifier of the annotation job
+	 * @return {@link FileSystemResource} with the annotated file
+	 */
+	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
+	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model,
+			HttpServletRequest request) throws JobNotFoundException
+	{
+		model.addAttribute("jobExecution", gavinJobFactory.findGavinJobExecution(jobIdentifier));
+		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
+		model.addAttribute("errorFileExists", getErrorFileForJob(jobIdentifier).exists());
+		model.addAttribute("pageUrl", getPageUrl(jobIdentifier, request));
+		return "view-gavin-result";
+	}
+
+	private String getPageUrl(String jobIdentifier, HttpServletRequest request)
+	{
+		String host;
+		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+		{
+			host = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort();
+		}
+		else
+		{
+			host = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host");
+		}
+		return format("{0}{1}/result/{2}", host, menuReaderService.getMenu().findMenuItemPath(GAVIN_APP),
+				jobIdentifier);
 	}
 
 	/**
@@ -122,21 +193,69 @@ public class GavinController extends MolgenisPluginController
 	 * @param jobIdentifier GAVIN_APP of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/result/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@RequestMapping(value = "/download/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
-	public FileSystemResource result(HttpServletResponse response,
+	public FileSystemResource download(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier)
+			throws FileNotFoundException, JobNotFoundException
 	{
-		GavinJobExecution jobExecution = dataService
-				.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
-		File file = fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "gavin-result.vcf");
+		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
+		File file = getDownloadFileForJob(jobIdentifier);
 		if (!file.exists())
 		{
-			LOG.warn(format("File {0} not found for job {1}", file.getName(), jobIdentifier));
-			throw new MolgenisDataException("No output file found for this job.");
+			LOG.warn("No result file found for job {}", jobIdentifier);
+			throw new FileNotFoundException("No result file found for this job. Results are removed every night.");
 		}
-		response.setHeader("Content-Disposition", format("inline; filename=\"{0}\"", jobExecution.getFilename()));
+		response.setHeader("Content-Disposition",
+				format("inline; filename=\"{0}-gavin.vcf\"", jobExecution.getFilename()));
 		return new FileSystemResource(file);
+	}
+
+	private File getDownloadFileForJob(String jobIdentifier)
+	{
+		return fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "gavin-result.vcf");
+	}
+
+	private File getErrorFileForJob(String jobIdentifier)
+	{
+		return fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "error.txt");
+	}
+
+	/**
+	 * Downloads the error report of a gavin annotation job.
+	 *
+	 * @param response      {@link HttpServletResponse} to write the Content-Disposition header to with the filename
+	 * @param jobIdentifier GAVIN_APP of the annotation job
+	 * @return {@link FileSystemResource} with the annotated file
+	 */
+	@RequestMapping(value = "/error/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@ResponseBody
+	public Resource downloadErrorReport(HttpServletResponse response,
+			@PathVariable(value = "jobIdentifier") String jobIdentifier)
+			throws FileNotFoundException, JobNotFoundException
+	{
+		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
+		response.setHeader("Content-Disposition",
+				format("inline; filename=\"{0}-error.txt\"", jobExecution.getFilename()));
+		final File file = getErrorFileForJob(jobIdentifier);
+		if (!file.exists())
+		{
+			LOG.warn("No error file found for job {}", jobIdentifier);
+			throw new FileNotFoundException("No error report found for this job. Results are removed every night.");
+		}
+		return new FileSystemResource(file);
+	}
+
+	@ExceptionHandler(value = FileNotFoundException.class)
+	public void handleFileNotFound(FileNotFoundException ex, HttpServletResponse res) throws IOException
+	{
+		res.sendError(404, ex.getMessage());
+	}
+
+	@ExceptionHandler(value = JobNotFoundException.class)
+	public void handleJobNotFound(JobNotFoundException ex, HttpServletResponse res) throws IOException
+	{
+		res.sendError(404, ex.getMessage());
 	}
 
 	@ExceptionHandler(RuntimeException.class)
@@ -149,16 +268,26 @@ public class GavinController extends MolgenisPluginController
 	}
 
 	/**
-	 * Removes the working directory from the file store.
+	 * Removes old files in the gavin working directory from the file store.
 	 */
-	@Scheduled(cron = "0 0 0 * * *")
+	@Scheduled(cron = "0 0 * * * *")
 	public void cleanUp()
 	{
-		LOG.info("Clean up working directory in the file store...");
+		LOG.debug("Clean up old jobs in the file store...");
 		try
 		{
-			fileStore.deleteDirectory(GAVIN_APP);
-			LOG.info("Done.");
+			final File[] oldFiles = fileStore.getFile(GAVIN_APP).listFiles(
+					file -> file.isDirectory() && MILLISECONDS.toSeconds(file.lastModified()) < now().minusHours(24)
+							.toEpochSecond());
+			if (oldFiles != null)
+			{
+				for (File file : oldFiles)
+				{
+					LOG.info("Deleting job directory {}", file.getName());
+					fileStore.deleteDirectory(GAVIN_APP + separator + file.getName());
+				}
+			}
+			LOG.debug("Done.");
 		}
 		catch (IOException e)
 		{

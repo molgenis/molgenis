@@ -1,4 +1,4 @@
-package org.molgenis.annotation.test.cmd;
+package org.molgenis.annotation.test.cmd.integration;
 
 import org.molgenis.annotation.cmd.CommandLineAnnotatorConfig;
 import org.molgenis.data.Entity;

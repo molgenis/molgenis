@@ -1,5 +1,6 @@
 $(function () {
     var form = $('#gavin-form');
+    var jobHrefRegex = /.+\/([^\/]+)/;
 
     if (form.length) {
         React.render(molgenis.ui.UploadContainer({
@@ -8,15 +9,14 @@ $(function () {
             'type': 'file',
             'name': 'gavin-uploader',
             'width': '12',
-            onCompletion: function (job) {
-                if (job.resultUrl) {
-                    molgenis.createAlert([{message: 'Annotated ' + job.filename}], 'success');
-                    document.location = job.resultUrl;
-                } else {
-                    molgenis.createAlert([{message: 'Failed to annotate file.'}], 'error')
+            onSubmit: function (jobHref) {
+                if ((match = jobHrefRegex.exec(jobHref)) !== null) {
+                    location.replace(molgenis.getContextUrl() + "/result/" + match[1]);
                 }
             },
-            validExtensions: ['.vcf', '.vcf.gz']
+            validExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz', '.txt', '.txt.gz', '.tab', 'tab.gz'],
+            showNameFieldExtensions: ['.vcf', '.vcf.gz', '.tsv', '.tsv.gz', '.txt', '.txt.gz', '.tab', 'tab.gz'],
+            maxFileSizeMB: 3
         }), form[0]);
     } else {
         $('#gavin-view').on('click', '.glyphicon-cog', function (e) {

@@ -1,4 +1,4 @@
-package org.molgenis.annotation.cmd;
+package org.molgenis.annotation.cmd.data;
 
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;

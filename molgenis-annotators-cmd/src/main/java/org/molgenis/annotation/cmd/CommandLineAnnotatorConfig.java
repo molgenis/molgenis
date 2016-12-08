@@ -1,10 +1,15 @@
 package org.molgenis.annotation.cmd;
 
 import org.molgenis.CommandLineOnlyConfiguration;
+import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
+import org.molgenis.annotation.cmd.data.CmdLineDataService;
+import org.molgenis.annotation.cmd.data.CmdLineSettingsEntity;
+import org.molgenis.annotation.cmd.utils.VcfValidator;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -42,6 +47,12 @@ public class CommandLineAnnotatorConfig
 	@Autowired
 	ApplicationContext applicationContext;
 
+	@Autowired
+	EntityTypeFactory entityTypeFactory;
+
+	@Autowired
+	AttributeFactory attributeFactory;
+
 	@PostConstruct
 	public void bootstrap()
 	{
@@ -74,6 +85,13 @@ public class CommandLineAnnotatorConfig
 	VcfUtils vcfUtils()
 	{
 		return new VcfUtils();
+	}
+
+
+	@Bean
+	EffectStructureConverter effectStructureConverter()
+	{
+		return new EffectStructureConverter(entityTypeFactory, attributeFactory);
 	}
 
 	@Bean

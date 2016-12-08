@@ -29,8 +29,23 @@
         <#else>
             <div class="panel-body">
                 <div id="instant-import-alert"></div>
-                <h4>Upload your VCF file and GAVIN will classify your variants</h4>
-                <p>Your data will not be stored on the server.</p>
+                <#if content?has_content>
+                    <div class="row">
+                        <div class="col-md-12">
+                        <#-- Do *not* HTML escape content -->
+			                ${content}
+                        </div>
+                    </div>
+                </#if>
+
+                <#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr></hr>
+                            <a href="${context_url?html}/edit" class="btn btn-default pull-left">Edit page</a>
+                        </div>
+                    </div>
+                </#if>
                 <div id="gavin-form"></div>
             </div>
         </#if>

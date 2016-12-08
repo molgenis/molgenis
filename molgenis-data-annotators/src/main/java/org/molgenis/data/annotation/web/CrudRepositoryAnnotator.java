@@ -4,7 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.core.RefEntityAnnotator;
+import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.exception.UiAnnotationException;
@@ -72,9 +72,9 @@ public class CrudRepositoryAnnotator
 		{
 			EntityType entityType = dataService.getMeta().getEntityType(repository.getName());
 
-			if (annotator instanceof RefEntityAnnotator)
+			if (annotator instanceof EffectCreatingAnnotator)
 			{
-				targetMetaData = ((RefEntityAnnotator) annotator).getTargetEntityType(entityType);
+				targetMetaData = ((EffectCreatingAnnotator) annotator).getTargetEntityType(entityType);
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
@@ -115,7 +115,7 @@ public class CrudRepositoryAnnotator
 	{
 		try
 		{
-			if (annotator instanceof RefEntityAnnotator && targetMetaData != null)
+			if (annotator instanceof EffectCreatingAnnotator && targetMetaData != null)
 			{
 				runAsSystem(() ->
 				{
@@ -140,9 +140,9 @@ public class CrudRepositoryAnnotator
 		Iterator<Entity> it = annotator.annotate(repository);
 
 		String entityName;
-		if (annotator instanceof RefEntityAnnotator)
+		if (annotator instanceof EffectCreatingAnnotator)
 		{
-			entityName = ((RefEntityAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getName();
+			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getName();
 		}
 		else
 		{
