@@ -505,7 +505,8 @@ class PostgreSqlRepository extends AbstractRepository
 	{
 		final Attribute idAttr = entityType.getIdAttribute();
 		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
-		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType)
+				.filter(attr -> !attr.isReadOnly()).collect(toList());
 		final String updateSql = getSqlUpdate(entityType);
 
 		// update values in entity table
