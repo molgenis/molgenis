@@ -251,7 +251,8 @@ public class DynamicEntity implements Entity
 				}
 				break;
 			case COMPOUND:
-				throw new IllegalArgumentException(format("Unexpected data type [%s] for attribute: [%s]", dataType.toString()));
+				throw new IllegalArgumentException(
+						format("Unexpected data type [%s] for attribute: [%s]", dataType.toString(), attrName));
 			case DATE:
 			case DATE_TIME:
 				if (!(value instanceof java.util.Date))
