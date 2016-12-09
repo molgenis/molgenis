@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 import static java.lang.String.valueOf;
 
-@ComponentScan(basePackages = { "org.molgenis.mail", "org.molgenis.data.settings" })
+@ComponentScan(basePackages = { "org.molgenis.mail", "org.molgenis.data.settings", "org.molgenis.data.listeners" })
 @Configuration
 public class MailConfig
 {

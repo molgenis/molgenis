@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static java.io.File.separator;
 import static java.util.Collections.emptyList;
@@ -260,9 +261,10 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		MailSender mailSender()
+		Supplier<MailSender> mailSender()
 		{
-			return mock(MailSender.class);
+			final MailSender mailSender = mock(MailSender.class);
+			return () -> mailSender;
 		}
 
 		@Bean
