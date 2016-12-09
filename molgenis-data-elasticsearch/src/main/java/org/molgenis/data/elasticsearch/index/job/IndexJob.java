@@ -137,7 +137,7 @@ class IndexJob extends Job
 			{
 				if (searchService.hasMapping(fullName))
 				{
-					progress.progress(progressCount, format("Dropping index entity {0}.", fullName));
+					progress.progress(progressCount, format("Dropping {0}", fullName));
 					searchService.delete(fullName);
 				}
 				else
