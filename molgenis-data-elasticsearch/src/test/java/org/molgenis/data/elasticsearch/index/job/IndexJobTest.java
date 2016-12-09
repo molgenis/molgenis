@@ -214,10 +214,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing repository test");
+		verify(progress).progress(0, "Indexing test");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
-		verify(progress).status("refreshIndex...");
-		verify(progress).status("refreshIndex done.");
+		verify(progress).status("Refresh index start");
+		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
