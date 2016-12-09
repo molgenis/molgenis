@@ -15,6 +15,8 @@ import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionMetaData;
+import org.molgenis.security.core.SecureIdGenerator;
+import org.molgenis.security.core.SecureIdGeneratorImpl;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.controller.StaticContentService;
@@ -194,6 +196,12 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	@ComponentScan({ "org.molgenis.gavin.job.meta", "org.molgenis.data.jobs.model" })
 	public static class Config
 	{
+		@Bean
+		SecureIdGenerator secureIdGenerator()
+		{
+			return new SecureIdGeneratorImpl();
+		}
+
 		@Bean
 		IndexPackage indexPackage()
 		{
