@@ -97,7 +97,7 @@ class IndexJob extends Job
 		}
 		finally
 		{
-			progress.status("Refresh Index start");
+			progress.status("Refresh index start");
 			searchService.refreshIndex();
 			progress.status("Refresh index done");
 		}
