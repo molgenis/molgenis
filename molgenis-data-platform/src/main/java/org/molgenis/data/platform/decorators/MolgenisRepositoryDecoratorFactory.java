@@ -2,7 +2,7 @@ package org.molgenis.data.platform.decorators;
 
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.auth.UserDecorator;
+import org.molgenis.auth.UserRepositoryDecorator;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateAnonymizer;
 import org.molgenis.data.aggregation.AggregateAnonymizerRepositoryDecorator;
@@ -192,7 +192,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		if (repo.getName().equals(USER))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new UserDecorator(
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new UserRepositoryDecorator(
 					(Repository<User>) (Repository<? extends Entity>) repo, userAuthorityFactory, dataService,
 					passwordEncoder);
 		}
