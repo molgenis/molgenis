@@ -6,8 +6,9 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
+import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -39,11 +40,15 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mail.MailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
@@ -148,7 +153,10 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public ConversionService conversionService()
 	{
-		return new DefaultConversionService();
+		DefaultConversionService defaultConversionService = new DefaultConversionService();
+		defaultConversionService.addConverter(new DateToStringConverter());
+		defaultConversionService.addConverter(new StringToDateConverter());
+		return defaultConversionService;
 	}
 
 	@Bean

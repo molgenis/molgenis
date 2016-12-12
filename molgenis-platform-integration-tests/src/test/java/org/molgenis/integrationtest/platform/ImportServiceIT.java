@@ -2,7 +2,11 @@ package org.molgenis.integrationtest.platform;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -26,14 +30,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.molgenis.data.DatabaseAction.ADD_IGNORE_EXISTING;
+import static org.molgenis.data.DatabaseAction.UPDATE;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
  * Test the Importer test cases
  */
-@Transactional()
-@TransactionConfiguration(defaultRollback = true)
+@TransactionConfiguration(defaultRollback = false)
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class ImportServiceIT extends AbstractTestNGSpringContextTests
 {
@@ -48,9 +52,17 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
-	// FIXME should not be necessary
 	@Autowired
 	ImportServiceRegistrar importServiceRegistrar;
+
+	@Autowired
+	IndexService indexService;
+
+	@Autowired
+	DataService dataService;
+
+	@Autowired
+	SearchService searchService;
 
 	@BeforeClass
 	public void beforeClass(){
@@ -62,7 +74,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void test() throws URISyntaxException, IOException
 	{
-		final String pathname = "/xls/emx_all_datatypes.xlsx";
+		final String pathname = "/xls/it_emx_all_datatypes.xlsx";
 		ClassPathResource classPath = new ClassPathResource(pathname);
 		File file = classPath.getFile();
 		LOG.trace("actual location: [{}]", file);
@@ -72,8 +84,22 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 			ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 
-			EntityImportReport entityImportReport = importService
-					.doImport(repoCollection, ADD_IGNORE_EXISTING, PACKAGE_DEFAULT);
+			EntityImportReport entityImportReportAdd = importService
+					.doImport(repoCollection, DatabaseAction.ADD, PACKAGE_DEFAULT);
+
+			EntityImportReport entityImportReportAddUpdate = importService
+					.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+
+			EntityImportReport entityImportReportUpdate = importService
+					.doImport(repoCollection, DatabaseAction.UPDATE, PACKAGE_DEFAULT);
+
+			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
+
+			dataService.hasRepository("");
+			dataService.hasRepository("");
+			dataService.hasRepository("");
+			dataService.hasRepository("");
+			dataService.hasRepository("");
 		});
 	}
 }
