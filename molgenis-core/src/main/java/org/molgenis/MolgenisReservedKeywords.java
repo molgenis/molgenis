@@ -9,7 +9,9 @@ import java.util.Set;
  */
 public class MolgenisReservedKeywords
 {
-	// Case sensitive
+	/**
+	 * Case sensitive
+	 */
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets
 			.newHashSet("login", "logout", "csv", "base", "exist", "meta");
 }
