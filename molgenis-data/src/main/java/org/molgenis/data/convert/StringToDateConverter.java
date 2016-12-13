@@ -30,8 +30,8 @@ public class StringToDateConverter implements Converter<String, Date>
 				catch (ParseException pe3)
 				{
 					throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
-							+ MolgenisDateFormat.DATEFORMAT_DATETIME + " OR " + MolgenisDateFormat.DATEFORMAT_DATE
-							+ " OR " + MolgenisDateFormat.DATEFORMAT_DATETIME_SIMPLE);
+							+ MolgenisDateFormat.getDateTimeFormat().toPattern() + " OR " + MolgenisDateFormat.getDateFormat().toPattern()
+							+ " OR " + MolgenisDateFormat.getDateTimeFormatSimple().toPattern());
 				}
 			}
 		}

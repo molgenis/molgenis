@@ -50,7 +50,6 @@ import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -748,7 +747,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
-		assertEquals((new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)).format(entity.get("date_time")),
+		assertEquals(MolgenisDateFormat.getDateTimeFormat().format(entity.get("date_time")),
 				"1985-08-12T08:12:13+0200");
 	}
 
@@ -842,7 +841,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>()
 				{
 				}.getType());
-		@SuppressWarnings("unchecked") Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		@SuppressWarnings("unchecked")
+		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 		assertEquals(lvl2.get("selfRef").toString(),
 				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
 	}
