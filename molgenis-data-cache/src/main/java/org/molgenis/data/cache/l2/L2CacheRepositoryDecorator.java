@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterators.partition;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Objects.requireNonNull;
@@ -48,8 +49,7 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l2Cache = requireNonNull(l2Cache);
-		this.cacheable = decoratedRepository.getCapabilities().contains(CACHEABLE) && !"sys_idx_GavinJobExecution"
-				.equals(decoratedRepository.getName());
+		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
 		this.transactionInformation = transactionInformation;
 	}
 
