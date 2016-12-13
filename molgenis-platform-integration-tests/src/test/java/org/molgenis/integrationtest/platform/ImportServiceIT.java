@@ -1,13 +1,11 @@
 package org.molgenis.integrationtest.platform;
 
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
-import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
@@ -21,7 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -29,8 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.molgenis.data.DatabaseAction.ADD_IGNORE_EXISTING;
-import static org.molgenis.data.DatabaseAction.UPDATE;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -65,7 +61,8 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	SearchService searchService;
 
 	@BeforeClass
-	public void beforeClass(){
+	public void beforeClass()
+	{
 		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
 		importServiceRegistrar.register(contextRefreshedEvent);
@@ -81,25 +78,33 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 
 		runAsSystem(() ->
 		{
-			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
+					.createFileRepositoryCollection(file);
 			ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 
-			EntityImportReport entityImportReportAdd = importService
-					.doImport(repoCollection, DatabaseAction.ADD, PACKAGE_DEFAULT);
+			// ADD
+			importService.doImport(repoCollection, DatabaseAction.ADD, PACKAGE_DEFAULT);
 
-			EntityImportReport entityImportReportAddUpdate = importService
-					.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+			// ADD/UPDATE
+			importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
 
-			EntityImportReport entityImportReportUpdate = importService
-					.doImport(repoCollection, DatabaseAction.UPDATE, PACKAGE_DEFAULT);
+			// UPDATE
+			importService.doImport(repoCollection, DatabaseAction.UPDATE, PACKAGE_DEFAULT);
 
+			// Wait for index to finish
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
-			dataService.hasRepository("");
-			dataService.hasRepository("");
-			dataService.hasRepository("");
-			dataService.hasRepository("");
-			dataService.hasRepository("");
+			// Test existing in PostgreSQL
+			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_Person"));
+			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_TypeTestRef"));
+			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_Location"));
+			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_TypeTest"));
+
+			// Test existing in Elasticsearch
+			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_Person"));
+			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_TypeTestRef"));
+			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_Location"));
+			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_TypeTest"));
 		});
 	}
 }
