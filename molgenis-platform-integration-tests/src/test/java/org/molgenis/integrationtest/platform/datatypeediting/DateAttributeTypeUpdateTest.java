@@ -4,10 +4,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
+import org.testng.annotations.*;
 
 import java.text.ParseException;
 
@@ -54,7 +51,7 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	 * @param convertedValue  The expected value after converting the type
 	 * @throws ParseException
 	 */
-	// FIXME @Test(dataProvider = "validConversionTestCases")
+	@Test(dataProvider = "validConversionTestCases")
 	public void testValidConversion(Object valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
 	{
@@ -114,7 +111,7 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
-	// FIXME @Test(dataProvider = "invalidConversionTestCases")
+	@Test(dataProvider = "invalidConversionTestCases")
 	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
 			String exceptionMessage) throws ParseException
 	{
