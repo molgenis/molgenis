@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
+
 @Component
 public class DefaultEntityValidator implements EntityValidator
 {
@@ -26,12 +28,15 @@ public class DefaultEntityValidator implements EntityValidator
 
 	private final DataService dataService;
 	private final EntityAttributesValidator entityAttributesValidator;
+	private final ExpressionValidator expressionValidator;
 
 	@Autowired
-	public DefaultEntityValidator(DataService dataService, EntityAttributesValidator entityAttributesValidator)
+	public DefaultEntityValidator(DataService dataService, EntityAttributesValidator entityAttributesValidator,
+			ExpressionValidator expressionValidator)
 	{
 		this.dataService = dataService;
 		this.entityAttributesValidator = entityAttributesValidator;
+		this.expressionValidator = requireNonNull(expressionValidator);
 	}
 
 	@Override
@@ -89,12 +94,9 @@ public class DefaultEntityValidator implements EntityValidator
 
 	public boolean mustDoNotNullCheck(EntityType entityType, Attribute attr, Entity entity)
 	{
-		// Do not validate if Questionnaire status is not SUBMITTED
-		if (EntityUtils.doesExtend(entityType, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
-
 		// Do not validate is visibleExpression resolves to false
-		if (StringUtils.isNotBlank(attr.getVisibleExpression()) && !ValidationUtils
-				.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityType)) return false;
+		if (StringUtils.isNotBlank(attr.getVisibleExpression()) && !expressionValidator
+				.resolveBooleanExpression(attr.getVisibleExpression(), entity)) return false;
 
 		return true;
 	}
@@ -110,6 +112,7 @@ public class DefaultEntityValidator implements EntityValidator
 					dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))
 			{
 				// Gather all attribute values
+				// FIXME: keeping everything in memory is not scaleable
 				List<Object> values = Lists.newArrayList();
 				for (Entity entity : entities)
 				{
@@ -120,10 +123,7 @@ public class DefaultEntityValidator implements EntityValidator
 				// Create 'in' query, should find only find itself or nothing
 				if (!values.isEmpty())
 				{
-					// TODO TBD: should an attribute be globally unique or unique per entity?
-					// For now workaround, identifier.
-					String entityName = attr.getName().equalsIgnoreCase("identifier") ? "Characteristic" : meta
-							.getName();
+					String entityName = meta.getName();
 
 					long count = dataService.count(entityName, new QueryImpl<Entity>().in(attr.getName(), values));
 					if (count > 0)

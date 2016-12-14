@@ -5,6 +5,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public interface RepositoryAnnotator
 {
-	String ANNOTATOR_PREFIX = "molgenis_annotated_";
+	String ANNOTATOR_PREFIX = "mgs_ann_";
 
 	AnnotatorInfo getInfo();
 
@@ -81,4 +82,5 @@ public interface RepositoryAnnotator
 		return getInfo() == null ? "no description" : getInfo().getDescription();
 	}
 
+	List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory);
 }

@@ -70,9 +70,9 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.molgenis.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.Sort.Direction.DESC;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.ontology.controller.SortaServiceController.URI;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.*;
@@ -475,7 +475,7 @@ public class SortaServiceController extends MolgenisPluginController
 			InputStream inputStream) throws IOException
 	{
 		String sessionId = httpServletRequest.getSession().getId();
-		File uploadFile = fileStore.store(inputStream, sessionId + "_input.csv");
+		File uploadFile = fileStore.store(inputStream, sessionId + ".csv");
 		String inputRepositoryName = idGenerator.generateId();
 		SortaCsvRepository inputRepository = new SortaCsvRepository(inputRepositoryName, jobName + " input", uploadFile,
 				entityTypeFactory, attrMetaFactory);
@@ -556,6 +556,8 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		EntityType resultEntityType = EntityType.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS, attrMetaFactory);
 		resultEntityType.setName(resultEntityName);
+		resultEntityType.setSimpleName(resultEntityName);
+		resultEntityType.setPackage(null);
 		resultEntityType.setAbstract(false);
 		resultEntityType.addAttribute(
 				attrMetaFactory.create().setName(INPUT_TERM).setDataType(XREF).setRefEntity(sourceMetaData)

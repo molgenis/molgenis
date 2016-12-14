@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.ClinvarMultiAllelicResultFilter;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class ClinvarAnnotator implements AnnotatorConfig
@@ -74,18 +74,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> attributes = new ArrayList<>();
-
-		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING).setDescription(
-				"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
-				.setLabel(CLINVAR_CLNSIG_LABEL);
-
-		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
-				.setDescription("Value representing the clinical significanct according to ClinVar")
-				.setLabel(CLINVAR_CLNALLE_LABEL);
-
-		attributes.add(clinvar_clnsig);
-		attributes.add(clinvar_clnalle);
+		List<Attribute> attributes = createClinvarOutputAttributes();
 
 		AnnotatorInfo clinvarInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME,
 				" ClinVar is a freely accessible, public archive of reports of the relationships"
@@ -104,14 +93,20 @@ public class ClinvarAnnotator implements AnnotatorConfig
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(
 				vcfAttributes);
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
 				clinvarMultiAllelicResultFilter, dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_LOCATION, clinvarAnnotatorSettings))
 		{
 			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createClinvarOutputAttributes();
+			}
+
+			@Override
 			protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 			{
-				String attrName = null;
+				String attrName;
 				if (CLINVAR_CLNSIG.equals(attr.getName()))
 				{
 					attrName = CLINVAR_CLNSIG_ResourceAttributeName;
@@ -132,10 +127,27 @@ public class ClinvarAnnotator implements AnnotatorConfig
 		annotator.init(entityAnnotator);
 	}
 
+	private List<Attribute> createClinvarOutputAttributes()
+	{
+		List<Attribute> attributes = new ArrayList<>();
+
+		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING).setDescription(
+				"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
+				.setLabel(CLINVAR_CLNSIG_LABEL);
+
+		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
+				.setDescription("Value representing the clinical significanct according to ClinVar")
+				.setLabel(CLINVAR_CLNALLE_LABEL);
+
+		attributes.add(clinvar_clnsig);
+		attributes.add(clinvar_clnalle);
+		return attributes;
+	}
+
 	@Bean
 	Resource clinVarTabixResource()
 	{
-		Resource clinVarTabixResource = new ResourceImpl(CLINVAR_TABIX_RESOURCE,
+		return new ResourceImpl(CLINVAR_TABIX_RESOURCE,
 				new SingleResourceConfig(CLINVAR_LOCATION, clinvarAnnotatorSettings))
 		{
 			@Override
@@ -145,7 +157,5 @@ public class ClinvarAnnotator implements AnnotatorConfig
 						attributeFactory);
 			}
 		};
-
-		return clinVarTabixResource;
 	}
 }

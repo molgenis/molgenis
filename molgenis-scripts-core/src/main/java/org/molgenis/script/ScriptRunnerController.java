@@ -66,9 +66,8 @@ public class ScriptRunnerController
 		}
 	}
 
-	@ExceptionHandler(GenerateScriptException.class)
-	public void handleGenerateScriptException(GenerateScriptException e, HttpServletResponse response)
-			throws IOException
+	@ExceptionHandler(ScriptException.class)
+	public void handleGenerateScriptException(ScriptException e, HttpServletResponse response) throws IOException
 	{
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 	}

@@ -3,14 +3,12 @@ package org.molgenis.data.mapper.service.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Sets;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -30,6 +28,8 @@ import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -48,14 +48,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
@@ -75,6 +71,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@Autowired
 	private OntologyTagService ontologyTagService;
@@ -248,7 +247,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		targetAttribute.setRefEntity(entityTypeXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
-		when(dataService.findOneById("xrefEntity1", "1")).thenReturn(xref1a);
+		when(entityManager.getReference(entityTypeXref, 1)).thenReturn(xref1a);
 		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityTypeSource);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
 	}
@@ -287,22 +286,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
-		when(dataService.findAll(eq(refEntityName), argThat(new ArgumentMatcher<Stream<Object>>()
-		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean matches(Object argument)
-			{
-				return ((Stream<Object>) argument).collect(toList()).equals(Arrays.asList(refEntityId0, refEntityId1));
-			}
-		}))).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(refEntity0, refEntity1);
-			}
-		});
+		when(entityManager.getReference(refEntityType, refEntityId0)).thenReturn(refEntity0);
+		when(entityManager.getReference(refEntityType, refEntityId1)).thenReturn(refEntity1);
 
 		// source Entity
 		EntityType entityTypeSource = entityTypeFactory.create(sourceEntityName);
@@ -351,10 +336,10 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 						.setRefEntity(refEntityType));
 
 		Entity source = new DynamicEntity(entityTypeSource);
-		source.set(sourceEntityAttrName, null);
+		source.set(sourceEntityAttrName, emptyList());
 
 		Object result = algorithmService.apply(attributeMapping, source, entityTypeSource);
-		assertNull(result);
+		assertEquals(result, emptyList());
 	}
 
 	@Test
@@ -510,10 +495,22 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public EntityManager entityManager()
+		{
+			return mock(EntityManager.class);
+		}
+
+		@Bean
+		public JsMagmaScriptEvaluator jsScriptEvaluator()
+		{
+			return new JsMagmaScriptEvaluator(new NashornScriptEngine());
+		}
+
+		@Bean
 		public AlgorithmService algorithmService()
 		{
-			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					algorithmGeneratorService());
+			return new AlgorithmServiceImpl(ontologyTagService(), semanticSearchService(), algorithmGeneratorService(),
+					entityManager(), jsScriptEvaluator());
 		}
 
 		@Bean

@@ -1,16 +1,18 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
-import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -33,7 +35,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -110,9 +112,10 @@ class RestControllerV2
 		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
 	}
 
-	static UnknownEntityException createUnknownEntityExceptionNotValidId(String id)
+	static UnknownEntityException createUnknownEntityExceptionNotValidId(Object id)
 	{
-		return new UnknownEntityException("The entity you are trying to update [" + id + "] does not exist.");
+		return new UnknownEntityException(
+				"The entity you are trying to update [" + id.toString() + "] does not exist.");
 	}
 
 	@Autowired
@@ -205,7 +208,14 @@ class RestControllerV2
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
-		dataService.deleteById(entityName, id);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().deleteAttributeById(id);
+		}
+		else
+		{
+			dataService.deleteById(entityName, id);
+		}
 	}
 
 	/**
@@ -283,7 +293,14 @@ class RestControllerV2
 			final List<String> ids = new ArrayList<String>();
 
 			// Add all entities
-			this.dataService.add(entityName, entities.stream());
+			if (ATTRIBUTE_META_DATA.equals(entityName))
+			{
+				this.dataService.getMeta().addAttributes(entityName, entities.stream().map(a -> (Attribute) a));
+			}
+			else
+			{
+				this.dataService.add(entityName, entities.stream());
+			}
 
 			entities.forEach(entity ->
 			{
@@ -328,7 +345,7 @@ class RestControllerV2
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityName);
 
 		// Validate the new name
-		MetaValidationUtils.validateName(request.getNewEntityName());
+		NameValidator.validateName(request.getNewEntityName());
 
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils
@@ -444,7 +461,7 @@ class RestControllerV2
 			int count = 0;
 			for (Entity entity : entities)
 			{
-				String id = checkForEntityId(entity, count);
+				Object id = checkForEntityId(entity, count);
 
 				Entity originalEntity = dataService.findOneById(entityName, id);
 				if (originalEntity == null)
@@ -494,14 +511,14 @@ class RestControllerV2
 	 * @param count
 	 * @return
 	 */
-	private String checkForEntityId(Entity entity, int count)
+	private static Object checkForEntityId(Entity entity, int count)
 	{
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
 			throw createMolgenisDataExceptionUnknownIdentifier(count);
 		}
-		return id.toString();
+		return id;
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -744,12 +761,12 @@ class RestControllerV2
 					case COMPOUND:
 						throw new RuntimeException("Invalid data type [" + dataType + "]");
 					case DATE:
-						Date dateValue = entity.getDate(attrName);
+						Date dateValue = entity.getUtilDate(attrName);
 						String dateValueStr = dateValue != null ? getDateFormat().format(dateValue) : null;
 						responseData.put(attrName, dateValueStr);
 						break;
 					case DATE_TIME:
-						Date dateTimeValue = entity.getDate(attrName);
+						Date dateTimeValue = entity.getUtilDate(attrName);
 						String dateTimeValueStr =
 								dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
 						responseData.put(attrName, dateTimeValueStr);

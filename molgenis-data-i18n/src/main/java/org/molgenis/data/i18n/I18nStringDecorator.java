@@ -1,15 +1,10 @@
 package org.molgenis.data.i18n;
 
-import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -17,7 +12,7 @@ import java.util.stream.Stream;
  * <p>
  * Clears the ResourceBundle cache after an update
  */
-public class I18nStringDecorator implements Repository<Entity>
+public class I18nStringDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decorated;
 
@@ -27,104 +22,9 @@ public class I18nStringDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Iterator<Entity> iterator()
+	protected Repository<Entity> delegate()
 	{
-		return decorated.iterator();
-	}
-
-	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
-	{
-		decorated.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decorated.close();
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decorated.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decorated.getQueryOperators();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decorated.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decorated.getEntityType();
-	}
-
-	@Override
-	public long count()
-	{
-		return decorated.count();
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return decorated.query();
-	}
-
-	@Override
-	public long count(Query<Entity> q)
-	{
-		return decorated.count(q);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
-	{
-		return decorated.findAll(q);
-	}
-
-	@Override
-	public Entity findOne(Query<Entity> q)
-	{
-		return decorated.findOne(q);
-	}
-
-	@Override
-	public Entity findOneById(Object id)
-	{
-		return decorated.findOneById(id);
-	}
-
-	@Override
-	public Entity findOneById(Object id, Fetch fetch)
-	{
-		return decorated.findOneById(id, fetch);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decorated.aggregate(aggregateQuery);
+		return decorated;
 	}
 
 	@Override
@@ -135,9 +35,9 @@ public class I18nStringDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void update(Stream<Entity> records)
+	public void update(Stream<Entity> entities)
 	{
-		decorated.update(records);
+		decorated.update(entities);
 		ResourceBundle.clearCache();
 	}
 

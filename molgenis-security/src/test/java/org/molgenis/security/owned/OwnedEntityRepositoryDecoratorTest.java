@@ -42,6 +42,18 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	public void delegate() throws Exception
+	{
+		assertEquals(ownedEntityRepositoryDecorator.delegate(), decoratedRepository);
+	}
+
+	@Test
+	public void query() throws Exception
+	{
+		assertEquals(ownedEntityRepositoryDecorator.query().getRepository(), ownedEntityRepositoryDecorator);
+	}
+
+	@Test
 	public void addStream()
 	{
 		Stream<Entity> entities = Stream.of(mock(Entity.class));

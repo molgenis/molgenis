@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 
@@ -180,17 +182,6 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz);
-
-	/**
-	 * Find one entity based on id. Returns null if not exists
-	 *
-	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
-	 *
-	 * @throws MolgenisDataAccessException
-	 *
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
 
 	/**
 	 * Find one entity based on id.

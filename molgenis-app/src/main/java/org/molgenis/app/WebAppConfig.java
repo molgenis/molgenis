@@ -6,9 +6,9 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.molgenis.ui.freemarker.RepositoryTemplateLoader;
 import org.molgenis.util.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -43,6 +43,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
+	/**
+	 * Configures Freemarker
+	 *
+	 * @return
+	 * @throws IOException
+	 * @throws TemplateException
+	 */
 	@Override
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{

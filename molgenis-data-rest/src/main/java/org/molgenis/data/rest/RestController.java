@@ -6,17 +6,17 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.AttributeType;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.MetaUtils;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
+import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -42,6 +42,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -60,12 +61,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.data.QueryRule.Operator.RANGE;
+import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -299,7 +297,6 @@ public class RestController
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -327,7 +324,6 @@ public class RestController
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(request.getAttributes());
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
@@ -353,7 +349,6 @@ public class RestController
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -376,7 +371,6 @@ public class RestController
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
-		validateAndConvertQueryValues(request.getQ(), dataService.getEntityType(entityName));
 		Set<String> attributesSet = toAttributeSet(request.getAttributes());
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
@@ -735,7 +729,14 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
-		dataService.deleteById(entityName, id);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().deleteAttributeById(id);
+		}
+		else
+		{
+			dataService.deleteById(entityName, id);
+		}
 	}
 
 	/**
@@ -1003,37 +1004,7 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private void validateAndConvertQueryValues(List<QueryRule> queryRules, EntityType entityType)
-	{
-		if (queryRules != null)
-		{
-			for (QueryRule queryRule : queryRules)
-			{
-				if (!queryRule.getNestedRules().isEmpty())
-				{
-					validateAndConvertQueryValues(queryRule.getNestedRules(), entityType);
-				}
-				else
-				{
-					if (queryRule.getValue() != null)
-					{
-						Attribute attribute = entityType.getAttribute(queryRule.getField());
-						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
-						{
-							//noinspection unchecked
-							queryRule.setValue(stream(((Iterable<Object>) queryRule.getValue()).spliterator(), false)
-									.map(val -> restService.toEntityValue(attribute, val)).collect(toList()));
-						}
-						else
-						{
-							queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
-						}
-					}
-				}
-			}
-		}
-	}
-
+	@Transactional
 	private void updateInternal(String entityName, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityName);
@@ -1043,26 +1014,33 @@ public class RestController
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
-		Entity existing = dataService.findOneById(entityName, id, MetaUtils.getEntityTypeFetch());
+		Entity existing = dataService.findOneById(entityName, id, new Fetch().field(meta.getIdAttribute().getName()));
 		if (existing == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
 		Entity entity = this.restService.toEntity(meta, entityMap);
-		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
 		restService.updateMappedByEntities(entity, existing);
 	}
 
+	@Transactional
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
 	{
-		EntityType meta = dataService.getEntityType(entityName);
+		EntityType entityType = dataService.getEntityType(entityName);
+		Entity entity = this.restService.toEntity(entityType, entityMap);
 
-		Entity entity = this.restService.toEntity(meta, entityMap);
+		if (ATTRIBUTE_META_DATA.equals(entityName))
+		{
+			dataService.getMeta().addAttribute(new Attribute(entity));
+		}
+		else
+		{
+			dataService.add(entityName, entity);
+		}
 
-		dataService.add(entityName, entity);
 		restService.updateMappedByEntities(entity);
 
 		Object id = entity.getIdValue();
@@ -1117,8 +1095,8 @@ public class RestController
 			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
 				entityHasAttributeMap.put("href", attrHref);
-				@SuppressWarnings("unchecked") Iterable<Attribute> attributeParts = (Iterable<Attribute>) entity
-						.get(refAttributeName);
+				@SuppressWarnings("unchecked")
+				Iterable<Attribute> attributeParts = (Iterable<Attribute>) entity.get(refAttributeName);
 				for (Attribute attribute : attributeParts)
 				{
 					String attrName = attribute.getName();
@@ -1212,103 +1190,90 @@ public class RestController
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getName(), entity.getIdValue()));
 
-		// TODO system fields
 		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			// filter fields
 			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
-			// TODO remove __Type from jpa entities
-			if (!attr.getName().equals("__Type"))
+			String attrName = attr.getName();
+			AttributeType attrType = attr.getDataType();
+
+			if (attrType == COMPOUND)
 			{
-				String attrName = attr.getName();
-				AttributeType attrType = attr.getDataType();
-
-				if (attrType == COMPOUND)
+				if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
-					if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
-					{
-						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-						entityMap.put(attrName,
-								new AttributeResponse(meta.getName(), meta, attr, subAttributesSet, null,
-										molgenisPermissionService, dataService, languageService));
-					}
-					else
-					{
-						entityMap.put(attrName, Collections.singletonMap("href",
-								Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-										attrName)));
-					}
-				}
-				else if (attrType == DATE)
-				{
-					Date date = entity.getDate(attrName);
-					entityMap.put(attrName, date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
-							.format(date) : null);
-				}
-				else if (attrType == DATE_TIME)
-				{
-					Date date = entity.getDate(attrName);
-					entityMap.put(attrName, date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
-							.format(date) : null);
-				}
-				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
-						&& attrType != ONE_TO_MANY && attrType != FILE)
-				{
-					entityMap.put(attrName, entity.get(attr.getName()));
-				}
-				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE)
-						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
-				{
-					Entity refEntity = entity.getEntity(attr.getName());
-					if (refEntity != null)
-					{
-						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-						EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getName());
-						Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityType, subAttributesSet,
-								null);
-						entityMap.put(attrName, refEntityMap);
-					}
-				}
-				else if ((attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
-						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
-				{
-					EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getName());
-					Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
-
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
-					for (Entity refEntity : mrefEntities)
-					{
-						Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityType, subAttributesSet,
-								null);
-						refEntityMaps.add(refEntityMap);
-					}
-
-					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
-							(long) refEntityMaps.size(), mrefEntities);
-
-					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
-							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName), null, molgenisPermissionService, dataService, languageService);
-
-					entityMap.put(attrName, ecr);
+					entityMap.put(attrName, new AttributeResponse(meta.getName(), meta, attr, subAttributesSet, null,
+							molgenisPermissionService, dataService, languageService));
 				}
-				else if ((attrType == XREF && entity.get(attr.getName()) != null) || (attrType == CATEGORICAL
-						&& entity.get(attr.getName()) != null) || (attrType == FILE
-						&& entity.get(attr.getName()) != null) || attrType == MREF || attrType == CATEGORICAL_MREF
-						|| attrType == ONE_TO_MANY)
+				else
 				{
-					// Add href to ref field
-					Map<String, String> ref = new LinkedHashMap<String, String>();
-					ref.put("href",
+					entityMap.put(attrName, Collections.singletonMap("href",
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName));
-					entityMap.put(attrName, ref);
+									attrName)));
+				}
+			}
+			else if (attrType == DATE)
+			{
+				Date date = entity.getDate(attrName);
+				entityMap.put(attrName,
+						date != null ? MolgenisDateFormat.getDateFormat().format(date) : null);
+			}
+			else if (attrType == DATE_TIME)
+			{
+				Date date = entity.getDate(attrName);
+				entityMap.put(attrName, date != null ? MolgenisDateFormat.getDateTimeFormat().format(date) : null);
+			}
+			else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
+					&& attrType != ONE_TO_MANY && attrType != FILE)
+			{
+				entityMap.put(attrName, entity.get(attr.getName()));
+			}
+			else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE) && attributeExpandsSet != null
+					&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
+			{
+				Entity refEntity = entity.getEntity(attr.getName());
+				if (refEntity != null)
+				{
+					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
+					EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getName());
+					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityType, subAttributesSet, null);
+					entityMap.put(attrName, refEntityMap);
+				}
+			}
+			else if ((attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
+					&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
+			{
+				EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getName());
+				Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
+
+				Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
+				List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
+				for (Entity refEntity : mrefEntities)
+				{
+					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityType, subAttributesSet, null);
+					refEntityMaps.add(refEntityMap);
 				}
 
-			}
+				EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
+						(long) refEntityMaps.size(), mrefEntities);
 
+				EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
+						Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+								attrName), null, molgenisPermissionService, dataService, languageService);
+
+				entityMap.put(attrName, ecr);
+			}
+			else if ((attrType == XREF && entity.get(attr.getName()) != null) || (attrType == CATEGORICAL
+					&& entity.get(attr.getName()) != null) || (attrType == FILE && entity.get(attr.getName()) != null)
+					|| attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
+			{
+				// Add href to ref field
+				Map<String, String> ref = new LinkedHashMap<String, String>();
+				ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+						attrName));
+				entityMap.put(attrName, ref);
+			}
 		}
 
 		return entityMap;

@@ -1,6 +1,7 @@
 package org.molgenis.test.data.staticentity;
 
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.test.data.TestPackage;
@@ -8,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -35,7 +36,7 @@ public class TestEntityStaticMetaData extends SystemEntityType
 	{
 		setPackage(testPackage);
 		addAttribute(EntityTestHarness.ATTR_ID, ROLE_ID).setAuto(true);
-		addAttribute(EntityTestHarness.ATTR_STRING, ROLE_LABEL);
+		addAttribute(EntityTestHarness.ATTR_STRING, ROLE_LABEL).setNillable(false);
 		addAttribute(EntityTestHarness.ATTR_BOOL).setDataType(BOOL);
 		addAttribute(EntityTestHarness.ATTR_CATEGORICAL).setDataType(CATEGORICAL)
 				.setRefEntity(testRefEntityStaticMetaData);
@@ -52,5 +53,7 @@ public class TestEntityStaticMetaData extends SystemEntityType
 		addAttribute(EntityTestHarness.ATTR_SCRIPT).setDataType(SCRIPT);
 		addAttribute(EntityTestHarness.ATTR_XREF).setDataType(XREF).setRefEntity(testRefEntityStaticMetaData);
 		addAttribute(EntityTestHarness.ATTR_MREF).setDataType(MREF).setRefEntity(testRefEntityStaticMetaData);
+		Attribute compound = addAttribute(EntityTestHarness.ATTR_COMPOUND).setDataType(COMPOUND);
+		addAttribute(EntityTestHarness.ATTR_COMPOUND_CHILD_INT).setDataType(INT).setParent(compound);
 	}
 }

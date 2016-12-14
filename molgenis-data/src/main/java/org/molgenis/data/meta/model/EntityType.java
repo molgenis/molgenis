@@ -1,8 +1,8 @@
 package org.molgenis.data.meta.model;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
@@ -20,7 +21,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
@@ -113,18 +114,30 @@ public class EntityType extends StaticEntity
 		// Own attributes (deep copy or shallow copy)
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
-			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAttributes().spliterator(), false)
+			// step #1: deep copy attributes
+			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
 					.map(attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
 					.map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
 					.collect(toMap(Attribute::getName, Function.identity(), (u, v) ->
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
-			entityTypeCopy.setOwnAttributes(ownAttrMap.values());
+
+			// step #2: update attribute.parent relations
+			ownAttrMap.forEach((attrName, ownAttr) ->
+			{
+				Attribute ownAttrParent = ownAttr.getParent();
+				if (ownAttrParent != null)
+				{
+					ownAttr.setParent(ownAttrMap.get(ownAttrParent.getName()));
+				}
+			});
+
+			entityTypeCopy.setOwnAllAttributes(ownAttrMap.values());
 		}
 		else
 		{
-			entityTypeCopy.setOwnAttributes(newArrayList(entityType.getOwnAttributes()));
+			entityTypeCopy.setOwnAllAttributes(newArrayList(entityType.getOwnAllAttributes()));
 		}
 
 		entityTypeCopy.setAbstract(entityType.isAbstract());
@@ -328,7 +341,6 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return id attribute
 	 */
-	// FIXME cache id attribute
 	public Attribute getOwnIdAttribute()
 	{
 		for (Attribute ownAttr : getOwnAllAttributes())
@@ -494,7 +506,7 @@ public class EntityType extends StaticEntity
 				.collect(toList());
 	}
 
-	public EntityType setOwnAttributes(Iterable<Attribute> attrs)
+	public EntityType setOwnAllAttributes(Iterable<Attribute> attrs)
 	{
 		invalidateCachedOwnAttrs();
 		set(ATTRIBUTES, attrs);
@@ -583,12 +595,45 @@ public class EntityType extends StaticEntity
 	{
 		invalidateCachedOwnAttrs();
 
-		attr.setEntity(this);
 		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
-		attr.setSequenceNumber(Iterables.size(attrs));
+		// validate that no other attribute exists with the same name
+		attrs.forEach(existingAttr ->
+		{
+			if (existingAttr.getName().equals(attr.getName()))
+			{
+				throw new MolgenisDataException(
+						format("Entity [%s] already contains attribute with name [%s], duplicate attribute names are not allowed",
+								this.getName(), attr.getName()));
+			}
+		});
+
+		attr.setEntity(this);
+		this.addSequenceNumber(attr, attrs);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+
 		setAttributeRoles(attr, attrTypes);
 		return this;
+	}
+
+	/**
+	 * Add a sequence number to the attribute.
+	 * If the sequence number exists add it ot the attribute.
+	 * If the sequence number does not exists then find the highest sequence number.
+	 * If Entity has not attributes with sequence numbers put 0.
+	 *
+	 * @param attr  the attribute to add
+	 * @param attrs existing attributes
+	 */
+	static void addSequenceNumber(Attribute attr, Iterable<Attribute> attrs)
+	{
+		Integer sequenceNumber = attr.getSequenceNumber();
+		if (null == sequenceNumber)
+		{
+			int i = StreamSupport.stream(attrs.spliterator(), false).filter(a -> null != a.getSequenceNumber())
+					.mapToInt(a -> a.getSequenceNumber()).max().orElse(-1);
+			if (i == -1) attr.setSequenceNumber(0);
+			else attr.setSequenceNumber(++i);
+		}
 	}
 
 	public void addAttributes(Iterable<Attribute> attrs)

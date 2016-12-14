@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class RepositoryValidationDecoratorTest
@@ -181,6 +181,12 @@ public class RepositoryValidationDecoratorTest
 		entityAttributesValidator = mock(EntityAttributesValidator.class);
 		repositoryValidationDecorator = new RepositoryValidationDecorator(dataService, decoratedRepo,
 				entityAttributesValidator, expressionValidator);
+	}
+
+	@Test
+	public void query() throws Exception
+	{
+		assertEquals(repositoryValidationDecorator.query().getRepository(), repositoryValidationDecorator);
 	}
 
 	@Test
@@ -402,188 +408,6 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@Test
-	public void addRequiredValueVisibleExpressionFalse()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
-
-		// actual tests
-		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@Test
-	public void addRequiredValueVisibleExpressionTrue()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@Test
-	public void addRequiredValueVisibleExpressionTrueValidationError()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
-
-		// actual tests
-		try
-		{
-			repositoryValidationDecorator.add(entity0);
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@Test
-	public void addRequiredQuestionnaireNotSubmitted()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because status is notSubmitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("notSubmitted");
-
-		// actual tests
-		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@Test
-	public void addRequiredQuestionnaireSubmittedValidationError()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.getString("status")).thenReturn("SUBMITTED");
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // not valid, because status is submitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("SUBMMITTED");
-
-		// actual tests
-		try
-		{
-			repositoryValidationDecorator.add(entity0);
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
 	}
 
 	@Test
@@ -1135,225 +959,6 @@ public class RepositoryValidationDecoratorTest
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void addStreamRequiredValueVisibleExpressionFalse()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.add(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-
-		stream.collect(Collectors.toList()); // process stream to enable validation
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void addStreamRequiredValueVisibleExpressionTrue()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.add(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-
-		stream.collect(Collectors.toList()); // process stream to enable validation
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void addStreamRequiredValueVisibleExpressionTrueValidationError()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.add(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-		try
-		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
-
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void addStreamRequiredQuestionnaireNotSubmitted()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because status is notSubmitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("notSubmitted");
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.add(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-
-		stream.collect(Collectors.toList()); // process stream to enable validation
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void addStreamRequiredQuestionnaireSubmittedValidationError()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.getString("status")).thenReturn("SUBMITTED");
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // not valid, because status is submitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("SUBMMITTED");
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.add(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-		try
-		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
-
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -2111,188 +1716,6 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
-	public void updateRequiredValueVisibleExpressionFalse()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
-
-		// actual tests
-		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@Test
-	public void updateRequiredValueVisibleExpressionTrue()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@Test
-	public void updateRequiredValueVisibleExpressionTrueValidationError()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
-
-		// actual tests
-		try
-		{
-			repositoryValidationDecorator.update(entity0);
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@Test
-	public void updateRequiredQuestionnaireNotSubmitted()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because status is notSubmitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("notSubmitted");
-
-		// actual tests
-		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@Test
-	public void updateRequiredQuestionnaireSubmittedValidationError()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.getString("status")).thenReturn("SUBMITTED");
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // not valid, because status is submitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("SUBMMITTED");
-
-		// actual tests
-		try
-		{
-			repositoryValidationDecorator.update(entity0);
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
-	}
-
-	@Test
 	public void updateRequiredMrefValueValidationError()
 	{
 		// entities
@@ -2795,6 +2218,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
+	@Test
 	public void updateReadOnlyXrefAttrValidationError()
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
@@ -2927,6 +2351,74 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0Clone)); // read only, no
+		// changes
+		// actual tests
+		repositoryValidationDecorator.update(updatedEntity0);
+		verify(decoratedRepo, times(1)).update(updatedEntity0);
+		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
+	}
+
+	@Test
+	public void updateReadOnlyMrefAttrNull()
+	{
+		String attrReadonlyMrefName = "readonlyMrefAttr";
+
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
+		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
+		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
+		when(readonlyMrefAttr.isNillable()).thenReturn(true);
+
+		when(entityType.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyMrefAttr));
+
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityType()).thenReturn(entityType);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique1");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique1");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrReadonlyMrefName)).thenReturn(emptyList());
+		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(emptyList());
+
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+
+		Entity updatedEntity0 = mock(Entity.class);
+		when(updatedEntity0.getEntityType()).thenReturn(entityType);
+
+		when(updatedEntity0.getIdValue()).thenReturn("id0");
+		when(updatedEntity0.getEntity(attrXrefName)).thenReturn(refEntity0Clone);
+		when(updatedEntity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(updatedEntity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0Clone));
+		when(updatedEntity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(updatedEntity0.getString(attrUniqueStringName)).thenReturn("unique1");
+		when(updatedEntity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0Clone);
+		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(null);
+		when(updatedEntity0.getEntities(attrReadonlyMrefName)).thenReturn(emptyList()); // read only,
+		// no
+		// changes
+		when(updatedEntity0.get(attrIdName)).thenReturn("id0");
+		when(updatedEntity0.get(attrXrefName)).thenReturn(refEntity0Clone);
+		when(updatedEntity0.get(attrNillableXrefName)).thenReturn(null);
+		when(updatedEntity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0Clone));
+		when(updatedEntity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
+		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		// changes
 		// actual tests
 		repositoryValidationDecorator.update(updatedEntity0);
@@ -3192,225 +2684,6 @@ public class RepositoryValidationDecoratorTest
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void updateStreamRequiredValueVisibleExpressionFalse()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(false);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.update(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-
-		stream.collect(Collectors.toList()); // process stream to enable validation
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void updateStreamRequiredValueVisibleExpressionTrue()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.update(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-
-		stream.collect(Collectors.toList()); // process stream to enable validation
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void updateStreamRequiredValueVisibleExpressionTrueValidationError()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // violation error
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// visible expression
-		String visibleExpression = "expr";
-		when(xrefAttr.getVisibleExpression()).thenReturn(visibleExpression);
-		when(expressionValidator.resolveBooleanExpression(visibleExpression, entity0, entityType)).thenReturn(true);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.update(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-		try
-		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
-
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void updateStreamRequiredQuestionnaireNotSubmitted()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because status is notSubmitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("notSubmitted");
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.update(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-
-		stream.collect(Collectors.toList()); // process stream to enable validation
-		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-	}
-
-	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Test
-	public void updateStreamRequiredQuestionnaireSubmittedValidationError()
-	{
-		EntityType questionnaireEntityType = mock(EntityType.class);
-		when(questionnaireEntityType.getName()).thenReturn("Questionnaire");
-		when(entityType.getExtends()).thenReturn(questionnaireEntityType);
-
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityType()).thenReturn(entityType);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.getString("status")).thenReturn("SUBMITTED");
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // not valid, because status is submitted
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-		when(entity0.get("status")).thenReturn("SUBMMITTED");
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.update(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-		try
-		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
-
-			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
-		}
-		catch (MolgenisValidationException e)
-		{
-			verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-			assertEquals(e.getMessage(), "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
-		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

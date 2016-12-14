@@ -49,7 +49,7 @@
      * @memberOf molgenis.dataexplorer.data
      */
     function createDataTable() {
-        $.get('/permission/FreemarkerTemplate/read').done(function (canRead) {
+        $.get('/permission/sys_FreemarkerTemplate/read').done(function (canRead) {
             Table = React.render(molgenis.ui.Table({
                 entity: getEntity().name,
                 attrs: getAttributesTree(),

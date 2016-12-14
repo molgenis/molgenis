@@ -1,6 +1,5 @@
 package org.molgenis.charts.highcharts.convert;
 
-import org.molgenis.AttributeType;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.MolgenisAxisType;
@@ -11,6 +10,7 @@ import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.basic.*;
 import org.molgenis.charts.highcharts.chart.Chart;
 import org.molgenis.charts.highcharts.stockchart.StockChart;
+import org.molgenis.data.meta.AttributeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,7 @@
 package org.molgenis.data.transaction;
 
 import org.apache.commons.logging.LogFactory;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * TransactionManager used by Molgenis.
@@ -29,13 +33,16 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisTransactionManager.class);
 	private final IdGenerator idGenerator;
 	private final List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
+	private final TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
 
-	public MolgenisTransactionManager(IdGenerator idGenerator, DataSource dataSource)
+	public MolgenisTransactionManager(IdGenerator idGenerator, DataSource dataSource,
+			TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry)
 	{
 		super(dataSource);
 		super.logger = LogFactory.getLog(DataSourceTransactionManager.class);
 		setNestedTransactionAllowed(false);
 		this.idGenerator = idGenerator;
+		this.transactionExceptionTranslatorRegistry = requireNonNull(transactionExceptionTranslatorRegistry);
 	}
 
 	public void addTransactionListener(MolgenisTransactionListener transactionListener)
@@ -98,7 +105,15 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 			transactionListeners.forEach(j -> j.commitTransaction(transaction.getId()));
 		}
 
-		super.doCommit(jpaTransactionStatus);
+		try
+		{
+			super.doCommit(jpaTransactionStatus);
+		}
+		catch (TransactionException e)
+		{
+			throw translateTransactionException(e);
+		}
+
 		if (!status.isReadOnly())
 		{
 			transactionListeners.forEach(j -> j.afterCommitTransaction(transaction.getId()));
@@ -174,5 +189,22 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
 		super.doResume(molgenisTransaction.getDataSourceTransaction(), suspendedResources);
+	}
+
+	private MolgenisDataException translateTransactionException(TransactionException transactionException)
+	{
+		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry
+				.getTransactionExceptionTranslators())
+		{
+			MolgenisDataException molgenisDataException = transactionExceptionTranslator
+					.doTranslate(transactionException);
+			if (molgenisDataException != null)
+			{
+				return molgenisDataException;
+			}
+		}
+		throw new RuntimeException(
+				format("Unexpected exception class [%s]", transactionException.getClass().getSimpleName()),
+				transactionException);
 	}
 }

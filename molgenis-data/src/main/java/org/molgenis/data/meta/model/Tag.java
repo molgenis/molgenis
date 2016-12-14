@@ -20,13 +20,13 @@ public class Tag extends StaticEntity
 	public Tag(String identifier, EntityType entityType)
 	{
 		super(entityType);
-		setIdentifier(identifier);
+		setId(identifier);
 	}
 
 	public static Tag newInstance(Tag tag)
 	{
 		Tag tagCopy = new Tag(tag.getEntityType());
-		tagCopy.setIdentifier(tag.getIdentifier());
+		tagCopy.setId(tag.getId());
 		tagCopy.setObjectIri(tag.getObjectIri());
 		tagCopy.setLabel(tag.getLabel());
 		tagCopy.setRelationIri(tag.getRelationIri());
@@ -35,69 +35,69 @@ public class Tag extends StaticEntity
 		return tagCopy;
 	}
 
-	public String getIdentifier()
+	public String getId()
 	{
-		return getString(TagMetaData.IDENTIFIER);
+		return getString(TagMetadata.ID);
 	}
 
-	public Tag setIdentifier(String identifier)
+	public Tag setId(String identifier)
 	{
-		set(TagMetaData.IDENTIFIER, identifier);
+		set(TagMetadata.ID, identifier);
 		return this;
 	}
 
 	public String getObjectIri()
 	{
-		return getString(TagMetaData.OBJECT_IRI);
+		return getString(TagMetadata.OBJECT_IRI);
 	}
 
 	public Tag setObjectIri(String objectIri)
 	{
-		set(TagMetaData.OBJECT_IRI, objectIri);
+		set(TagMetadata.OBJECT_IRI, objectIri);
 		return this;
 	}
 
 	public String getLabel()
 	{
-		return getString(TagMetaData.LABEL);
+		return getString(TagMetadata.LABEL);
 	}
 
 	public Tag setLabel(String label)
 	{
-		set(TagMetaData.LABEL, label);
+		set(TagMetadata.LABEL, label);
 		return this;
 	}
 
 	public String getRelationIri()
 	{
-		return getString(TagMetaData.RELATION_IRI);
+		return getString(TagMetadata.RELATION_IRI);
 	}
 
 	public Tag setRelationIri(String relationIri)
 	{
-		set(TagMetaData.RELATION_IRI, relationIri);
+		set(TagMetadata.RELATION_IRI, relationIri);
 		return this;
 	}
 
 	public String getRelationLabel()
 	{
-		return getString(TagMetaData.RELATION_LABEL);
+		return getString(TagMetadata.RELATION_LABEL);
 	}
 
 	public Tag setRelationLabel(String relationLabel)
 	{
-		set(TagMetaData.RELATION_LABEL, relationLabel);
+		set(TagMetadata.RELATION_LABEL, relationLabel);
 		return this;
 	}
 
 	public String getCodeSystem()
 	{
-		return getString(TagMetaData.CODE_SYSTEM);
+		return getString(TagMetadata.CODE_SYSTEM);
 	}
 
 	public Tag setCodeSystem(String codeSystem)
 	{
-		set(TagMetaData.CODE_SYSTEM, codeSystem);
+		set(TagMetadata.CODE_SYSTEM, codeSystem);
 		return this;
 	}
 }

@@ -3,7 +3,7 @@ package org.molgenis.data.i18n;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.settings.AppSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -44,7 +44,7 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		if (!baseName.equals(I18N_STRING)) return null;
 
 		// Only handle languages that are present in the languages repository
-		if (runAsSystem(() -> dataService.query(LANGUAGE).eq(LanguageMetaData.CODE, languageCode).count()) == 0)
+		if (runAsSystem(() -> dataService.query(LANGUAGE).eq(LanguageMetadata.CODE, languageCode).count()) == 0)
 			return null;
 
 		return new MolgenisResourceBundle(dataService, languageCode, appSettings);

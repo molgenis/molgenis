@@ -1,29 +1,26 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
-public class RepositoryValidationDecorator implements Repository<Entity>
+public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private enum ValidationMode
 	{
@@ -42,6 +39,12 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		this.decoratedRepository = requireNonNull(repository);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
 		this.expressionValidator = requireNonNull(expressionValidator);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	@Override
@@ -65,12 +68,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void delete(Entity entity)
-	{
-		decoratedRepository.delete(entity);
-	}
-
-	@Override
 	public void add(Entity entity)
 	{
 		try (ValidationResource validationResource = new ValidationResource())
@@ -88,131 +85,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			entities = validate(entities, validationResource, ValidationMode.ADD);
 			return decoratedRepository.add(entities);
 		}
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepository.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepository.getEntityType();
-	}
-
-	@Override
-	public Iterator<Entity> iterator()
-	{
-		return decoratedRepository.iterator();
-	}
-
-	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
-	{
-		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepository.close();
-	}
-
-	@Override
-	public long count()
-	{
-		return decoratedRepository.count();
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return decoratedRepository.query();
-	}
-
-	@Override
-	public long count(Query<Entity> q)
-	{
-		return decoratedRepository.count(q);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
-	{
-		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Entity findOne(Query<Entity> q)
-	{
-		return decoratedRepository.findOne(q);
-	}
-
-	@Override
-	public Entity findOneById(Object id)
-	{
-		return decoratedRepository.findOneById(id);
-	}
-
-	@Override
-	public Entity findOneById(Object id, Fetch fetch)
-	{
-		return decoratedRepository.findOneById(id, fetch);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
-	}
-
-	@Override
-	public void delete(Stream<Entity> entities)
-	{
-		decoratedRepository.delete(entities);
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		decoratedRepository.deleteById(id);
-	}
-
-	@Override
-	public void deleteAll(Stream<Object> ids)
-	{
-		decoratedRepository.deleteAll(ids);
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		decoratedRepository.deleteAll();
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decoratedRepository.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decoratedRepository.getQueryOperators();
 	}
 
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,
@@ -278,8 +150,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT))
 		{
-			List<Attribute> requiredValueAttrs = StreamSupport
-					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			List<Attribute> requiredValueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
 			validationResource.setRequiredValueAttrs(requiredValueAttrs);
@@ -293,7 +164,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs
-			refAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
 		}
 		else
@@ -301,7 +172,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			// validate cross-repository collection reference constraints. the decorated repository takes care of
 			// validating other reference constraints
 			String backend = dataService.getMeta().getBackend(getEntityType()).getName();
-			refAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
 							attr)).collect(toList());
 		}
@@ -349,8 +220,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		if (!getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT))
 		{
 			// get unique attributes
-			List<Attribute> uniqueAttrs = StreamSupport
-					.stream(getEntityType().getAtomicAttributes().spliterator(), false)
+			List<Attribute> uniqueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
 			// get existing values for each attributes
@@ -393,9 +263,9 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
 		String idAttrName = getEntityType().getIdAttribute().getName();
-		List<Attribute> readonlyAttrs = StreamSupport.stream(getEntityType().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.getName().equals(idAttrName))
-				.collect(toList());
+		List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
+						.getName().equals(idAttrName)).collect(toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}
@@ -408,32 +278,10 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity
 					.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
 			{
-				boolean isValid = false;
-
-				// FIXME remove hack (see https://github.com/molgenis/molgenis/issues/4308)
-				// Do not validate if Questionnaire status is not SUBMITTED
-				if (EntityUtils.doesExtend(getEntityType(), "Questionnaire") && !"SUBMITTED"
-						.equals(entity.getString("status")))
-				{
-					isValid = true;
-				}
-				// Do not validate if visibleExpression resolves to false
-				else if (nonNillableAttr.getVisibleExpression() != null && !expressionValidator
-						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity, getEntityType()))
-				{
-
-					isValid = true;
-				}
-
-				if (!isValid)
-				{
-					String message = format("The attribute '%s' of entity '%s' can not be null.",
-							nonNillableAttr.getName(), getName());
-
-					ConstraintViolation constraintViolation = new ConstraintViolation(message, nonNillableAttr,
-							Long.valueOf(validationResource.getRow()));
-					validationResource.addViolation(constraintViolation);
-				}
+				ConstraintViolation constraintViolation = new ConstraintViolation(
+						format("The attribute '%s' of entity '%s' can not be null.", nonNillableAttr.getName(),
+								getName()), nonNillableAttr, Integer.valueOf(validationResource.getRow()).longValue());
+				validationResource.addViolation(constraintViolation);
 			}
 		});
 	}
@@ -562,19 +410,11 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			}
 			else if (isMultipleReferenceType(readonlyAttr))
 			{
-				List<Object> entityIds = new ArrayList<>();
-				((Iterable<Entity>) value).forEach(mrefEntity ->
-				{
-					entityIds.add(mrefEntity.getIdValue());
-				});
-				value = entityIds;
+				value = stream(entity.getEntities(readonlyAttr.getName()).spliterator(), false).map(Entity::getIdValue)
+						.collect(toList());
 
-				List<Object> existingEntityIds = new ArrayList<>();
-				((Iterable<Entity>) existingValue).forEach(mrefEntity ->
-				{
-					existingEntityIds.add(mrefEntity.getIdValue());
-				});
-				existingValue = existingEntityIds;
+				existingValue = stream(entityToUpdate.getEntities(readonlyAttr.getName()).spliterator(), false)
+						.map(Entity::getIdValue).collect(toList());
 			}
 
 			if (value != null && existingValue != null && !value.equals(existingValue))

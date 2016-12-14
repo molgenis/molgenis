@@ -30,7 +30,7 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null) return false;
 
-		String pluginAuthority = authorityPrefix + permission.toString() + '_' + authorityId.toUpperCase();
+		String pluginAuthority = authorityPrefix + permission.toString() + '_' + authorityId;
 		Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities();
 		if (grantedAuthorities != null)
 		{

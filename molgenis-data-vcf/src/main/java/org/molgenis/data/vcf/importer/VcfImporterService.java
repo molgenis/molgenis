@@ -2,15 +2,15 @@ package org.molgenis.data.vcf.importer;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
+import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
+import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Service
 public class VcfImporterService implements ImportService
@@ -88,7 +89,7 @@ public class VcfImporterService implements ImportService
 			EntityType emd = source.getRepository(entityName).getEntityType();
 
 			// Vcf entity
-			boolean entityExists = dataService.hasRepository(entityName);
+			boolean entityExists = runAsSystem(() -> dataService.hasRepository(entityName));
 			report.getSheetsImportable().put(entityName, !entityExists);
 
 			// Available Attributes
@@ -104,7 +105,7 @@ public class VcfImporterService implements ImportService
 			if (sampleAttribute != null)
 			{
 				String sampleEntityName = sampleAttribute.getRefEntity().getName();
-				boolean sampleEntityExists = dataService.hasRepository(sampleEntityName);
+				boolean sampleEntityExists = runAsSystem(() -> dataService.hasRepository(sampleEntityName));
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
 				List<String> availableSampleAttributeNames = Lists.newArrayList();
@@ -138,10 +139,10 @@ public class VcfImporterService implements ImportService
 			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
-		Repository<Entity> sampleRepository = null;
+		Repository<Entity> sampleRepository;
 		String entityName = inRepository.getName();
 
-		if (dataService.hasRepository(entityName))
+		if (runAsSystem(() -> dataService.hasRepository(entityName)))
 		{
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
@@ -154,16 +155,20 @@ public class VcfImporterService implements ImportService
 		{
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
-			sampleRepository = dataService.getMeta().createRepository(samplesEntityType);
+			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityType.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
+		}
+		else
+		{
+			sampleRepository = null;
 		}
 
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int sampleEntityCount = 0;
 		List<Entity> sampleEntities = new ArrayList<>();
-		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityType))
+		try (Repository<Entity> outRepository = runAsSystem(() -> dataService.getMeta().createRepository(entityType)))
 		{
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(entityType.getName()));
@@ -197,7 +202,7 @@ public class VcfImporterService implements ImportService
 
 				if (!sampleEntities.isEmpty())
 				{
-					sampleRepository.add(sampleEntities.stream());
+					runAsSystem(() -> sampleRepository.add(sampleEntities.stream()));
 					sampleEntityCount += sampleEntities.size();
 				}
 
@@ -209,11 +214,11 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
+			runAsSystem(() -> outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
 			{
 				vcfEntityCount.incrementAndGet();
 				return true;
-			}));
+			})));
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityName, vcfEntityCount.get());

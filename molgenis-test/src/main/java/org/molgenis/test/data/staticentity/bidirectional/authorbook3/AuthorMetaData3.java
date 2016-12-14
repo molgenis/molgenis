@@ -10,8 +10,8 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.Sort.Direction.ASC;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -43,7 +43,7 @@ public class AuthorMetaData3 extends SystemEntityType
 		setLabel("Author");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
-		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
+		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setLabel("Label");
 		Attribute attribute = bookMetaData.getAttribute(BookMetaData3.AUTHOR);
 		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute)
 				.setOrderBy(new Sort(BookMetaData3.ID, ASC));

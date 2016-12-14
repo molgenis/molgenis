@@ -8,8 +8,8 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.BOOL;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -42,7 +42,8 @@ public class GroupMetaData extends SystemEntityType
 
 		setExtends(authorityMetaData);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setDescription("").setNillable(false);
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setDescription("").setNillable(false)
+				.setUnique(true);
 		addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
 				.setDescription("Boolean to indicate whether this group is in use.").setAggregatable(true)
 				.setNillable(false);

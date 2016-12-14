@@ -7,7 +7,6 @@ import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -21,8 +20,8 @@ import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
@@ -40,16 +39,14 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	private final DataSource dataSource;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataService dataService;
-	private final PlatformTransactionManager transactionManager;
 
 	PostgreSqlRepositoryCollection(PostgreSqlEntityFactory postgreSqlEntityFactory, DataSource dataSource,
-			JdbcTemplate jdbcTemplate, DataService dataService, PlatformTransactionManager transactionManager)
+			JdbcTemplate jdbcTemplate, DataService dataService)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
 		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.dataService = requireNonNull(dataService);
-		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	@Override
@@ -142,108 +139,114 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void addAttribute(EntityType entityType, Attribute attr)
 	{
-		addAttributeRec(entityType, attr, true);
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot add attribute [%s] to abstract entity type [%s].", attr.getName(),
+							entityType.getName()));
+		}
+		if (entityType.getAttribute(attr.getName()) != null)
+		{
+			throw new MolgenisDataException(
+					format("Adding attribute operation failed. Attribute already exists [%s]", attr.getName()));
+		}
+		addAttributeInternal(entityType, attr);
 	}
 
 	@Override
 	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		updateAttributeRec(entityType, attr, updatedAttr);
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot update attribute [%s] for abstract entity type [%s].", attr.getName(),
+							entityType.getName()));
+		}
+		if (!isPersisted(attr) && !isPersisted(updatedAttr))
+		{
+			return;
+		}
+
+		if (isPersisted(attr) && !isPersisted(updatedAttr))
+		{
+			deleteAttribute(entityType, attr);
+		}
+		else if (!isPersisted(attr) && isPersisted(updatedAttr))
+		{
+			addAttributeInternal(entityType, updatedAttr);
+		}
+		else
+		{
+			updateColumn(entityType, attr, updatedAttr);
+		}
 	}
 
 	@Override
 	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot delete attribute [%s] from abstract entity type [%s].", attr.getName(),
+							entityType.getName()));
+		}
 		if (entityType.getAttribute(attr.getName()) == null)
 		{
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
 		}
-		deleteAttributeRec(entityType, attr);
-	}
-
-	/**
-	 * Recursively add attribute to entity and entities extending from this entity.
-	 *
-	 * @param entityType      entity meta data
-	 * @param attr            attribute to add
-	 * @param checkAttrExists whether or not to perform a check if the attribute exists for the given entity
-	 */
-	private void addAttributeRec(EntityType entityType, Attribute attr, boolean checkAttrExists)
-	{
-		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
-		{
-			// computed attributes and compound attributes are not persisted
-			return;
-		}
-
-		if (checkAttrExists && entityType.getAttribute(attr.getName()) != null)
-		{
-			throw new MolgenisDataException(
-					format("Adding attribute operation failed. Attribute already exists [%s]", attr.getName()));
-		}
-
-		if (entityType.isAbstract())
-		{
-			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> addAttributeRec(childEntityType, attr, checkAttrExists));
-		}
-		else
-		{
-			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
-			{
-				if (isMultipleReferenceType(attr))
-				{
-					createJunctionTable(entityType, attr);
-				}
-				else
-				{
-					createColumn(entityType, attr);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Recursively update attribute of entity and entities extending from this entity.
-	 *
-	 * @param entityType  entity meta data
-	 * @param attr        existing attribute
-	 * @param updatedAttr updated attribute
-	 */
-	private void updateAttributeRec(EntityType entityType, Attribute attr, Attribute updatedAttr)
-	{
-		if ((attr.getExpression() != null && updatedAttr.getExpression() != null) || (attr.getDataType() == COMPOUND
-				&& updatedAttr.getDataType() == COMPOUND))
+		if (!isPersisted(attr))
 		{
 			return;
 		}
 
-		if (entityType.isAbstract())
+		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 		{
-			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> updateAttributeRec(childEntityType, attr, updatedAttr));
-		}
-		else
-		{
-			if ((attr.getExpression() == null && updatedAttr.getExpression() != null) || (attr.getDataType() != COMPOUND
-					&& updatedAttr.getDataType() == COMPOUND))
+			if (isMultipleReferenceType(attr))
 			{
-				// computed attributes and compound attributes are not persisted
-				deleteAttribute(entityType, attr);
-			}
-			else if ((attr.getExpression() != null && updatedAttr.getExpression() == null) || (
-					attr.getDataType() == COMPOUND && updatedAttr.getDataType() != COMPOUND))
-			{
-				// computed attributes and compound attributes are not persisted
-				addAttributeRec(entityType, updatedAttr, false);
+				dropJunctionTable(entityType, attr);
 			}
 			else
 			{
-				updateColumn(entityType, attr, updatedAttr);
+				dropColumn(entityType, attr);
 			}
 		}
+	}
+
+	/**
+	 * Add attribute to entityType.
+	 *  @param entityType      the {@link EntityType} to add attribute to
+	 * @param attr            attribute to add
+	 */
+	private void addAttributeInternal(EntityType entityType, Attribute attr)
+	{
+		if (!isPersisted(attr))
+		{
+			return;
+		}
+
+		if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
+		{
+			if (isMultipleReferenceType(attr))
+			{
+				createJunctionTable(entityType, attr);
+			}
+			else
+			{
+				createColumn(entityType, attr);
+			}
+		}
+	}
+
+	/**
+	 * Indicates if the attribute is persisted in the database.
+	 * Compound attributes and computed attributes with an expression are not persisted.
+	 *
+	 * @param attr the attribute to check
+	 * @return boolean indicating if the entity is persisted in the database.
+	 */
+	private boolean isPersisted(Attribute attr)
+	{
+		return !attr.hasExpression() && attr.getDataType() != COMPOUND;
 	}
 
 	/**
@@ -421,47 +424,11 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	/**
-	 * Recursively delete attribute in entity and entities extending from this entity.
-	 *
-	 * @param entityType entity meta data
-	 * @param attr       attribute to delete
-	 */
-	private void deleteAttributeRec(EntityType entityType, Attribute attr)
-	{
-		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
-		{
-			// computed attributes and compound attributes are not persisted
-			return;
-		}
-
-		if (entityType.isAbstract())
-		{
-			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EXTENDS, entityType).findAll()
-					.forEach(childEntityType -> deleteAttributeRec(childEntityType, attr));
-		}
-		else
-		{
-			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
-			{
-				if (isMultipleReferenceType(attr))
-				{
-					dropJunctionTable(entityType, attr);
-				}
-				else
-				{
-					dropColumn(entityType, attr);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Return a new PostgreSQL repository
 	 */
 	private PostgreSqlRepository createPostgreSqlRepository()
 	{
-		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, transactionManager);
+		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource);
 	}
 
 	private boolean isTableExists(EntityType entityType)

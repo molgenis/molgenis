@@ -1,7 +1,7 @@
 package org.molgenis.data.rsql;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Service;
@@ -74,7 +74,7 @@ public class RSQLValueParser
 		{
 			throw new MolgenisDataException(
 					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), paramValue,
-							MolgenisDateFormat.DATEFORMAT_DATETIME));
+							MolgenisDateFormat.getDateTimeFormat().toPattern()));
 		}
 	}
 
@@ -88,7 +88,7 @@ public class RSQLValueParser
 		{
 			throw new MolgenisDataException(
 					format("Attribute [%s] value [%s] does not match date format [%s].", attr.getName(), paramValue,
-							MolgenisDateFormat.DATEFORMAT_DATE));
+							MolgenisDateFormat.getDateFormat().toPattern()));
 		}
 	}
 

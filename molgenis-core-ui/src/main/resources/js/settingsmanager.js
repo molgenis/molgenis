@@ -26,7 +26,7 @@
                     {field: 'package', operator: 'EQUALS', value: 'sys' + molgenis.packageSeparator + 'set'},
                     {operator: 'AND'},
                     {operator: 'NOT'},
-                    {field: 'abstract', operator: 'EQUALS', value: 'true'}
+                    {field: 'isAbstract', operator: 'EQUALS', value: 'true'}
                 ]
             },
             mode: 'view',

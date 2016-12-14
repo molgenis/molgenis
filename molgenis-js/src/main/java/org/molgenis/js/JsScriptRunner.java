@@ -36,6 +36,6 @@ public class JsScriptRunner implements ScriptRunner
 	{
 		String jsScript = script.generateScript(parameters);
 		Object scriptResult = jsScriptExecutor.executeScript(jsScript);
-		return scriptResult.toString();
+		return scriptResult != null ? scriptResult.toString() : null;
 	}
 }

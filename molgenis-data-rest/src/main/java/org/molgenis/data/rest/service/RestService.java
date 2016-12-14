@@ -1,11 +1,11 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
@@ -36,8 +36,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -305,7 +305,7 @@ public class RestService
 				{
 					throw new MolgenisDataException(
 							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATETIME));
+									paramStrValue, MolgenisDateFormat.getDateTimeFormat().toPattern()));
 				}
 			}
 			else
@@ -343,7 +343,7 @@ public class RestService
 				{
 					throw new MolgenisDataException(
 							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATE));
+									paramStrValue, MolgenisDateFormat.getDateFormat().toPattern()));
 				}
 			}
 			else

@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import org.molgenis.AttributeType;
 import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -10,6 +9,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -31,12 +31,12 @@ import static com.google.api.client.util.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.util.DependencyResolver.hasSelfReferences;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 public class MappingServiceImpl implements MappingService
@@ -67,6 +67,7 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
+	@Transactional
 	public MappingProject addMappingProject(String projectName, User owner, String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
@@ -77,13 +78,14 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
+	@Transactional
 	public void deleteMappingProject(String mappingProjectId)
 	{
 		mappingProjectRepository.delete(mappingProjectId);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_menumanager')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId)
 	{
@@ -118,7 +120,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_menumanager')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
 	{
@@ -148,6 +150,7 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@RunAsSystem
+	@Transactional
 	public void updateMappingProject(MappingProject mappingProject)
 	{
 		mappingProjectRepository.update(mappingProject);
@@ -165,11 +168,13 @@ public class MappingServiceImpl implements MappingService
 		return applyMappings(mappingTarget, entityName, true);
 	}
 
-	// TODO discuss: why isn't this method transactional?
 	@Override
+	@Transactional
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
+		targetMetaData.setPackage(null);
+		targetMetaData.setSimpleName(entityName);
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
 		if (addSourceAttribute)
@@ -217,19 +222,9 @@ public class MappingServiceImpl implements MappingService
 		}
 		catch (RuntimeException ex)
 		{
-			if (targetRepo.getName().equals(mappingTarget.getName()))
-			{
-				// Mapping to the target model, if something goes wrong we do not want to delete it
-				LOG.error("Error applying mappings to the target", ex);
-				throw ex;
-			}
-			else
-			{
-				// A new repository was created for mapping, so we can drop it if something went wrong
-				LOG.error("Error applying mappings, dropping created repository.", ex);
-				dataService.getMeta().deleteEntityType(targetMetaData.getName());
-				throw ex;
-			}
+			// Mapping to the target model, if something goes wrong we do not want to delete it
+			LOG.error("Error applying mappings to the target", ex);
+			throw ex;
 		}
 	}
 
@@ -302,21 +297,32 @@ public class MappingServiceImpl implements MappingService
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		sourceRepo.iterator().forEachRemaining(sourceEntity ->
+		if (targetRepo.count() == 0)
 		{
+			sourceRepo.forEachBatched(entities -> targetRepo.add(entities.stream()
+					.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute))), 1000);
+		}
+		else
+		{
+			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
+			sourceRepo.iterator().forEachRemaining(sourceEntity ->
 			{
-				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-						sourceMapping.getSourceEntityType(), addSourceAttribute);
-				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
 				{
-					targetRepo.add(mappedEntity);
+					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute);
+					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+					{
+						targetRepo.add(mappedEntity);
+					}
+					else
+					{
+						targetRepo.update(mappedEntity);
+					}
 				}
-				else
-				{
-					targetRepo.update(mappedEntity);
-				}
-			}
-		});
+			});
+		}
+
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData,

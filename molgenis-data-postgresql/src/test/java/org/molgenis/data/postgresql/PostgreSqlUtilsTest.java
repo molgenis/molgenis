@@ -1,8 +1,8 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
@@ -12,6 +12,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -19,7 +20,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.assertEquals;
@@ -312,8 +313,7 @@ public class PostgreSqlUtilsTest
 				new Object[] { attrCategorical, categoricalValueId }, new Object[] { attrCategoricalNillable, null },
 				new Object[] { attrCategoricalMref, asList(categoricalMrefValueId0, categoricalMrefValueId1) },
 				new Object[] { attrCategoricalMrefNillable, emptyList() },
-				new Object[] { attrDate, new java.sql.Date(dateValue.getTime()) },
-				new Object[] { attrDateNillable, null },
+				new Object[] { attrDate, LocalDate.of(2012, 12, 21) }, new Object[] { attrDateNillable, null },
 				new Object[] { attrDateTime, new java.sql.Timestamp(dateTimeValue.getTime()) },
 				new Object[] { attrDateTimeNillable, null }, new Object[] { attrDecimal, decimalValue },
 				new Object[] { attrDecimalNillable, null }, new Object[] { attrEmail, emailValue },

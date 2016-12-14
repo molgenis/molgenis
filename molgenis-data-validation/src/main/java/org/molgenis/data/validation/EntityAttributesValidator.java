@@ -2,11 +2,12 @@ package org.molgenis.data.validation;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.impl.EmailValidator;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -18,7 +19,8 @@ import java.util.Set;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
-import static org.molgenis.AttributeType.*;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.*;
 
 /**
  * Attribute data type validator.
@@ -28,7 +30,14 @@ import static org.molgenis.AttributeType.*;
 @Component
 public class EntityAttributesValidator
 {
+	private final ExpressionValidator expressionValidator;
 	private EmailValidator emailValidator;
+
+	@Autowired
+	public EntityAttributesValidator(ExpressionValidator expressionValidator)
+	{
+		this.expressionValidator = requireNonNull(expressionValidator);
+	}
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityType meta)
 	{
@@ -166,7 +175,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private static Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
+	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
 	{
 		List<String> validationExpressions = new ArrayList<>();
 		List<Attribute> expressionAttributes = new ArrayList<>();
@@ -178,19 +187,19 @@ public class EntityAttributesValidator
 				expressionAttributes.add(attribute);
 				validationExpressions.add(attribute.getValidationExpression());
 			}
-
 		}
 
 		Set<ConstraintViolation> violations = new LinkedHashSet<>();
 
 		if (!validationExpressions.isEmpty())
 		{
-			List<Boolean> results = ValidationUtils.resolveBooleanExpressions(validationExpressions, entity, meta);
+			List<Boolean> results = expressionValidator.resolveBooleanExpressions(validationExpressions, entity);
 			for (int i = 0; i < results.size(); i++)
 			{
 				if (!results.get(i))
 				{
-					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), meta));
+					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), meta,
+							format("Offended expression: %s", validationExpressions.get(i))));
 				}
 			}
 		}
@@ -377,12 +386,6 @@ public class EntityAttributesValidator
 		{
 			List<String> enumOptions = attribute.getEnumOptions();
 
-			// Keep OMX/JPA happy
-			if (enumOptions == null)
-			{
-				return null;
-			}
-
 			if (!enumOptions.contains(value))
 			{
 				return createConstraintViolation(entity, attribute, entityType,
@@ -419,9 +422,9 @@ public class EntityAttributesValidator
 			String message)
 	{
 		String dataValue = getDataValuesForType(entity, attribute).toString();
-		String fullMessage = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
+		String fullMessage = format("Invalid [%s] value [%s] for attribute [%s] of entity [%s] with type [%s].",
 				attribute.getDataType().toString().toLowerCase(), dataValue, attribute.getLabel(),
-				entityType.getName());
+				entity.getLabelValue(), entityType.getName());
 		fullMessage += " " + message;
 
 		return new ConstraintViolation(fullMessage, dataValue, entity, attribute, entityType, null);

@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
-import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.core.entity.impl.framework.AbstractAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
@@ -26,11 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.AttributeType.STRING;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.annotation.web.settings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Configuration
 public class FitConAnnotator implements AnnotatorConfig
@@ -58,6 +58,7 @@ public class FitConAnnotator implements AnnotatorConfig
 
 	@Autowired
 	private AttributeFactory attributeFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -70,12 +71,7 @@ public class FitConAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<Attribute> attributes = new ArrayList<>();
-		Attribute dann_score = attributeFactory.create().setName(FITCON_SCORE).setDataType(STRING)
-				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.")
-				.setLabel(FITCON_SCORE_LABEL);
-
-		attributes.add(dann_score);
+		List<Attribute> attributes = createFitconOutputAttributes();
 
 		AnnotatorInfo fitconInfo = AnnotatorInfo
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
@@ -96,18 +92,36 @@ public class FitConAnnotator implements AnnotatorConfig
 								+ " about a 14%relative increase in the area under the curve (AUC) metric over CADD’s SVMmethodology."
 								+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
 						attributes);
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(FITCON_TABIX_RESOURCE, fitconInfo,
+		EntityAnnotator entityAnnotator = new AbstractAnnotator(FITCON_TABIX_RESOURCE, fitconInfo,
 				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, vcfAttributes),
 				dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_LOCATION, fitConAnnotatorSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_LOCATION, fitConAnnotatorSettings))
+		{
+			@Override
+			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+			{
+				return createFitconOutputAttributes();
+			}
+		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	private List<Attribute> createFitconOutputAttributes()
+	{
+		List<Attribute> attributes = newArrayList();
+		Attribute fitcon_score = attributeFactory.create().setName(FITCON_SCORE).setDataType(STRING)
+				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.")
+				.setLabel(FITCON_SCORE_LABEL);
+
+		attributes.add(fitcon_score);
+		return attributes;
 	}
 
 	@Bean
 	Resource fitconResource()
 	{
-		Resource fitConTabixResource = null;
+		Resource fitConTabixResource;
 		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE,
 				new SingleResourceConfig(FITCON_LOCATION, fitConAnnotatorSettings))
 		{
@@ -235,8 +249,7 @@ public class FitConAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(attributeFactory.create().setName("RawScore"));
 				repoMetaData.addAttribute(attributeFactory.create().setName("PHRED"));
 
-				Attribute idAttribute = attributeFactory.create().setName("id")
-						.setVisible(false).setIdAttribute(true);
+				Attribute idAttribute = attributeFactory.create().setName("id").setVisible(false).setIdAttribute(true);
 				repoMetaData.addAttribute(idAttribute);
 
 				return new TabixRepositoryFactory(repoMetaData);

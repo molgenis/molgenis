@@ -24,7 +24,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 

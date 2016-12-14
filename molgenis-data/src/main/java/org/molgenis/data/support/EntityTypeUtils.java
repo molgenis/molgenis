@@ -1,14 +1,14 @@
 package org.molgenis.data.support;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.util.EntityUtils;
 
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 public class EntityTypeUtils
@@ -156,6 +156,7 @@ public class EntityTypeUtils
 			case HYPERLINK:
 			case STRING:
 				return true;
+			case ONE_TO_MANY:
 			case BOOL:
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -196,6 +197,7 @@ public class EntityTypeUtils
 			case BOOL:
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
+			case ONE_TO_MANY:
 			case COMPOUND:
 			case DATE:
 			case DATE_TIME:
@@ -206,6 +208,80 @@ public class EntityTypeUtils
 			case HYPERLINK:
 			case INT:
 			case LONG:
+			case MREF:
+			case STRING:
+			case XREF:
+				return false;
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	/**
+	 * Returns whether the attribute is an integer type.
+	 *
+	 * @param attrType attribute type
+	 * @return true if the attribute is an integer type.
+	 */
+	public static boolean isIntegerType(AttributeType attrType)
+	{
+		switch (attrType)
+		{
+			case INT:
+			case LONG:
+				return true;
+			case HTML:
+			case SCRIPT:
+			case TEXT:
+			case BOOL:
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case COMPOUND:
+			case ONE_TO_MANY:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case FILE:
+			case HYPERLINK:
+			case MREF:
+			case STRING:
+			case XREF:
+				return false;
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	/**
+	 * Returns whether the attribute is a date type.
+	 *
+	 * @param attrType attribute type
+	 * @return true if the attribute is a date type.
+	 */
+	public static boolean isDateType(AttributeType attrType)
+	{
+		switch (attrType)
+		{
+			case DATE:
+			case DATE_TIME:
+				return true;
+			case LONG:
+			case INT:
+			case HTML:
+			case SCRIPT:
+			case TEXT:
+			case BOOL:
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case COMPOUND:
+			case ONE_TO_MANY:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case FILE:
+			case HYPERLINK:
 			case MREF:
 			case STRING:
 			case XREF:
@@ -234,7 +310,7 @@ public class EntityTypeUtils
 	 */
 	public static String buildFullName(Package package_, String simpleName)
 	{
-		if (package_ != null && !PACKAGE_DEFAULT.equals(package_.getName()))
+		if (package_ != null)
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append(package_.getName());
@@ -268,5 +344,20 @@ public class EntityTypeUtils
 			}
 		}
 		return fetch;
+	}
+
+	public static boolean hasSelfReferences(EntityType entityType)
+	{
+		for (Attribute attr : entityType.getAtomicAttributes())
+		{
+			if (attr.getRefEntity() != null)
+			{
+				if (EntityUtils.equals(attr.getRefEntity(), entityType))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

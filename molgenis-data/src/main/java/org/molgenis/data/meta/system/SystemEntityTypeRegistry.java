@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 
 /**
  * Registry containing all {@link SystemEntityType}.
@@ -44,7 +44,7 @@ public class SystemEntityTypeRegistry
 		return systemEntityTypeMap.containsKey(entityName);
 	}
 
-	public void addSystemEntityType(SystemEntityType systemEntityType)
+	void addSystemEntityType(SystemEntityType systemEntityType)
 	{
 		String systemEntityTypeName = systemEntityType.getName();
 		if (systemEntityTypeName == null)

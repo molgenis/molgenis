@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -37,7 +37,7 @@ public class BookMetaData4 extends SystemEntityType
 		setLabel("Book");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
-		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
+		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setLabel("Label");
 		addAttribute(AUTHOR).setDataType(XREF).setRefEntity(authorMetaData);
 	}
 

@@ -7,9 +7,9 @@ import com.google.gson.reflect.TypeToken;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
@@ -50,7 +50,6 @@ import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -62,8 +61,8 @@ import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -750,7 +749,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
-		assertEquals((new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)).format(entity.get("date_time")),
+		assertEquals(MolgenisDateFormat.getDateTimeFormat().format(entity.get("date_time")),
 				"1985-08-12T08:12:13+0200");
 	}
 

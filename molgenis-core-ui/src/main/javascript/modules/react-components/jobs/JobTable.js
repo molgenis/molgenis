@@ -11,6 +11,7 @@
  */
 import React from "react";
 import moment from "moment";
+import twix from 'twix';
 import "moment-duration-format";
 import {Button} from "../Button";
 

@@ -1,9 +1,9 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
@@ -17,14 +17,15 @@ import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 @Component
-public class PostgreSqlEntityFactory
+class PostgreSqlEntityFactory
 {
 	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlEntityFactory.class);
@@ -135,8 +136,8 @@ public class PostgreSqlEntityFactory
 					throw new RuntimeException(
 							format("Value mapping not allowed for attribute type [%s]", attr.getDataType().toString()));
 				case DATE:
-					// valid, because java.sql.Date extends required type java.util.Date
-					value = resultSet.getDate(colName);
+					LocalDate localDate = resultSet.getObject(colName, LocalDate.class);
+					value = localDate != null ? Date.from(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant()) : null;
 					break;
 				case DATE_TIME:
 					// valid, because java.sql.Timestamp extends required type java.util.Date

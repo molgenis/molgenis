@@ -7,13 +7,13 @@ import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
+import org.molgenis.data.importer.EntitiesValidationReport;
+import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +30,7 @@ import static java.util.Collections.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.testng.Assert.*;
 
 public class VcfImporterServiceTest

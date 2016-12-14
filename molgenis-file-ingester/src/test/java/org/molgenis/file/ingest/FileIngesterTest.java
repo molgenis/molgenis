@@ -1,6 +1,7 @@
 package org.molgenis.file.ingest;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
@@ -12,7 +13,6 @@ import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

@@ -21,7 +21,7 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 /**
  * ExcelSheet {@link org.molgenis.data.Repository} implementation

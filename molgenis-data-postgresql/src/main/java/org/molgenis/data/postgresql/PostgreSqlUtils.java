@@ -1,11 +1,13 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.AttributeType;
+import org.apache.commons.lang3.time.DateUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
 
+import java.time.ZoneId;
 import java.util.Date;
 
 import static java.lang.String.format;
@@ -50,10 +52,12 @@ class PostgreSqlUtils
 						mrefEntity.getEntityType().getIdAttribute())).collect(toList());
 			case DATE:
 				Date date = entity.getUtilDate(attrName);
-				return date != null ? new java.sql.Date(date.getTime()) : null;
+				// http://stackoverflow.com/questions/21242110/convert-java-util-date-to-java-time-localdate
+				return date != null ? date.toInstant().atZone(ZoneId.of("UTC")).toLocalDate() : null;
 			case DATE_TIME:
 				Date dateTime = entity.getUtilDate(attrName);
-				return dateTime != null ? new java.sql.Timestamp(dateTime.getTime()) : null;
+				return dateTime != null ? new java.sql.Timestamp(
+						(dateTime.getTime() / DateUtils.MILLIS_PER_SECOND) * DateUtils.MILLIS_PER_SECOND) : null;
 			case DECIMAL:
 				return entity.getDouble(attrName);
 			case EMAIL:
