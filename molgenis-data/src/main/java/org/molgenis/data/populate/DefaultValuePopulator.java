@@ -125,7 +125,7 @@ public class DefaultValuePopulator
 		{
 			throw new RuntimeException(
 					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), valueAsString,
-							MolgenisDateFormat.DATEFORMAT_DATE));
+							MolgenisDateFormat.getDateFormat().toPattern()));
 		}
 	}
 
@@ -139,7 +139,7 @@ public class DefaultValuePopulator
 		{
 			throw new RuntimeException(
 					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), valueAsString,
-							MolgenisDateFormat.DATEFORMAT_DATETIME));
+							MolgenisDateFormat.getDateTimeFormat().toPattern()));
 		}
 	}
 

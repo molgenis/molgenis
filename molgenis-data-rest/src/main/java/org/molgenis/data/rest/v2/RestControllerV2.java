@@ -35,7 +35,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -762,12 +761,12 @@ class RestControllerV2
 					case COMPOUND:
 						throw new RuntimeException("Invalid data type [" + dataType + "]");
 					case DATE:
-						Date dateValue = entity.getDate(attrName);
+						Date dateValue = entity.getUtilDate(attrName);
 						String dateValueStr = dateValue != null ? getDateFormat().format(dateValue) : null;
 						responseData.put(attrName, dateValueStr);
 						break;
 					case DATE_TIME:
-						Date dateTimeValue = entity.getDate(attrName);
+						Date dateTimeValue = entity.getUtilDate(attrName);
 						String dateTimeValueStr =
 								dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
 						responseData.put(attrName, dateTimeValueStr);

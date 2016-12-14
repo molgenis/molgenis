@@ -17,6 +17,8 @@ import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -134,8 +136,8 @@ class PostgreSqlEntityFactory
 					throw new RuntimeException(
 							format("Value mapping not allowed for attribute type [%s]", attr.getDataType().toString()));
 				case DATE:
-					// valid, because java.sql.Date extends required type java.util.Date
-					value = resultSet.getDate(colName);
+					LocalDate localDate = resultSet.getObject(colName, LocalDate.class);
+					value = localDate != null ? Date.from(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant()) : null;
 					break;
 				case DATE_TIME:
 					// valid, because java.sql.Timestamp extends required type java.util.Date
