@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
@@ -31,8 +32,8 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserDecorator(Repository<User> decoratedRepository,
-			UserAuthorityFactory userAuthorityFactory, DataService dataService, PasswordEncoder passwordEncoder)
+	public UserDecorator(Repository<User> decoratedRepository, UserAuthorityFactory userAuthorityFactory,
+			DataService dataService, PasswordEncoder passwordEncoder)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
@@ -96,7 +97,7 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 		String currentPassword = currentUser.getPassword();
 		String password = user.getPassword();
 		//password is updated
-		if(!currentPassword.equals(password))
+		if (!currentPassword.equals(password))
 		{
 			password = passwordEncoder.encode(user.getPassword());
 		}
@@ -126,8 +127,7 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 	private void updateSuperuserAuthority(User user)
 	{
 		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
-		UserAuthority suAuthority = userAuthorityRepo.query().eq(USER, user).and()
-				.eq(ROLE, AUTHORITY_SU).findOne();
+		UserAuthority suAuthority = userAuthorityRepo.query().eq(USER, user).and().eq(ROLE, AUTHORITY_SU).findOne();
 
 		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
@@ -152,6 +152,11 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 	private Repository<UserAuthority> getUserAuthorityRepository()
 	{
 		return dataService.getRepository(USER_AUTHORITY, UserAuthority.class);
+	}
+
+	private Repository<GroupMember> getGroupMemberRepository()
+	{
+		return dataService.getRepository(GROUP_MEMBER, GroupMember.class);
 	}
 
 	@Override
@@ -234,31 +239,55 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 	@Override
 	public void delete(User entity)
 	{
+		deleteUserAuthoritiesAndGroupMember(entity);
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
 	public void delete(Stream<User> entities)
 	{
+		entities = entities.map(entity ->
+		{
+			deleteUserAuthoritiesAndGroupMember(entity);
+			return entity;
+		});
 		decoratedRepository.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
+		deleteUserAuthoritiesAndGroupMember(findOneById(id));
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
+		ids = ids.map(id ->
+		{
+			deleteUserAuthoritiesAndGroupMember(findOneById(id));
+			return id;
+		});
 		decoratedRepository.deleteAll(ids);
+	}
+
+	private void deleteUserAuthoritiesAndGroupMember(User user)
+	{
+		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
+		Stream<UserAuthority> userAuthorities = userAuthorityRepo.query().eq(UserAuthorityMetaData.USER, user)
+				.findAll();
+		userAuthorityRepo.delete(userAuthorities);
+
+		Repository<GroupMember> groupMemberRepo = getGroupMemberRepository();
+		Stream<GroupMember> groupMembers = groupMemberRepo.query().eq(GroupMemberMetaData.USER, user).findAll();
+		groupMemberRepo.delete(groupMembers);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		decoratedRepository.deleteAll();
+		throw new UnsupportedOperationException("Deleting all users is not supported.");
 	}
 
 	@Override
