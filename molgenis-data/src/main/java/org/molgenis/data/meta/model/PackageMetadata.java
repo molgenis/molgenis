@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
@@ -30,7 +30,7 @@ public class PackageMetadata extends SystemEntityType
 	public static final String ENTITY_TYPES = "entityTypes";
 	public static final String TAGS = "tags";
 
-	private TagMetaData tagMetaData;
+	private TagMetadata tagMetadata;
 	private EntityTypeMetadata entityTypeMetadata;
 
 	public PackageMetadata()
@@ -55,14 +55,14 @@ public class PackageMetadata extends SystemEntityType
 				.setMappedBy(entityTypeMetadata.getAttribute(EntityTypeMetadata.PACKAGE))
 				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL)).setRefEntity(entityTypeMetadata)
 				.setLabel("Entity types");
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
 	@Autowired
-	public void setTagMetaData(TagMetaData tagMetaData)
+	public void setTagMetadata(TagMetadata tagMetadata)
 	{
-		this.tagMetaData = requireNonNull(tagMetaData);
+		this.tagMetadata = requireNonNull(tagMetadata);
 	}
 
 	@Autowired

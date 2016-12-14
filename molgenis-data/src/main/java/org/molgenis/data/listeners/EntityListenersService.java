@@ -25,9 +25,6 @@ public final class EntityListenersService
 
 	/**
 	 * Register a repository to the entity listeners service once
-	 *
-	 * @param repoFullName
-	 * @return
 	 */
 	void register(String repoFullName)
 	{
@@ -48,8 +45,6 @@ public final class EntityListenersService
 	/**
 	 * Update all registered listeners of the entities
 	 *
-	 * @param repoFullName
-	 * @param entities
 	 * @return Stream<Entity>
 	 */
 	Stream<Entity> updateEntities(String repoFullName, Stream<Entity> entities)
@@ -62,10 +57,7 @@ public final class EntityListenersService
 			return entities.filter(entity ->
 			{
 				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-				entityEntityListeners.forEach(entityListener ->
-				{
-					entityListener.postUpdate(entity);
-				});
+				entityEntityListeners.forEach(entityListener -> entityListener.postUpdate(entity));
 				return true;
 			});
 		}
@@ -77,9 +69,6 @@ public final class EntityListenersService
 
 	/**
 	 * Update all registered listeners of an entity
-	 *
-	 * @param repoFullName
-	 * @param entity
 	 */
 	void updateEntity(String repoFullName, Entity entity)
 	{
@@ -89,10 +78,7 @@ public final class EntityListenersService
 			verifyRepoRegistered(repoFullName);
 			SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
 			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-			entityEntityListeners.forEach(entityListener ->
-			{
-				entityListener.postUpdate(entity);
-			});
+			entityEntityListeners.forEach(entityListener -> entityListener.postUpdate(entity));
 		}
 		finally
 		{
@@ -103,7 +89,6 @@ public final class EntityListenersService
 	/**
 	 * Adds an entity listener for a entity of the given class that listens to entity changes
 	 *
-	 * @param repoFullName
 	 * @param entityListener entity listener for a entity
 	 */
 
@@ -125,9 +110,8 @@ public final class EntityListenersService
 	/**
 	 * Removes an entity listener for a entity of the given class
 	 *
-	 * @param repoFullName
 	 * @param entityListener entity listener for a entity
-	 * @return
+	 * @return boolean
 	 */
 	public boolean removeEntityListener(String repoFullName, EntityListener entityListener)
 	{
@@ -153,7 +137,6 @@ public final class EntityListenersService
 	 * Check if a repository has no listeners
 	 * Repository must be registered
 	 *
-	 * @param repoFullName
 	 * @return boolean
 	 */
 	boolean isEmpty(String repoFullName)
@@ -172,10 +155,8 @@ public final class EntityListenersService
 
 	/**
 	 * Verify that the repository is registered
-	 *
-	 * @param repoFullName
 	 */
-	protected void verifyRepoRegistered(String repoFullName)
+	private void verifyRepoRegistered(String repoFullName)
 	{
 		lock.readLock().lock();
 		try

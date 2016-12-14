@@ -1,6 +1,6 @@
 {
   "name": "MOLGENIS",
-  "version": "2.0.0-FAIR-SNAPSHOT",
+  "version": "2.1.0-SNAPSHOT",
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
     "watch": "webpack -d --watch",

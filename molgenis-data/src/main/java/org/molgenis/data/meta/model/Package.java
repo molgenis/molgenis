@@ -1,17 +1,13 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.util.ApplicationContextProvider;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
 

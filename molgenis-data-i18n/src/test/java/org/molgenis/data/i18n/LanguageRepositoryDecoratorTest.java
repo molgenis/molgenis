@@ -7,7 +7,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -61,7 +61,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Mock
 	private RepositoryCollection defaultBackend;
 	@Mock
-	private LanguageMetaData languageMeta;
+	private LanguageMetadata languageMeta;
 	@Mock
 	private LanguageService languageService;
 

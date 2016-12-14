@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.data.Entity;
+import com.google.common.collect.Lists;
+import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -8,62 +9,78 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.AttributeType.*;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
 public class EntityTypeTest
 {
-	private EntityType entityType;
-	private Attribute randomAttribute;
-	private Attribute compoundAttribute;
-	private Attribute attributePart;
-
-	private EntityType nestedEntityType;
-	private Attribute nestedCompoundParent;
-	private Attribute nestedCompoundPart;
-	private Attribute nestedAttributePart;
-
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		// Setup for single level compound
-		randomAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute randomAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(randomAttribute.getName()).thenReturn("randomAttribute");
 
-		attributePart = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attributePart = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(attributePart.getName()).thenReturn("attributePart");
 		Iterable<Attribute> attributeParts = newArrayList(attributePart);
 
-		compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+		Attribute compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(compoundAttribute.getName()).thenReturn("compoundAttribute");
 		when(compoundAttribute.getChildren()).thenReturn(attributeParts);
 
-		Iterable<Attribute> mockedAttributes = newArrayList(compoundAttribute, randomAttribute);
-
-		Entity entity = when(mock(Entity.class).getEntities(ATTRIBUTES, Attribute.class)).thenReturn(mockedAttributes)
-				.getMock();
-		entityType = new EntityType(entity);
-
 		// Setup for nested compound test
-		nestedAttributePart = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute nestedAttributePart = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Iterable<Attribute> nestedCompoundAttributeParts = newArrayList(nestedAttributePart);
 
-		nestedCompoundPart = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+		Attribute nestedCompoundPart = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(nestedCompoundPart.getChildren()).thenReturn(nestedCompoundAttributeParts);
 		Iterable<Attribute> nestedAttributeParts = newArrayList(nestedCompoundPart, attributePart);
 
-		nestedCompoundParent = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+		Attribute nestedCompoundParent = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 		when(nestedCompoundParent.getChildren()).thenReturn(nestedAttributeParts);
+	}
 
-		Iterable<Attribute> mockedNestedAttributes = newArrayList(nestedCompoundParent, randomAttribute);
+	@Test
+	public void addSequenceNumberNull()
+	{
+		EntityType entityType = mock(EntityType.class);
 
-		Entity nestedEntity = when(mock(Entity.class).getEntities(ATTRIBUTES, Attribute.class))
-				.thenReturn(mockedNestedAttributes).getMock();
-		nestedEntityType = new EntityType(nestedEntity);
+		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+
+		when(attr1.getSequenceNumber()).thenReturn(0);
+		when(attr2.getSequenceNumber()).thenReturn(1);
+		when(attr3.getSequenceNumber()).thenReturn(2);
+		when(attribute.getSequenceNumber()).thenReturn(null);
+
+		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		verify(attribute).setSequenceNumber(3);
+	}
+
+	@Test
+	public void addSequenceNumberNullAndOtherNull()
+	{
+		EntityType entityType = mock(EntityType.class);
+
+		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+
+		when(attr1.getSequenceNumber()).thenReturn(null);
+		when(attr2.getSequenceNumber()).thenReturn(null);
+		when(attr3.getSequenceNumber()).thenReturn(null);
+		when(attribute.getSequenceNumber()).thenReturn(null);
+
+		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		verify(attribute).setSequenceNumber(0);
 	}
 
 	@Test
@@ -160,8 +177,11 @@ public class EntityTypeTest
 		Attribute attrLabel = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(attrLabel.isLabelAttribute()).thenReturn(true);
 		when(attrLabel.getLookupAttributeIndex()).thenReturn(1);
+		Attribute attrCompoundPart = when(mock(Attribute.class).getName()).thenReturn("compoundPart").getMock();
+		when(attrCompoundPart.getLookupAttributeIndex()).thenReturn(null);
 		Attribute attrCompound = when(mock(Attribute.class).getName()).thenReturn("compound").getMock();
 		when(attrCompound.getLookupAttributeIndex()).thenReturn(null);
+		when(attrCompound.getChildren()).thenReturn(singletonList(attrCompoundPart));
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
 
@@ -173,7 +193,7 @@ public class EntityTypeTest
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.getDescription()).thenReturn("description");
 
-		when(entityType.getOwnAttributes()).thenReturn(asList(attrId, attrLabel, attrCompound));
+		when(entityType.getOwnAllAttributes()).thenReturn(asList(attrId, attrLabel, attrCompound, attrCompoundPart));
 		when(entityType.getOwnIdAttribute()).thenReturn(attrId);
 		when(entityType.getOwnLabelAttribute()).thenReturn(attrLabel);
 		when(entityType.getOwnLookupAttributes()).thenReturn(asList(attrId, attrLabel));
@@ -190,11 +210,12 @@ public class EntityTypeTest
 		assertEquals(entityTypeCopy.getLabel(), "label");
 		assertEquals(entityTypeCopy.getDescription(), "description");
 
-		List<Attribute> ownAttrsCopy = newArrayList(entityType.getOwnAttributes());
-		assertEquals(ownAttrsCopy.size(), 3);
+		List<Attribute> ownAttrsCopy = newArrayList(entityTypeCopy.getOwnAllAttributes());
+		assertEquals(ownAttrsCopy.size(), 4);
 		assertSame(ownAttrsCopy.get(0), attrId);
 		assertSame(ownAttrsCopy.get(1), attrLabel);
 		assertSame(ownAttrsCopy.get(2), attrCompound);
+		assertSame(ownAttrsCopy.get(3), attrCompoundPart);
 		assertSame(entityTypeCopy.getIdAttribute(), attrId);
 		assertSame(entityTypeCopy.getLabelAttribute(), attrLabel);
 
@@ -212,6 +233,17 @@ public class EntityTypeTest
 		assertSame(tagsCopy.get(0), tag0);
 		assertSame(tagsCopy.get(1), tag1);
 		assertEquals(entityTypeCopy.getBackend(), "backend");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed")
+	public void addAttributeWithDuplicateName()
+	{
+		EntityType entityType = new EntityType(createEntityTypeMeta());
+		entityType.setName("myEntity");
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
+		entityType.addAttribute(attr0);
+		entityType.addAttribute(attr1);
 	}
 
 	private static EntityType createEntityTypeMeta()

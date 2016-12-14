@@ -8,15 +8,15 @@ import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
+import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
-import org.molgenis.js.RhinoConfig;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
@@ -60,14 +60,15 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
  FIXME Ideally, we'd like to scan all of org.molgenis.data or even org.molgenis, but there's some unwanted dependencies
  in org.molgenis.data and subpackages from included modules
   */
-@ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.index", "org.molgenis.data.jobs",
-		"org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.test.data", "org.molgenis.data.platform",
-		"org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.cache",
-		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
-		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation" })
+@ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
+		"org.molgenis.data.jobs", "org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
+		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
+		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
+		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
+		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, RhinoConfig.class, UuidGenerator.class, ExpressionValidator.class,
-		PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
+		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class, PlatformConfig.class,
+		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
@@ -85,6 +86,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private RepositoryCollectionBootstrapper repoCollectionBootstrapper;
 	@Autowired
 	private SystemEntityTypeRegistrar systemEntityTypeRegistrar;
+	@Autowired
+	private SystemPackageRegistrar systemPackageRegistrar;
 	@Autowired
 	private EntityFactoryRegistrar entityFactoryRegistrar;
 	@Autowired
@@ -186,14 +189,18 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					systemEntityTypeRegistrar.register(event);
 					LOG.trace("Registered system entity meta data");
 
+					LOG.trace("Registering system packages ...");
+					systemPackageRegistrar.register(event);
+					LOG.trace("Registered system packages");
+
 					LOG.trace("Registering entity factories ...");
 					entityFactoryRegistrar.register(event);
 					LOG.trace("Registered entity factories");
 					LOG.debug("Bootstrapped registries");
 
-					LOG.trace("Bootstrapping system entity meta data ...");
+					LOG.trace("Bootstrapping system entity types ...");
 					systemEntityTypeBootstrapper.bootstrap(event);
-					LOG.debug("Bootstrapped system entity meta data");
+					LOG.debug("Bootstrapped system entity types");
 				});
 			}
 			catch (Exception unexpected)

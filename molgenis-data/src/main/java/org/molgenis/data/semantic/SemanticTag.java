@@ -1,7 +1,7 @@
 package org.molgenis.data.semantic;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.meta.model.TagMetadata;
 
 public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 {
@@ -14,8 +14,8 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 	public static <SubjectType> SemanticTag<SubjectType, LabeledResource, LabeledResource> asTag(
 			SubjectType subjectType, Entity tagEntity)
 	{
-		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
-		String relationIri = tagEntity.getString(TagMetaData.RELATION_IRI);
+		String identifier = tagEntity.getString(TagMetadata.ID);
+		String relationIri = tagEntity.getString(TagMetadata.RELATION_IRI);
 		Relation relation = Relation.forIRI(relationIri);
 		if (relation == null)
 		{
@@ -23,16 +23,16 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 		}
 
 		LabeledResource codeSystem = null;
-		if (tagEntity.getString(TagMetaData.CODE_SYSTEM) != null)
+		if (tagEntity.getString(TagMetadata.CODE_SYSTEM) != null)
 		{
-			codeSystem = new LabeledResource(tagEntity.getString(TagMetaData.CODE_SYSTEM),
-					tagEntity.getString(TagMetaData.CODE_SYSTEM));
+			codeSystem = new LabeledResource(tagEntity.getString(TagMetadata.CODE_SYSTEM),
+					tagEntity.getString(TagMetadata.CODE_SYSTEM));
 		}
 
-		LabeledResource objectResource = new LabeledResource(tagEntity.getString(TagMetaData.OBJECT_IRI),
-				tagEntity.getString(TagMetaData.LABEL));
+		LabeledResource objectResource = new LabeledResource(tagEntity.getString(TagMetadata.OBJECT_IRI),
+				tagEntity.getString(TagMetadata.LABEL));
 
-		return new SemanticTag<SubjectType, LabeledResource, LabeledResource>(identifier, subjectType, relation,
+		return new SemanticTag<>(identifier, subjectType, relation,
 				objectResource, codeSystem);
 	}
 

@@ -69,21 +69,21 @@ public interface Query<E extends Entity> extends Iterable<E>
 	/**
 	 * @param field
 	 * @param value
-	 * @return
+	 * @return Query<E>
 	 */
 	Query<E> like(String field, String value);
 
 	/**
 	 * @param field
 	 * @param value categorical/xref: entity or entity id; mref: entity iterable or id iterable; else: value
-	 * @return
+	 * @return Query<E>
 	 */
 	Query<E> eq(String field, Object value);
 
 	/**
 	 * @param field
 	 * @param values ids
-	 * @return
+	 * @return Query<E>
 	 */
 	Query<E> in(String field, Iterable<?> values);
 

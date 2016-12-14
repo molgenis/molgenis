@@ -20,10 +20,10 @@
     <@renderTags tags=package.tags/>
 
 <#-- Subpackages -->
-    <#if package.subPackages?has_content>
+    <#if package.children?has_content>
         <h4>Packages</h4>
         <ul class="list-group">
-            <#list package.subPackages as subPackage>
+            <#list package.children as subPackage>
                 <li class="list-group-item"><a
                         href="#package-${subPackage.name?replace(" ", "_")?html}">${subPackage.name?html}</a></li>
             </#list>
@@ -31,12 +31,12 @@
     </#if>
 
 <#-- Entities index -->
-    <#if package.entityMetaDatas?has_content>
+    <#if package.entityTypes?has_content>
         <h4 id="entities-${package.name?replace(" ", "_")?html}">Entities</h4>
         <div class="row">
             <div class="col-md-4">
                 <ul class="list-group">
-                    <#list package.entityMetaDatas as entity>
+                    <#list package.entityTypes as entity>
                         <li class="list-group-item"><a
                                 href="#entity-${entity.name?replace(" ", "_")?html}">${entity.label?html}</a></li>
                     </#list>
@@ -48,12 +48,12 @@
         </div>
 
     <#-- Entities -->
-        <#list package.entityMetaDatas as entity>
+        <#list package.entityTypes as entity>
             <div class="panel" id="entity-${entity.name?replace(" ", "_")?html}">
                 <div class="panel-heading">
                     <h3 class="panel-title">${entity.label?html}
                         <small class="panel-title"><#if entity.extends?has_content>
-                            extends ${entity.extends.label?html}</#if><#if entity.abstract> (abstract)</#if></small>
+                            extends ${entity.extends.label?html}</#if><#if entity.isAbstract()> (abstract)</#if></small>
                     </h3>
                 </div>
                 <div class="panel-body">
@@ -95,33 +95,33 @@
         </p>
     </#if>
 </div>
-    <#if package.subPackages?has_content>
-        <#list package.subPackages as subPackage>
+    <#if package.children?has_content>
+        <#list package.children as subPackage>
             <@renderPackage subPackage/>
         </#list>
     </#if>
 </#macro>
 <#macro renderAttribute attribute entity depth>
     <#assign nextDepth = depth + ["x"]/>
-    <#assign dataType=attribute.dataType>
+    <#assign dataType=attribute.type>
 <tr id="attribute-${entity.name?replace(" ", "_")?html}${attribute.name?replace(" ", "_")?html}">
     <td><#list depth as lvl>
-        &nbsp;</#list>${attribute.label?html}<#if entity.idAttribute?? && entity.idAttribute.name == attribute.name>
-        <em>(id attribute)</em></#if><#if entity.labelAttribute?? && entity.labelAttribute.name == attribute.name> <em>(label
-        attribute)</em></#if><#list entity.lookupAttributes as lookupAttribute><#if lookupAttribute.name == attribute.name>
-        <em>(lookup attribute)</em><#break></#if></#list></td>
+        &nbsp;</#list>${attribute.label?html}<#if attribute.isIdAttribute()>
+        <em>(id attribute)</em></#if><#if attribute.isLabelAttribute()> <em>(label
+        attribute)</em></#if><#if attribute.lookupAttributeIndex??>
+        <em>(lookup attribute)</em></#if></td>
     <td><#if attribute.defaultValue?has_content>${attribute.defaultValue?html}</#if></td>
     <td>${dataType?html}<#if dataType == "CATEGORICAL" || dataType == "CATEGORICAL_MREF" || dataType == "MREF" || dataType == "XREF">
-        (<a href="#entity-${attribute.refEntity.name?replace(" ", "_")?html}">${attribute.refEntity.label?html}</a>)</#if>
+        (<a href="#entity-${attribute.refEntityType.name?replace(" ", "_")?html}">${attribute.refEntityType.label?html}</a>)</#if>
     </td>
     <td>
         <#assign constraints = []>
-        <#if attribute.nillable><#assign constraints = constraints + [ "nillable" ] /></#if>
-        <#if attribute.readOnly><#assign constraints = constraints + [ "read-only" ] /></#if>
-        <#if attribute.unique><#assign constraints = constraints + [ "unique" ] /></#if>
-        <#if !attribute.visible><#assign constraints = constraints + [ "hidden" ] /></#if>
-        <#if attribute.auto><#assign constraints = constraints + [ "auto" ] /></#if>
-        <#if attribute.isAggregatable><#assign constraints = constraints + [ "aggregates" ] /></#if>
+        <#if attribute.isNillable()><#assign constraints = constraints + [ "nullable" ] /></#if>
+        <#if attribute.isReadOnly()><#assign constraints = constraints + [ "read-only" ] /></#if>
+        <#if attribute.isUnique()><#assign constraints = constraints + [ "unique" ] /></#if>
+        <#if !attribute.isVisible()><#assign constraints = constraints + [ "hidden" ] /></#if>
+        <#if attribute.isAuto()><#assign constraints = constraints + [ "auto" ] /></#if>
+        <#if attribute.isAggregatable()><#assign constraints = constraints + [ "aggregates" ] /></#if>
         <#if attribute.range?has_content>
             <#assign range = "range [">
             <#if attribute.range.min?has_content>
@@ -137,7 +137,7 @@
     </td>
     <td class="description-column"><#if attribute.description?has_content>${attribute.description?html}</#if></td>
 </tr>
-    <#if attribute.dataType == "COMPOUND">
+    <#if attribute.type == "COMPOUND">
         <#list attribute.children as attributePart>
             <@renderAttribute attributePart entity nextDepth/>
         </#list>
@@ -147,10 +147,10 @@
 
 <#macro createPackageListItem package>
 <li><a href="#package-${package.name?replace(" ", "_")?html}">${package.name?html}</a></li>
-    <#if package.subPackages?has_content>
+    <#if package.children?has_content>
     <li>
         <ul>
-            <#list package.subPackages as subPackage>
+            <#list package.children as subPackage>
                     <@createPackageListItem subPackage/>
                 </#list>
         </ul>

@@ -9,9 +9,9 @@ import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -397,8 +397,8 @@ public class AggregateResponseParser
 		@Override
 		public int compare(Object o1, Object o2)
 		{
-			return o1 == null ? 1 : (o2 == null ? -1 : o1.toString().compareTo(o2.toString())); // FIXME check if this
-			// is allowed?
+			return o1 == null ? 1 : (
+					o2 == null ? -1 : o1.toString().compareTo(o2.toString())); // FIXME check if this is allowed?
 		}
 	}
 }

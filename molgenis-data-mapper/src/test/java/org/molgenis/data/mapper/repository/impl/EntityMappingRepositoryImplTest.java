@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -18,6 +19,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -79,8 +81,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "sourceAttributes");
+		attributeMappingEntity.set(AttributeMappingMetaData.TARGET_ATTRIBUTE, "targetAttribute");
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCE_ATTRIBUTES, "sourceAttributes");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
 
 		List<Entity> attributeMappingEntities = Lists.newArrayList();
@@ -120,10 +122,10 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "");
+		attributeMappingEntity.set(AttributeMappingMetaData.TARGET_ATTRIBUTE, "targetAttribute");
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCE_ATTRIBUTES, "");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, CURATED.toString());
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM_STATE, CURATED.toString());
 
 		List<Entity> attributeMappingEntities = Lists.newArrayList();
 		attributeMappingEntities.add(attributeMappingEntity);
@@ -187,6 +189,18 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		IdGenerator idGenerator()
 		{
 			return new UuidGenerator();
+		}
+
+		@Bean
+		EntityManager entityManager()
+		{
+			return mock(EntityManager.class);
+		}
+
+		@Bean
+		JsMagmaScriptEvaluator jsMagmaScriptEvaluator()
+		{
+			return mock(JsMagmaScriptEvaluator.class);
 		}
 
 		@Bean

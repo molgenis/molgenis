@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -333,8 +334,7 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void query()
 	{
-		indexedRepositoryDecorator.query();
-		verify(decoratedRepo, times(1)).query();
+		assertEquals(indexedRepositoryDecorator.query().getRepository(), indexedRepositoryDecorator);
 		verifyZeroInteractions(searchService);
 	}
 

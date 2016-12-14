@@ -18,6 +18,7 @@ import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.converter.RDFConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
+import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.ui.menu.MenuReaderServiceImpl;
@@ -45,6 +46,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -114,6 +116,13 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new CsvHttpMessageConverter());
 		converters.add(new ResourceHttpMessageConverter());
 		converters.add(rdfConverter);
+	}
+
+	@Override
+	public void configurePathMatch(PathMatchConfigurer configurer)
+	{
+		// Fix for https://github.com/molgenis/molgenis/issues/5431
+		configurer.setUseRegisteredSuffixPatternMatch(true);
 	}
 
 	@Bean

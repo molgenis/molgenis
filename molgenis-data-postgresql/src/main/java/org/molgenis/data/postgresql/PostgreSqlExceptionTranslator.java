@@ -1,30 +1,39 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionException;
 
 import javax.sql.DataSource;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
+import static java.util.stream.Collectors.joining;
+import static org.molgenis.data.meta.AttributeType.*;
 
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions
  */
-public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
+@Component
+class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator implements TransactionExceptionTranslator
 {
-	public PostgreSqlExceptionTranslator(DataSource dataSource)
+	@Autowired
+	PostgreSqlExceptionTranslator(DataSource dataSource)
 	{
 		super(requireNonNull(dataSource));
 	}
@@ -93,11 +102,54 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 				return translateUniqueKeyViolation(pSqlException);
 			case "23514": // check_violation
 				return translateCheckConstraintViolation(pSqlException);
+			case "2BP01":
+				return translateDependentObjectsStillExist(pSqlException);
 			case "42703":
 				return translateUndefinedColumnException(pSqlException);
 			default:
 				return null;
 		}
+	}
+
+	/**
+	 * Package private for testability
+	 *
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
+	 */
+	static MolgenisValidationException translateDependentObjectsStillExist(PSQLException pSqlException)
+	{
+		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
+		String detail = serverErrorMessage.getDetail();
+		Matcher matcher = Pattern.compile("constraint (.+) on table \"?([^\"]+)\"? depends on table \"?([^\"]+)\"?\n?")
+				.matcher(detail);
+
+		String table = null;
+		Set<String> dependentTables = new LinkedHashSet<>();
+		while (matcher.find())
+		{
+			table = matcher.group(2);
+			dependentTables.add(matcher.group(3));
+		}
+
+		if (table == null) // no matches
+		{
+			throw new RuntimeException("Error translating exception", pSqlException);
+		}
+
+		String message;
+		if (dependentTables.size() == 1)
+		{
+			message = format("Cannot delete entity '%s' because entity '%s' depends on it.", table,
+					dependentTables.iterator().next());
+		}
+		else
+		{
+			message = format("Cannot delete entity '%s' because entities '%s' depend on it.", table,
+					dependentTables.stream().collect(joining(", ")));
+		}
+		ConstraintViolation constraintViolation = new ConstraintViolation(message, null);
+		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
 	/**
@@ -159,7 +211,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
 		String message = serverErrorMessage.getMessage();
-		Matcher matcher = Pattern.compile("null value in column \"(.*?)\" violates not-null constraint")
+		Matcher matcher = Pattern.compile("null value in column \"?(.*?)\"? violates not-null constraint")
 				.matcher(message);
 		boolean matches = matcher.matches();
 		if (matches)
@@ -305,5 +357,18 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		String message = serverErrorMessage.getMessage();
 		ConstraintViolation constraintViolation = new ConstraintViolation(message);
 		return new MolgenisValidationException(singleton(constraintViolation));
+	}
+
+	@Override
+	public MolgenisDataException doTranslate(TransactionException transactionException)
+	{
+		Throwable cause = transactionException.getCause();
+		if (!(cause instanceof PSQLException))
+		{
+			return null;
+		}
+
+		PSQLException pSqlException = (PSQLException) cause;
+		return doTranslate(pSqlException);
 	}
 }

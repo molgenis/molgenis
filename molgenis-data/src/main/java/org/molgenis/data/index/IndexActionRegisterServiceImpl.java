@@ -5,9 +5,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
@@ -31,6 +34,8 @@ import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.FULL_NAME;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
@@ -57,7 +62,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@Autowired
 	private IndexActionGroupFactory indexActionGroupFactory;
 
-	public IndexActionRegisterServiceImpl()
+	IndexActionRegisterServiceImpl()
 	{
 		addExcludedEntity(INDEX_ACTION_GROUP);
 		addExcludedEntity(INDEX_ACTION);
@@ -101,42 +106,77 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()))
-				.flatMap(this::addReferencingEntities).collect(toSet());
-
+		Set<IndexAction> indexActionSet = filterUnnecessaryIndexActions();
 		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
 		for (int i = 0; i < indexActions1.size(); i++)
 		{
 			indexActions1.get(i).setActionOrder(i);
 		}
-		List<IndexAction> indexActions = indexActions1;
-		if (!indexActions.isEmpty())
+		if (indexActions1.isEmpty())
 		{
-			LOG.debug("Store index actions for transaction {}", transactionId);
-			dataService.add(INDEX_ACTION_GROUP,
-					indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
-			dataService.add(INDEX_ACTION, indexActions.stream());
+			return;
 		}
+		LOG.debug("Store index actions for transaction {}", transactionId);
+		dataService
+				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
+		dataService.add(INDEX_ACTION, indexActions1.stream());
+	}
+
+	/**
+	 * Filter all unnecessary index actions
+	 *
+	 * @return Set<IndexAction>
+	 */
+	private Set<IndexAction> filterUnnecessaryIndexActions()
+	{
+		// 1. add all referencing entities
+		Set<IndexAction> allIndexAction = getIndexActionsForCurrentTransaction().stream()
+				.flatMap(this::addReferencingEntities).collect(toSet());
+
+		// 2. Filter excluded entities
+		Set<IndexAction> indexActionWithoutExcluded = allIndexAction.stream()
+				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName())).collect(toSet());
+
+		// 3. Find all entities names of actions where no row is specified
+		Set<String> entityFullNames = indexActionWithoutExcluded.stream()
+				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityFullName)
+				.collect(toSet());
+
+		// 4. Filter all row index actions from list
+		return indexActionWithoutExcluded.stream()
+				.filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullNames
+						.contains(indexAction.getEntityFullName())).collect(toSet());
 	}
 
 	/**
 	 * Add for all referencing entities an index action
 	 *
-	 * @param indexAction
 	 * @return Stream<IndexAction>
 	 */
 	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
 	{
-		if (indexAction.getEntityId() != null || !dataService.hasRepository(
-				indexAction.getEntityFullName())) // When entity is deleted the entityType cannot be retrieved
+		if (indexAction.getEntityId() != null)
 		{
 			return Stream.of(indexAction);
 		}
-		return Stream.concat(Stream.of(indexAction), EntityUtils
-				.getReferencingEntityType(dataService.getEntityType(indexAction.getEntityFullName()), dataService)
-				.stream().map(pair -> indexActionFactory.create().setEntityFullName(pair.getA().getName())
-						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING)));
+
+		EntityType entityType = dataService.getEntityType(indexAction.getEntityFullName());
+		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
+		{
+			return Stream.of(indexAction);
+		}
+
+		// get referencing entity names
+		Set<String> referencingEntityNames = dataService.query(ATTRIBUTE_META_DATA, Attribute.class)
+				.fetch(new Fetch().field(ID).field(ENTITY, new Fetch().field(FULL_NAME)))
+				.eq(REF_ENTITY_TYPE, entityType).findAll().map(attr -> attr.getEntity().getName()).collect(toSet());
+
+		// convert referencing entity names to index actions
+		Stream<IndexAction> referencingEntityIndexActions = referencingEntityNames.stream()
+				.map(referencingEntityName -> indexActionFactory.create().setEntityFullName(referencingEntityName)
+						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
+
+		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
 	}
 
 	@Override
@@ -159,8 +199,9 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean isEntityDirty(EntityKey entityKey)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() != null && entityKey
-						.equals(EntityKey.create(indexAction.getEntityFullName(), indexAction.getEntityId())));
+				indexAction -> indexAction.getEntityId() != null && indexAction.getEntityFullName()
+						.equals(entityKey.getEntityName()) && indexAction.getEntityId()
+						.equals(entityKey.getId().toString()));
 	}
 
 	@Override
@@ -181,8 +222,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<EntityKey> getDirtyEntities()
 	{
 		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() != null)
-				.map(indexAction -> EntityKey.create(indexAction.getEntityFullName(), indexAction.getEntityId()))
-				.collect(toSet());
+				.map(this::createEntityKey).collect(toSet());
 	}
 
 	@Override
@@ -196,6 +236,19 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<String> getDirtyRepositories()
 	{
 		return getIndexActionsForCurrentTransaction().stream().map(IndexAction::getEntityFullName).collect(toSet());
+	}
+
+	/**
+	 * Create an EntityKey
+	 * Attention! MOLGENIS supports multiple id object types and the Entity id from the index registry s always a String
+	 *
+	 * @return EntityKey
+	 */
+	private EntityKey createEntityKey(IndexAction indexAction)
+	{
+		return EntityKey.create(indexAction.getEntityFullName(),
+				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
+						dataService.getEntityType(indexAction.getEntityFullName()).getIdAttribute()) : null);
 	}
 
 }

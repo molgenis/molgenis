@@ -15,8 +15,8 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.AttributeType.INT;
-import static org.molgenis.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
 public class SortGeneratorTest

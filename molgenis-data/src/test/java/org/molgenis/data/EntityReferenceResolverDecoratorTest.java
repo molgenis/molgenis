@@ -3,6 +3,7 @@ package org.molgenis.data;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -337,8 +338,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void query()
 	{
-		entityReferenceResolverDecorator.query();
-		verify(decoratedRepo, times(1)).query();
+		assertEquals(entityReferenceResolverDecorator.query().getRepository(), entityReferenceResolverDecorator);
 		verifyZeroInteractions(entityManager);
 	}
 

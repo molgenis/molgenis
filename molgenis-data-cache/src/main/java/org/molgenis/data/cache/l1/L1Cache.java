@@ -1,7 +1,8 @@
 package org.molgenis.data.cache.l1;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
@@ -49,8 +50,8 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 	private CombinedEntityCache createCache()
 	{
-		Cache<EntityKey, Optional<Map<String, Object>>> cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE)
-				.recordStats().build();
+		Cache<EntityKey, Optional<Map<String, Object>>> cache = CaffeinatedGuava
+				.build(Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).recordStats());
 		return new CombinedEntityCache(entityHydration, cache);
 	}
 

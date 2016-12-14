@@ -71,7 +71,14 @@ public class SortaJobProcessor
 			List<Entity> entitiesToAdd = newArrayList();
 			dataService.findAll(inputRepositoryName).forEach(inputRow ->
 			{
-				Entity resultEntity = new DynamicEntity(matchingTaskContentMetaData);
+				Entity resultEntity = new DynamicEntity(matchingTaskContentMetaData)
+				{
+					@Override
+					protected void validateValueType(String attrName, Object value)
+					{
+						// FIXME enable validation by not overriding this method
+					}
+				};
 				resultEntity.set(MatchingTaskContentMetaData.INPUT_TERM, inputRow);
 				resultEntity.set(MatchingTaskContentMetaData.IDENTIFIER, idGenerator.generateId());
 				resultEntity.set(MatchingTaskContentMetaData.VALIDATED, false);

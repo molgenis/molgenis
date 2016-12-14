@@ -3,6 +3,8 @@ package org.molgenis.auth;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,7 +22,7 @@ import static org.molgenis.auth.UserAuthorityMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
-public class UserDecorator implements Repository<User>
+public class UserDecorator extends AbstractRepositoryDecorator<User>
 {
 	private static final int BATCH_SIZE = 1000;
 
@@ -36,6 +38,12 @@ public class UserDecorator implements Repository<User>
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.dataService = requireNonNull(dataService);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
+	}
+
+	@Override
+	protected Repository<User> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	@Override
@@ -179,12 +187,6 @@ public class UserDecorator implements Repository<User>
 	public long count()
 	{
 		return decoratedRepository.count();
-	}
-
-	@Override
-	public Query<User> query()
-	{
-		return decoratedRepository.query();
 	}
 
 	@Override

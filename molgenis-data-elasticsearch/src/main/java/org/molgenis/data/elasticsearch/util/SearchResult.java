@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.util;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.molgenis.data.AggregateResult;
+import org.molgenis.data.aggregation.AggregateResult;
 
 import java.util.Collections;
 import java.util.Iterator;

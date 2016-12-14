@@ -21,7 +21,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 
@@ -37,6 +37,7 @@ public class EntityUtils
 	 */
 	public static Object getTypedValue(String valueStr, Attribute attr)
 	{
+		//Reference types cannot be processed because we lack an entityManager in this route.
 		if (EntityTypeUtils.isReferenceType(attr))
 		{
 			throw new MolgenisDataException(
@@ -202,10 +203,10 @@ public class EntityUtils
 	/**
 	 * Get an Iterable of entities as a stream of entities
 	 *
-	 * @param entities
-	 * @return
+	 * @param entities entities iterable
+	 * @return entities stream
 	 */
-	public static Stream<Entity> asStream(Iterable<Entity> entities)
+	public static <E extends Entity> Stream<E> asStream(Iterable<E> entities)
 	{
 		return stream(entities.spliterator(), false);
 	}
@@ -293,7 +294,7 @@ public class EntityUtils
 		if (tags.size() != otherTags.size()) return false;
 		for (int i = 0; i < tags.size(); ++i)
 		{
-			if (!tags.get(i).getIdentifier().equals(otherTags.get(i).getIdentifier())) return false;
+			if (!tags.get(i).getId().equals(otherTags.get(i).getId())) return false;
 		}
 		return true;
 	}
@@ -327,7 +328,7 @@ public class EntityUtils
 	 */
 	public static boolean equals(Tag tag, Tag otherTag)
 	{
-		if (!Objects.equals(tag.getIdentifier(), otherTag.getIdentifier())) return false;
+		if (!Objects.equals(tag.getId(), otherTag.getId())) return false;
 		if (!Objects.equals(tag.getObjectIri(), otherTag.getObjectIri())) return false;
 		if (!Objects.equals(tag.getLabel(), otherTag.getLabel())) return false;
 		if (!Objects.equals(tag.getRelationIri(), otherTag.getRelationIri())) return false;
@@ -375,6 +376,9 @@ public class EntityUtils
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
 		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
+		if (!Objects.equals(attr.isIdAttribute(), otherAttr.isIdAttribute())) return false;
+		if (!Objects.equals(attr.isLabelAttribute(), otherAttr.isLabelAttribute())) return false;
+		if (!Objects.equals(attr.getLookupAttributeIndex(), otherAttr.getLookupAttributeIndex())) return false;
 
 		// recursively compare attribute parts
 		if (!EntityUtils.equals(attr.getChildren(), otherAttr.getChildren())) return false;
@@ -407,7 +411,7 @@ public class EntityUtils
 		if (tags.size() != otherTags.size()) return false;
 		for (int i = 0; i < tags.size(); ++i)
 		{
-			if (!Objects.equals(tags.get(i).getIdentifier(), otherTags.get(i).getIdentifier())) return false;
+			if (!Objects.equals(tags.get(i).getId(), otherTags.get(i).getId())) return false;
 		}
 		return true;
 	}

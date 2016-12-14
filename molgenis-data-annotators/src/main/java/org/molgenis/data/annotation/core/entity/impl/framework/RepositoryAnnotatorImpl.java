@@ -7,6 +7,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +30,7 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	@Override
 	public List<Attribute> getOutputAttributes()
 	{
-		return entityAnnotator.getAnnotationAttributeMetadatas();
+		return entityAnnotator.getAnnotatorAttributes();
 	}
 
 	@Override
@@ -66,5 +67,11 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
 	{
 		return entityAnnotator.getCmdLineAnnotatorSettingsConfigurer();
+	}
+
+	@Override
+	public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
+	{
+		return entityAnnotator.createAnnotatorAttributes(attributeFactory);
 	}
 }

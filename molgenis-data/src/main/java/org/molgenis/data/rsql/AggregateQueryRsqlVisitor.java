@@ -3,11 +3,11 @@ package org.molgenis.data.rsql;
 import cz.jirutka.rsql.parser.ast.*;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
 
-import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,9 +31,8 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 	@Override
 	public AggregateQuery visit(AndNode node)
 	{
-		for (Iterator<Node> it = node.iterator(); it.hasNext(); )
+		for (Node child : node)
 		{
-			Node child = it.next();
 			child.accept(this);
 		}
 

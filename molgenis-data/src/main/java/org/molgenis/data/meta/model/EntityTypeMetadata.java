@@ -11,7 +11,7 @@ import java.util.Set;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.SEQUENCE_NR;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
@@ -23,6 +23,10 @@ public class EntityTypeMetadata extends SystemEntityType
 	private static final String SIMPLE_NAME_ = "EntityType";
 	public static final String ENTITY_TYPE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
+	private AttributeMetadata attributeMetadata;
+	private PackageMetadata packageMetadata;
+	private TagMetadata tagMetadata;
+
 	public static final String FULL_NAME = "fullName";
 	public static final String SIMPLE_NAME = "simpleName";
 	public static final String PACKAGE = "package";
@@ -33,10 +37,6 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String EXTENDS = "extends";
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
-
-	private AttributeMetadata attributeMetadata;
-	private PackageMetadata packageMetadata;
-	private TagMetaData tagMetaData;
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -55,7 +55,6 @@ public class EntityTypeMetadata extends SystemEntityType
 
 		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
-		// TODO discuss whether package should be nillable
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
@@ -66,7 +65,7 @@ public class EntityTypeMetadata extends SystemEntityType
 				.setReadOnly(true).setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
 				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
 	}
@@ -106,9 +105,9 @@ public class EntityTypeMetadata extends SystemEntityType
 	}
 
 	@Autowired
-	public void setTagMetaData(TagMetaData tagMetaData)
+	public void setTagMetadata(TagMetadata tagMetadata)
 	{
-		this.tagMetaData = requireNonNull(tagMetaData);
+		this.tagMetadata = requireNonNull(tagMetadata);
 	}
 
 	@Override

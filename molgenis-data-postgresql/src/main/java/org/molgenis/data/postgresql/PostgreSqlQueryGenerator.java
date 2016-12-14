@@ -1,9 +1,9 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.collect.Lists;
-import org.molgenis.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -19,8 +19,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.AttributeType.*;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
@@ -737,6 +737,11 @@ class PostgreSqlQueryGenerator
 					result.append(predicate);
 					break;
 				case EQUALS:
+					if (attr == null)
+					{
+						throw new MolgenisDataException("Missing attribute field in EQUALS query rule");
+					}
+
 					if (isPersistedInOtherTable(attr))
 					{
 						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
@@ -769,6 +774,7 @@ class PostgreSqlQueryGenerator
 						if (attr.getDataType() == BOOL)
 						{
 							Boolean bool = (Boolean) postgreSqlVal;
+							//noinspection ConstantConditions (getPostgreSqlQueryValue() != null if r.getValue() != null)
 							if (bool) predicate.append(" IS TRUE");
 							else predicate.append(" IS FALSE");
 						}

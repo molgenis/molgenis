@@ -35,7 +35,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -46,18 +46,18 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private final TagRepository tagRepository;
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
-	private final TagMetaData tagMetaData;
+	private final TagMetadata tagMetadata;
 
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagServiceImpl.class);
 
 	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
-			IdGenerator idGenerator, TagMetaData tagMetaData)
+			IdGenerator idGenerator, TagMetadata tagMetadata)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tagRepository = requireNonNull(tagRepository);
 		this.ontologyService = requireNonNull(ontologyService);
 		this.idGenerator = requireNonNull(idGenerator);
-		this.tagMetaData = requireNonNull(tagMetaData);
+		this.tagMetadata = requireNonNull(tagMetadata);
 	}
 
 	@Override
@@ -147,11 +147,11 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		boolean added = false;
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
-		Tag tag = new Tag(tagMetaData);
+		Tag tag = new Tag(tagMetadata);
 		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
 		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
 		Relation relation = Relation.forIRI(relationIRI);
-		tag.setIdentifier(idGenerator.generateId());
+		tag.setId(idGenerator.generateId());
 		tag.setCodeSystem(null);
 		tag.setRelationIri(relation.getIRI());
 		tag.setRelationLabel(relation.getLabel());
@@ -162,11 +162,11 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		Map<String, Entity> tags = Maps.newHashMap();
 		for (Entity attrTag : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
-			tags.put(attrTag.get(TagMetaData.OBJECT_IRI).toString(), attrTag);
+			tags.put(attrTag.get(TagMetadata.OBJECT_IRI).toString(), attrTag);
 		}
-		if (!tags.containsKey(tag.get(TagMetaData.OBJECT_IRI).toString()))
+		if (!tags.containsKey(tag.get(TagMetadata.OBJECT_IRI).toString()))
 		{
-			tags.put(tag.get(TagMetaData.OBJECT_IRI).toString(), tag);
+			tags.put(tag.get(TagMetadata.OBJECT_IRI).toString(), tag);
 			added = true;
 		}
 		attributeEntity.set(AttributeMetadata.TAGS, tags.values());
@@ -214,22 +214,19 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@Override
 	public void addEntityTag(SemanticTag<EntityType, OntologyTerm, Ontology> tag)
 	{
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void removeEntityTag(SemanticTag<EntityType, OntologyTerm, Ontology> tag)
 	{
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(EntityType entityType)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -251,8 +248,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
-		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI)) && relationIRI
-				.equals(e.getString(TagMetaData.RELATION_IRI));
+		return ontologyTermIRI.equals(e.getString(TagMetadata.OBJECT_IRI)) && relationIRI
+				.equals(e.getString(TagMetadata.RELATION_IRI));
 	}
 
 	@RunAsSystem
@@ -275,7 +272,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,
 			Entity tagEntity)
 	{
-		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
+		String identifier = tagEntity.getString(TagMetadata.ID);
 		Relation relation = asRelation(tagEntity);
 		Ontology ontology = asOntology(tagEntity);
 		OntologyTerm ontologyTerm = asOntologyTerm(tagEntity);
@@ -289,7 +286,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	private static Relation asRelation(Entity tagEntity)
 	{
-		String relationIRI = tagEntity.getString(TagMetaData.RELATION_IRI);
+		String relationIRI = tagEntity.getString(TagMetadata.RELATION_IRI);
 		if (relationIRI == null)
 		{
 			return null;
@@ -299,7 +296,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	private OntologyTerm asOntologyTerm(Entity tagEntity)
 	{
-		String objectIRI = tagEntity.getString(TagMetaData.OBJECT_IRI);
+		String objectIRI = tagEntity.getString(TagMetadata.OBJECT_IRI);
 		if (objectIRI == null)
 		{
 			return null;
@@ -309,7 +306,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	private Ontology asOntology(Entity tagEntity)
 	{
-		String codeSystemIRI = tagEntity.getString(TagMetaData.CODE_SYSTEM);
+		String codeSystemIRI = tagEntity.getString(TagMetadata.CODE_SYSTEM);
 		if (codeSystemIRI == null)
 		{
 			return null;

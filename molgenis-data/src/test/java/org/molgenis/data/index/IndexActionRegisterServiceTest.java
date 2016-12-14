@@ -3,10 +3,14 @@ package org.molgenis.data.index;
 import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -14,19 +18,26 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
+import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class IndexActionRegisterServiceTest
 {
 	@InjectMocks
-	private IndexActionRegisterService indexActionRegisterService = new IndexActionRegisterServiceImpl();
+	private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl();
 	@Mock
 	private IndexActionGroupFactory indexActionGroupFactory;
 	@Mock
@@ -68,15 +79,19 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 		EntityType emd = mock(EntityType.class);
 
-		// To avoid addReferencingEntities(IndexAction indexAction)
 		when(dataService.getEntityType(indexAction.getEntityFullName())).thenReturn(emd);
-		when(dataService.getEntityNames()).thenReturn(Stream.empty());
+		//noinspection unchecked
+		Query<Attribute> query = mock(Query.class);
+		when(query.fetch(any(Fetch.class))).thenReturn(query);
+		when(query.eq(REF_ENTITY_TYPE, emd)).thenReturn(query);
+		when(query.findAll()).thenReturn(Stream.empty());
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(query);
 
-		indexActionRegisterService.register("TestEntityName", "123");
+		indexActionRegisterServiceImpl.register("TestEntityName", "123");
 
 		verifyZeroInteractions(dataService);
 
-		indexActionRegisterService.storeIndexActions("1");
+		indexActionRegisterServiceImpl.storeIndexActions("1");
 
 		verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);
 		verify(dataService).add(eq(INDEX_ACTION), indexActionStreamCaptor.capture());
@@ -97,15 +112,15 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
-		indexActionRegisterService.register("TestEntityName", "123");
+		indexActionRegisterServiceImpl.register("TestEntityName", "123");
 
 		verifyZeroInteractions(dataService);
 
-		indexActionRegisterService.forgetIndexActions("1");
+		indexActionRegisterServiceImpl.forgetIndexActions("1");
 
 		verifyZeroInteractions(dataService);
 
-		indexActionRegisterService.storeIndexActions("1");
+		indexActionRegisterServiceImpl.storeIndexActions("1");
 
 		verifyZeroInteractions(dataService);
 	}
@@ -125,9 +140,55 @@ public class IndexActionRegisterServiceTest
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getName()).thenReturn("ABC");
-		indexActionRegisterService.addExcludedEntity("ABC");
+		indexActionRegisterServiceImpl.addExcludedEntity("ABC");
 
-		indexActionRegisterService.register("ABC", "123");
+		indexActionRegisterServiceImpl.register("ABC", "123");
 		verifyNoMoreInteractions(dataService);
+	}
+
+	@Test
+	public void isEntityDirtyTrue()
+	{
+		String entityName = "org_test_Test";
+		String entityIdString = "123";
+		Integer entityIdInteger = Integer.valueOf("123");
+
+		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
+		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
+		when(indexActionFactory.create()).thenReturn(indexAction);
+		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
+		when(indexAction.setEntityFullName(entityName)).thenReturn(indexAction);
+		when(indexAction.getEntityFullName()).thenReturn(entityName);
+		when(indexAction.setEntityId(entityIdString)).thenReturn(indexAction);
+		when(indexAction.getEntityId()).thenReturn(entityIdString);
+		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
+		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
+
+		indexActionRegisterServiceImpl.register(entityName, entityIdString);
+		EntityKey entityKey = EntityKey.create(entityName, entityIdInteger);
+		assertTrue(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
+	}
+
+	@Test
+	public void isEntityDirtyFalse()
+	{
+		String entityName = "org_test_Test";
+		String entityId1 = "123";
+		String entityId2 = "false";
+
+		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
+		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
+		when(indexActionFactory.create()).thenReturn(indexAction);
+		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
+		when(indexAction.setEntityFullName(entityName)).thenReturn(indexAction);
+		when(indexAction.getEntityFullName()).thenReturn(entityName);
+		when(indexAction.setEntityId(entityId1)).thenReturn(indexAction);
+		when(indexAction.getEntityId()).thenReturn(entityId1);
+		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
+		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
+
+		indexActionRegisterServiceImpl.register(entityName, entityId1);
+		EntityKey entityKey = EntityKey.create(entityName, entityId2);
+		assertFalse(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
 	}
 }

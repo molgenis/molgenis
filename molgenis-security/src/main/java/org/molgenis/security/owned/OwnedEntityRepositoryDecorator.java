@@ -1,17 +1,16 @@
 package org.molgenis.security.owned;
 
 import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -27,7 +26,7 @@ import static org.molgenis.security.owned.OwnedEntityType.OWNED;
  * <p>
  * Admins are not effected.
  */
-public class OwnedEntityRepositoryDecorator implements Repository<Entity>
+public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decoratedRepo;
 
@@ -37,9 +36,21 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepo;
+	}
+
+	@Override
+	public Query<Entity> query()
+	{
+		return new QueryImpl<>(this);
+	}
+
+	@Override
 	public Iterator<Entity> iterator()
 	{
-		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl<Entity>()).iterator();
+		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl<>()).iterator();
 		return decoratedRepo.iterator();
 	}
 
@@ -55,7 +66,8 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 			if (mustAddRowLevelSecurity())
 			{
 				//TODO: This results in smaller batches! Should do a findAll instead!
-				consumer.accept(entities.stream().filter(this::currentUserIsOwner).collect(toList()));
+				consumer.accept(
+						entities.stream().filter(OwnedEntityRepositoryDecorator::currentUserIsOwner).collect(toList()));
 			}
 			else
 			{
@@ -65,45 +77,10 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void close() throws IOException
-	{
-		decoratedRepo.close();
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decoratedRepo.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decoratedRepo.getQueryOperators();
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepo.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepo.getEntityType();
-	}
-
-	@Override
 	public long count()
 	{
-		if (mustAddRowLevelSecurity()) return count(new QueryImpl<Entity>());
+		if (mustAddRowLevelSecurity()) return count(new QueryImpl<>());
 		return decoratedRepo.count();
-	}
-
-	@Override
-	public Query<Entity> query()
-	{
-		return decoratedRepo.query();
 	}
 
 	@Override
@@ -166,7 +143,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		Stream<Entity> entities = decoratedRepo.findAll(ids);
 		if (mustAddRowLevelSecurity())
 		{
-			entities = entities.filter(this::currentUserIsOwner);
+			entities = entities.filter(OwnedEntityRepositoryDecorator::currentUserIsOwner);
 		}
 		return entities;
 	}
@@ -181,7 +158,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
 		{
-			entities = entities.filter(this::currentUserIsOwner);
+			entities = entities.filter(OwnedEntityRepositoryDecorator::currentUserIsOwner);
 		}
 		return entities;
 	}
@@ -196,8 +173,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void update(Entity entity)
 	{
-		if (isOwnedEntityType() && (mustAddRowLevelSecurity()
-				|| entity.get(OwnedEntityType.OWNER_USERNAME) == null))
+		if (isOwnedEntityType() && (mustAddRowLevelSecurity() || entity.get(OwnedEntityType.OWNER_USERNAME) == null))
 			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		decoratedRepo.update(entity);
 	}
@@ -234,7 +210,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			entities = entities.filter(this::currentUserIsOwner);
+			entities = entities.filter(OwnedEntityRepositoryDecorator::currentUserIsOwner);
 		}
 
 		decoratedRepo.delete(entities);
@@ -281,8 +257,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void add(Entity entity)
 	{
-		if (isOwnedEntityType() && (mustAddRowLevelSecurity()
-				|| entity.get(OwnedEntityType.OWNER_USERNAME) == null))
+		if (isOwnedEntityType() && (mustAddRowLevelSecurity() || entity.get(OwnedEntityType.OWNER_USERNAME) == null))
 		{
 			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
@@ -312,9 +287,8 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 
 	private boolean mustAddRowLevelSecurity()
 	{
-		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
-			return false;
-		return isOwnedEntityType();
+		return !(SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+				&& isOwnedEntityType();
 	}
 
 	private boolean isOwnedEntityType()
@@ -322,7 +296,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		return EntityUtils.doesExtend(getEntityType(), OWNED);
 	}
 
-	private void addRowLevelSecurity(Query<Entity> q)
+	private static void addRowLevelSecurity(Query<Entity> q)
 	{
 		String user = SecurityUtils.getCurrentUsername();
 		if (user != null)
@@ -332,14 +306,13 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		}
 	}
 
-	private String getOwnerUserName(Entity questionnaire)
+	private static String getOwnerUserName(Entity questionnaire)
 	{
 		return questionnaire.getString(OwnedEntityType.OWNER_USERNAME);
 	}
 
-	private boolean currentUserIsOwner(Entity entity)
+	private static boolean currentUserIsOwner(Entity entity)
 	{
-		if (null == entity) return false;
-		return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
+		return null != entity && Objects.equals(SecurityUtils.getCurrentUsername(), getOwnerUserName(entity));
 	}
 }

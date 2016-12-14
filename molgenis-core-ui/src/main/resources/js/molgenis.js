@@ -292,6 +292,7 @@ function createInput(attr, attrs, val, lbl) {
             var $input = createBasicInput('radio', attrs, val);
             return label.append($input).append(val ? 'True' : 'False');
         case 'CATEGORICAL':
+        case 'CATEGORICAL_MREF':
             var label = $('<label>');
             var $input = createBasicInput('checkbox', attrs, val);
             return $('<div class="checkbox">').append(label.append($input).append(lbl));
@@ -340,7 +341,6 @@ function createInput(attr, attrs, val, lbl) {
         case 'ENUM':
         case 'SCRIPT':
             return createBasicInput('text', attrs, val).addClass('form-control');
-        case 'CATEGORICAL_MREF':
         case 'MREF':
         case 'XREF':
         case 'FILE':
@@ -787,5 +787,32 @@ if (!String.prototype.startsWith) {
         return this.lastIndexOf(searchString, position) === position;
     };
 }
+
+if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+        value: function (predicate) {
+            'use strict';
+            if (this == null) {
+                throw new TypeError('Array.prototype.find called on null or undefined');
+            }
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            var list = Object(this);
+            var length = list.length >>> 0;
+            var thisArg = arguments[1];
+            var value;
+
+            for (var i = 0; i < length; i++) {
+                value = list[i];
+                if (predicate.call(thisArg, value, i, list)) {
+                    return value;
+                }
+            }
+            return undefined;
+        }
+    });
+}
+
 Number.MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
 Number.MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER || -9007199254740991;
