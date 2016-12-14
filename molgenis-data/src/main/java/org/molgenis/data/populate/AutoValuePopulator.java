@@ -6,6 +6,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import static java.lang.String.format;
@@ -64,7 +67,6 @@ public class AutoValuePopulator
 		}).collect(toList());
 
 		// set current date for auto date and datetime attributes
-		Date dateNow = new Date();
 		for (Entity entity : entities)
 		{
 			for (Attribute attr : autoAttrs)
@@ -73,10 +75,12 @@ public class AutoValuePopulator
 				switch (type)
 				{
 					case DATE:
-						entity.set(attr.getName(), dateNow);
+						Date localDateUTC = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant());
+						entity.set(attr.getName(), localDateUTC);
 						break;
 					case DATE_TIME:
-						entity.set(attr.getName(), dateNow);
+						Date dateUTC = new Date();
+						entity.set(attr.getName(), dateUTC);
 						break;
 					default:
 						throw new RuntimeException(format("Unexpected data type [%s]", type.toString()));

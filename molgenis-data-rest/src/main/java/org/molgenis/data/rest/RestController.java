@@ -1217,13 +1217,12 @@ public class RestController
 			{
 				Date date = entity.getDate(attrName);
 				entityMap.put(attrName,
-						date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE).format(date) : null);
+						date != null ? MolgenisDateFormat.getDateFormat().format(date) : null);
 			}
 			else if (attrType == DATE_TIME)
 			{
 				Date date = entity.getDate(attrName);
-				entityMap.put(attrName, date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
-						.format(date) : null);
+				entityMap.put(attrName, date != null ? MolgenisDateFormat.getDateTimeFormat().format(date) : null);
 			}
 			else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
 					&& attrType != ONE_TO_MANY && attrType != FILE)

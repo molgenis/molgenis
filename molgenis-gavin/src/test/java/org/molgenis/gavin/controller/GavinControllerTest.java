@@ -182,8 +182,8 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		when(oldJobDir.getName()).thenReturn("ASDFASDFASDF");
 
 		gavinController.cleanUp();
-		verify(fileStore).deleteDirectory("gavin-app/ASDFASDFASDF");
-		assertTrue(fileFilterCaptor.getValue().accept(oldJobDir),
+        verify(fileStore).deleteDirectory("gavin-app" + File.separator + "ASDFASDFASDF");
+        assertTrue(fileFilterCaptor.getValue().accept(oldJobDir),
 				"cleanUp should remove files that are more than 24 hours old");
 		assertFalse(fileFilterCaptor.getValue().accept(newJobDir),
 				"cleanUp should leave files that are less than 24 hours old");
