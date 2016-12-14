@@ -28,7 +28,7 @@ public class EntityModelWriter
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
-	public EntityModelWriter(TagService<LabeledResource, LabeledResource> tagService)
+	public EntityModelWriter(TagService<LabeledResource, LabeledResource> tagService, SimpleValueFactory valueFactory)
 			throws DatatypeConfigurationException
 	{
 		this.valueFactory = SimpleValueFactory.getInstance();
@@ -100,6 +100,7 @@ public class EntityModelWriter
 				break;
 			case INT:
 				model.add(subject, predicate, valueFactory.createLiteral(objectEntity.getInt(name)));
+				break;
 			case ENUM:
 			case EMAIL:
 			case HTML:
