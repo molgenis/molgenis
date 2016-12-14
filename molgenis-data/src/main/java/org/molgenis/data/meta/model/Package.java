@@ -18,7 +18,7 @@ import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
 @SuppressWarnings("SpringJavaAutowiringInspection")
 public class Package extends StaticEntity
 {
-	public static final String PACKAGE_SEPARATOR = ".";
+	public static final String PACKAGE_SEPARATOR = "_";
 
 	public Package(Entity entity)
 	{
