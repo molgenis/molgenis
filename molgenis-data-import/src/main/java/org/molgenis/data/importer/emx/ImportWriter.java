@@ -41,6 +41,7 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -224,7 +225,7 @@ public class ImportWriter
 
 				// Try without default package
 				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getName().toLowerCase()
-						.startsWith(defaultPackage.toLowerCase() + "_"))
+						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
 					emxEntityRepo = source.getRepository(entityType.getName().substring(defaultPackage.length() + 1));
 				}

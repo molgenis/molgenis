@@ -19,11 +19,11 @@
         };
 
         var EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
-            entity: 'sys_md_EntityType',
+            entity: 'sys' + molgenis.packageSeparator + 'md' + molgenis.packageSeparator + 'EntityType',
             query: {
                 operator: 'NESTED',
                 nestedRules: [
-                    {field: 'package', operator: 'EQUALS', value: 'sys_set'},
+                    {field: 'package', operator: 'EQUALS', value: 'sys' + molgenis.packageSeparator + 'set'},
                     {operator: 'AND'},
                     {operator: 'NOT'},
                     {field: 'isAbstract', operator: 'EQUALS', value: 'true'}
@@ -40,7 +40,7 @@
         // initialize with application settings
         onValueChange({
             value: {
-                fullName: 'sys_set_app',
+                fullName: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + 'app',
                 simpleName: 'app'
             }
         });

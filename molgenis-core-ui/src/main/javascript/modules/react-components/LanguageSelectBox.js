@@ -3,6 +3,7 @@ import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import Spinner from "./Spinner";
 import Select2 from "./wrapper/Select2";
 import React from "react";
+import {packageSeparator} from "rest-client";
 
 var api = new RestClient();
 
@@ -53,7 +54,7 @@ var LanguageSelectBox = React.createClass({
                 'value': true
             }]
         };
-        api.get('/api/v2/sys_Language', query).done(function (languages) {
+        api.get('/api/v2/sys' + packageSeparator + 'Language', query).done(function (languages) {
             var selectedLanguage = null;
             var select2Data = languages.items.map(function (item) {
                 if (item.code === languages.meta.languageCode) {

@@ -5,6 +5,7 @@ window.top.molgenis = window.top.molgenis || {};
 
 import RestClientV1 from "rest-client/RestClientV1";
 import RestClientV2, {createRsqlQuery} from "rest-client/RestClientV2";
+import { packageSeparator } from 'rest-client';
 import {
     getAtomicAttributes,
     getCompoundAttributes,
@@ -19,6 +20,7 @@ import {htmlEscape} from "utils/HtmlUtils";
 
 window.top.molgenis.RestClient = RestClientV1;
 window.top.molgenis.RestClientV2 = RestClientV2;
+window.top.molgenis.packageSeparator = packageSeparator;
 
 window.top.molgenis.createRsqlQuery = createRsqlQuery;
 

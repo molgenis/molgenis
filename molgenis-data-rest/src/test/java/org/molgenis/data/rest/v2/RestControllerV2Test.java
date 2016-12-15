@@ -64,6 +64,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -526,7 +527,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions,
-				"Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'");
+				"Operation failed. Duplicate entity: 'org" + PACKAGE_SEPARATOR + "molgenis" + PACKAGE_SEPARATOR + "blah"
+						+ PACKAGE_SEPARATOR + "duplicateEntity'");
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
