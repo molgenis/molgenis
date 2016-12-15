@@ -2,6 +2,7 @@ package org.molgenis.fair.controller;
 
 import com.google.common.collect.Multimap;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.molgenis.data.Entity;
@@ -76,6 +77,63 @@ public class EntityModelWriterTest
 		IRI iri11 = mock(IRI.class);
 		IRI iri12 = mock(IRI.class);
 
+		IRI url_iri = mock(IRI.class);
+		IRI ref_iri = mock(IRI.class);
+		IRI ref_iri2 = mock(IRI.class);
+		IRI molgenis_iri = mock(IRI.class);
+
+		Literal literal1 = mock(Literal.class);
+		Literal literal2 = mock(Literal.class);
+		Literal literal3 = mock(Literal.class);
+		Literal literal4 = mock(Literal.class);
+		Literal literal5 = mock(Literal.class);
+		Literal literal6 = mock(Literal.class);
+		Literal literal7 = mock(Literal.class);
+		Literal literal9a = mock(Literal.class);
+		Literal literal9b = mock(Literal.class);
+		Literal literal9c = mock(Literal.class);
+		Literal literal10 = mock(Literal.class);
+		Literal literal12 = mock(Literal.class);
+
+		Literal url_literal = mock(Literal.class);
+		Literal ref_literal1 = mock(Literal.class);
+		Literal ref_literal2 = mock(Literal.class);
+		Literal molgenis_literal = mock(Literal.class);
+
+		when(iri1.toString()).thenReturn("iri1");
+		when(literal1.toString()).thenReturn("literal1");
+		when(iri2.toString()).thenReturn("iri2");
+		when(literal2.toString()).thenReturn("literal2");
+		when(iri3.toString()).thenReturn("iri3");
+		when(literal3.toString()).thenReturn("literal3");
+		when(iri4.toString()).thenReturn("iri4");
+		when(literal4.toString()).thenReturn("literal4");
+		when(iri5.toString()).thenReturn("iri5");
+		when(literal5.toString()).thenReturn("literal5");
+		when(iri6.toString()).thenReturn("iri6");
+		when(literal6.toString()).thenReturn("literal6");
+		when(iri7.toString()).thenReturn("iri7");
+		when(literal7.toString()).thenReturn("literal7");
+		when(iri8.toString()).thenReturn("iri8");
+		when(iri9.toString()).thenReturn("iri9");
+		when(literal9a.toString()).thenReturn("literal9a");
+		when(literal9b.toString()).thenReturn("literal9b");
+		when(literal9c.toString()).thenReturn("literal9c");
+		when(iri10.toString()).thenReturn("iri10");
+		when(literal10.toString()).thenReturn("literal10");
+		when(iri11.toString()).thenReturn("iri11");
+		when(iri12.toString()).thenReturn("iri12");
+		when(literal12.toString()).thenReturn("literal12");
+
+		when(url_iri.toString()).thenReturn("url_iri");
+		when(url_literal.toString()).thenReturn("url_literal");
+		when(ref_iri.toString()).thenReturn("ref_iri");
+		when(ref_literal1.toString()).thenReturn("ref_literal1");
+		when(ref_iri2.toString()).thenReturn("ref_iri2");
+		when(ref_literal2.toString()).thenReturn("ref_literal2");
+		when(molgenis_iri.toString()).thenReturn("molgenis_iri");
+		when(molgenis_literal.toString()).thenReturn("molgenis_literal");
+
 		Multimap<Relation, LabeledResource> multiMap1 = mock(Multimap.class);
 		Multimap<Relation, LabeledResource> multiMap2 = mock(Multimap.class);
 		Multimap<Relation, LabeledResource> multiMap3 = mock(Multimap.class);
@@ -112,23 +170,24 @@ public class EntityModelWriterTest
 		when(objectEntity.getEntityType()).thenReturn(entityType);
 		when(objectEntity.get("attributeName1")).thenReturn("value1");
 		when(objectEntity.getString("attributeName1")).thenReturn("value1");
-		when(objectEntity.get("attributeName2")).thenReturn("value2");
+		when(objectEntity.get("attributeName2")).thenReturn(2);
 		when(objectEntity.getInt("attributeName2")).thenReturn(2);
-		when(objectEntity.get("attributeName3")).thenReturn("value3");
+		when(objectEntity.get("attributeName3")).thenReturn(refEntity);
 		when(objectEntity.getEntity("attributeName3")).thenReturn(refEntity);
-		when(objectEntity.get("attributeName4")).thenReturn("value4");
+		when(objectEntity.get("attributeName4")).thenReturn(true);
 		when(objectEntity.getBoolean("attributeName4")).thenReturn(true);
-		when(objectEntity.get("attributeName5")).thenReturn("value5");
+		when(objectEntity.get("attributeName5")).thenReturn(date);
 		when(objectEntity.getUtilDate("attributeName5")).thenReturn(date);
-		when(objectEntity.get("attributeName6")).thenReturn("value6");
+		when(objectEntity.get("attributeName6")).thenReturn(10.0);
 		when(objectEntity.getDouble("attributeName6")).thenReturn(10.0);
-		when(objectEntity.get("attributeName7")).thenReturn("value7");
+		when(objectEntity.get("attributeName7")).thenReturn(987654321l);
 		when(objectEntity.getLong("attributeName7")).thenReturn(987654321l);
 		when(objectEntity.get("attributeName8")).thenReturn("value8");
 		when(objectEntity.getEntities("attributeName8")).thenReturn(Collections.singletonList(refEntity));
 		when(objectEntity.get("KEYWORDS")).thenReturn("molgenis,genetics,fair");
 		when(objectEntity.getString("KEYWORDS")).thenReturn("molgenis,genetics,fair");
 		when(objectEntity.get("IRI")).thenReturn("http://refIRI.iri");
+		when(objectEntity.getString("IRI")).thenReturn("http://refIRI.iri");
 		when(objectEntity.getEntity("IRI")).thenReturn(iriRefEntity);
 		when(objectEntity.get("attributeName11")).thenReturn(null);
 		when(objectEntity.get("attributeName12")).thenReturn("http://www/molgenis.org");
@@ -209,49 +268,84 @@ public class EntityModelWriterTest
 		when(multiMap11.get(Relation.isAssociatedWith)).thenReturn(Arrays.asList(tag11));
 		when(multiMap12.get(Relation.isAssociatedWith)).thenReturn(Arrays.asList(tag12));
 
-		when(valueFactory.createIRI("IRI1")).thenReturn(iri1);
-		when(valueFactory.createIRI("IRI2")).thenReturn(iri2);
-		when(valueFactory.createIRI("IRI3")).thenReturn(iri3);
-		when(valueFactory.createIRI("IRI4")).thenReturn(iri4);
-		when(valueFactory.createIRI("IRI5")).thenReturn(iri5);
-		when(valueFactory.createIRI("IRI6")).thenReturn(iri6);
-		when(valueFactory.createIRI("IRI7")).thenReturn(iri7);
-		when(valueFactory.createIRI("IRI8")).thenReturn(iri8);
-		when(valueFactory.createIRI("IRI9")).thenReturn(iri9);
-		when(valueFactory.createIRI("IRI10")).thenReturn(iri10);
-		when(valueFactory.createIRI("IRI11")).thenReturn(iri11);
-		when(valueFactory.createIRI("IRI12")).thenReturn(iri12);
+		when(valueFactory.createIRI("http://IRI1.nl")).thenReturn(iri1);
+		when(valueFactory.createIRI("http://IRI2.nl")).thenReturn(iri2);
+		when(valueFactory.createIRI("http://IRI3.nl")).thenReturn(iri3);
+		when(valueFactory.createIRI("http://IRI4.nl")).thenReturn(iri4);
+		when(valueFactory.createIRI("http://IRI5.nl")).thenReturn(iri5);
+		when(valueFactory.createIRI("http://IRI6.nl")).thenReturn(iri6);
+		when(valueFactory.createIRI("http://IRI7.nl")).thenReturn(iri7);
+		when(valueFactory.createIRI("http://IRI8.nl")).thenReturn(iri8);
+		when(valueFactory.createIRI("http://www.w3.org/ns/dcat#keyword")).thenReturn(iri9);
+		when(valueFactory.createIRI("http://IRI10.nl")).thenReturn(iri10);
+		when(valueFactory.createIRI("http://IRI11.nl")).thenReturn(iri11);
+		when(valueFactory.createIRI("http://IRI12.nl")).thenReturn(iri12);
+
+		when(iri1.stringValue()).thenReturn("http://IRI1.nl");
+		when(iri2.stringValue()).thenReturn("http://IRI2.nl");
+		when(iri3.stringValue()).thenReturn("http://IRI3.nl");
+		when(iri4.stringValue()).thenReturn("http://IRI4.nl");
+		when(iri5.stringValue()).thenReturn("http://IRI5.nl");
+		when(iri6.stringValue()).thenReturn("http://IRI6.nl");
+		when(iri7.stringValue()).thenReturn("http://IRI7.nl");
+		when(iri8.stringValue()).thenReturn("http://IRI8.nl");
+		when(iri9.stringValue()).thenReturn("http://www.w3.org/ns/dcat#keyword");
+		when(iri10.stringValue()).thenReturn("http://IRI10.nl");
+		when(iri11.stringValue()).thenReturn("http://IRI11.nl");
+		when(iri12.stringValue()).thenReturn("http://IRI12.nl");
+
+		when(url_iri.stringValue()).thenReturn("http://IRI13.nl");
+		when(ref_iri.stringValue()).thenReturn("http://IRI14.nl");
+		when(ref_iri2.stringValue()).thenReturn("http://IRI15.nl");
+		when(molgenis_iri.stringValue()).thenReturn("http://IRI16.nl");
+
+		when(valueFactory.createLiteral("value1")).thenReturn(literal1);
+		when(valueFactory.createLiteral(2)).thenReturn(literal2);
+		when(valueFactory.createLiteral(true)).thenReturn(literal4);
+		when(valueFactory.createLiteral(date)).thenReturn(literal5);
+		when(valueFactory.createLiteral(10.0)).thenReturn(literal6);
+		when(valueFactory.createLiteral(987654321l)).thenReturn(literal7);
+		when(valueFactory.createLiteral("molgenis")).thenReturn(literal9a);
+		when(valueFactory.createLiteral("genetics")).thenReturn(literal9b);
+		when(valueFactory.createLiteral("fair")).thenReturn(literal9c);
+		when(valueFactory.createLiteral("http://refIRI.iri")).thenReturn(literal10);
+		when(valueFactory.createLiteral("http://www/molgenis.org")).thenReturn(literal12);
+
+		when(valueFactory.createIRI("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this")).thenReturn(url_iri);
+		when(valueFactory.createIRI("http://IRI13.nl/refID")).thenReturn(ref_iri);
+		when(valueFactory.createIRI("http://refIRI.iri")).thenReturn(ref_iri2);
+		when(valueFactory.createIRI("http://www/molgenis.org")).thenReturn(molgenis_iri);
 
 		Model result = writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
 		assertEquals(result.size(), 13);
 		Iterator results = result.iterator();
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, \"value1\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]");
+				"(url_iri, iri1, literal1) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI2.nl, \"2\"^^<http://www.w3.org/2001/XMLSchema#int>) [null]");
+				"(url_iri, iri2, literal2) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI3.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]");
+				"(url_iri, iri3, ref_iri) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI4.nl, \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>) [null]");
+				"(url_iri, iri4, literal4) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI5.nl, \"1970-01-01T01:00:00.000+01:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]");
+				"(url_iri, iri5, literal5) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI6.nl, \"10.0\"^^<http://www.w3.org/2001/XMLSchema#double>) [null]");
+				"(url_iri, iri6, literal6) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI7.nl, \"987654321\"^^<http://www.w3.org/2001/XMLSchema#long>) [null]");
+				"(url_iri, iri7, literal7) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI8.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]");
+				"(url_iri, iri8, ref_iri) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"molgenis\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]");
+				"(url_iri, iri9, literal9a) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"genetics\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]");
+				"(url_iri, iri9, literal9b) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"fair\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]");
+				"(url_iri, iri9, literal9c) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI10.nl, http://refIRI.iri) [null]");
+				"(url_iri, iri10, ref_iri2) [null]");
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI12.nl, http://www/molgenis.org) [null]");
+				"(url_iri, iri12, molgenis_iri) [null]");
 
 	}
 }
