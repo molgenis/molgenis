@@ -31,7 +31,7 @@ public class EntityModelWriter
 	public EntityModelWriter(TagService<LabeledResource, LabeledResource> tagService, SimpleValueFactory valueFactory)
 			throws DatatypeConfigurationException
 	{
-		this.valueFactory = SimpleValueFactory.getInstance();
+		this.valueFactory = valueFactory;
 		this.tagService = tagService;
 	}
 
