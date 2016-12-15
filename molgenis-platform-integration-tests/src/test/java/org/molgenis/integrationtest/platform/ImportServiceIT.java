@@ -28,6 +28,7 @@ import java.io.File;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -93,16 +94,16 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_Person"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_TypeTestRef"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_Location"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_TypeTest"));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "Person")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "TypeTestRef")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "Location")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "TypeTest")));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_Person"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_TypeTestRef"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_Location"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_TypeTest"));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "Person")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "TypeTestRef")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "Location")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "datatypes", "TypeTest")));
 		});
 	}
 
@@ -132,19 +133,21 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 
 			// Test existing in PostgreSQL
 			// "base_TestEntity_0" and "advanced_TestEntity_1" are abstract;
-			Assert.assertTrue(dataService.hasRepository("it_deep_advanced_p_TestEntity_2"));
-			Assert.assertTrue(dataService.hasRepository("it_deep_TestCategorical_1"));
-			Assert.assertTrue(dataService.hasRepository("it_deep_TestXref_1"));
-			Assert.assertTrue(dataService.hasRepository("it_deep_TestXref_2"));
-			Assert.assertTrue(dataService.hasRepository("it_deep_TestMref_1"));
+
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "deep", "advanced", "p", "TestEntity_2")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestCategorical_1")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestXref_1")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestXref_2")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestMref_1")));
 
 			// Test existing in Elasticsearch
 			// "base_TestEntity_0" and "advanced_TestEntity_1" are abstract;
-			Assert.assertTrue(searchService.hasMapping("it_deep_advanced_p_TestEntity_2"));
-			Assert.assertTrue(searchService.hasMapping("it_deep_TestCategorical_1"));
-			Assert.assertTrue(searchService.hasMapping("it_deep_TestXref_1"));
-			Assert.assertTrue(searchService.hasMapping("it_deep_TestXref_2"));
-			Assert.assertTrue(searchService.hasMapping("it_deep_TestMref_1"));
+
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "deep", "advanced", "p", "TestEntity_2")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestCategorical_1")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestXref_1")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestXref_2")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "deep", "TestMref_1")));
 		});
 	}
 
@@ -173,20 +176,20 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref1"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref2"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref3"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref4"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref5"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_TestLookupAttributes"));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref1")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref2")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref3")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref4")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref5")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "TestLookupAttributes")));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref1"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref2"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref3"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref4"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref5"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_TestLookupAttributes"));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref1")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref2")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref3")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref4")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "Ref5")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "lookupattribute", "TestLookupAttributes")));
 		});
 	}
 
@@ -215,10 +218,10 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("it_emx_autoid_testAutoId"));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "autoid", "testAutoId")));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("it_emx_autoid_testAutoId"));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "autoid", "testAutoId")));
 		});
 	}
 
@@ -247,14 +250,14 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("it_emx_onetomany_book"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_onetomany_author"));
-			Assert.assertTrue(dataService.hasRepository("it_emx_onetomany_node"));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "onetomany", "book")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "onetomany", "author")));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "onetomany", "node")));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("it_emx_onetomany_book"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_onetomany_author"));
-			Assert.assertTrue(searchService.hasMapping("it_emx_onetomany_node"));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "onetomany", "book")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "onetomany", "author")));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "onetomany", "node")));
 		});
 	}
 
@@ -283,10 +286,10 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("it_emx_selfreferences_PersonTest"));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "selfreferences", "PersonTest")));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("it_emx_selfreferences_PersonTest"));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "selfreferences", "PersonTest")));
 		});
 	}
 
@@ -315,10 +318,10 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("it_emx_tags_TagEntity"));
+			Assert.assertTrue(dataService.hasRepository(String.join(PACKAGE_SEPARATOR, "it", "emx", "tags", "TagEntity")));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("it_emx_tags_TagEntity"));
+			Assert.assertTrue(searchService.hasMapping(String.join(PACKAGE_SEPARATOR, "it", "emx", "tags", "TagEntity")));
 		});
 	}
 

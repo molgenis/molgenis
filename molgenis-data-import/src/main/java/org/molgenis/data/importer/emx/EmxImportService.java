@@ -26,10 +26,9 @@ import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
-@Component()
+@Component
 public class EmxImportService implements ImportService
 {
-	public static final String QUALIFIER = "emxImportService";
 	private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
 
 	private final MetaDataParser parser;
