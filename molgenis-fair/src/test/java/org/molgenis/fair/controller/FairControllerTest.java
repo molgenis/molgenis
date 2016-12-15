@@ -10,9 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class FairControllerTest
 {
@@ -37,7 +35,7 @@ public class FairControllerTest
 		when(request.getLocalPort()).thenReturn(8080);
 
 		Entity answer = mock(Entity.class);
-		when(dataService.findOne( eq("fdp_Metadata"), anyObject())).thenReturn(answer);
+		when(dataService.findOne(eq("fdp_Metadata"), anyObject())).thenReturn(answer);
 
 		controller.getMetadata(request);
 		Mockito.verify(entityModelWriter).createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp", answer);
@@ -75,7 +73,8 @@ public class FairControllerTest
 		when(dataService.findOneById("fdp_Dataset", "datasetID")).thenReturn(answer);
 		controller.getDataset("catalogID", "datasetID", request);
 
-		Mockito.verify(entityModelWriter).createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID/datasetID", answer);
+		Mockito.verify(entityModelWriter)
+				.createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID/datasetID", answer);
 	}
 
 	@Test
@@ -91,7 +90,8 @@ public class FairControllerTest
 		when(dataService.findOneById("fdp_Distribution", "distributionID")).thenReturn(answer);
 		controller.getDistribution("catalogID", "datasetID", "distributionID", request);
 
-		Mockito.verify(entityModelWriter).createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID/datasetID/distributionID", answer);
+		Mockito.verify(entityModelWriter)
+				.createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID/datasetID/distributionID", answer);
 	}
 
 }

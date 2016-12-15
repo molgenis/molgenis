@@ -3,23 +3,18 @@ package org.molgenis.fair.controller;
 import com.google.common.collect.Multimap;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.elasticsearch.cluster.routing.allocation.decider.Decision;
-import org.molgenis.AttributeType;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.TagService;
-import com.google.common.collect.Multimap;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.Collections;
