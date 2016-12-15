@@ -77,7 +77,7 @@
             checkImportResult();
 
             function checkImportResult() {
-                restApi.getAsync('/api/v1/sys_ImportRun/${wizard.importRunId?js_string}', {}, function (importRun) {
+                restApi.getAsync('/api/v1/sys' + molgenis.packageSeparator + 'ImportRun/${wizard.importRunId?js_string}', {}, function (importRun) {
                     if (timer) {
                         clearTimeout(timer);
                     }
