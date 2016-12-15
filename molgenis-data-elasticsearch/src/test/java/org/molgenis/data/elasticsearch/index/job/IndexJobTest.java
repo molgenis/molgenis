@@ -137,6 +137,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
+		when(dataService.hasRepository("test")).thenReturn(true);
+
 		indexJob.call(progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
@@ -147,8 +149,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Indexing test.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
-		verify(progress).status("refreshIndex...");
-		verify(progress).status("refreshIndex done.");
+		verify(progress).status("Refresh index start");
+		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 		verify(searchService).refreshIndex();
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
@@ -178,6 +180,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 				.setEntityFullName("test").setEntityId("entityId").setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
+		when(dataService.hasRepository("test")).thenReturn(true);
 		indexActionGroup.setCount(1);
 
 		indexJob.call(this.progress);
@@ -189,8 +192,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Indexing test.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
-		verify(progress).status("refreshIndex...");
-		verify(progress).status("refreshIndex done.");
+		verify(progress).status("Refresh index start");
+		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
@@ -214,10 +217,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing repository test");
+		verify(progress).progress(0, "Indexing test");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
-		verify(progress).status("refreshIndex...");
-		verify(progress).status("refreshIndex done.");
+		verify(progress).status("Refresh index start");
+		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
@@ -244,10 +247,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing repository test");
+		verify(progress).progress(0, "Indexing test");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
-		verify(progress).status("refreshIndex...");
-		verify(progress).status("refreshIndex done.");
+		verify(progress).status("Refresh index start");
+		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
@@ -269,6 +272,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
+		when(dataService.hasRepository("test")).thenReturn(false);
+		when(searchService.hasMapping("test")).thenReturn(true);
+
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
@@ -276,10 +282,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Dropping index of repository test.");
+		verify(progress).progress(0, "Dropping test");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
-		verify(progress).status("refreshIndex...");
-		verify(progress).status("refreshIndex done.");
+		verify(progress).status("Refresh index start");
+		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
@@ -305,6 +311,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		MolgenisDataException mde = new MolgenisDataException("Random unrecoverable exception");
 		doThrow(mde).when(searchService).deleteById("entityId2", testEntityType);
+
+		when(dataService.hasRepository("test")).thenReturn(true);
 
 		try
 		{
