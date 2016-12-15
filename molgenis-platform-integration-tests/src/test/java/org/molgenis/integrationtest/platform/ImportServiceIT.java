@@ -69,9 +69,9 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testItEmxAllDatatypes()
+	public void testEmxDatatypes()
 	{
-		final String pathname = "/xls/it_emx_all_datatypes.xlsx";
+		final String pathname = "/xls/it_emx_datatypes.xlsx";
 		File file = getFile(pathname);
 
 		runAsSystem(() ->
@@ -93,16 +93,16 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_Person"));
-			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_TypeTestRef"));
-			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_Location"));
-			Assert.assertTrue(dataService.hasRepository("org_molgenis_it_TypeTest"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_Person"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_TypeTestRef"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_Location"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_datatypes_TypeTest"));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_Person"));
-			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_TypeTestRef"));
-			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_Location"));
-			Assert.assertTrue(searchService.hasMapping("org_molgenis_it_TypeTest"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_Person"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_TypeTestRef"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_Location"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_datatypes_TypeTest"));
 		});
 	}
 
@@ -132,19 +132,19 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 
 			// Test existing in PostgreSQL
 			// "base_TestEntity_0" and "advanced_TestEntity_1" are abstract;
-			Assert.assertTrue(dataService.hasRepository("deep_advanced_p_TestEntity_2"));
-			Assert.assertTrue(dataService.hasRepository("deep_TestCategorical_1"));
-			Assert.assertTrue(dataService.hasRepository("deep_TestXref_1"));
-			Assert.assertTrue(dataService.hasRepository("deep_TestXref_2"));
-			Assert.assertTrue(dataService.hasRepository("deep_TestMref_1"));
+			Assert.assertTrue(dataService.hasRepository("it_deep_advanced_p_TestEntity_2"));
+			Assert.assertTrue(dataService.hasRepository("it_deep_TestCategorical_1"));
+			Assert.assertTrue(dataService.hasRepository("it_deep_TestXref_1"));
+			Assert.assertTrue(dataService.hasRepository("it_deep_TestXref_2"));
+			Assert.assertTrue(dataService.hasRepository("it_deep_TestMref_1"));
 
 			// Test existing in Elasticsearch
 			// "base_TestEntity_0" and "advanced_TestEntity_1" are abstract;
-			Assert.assertTrue(searchService.hasMapping("deep_advanced_p_TestEntity_2"));
-			Assert.assertTrue(searchService.hasMapping("deep_TestCategorical_1"));
-			Assert.assertTrue(searchService.hasMapping("deep_TestXref_1"));
-			Assert.assertTrue(searchService.hasMapping("deep_TestXref_2"));
-			Assert.assertTrue(searchService.hasMapping("deep_TestMref_1"));
+			Assert.assertTrue(searchService.hasMapping("it_deep_advanced_p_TestEntity_2"));
+			Assert.assertTrue(searchService.hasMapping("it_deep_TestCategorical_1"));
+			Assert.assertTrue(searchService.hasMapping("it_deep_TestXref_1"));
+			Assert.assertTrue(searchService.hasMapping("it_deep_TestXref_2"));
+			Assert.assertTrue(searchService.hasMapping("it_deep_TestMref_1"));
 		});
 	}
 
@@ -173,27 +173,27 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("lookupattribute_Ref1"));
-			Assert.assertTrue(dataService.hasRepository("lookupattribute_Ref2"));
-			Assert.assertTrue(dataService.hasRepository("lookupattribute_Ref3"));
-			Assert.assertTrue(dataService.hasRepository("lookupattribute_Ref4"));
-			Assert.assertTrue(dataService.hasRepository("lookupattribute_Ref5"));
-			Assert.assertTrue(dataService.hasRepository("lookupattribute_TestLookupAttributes"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref1"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref2"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref3"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref4"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_Ref5"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_lookupattribute_TestLookupAttributes"));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("lookupattribute_Ref1"));
-			Assert.assertTrue(searchService.hasMapping("lookupattribute_Ref2"));
-			Assert.assertTrue(searchService.hasMapping("lookupattribute_Ref3"));
-			Assert.assertTrue(searchService.hasMapping("lookupattribute_Ref4"));
-			Assert.assertTrue(searchService.hasMapping("lookupattribute_Ref5"));
-			Assert.assertTrue(searchService.hasMapping("lookupattribute_TestLookupAttributes"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref1"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref2"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref3"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref4"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_Ref5"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_lookupattribute_TestLookupAttributes"));
 		});
 	}
 
 	@Test
 	public void testEmxAutoId()
 	{
-		final String pathname = "/xls/it_emx_auto_id.xlsx";
+		final String pathname = "/xls/it_emx_autoid.xlsx";
 		File file = getFile(pathname);
 
 		runAsSystem(() ->
@@ -215,10 +215,10 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("autoid_testAutoId"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_autoid_testAutoId"));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("autoid_testAutoId"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_autoid_testAutoId"));
 		});
 	}
 
@@ -247,14 +247,78 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 			// Test existing in PostgreSQL
-			Assert.assertTrue(dataService.hasRepository("onetomany_book"));
-			Assert.assertTrue(dataService.hasRepository("onetomany_author"));
-			Assert.assertTrue(dataService.hasRepository("onetomany_node"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_onetomany_book"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_onetomany_author"));
+			Assert.assertTrue(dataService.hasRepository("it_emx_onetomany_node"));
 
 			// Test existing in Elasticsearch
-			Assert.assertTrue(searchService.hasMapping("onetomany_book"));
-			Assert.assertTrue(searchService.hasMapping("onetomany_author"));
-			Assert.assertTrue(searchService.hasMapping("onetomany_node"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_onetomany_book"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_onetomany_author"));
+			Assert.assertTrue(searchService.hasMapping("it_emx_onetomany_node"));
+		});
+	}
+
+	@Test
+	public void testEmxSelfReferences()
+	{
+		final String pathname = "/xls/it_emx_self_references.xlsx";
+		File file = getFile(pathname);
+
+		runAsSystem(() ->
+		{
+			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
+					.createFileRepositoryCollection(file);
+			ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+
+			// ADD
+			importService.doImport(repoCollection, DatabaseAction.ADD, PACKAGE_DEFAULT);
+
+			// ADD/UPDATE
+			importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+
+			// UPDATE
+			importService.doImport(repoCollection, DatabaseAction.UPDATE, PACKAGE_DEFAULT);
+
+			// Wait for index to finish
+			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
+
+			// Test existing in PostgreSQL
+			Assert.assertTrue(dataService.hasRepository("it_emx_selfreferences_PersonTest"));
+
+			// Test existing in Elasticsearch
+			Assert.assertTrue(searchService.hasMapping("it_emx_selfreferences_PersonTest"));
+		});
+	}
+
+	@Test
+	public void testEmxTags()
+	{
+		final String pathname = "/xls/it_emx_tags.xlsx";
+		File file = getFile(pathname);
+
+		runAsSystem(() ->
+		{
+			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
+					.createFileRepositoryCollection(file);
+			ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+
+			// ADD
+			importService.doImport(repoCollection, DatabaseAction.ADD, PACKAGE_DEFAULT);
+
+			// ADD/UPDATE
+			importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+
+			// UPDATE
+			importService.doImport(repoCollection, DatabaseAction.UPDATE, PACKAGE_DEFAULT);
+
+			// Wait for index to finish
+			PlatformIT.waitForWorkToBeFinished(indexService, LOG);
+
+			// Test existing in PostgreSQL
+			Assert.assertTrue(dataService.hasRepository("it_emx_tags_TagEntity"));
+
+			// Test existing in Elasticsearch
+			Assert.assertTrue(searchService.hasMapping("it_emx_tags_TagEntity"));
 		});
 	}
 
