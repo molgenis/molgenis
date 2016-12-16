@@ -17,9 +17,9 @@ import static org.molgenis.ui.converter.RDFMediaType.APPLICATION_TRIG;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE;
 
 @Component
-public class RDFConverter extends AbstractHttpMessageConverter<Model>
+public class RdfConverter extends AbstractHttpMessageConverter<Model>
 {
-	public RDFConverter()
+	public RdfConverter()
 	{
 		super(TEXT_TURTLE, APPLICATION_TRIG);
 	}

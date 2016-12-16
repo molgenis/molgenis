@@ -16,7 +16,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.ui.converter.RDFConverter;
+import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.ui.menu.MenuMolgenisUi;
@@ -63,7 +63,7 @@ import java.util.Properties;
 import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
-@Import({PlatformConfig.class, RDFConverter.class})
+@Import({PlatformConfig.class, RdfConverter.class})
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -76,7 +76,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Autowired
-	private RDFConverter rdfConverter;
+	private RdfConverter rdfConverter;
 
 	@Autowired
 	private LanguageService languageService;
