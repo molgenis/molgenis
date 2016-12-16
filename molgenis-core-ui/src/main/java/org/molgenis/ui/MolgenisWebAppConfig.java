@@ -16,6 +16,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.ui.menu.MenuMolgenisUi;
@@ -62,7 +63,7 @@ import java.util.Properties;
 import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
-@Import(PlatformConfig.class)
+@Import({PlatformConfig.class, RdfConverter.class})
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -73,6 +74,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
+	@Autowired
+	private RdfConverter rdfConverter;
 
 	@Autowired
 	private LanguageService languageService;
@@ -111,6 +115,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
 		converters.add(new ResourceHttpMessageConverter());
+		converters.add(rdfConverter);
 	}
 
 	@Override
@@ -128,8 +133,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		 *
 		 * See https://jira.spring.io/browse/SPR-10655
 		 */
-		String corsInterceptPattern = "/api/**";
-		return new MappedInterceptor(new String[] { corsInterceptPattern }, corsInterceptor());
+		return new MappedInterceptor(new String[] { "/api/**", "/fdp/**" }, corsInterceptor());
 	}
 
 	@Override

@@ -47,7 +47,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 @RequestMapping(URI)
 public class TagWizardController extends MolgenisPluginController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TagWizardController.class);
 
 	public static final String ID = "tagwizard";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
