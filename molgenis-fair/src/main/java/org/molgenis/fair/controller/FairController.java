@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,11 +44,13 @@ public class FairController
 		String apiUrl;
 		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
 		{
-			apiUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort() + BASE_URI;
+			apiUrl = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(BASE_URI).toUriString();
 		}
 		else
 		{
-			apiUrl = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + BASE_URI;
+			String scheme = request.getHeader("X-Forwarded-Proto");
+			if (scheme == null) scheme = request.getScheme();
+			apiUrl = scheme + "://" + request.getHeader("X-Forwarded-Host") + BASE_URI;
 		}
 		return apiUrl;
 	}
@@ -95,7 +98,5 @@ public class FairController
 		Entity subjectEntity = dataService.findOneById("fdp_Distribution", distributionID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
-
-
 
 }
