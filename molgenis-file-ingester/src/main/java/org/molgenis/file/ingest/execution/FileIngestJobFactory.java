@@ -17,8 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.function.Supplier;
-
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 
@@ -30,12 +28,12 @@ public class FileIngestJobFactory
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final PlatformTransactionManager transactionManager;
 	private final FileIngester fileIngester;
-	private final Supplier<MailSender> mailSender;
+	private final MailSender mailSender;
 
 	@Autowired
 	public FileIngestJobFactory(DataService dataService, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, PlatformTransactionManager transactionManager,
-			FileIngester fileIngester, Supplier<MailSender> mailSender)
+			FileIngester fileIngester, MailSender mailSender)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userDetailsService = requireNonNull(userDetailsService);

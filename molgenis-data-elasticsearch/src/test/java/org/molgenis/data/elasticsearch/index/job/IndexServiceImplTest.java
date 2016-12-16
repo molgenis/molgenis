@@ -29,7 +29,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -196,9 +195,9 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public Supplier<MailSender> mailSender()
+		public MailSender mailSender()
 		{
-			return () -> mailSender;
+			return mailSender;
 		}
 	}
 

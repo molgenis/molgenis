@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
-import java.util.function.Supplier;
 
 import static java.lang.String.valueOf;
 
@@ -20,9 +21,22 @@ public class MailConfig
 	private MailSettings mailSettings;
 
 	@Bean
-	public Supplier<MailSender> mailSenderSupplier()
+	public MailSender mailSender()
 	{
-		return this::createMailSender;
+		return new MailSender()
+		{
+			@Override
+			public void send(SimpleMailMessage simpleMessage) throws MailException
+			{
+				createMailSender().send(simpleMessage);
+			}
+
+			@Override
+			public void send(SimpleMailMessage... simpleMessages) throws MailException
+			{
+				createMailSender().send(simpleMessages);
+			}
+		};
 	}
 
 	private MailSender createMailSender()

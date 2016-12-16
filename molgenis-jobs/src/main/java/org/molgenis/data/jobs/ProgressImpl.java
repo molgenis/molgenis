@@ -12,8 +12,8 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
 import java.util.Date;
-import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecution.Status.*;
 
 /**
@@ -27,13 +27,13 @@ public class ProgressImpl implements Progress
 
 	private final JobExecution jobExecution;
 	private final JobExecutionUpdater updater;
-	private final Supplier<MailSender> mailSender;
+	private final MailSender mailSender;
 
-	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater, Supplier<MailSender> mailSender)
+	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater, MailSender mailSender)
 	{
-		this.jobExecution = jobExecution;
-		this.mailSender = mailSender;
-		this.updater = updater;
+		this.jobExecution = requireNonNull(jobExecution);
+		this.mailSender = requireNonNull(mailSender);
+		this.updater = requireNonNull(updater);
 	}
 
 	private void update()
@@ -85,7 +85,7 @@ public class ProgressImpl implements Progress
 			mailMessage.setTo(to);
 			mailMessage.setSubject(subject);
 			mailMessage.setText(text);
-			mailSender.get().send(mailMessage);
+			mailSender.send(mailMessage);
 		}
 	}
 

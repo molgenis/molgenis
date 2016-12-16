@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -39,14 +38,14 @@ public class AccountServiceImpl implements AccountService
 	private static final Logger LOG = LoggerFactory.getLogger(AccountServiceImpl.class);
 
 	private final DataService dataService;
-	private final Supplier<MailSender> mailSender;
+	private final MailSender mailSender;
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final SecureIdGenerator secureIdGenerator;
 	private final GroupMemberFactory groupMemberFactory;
 
 	@Autowired
-	public AccountServiceImpl(DataService dataService, Supplier<MailSender> mailSender, UserService userService,
+	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
 			AppSettings appSettings, SecureIdGenerator secureIdGenerator, GroupMemberFactory groupMemberFactory)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -118,7 +117,7 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
 			mailMessage.setSubject("User registration for " + appSettings.getTitle());
 			mailMessage.setText(createActivationEmailText(user, activationUri));
-			mailSender.get().send(mailMessage);
+			mailSender.send(mailMessage);
 		}
 		catch (MailException mce)
 		{
@@ -156,7 +155,7 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(user.getEmail());
 			mailMessage.setSubject("Your registration request for " + appSettings.getTitle());
 			mailMessage.setText(createActivatedEmailText(user, appSettings.getTitle()));
-			mailSender.get().send(mailMessage);
+			mailSender.send(mailMessage);
 		}
 		else
 		{
@@ -199,7 +198,7 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(user.getEmail());
 			mailMessage.setSubject("Your new password request");
 			mailMessage.setText(createPasswordResettedEmailText(newPassword));
-			mailSender.get().send(mailMessage);
+			mailSender.send(mailMessage);
 		}
 		else
 		{

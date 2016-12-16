@@ -28,7 +28,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailSender;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -45,7 +44,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import static java.io.File.separator;
 import static java.util.Collections.emptyList;
@@ -266,13 +264,6 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		JobExecutionUpdater jobExecutionUpdater()
 		{
 			return mock(JobExecutionUpdater.class);
-		}
-
-		@Bean
-		Supplier<MailSender> mailSender()
-		{
-			final MailSender mailSender = mock(MailSender.class);
-			return () -> mailSender;
 		}
 
 		@Bean

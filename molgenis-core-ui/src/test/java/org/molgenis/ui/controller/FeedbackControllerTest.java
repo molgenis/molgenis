@@ -1,6 +1,5 @@
 package org.molgenis.ui.controller;
 
-import org.mockito.Mock;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
@@ -28,18 +27,15 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -54,7 +50,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	private UserService userService;
 
 	@Autowired
-	private Supplier<MailSender> mailSenderSupplier;
+	private MailSender mailSender;
 
 	@Autowired
 	private CaptchaService captchaService;
@@ -65,25 +61,15 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private AppSettings appSettings;
 
-	@Mock
-	private MailSender mailSender;
-
 	@Autowired
 	private UserFactory userFactory;
 
 	private MockMvc mockMvcFeedback;
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-	}
-
 	@BeforeMethod
 	public void beforeMethod() throws CaptchaException
 	{
-		reset(mailSenderSupplier, appSettings, userService, mailSender, captchaService);
-		when(mailSenderSupplier.get()).thenReturn(mailSender);
+		reset(mailSender, appSettings, userService, captchaService);
 		when(appSettings.getTitle()).thenReturn("app123");
 		mockMvcFeedback = MockMvcBuilders.standaloneSetup(feedbackController)
 				.setMessageConverters(gsonHttpMessageConverter).build();
@@ -207,18 +193,10 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	@Configuration
 	public static class Config
 	{
-		public Config()
-		{
-			initMocks(this);
-		}
-
-		@Mock
-		private Supplier<MailSender> mailSenderSupplier;
-
 		@Bean
 		public FeedbackController feedbackController()
 		{
-			return new FeedbackController(molgenisUserService(), appSettings(), captchaService(), mailSenderSupplier);
+			return new FeedbackController(molgenisUserService(), appSettings(), captchaService(), mailSender());
 		}
 
 		@Bean
@@ -240,9 +218,9 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public Supplier<MailSender> mailSenderSupplier()
+		public MailSender mailSender()
 		{
-			return mailSenderSupplier;
+			return mock(MailSender.class);
 		}
 
 		@Bean

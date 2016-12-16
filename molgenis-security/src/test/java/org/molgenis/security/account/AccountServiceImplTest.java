@@ -24,7 +24,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URISyntaxException;
-import java.util.function.Supplier;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -45,9 +44,6 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	private DataService dataService;
 
 	@Autowired
-	private Supplier<MailSender> mailSenderSupplier;
-
-	@Mock
 	private MailSender mailSender;
 
 	@Mock
@@ -63,7 +59,6 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	public void beforeClass()
 	{
 		initMocks(this);
-		when(mailSenderSupplier.get()).thenReturn(mailSender);
 		when(appSettings.getTitle()).thenReturn("Molgenis title");
 	}
 
@@ -225,7 +220,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AccountService accountService()
 		{
-			return new AccountServiceImpl(dataService(), mailSenderSupplier(), molgenisUserService(), appSettings(),
+			return new AccountServiceImpl(dataService(), mailSender(), molgenisUserService(), appSettings(),
 					secureIdGenerator(), molgenisGroupMemberFactory());
 		}
 
@@ -242,9 +237,9 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Supplier<MailSender> mailSenderSupplier()
+		public MailSender mailSender()
 		{
-			return mock(Supplier.class);
+			return mock(MailSender.class);
 		}
 
 		@Bean

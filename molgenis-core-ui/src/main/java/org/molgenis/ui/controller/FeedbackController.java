@@ -28,7 +28,6 @@ import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
@@ -51,17 +50,17 @@ public class FeedbackController extends AbstractStaticContentController
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final CaptchaService captchaService;
-	private final Supplier<MailSender> mailSenderSupplier;
+	private final MailSender mailSender;
 
 	@Autowired
 	public FeedbackController(UserService userService, AppSettings appSettings, CaptchaService captchaService,
-			Supplier<MailSender> mailSenderSupplier)
+			MailSender mailSender)
 	{
 		super(ID, URI);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
 		this.captchaService = requireNonNull(captchaService);
-		this.mailSenderSupplier = requireNonNull(mailSenderSupplier);
+		this.mailSender = requireNonNull(mailSender);
 	}
 
 	/**
@@ -100,7 +99,7 @@ public class FeedbackController extends AbstractStaticContentController
 		{
 			LOG.info("Sending feedback:" + form);
 			SimpleMailMessage message = createFeedbackMessage(form);
-			mailSenderSupplier.get().send(message);
+			mailSender.send(message);
 			form.setSubmitted(true);
 			captchaService.removeCaptcha();
 		}

@@ -45,7 +45,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 		};
 		jobExecution.setIdentifier("ABCDE");
 		jobExecution.setType("Annotator");
-		progress = new ProgressImpl(jobExecution, updater, () -> mailSender);
+		progress = new ProgressImpl(jobExecution, updater, mailSender);
 	}
 
 	@Test

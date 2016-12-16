@@ -20,7 +20,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -37,7 +36,7 @@ public class GavinJobFactory
 	private PlatformTransactionManager transactionManager;
 	private UserDetailsService userDetailsService;
 	private JobExecutionUpdater jobExecutionUpdater;
-	private Supplier<MailSender> mailSender;
+	private MailSender mailSender;
 	private FileStore fileStore;
 	private RepositoryAnnotator cadd;
 	private RepositoryAnnotator exac;
@@ -48,9 +47,9 @@ public class GavinJobFactory
 
 	@Autowired
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
-			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater,
-			Supplier<MailSender> mailSender, FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac,
-			RepositoryAnnotator snpEff, EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser,
+			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
+			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
+			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser,
 			AnnotatorRunner annotatorRunner)
 	{
 		this.dataService = requireNonNull(dataService);
