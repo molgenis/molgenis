@@ -26,7 +26,7 @@ public class RDFMediaType
 	public static final Set<MediaType> rdfMediaTypes;
 	static {
 
-		HashSet<MediaType> types = new HashSet<>(
+		Set<MediaType> types = new HashSet<>(
 				Arrays.asList(new MediaType[]{
 						TEXT_TURTLE,
 						APPLICATION_RDF_XML,

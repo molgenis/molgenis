@@ -18,6 +18,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 
 import static com.google.common.collect.Iterables.contains;
 import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 
 @Component
 public class EntityModelWriter
@@ -31,8 +32,8 @@ public class EntityModelWriter
 	public EntityModelWriter(TagService<LabeledResource, LabeledResource> tagService, SimpleValueFactory valueFactory)
 			throws DatatypeConfigurationException
 	{
-		this.valueFactory = valueFactory;
-		this.tagService = tagService;
+		this.valueFactory = requireNonNull(valueFactory);
+		this.tagService = requireNonNull(tagService);
 	}
 
 	private void setNamespacePrefixes(Model model)
@@ -116,6 +117,8 @@ public class EntityModelWriter
 			case CATEGORICAL:
 			case FILE:
 				addRelationForXrefTypeAttribute(model, subject, predicate, objectEntity.getEntity(name));
+			default:
+				throw new RuntimeException("DataType " + objectAttribute.getDataType() + "is not supported");
 		}
 	}
 
@@ -128,7 +131,7 @@ public class EntityModelWriter
 		else
 		{
 			model.add(subject, predicate,
-					valueFactory.createIRI(subject.stringValue() + "/" + objectEntity.getIdValue()));
+					valueFactory.createIRI(subject.stringValue() + '/' + objectEntity.getIdValue()));
 		}
 	}
 
@@ -151,7 +154,7 @@ public class EntityModelWriter
 		for (Entity objectEntity : objectEntities)
 		{
 			model.add(subject, predicate,
-					valueFactory.createIRI(subject.stringValue() + "/" + objectEntity.getIdValue()));
+					valueFactory.createIRI(subject.stringValue() + '/' + objectEntity.getIdValue()));
 
 		}
 	}

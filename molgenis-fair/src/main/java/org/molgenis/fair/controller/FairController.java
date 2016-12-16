@@ -14,15 +14,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-@Controller
-@RequestMapping(BASE_URI)
 /**
  * Serves metadata for the molgenis FAIR DataPoint.
- */ public class FairController
+ */
+@Controller
+@RequestMapping(BASE_URI)
+public class FairController
 {
 	static final String BASE_URI = "/fdp";
 
@@ -32,8 +34,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 	@Autowired
 	public FairController(DataService dataService, EntityModelWriter entityModelWriter)
 	{
-		this.dataService = dataService;
-		this.entityModelWriter = entityModelWriter;
+		this.dataService = requireNonNull(dataService);
+		this.entityModelWriter = requireNonNull(entityModelWriter);
 	}
 
 	private static String getBaseUri(HttpServletRequest request)
@@ -60,28 +62,28 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID:.+}")
+	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getCatalog(@PathVariable("catalogID") String catalogID, HttpServletRequest request)
 	{
-		String subjectIRI = getBaseUri(request) + "/" + catalogID;
+		String subjectIRI = getBaseUri(request) + '/' + catalogID;
 		Entity subjectEntity = dataService.findOneById("fdp_Catalog", catalogID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID:.+}/{datasetID:.+}")
+	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getDataset(@PathVariable("catalogID") String catalogID, @PathVariable("datasetID") String datasetID,
 			HttpServletRequest request)
 	{
-		String subjectIRI = getBaseUri(request) + "/" + catalogID + "/" + datasetID;
+		String subjectIRI = getBaseUri(request) + '/' + catalogID + '/' + datasetID;
 		Entity subjectEntity = dataService.findOneById("fdp_Dataset", datasetID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID:.+}/{datasetID:.+}/{distributionID:.+}")
+	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}/{distributionID}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getDistribution(@PathVariable("catalogID") String catalogID,
@@ -89,7 +91,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 			HttpServletRequest request)
 	{
 
-		String subjectIRI = getBaseUri(request) + "/" + catalogID + "/" + datasetID + "/" + distributionID;
+		String subjectIRI = getBaseUri(request) + '/' + catalogID + '/' + datasetID + '/' + distributionID;
 		Entity subjectEntity = dataService.findOneById("fdp_Distribution", distributionID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
