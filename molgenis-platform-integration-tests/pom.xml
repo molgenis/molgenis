@@ -38,6 +38,11 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-excel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-jobs</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -52,6 +57,11 @@
             <artifactId>molgenis-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-import</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
