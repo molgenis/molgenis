@@ -1,7 +1,9 @@
 package org.molgenis.mail;
 
 import org.molgenis.data.DataService;
-import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -18,6 +20,8 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class MailSenderImpl implements MailSender
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MailSenderImpl.class);
+
 	private final DataService dataService;
 	private final MailSettings mailSettings;
 	private Properties defaultProperties;
@@ -34,17 +38,22 @@ public class MailSenderImpl implements MailSender
 	@Override
 	public void send(SimpleMailMessage simpleMessage) throws MailException
 	{
+		LOG.trace("Sending message...");
 		createMailSender().send(simpleMessage);
+		LOG.debug("Sent message.");
 	}
 
 	@Override
 	public void send(SimpleMailMessage... simpleMessages) throws MailException
 	{
+		LOG.trace("Sending messages...");
 		createMailSender().send(simpleMessages);
+		LOG.debug("Sent messages.");
 	}
 
 	private MailSender createMailSender()
 	{
+		LOG.trace("createMailSender");
 		if (mailSettings.getUsername() == null || mailSettings.getPassword() == null)
 		{
 			throw new IllegalStateException(
@@ -62,12 +71,15 @@ public class MailSenderImpl implements MailSender
 		return mailSender;
 	}
 
-	@RunAsSystem
-	public Properties getProperties()
+	private Properties getProperties()
 	{
 		Properties result = new Properties(defaultProperties);
-		result.putAll(dataService.findAll(MailSenderPropertyType.MAIL_SENDER_PROPERTY, MailSenderProperty.class)
-				.collect(Collectors.toMap(MailSenderProperty::getKey, MailSenderProperty::getValue)));
+		RunAsSystemProxy.runAsSystem(() ->
+		{
+			result.putAll(dataService.findAll(MailSenderPropertyType.MAIL_SENDER_PROPERTY, MailSenderProperty.class)
+					.collect(Collectors.toMap(MailSenderProperty::getKey, MailSenderProperty::getValue)));
+		});
+		LOG.debug("Mail properties: {}", result);
 		return result;
 	}
 }
