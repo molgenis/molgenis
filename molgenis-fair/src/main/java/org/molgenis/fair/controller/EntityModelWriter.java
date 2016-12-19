@@ -117,6 +117,7 @@ public class EntityModelWriter
 			case CATEGORICAL:
 			case FILE:
 				addRelationForXrefTypeAttribute(model, subject, predicate, objectEntity.getEntity(name));
+				break;
 			default:
 				throw new RuntimeException("DataType " + objectAttribute.getDataType() + "is not supported");
 		}
