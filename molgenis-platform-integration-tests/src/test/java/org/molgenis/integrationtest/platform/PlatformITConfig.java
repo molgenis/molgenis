@@ -17,7 +17,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
-import org.molgenis.mail.MailConfig;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
@@ -71,8 +70,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class, PlatformConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
-		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
-		MailConfig.class })
+		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	static

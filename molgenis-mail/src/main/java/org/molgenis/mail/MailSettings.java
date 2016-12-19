@@ -1,5 +1,7 @@
 package org.molgenis.mail;
 
+import java.nio.charset.Charset;
+
 interface MailSettings
 {
 	String getHost();
@@ -12,9 +14,5 @@ interface MailSettings
 
 	String getPassword();
 
-	boolean isAuth();
-
-	boolean isStartTlsEnable();
-
-	boolean isQuitWait();
+	Charset getDefaultEncoding();
 }
