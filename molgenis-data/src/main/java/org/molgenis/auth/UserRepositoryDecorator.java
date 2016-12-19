@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
@@ -112,14 +114,15 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 			userAuthority.setUser(user);
 			userAuthority.setRole(AUTHORITY_SU);
 
-			getUserAuthorityRepository().add(userAuthority);
+			dataService.add(USER_AUTHORITY, userAuthority);
 		}
 	}
 
 	private void updateSuperuserAuthority(User user)
 	{
-		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
-		UserAuthority suAuthority = userAuthorityRepo.query().eq(USER, user).and().eq(ROLE, AUTHORITY_SU).findOne();
+		UserAuthority suAuthority = dataService
+				.findOne(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU),
+						UserAuthority.class);
 
 		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
@@ -129,20 +132,70 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 				UserAuthority userAuthority = userAuthorityFactory.create();
 				userAuthority.setUser(user);
 				userAuthority.setRole(AUTHORITY_SU);
-				userAuthorityRepo.add(userAuthority);
+				dataService.add(USER_AUTHORITY, userAuthority);
 			}
 		}
 		else
 		{
 			if (suAuthority != null)
 			{
-				userAuthorityRepo.deleteById(suAuthority.getId());
+				dataService.deleteById(USER_AUTHORITY, suAuthority.getId());
 			}
 		}
 	}
 
-	private Repository<UserAuthority> getUserAuthorityRepository()
+	@Override
+	public void delete(User entity)
 	{
-		return dataService.getRepository(USER_AUTHORITY, UserAuthority.class);
+		deleteUserAuthoritiesAndGroupMember(entity);
+		decoratedRepository.delete(entity);
+	}
+
+	@Override
+	public void delete(Stream<User> entities)
+	{
+		entities = entities.map(entity ->
+		{
+			deleteUserAuthoritiesAndGroupMember(entity);
+			return entity;
+		});
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		deleteUserAuthoritiesAndGroupMember(findOneById(id));
+		decoratedRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteAll(Stream<Object> ids)
+	{
+		ids = ids.map(id ->
+		{
+			deleteUserAuthoritiesAndGroupMember(findOneById(id));
+			return id;
+		});
+		decoratedRepository.deleteAll(ids);
+	}
+
+	private void deleteUserAuthoritiesAndGroupMember(User user)
+	{
+		Stream<UserAuthority> userAuthorities = dataService
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+						UserAuthority.class);
+		dataService.delete(USER_AUTHORITY, userAuthorities);
+
+		Stream<GroupMember> groupMembers = dataService
+				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+						GroupMember.class);
+		dataService.delete(GROUP_MEMBER, groupMembers);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		throw new UnsupportedOperationException("Deleting all users is not supported.");
 	}
 }
