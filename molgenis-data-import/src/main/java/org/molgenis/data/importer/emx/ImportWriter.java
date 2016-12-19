@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -545,7 +546,13 @@ public class ImportWriter
 				break;
 			}
 			case UPDATE:
-				repo.update(stream(entities.spliterator(), false));
+				AtomicInteger atomicCount = new AtomicInteger(0);
+				repo.update(stream(entities.spliterator(), false).filter(entity ->
+				{
+					atomicCount.incrementAndGet();
+					return true;
+				}));
+				count = atomicCount.get();
 				break;
 			default:
 				throw new RuntimeException(format("Unknown database action [%s]", dbAction.toString()));
