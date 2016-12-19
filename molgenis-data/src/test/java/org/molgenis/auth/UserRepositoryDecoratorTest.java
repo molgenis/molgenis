@@ -5,6 +5,7 @@ import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -16,14 +17,17 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 public class UserRepositoryDecoratorTest
 {
 	private Repository<User> decoratedRepository;
 	private Repository<UserAuthority> userAuthorityRepository;
+	private Repository<GroupMember> groupMemberRepository;
 	private UserRepositoryDecorator userRepositoryDecorator;
 	private PasswordEncoder passwordEncoder;
+	private DataService dataService;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -31,10 +35,12 @@ public class UserRepositoryDecoratorTest
 	{
 		decoratedRepository = mock(Repository.class);
 		userAuthorityRepository = mock(Repository.class);
+		groupMemberRepository = mock(Repository.class);
 		UserAuthorityFactory userAuthorityFactory = mock(UserAuthorityFactory.class);
 		when(userAuthorityFactory.create()).thenAnswer(invocation -> mock(UserAuthority.class));
-		DataService dataService = mock(DataService.class);
+		dataService = mock(DataService.class);
 		when(dataService.getRepository(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityRepository);
+		when(dataService.getRepository(GROUP_MEMBER, GroupMember.class)).thenReturn(groupMemberRepository);
 		passwordEncoder = mock(PasswordEncoder.class);
 		userRepositoryDecorator = new UserRepositoryDecorator(decoratedRepository, userAuthorityFactory, dataService,
 				passwordEncoder);
@@ -83,11 +89,98 @@ public class UserRepositoryDecoratorTest
 	}
 
 	@Test
+	public void delete()
+	{
+		User user = mock(User.class);
+
+		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
+		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
+		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+				UserAuthority.class)).thenReturn(userAuthorities);
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class)).thenReturn(groupMembers);
+
+		userRepositoryDecorator.delete(user);
+
+		verify(decoratedRepository, times(1)).delete(user);
+		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
+		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
 	public void deleteStream()
 	{
-		Stream<User> entities = Stream.empty();
+		User user = mock(User.class);
+
+		Stream<User> entities = Stream.of(user);
+		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
+		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
+		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+				UserAuthority.class)).thenReturn(userAuthorities);
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class)).thenReturn(groupMembers);
+
+		ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
 		userRepositoryDecorator.delete(entities);
-		verify(decoratedRepository, times(1)).delete(entities);
+
+		verify(decoratedRepository, times(1)).delete(captor.capture());
+		captor.getValue().forEach(u ->
+		{
+		});
+		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
+		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
+	}
+
+	@Test
+	public void deleteById()
+	{
+		User user = mock(User.class);
+		when(userRepositoryDecorator.findOneById("1")).thenReturn(user);
+
+		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
+		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
+		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+				UserAuthority.class)).thenReturn(userAuthorities);
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class)).thenReturn(groupMembers);
+
+		userRepositoryDecorator.delete(user);
+
+		verify(decoratedRepository, times(1)).delete(user);
+		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
+		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void deleteAllStream()
+	{
+		User user = mock(User.class);
+		when(userRepositoryDecorator.findOneById("1")).thenReturn(user);
+
+		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
+		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
+		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+				UserAuthority.class)).thenReturn(userAuthorities);
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+				GroupMember.class)).thenReturn(groupMembers);
+
+		ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
+		userRepositoryDecorator.deleteAll(Stream.of("1"));
+
+		verify(decoratedRepository, times(1)).deleteAll(captor.capture());
+		captor.getValue().forEach(u ->
+		{
+		});
+		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
+		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void deleteAll()
+	{
+		userRepositoryDecorator.deleteAll();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

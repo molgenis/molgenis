@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -113,14 +114,15 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 			userAuthority.setUser(user);
 			userAuthority.setRole(AUTHORITY_SU);
 
-			getUserAuthorityRepository().add(userAuthority);
+			dataService.add(USER_AUTHORITY, userAuthority);
 		}
 	}
 
 	private void updateSuperuserAuthority(User user)
 	{
-		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
-		UserAuthority suAuthority = userAuthorityRepo.query().eq(USER, user).and().eq(ROLE, AUTHORITY_SU).findOne();
+		UserAuthority suAuthority = dataService
+				.findOne(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU),
+						UserAuthority.class);
 
 		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
@@ -130,26 +132,16 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 				UserAuthority userAuthority = userAuthorityFactory.create();
 				userAuthority.setUser(user);
 				userAuthority.setRole(AUTHORITY_SU);
-				userAuthorityRepo.add(userAuthority);
+				dataService.add(USER_AUTHORITY, userAuthority);
 			}
 		}
 		else
 		{
 			if (suAuthority != null)
 			{
-				userAuthorityRepo.deleteById(suAuthority.getId());
+				dataService.deleteById(USER_AUTHORITY, suAuthority.getId());
 			}
 		}
-	}
-
-	private Repository<UserAuthority> getUserAuthorityRepository()
-	{
-		return dataService.getRepository(USER_AUTHORITY, UserAuthority.class);
-	}
-
-	private Repository<GroupMember> getGroupMemberRepository()
-	{
-		return dataService.getRepository(GROUP_MEMBER, GroupMember.class);
 	}
 
 	@Override
@@ -190,14 +182,15 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 
 	private void deleteUserAuthoritiesAndGroupMember(User user)
 	{
-		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
-		Stream<UserAuthority> userAuthorities = userAuthorityRepo.query().eq(UserAuthorityMetaData.USER, user)
-				.findAll();
-		userAuthorityRepo.delete(userAuthorities);
+		Stream<UserAuthority> userAuthorities = dataService
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+						UserAuthority.class);
+		dataService.delete(USER_AUTHORITY, userAuthorities);
 
-		Repository<GroupMember> groupMemberRepo = getGroupMemberRepository();
-		Stream<GroupMember> groupMembers = groupMemberRepo.query().eq(GroupMemberMetaData.USER, user).findAll();
-		groupMemberRepo.delete(groupMembers);
+		Stream<GroupMember> groupMembers = dataService
+				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+						GroupMember.class);
+		dataService.delete(GROUP_MEMBER, groupMembers);
 	}
 
 	@Override
