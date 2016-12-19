@@ -43,6 +43,7 @@
         <google.guava.version>19.0</google.guava.version>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
+        <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
     </properties>
 
     <build>
@@ -684,6 +685,7 @@
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
         <module>molgenis-data-i18n</module>
+        <module>molgenis-fair</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>

@@ -24,7 +24,7 @@ $(function () {
             var annotator = $(e.target).data('name');
             React.unmountComponentAtNode(formNode);
             React.render(molgenis.ui.Form({
-                entity: 'sys_set_' + annotator,
+                entity: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + annotator,
                 entityInstance: annotator,
                 mode: 'edit',
                 modal: true,
