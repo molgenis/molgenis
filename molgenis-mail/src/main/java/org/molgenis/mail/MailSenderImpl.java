@@ -26,7 +26,7 @@ public class MailSenderImpl implements MailSender
 	public MailSenderImpl(DataService dataService, MailSettings mailSettings) throws IOException
 	{
 		defaultProperties = new Properties();
-		//		defaultProperties.load(getClass().getResourceAsStream("mail-default.properties"));
+		defaultProperties.load(getClass().getResourceAsStream("mail-default.properties"));
 		this.dataService = requireNonNull(dataService);
 		this.mailSettings = requireNonNull(mailSettings);
 	}
@@ -57,6 +57,7 @@ public class MailSenderImpl implements MailSender
 		mailSender.setProtocol(mailSettings.getProtocol());
 		mailSender.setUsername(mailSettings.getUsername());
 		mailSender.setPassword(mailSettings.getPassword());
+		mailSender.setDefaultEncoding(mailSettings.getDefaultEncoding().name());
 		mailSender.setJavaMailProperties(getProperties());
 		return mailSender;
 	}
