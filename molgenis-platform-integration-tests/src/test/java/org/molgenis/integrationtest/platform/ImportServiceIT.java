@@ -15,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.testng.annotations.BeforeClass;
@@ -34,7 +37,6 @@ import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -42,6 +44,7 @@ import static org.testng.Assert.assertEquals;
  */
 @TransactionConfiguration(defaultRollback = false)
 @ContextConfiguration(classes = { PlatformITConfig.class })
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class ImportServiceIT extends AbstractTestNGSpringContextTests
 {
 	private final static Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
@@ -102,18 +105,15 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
 	public void testDoImportAddEmx(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes)
 	{
-		runAsSystem(() ->
-		{
-			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(file);
-			ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 
-			EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 
-			validateImportReport(importReport, entityCountMap, addedEntityTypes);
-		});
+		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 	}
 
 	@DataProvider(name = "doImportEmxAddUpdateProvider")
@@ -129,6 +129,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
 	public void testDoImportAddUpdateEmx(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes)
 	{
@@ -138,22 +139,19 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	private void executeAddUpdateOrUpdateTest(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes)
 	{
-		runAsSystem(() ->
-		{
-			FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(file);
-			ImportService addImportService = importServiceFactory.getImportService(file, addRepoCollection);
-			addImportService.doImport(addRepoCollection, ADD, PACKAGE_DEFAULT);
+		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory
+				.createFileRepositoryCollection(file);
+		ImportService addImportService = importServiceFactory.getImportService(file, addRepoCollection);
+		addImportService.doImport(addRepoCollection, ADD, PACKAGE_DEFAULT);
 
-			FileRepositoryCollection addUpdateRepoCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(addUpdateFile);
-			ImportService addUpdateImportService = importServiceFactory
-					.getImportService(addUpdateFile, addUpdateRepoCollection);
-			EntityImportReport importReport = addUpdateImportService
-					.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+		FileRepositoryCollection addUpdateRepoCollection = fileRepositoryCollectionFactory
+				.createFileRepositoryCollection(addUpdateFile);
+		ImportService addUpdateImportService = importServiceFactory
+				.getImportService(addUpdateFile, addUpdateRepoCollection);
+		EntityImportReport importReport = addUpdateImportService
+				.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
 
-			validateImportReport(importReport, entityCountMap, addedEntityTypes);
-		});
+		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 	}
 
 	@DataProvider(name = "doImportEmxUpdateProvider")
@@ -168,7 +166,28 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
 	public void testDoImportUpdateEmx(File file, File updateFile, Map<String, Integer> entityCountMap,
+			Set<String> addedEntityTypes)
+	{
+		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes);
+	}
+
+	@DataProvider(name = "doImportEmxUpdateAsNonSuperuserProvider")
+	public Iterator<Object[]> doImportEmxUpdateAsNonSuperuserProvider()
+	{
+		List<Object[]> data = new ArrayList<>();
+
+		data.add(createUpdateData("it_emx_nonsu_update.xlsx", "it_emx_nonsu_update-update.xlsx",
+				asList("it", "emx", "nonsu", "update"),
+				ImmutableMap.<String, Integer>builder().put("TestUpdate", 2).build(), Collections.emptySet()));
+
+		return data.iterator();
+	}
+
+	@Test(dataProvider = "doImportEmxUpdateAsNonSuperuserProvider")
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
+	public void testDoImportUpdateAsNonSuperuserEmx(File file, File updateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes)
 	{
 		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes);
