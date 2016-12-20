@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.system;
 
+import com.google.common.collect.Maps;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
@@ -7,7 +8,10 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -34,14 +38,16 @@ public class SystemEntityTypePersister
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final UuidGenerator uuidGenerator;
 
 	@Autowired
 	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, UuidGenerator uuidGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.uuidGenerator = requireNonNull(uuidGenerator);
 	}
 
 	public void persist(ContextRefreshedEvent event)
@@ -146,16 +152,27 @@ public class SystemEntityTypePersister
 	 */
 	private void injectExistingIdentifiers(List<EntityType> entityTypes)
 	{
-
-		Map<Object, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getIdValue), EntityType.class)
-				.collect(toMap(EntityType::getIdValue, Function.identity()));
+		Map<Locator, EntityType> existingEntityTypeMap = Maps.newHashMap();
+		entityTypes.forEach(entityType ->
+		{
+			Locator locator = new Locator(entityType.getPackage(), entityType.getSimpleName());
+			EntityType existingEntityType = dataService.findOne(ENTITY_TYPE_META_DATA,
+					new QueryImpl<EntityType>().eq(EntityTypeMetadata.PACKAGE, locator.getPackage_()).and()
+							.eq(EntityTypeMetadata.SIMPLE_NAME, locator.getName()), EntityType.class);
+			if (existingEntityType != null)
+			{
+				existingEntityTypeMap.put(locator, existingEntityType);
+			}
+		});
 
 		entityTypes.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getIdValue());
+			EntityType existingEntityType = existingEntityTypeMap
+					.get(new Locator(entityType.getPackage(), entityType.getSimpleName()));
 			if (existingEntityType != null)
 			{
+				entityType.setId(existingEntityType.getId());
+
 				Map<String, Attribute> existingAttrs = stream(existingEntityType.getOwnAllAttributes().spliterator(),
 						false).collect(toMap(Attribute::getName, Function.identity()));
 				entityType.getOwnAllAttributes().forEach(attr ->
@@ -168,6 +185,53 @@ public class SystemEntityTypePersister
 					}
 				});
 			}
+			else
+			{
+				// FIXME auto id not generated automatically
+				entityType.setId(uuidGenerator.generateId());
+			}
 		});
+	}
+
+	private class Locator
+	{
+		private final Package package_;
+		private final String name;
+
+		Locator(Package package_, String name)
+		{
+			this.package_ = requireNonNull(package_);
+			this.name = requireNonNull(name);
+		}
+
+		public Package getPackage_()
+		{
+			return package_;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Locator locator = (Locator) o;
+
+			if (!getPackage_().equals(locator.getPackage_())) return false;
+			return getName().equals(locator.getName());
+		}
+
+		@Override
+		public int hashCode()
+		{
+			int result = getPackage_().hashCode();
+			result = 31 * result + getName().hashCode();
+			return result;
+		}
 	}
 }

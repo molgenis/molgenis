@@ -43,6 +43,7 @@ public class PackageMetadata extends SystemEntityType
 	{
 		setLabel("Package");
 		setDescription("Grouping of related entities");
+		addAttribute("id");
 		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
@@ -53,8 +54,8 @@ public class PackageMetadata extends SystemEntityType
 				.setOrderBy(new Sort(LABEL)).setRefEntity(this).setLabel("Children");
 		addAttribute(ENTITY_TYPES).setReadOnly(true).setDataType(ONE_TO_MANY)
 				.setMappedBy(entityTypeMetadata.getAttribute(EntityTypeMetadata.PACKAGE))
-				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL)).setRefEntity(entityTypeMetadata)
-				.setLabel("Entity types");
+				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL))
+				.setRefEntity(entityTypeMetadata).setLabel("Entity types");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 	}
 
