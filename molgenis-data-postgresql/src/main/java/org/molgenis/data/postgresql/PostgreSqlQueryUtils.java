@@ -113,9 +113,17 @@ class PostgreSqlQueryUtils
 	 */
 	static Stream<Attribute> getTableAttributes(EntityType entityType)
 	{
-		return getPersistedAttributes(entityType)
-				.filter(attr -> !isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr
-						.isMappedBy()));
+		return getPersistedAttributes(entityType).filter(PostgreSqlQueryUtils::isTableAttribute);
+	}
+
+	static boolean isTableAttribute(Attribute attr)
+	{
+		return !isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy());
+	}
+
+	static Stream<Attribute> getTableAttributesReadonly(EntityType entityType)
+	{
+		return getTableAttributes(entityType).filter(Attribute::isReadOnly);
 	}
 
 	/**

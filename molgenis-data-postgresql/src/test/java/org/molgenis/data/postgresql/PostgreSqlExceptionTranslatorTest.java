@@ -18,6 +18,32 @@ public class PostgreSqlExceptionTranslatorTest
 	}
 
 	@Test
+	public void translateReadonlyViolation()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage())
+				.thenReturn("Updating read-only column \"attr\" of table \"entity\" with id [abc] is not allowed");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = PostgreSqlExceptionTranslator
+				.translateReadonlyViolation(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(),
+				"Updating read-only attribute 'attr' of entity 'entity' with id 'abc' is not allowed.");
+	}
+
+	@Test
+	public void translateReadonlyViolationNoDoubleQuotes()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage())
+				.thenReturn("Updating read-only column attr of table entity with id [abc] is not allowed");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = PostgreSqlExceptionTranslator
+				.translateReadonlyViolation(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(),
+				"Updating read-only attribute 'attr' of entity 'entity' with id 'abc' is not allowed.");
+	}
+
+	@Test
 	public void translateDependentObjectsStillExistOneDependentTableSingleDependency()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);

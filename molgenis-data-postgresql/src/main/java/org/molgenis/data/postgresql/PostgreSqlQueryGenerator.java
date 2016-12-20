@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +30,8 @@ import static org.molgenis.data.support.EntityTypeUtils.*;
  */
 class PostgreSqlQueryGenerator
 {
+	final static String ERR_CODE_READONLY_VIOLATION = "23506";
+
 	private PostgreSqlQueryGenerator()
 	{
 
@@ -179,6 +182,60 @@ class PostgreSqlQueryGenerator
 		sql.append(')');
 
 		return sql.toString();
+	}
+
+	private static String getSqlFunctionValidateUpdateName(EntityType entityType)
+	{
+		return '"' + "validate_update_" + getTableName(entityType, false) + '"';
+	}
+
+	static String getSqlCreateFunctionValidateUpdate(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
+	{
+		StringBuilder strBuilder = new StringBuilder(512).append("CREATE FUNCTION ")
+				.append(getSqlFunctionValidateUpdateName(entityType)).append("() RETURNS TRIGGER AS $$\nBEGIN\n");
+
+		String tableName = getTableName(entityType);
+		String idColName = getColumnName(entityType.getIdAttribute());
+		readonlyTableAttrs.forEach(attr ->
+		{
+			String colName = getColumnName(attr);
+
+			strBuilder.append("  IF OLD.").append(colName).append(" <> NEW.").append(colName).append(" THEN\n");
+			strBuilder.append("    RAISE EXCEPTION 'Updating read-only column ").append(colName).append(" of table ")
+					.append(tableName).append(" with id [%] is not allowed', OLD.").append(idColName)
+					.append(" USING ERRCODE = '").append(ERR_CODE_READONLY_VIOLATION).append("';\n");
+			strBuilder.append("  END IF;\n");
+		});
+		strBuilder.append("  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;");
+
+		return strBuilder.toString();
+	}
+
+	static String getSqlDropFunctionValidateUpdate(EntityType entityType)
+	{
+		return "DROP FUNCTION " + getSqlFunctionValidateUpdateName(entityType) + "();";
+	}
+
+	private static String getSqlUpdateTriggerName(EntityType entityType)
+	{
+		return '"' + "update_trigger_" + getTableName(entityType, false) + '"';
+	}
+
+	static String getSqlCreateUpdateTrigger(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
+	{
+		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
+				.append(getSqlUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
+				.append(getTableName(entityType)).append(" FOR EACH ROW WHEN (");
+		strBuilder.append(readonlyTableAttrs.stream()
+				.map(attr -> "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW." + getColumnName(attr))
+				.collect(joining(" OR ")));
+		strBuilder.append(") EXECUTE PROCEDURE ").append(getSqlFunctionValidateUpdateName(entityType)).append("();");
+		return strBuilder.toString();
+	}
+
+	static String getSqlDropUpdateTrigger(EntityType entityType)
+	{
+		return "DROP TRIGGER " + getSqlUpdateTriggerName(entityType) + " ON " + getTableName(entityType);
 	}
 
 	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)
