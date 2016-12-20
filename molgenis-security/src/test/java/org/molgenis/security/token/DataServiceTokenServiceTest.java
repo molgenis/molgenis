@@ -61,6 +61,7 @@ public class DataServiceTokenServiceTest
 		when(token.getToken()).thenReturn("token");
 		when(token.getUser()).thenReturn(user);
 
+		@SuppressWarnings("unchecked")
 		Query<Token> q = mock(Query.class);
 		when(q.eq(TOKEN_ATTR, "token")).thenReturn(q);
 		when(q.findOne()).thenReturn(token);
@@ -79,6 +80,7 @@ public class DataServiceTokenServiceTest
 		when(token.getToken()).thenReturn("token");
 		when(token.getExpirationDate()).thenReturn(DateUtils.addDays(new Date(), -1));
 
+		@SuppressWarnings("unchecked")
 		Query<Token> q = mock(Query.class);
 		when(q.eq(TOKEN_ATTR, "token")).thenReturn(q);
 		when(q.findOne()).thenReturn(token);
@@ -92,6 +94,7 @@ public class DataServiceTokenServiceTest
 	{
 		User user = mock(User.class);
 
+		@SuppressWarnings("unchecked")
 		Query<User> q = mock(Query.class);
 		when(q.eq(USERNAME, "admin")).thenReturn(q);
 		when(q.findOne()).thenReturn(user);
@@ -112,6 +115,7 @@ public class DataServiceTokenServiceTest
 		Token token = mock(Token.class);
 		when(token.getToken()).thenReturn("token");
 
+		@SuppressWarnings("unchecked")
 		Query<Token> q = mock(Query.class);
 		when(q.eq(TOKEN_ATTR, "token")).thenReturn(q);
 		when(q.findOne()).thenReturn(token);

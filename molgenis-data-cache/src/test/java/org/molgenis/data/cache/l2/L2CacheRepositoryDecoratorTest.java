@@ -142,6 +142,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		assertTrue(EntityUtils.equals(retrievedEntities.get(1), entities.get(3)));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllQueriesInBatches()
 	{

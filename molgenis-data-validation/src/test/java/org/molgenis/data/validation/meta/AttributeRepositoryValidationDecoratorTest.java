@@ -19,14 +19,13 @@ public class AttributeRepositoryValidationDecoratorTest
 	private Repository<Attribute> decoratedRepo;
 	private AttributeValidator attributeValidator;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		//noinspection unchecked
 		decoratedRepo = mock(Repository.class);
 		attributeValidator = mock(AttributeValidator.class);
-		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(decoratedRepo,
-				attributeValidator);
+		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(decoratedRepo, attributeValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -69,7 +68,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.UPDATE);
 		doNothing().when(attributeValidator).validate(attribute1, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
@@ -85,7 +84,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
 				.validate(attribute1, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
@@ -119,7 +118,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.ADD);
 		doNothing().when(attributeValidator).validate(attribute1, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
@@ -135,7 +134,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
 				.validate(attribute1, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
