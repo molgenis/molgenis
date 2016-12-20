@@ -98,6 +98,7 @@ public class SystemEntityTypePersister
 
 	private boolean isNotPersisted(Package package_)
 	{
+		// FIXME use locator
 		return dataService.findOneById(PACKAGE, package_.getIdValue(), Package.class) == null;
 	}
 
@@ -152,26 +153,25 @@ public class SystemEntityTypePersister
 	 */
 	private void injectExistingIdentifiers(List<EntityType> entityTypes)
 	{
-		Map<Locator, EntityType> existingEntityTypeMap = Maps.newHashMap();
+		Map<String, EntityType> existingEntityTypeMap = Maps.newHashMap();
 		entityTypes.forEach(entityType ->
 		{
-			Locator locator = new Locator(entityType.getPackage(), entityType.getSimpleName());
 			EntityType existingEntityType = dataService.findOne(ENTITY_TYPE_META_DATA,
-					new QueryImpl<EntityType>().eq(EntityTypeMetadata.PACKAGE, locator.getPackage_()).and()
-							.eq(EntityTypeMetadata.SIMPLE_NAME, locator.getName()), EntityType.class);
+					new QueryImpl<EntityType>().eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()).and()
+							.eq(EntityTypeMetadata.SIMPLE_NAME, entityType.getSimpleName()), EntityType.class);
 			if (existingEntityType != null)
 			{
-				existingEntityTypeMap.put(locator, existingEntityType);
+				existingEntityTypeMap.put(entityType.getName(), existingEntityType);
 			}
 		});
 
 		entityTypes.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap
-					.get(new Locator(entityType.getPackage(), entityType.getSimpleName()));
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
 			if (existingEntityType != null)
 			{
 				entityType.setId(existingEntityType.getId());
+				System.out.println(entityType.getName() + " " + existingEntityType.getId());
 
 				Map<String, Attribute> existingAttrs = stream(existingEntityType.getOwnAllAttributes().spliterator(),
 						false).collect(toMap(Attribute::getName, Function.identity()));
@@ -187,51 +187,10 @@ public class SystemEntityTypePersister
 			}
 			else
 			{
-				// FIXME auto id not generated automatically
-				entityType.setId(uuidGenerator.generateId());
+				// FIXME should be done by populator
+				entityType.setId("g" + entityType.getName());
+
 			}
 		});
-	}
-
-	private class Locator
-	{
-		private final Package package_;
-		private final String name;
-
-		Locator(Package package_, String name)
-		{
-			this.package_ = requireNonNull(package_);
-			this.name = requireNonNull(name);
-		}
-
-		public Package getPackage_()
-		{
-			return package_;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-		@Override
-		public boolean equals(Object o)
-		{
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			Locator locator = (Locator) o;
-
-			if (!getPackage_().equals(locator.getPackage_())) return false;
-			return getName().equals(locator.getName());
-		}
-
-		@Override
-		public int hashCode()
-		{
-			int result = getPackage_().hashCode();
-			result = 31 * result + getName().hashCode();
-			return result;
-		}
 	}
 }

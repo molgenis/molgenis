@@ -30,6 +30,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
@@ -178,7 +179,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getName));
+		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getId));
 
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getName).collect(joining(",")));
 	}
@@ -733,13 +734,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		@Override
 		public String getName()
 		{
-			return entityType.getName();
-		}
-
-		@Override
-		public EntityType setName(String fullName)
-		{
-			return entityType.setName(fullName);
+			return getPackage().getName() + PACKAGE_SEPARATOR + getSimpleName();
 		}
 
 		@Override

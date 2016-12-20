@@ -166,12 +166,12 @@ public class EntityType extends StaticEntity
 
 	public String getId()
 	{
-		return getString("id");
+		return getString(ID);
 	}
 
 	public EntityType setId(String id)
 	{
-		set("id", id);
+		set(ID, id);
 		return this;
 	}
 
@@ -184,16 +184,17 @@ public class EntityType extends StaticEntity
 	 */
 	public EntityType setName(String fullName)
 	{
-		set(FULL_NAME, fullName);
-		if (getSimpleName() == null)
-		{
-			set(SIMPLE_NAME, fullName);
-		}
-		if (getLabel() == null)
-		{
-			set(LABEL, fullName);
-		}
-		return this;
+		throw new UnsupportedOperationException();
+		//		set(FULL_NAME, fullName);
+		//		if (getSimpleName() == null)
+		//		{
+		//			set(SIMPLE_NAME, fullName);
+		//		}
+		//		if (getLabel() == null)
+		//		{
+		//			set(LABEL, fullName);
+		//		}
+		//		return this;
 	}
 
 	/**

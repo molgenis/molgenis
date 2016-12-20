@@ -27,6 +27,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	private PackageMetadata packageMetadata;
 	private TagMetadata tagMetadata;
 
+	public static final String ID = "id";
 	public static final String FULL_NAME = "fullName";
 	public static final String SIMPLE_NAME = "simpleName";
 	public static final String PACKAGE = "package";
@@ -53,7 +54,7 @@ public class EntityTypeMetadata extends SystemEntityType
 		setLabel("Entity");
 		setDescription("Meta data for entity classes");
 
-		addAttribute("id", ROLE_ID).setAuto(true);
+		addAttribute(ID, ROLE_ID).setAuto(true);
 		addAttribute(FULL_NAME).setVisible(false).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);

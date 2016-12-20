@@ -59,7 +59,8 @@ public abstract class SystemEntityType extends EntityType
 	public void bootstrap(EntityTypeMetadata entityTypeMetadata)
 	{
 		super.init(new BootstrapEntity(entityTypeMetadata));
-		setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
+		// FIXME setPackage ?
+		//setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
 		setSimpleName(entityName);
 		setDefaultValues();
 		init();

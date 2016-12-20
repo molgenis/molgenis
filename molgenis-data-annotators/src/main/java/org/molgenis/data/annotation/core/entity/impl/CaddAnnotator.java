@@ -148,7 +148,8 @@ public class CaddAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				String idAttrName = "id";
-				EntityType repoMetaData = entityTypeFactory.create().setName(CADD_TABIX_RESOURCE);
+				// FIXME set simple name, etc.
+				EntityType repoMetaData = entityTypeFactory.create().setId(CADD_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
