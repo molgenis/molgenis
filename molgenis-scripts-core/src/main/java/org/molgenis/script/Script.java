@@ -146,7 +146,8 @@ public class Script extends StaticEntity
 	{
 		try
 		{
-			Template template = new Template(null, new StringReader(getContent()), new Configuration());
+			Template template = new Template(null, new StringReader(getContent()),
+					new Configuration(Configuration.VERSION_2_3_21));
 			template.process(parameterValues, writer);
 		}
 		catch (TemplateException | IOException e)

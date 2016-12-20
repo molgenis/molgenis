@@ -199,6 +199,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void findAllAsStream()
 	{
 		Language language0 = mock(Language.class);
+		@SuppressWarnings("unchecked")
 		Query<Language> query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(language0));
 		Stream<Language> entities = languageRepositoryDecorator.findAll(query);
@@ -209,6 +210,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Consumer<List<Language>> consumer = mock(Consumer.class);
 		decoratedRepo.forEachBatched(fetch, consumer, 234);
 		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);

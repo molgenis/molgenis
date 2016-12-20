@@ -31,6 +31,7 @@ public class MolgenisResourceBundleControlTest
 	private Query<Entity> queryMock;
 	private MolgenisResourceBundleControl molgenisResourceBundleControl;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{

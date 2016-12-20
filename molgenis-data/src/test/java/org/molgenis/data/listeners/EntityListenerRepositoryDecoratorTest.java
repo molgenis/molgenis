@@ -25,6 +25,7 @@ public class EntityListenerRepositoryDecoratorTest
 	private EntityListenerRepositoryDecorator entityListenerRepositoryDecorator;
 	private EntityListenersService entityListenersService = new EntityListenersService();
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -80,6 +81,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityWithListener()
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
@@ -99,6 +101,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityWithListeners()
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
@@ -122,6 +125,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityWithoutListener()
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
@@ -141,6 +145,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityNoListeners()
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
@@ -226,6 +231,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void removeEntityListener()
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
@@ -273,6 +279,7 @@ public class EntityListenerRepositoryDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = Mockito.mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = Mockito.mock(Query.class);
 		Mockito.when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
@@ -283,6 +290,7 @@ public class EntityListenerRepositoryDecoratorTest
 	public void streamFetch()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = Mockito.mock(Consumer.class);
 		entityListenerRepositoryDecorator.forEachBatched(fetch, consumer, 543);
 		Mockito.verify(decoratedRepository, Mockito.times(1)).forEachBatched(fetch, consumer, 543);

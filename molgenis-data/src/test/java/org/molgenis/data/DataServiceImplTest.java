@@ -35,6 +35,7 @@ public class DataServiceImplTest
 	private DataServiceImpl dataService;
 	private MetaDataService metaDataService;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -241,6 +242,7 @@ public class DataServiceImplTest
 	public void findAllStreamStringQuery()
 	{
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query);
@@ -252,6 +254,7 @@ public class DataServiceImplTest
 	{
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);

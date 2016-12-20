@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
 
 @ContextConfiguration(classes = { IndexBootstrapperTest.Config.class })
 public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
@@ -62,10 +62,13 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupNoIndex()
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo1 = mock(Repository.class);
 		when(repo1.getName()).thenReturn("repo1");
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo2 = mock(Repository.class);
 		when(repo2.getName()).thenReturn("repo2");
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo3 = mock(Repository.class);
 		when(repo3.getName()).thenReturn("repo3");
 

@@ -30,6 +30,7 @@ public class LanguageServiceTest
 	private AppSettings appSettingsMock;
 	private Query<Entity> queryMock;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{

@@ -288,6 +288,7 @@ public class InMemoryRepositoryTest
 			inMemoryRepository.add(entity1);
 			Fetch fetch = new Fetch();
 
+			@SuppressWarnings("unchecked")
 			Consumer<List<Entity>> consumer = mock(Consumer.class);
 			inMemoryRepository.forEachBatched(fetch, consumer, 1000);
 			verify(consumer).accept(Arrays.asList(entity0, entity1));

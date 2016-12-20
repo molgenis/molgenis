@@ -60,7 +60,7 @@ public class MetaDataServiceImplTest
 		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
 				.thenReturn(entityType);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
@@ -85,6 +85,7 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.getRepository("unknownEntity");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void getRepositoryTyped()
 	{
@@ -95,10 +96,8 @@ public class MetaDataServiceImplTest
 		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
 				.thenReturn(entityType);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		//noinspection unchecked
 		Repository<Package> repo = mock(Repository.class);
 
-		//noinspection unchecked
 		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
 		assertEquals(metaDataServiceImpl.getRepository(entityName, Package.class), repo);
@@ -129,7 +128,7 @@ public class MetaDataServiceImplTest
 		String backendName = "backend";
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
@@ -143,6 +142,7 @@ public class MetaDataServiceImplTest
 		assertNull(metaDataServiceImpl.getRepository(entityType));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void getRepositoryTypedEntityType()
 	{
@@ -150,10 +150,8 @@ public class MetaDataServiceImplTest
 		String backendName = "backend";
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		//noinspection unchecked
 		Repository<Package> repo = mock(Repository.class);
 
-		//noinspection unchecked
 		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
@@ -178,7 +176,7 @@ public class MetaDataServiceImplTest
 		EntityType entityType1 = mock(EntityType.class);
 		when(entityType1.getBackend()).thenReturn(backendName1);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
 
 		when(entityQ.eq(IS_ABSTRACT, false)).thenReturn(entityQ);
@@ -186,15 +184,16 @@ public class MetaDataServiceImplTest
 		when(entityQ.findAll()).thenReturn(Stream.of(entityType0, entityType1));
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		RepositoryCollection repoCollection0 = mock(RepositoryCollection.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repoCollection0.getRepository(entityType0)).thenReturn(repo0);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName0)).thenReturn(repoCollection0);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo1 = mock(Repository.class);
 		RepositoryCollection repoCollection1 = mock(RepositoryCollection.class);
 		when(repoCollection1.getRepository(entityType1)).thenReturn(repo1);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName1)).thenReturn(repoCollection1);
+		@SuppressWarnings("unchecked")
 		List<Repository<Entity>> expectedRepos = newArrayList(repo0, repo1);
 		assertEquals(metaDataServiceImpl.getRepositories().collect(toList()), expectedRepos);
 	}
@@ -205,9 +204,9 @@ public class MetaDataServiceImplTest
 		String entityName = "entity";
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(false).getMock();
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ2 = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
@@ -224,9 +223,9 @@ public class MetaDataServiceImplTest
 	{
 		String entityName = "entity";
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ2 = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
@@ -251,12 +250,12 @@ public class MetaDataServiceImplTest
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		assertEquals(metaDataServiceImpl.createRepository(entityType), repo);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
@@ -273,6 +272,7 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.createRepository(entityType);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void createRepositoryTyped()
 	{
@@ -288,12 +288,10 @@ public class MetaDataServiceImplTest
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
 
-		//noinspection unchecked
 		Repository<Package> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 		assertEquals(metaDataServiceImpl.createRepository(entityType, entityClass), repo);
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
@@ -365,7 +363,7 @@ public class MetaDataServiceImplTest
 	{
 		Package package0 = mock(Package.class);
 		Package package1 = mock(Package.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Package> packageQ = mock(Query.class);
 		when(packageQ.eq(PARENT, null)).thenReturn(packageQ);
 		when(packageQ.findAll()).thenReturn(Stream.of(package0, package1));
@@ -444,7 +442,7 @@ public class MetaDataServiceImplTest
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 		metaDataServiceImpl.addEntityType(entityType);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
@@ -454,10 +452,10 @@ public class MetaDataServiceImplTest
 		verifyNoMoreInteractions(dataService);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void addEntityTypesNoMappedByAttrs()
 	{
-		//noinspection unchecked
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
 				eq(EntityType.class))).thenReturn(Stream.empty());
 
@@ -479,18 +477,15 @@ public class MetaDataServiceImplTest
 
 		InOrder inOrder = inOrder(dataService);
 
-		//noinspection unchecked
 		inOrder.verify(dataService)
 				.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
 						eq(EntityType.class));
 
-		//noinspection unchecked
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
 		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor1.capture());
 		assertEquals(attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
 
-		//noinspection unchecked
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType0);
 		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0.capture());
@@ -499,6 +494,7 @@ public class MetaDataServiceImplTest
 		verifyNoMoreInteractions(dataService);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void addEntityTypesMappedByAttrs()
 	{
@@ -531,7 +527,6 @@ public class MetaDataServiceImplTest
 		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
-		//noinspection unchecked
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
 				eq(EntityType.class))).thenReturn(Stream.empty());
 
@@ -541,13 +536,11 @@ public class MetaDataServiceImplTest
 
 		InOrder inOrder = inOrder(dataService);
 
-		//noinspection unchecked
 		inOrder.verify(dataService)
 				.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
 						eq(EntityType.class));
 
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor1.capture());
 		assertEquals(attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
@@ -556,7 +549,6 @@ public class MetaDataServiceImplTest
 		inOrder.verify(dataService).add(eq(ENTITY_TYPE_META_DATA), entityCaptor0.capture());
 		assertEquals(newArrayList(entityCaptor0.getValue().getOwnAllAttributes()), singletonList(entity0Attr1));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0.capture());
 		assertEquals(attrsCaptor0.getValue().collect(toList()), singletonList(entity0Attr1));
@@ -565,7 +557,6 @@ public class MetaDataServiceImplTest
 		inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor0b.capture());
 		assertEquals(entityCaptor0b.getValue(), entityType0);
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrsCaptor0b = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0b.capture());
 		assertEquals(attrsCaptor0b.getValue().collect(toList()), singletonList(entity0Attr0));
@@ -600,7 +591,7 @@ public class MetaDataServiceImplTest
 
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
 		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityName0, entityName1));
@@ -656,7 +647,7 @@ public class MetaDataServiceImplTest
 		InOrder inOrder = inOrder(dataService);
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> entityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor.capture());
 		List<EntityType> updatedEntities = entityCaptor.getValue().collect(toList());
@@ -664,7 +655,7 @@ public class MetaDataServiceImplTest
 		assertEquals(updatedEntities.get(0).getName(), entityName0);
 		assertEquals(newArrayList(updatedEntities.get(0).getOwnAllAttributes()), newArrayList(entity0Attr1));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
 		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityName0, entityName1));
@@ -719,7 +710,7 @@ public class MetaDataServiceImplTest
 		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(entityType.getTags()).thenReturn(emptyList());
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
@@ -728,12 +719,12 @@ public class MetaDataServiceImplTest
 
 		metaDataServiceImpl.updateEntityType(entityType);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
@@ -746,7 +737,7 @@ public class MetaDataServiceImplTest
 	{
 		String entityName = "entity";
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
 
 		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
@@ -763,6 +754,7 @@ public class MetaDataServiceImplTest
 		verifyNoMoreInteractions(dataService);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void updateEntityTypeCollection()
 	{
@@ -829,7 +821,6 @@ public class MetaDataServiceImplTest
 				return Stream.empty();
 			}
 		});
-		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
@@ -838,19 +829,15 @@ public class MetaDataServiceImplTest
 
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
-		//noinspection unchecked
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
-				eq(EntityType.class)))
-				.thenReturn(Stream.of(existingEntityType));
+				eq(EntityType.class))).thenReturn(Stream.of(existingEntityType));
 
 		metaDataServiceImpl.upsertEntityTypes(singletonList(entityType));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
@@ -858,6 +845,7 @@ public class MetaDataServiceImplTest
 		verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void updateEntityTypeCollectionMappedByExisting()
 	{
@@ -928,7 +916,6 @@ public class MetaDataServiceImplTest
 			}
 		});
 
-		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
@@ -937,10 +924,8 @@ public class MetaDataServiceImplTest
 
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
-		//noinspection unchecked
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
-				eq(EntityType.class)))
-				.thenReturn(Stream.of(existingEntityType));
+				eq(EntityType.class))).thenReturn(Stream.of(existingEntityType));
 
 		metaDataServiceImpl.upsertEntityTypes(singletonList(entityType));
 
@@ -948,17 +933,14 @@ public class MetaDataServiceImplTest
 
 		inOrder.verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
 		assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
@@ -966,6 +948,7 @@ public class MetaDataServiceImplTest
 		inOrder.verifyNoMoreInteractions();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void updateEntityTypeCollectionMappedByNew()
 	{
@@ -1036,7 +1019,6 @@ public class MetaDataServiceImplTest
 			}
 		});
 
-		//noinspection unchecked
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(ATTRIBUTE_META_DATA, entityName)).thenReturn(entityQ);
@@ -1045,10 +1027,8 @@ public class MetaDataServiceImplTest
 
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
-		//noinspection unchecked
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), (Stream<Object>) any(Stream.class), any(Fetch.class),
-				eq(EntityType.class)))
-				.thenReturn(Stream.of(existingEntityType));
+				eq(EntityType.class))).thenReturn(Stream.of(existingEntityType));
 
 		InOrder inOrder = inOrder(dataService);
 
@@ -1056,17 +1036,14 @@ public class MetaDataServiceImplTest
 
 		inOrder.verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
 		assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));

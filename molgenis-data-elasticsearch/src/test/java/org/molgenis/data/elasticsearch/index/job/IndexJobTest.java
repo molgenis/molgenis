@@ -167,7 +167,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	{
 		Entity actualEntity = dataService.findOneById("test", "entityId");
 		EntityType emd = actualEntity.getEntityType();
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(emd.getIdAttribute().getName(), "entityId");
 
 		when(searchService.findOne(q, emd)).thenReturn(actualEntity);
