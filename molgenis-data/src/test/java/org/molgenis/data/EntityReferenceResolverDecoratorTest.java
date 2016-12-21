@@ -97,6 +97,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void countQuery()
 	{
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		entityReferenceResolverDecorator.count(q);
 		verify(decoratedRepo, times(1)).count(q);
@@ -151,6 +152,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findAllAsStreamFetch()
 	{
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Fetch fetch = mock(Fetch.class);
 		when(query.getFetch()).thenReturn(fetch);
@@ -165,6 +167,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findAllAsStreamNoFetch()
 	{
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Stream<Entity> entities = Stream.of(entity0);
 		when(decoratedRepo.findAll(query)).thenReturn(entities);
@@ -240,6 +243,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneQueryFetchEntity()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		when(q.getFetch()).thenReturn(fetch);
 		Entity entity = mock(Entity.class);
@@ -253,6 +257,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneQueryFetchEntityNull()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		when(q.getFetch()).thenReturn(fetch);
 		entityReferenceResolverDecorator.findOne(q);
@@ -263,6 +268,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void findOneQueryNoFetch()
 	{
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		entityReferenceResolverDecorator.findOne(q);
 		verify(decoratedRepo, times(1)).findOne(q);

@@ -46,13 +46,14 @@ public class ScriptTypePopulatorTest
 		ScriptType scriptType1 = mock(ScriptType.class);
 		when(scriptTypeFactory.create(scriptRunner1Name)).thenReturn(scriptType1);
 		scriptTypePopulator.populate();
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(SCRIPT_TYPE), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(scriptType1));
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/5168
+	@SuppressWarnings("unchecked")
 	@Test
 	public void populateNoChanges() throws Exception
 	{
@@ -66,7 +67,6 @@ public class ScriptTypePopulatorTest
 		ScriptType scriptType1 = mock(ScriptType.class);
 		when(dataService.findOneById(SCRIPT_TYPE, scriptRunner1Name, ScriptType.class)).thenReturn(scriptType1);
 		scriptTypePopulator.populate();
-		//noinspection unchecked
 		verify(dataService, times(0)).add(eq(SCRIPT_TYPE), any(Stream.class));
 	}
 }

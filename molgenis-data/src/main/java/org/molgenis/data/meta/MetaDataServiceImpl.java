@@ -70,10 +70,10 @@ public class MetaDataServiceImpl implements MetaDataService
 		return !entityType.isAbstract() ? getRepository(entityType) : null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
 	{
-		//noinspection unchecked
 		return (Repository<E>) getRepository(entityName);
 	}
 
@@ -92,10 +92,10 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> Repository<E> getRepository(EntityType entityType, Class<E> entityClass)
 	{
-		//noinspection unchecked
 		return (Repository<E>) getRepository(entityType);
 	}
 

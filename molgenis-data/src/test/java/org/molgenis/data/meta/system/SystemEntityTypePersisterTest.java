@@ -129,13 +129,14 @@ public class SystemEntityTypePersisterTest
 		when(dataService.findOneById(PACKAGE, packageName0, Package.class)).thenReturn(package0);
 		when(dataService.findOneById(PACKAGE, packageName1, Package.class)).thenReturn(null);
 		systemEntityTypePersister.persist(event);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(PACKAGE), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), newArrayList(package1));
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/5168
+	@SuppressWarnings("unchecked")
 	@Test
 	public void persistSystemPackageNoChange()
 	{
@@ -162,7 +163,6 @@ public class SystemEntityTypePersisterTest
 		when(dataService.findOneById(PACKAGE, packageName0, Package.class)).thenReturn(package0);
 		when(dataService.findOneById(PACKAGE, packageName1, Package.class)).thenReturn(package1);
 		systemEntityTypePersister.persist(event);
-		//noinspection unchecked
 		verify(dataService, times(0)).add(eq(PACKAGE), any(Stream.class));
 	}
 

@@ -19,9 +19,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
 @Component
@@ -222,14 +224,16 @@ class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
+				Arrays.sort(mrefIdsAndOrder, comparing(o -> Integer.valueOf(o[0])));
+
 				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
-				for (String[] mrefIdAndOrder : mrefIdsAndOrder)
+				for (int i = 0; i < mrefIdsAndOrder.length; ++i)
 				{
-					Integer seqNr = Integer.valueOf(mrefIdAndOrder[0]);
+					String[] mrefIdAndOrder = mrefIdsAndOrder[i];
 					String mrefIdStr = mrefIdAndOrder[1];
 					Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
-					mrefIds[seqNr] = mrefId;
+					mrefIds[i] = mrefId;
 				}
 
 				// convert ids to (lazy) entities

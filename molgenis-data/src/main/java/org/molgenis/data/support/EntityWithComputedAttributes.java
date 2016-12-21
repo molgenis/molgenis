@@ -86,6 +86,7 @@ public class EntityWithComputedAttributes implements Entity
 		return decoratedEntity.getDouble(attributeName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
@@ -97,6 +98,7 @@ public class EntityWithComputedAttributes implements Entity
 		return decoratedEntity.getEntities(attributeName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
@@ -119,6 +121,7 @@ public class EntityWithComputedAttributes implements Entity
 		return decoratedEntity.getEntity(attributeName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{

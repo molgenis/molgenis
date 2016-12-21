@@ -27,10 +27,11 @@ import static org.testng.Assert.assertNull;
 public class OwnedEntityRepositoryDecoratorTest
 {
 	private EntityType entityType;
-	private Repository decoratedRepository;
+	private Repository<Entity> decoratedRepository;
 	private OwnedEntityRepositoryDecorator ownedEntityRepositoryDecorator;
-	private ArgumentCaptor<Consumer<List>> consumerCaptor;
+	private ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{
@@ -301,7 +302,8 @@ public class OwnedEntityRepositoryDecoratorTest
 	public void findAllAsStreamNotExtendsOwned()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), asList(entity0));
@@ -316,7 +318,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
-		Query query = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), asList(entity0));
@@ -336,7 +339,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity1 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
 
-		Consumer consumer = mock(Consumer.class);
+		@SuppressWarnings("unchecked")
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		ownedEntityRepositoryDecorator.forEachBatched(fetch, consumer, 123);
 
 		verify(decoratedRepository).forEachBatched(eq(decoratedFetch), consumerCaptor.capture(), eq(123));
@@ -359,7 +363,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity1 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
 
-		Consumer consumer = mock(Consumer.class);
+		@SuppressWarnings("unchecked")
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		ownedEntityRepositoryDecorator.forEachBatched(fetch, consumer, 123);
 
 		verify(decoratedRepository).forEachBatched(eq(decoratedFetch), consumerCaptor.capture(), eq(123));
