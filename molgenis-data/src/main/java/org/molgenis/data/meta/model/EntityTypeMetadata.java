@@ -50,7 +50,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public void init()
 	{
 		requireNonNull(backendEnumOptions, "backend enum options not set!");
-
+		setId(ENTITY_TYPE_META_DATA);
 		setLabel("Entity");
 		setDescription("Meta data for entity classes");
 

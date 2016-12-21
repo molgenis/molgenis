@@ -78,7 +78,7 @@ public class AttributeMetadata extends SystemEntityType
 	{
 		setLabel("Attribute");
 		setDescription("Meta data for attributes");
-
+		setId(ATTRIBUTE_META_DATA);
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false)

@@ -43,7 +43,7 @@ class PostgreSqlIdentifierGenerator
 	{
 		String idPart = generateIdentifierId(entityType.getId());
 		int maxNamePartLength = maxLength - 1 - idPart.length(); // minus one for separator
-		String namePart = generateIdentifierName(entityType.getName(), maxNamePartLength);
+		String namePart = generateIdentifierName(entityType.getSimpleName(), maxNamePartLength);
 		return namePart + '#' + idPart;
 	}
 

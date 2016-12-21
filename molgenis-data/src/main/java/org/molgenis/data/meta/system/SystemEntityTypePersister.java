@@ -189,7 +189,7 @@ public class SystemEntityTypePersister
 					}
 				});
 			}
-			else
+			else if (entityType.getId() == null)
 			{
 				// FIXME should be done by populator
 				entityType.setId(idGenerator.generateShortId());

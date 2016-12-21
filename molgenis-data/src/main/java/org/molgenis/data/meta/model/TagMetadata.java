@@ -31,6 +31,7 @@ public class TagMetadata extends SystemEntityType
 	{
 		setLabel("Tag");
 		setDescription("Semantic tags that can be applied to entities, attributes and other data");
+		setId(TAG);
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(TEXT).setLabel("Object IRI");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
