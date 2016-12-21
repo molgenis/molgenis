@@ -395,7 +395,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// TODO replace with dataService.upsert once available in Repository
 		packages.forEach(package_ ->
 		{
-			Package existingPackage = dataService.findOneById(PACKAGE, package_.getName(), Package.class);
+			Package existingPackage = dataService.findOneById(PACKAGE, package_.getId(), Package.class);
 			if (existingPackage == null)
 			{
 				addPackage(package_);

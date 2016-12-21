@@ -1,20 +1,15 @@
 package org.molgenis.data.meta.system;
 
-import com.google.common.collect.Maps;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.populate.UuidGenerator;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.populate.RandomIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -41,33 +36,32 @@ public class SystemEntityTypePersister
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final SystemPackageRegistry systemPackageRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private final UuidGenerator uuidGenerator;
+	private final RandomIdGenerator idGenerator;
 
 	@Autowired
 	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, UuidGenerator uuidGenerator,
-			SystemPackageRegistry systemPackageRegistry)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, SystemPackageRegistry systemPackageRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.uuidGenerator = requireNonNull(uuidGenerator);
+		this.idGenerator = new RandomIdGenerator();
 	}
 
 	public void persist(ContextRefreshedEvent event)
 	{
-		// persist entity meta data meta data
-		persistMetadataMetadata(event.getApplicationContext());
+		// persist entity metadata metadata
+		persistMetadataMetadata();
 
-		// persist Packages
-		List<SystemPackage> systemPackages = systemPackageRegistry.getSystemPackages().collect(toList());
-		List<Package> newSystemPackages = injectExistingPackageIdentifiers(systemPackages);
-		dataService.add(PACKAGE, newSystemPackages.stream());
+		// persist Package entities
+		List<Package> systemPackages = systemPackageRegistry.getSystemPackages().collect(toList());
+		injectExistingPackageIdentifiers(systemPackages);
+		dataService.getMeta().upsertPackages(systemPackages.stream());
 
-		// persist EntityTypes
+		// persist EntityType entities
 		List<EntityType> metaEntityMetaSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
-		injectExistingIdentifiers(metaEntityMetaSet);
+		injectExistingEntityTypeAttributeIdentifiers(metaEntityMetaSet);
 		dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
 
 		// remove non-existing metadata
@@ -75,7 +69,7 @@ public class SystemEntityTypePersister
 		removeNonExistingSystemPackages();
 	}
 
-	private void persistMetadataMetadata(ApplicationContext ctx)
+	private void persistMetadataMetadata()
 	{
 		MetaDataService metadataService = dataService.getMeta();
 
@@ -144,27 +138,25 @@ public class SystemEntityTypePersister
 		return !systemPackageRegistry.containsPackage(package_);
 	}
 
-	private List<Package> injectExistingPackageIdentifiers(List<SystemPackage> systemPackages)
+	private void injectExistingPackageIdentifiers(List<Package> systemPackages)
 	{
 		Map<String, Package> existingPackageMap = dataService.findAll(PACKAGE, Package.class)
 				.collect(toMap(Package::getName, pack -> pack));
 
-		return systemPackages.stream().filter(pack ->
+		systemPackages.forEach(pack ->
 		{
 			Package existingPackage = existingPackageMap.get(pack.getName());
 
 			if (existingPackage == null)
 			{
 				// FIXME use populator
-				pack.setId(uuidGenerator.generateId());
-				return true;
+				pack.setId(idGenerator.generateShortId());
 			}
 			else
 			{
 				pack.setId(existingPackage.getId());
-				return false;
 			}
-		}).collect(toList());
+		});
 	}
 
 	/**
@@ -172,23 +164,15 @@ public class SystemEntityTypePersister
 	 *
 	 * @param entityTypes system entity types
 	 */
-	private void injectExistingIdentifiers(List<EntityType> entityTypes)
+	private void injectExistingEntityTypeAttributeIdentifiers(List<EntityType> entityTypes)
 	{
-		Map<String, EntityType> existingEntityTypeMap = Maps.newHashMap();
-		entityTypes.forEach(entityType ->
-		{
-			EntityType existingEntityType = dataService.findOne(ENTITY_TYPE_META_DATA,
-					new QueryImpl<EntityType>().eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()).and()
-							.eq(EntityTypeMetadata.SIMPLE_NAME, entityType.getSimpleName()), EntityType.class);
-			if (existingEntityType != null)
-			{
-				existingEntityTypeMap.put(entityType.getName(), existingEntityType);
-			}
-		});
+		Map<String, EntityType> existingEntityTypeMap = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
+				.collect(toMap(EntityType::getName, entityType -> entityType));
 
 		entityTypes.forEach(entityType ->
 		{
 			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+
 			if (existingEntityType != null)
 			{
 				entityType.setId(existingEntityType.getId());
@@ -208,7 +192,7 @@ public class SystemEntityTypePersister
 			else
 			{
 				// FIXME should be done by populator
-				entityType.setId(uuidGenerator.generateId());
+				entityType.setId(idGenerator.generateShortId());
 			}
 		});
 	}

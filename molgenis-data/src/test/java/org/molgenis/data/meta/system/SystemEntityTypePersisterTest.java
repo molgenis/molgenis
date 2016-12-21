@@ -15,7 +15,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.populate.UuidGenerator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.testng.annotations.BeforeMethod;
@@ -62,7 +61,7 @@ public class SystemEntityTypePersisterTest
 		systemPackageRegistry = mock(SystemPackageRegistry.class);
 		EntityTypeDependencyResolver entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
-				entityTypeDependencyResolver, mock(UuidGenerator.class), systemPackageRegistry);
+				entityTypeDependencyResolver, systemPackageRegistry);
 	}
 
 	@Test
