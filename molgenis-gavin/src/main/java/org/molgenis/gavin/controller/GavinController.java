@@ -1,5 +1,6 @@
 package org.molgenis.gavin.controller;
 
+import org.molgenis.data.populate.RandomIdGenerator;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
@@ -63,7 +64,7 @@ public class GavinController extends AbstractStaticContentController
 	private final GavinJobExecutionFactory gavinJobExecutionFactory;
 	private final FileStore fileStore;
 	private final UserAccountService userAccountService;
-	private final SecureIdGenerator secureIdGenerator;
+	private final RandomIdGenerator randomIdGenerator;
 	private final MenuReaderService menuReaderService;
 
 	@Autowired
@@ -78,7 +79,7 @@ public class GavinController extends AbstractStaticContentController
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.menuReaderService = menuReaderService;
-		secureIdGenerator = new SecureIdGenerator();
+		randomIdGenerator = new RandomIdGenerator();
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class GavinController extends AbstractStaticContentController
 			extension = TSV_GZ;
 		}
 
-		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(secureIdGenerator.generateId());
+		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(randomIdGenerator.generateId());
 		gavinJobExecution.setFilename(entityName);
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		gavinJobExecution.setInputFileExtension(extension);
