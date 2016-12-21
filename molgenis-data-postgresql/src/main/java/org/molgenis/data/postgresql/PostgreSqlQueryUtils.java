@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.postgresql.PostgreSqlIdentifierGenerator.generateJunctionTableIdentifier;
+import static org.molgenis.data.postgresql.PostgreSqlIdentifierGenerator.generateTableIdentifier;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
@@ -46,7 +48,7 @@ class PostgreSqlQueryUtils
 		{
 			strBuilder.append('"');
 		}
-		strBuilder.append(entityType.getName());
+		strBuilder.append(generateTableIdentifier(entityType));
 		if (quoteSystemIdentifiers)
 		{
 			strBuilder.append('"');
@@ -63,7 +65,7 @@ class PostgreSqlQueryUtils
 	 */
 	static String getJunctionTableName(EntityType entityType, Attribute attr)
 	{
-		return '"' + entityType.getName() + '_' + attr.getName() + '"';
+		return '"' + generateJunctionTableIdentifier(entityType, attr) + '"';
 	}
 
 	/**
@@ -76,7 +78,7 @@ class PostgreSqlQueryUtils
 	 */
 	static String getJunctionTableIndexName(EntityType entityType, Attribute attr, Attribute idxAttr)
 	{
-		return '"' + entityType.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		return '"' + generateJunctionTableIdentifier(entityType, attr) + '_' + idxAttr.getName() + "_idx\"";
 	}
 
 	/**
