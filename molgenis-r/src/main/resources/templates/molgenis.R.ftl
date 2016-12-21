@@ -14,7 +14,14 @@ options(scipen=999)
 molgenis.env <- new.env()
 
 local({
-molgenis.api.url <- "${api_url}"
+molgenis.api.url <- "${api_url}"+'/v1/'
+    <#if token??>
+    molgenis.token <- "${token}"
+    <#else>
+    molgenis.token <- NULL
+    </#if>
+}, env = molgenis.env)
+molgenis.api.url.v2 <- "${api_url}"+'/v2/'
     <#if token??>
     molgenis.token <- "${token}"
     <#else>
