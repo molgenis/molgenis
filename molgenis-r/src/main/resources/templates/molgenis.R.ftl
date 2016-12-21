@@ -72,24 +72,24 @@ molgenis.logout <- local(function() {
 
 #######################################################################
 molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColumn= NULL, sortOrder = NULL, attributes = NULL) {
-url <- paste0(molgenis.api.url, "csv/", entity, "?molgenis-token=", molgenis.token, "&start=", start, "&num=", num, "&sortColumn=", sortColumn, "&sortOrder=", sortOrder)
+    url <- paste0(molgenis.api.url, "csv/", entity, "?molgenis-token=", molgenis.token, "&start=", start, "&num=", num, "&sortColumn=", sortColumn, "&sortOrder=", sortOrder)
 
-if (!is.null(q)) {
-    url <- paste0(url, "&q=", curlEscape(q))
-}
+    if (!is.null(q)) {
+        url <- paste0(url, "&q=", curlEscape(q))
+    }
 
-if (!is.null(attributes)) {
-    url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
-}
+    if (!is.null(attributes)) {
+        url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
+    }
 
-# FIXME Check metadata for every column and set a colClass vector corresponding to the correct type
-# EXAMPLE: column1 contains strings,
-# characterClass <- c("character")
-# names(characterClass) <- c("column1")
-# read.csv(url, colClass = c(characterClass))
-csv <- getURL(url)
-dataFrame <- read.csv(textConnection(csv))
-    return (dataFrame)
+    # FIXME Check metadata for every column and set a colClass vector corresponding to the correct type
+    # EXAMPLE: column1 contains strings,
+    # characterClass <- c("character")
+    # names(characterClass) <- c("column1")
+    # read.csv(url, colClass = c(characterClass))
+    csv <- getURL(url)
+    dataFrame <- read.csv(textConnection(csv))
+        return (dataFrame)
 }, molgenis.env)
 
 
