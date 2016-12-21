@@ -14,11 +14,11 @@ molgenis.env <- new.env()
 
 local({
 molgenis.api.url <- "${api_url}"
-<#if token??>
-molgenis.token <- "${token}"
-<#else>
-molgenis.token <- NULL
-</#if>
+    <#if token??>
+    molgenis.token <- "${token}"
+    <#else>
+    molgenis.token <- NULL
+    </#if>
 }, env = molgenis.env)
 
 ###################################################################
@@ -32,11 +32,11 @@ molgenis.token <- NULL
 ###################################################################
 molgenis.login <- local(function(username, password) {
 jsonRequest <- toJSON(list(username = username, password = password))
-url <- paste0(molgenis.api.url, "login")
-jsonResponse <- postForm(url, .opts = list(postfields = jsonRequest, httpheader = c('Content-Type' = 'application/json')))
-cat("Login success")
-response <- fromJSON(jsonResponse)
-molgenis.token <<- response$token
+    url <- paste0(molgenis.api.url, "login")
+    jsonResponse <- postForm(url, .opts = list(postfields = jsonRequest, httpheader = c('Content-Type' = 'application/json')))
+    cat("Login success")
+    response <- fromJSON(jsonResponse)
+    molgenis.token <<- response$token
 }, molgenis.env)
 
 
@@ -46,9 +46,9 @@ molgenis.token <<- response$token
 #
 ####################################################################
 molgenis.logout <- local(function() {
-url <- paste0(molgenis.api.url, 'logout')
-getURL(url, httpheader = list('x-molgenis-token' = molgenis.token))
-cat("Logout success")
+    url <- paste0(molgenis.api.url, 'logout')
+    getURL(url, httpheader = list('x-molgenis-token' = molgenis.token))
+    cat("Logout success")
 }, molgenis.env)
 
 
@@ -74,11 +74,11 @@ molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, sortColu
 url <- paste0(molgenis.api.url, "csv/", entity, "?molgenis-token=", molgenis.token, "&start=", start, "&num=", num, "&sortColumn=", sortColumn, "&sortOrder=", sortOrder)
 
 if (!is.null(q)) {
-url <- paste0(url, "&q=", curlEscape(q))
+    url <- paste0(url, "&q=", curlEscape(q))
 }
 
 if (!is.null(attributes)) {
-url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
+    url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")))
 }
 
 # FIXME Check metadata for every column and set a colClass vector corresponding to the correct type
@@ -88,8 +88,7 @@ url <- paste0(url, "&attributes=", curlEscape(paste0(attributes, collapse = ",")
 # read.csv(url, colClass = c(characterClass))
 csv <- getURL(url)
 dataFrame <- read.csv(textConnection(csv))
-
-return (dataFrame)
+    return (dataFrame)
 }, molgenis.env)
 
 
@@ -108,7 +107,7 @@ return (dataFrame)
 #
 ####################################################################
 molgenis.add <- local(function(entity, ...) {
-molgenis.addList(entity, list(...))
+    molgenis.addList(entity, list(...))
 }, env = molgenis.env)
 
 ######################################################################
@@ -127,9 +126,9 @@ molgenis.addList(entity, list(...))
 #
 ####################################################################
 molgenis.addAll <- function(entity, rows) {
-apply(rows, 1, function(row){
-molgenis.addList(entity, row)
-})
+    apply(rows, 1, function(row){
+        molgenis.addList(entity, row)
+    })
 }
 
 ######################################################################
@@ -145,28 +144,28 @@ molgenis.addList(entity, row)
 #
 #####################################################################
 molgenis.addList <- local(function(entity, attributeList) {
-url <- paste0(molgenis.api.url, entity)
-h <- basicHeaderGatherer()
+    url <- paste0(molgenis.api.url, entity)
+    h <- basicHeaderGatherer()
 
-postForm(url,
-.params = attributeList,
-style = "POST",
-.opts = list(headerfunction = h$update,
-httpheader = list("x-molgenis-token" = molgenis.token,
-"Content-Type" = "application/x-www-form-urlencoded")))
+    postForm(url,
+            .params = attributeList,
+            style = "POST",
+            .opts = list(headerfunction = h$update,
+            httpheader = list("x-molgenis-token" = molgenis.token,
+                                "Content-Type" = "application/x-www-form-urlencoded")))
 
-returnedHeaders <- h$value()
+    returnedHeaders <- h$value()
 
-#On success the api returns httpcode 201 CREATED
-if (returnedHeaders["status"] != "201") {
-stop("Error creating entity")
-}
+    #On success the api returns httpcode 201 CREATED
+    if (returnedHeaders["status"] != "201") {
+        stop("Error creating entity")
+    }
 
-#The entity is created successfully, return the new id
-location <- returnedHeaders["Location"]
-l <- strsplit(location, "/")[[1]]
+    #The entity is created successfully, return the new id
+    location <- returnedHeaders["Location"]
+    l <- strsplit(location, "/")[[1]]
 
-return (l[length(l)])
+    return (l[length(l)])
 
 }, env = molgenis.env)
 
@@ -187,23 +186,23 @@ molgenis.update <- local(function(entity, id, ...) {
 url <- paste0(molgenis.api.url, entity, "/", id)
 
 parameters <- list(...)
-parameters <- c(parameters, "_method" = "PUT")
+    parameters <- c(parameters, "_method" = "PUT")
 
-h <- basicHeaderGatherer()
+    h <- basicHeaderGatherer()
 
-postForm(url,
-.params = parameters,
-style = "POST",
-.opts = list(headerfunction = h$update,
-httpheader = list("x-molgenis-token" = molgenis.token,
-"Content-Type" = "application/x-www-form-urlencoded")))
+    postForm(url,
+            .params = parameters,
+            style = "POST",
+            .opts = list(headerfunction = h$update,
+            httpheader = list("x-molgenis-token" = molgenis.token,
+                                "Content-Type" = "application/x-www-form-urlencoded")))
 
-returnedHeaders <- h$value()
+    returnedHeaders <- h$value()
 
-#On success the api returns httpcode 204 NO_CONTENT
-if (returnedHeaders["status"] != "204") {
-stop("Error updating entity")
-}
+    #On success the api returns httpcode 204 NO_CONTENT
+    if (returnedHeaders["status"] != "204") {
+        stop("Error updating entity")
+    }
 
 }, env = molgenis.env)
 
@@ -220,21 +219,21 @@ stop("Error updating entity")
 #
 #####################################################################
 molgenis.delete <- local(function(entity, id) {
-url <- paste0(molgenis.api.url, entity, "/", id)
-h <- basicHeaderGatherer()
+    url <- paste0(molgenis.api.url, entity, "/", id)
+    h <- basicHeaderGatherer()
 
-postForm(url,
-.params = c("_method" = "DELETE"),
-style = "POST",
-.opts = list(headerfunction = h$update,
-httpheader = list("x-molgenis-token" = molgenis.token)))
+    postForm(url,
+            .params = c("_method" = "DELETE"),
+            style = "POST",
+            .opts = list(headerfunction = h$update,
+            httpheader = list("x-molgenis-token" = molgenis.token)))
 
-returnedHeaders <- h$value()
+    returnedHeaders <- h$value()
 
-#On success the api returns httpcode 204 NO_CONTENT
-if (returnedHeaders["status"] != "204") {
-stop("Error deleting entity")
-}
+    #On success the api returns httpcode 204 NO_CONTENT
+    if (returnedHeaders["status"] != "204") {
+        stop("Error deleting entity")
+    }
 
 }, env = molgenis.env)
 
@@ -249,11 +248,11 @@ stop("Error deleting entity")
 #
 #####################################################################
 molgenis.getEntityType <- local(function(entity) {
-url <- paste0(molgenis.api.url, entity, "/meta?expand=attributes")
-responseJson <- getURL(url, httpheader = list("x-molgenis-token" = molgenis.token))
-response <- fromJSON(responseJson)
+    url <- paste0(molgenis.api.url, entity, "/meta?expand=attributes")
+    responseJson <- getURL(url, httpheader = list("x-molgenis-token" = molgenis.token))
+    response <- fromJSON(responseJson)
 
-return (response)
+    return (response)
 }, molgenis.env)
 
 
@@ -269,9 +268,9 @@ return (response)
 #
 #####################################################################
 molgenis.getAttributeMetaData <- local(function(entity, attribute){
-url <- paste0(molgenis.api.url, entity, "/meta/", attribute)
-responseJson <- getURL(url, httpheader = list("x-molgenis-token" = molgenis.token))
-response <- fromJSON(responseJson)
+    url <- paste0(molgenis.api.url, entity, "/meta/", attribute)
+    responseJson <- getURL(url, httpheader = list("x-molgenis-token" = molgenis.token))
+    response <- fromJSON(responseJson)
 
-return (response)
+    return (response)
 }, molgenis.env)
