@@ -175,7 +175,8 @@ public class MappingServiceImpl implements MappingService
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetaData.setPackage(null);
 		targetMetaData.setSimpleName(entityName);
-		targetMetaData.setName(entityName);
+		targetMetaData.setId(entityName);
+		// FIXME auto id
 		targetMetaData.setLabel(entityName);
 		if (addSourceAttribute)
 		{

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Registry containing all {@link SystemPackage}.
@@ -38,5 +39,10 @@ public class SystemPackageRegistry
 			if (systemPackage.getName().equals(package_.getName())) return true;
 		}
 		return false;
+	}
+
+	public Stream<SystemPackage> getSystemPackages()
+	{
+		return systemPackages.stream();
 	}
 }
