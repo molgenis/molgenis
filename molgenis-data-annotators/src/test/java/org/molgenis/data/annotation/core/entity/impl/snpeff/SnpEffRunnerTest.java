@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -89,7 +89,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	{
 		jarRunner = mock(JarRunnerImpl.class);
 
-		IdGenerator idGenerator = new UuidGenerator();
+		IdGenerator idGenerator = new IdGeneratorImpl();
 
 		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
 				entityTypeFactory, attributeFactory);
