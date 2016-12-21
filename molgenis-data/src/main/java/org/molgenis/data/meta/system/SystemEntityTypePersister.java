@@ -6,6 +6,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -37,15 +39,18 @@ public class SystemEntityTypePersister
 {
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private final SystemPackageRegistry systemPackageRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final UuidGenerator uuidGenerator;
 
 	@Autowired
 	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, UuidGenerator uuidGenerator)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, UuidGenerator uuidGenerator,
+			SystemPackageRegistry systemPackageRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
+		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 		this.uuidGenerator = requireNonNull(uuidGenerator);
 	}
@@ -55,17 +60,19 @@ public class SystemEntityTypePersister
 		// persist entity meta data meta data
 		persistMetadataMetadata(event.getApplicationContext());
 
-		// persist entity meta data
+		// persist Packages
+		List<SystemPackage> systemPackages = systemPackageRegistry.getSystemPackages().collect(toList());
+		List<Package> newSystemPackages = injectExistingPackageIdentifiers(systemPackages);
+		dataService.add(PACKAGE, newSystemPackages.stream());
+
+		// persist EntityTypes
 		List<EntityType> metaEntityMetaSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
-
-		// inject attribute identifiers
 		injectExistingIdentifiers(metaEntityMetaSet);
-
-		// upsert entity types
 		dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
 
-		// remove entity meta data
-		removeNonExistingSystemEntities();
+		// remove non-existing metadata
+		removeNonExistingSystemEntityTypes();
+		removeNonExistingSystemPackages();
 	}
 
 	private void persistMetadataMetadata(ApplicationContext ctx)
@@ -86,49 +93,35 @@ public class SystemEntityTypePersister
 				metadataRepoCollection.createRepository(metaEntityType);
 			}
 		});
-
-		// collect meta entities
-		Map<String, Package> packageMap = ctx.getBeansOfType(Package.class);
-		List<Package> packagesToAdd = packageMap.values().stream().filter(this::isNotPersisted).collect(toList());
-		if (!packagesToAdd.isEmpty())
-		{
-			persist(packagesToAdd);
-		}
-	}
-
-	private boolean isNotPersisted(Package package_)
-	{
-		// FIXME use locator
-		return dataService.findOneById(PACKAGE, package_.getIdValue(), Package.class) == null;
-	}
-
-	private void persist(List<Package> packages)
-	{
-		dataService.add(PACKAGE, packages.stream());
 	}
 
 	/**
 	 * Package-private for testability
 	 */
-	void removeNonExistingSystemEntities()
+	void removeNonExistingSystemEntityTypes()
 	{
 		// get all system entities
-		List<EntityType> systemEntityMetaSet = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-				.filter(SystemEntityTypePersister::isSystemEntity).collect(toList());
+		List<EntityType> removedSystemEntityMetas = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
+				.filter(SystemEntityTypePersister::isSystemEntity).filter(this::isNotExists).collect(toList());
 
-		// determine removed system entities
-		List<EntityType> removedSystemEntityMetas = systemEntityMetaSet.stream().filter(this::isNotExists)
-				.collect(toList());
+		dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
+	}
 
-		if (!removedSystemEntityMetas.isEmpty())
-		{
-			dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
-		}
+	private void removeNonExistingSystemPackages()
+	{
+		Stream<Package> systemPackages = dataService.findAll(PACKAGE, Package.class)
+				.filter(SystemEntityTypePersister::isSystemPackage).filter(this::isNotExists);
+
+		dataService.delete(PACKAGE, systemPackages);
 	}
 
 	private static boolean isSystemEntity(EntityType entityType)
 	{
-		Package package_ = entityType.getPackage();
+		return isSystemPackage(entityType.getPackage());
+	}
+
+	private static boolean isSystemPackage(Package package_)
+	{
 		if (package_ == null)
 		{
 			return false;
@@ -144,6 +137,34 @@ public class SystemEntityTypePersister
 	private boolean isNotExists(EntityType entityType)
 	{
 		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getName());
+	}
+
+	private boolean isNotExists(Package package_)
+	{
+		return !systemPackageRegistry.containsPackage(package_);
+	}
+
+	private List<Package> injectExistingPackageIdentifiers(List<SystemPackage> systemPackages)
+	{
+		Map<String, Package> existingPackageMap = dataService.findAll(PACKAGE, Package.class)
+				.collect(toMap(Package::getName, pack -> pack));
+
+		return systemPackages.stream().filter(pack ->
+		{
+			Package existingPackage = existingPackageMap.get(pack.getName());
+
+			if (existingPackage == null)
+			{
+				// FIXME use populator
+				pack.setId(uuidGenerator.generateId());
+				return true;
+			}
+			else
+			{
+				pack.setId(existingPackage.getId());
+				return false;
+			}
+		}).collect(toList());
 	}
 
 	/**
@@ -171,7 +192,6 @@ public class SystemEntityTypePersister
 			if (existingEntityType != null)
 			{
 				entityType.setId(existingEntityType.getId());
-				System.out.println(entityType.getName() + " " + existingEntityType.getId());
 
 				Map<String, Attribute> existingAttrs = stream(existingEntityType.getOwnAllAttributes().spliterator(),
 						false).collect(toMap(Attribute::getName, Function.identity()));
@@ -188,8 +208,7 @@ public class SystemEntityTypePersister
 			else
 			{
 				// FIXME should be done by populator
-				entityType.setId("g" + entityType.getName());
-
+				entityType.setId(uuidGenerator.generateId());
 			}
 		});
 	}

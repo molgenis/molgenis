@@ -161,7 +161,7 @@ public class EntityType extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getPackage().getName() + PACKAGE_SEPARATOR + getSimpleName();
+		return getPackage() == null ? getSimpleName() : getPackage().getName() + PACKAGE_SEPARATOR + getSimpleName();
 	}
 
 	public String getId()

@@ -40,6 +40,7 @@ public class SystemEntityTypePersisterTest
 	private DataService dataService;
 
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private SystemPackageRegistry systemPackageRegistry;
 	private SystemEntityTypePersister systemEntityTypePersister;
 	private AttributeMetadata attrMetaMeta;
 	private MetaDataService metaDataService;
@@ -58,9 +59,10 @@ public class SystemEntityTypePersisterTest
 		dataService = mock(DataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
+		systemPackageRegistry = mock(SystemPackageRegistry.class);
 		EntityTypeDependencyResolver entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
-				entityTypeDependencyResolver, mock(UuidGenerator.class));
+				entityTypeDependencyResolver, mock(UuidGenerator.class), systemPackageRegistry);
 	}
 
 	@Test
@@ -97,7 +99,7 @@ public class SystemEntityTypePersisterTest
 
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
 				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
-		systemEntityTypePersister.removeNonExistingSystemEntities();
+		systemEntityTypePersister.removeNonExistingSystemEntityTypes();
 		verify(metaDataService).deleteEntityType(newArrayList(refRemovedMeta, removedMeta));
 	}
 
@@ -144,6 +146,7 @@ public class SystemEntityTypePersisterTest
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
 				.thenReturn(Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
+		when(systemPackageRegistry.getSystemPackages()).thenAnswer(new EmptyStreamAnswer());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
