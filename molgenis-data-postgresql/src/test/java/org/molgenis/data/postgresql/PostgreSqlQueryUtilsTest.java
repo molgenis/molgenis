@@ -25,7 +25,7 @@ public class PostgreSqlQueryUtilsTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityType, attr), "\"entity_attr\"");
+		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr), "\"entity_attr\"");
 	}
 
 	@DataProvider(name = "getPersistedAttributesProvider")
@@ -126,7 +126,7 @@ public class PostgreSqlQueryUtilsTest
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		Attribute idxAttr = when(mock(Attribute.class).getName()).thenReturn("idxAttr").getMock();
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableIndexName(entityType, attr, idxAttr),
+		assertEquals(PostgreSqlNameGenerator.getJunctionTableIndexName(entityType, attr, idxAttr),
 				"\"entity_attr_idxAttr_idx\"");
 	}
 }

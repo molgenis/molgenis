@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.postgresql.PostgreSqlIdentifierGenerator.generateJunctionTableIdentifier;
-import static org.molgenis.data.postgresql.PostgreSqlIdentifierGenerator.generateTableIdentifier;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
@@ -18,67 +16,8 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
  */
 class PostgreSqlQueryUtils
 {
-	static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
-
 	private PostgreSqlQueryUtils()
 	{
-	}
-
-	/**
-	 * Returns the double-quoted table name based on entity name
-	 *
-	 * @param entityType entity meta data
-	 * @return table name for this entity
-	 */
-	static String getTableName(EntityType entityType)
-	{
-		return getTableName(entityType, true);
-	}
-
-	/**
-	 * Returns the table name based on entity name
-	 *
-	 * @param entityType entity meta data
-	 * @return PostgreSQL table name
-	 */
-	static String getTableName(EntityType entityType, boolean quoteSystemIdentifiers)
-	{
-		StringBuilder strBuilder = new StringBuilder(32);
-		if (quoteSystemIdentifiers)
-		{
-			strBuilder.append('"');
-		}
-		strBuilder.append(generateTableIdentifier(entityType));
-		if (quoteSystemIdentifiers)
-		{
-			strBuilder.append('"');
-		}
-		return strBuilder.toString();
-	}
-
-	/**
-	 * Returns the junction table name for the given attribute of the given entity
-	 *
-	 * @param entityType entity meta data that owns the attribute
-	 * @param attr       attribute
-	 * @return PostgreSQL junction table name
-	 */
-	static String getJunctionTableName(EntityType entityType, Attribute attr)
-	{
-		return '"' + generateJunctionTableIdentifier(entityType, attr) + '"';
-	}
-
-	/**
-	 * Returns the junction table index name for the given indexed attribute in a junction table
-	 *
-	 * @param entityType entity meta data
-	 * @param attr       attribute
-	 * @param idxAttr    indexed attribute
-	 * @return PostgreSQL junction table index name
-	 */
-	static String getJunctionTableIndexName(EntityType entityType, Attribute attr, Attribute idxAttr)
-	{
-		return '"' + generateJunctionTableIdentifier(entityType, attr) + '_' + idxAttr.getName() + "_idx\"";
 	}
 
 	/**

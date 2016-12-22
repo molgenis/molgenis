@@ -22,6 +22,7 @@ import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
@@ -184,15 +185,10 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	private static String getSqlFunctionValidateUpdateName(EntityType entityType)
-	{
-		return '"' + "validate_update_" + getTableName(entityType, false) + '"';
-	}
-
 	static String getSqlCreateFunctionValidateUpdate(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
 	{
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE FUNCTION ")
-				.append(getSqlFunctionValidateUpdateName(entityType)).append("() RETURNS TRIGGER AS $$\nBEGIN\n");
+				.append(getFunctionValidateUpdateName(entityType)).append("() RETURNS TRIGGER AS $$\nBEGIN\n");
 
 		String tableName = getTableName(entityType);
 		String idColName = getColumnName(entityType.getIdAttribute());
@@ -213,36 +209,31 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlDropFunctionValidateUpdate(EntityType entityType)
 	{
-		return "DROP FUNCTION " + getSqlFunctionValidateUpdateName(entityType) + "();";
-	}
-
-	private static String getSqlUpdateTriggerName(EntityType entityType)
-	{
-		return '"' + "update_trigger_" + getTableName(entityType, false) + '"';
+		return "DROP FUNCTION " + getFunctionValidateUpdateName(entityType) + "();";
 	}
 
 	static String getSqlCreateUpdateTrigger(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
 	{
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
-				.append(getSqlUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
+				.append(getUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
 				.append(getTableName(entityType)).append(" FOR EACH ROW WHEN (");
 		strBuilder.append(readonlyTableAttrs.stream()
 				.map(attr -> "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW." + getColumnName(attr))
 				.collect(joining(" OR ")));
-		strBuilder.append(") EXECUTE PROCEDURE ").append(getSqlFunctionValidateUpdateName(entityType)).append("();");
+		strBuilder.append(") EXECUTE PROCEDURE ").append(getFunctionValidateUpdateName(entityType)).append("();");
 		return strBuilder.toString();
 	}
 
 	static String getSqlDropUpdateTrigger(EntityType entityType)
 	{
-		return "DROP TRIGGER " + getSqlUpdateTriggerName(entityType) + " ON " + getTableName(entityType);
+		return "DROP TRIGGER " + getUpdateTriggerName(entityType) + " ON " + getTableName(entityType);
 	}
 
 	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)
 	{
 		Attribute idAttr = entityType.getIdAttribute();
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityType, attr))
-				.append(" (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
+				.append(" (").append(getJunctionTableOrderColumnName()).append(" INT,")
 				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
 				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
 				.append(" NOT NULL").append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
@@ -279,7 +270,7 @@ class PostgreSqlQueryGenerator
 			default:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 		}
-		sql.append(", UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
+		sql.append(", UNIQUE (").append(getJunctionTableOrderColumnName()).append(',')
 				.append(getColumnName(idAttr)).append(')');
 
 		sql.append(')');
@@ -332,7 +323,7 @@ class PostgreSqlQueryGenerator
 	static String getSqlInsertJunction(EntityType entityType, Attribute attr)
 	{
 		String junctionTableName = getJunctionTableName(entityType, attr);
-		return "INSERT INTO " + junctionTableName + " (" + getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME) + ','
+		return "INSERT INTO " + junctionTableName + " (" + getJunctionTableOrderColumnName() + ','
 				+ getColumnName(entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
 	}
 
@@ -369,10 +360,10 @@ class PostgreSqlQueryGenerator
 		String idColName = getColumnName(entityType.getIdAttribute());
 		String refIdColName = getColumnName(attr);
 
-		return "SELECT " + idColName + ", \"" + JUNCTION_TABLE_ORDER_ATTR_NAME + "\"," + refIdColName + " FROM "
+		return "SELECT " + idColName + "," + getJunctionTableOrderColumnName() + "," + refIdColName + " FROM "
 				+ getJunctionTableName(entityType, attr) + " WHERE " + idColName + " in (" + range(0, numOfIds)
-				.mapToObj((x) -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ", \""
-				+ JUNCTION_TABLE_ORDER_ATTR_NAME + '"';
+				.mapToObj((x) -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ","
+				+ getJunctionTableOrderColumnName();
 	}
 
 	/**
@@ -474,8 +465,8 @@ class PostgreSqlQueryGenerator
 							String mrefSelect = MessageFormat
 									.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
 													+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
-											getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-											getJunctionTableName(entityType, attr), getColumnName(idAttribute));
+											getJunctionTableOrderColumnName(), getJunctionTableName(entityType, attr),
+											getColumnName(idAttribute));
 							select.append(mrefSelect);
 						}
 					}
@@ -760,7 +751,8 @@ class PostgreSqlQueryGenerator
 						result.append("this");
 					}
 
-					result.append('.').append(getColumnName(r.getField())).append(" IN (").append(in).append(')');
+					result.append('.').append(getColumnName(entityType.getAttribute(r.getField()))).append(" IN (")
+							.append(in).append(')');
 					break;
 				case NOT:
 					result.append(" NOT ");
@@ -789,7 +781,7 @@ class PostgreSqlQueryGenerator
 					{
 						column.append("this");
 					}
-					column.append('.').append(getColumnName(r.getField()));
+					column.append('.').append(getColumnName(entityType.getAttribute(r.getField())));
 					predicate.append(column).append(" >= ? AND ").append(column).append(" <= ?");
 					result.append(predicate);
 					break;
@@ -808,16 +800,16 @@ class PostgreSqlQueryGenerator
 						predicate.append("this");
 					}
 
-					String attrName;
+					Attribute equalsAttr;
 					if (attr.isMappedBy())
 					{
-						attrName = attr.getRefEntity().getIdAttribute().getName();
+						equalsAttr = attr.getRefEntity().getIdAttribute();
 					}
 					else
 					{
-						attrName = r.getField();
+						equalsAttr = entityType.getAttribute(r.getField());
 					}
-					predicate.append('.').append(getColumnName(attrName));
+					predicate.append('.').append(getColumnName(equalsAttr));
 					if (r.getValue() == null)
 					{
 						// expression = null is not valid, use IS NULL
@@ -863,7 +855,7 @@ class PostgreSqlQueryGenerator
 						predicate.append("this");
 					}
 
-					predicate.append('.').append(getColumnName(r.getField()));
+					predicate.append('.').append(getColumnName(entityType.getAttribute(r.getField())));
 					switch (operator)
 					{
 						case GREATER:
@@ -974,46 +966,6 @@ class PostgreSqlQueryGenerator
 		}
 
 		return from.toString();
-	}
-
-	private static String getColumnName(Attribute attr)
-	{
-		return getColumnName(attr.getName());
-	}
-
-	private static String getColumnName(String attrName)
-	{
-		return '"' + attrName + '"';
-	}
-
-	private static String getFilterColumnName(Attribute attr, int filterIndex)
-	{
-		return '"' + attr.getName() + "_filter" + filterIndex + '"';
-	}
-
-	private static String getPrimaryKeyName(EntityType entityType, Attribute attr)
-	{
-		return getConstraintName(entityType, attr, "pkey");
-	}
-
-	private static String getForeignKeyName(EntityType entityType, Attribute attr)
-	{
-		return getConstraintName(entityType, attr, "fkey");
-	}
-
-	private static String getUniqueKeyName(EntityType entityType, Attribute attr)
-	{
-		return getConstraintName(entityType, attr, "key");
-	}
-
-	private static String getCheckConstraintName(EntityType entityType, Attribute attr)
-	{
-		return getConstraintName(entityType, attr, "chk");
-	}
-
-	private static String getConstraintName(EntityType entityType, Attribute attr, String constraintPostfix)
-	{
-		return '"' + entityType.getName() + '_' + attr.getName() + '_' + constraintPostfix + '"';
 	}
 
 	private static <E extends Entity> List<Attribute> getJoinQueryAttrs(EntityType entityType, Query<E> q)
