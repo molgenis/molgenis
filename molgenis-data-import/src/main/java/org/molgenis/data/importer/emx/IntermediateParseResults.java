@@ -131,7 +131,8 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityType emd = entityTypeFactory.create().setName(name).setSimpleName(simpleName);
+		// FIXME set simple name etc.
+		EntityType emd = entityTypeFactory.create().setId(name).setSimpleName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}

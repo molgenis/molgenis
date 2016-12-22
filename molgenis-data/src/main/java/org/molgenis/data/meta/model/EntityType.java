@@ -161,7 +161,18 @@ public class EntityType extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(FULL_NAME);
+		return getPackage() == null ? getSimpleName() : getPackage().getName() + PACKAGE_SEPARATOR + getSimpleName();
+	}
+
+	public String getId()
+	{
+		return getString(ID);
+	}
+
+	public EntityType setId(String id)
+	{
+		set(ID, id);
+		return this;
 	}
 
 	/**
@@ -173,16 +184,17 @@ public class EntityType extends StaticEntity
 	 */
 	public EntityType setName(String fullName)
 	{
-		set(FULL_NAME, fullName);
-		if (getSimpleName() == null)
-		{
-			set(SIMPLE_NAME, fullName);
-		}
-		if (getLabel() == null)
-		{
-			set(LABEL, fullName);
-		}
-		return this;
+		throw new UnsupportedOperationException();
+		//		set(FULL_NAME, fullName);
+		//		if (getSimpleName() == null)
+		//		{
+		//			set(SIMPLE_NAME, fullName);
+		//		}
+		//		if (getLabel() == null)
+		//		{
+		//			set(LABEL, fullName);
+		//		}
+		//		return this;
 	}
 
 	/**

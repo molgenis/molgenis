@@ -8,8 +8,7 @@ import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
-import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
+import static org.molgenis.data.meta.model.PackageMetadata.*;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
@@ -67,6 +66,17 @@ public class Package extends StaticEntity
 		return packageCopy;
 	}
 
+	public String getId()
+	{
+		return getString(ID);
+	}
+
+	public Package setId(String id)
+	{
+		set(PackageMetadata.ID, id);
+		return this;
+	}
+
 	/**
 	 * Gets the name of the package without the trailing parent packages
 	 *
@@ -118,7 +128,7 @@ public class Package extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(PackageMetadata.FULL_NAME);
+		return getParent() == null ? getSimpleName() : getParent().getName() + PACKAGE_SEPARATOR + getSimpleName();
 	}
 
 	public Package setName(String fullName)

@@ -30,6 +30,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
@@ -178,7 +179,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getName));
+		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getId));
 
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getName).collect(joining(",")));
 	}
@@ -245,11 +246,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	 */
 	private static boolean hasNewMappedByAttrs(EntityType entityType, EntityType existingEntityType)
 	{
-		Set<String> mappedByAttrs = entityType.getOwnMappedByAttributes().map(Attribute::getName)
-				.collect(toSet());
+		Set<String> mappedByAttrs = entityType.getOwnMappedByAttributes().map(Attribute::getName).collect(toSet());
 
-		Set<String> existingMappedByAttrs = existingEntityType.getOwnMappedByAttributes()
-				.map(Attribute::getName).collect(toSet());
+		Set<String> existingMappedByAttrs = existingEntityType.getOwnMappedByAttributes().map(Attribute::getName)
+				.collect(toSet());
 		return !mappedByAttrs.equals(existingMappedByAttrs);
 	}
 
@@ -265,9 +265,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), getEntityTypeFetch(),
-						EntityType.class)
-				.collect(toMap(EntityType::getName, Function.identity()));
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getId), getEntityTypeFetch(),
+						EntityType.class).collect(toMap(EntityType::getId, Function.identity()));
 
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
 		addMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
@@ -280,7 +279,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 2nd pass: create mappedBy attributes and update entity
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
@@ -304,7 +303,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 1st pass: create entities and attributes except for mappedBy attributes
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
@@ -377,8 +376,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return dataService
-					.findOneById(ENTITY_TYPE_META_DATA, fullyQualifiedEntityName, getEntityTypeFetch(), EntityType.class);
+			return dataService.findOneById(ENTITY_TYPE_META_DATA, fullyQualifiedEntityName, getEntityTypeFetch(),
+					EntityType.class);
 		}
 	}
 
@@ -396,7 +395,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// TODO replace with dataService.upsert once available in Repository
 		packages.forEach(package_ ->
 		{
-			Package existingPackage = dataService.findOneById(PACKAGE, package_.getName(), Package.class);
+			Package existingPackage = dataService.findOneById(PACKAGE, package_.getId(), Package.class);
 			if (existingPackage == null)
 			{
 				addPackage(package_);
@@ -457,8 +456,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Stream<Repository<Entity>> getRepositories()
 	{
-		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(IS_ABSTRACT, false).fetch(getEntityTypeFetch())
-				.findAll().map(this::getRepository);
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(IS_ABSTRACT, false)
+				.fetch(getEntityTypeFetch()).findAll().map(this::getRepository);
 	}
 
 	/**
@@ -472,8 +471,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		// analyze both compound and atomic attributes owned by the entity
 		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
-		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(),
-				false).collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
 
 		// determine attributes to add, update and delete
 		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
@@ -526,8 +525,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (dataService.hasRepository(entityName))
 		{
 			EntityType oldEntityType = dataService.getEntityType(entityName);
-			List<Attribute> oldAtomicAttributes = stream(oldEntityType.getAtomicAttributes().spliterator(),
-					false).collect(toList());
+			List<Attribute> oldAtomicAttributes = stream(oldEntityType.getAtomicAttributes().spliterator(), false)
+					.collect(toList());
 
 			LinkedHashMap<String, Attribute> newAtomicAttributesMap = newLinkedHashMap();
 			stream(newEntityType.getAtomicAttributes().spliterator(), false)
@@ -735,13 +734,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		@Override
 		public String getName()
 		{
-			return entityType.getName();
-		}
-
-		@Override
-		public EntityType setName(String fullName)
-		{
-			return entityType.setName(fullName);
+			return getPackage().getName() + PACKAGE_SEPARATOR + getSimpleName();
 		}
 
 		@Override

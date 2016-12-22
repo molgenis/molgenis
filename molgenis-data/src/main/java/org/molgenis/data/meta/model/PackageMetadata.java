@@ -21,6 +21,7 @@ public class PackageMetadata extends SystemEntityType
 	private static final String SIMPLE_NAME_ = "Package";
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
+	public static final String ID = "id";
 	public static final String FULL_NAME = "fullName";
 	public static final String SIMPLE_NAME = "name";
 	public static final String LABEL = "label";
@@ -43,7 +44,8 @@ public class PackageMetadata extends SystemEntityType
 	{
 		setLabel("Package");
 		setDescription("Grouping of related entities");
-		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setLabel("Qualified name");
+		addAttribute(ID, ROLE_ID).setAuto(true);
+		addAttribute(FULL_NAME, ROLE_LABEL).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
@@ -53,8 +55,8 @@ public class PackageMetadata extends SystemEntityType
 				.setOrderBy(new Sort(LABEL)).setRefEntity(this).setLabel("Children");
 		addAttribute(ENTITY_TYPES).setReadOnly(true).setDataType(ONE_TO_MANY)
 				.setMappedBy(entityTypeMetadata.getAttribute(EntityTypeMetadata.PACKAGE))
-				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL)).setRefEntity(entityTypeMetadata)
-				.setLabel("Entity types");
+				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL))
+				.setRefEntity(entityTypeMetadata).setLabel("Entity types");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 	}
 
