@@ -51,7 +51,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
+		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity#fc2928f6\" AS this LEFT JOIN \"RefEntity#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
 		long count = 123L;
 		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
 		postgreSqlRepo.setEntityType(entityType);
@@ -70,7 +70,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"RefEntity\" WHERE this.\"entityId\" = \"RefEntity\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"RefEntity#07f902bf\" WHERE this.\"entityId\" = \"RefEntity#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity#fc2928f6\" AS this LEFT JOIN \"RefEntity#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
 		//noinspection unchecked
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
 		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
@@ -84,16 +84,20 @@ public class PostgreSqlRepositoryTest
 	{
 		String refIdAttrName = "refEntityId";
 		Attribute refIdAttr = mock(Attribute.class);
+		when(refIdAttr.getIdentifier()).thenReturn(refIdAttrName);
 		when(refIdAttr.getName()).thenReturn(refIdAttrName);
 		when(refIdAttr.getDataType()).thenReturn(INT);
 
 		String xrefAttrName = "xrefAttr";
 		Attribute xrefAttr = mock(Attribute.class);
+		when(xrefAttr.getIdentifier()).thenReturn(xrefAttrName);
 		when(xrefAttr.getName()).thenReturn(xrefAttrName);
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		EntityType refEntityMeta = mock(EntityType.class);
 		String refEntityName = "RefEntity";
+		when(refEntityMeta.getId()).thenReturn("refEntityId");
+		when(refEntityMeta.getSimpleName()).thenReturn(refEntityName);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute(refIdAttrName)).thenReturn(refIdAttr);
@@ -101,10 +105,12 @@ public class PostgreSqlRepositoryTest
 
 		String idAttrName = "entityId";
 		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getIdentifier()).thenReturn(idAttrName);
 		when(idAttr.getName()).thenReturn(idAttrName);
 		when(idAttr.getDataType()).thenReturn(STRING);
 
 		Attribute oneToManyAttr = mock(Attribute.class);
+		when(oneToManyAttr.getIdentifier()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -113,6 +119,8 @@ public class PostgreSqlRepositoryTest
 
 		EntityType entityType = mock(EntityType.class);
 		String entityName = "Entity";
+		when(entityType.getId()).thenReturn("entityId");
+		when(entityType.getSimpleName()).thenReturn(entityName);
 		when(entityType.getName()).thenReturn(entityName);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAttribute(idAttrName)).thenReturn(idAttr);

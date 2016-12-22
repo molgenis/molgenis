@@ -23,13 +23,29 @@ public class MetaIdGenerator
 	{
 	}
 
+	/**
+	 * Generates an human readable identifier for an entity type with a given maximum length
+	 *
+	 * @param entityType    entity type
+	 * @param maxByteLength must be >= 10
+	 * @return human readable identifier
+	 */
 	public static String generateId(EntityType entityType, int maxByteLength)
 	{
+		validateMaxByteLength(maxByteLength);
 		return generateId(entityType.getId(), entityType.getSimpleName(), maxByteLength);
 	}
 
+	/**
+	 * Generates an human readable identifier for an attribute with a given maximum length
+	 *
+	 * @param attribute attribute
+	 * @param maxByteLength must be >= 10
+	 * @return human readable identifier
+	 */
 	public static String generateId(Attribute attribute, int maxByteLength)
 	{
+		validateMaxByteLength(maxByteLength);
 		String attributeName = attribute.getName();
 		if (PATTERN_WORD.matcher(attributeName).matches() && attributeName.length() <= maxByteLength)
 		{
@@ -59,5 +75,13 @@ public class MetaIdGenerator
 		// guarantee that one character is stored in one byte
 		String identifierName = PATTERN_WORD_REPLACE.matcher(name).replaceAll("");
 		return identifierName.length() > maxByteLength ? identifierName.substring(0, maxByteLength) : identifierName;
+	}
+
+	private static void validateMaxByteLength(int maxByteLength)
+	{
+		if (maxByteLength < 10)
+		{
+			throw new IllegalArgumentException("Max byte length must be >= 10");
+		}
 	}
 }

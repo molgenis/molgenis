@@ -7,7 +7,7 @@ import static org.molgenis.data.meta.MetaIdGenerator.generateId;
 
 class PostgreSqlNameGenerator
 {
-	private static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
+	static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
 
 	/**
 	 * Maximum identifier length in bytes.
