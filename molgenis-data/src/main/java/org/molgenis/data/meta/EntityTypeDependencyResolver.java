@@ -83,37 +83,33 @@ public class EntityTypeDependencyResolver
 	 *
 	 * @return dependencies of the entity meta data node
 	 */
-	private static Function getDependencies()
+	private static Function<EntityTypeNode, Set<EntityTypeNode>> getDependencies()
 	{
-		return new Function<EntityTypeNode, Set<EntityTypeNode>>()
+		return entityTypeNode ->
 		{
-			@Override
-			public Set<EntityTypeNode> apply(EntityTypeNode entityTypeNode)
-			{
-				// get referenced entities excluding entities of mappedBy attributes
-				EntityType entityType = entityTypeNode.getEntityType();
-				Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
-						.flatMap(attr ->
+			// get referenced entities excluding entities of mappedBy attributes
+			EntityType entityType = entityTypeNode.getEntityType();
+			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
+					.flatMap(attr ->
+					{
+						EntityType refEntity = attr.getRefEntity();
+						if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
+								.equals(entityType.getName()))
 						{
-							EntityType refEntity = attr.getRefEntity();
-							if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
-									.equals(entityType.getName()))
-							{
-								return Stream.of(new EntityTypeNode(refEntity));
-							}
-							else
-							{
-								return Stream.empty();
-							}
-						}).collect(toCollection(HashSet::new));
+							return Stream.of(new EntityTypeNode(refEntity));
+						}
+						else
+						{
+							return Stream.empty();
+						}
+					}).collect(toCollection(HashSet::new));
 
-				EntityType extendsEntityMeta = entityType.getExtends();
-				if (extendsEntityMeta != null)
-				{
-					refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
-				}
-				return refEntityMetaSet;
+			EntityType extendsEntityMeta = entityType.getExtends();
+			if (extendsEntityMeta != null)
+			{
+				refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
 			}
+			return refEntityMetaSet;
 		};
 	}
 

@@ -24,6 +24,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class EntityTypeValidatorTest
@@ -38,6 +39,7 @@ public class EntityTypeValidatorTest
 	private Query<Attribute> attrQ;
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -63,23 +65,17 @@ public class EntityTypeValidatorTest
 		when(labelAttr.getIdentifier()).thenReturn("#labelAttr");
 		when(labelAttr.getDataType()).thenReturn(STRING);
 
-		//noinspection unchecked
 		entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
-		//noinspection unchecked
 		Query<EntityType> entityQ0 = mock(Query.class);
-		//noinspection unchecked
 		Query<EntityType> entityQ1 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
 		when(entityQ0.findOne()).thenReturn(null);
 		when(entityQ1.findOne()).thenReturn(null);
 
-		//noinspection unchecked
 		attrQ = mock(Query.class);
-		//noinspection unchecked
 		Query<Attribute> attrQ0 = mock(Query.class);
-		//noinspection unchecked
 		Query<Attribute> attrQ1 = mock(Query.class);
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ0);
@@ -91,7 +87,7 @@ public class EntityTypeValidatorTest
 		Package package_ = when(mock(Package.class).getName()).thenReturn(packageName).getMock();
 		when(entityType.getPackage()).thenReturn(package_);
 		String name = "name";
-		when(entityType.getName()).thenReturn(packageName + '_' + name);
+		when(entityType.getName()).thenReturn(packageName + PACKAGE_SEPARATOR + name);
 		when(entityType.getSimpleName()).thenReturn(name);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
@@ -136,9 +132,9 @@ public class EntityTypeValidatorTest
 	@Test
 	public void testValidateAttributeOwnedBySameEntity()
 	{
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ0 = mock(Query.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ1 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
@@ -156,9 +152,9 @@ public class EntityTypeValidatorTest
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Attribute> attrQ0 = mock(Query.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Attribute> attrQ1 = mock(Query.class);
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ0);
@@ -166,7 +162,7 @@ public class EntityTypeValidatorTest
 		when(attrQ0.findOne()).thenReturn(null);
 		Attribute attrParent = when(mock(Attribute.class).getName()).thenReturn("attrParent").getMock();
 		when(attrQ1.findOne()).thenReturn(attrParent);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ0 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attrParent)).thenReturn(entityQ0);
 		when(entityQ0.findOne()).thenReturn(entityType);
@@ -290,7 +286,7 @@ public class EntityTypeValidatorTest
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		entityTypeValidator.validate(entityType);
 	}
-	
+
 	@Test
 	public void testValidateSystemPackageValid()
 	{

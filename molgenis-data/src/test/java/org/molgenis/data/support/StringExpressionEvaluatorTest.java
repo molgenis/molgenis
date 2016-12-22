@@ -137,22 +137,12 @@ public class StringExpressionEvaluatorTest
 		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
 	}
 
-	@Test
+	@Test(expectedExceptions = ConversionFailedException.class, expectedExceptionsMessageRegExp = "Failed to convert from type \\[java.lang.String\\] to type \\[java.lang.Long\\] for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"")
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
-
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("NonNumericString");
-		try
-		{
-			assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
-			fail("Expected ConversionFailedException.");
-		}
-		catch (ConversionFailedException expected)
-		{
-			assertEquals(expected.getMessage(),
-					"Failed to convert from type java.lang.String to type java.lang.Long for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"");
-		}
+		new StringExpressionEvaluator(amd, entityType).evaluate(entity);
 	}
 }

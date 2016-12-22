@@ -1,28 +1,23 @@
 package org.molgenis.auth;
 
 import com.google.common.collect.Iterators;
-import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.aggregation.AggregateQuery;
-import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
-public class UserDecorator extends AbstractRepositoryDecorator<User>
+public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 {
 	private static final int BATCH_SIZE = 1000;
 
@@ -31,8 +26,8 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserDecorator(Repository<User> decoratedRepository,
-			UserAuthorityFactory userAuthorityFactory, DataService dataService, PasswordEncoder passwordEncoder)
+	public UserRepositoryDecorator(Repository<User> decoratedRepository, UserAuthorityFactory userAuthorityFactory,
+			DataService dataService, PasswordEncoder passwordEncoder)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
@@ -96,7 +91,7 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 		String currentPassword = currentUser.getPassword();
 		String password = user.getPassword();
 		//password is updated
-		if(!currentPassword.equals(password))
+		if (!currentPassword.equals(password))
 		{
 			password = passwordEncoder.encode(user.getPassword());
 		}
@@ -119,15 +114,15 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 			userAuthority.setUser(user);
 			userAuthority.setRole(AUTHORITY_SU);
 
-			getUserAuthorityRepository().add(userAuthority);
+			dataService.add(USER_AUTHORITY, userAuthority);
 		}
 	}
 
 	private void updateSuperuserAuthority(User user)
 	{
-		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
-		UserAuthority suAuthority = userAuthorityRepo.query().eq(USER, user).and()
-				.eq(ROLE, AUTHORITY_SU).findOne();
+		UserAuthority suAuthority = dataService
+				.findOne(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU),
+						UserAuthority.class);
 
 		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
@@ -137,145 +132,70 @@ public class UserDecorator extends AbstractRepositoryDecorator<User>
 				UserAuthority userAuthority = userAuthorityFactory.create();
 				userAuthority.setUser(user);
 				userAuthority.setRole(AUTHORITY_SU);
-				userAuthorityRepo.add(userAuthority);
+				dataService.add(USER_AUTHORITY, userAuthority);
 			}
 		}
 		else
 		{
 			if (suAuthority != null)
 			{
-				userAuthorityRepo.deleteById(suAuthority.getId());
+				dataService.deleteById(USER_AUTHORITY, suAuthority.getId());
 			}
 		}
-	}
-
-	private Repository<UserAuthority> getUserAuthorityRepository()
-	{
-		return dataService.getRepository(USER_AUTHORITY, UserAuthority.class);
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepository.getName();
-	}
-
-	public EntityType getEntityType()
-	{
-		return decoratedRepository.getEntityType();
-	}
-
-	@Override
-	public Iterator<User> iterator()
-	{
-		return decoratedRepository.iterator();
-	}
-
-	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<User>> consumer, int batchSize)
-	{
-		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepository.close();
-	}
-
-	@Override
-	public long count()
-	{
-		return decoratedRepository.count();
-	}
-
-	@Override
-	public long count(Query<User> q)
-	{
-		return decoratedRepository.count(q);
-	}
-
-	@Override
-	public Stream<User> findAll(Query<User> q)
-	{
-		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public User findOne(Query<User> q)
-	{
-		return decoratedRepository.findOne(q);
-	}
-
-	@Override
-	public User findOneById(Object id)
-	{
-		return decoratedRepository.findOneById(id);
-	}
-
-	@Override
-	public User findOneById(Object id, Fetch fetch)
-	{
-		return decoratedRepository.findOneById(id, fetch);
-	}
-
-	@Override
-	public Stream<User> findAll(Stream<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Stream<User> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
 	public void delete(User entity)
 	{
+		deleteUserAuthoritiesAndGroupMember(entity);
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
 	public void delete(Stream<User> entities)
 	{
+		entities = entities.map(entity ->
+		{
+			deleteUserAuthoritiesAndGroupMember(entity);
+			return entity;
+		});
 		decoratedRepository.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
+		deleteUserAuthoritiesAndGroupMember(findOneById(id));
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
+		ids = ids.map(id ->
+		{
+			deleteUserAuthoritiesAndGroupMember(findOneById(id));
+			return id;
+		});
 		decoratedRepository.deleteAll(ids);
+	}
+
+	private void deleteUserAuthoritiesAndGroupMember(User user)
+	{
+		Stream<UserAuthority> userAuthorities = dataService
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+						UserAuthority.class);
+		dataService.delete(USER_AUTHORITY, userAuthorities);
+
+		Stream<GroupMember> groupMembers = dataService
+				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+						GroupMember.class);
+		dataService.delete(GROUP_MEMBER, groupMembers);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		decoratedRepository.deleteAll();
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decoratedRepository.getCapabilities();
-	}
-
-	@Override
-	public Set<Operator> getQueryOperators()
-	{
-		return decoratedRepository.getQueryOperators();
+		throw new UnsupportedOperationException("Deleting all users is not supported.");
 	}
 }

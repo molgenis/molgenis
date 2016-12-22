@@ -18,21 +18,16 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
-import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class IndexActionRegisterServiceTest
 {
@@ -80,7 +75,7 @@ public class IndexActionRegisterServiceTest
 		EntityType emd = mock(EntityType.class);
 
 		when(dataService.getEntityType(indexAction.getEntityFullName())).thenReturn(emd);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Attribute> query = mock(Query.class);
 		when(query.fetch(any(Fetch.class))).thenReturn(query);
 		when(query.eq(REF_ENTITY_TYPE, emd)).thenReturn(query);

@@ -74,7 +74,7 @@ public class RSQLValueParser
 		{
 			throw new MolgenisDataException(
 					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), paramValue,
-							MolgenisDateFormat.DATEFORMAT_DATETIME));
+							MolgenisDateFormat.getDateTimeFormat().toPattern()));
 		}
 	}
 
@@ -88,7 +88,7 @@ public class RSQLValueParser
 		{
 			throw new MolgenisDataException(
 					format("Attribute [%s] value [%s] does not match date format [%s].", attr.getName(), paramValue,
-							MolgenisDateFormat.DATEFORMAT_DATE));
+							MolgenisDateFormat.getDateFormat().toPattern()));
 		}
 	}
 

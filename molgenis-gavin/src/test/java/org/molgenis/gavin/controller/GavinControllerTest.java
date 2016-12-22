@@ -15,8 +15,6 @@ import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionMetaData;
-import org.molgenis.security.core.SecureIdGenerator;
-import org.molgenis.security.core.SecureIdGeneratorImpl;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.controller.StaticContentService;
@@ -183,7 +181,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		when(oldJobDir.getName()).thenReturn("ASDFASDFASDF");
 
 		gavinController.cleanUp();
-		verify(fileStore).deleteDirectory("gavin-app/ASDFASDFASDF");
+		verify(fileStore).deleteDirectory("gavin-app" + File.separator + "ASDFASDFASDF");
 		assertTrue(fileFilterCaptor.getValue().accept(oldJobDir),
 				"cleanUp should remove files that are more than 24 hours old");
 		assertFalse(fileFilterCaptor.getValue().accept(newJobDir),
@@ -194,12 +192,6 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	@ComponentScan({ "org.molgenis.gavin.job.meta", "org.molgenis.data.jobs.model" })
 	public static class Config
 	{
-		@Bean
-		SecureIdGenerator secureIdGenerator()
-		{
-			return new SecureIdGeneratorImpl();
-		}
-
 		@Bean
 		IndexPackage indexPackage()
 		{

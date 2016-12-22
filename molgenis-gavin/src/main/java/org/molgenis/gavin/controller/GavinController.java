@@ -1,12 +1,12 @@
 package org.molgenis.gavin.controller;
 
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.JobNotFoundException;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
-import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -40,6 +40,7 @@ import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.gavin.controller.GavinController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -64,14 +65,13 @@ public class GavinController extends AbstractStaticContentController
 	private final GavinJobExecutionFactory gavinJobExecutionFactory;
 	private final FileStore fileStore;
 	private final UserAccountService userAccountService;
-	private final SecureIdGenerator secureIdGenerator;
+	private final IdGenerator idGenerator;
 	private final MenuReaderService menuReaderService;
 
 	@Autowired
 	public GavinController(@Qualifier("gavinExecutors") ExecutorService executorService,
 			GavinJobFactory gavinJobFactory, GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
-			UserAccountService userAccountService, MenuReaderService menuReaderService,
-			SecureIdGenerator secureIdGenerator)
+			UserAccountService userAccountService, MenuReaderService menuReaderService, IdGenerator idGenerator)
 	{
 		super(GAVIN_APP, URI);
 		this.executorService = requireNonNull(executorService);
@@ -79,8 +79,8 @@ public class GavinController extends AbstractStaticContentController
 		this.gavinJobExecutionFactory = requireNonNull(gavinJobExecutionFactory);
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
-		this.menuReaderService = menuReaderService;
-		this.secureIdGenerator = secureIdGenerator;
+		this.menuReaderService = requireNonNull(menuReaderService);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	/**
@@ -120,7 +120,8 @@ public class GavinController extends AbstractStaticContentController
 			extension = TSV_GZ;
 		}
 
-		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory.create(secureIdGenerator.generateId());
+		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory
+				.create(idGenerator.generateId(SECURE_RANDOM));
 		gavinJobExecution.setFilename(entityName);
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		gavinJobExecution.setInputFileExtension(extension);

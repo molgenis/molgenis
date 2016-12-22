@@ -22,6 +22,7 @@ public class I18nStringDecoratorTest
 	private Repository<Entity> decoratedRepo;
 	private I18nStringDecorator i18nStringDecorator;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -100,6 +101,7 @@ public class I18nStringDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = i18nStringDecorator.findAll(query);
@@ -110,6 +112,7 @@ public class I18nStringDecoratorTest
 	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		i18nStringDecorator.forEachBatched(fetch, consumer, 234);
 		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);

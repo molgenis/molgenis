@@ -21,7 +21,7 @@
     function getCreateForm(type) {
         React.render(molgenis.ui.Form({
             mode: 'create',
-            entity: 'sys_sec_' + type,
+            entity: 'sys' + molgenis.packageSeparator + 'sec' + molgenis.packageSeparator + type,
             modal: true,
             onSubmitSuccess: function (e) {
 
@@ -147,7 +147,7 @@
     }
 
     function getAllUsersGroup(callback) {
-        api.getAsync('/api/v1/sys_sec_Group', {
+        api.getAsync('/api/v1/sys' + molgenis.packageSeparator + 'sec' + molgenis.packageSeparator + 'Group', {
             q: [{
                 field: 'name',
                 operator: 'EQUALS',

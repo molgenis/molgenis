@@ -163,26 +163,26 @@ public class DynamicEntity implements Entity
 		return (Entity) get(attrName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> E getEntity(String attrName, Class<E> clazz)
 	{
-		//noinspection unchecked
 		return (E) get(attrName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<Entity> getEntities(String attrName)
 	{
 		Object value = get(attrName);
-		//noinspection unchecked
 		return value != null ? (Iterable<Entity>) value : emptyList();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attrName, Class<E> clazz)
 	{
 		Object value = get(attrName);
-		//noinspection unchecked
 		return value != null ? (Iterable<E>) value : emptyList();
 	}
 

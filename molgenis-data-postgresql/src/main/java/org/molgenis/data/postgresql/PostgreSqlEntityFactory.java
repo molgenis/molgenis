@@ -17,9 +17,13 @@ import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
 @Component
@@ -134,8 +138,8 @@ class PostgreSqlEntityFactory
 					throw new RuntimeException(
 							format("Value mapping not allowed for attribute type [%s]", attr.getDataType().toString()));
 				case DATE:
-					// valid, because java.sql.Date extends required type java.util.Date
-					value = resultSet.getDate(colName);
+					LocalDate localDate = resultSet.getObject(colName, LocalDate.class);
+					value = localDate != null ? Date.from(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant()) : null;
 					break;
 				case DATE_TIME:
 					// valid, because java.sql.Timestamp extends required type java.util.Date
@@ -220,14 +224,16 @@ class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
+				Arrays.sort(mrefIdsAndOrder, comparing(o -> Integer.valueOf(o[0])));
+
 				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
-				for (String[] mrefIdAndOrder : mrefIdsAndOrder)
+				for (int i = 0; i < mrefIdsAndOrder.length; ++i)
 				{
-					Integer seqNr = Integer.valueOf(mrefIdAndOrder[0]);
+					String[] mrefIdAndOrder = mrefIdsAndOrder[i];
 					String mrefIdStr = mrefIdAndOrder[1];
 					Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
-					mrefIds[seqNr] = mrefId;
+					mrefIds[i] = mrefId;
 				}
 
 				// convert ids to (lazy) entities

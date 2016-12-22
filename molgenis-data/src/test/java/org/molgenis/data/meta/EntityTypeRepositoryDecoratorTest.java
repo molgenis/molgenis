@@ -220,7 +220,8 @@ public class EntityTypeRepositoryDecoratorTest
 	private void countQuerySuOrSystem() throws Exception
 	{
 		long count = 123L;
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<EntityType> q = mock(Query.class);
 		when(decoratedRepo.count(q)).thenReturn(count);
 		assertEquals(repo.count(q), 123L);
 	}
@@ -234,6 +235,7 @@ public class EntityTypeRepositoryDecoratorTest
 		String entityType1Name = "entity1";
 		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
 		Query<EntityType> q = new QueryImpl<>();
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
@@ -261,7 +263,8 @@ public class EntityTypeRepositoryDecoratorTest
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<EntityType> q = mock(Query.class);
 		when(decoratedRepo.findAll(q)).thenReturn(Stream.of(entityType0, entityType1));
 		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType1));
 	}
@@ -276,7 +279,9 @@ public class EntityTypeRepositoryDecoratorTest
 		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
+		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
@@ -298,9 +303,11 @@ public class EntityTypeRepositoryDecoratorTest
 		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
+		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
@@ -368,6 +375,7 @@ public class EntityTypeRepositoryDecoratorTest
 	private void forEachBatchedSuOrSystem() throws Exception
 	{
 		Fetch fetch = mock(Fetch.class);
+		@SuppressWarnings("unchecked")
 		Consumer<List<EntityType>> consumer = mock(Consumer.class);
 		repo.forEachBatched(fetch, consumer, 10);
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
@@ -411,7 +419,8 @@ public class EntityTypeRepositoryDecoratorTest
 	private void findOneQuerySuOrSystem() throws Exception
 	{
 		EntityType entityType0 = mock(EntityType.class);
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<EntityType> q = mock(Query.class);
 		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
 		assertEquals(repo.findOne(q), entityType0);
 	}
@@ -422,6 +431,7 @@ public class EntityTypeRepositoryDecoratorTest
 		setUserAuthentication();
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
 		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
@@ -434,6 +444,7 @@ public class EntityTypeRepositoryDecoratorTest
 		setUserAuthentication();
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
 		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
@@ -679,7 +690,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
 				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
@@ -687,8 +698,7 @@ public class EntityTypeRepositoryDecoratorTest
 		UserAuthority userAuthority = mock(UserAuthority.class);
 		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
 		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
-
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
 		when(groupAuthorityQ.in(ROLE,
 				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
@@ -702,17 +712,17 @@ public class EntityTypeRepositoryDecoratorTest
 		verify(decoratedRepo).delete(entityType);
 		verify(repoCollection).deleteRepository(entityType);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
 		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
 		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), newArrayList(attr0, attrCompound, attr1a, attr1b));
@@ -740,7 +750,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
 				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
@@ -749,7 +759,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
 		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
 		when(groupAuthorityQ.in(ROLE,
 				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
@@ -763,17 +773,17 @@ public class EntityTypeRepositoryDecoratorTest
 		verify(decoratedRepo).delete(entityType);
 		verify(repoCollection, times(0)).deleteRepository(entityType); // entity is abstract
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
 		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
 		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
@@ -795,7 +805,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<UserAuthority> userAuthorityQ = mock(Query.class);
 		when(userAuthorityQ.in(ROLE,
 				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
@@ -804,7 +814,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
 		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
 		when(groupAuthorityQ.in(ROLE,
 				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
@@ -818,17 +828,17 @@ public class EntityTypeRepositoryDecoratorTest
 		verify(decoratedRepo).delete(entityType);
 		verify(repoCollection, times(0)).deleteRepository(entityType); // entity is abstract
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
 		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
 		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));

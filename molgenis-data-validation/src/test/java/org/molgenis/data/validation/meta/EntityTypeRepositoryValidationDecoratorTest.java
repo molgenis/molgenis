@@ -18,10 +18,10 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	private Repository<EntityType> decoratedRepo;
 	private EntityTypeValidator entityTypeValidator;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		//noinspection unchecked
 		decoratedRepo = mock(Repository.class);
 		entityTypeValidator = mock(EntityTypeValidator.class);
 		entityTypeRepoValidationDecorator = new EntityTypeRepositoryValidationDecorator(decoratedRepo,
@@ -64,7 +64,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doNothing().when(entityTypeValidator).validate(entityType0);
 		doNothing().when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
@@ -78,7 +78,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doNothing().when(entityTypeValidator).validate(entityType0);
 		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
@@ -108,7 +108,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doNothing().when(entityTypeValidator).validate(entityType0);
 		doNothing().when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
@@ -122,7 +122,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doNothing().when(entityTypeValidator).validate(entityType0);
 		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream

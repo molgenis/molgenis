@@ -26,13 +26,13 @@ public class RepositorySecurityDecoratorTest
 	private Repository<Entity> decoratedRepository;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{
 		entityName = "entity";
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getName()).thenReturn(entityName);
-		//noinspection unchecked
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getName()).thenReturn(entityName);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
@@ -286,7 +286,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Entity entity0 = mock(Entity.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
@@ -301,7 +301,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Entity entity0 = mock(Entity.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
@@ -317,7 +317,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Fetch fetch = new Fetch();
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
 
@@ -332,7 +332,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Fetch fetch = new Fetch();
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
 

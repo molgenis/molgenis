@@ -390,7 +390,7 @@ public class QueryValidator
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-								paramStrValue, MolgenisDateFormat.DATEFORMAT_DATETIME)));
+								paramStrValue, MolgenisDateFormat.getDateTimeFormat().toPattern())));
 			}
 		}
 		else
@@ -428,7 +428,7 @@ public class QueryValidator
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-								paramStrValue, MolgenisDateFormat.DATEFORMAT_DATE)));
+								paramStrValue, MolgenisDateFormat.getDateFormat().toPattern())));
 			}
 		}
 		else

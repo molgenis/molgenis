@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -41,6 +42,7 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -224,7 +226,7 @@ public class ImportWriter
 
 				// Try without default package
 				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getName().toLowerCase()
-						.startsWith(defaultPackage.toLowerCase() + "_"))
+						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
 					emxEntityRepo = source.getRepository(entityType.getName().substring(defaultPackage.length() + 1));
 				}
@@ -544,7 +546,13 @@ public class ImportWriter
 				break;
 			}
 			case UPDATE:
-				repo.update(stream(entities.spliterator(), false));
+				AtomicInteger atomicCount = new AtomicInteger(0);
+				repo.update(stream(entities.spliterator(), false).filter(entity ->
+				{
+					atomicCount.incrementAndGet();
+					return true;
+				}));
+				count = atomicCount.get();
 				break;
 			default:
 				throw new RuntimeException(format("Unknown database action [%s]", dbAction.toString()));

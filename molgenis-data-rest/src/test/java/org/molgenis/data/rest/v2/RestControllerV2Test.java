@@ -50,7 +50,6 @@ import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -65,6 +64,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -527,7 +527,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions,
-				"Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'");
+				"Operation failed. Duplicate entity: 'org" + PACKAGE_SEPARATOR + "molgenis" + PACKAGE_SEPARATOR + "blah"
+						+ PACKAGE_SEPARATOR + "duplicateEntity'");
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
 	}
 
@@ -748,7 +749,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
-		assertEquals((new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)).format(entity.get("date_time")),
+		assertEquals(MolgenisDateFormat.getDateTimeFormat().format(entity.get("date_time")),
 				"1985-08-12T08:12:13+0200");
 	}
 
@@ -842,7 +843,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>()
 				{
 				}.getType());
-		@SuppressWarnings("unchecked") Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		@SuppressWarnings("unchecked")
+		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 		assertEquals(lvl2.get("selfRef").toString(),
 				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
 	}

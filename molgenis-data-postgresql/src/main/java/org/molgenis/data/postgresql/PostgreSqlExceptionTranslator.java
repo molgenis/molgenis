@@ -106,9 +106,36 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 				return translateDependentObjectsStillExist(pSqlException);
 			case "42703":
 				return translateUndefinedColumnException(pSqlException);
+			case PostgreSqlQueryGenerator.ERR_CODE_READONLY_VIOLATION:
+				return translateReadonlyViolation(pSqlException);
 			default:
 				return null;
 		}
+	}
+
+	/**
+	 * Package private for testability
+	 *
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
+	 */
+	static MolgenisValidationException translateReadonlyViolation(PSQLException pSqlException)
+	{
+		Matcher matcher = Pattern
+				.compile("Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
+				.matcher(pSqlException.getServerErrorMessage().getMessage());
+		boolean matches = matcher.matches();
+		if (!matches)
+		{
+			throw new RuntimeException("Error translating exception", pSqlException);
+		}
+		String colName = matcher.group(1);
+		String tableName = matcher.group(2);
+		String id = matcher.group(3);
+		ConstraintViolation constraintViolation = new ConstraintViolation(
+				format("Updating read-only attribute '%s' of entity '%s' with id '%s' is not allowed.", colName,
+						tableName, id));
+		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
 	/**

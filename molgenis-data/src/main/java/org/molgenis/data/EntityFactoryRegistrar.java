@@ -30,6 +30,11 @@ public class EntityFactoryRegistrar
 	{
 		ApplicationContext ctx = event.getApplicationContext();
 		Map<String, EntityFactory> entityFactoryMap = ctx.getBeansOfType(EntityFactory.class);
-		entityFactoryMap.values().forEach(entityFactoryRegistry::registerStaticEntityFactory);
+		entityFactoryMap.values().forEach(this::registerStaticEntityFactory);
+	}
+
+	private void registerStaticEntityFactory(EntityFactory untypedEntityFactory)
+	{
+		entityFactoryRegistry.registerStaticEntityFactory((EntityFactory<? extends Entity, ?>) untypedEntityFactory);
 	}
 }

@@ -84,6 +84,7 @@ public final class IntermediateParseResults
 		EntityType entityType = getEntityType(entityName);
 		if (entityType == null) entityType = addEntityType(entityName);
 
+		int lookupAttributeIndex = 0;
 		for (EmxAttribute emxAttr : emxAttrs)
 		{
 			Attribute attr = emxAttr.getAttr();
@@ -92,7 +93,30 @@ public final class IntermediateParseResults
 			// set attribute roles
 			if (emxAttr.isIdAttr()) attr.setIdAttribute(true);
 			if (emxAttr.isLabelAttr()) attr.setLabelAttribute(true);
-			if (emxAttr.isLookupAttr()) attr.setLookupAttributeIndex(0); // FIXME assign unique index
+			if (emxAttr.isLookupAttr()) attr.setLookupAttributeIndex(lookupAttributeIndex++);
+		}
+
+		if (entityType.getLabelAttribute() == null)
+		{
+			Attribute ownIdAttr = entityType.getOwnIdAttribute();
+			if (ownIdAttr != null && ownIdAttr.isVisible())
+			{
+				ownIdAttr.setLabelAttribute(true);
+			}
+		}
+
+		if (!entityType.getLookupAttributes().iterator().hasNext())
+		{
+			Attribute ownIdAttr = entityType.getOwnIdAttribute();
+			if (ownIdAttr != null && ownIdAttr.isVisible())
+			{
+				ownIdAttr.setLookupAttributeIndex(lookupAttributeIndex++);
+			}
+			Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
+			if (ownLabelAttr != null)
+			{
+				ownLabelAttr.setLookupAttributeIndex(lookupAttributeIndex);
+			}
 		}
 	}
 
@@ -177,8 +201,7 @@ public final class IntermediateParseResults
 	public String toString()
 	{
 		return "IntermediateParseResults [entities=" + entities + ", packages=" + packages + ", tags=" + tags
-				+ ", languages=" + languages
-				+ ", i18nStrings=" + i18nStrings + "]";
+				+ ", languages=" + languages + ", i18nStrings=" + i18nStrings + "]";
 	}
 
 	@Override

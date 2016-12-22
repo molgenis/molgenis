@@ -305,6 +305,7 @@ public class IndexedRepositoryDecoratorTest
 	public void forEachBatched()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		indexedRepositoryDecorator.forEachBatched(fetch, consumer, 12);
 		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 12);

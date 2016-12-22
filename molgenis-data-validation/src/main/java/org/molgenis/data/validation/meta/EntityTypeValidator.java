@@ -278,11 +278,11 @@ public class EntityTypeValidator
 			}
 		}
 
-		// Validate that entity name equals entity package name + underscore + entity simple name
+		// Validate that entity name equals entity package name + package separator + entity simple name
 		Package package_ = entityType.getPackage();
 		if (package_ != null)
 		{
-			if (!(package_.getName() + '_' + entityType.getSimpleName()).equals(entityType.getName()))
+			if (!(package_.getName() + Package.PACKAGE_SEPARATOR + entityType.getSimpleName()).equals(entityType.getName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Qualified entity name [%s] not equal to entity package name [%s] underscore entity name [%s]",

@@ -69,6 +69,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		Group allUsersGroup = mock(Group.class);
+		@SuppressWarnings("unchecked")
 		Query<Group> q = mock(Query.class);
 		when(q.eq(NAME, ALL_USER_GROUP)).thenReturn(q);
 		when(q.findOne()).thenReturn(allUsersGroup);
@@ -85,6 +86,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser()
 	{
+		@SuppressWarnings("unchecked")
 		Query<User> q = mock(Query.class);
 		when(q.eq(ACTIVE, false)).thenReturn(q);
 		when(q.and()).thenReturn(q);
@@ -109,6 +111,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_invalidActivationCode()
 	{
+		@SuppressWarnings("unchecked")
 		Query<User> q = mock(Query.class);
 		when(q.eq(ACTIVE, false)).thenReturn(q);
 		when(q.and()).thenReturn(q);
@@ -122,6 +125,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_alreadyActivated()
 	{
+		@SuppressWarnings("unchecked")
 		Query<User> q = mock(Query.class);
 		when(q.eq(ACTIVE, false)).thenReturn(q);
 		when(q.and()).thenReturn(q);
@@ -187,6 +191,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		User user = mock(User.class);
 		when(user.getPassword()).thenReturn("password");
 
+		@SuppressWarnings("unchecked")
 		Query<User> q = mock(Query.class);
 		when(q.eq(EMAIL, "invalid-user@molgenis.org")).thenReturn(q);
 		when(q.findOne()).thenReturn(null);
@@ -202,6 +207,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(user.getUsername()).thenReturn("test");
 		when(user.getPassword()).thenReturn("oldpass");
 
+		@SuppressWarnings("unchecked")
 		Query<User> q = mock(Query.class);
 		when(q.eq(USERNAME, "test")).thenReturn(q);
 		when(q.findOne()).thenReturn(user);

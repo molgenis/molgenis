@@ -6,12 +6,14 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
+import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
-import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -43,12 +45,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.SocketUtils;
 
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import static org.mockito.Mockito.mock;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
@@ -65,17 +69,25 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
 		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
 		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
-		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction" })
+		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
+		"org.molgenis.data.importer.emx", "org.molgenis.data.importer.config", "org.molgenis.data.excel" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class, PlatformConfig.class,
+		RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
-		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })
+		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
+		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
+		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
+		org.molgenis.security.permission.PermissionSystemService.class,
+		org.molgenis.data.importer.ImportServiceRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
+	private static final String INTEGRATION_TEST_DATABASE_NAME;
+
 	static
 	{
-		dropAndCreateDatabase();
+		INTEGRATION_TEST_DATABASE_NAME = "molgenis_test_" + System.nanoTime();
+		dropAndCreateDatabase(INTEGRATION_TEST_DATABASE_NAME);
 	}
 
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -96,6 +108,21 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
+		String dbUriAdmin;
+		try
+		{
+			dbUriAdmin = PostgreSqlDatabase.getPostgreSqlDatabaseUri();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		Properties overwriteProperties = new Properties();
+		overwriteProperties.setProperty("db_uri",
+				dbUriAdmin + INTEGRATION_TEST_DATABASE_NAME + "?reWriteBatchedInserts=true&autosave=CONSERVATIVE");
+		overwriteProperties.setProperty("elasticsearch.transport.tcp.port",
+				String.valueOf(SocketUtils.findAvailableTcpPort(9301, 9400)));
+
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[] { new ClassPathResource("/postgresql/molgenis.properties") };
 		pspc.setLocations(resources);
@@ -103,6 +130,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
 		pspc.setNullValue("@null");
+		pspc.setProperties(overwriteProperties);
+
 		return pspc;
 	}
 
@@ -116,7 +145,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public void cleanup() throws IOException, SQLException
 	{
 		((ComboPooledDataSource) dataSource).close();
-		PostgreSqlDatabase.dropDatabase();
+		PostgreSqlDatabase.dropDatabase(INTEGRATION_TEST_DATABASE_NAME);
 
 		try
 		{
@@ -143,7 +172,10 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public ConversionService conversionService()
 	{
-		return new DefaultConversionService();
+		DefaultConversionService defaultConversionService = new DefaultConversionService();
+		defaultConversionService.addConverter(new DateToStringConverter());
+		defaultConversionService.addConverter(new StringToDateConverter());
+		return defaultConversionService;
 	}
 
 	@Bean

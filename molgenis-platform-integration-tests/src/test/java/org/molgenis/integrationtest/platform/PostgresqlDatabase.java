@@ -16,7 +16,13 @@ import java.util.Properties;
  */
 class PostgreSqlDatabase
 {
-	private static final String INTEGRATION_DATABASE = "molgenis_integration_test";
+	public static String getPostgreSqlDatabaseUri() throws IOException
+	{
+		Properties properties = new Properties();
+		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/postgresql/molgenis.properties");
+		properties.load(new FileInputStream(file));
+		return properties.getProperty("db_uri_admin");
+	}
 
 	private static Connection getConnection() throws IOException, SQLException
 	{
@@ -24,31 +30,28 @@ class PostgreSqlDatabase
 		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/postgresql/molgenis.properties");
 		properties.load(new FileInputStream(file));
 
-		String db_uri = properties.getProperty("db_uri");
-		int slashIndex = db_uri.lastIndexOf('/');
-
-		// remove the, not yet created, database name from the connection url
-		String adminDbUri = db_uri.substring(0, slashIndex + 1);
-		return DriverManager
-				.getConnection(adminDbUri, properties.getProperty("db_user"), properties.getProperty("db_password"));
+		String dbUriAdmin = getPostgreSqlDatabaseUri();
+		String dbUser = properties.getProperty("db_user");
+		String dbPassword = properties.getProperty("db_password");
+		return DriverManager.getConnection(dbUriAdmin, dbUser, dbPassword);
 	}
 
-	static void dropDatabase() throws IOException, SQLException
+	static void dropDatabase(String databaseName) throws IOException, SQLException
 	{
 		Connection conn = getConnection();
 		Statement statement = conn.createStatement();
-		statement.executeUpdate("DROP DATABASE IF exists \"" + INTEGRATION_DATABASE + "\"");
+		statement.executeUpdate("DROP DATABASE IF exists \"" + databaseName + "\"");
 		conn.close();
 	}
 
-	static void dropAndCreateDatabase()
+	static void dropAndCreateDatabase(String databaseName)
 	{
 		try
 		{
 			Connection conn = getConnection();
 			Statement statement = conn.createStatement();
-			statement.executeUpdate("DROP DATABASE IF EXISTS \"" + INTEGRATION_DATABASE + "\"");
-			statement.executeUpdate("CREATE DATABASE \"" + INTEGRATION_DATABASE + "\"");
+			statement.executeUpdate("DROP DATABASE IF EXISTS \"" + databaseName + "\"");
+			statement.executeUpdate("CREATE DATABASE \"" + databaseName + "\"");
 
 			conn.close();
 		}

@@ -70,7 +70,7 @@ class PostgreSqlRepository extends AbstractRepository
 	 */
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
 			EnumSet.of(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
-					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE));
+					VALIDATE_NOTNULL_CONSTRAINT, VALIDATE_READONLY_CONSTRAINT, CACHEABLE));
 
 	/**
 	 * Supported query operators
@@ -505,7 +505,8 @@ class PostgreSqlRepository extends AbstractRepository
 	{
 		final Attribute idAttr = entityType.getIdAttribute();
 		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
-		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType)
+				.filter(attr -> !attr.isReadOnly()).collect(toList());
 		final String updateSql = getSqlUpdate(entityType);
 
 		// update values in entity table
