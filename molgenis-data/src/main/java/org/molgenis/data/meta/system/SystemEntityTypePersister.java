@@ -147,12 +147,7 @@ public class SystemEntityTypePersister
 		{
 			Package existingPackage = existingPackageMap.get(pack.getName());
 
-			if (existingPackage == null)
-			{
-				// FIXME use populator
-				pack.setId(idGenerator.generateShortId());
-			}
-			else
+			if (existingPackage != null)
 			{
 				pack.setId(existingPackage.getId());
 			}
@@ -188,11 +183,6 @@ public class SystemEntityTypePersister
 						attr.setIdentifier(existingAttr.getIdentifier());
 					}
 				});
-			}
-			else
-			{
-				// FIXME should be done by populator
-				entityType.setId(idGenerator.generateShortId());
 			}
 		});
 	}
