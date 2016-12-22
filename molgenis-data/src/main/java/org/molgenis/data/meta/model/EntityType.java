@@ -185,16 +185,6 @@ public class EntityType extends StaticEntity
 	public EntityType setName(String fullName)
 	{
 		throw new UnsupportedOperationException();
-		//		set(FULL_NAME, fullName);
-		//		if (getSimpleName() == null)
-		//		{
-		//			set(SIMPLE_NAME, fullName);
-		//		}
-		//		if (getLabel() == null)
-		//		{
-		//			set(LABEL, fullName);
-		//		}
-		//		return this;
 	}
 
 	/**

@@ -437,7 +437,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + rowIndex);
 
 			Package package_ = packageFactory.create();
-			package_.setName(name);
 			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
 			package_.setLabel(packageEntity.getString(EMX_PACKAGE_LABEL));
 

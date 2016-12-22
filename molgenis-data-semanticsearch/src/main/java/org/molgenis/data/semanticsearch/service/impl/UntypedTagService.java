@@ -14,7 +14,6 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 /**
  * Service to tag metadata with simple
@@ -162,16 +160,8 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	@RunAsSystem
 	public Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
-		Entity packageEntity = dataService
-				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetadata.FULL_NAME, p.getName()));
-
-		if (packageEntity == null)
-		{
-			throw new UnknownEntityException("Unknown package [" + p.getName() + "]");
-		}
-
 		List<SemanticTag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();
-		for (Entity tagEntity : packageEntity.getEntities(PackageMetadata.TAGS))
+		for (Tag tagEntity : p.getTags())
 		{
 			tags.add(SemanticTag.asTag(p, tagEntity));
 		}

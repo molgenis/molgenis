@@ -231,7 +231,6 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		Package p = packageFactory.create("test", "desc");
 
 		Package pack = packageFactory.create();
-		pack.setName("test");
 		pack.setSimpleName("test");
 		pack.setTags(singletonList(chromosomeNameTagEntity));
 

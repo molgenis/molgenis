@@ -55,7 +55,6 @@ public class Package extends StaticEntity
 	public static Package newInstance(Package package_)
 	{
 		Package packageCopy = new Package(package_.getEntityType());
-		packageCopy.setName(package_.getName());
 		packageCopy.setSimpleName(package_.getSimpleName());
 		packageCopy.setLabel(package_.getLabel());
 		packageCopy.setDescription(package_.getDescription());
@@ -82,15 +81,16 @@ public class Package extends StaticEntity
 	 *
 	 * @return package name
 	 */
+	// TODO rename to getName
 	public String getSimpleName()
 	{
 		return getString(PackageMetadata.SIMPLE_NAME);
 	}
 
+	// TODO rename to setName
 	public Package setSimpleName(String simpleName)
 	{
 		set(PackageMetadata.SIMPLE_NAME, simpleName);
-		updateFullName();
 		return this;
 	}
 
@@ -107,7 +107,6 @@ public class Package extends StaticEntity
 	public Package setParent(Package parentPackage)
 	{
 		set(PackageMetadata.PARENT, parentPackage);
-		updateFullName();
 		return this;
 	}
 
@@ -126,15 +125,10 @@ public class Package extends StaticEntity
 	 *
 	 * @return fully qualified package name
 	 */
+	// TODO rename to getFullyQualifiedName
 	public String getName()
 	{
 		return getParent() == null ? getSimpleName() : getParent().getName() + PACKAGE_SEPARATOR + getSimpleName();
-	}
-
-	public Package setName(String fullName)
-	{
-		set(PackageMetadata.FULL_NAME, fullName);
-		return this;
 	}
 
 	/**
@@ -236,25 +230,6 @@ public class Package extends StaticEntity
 			package_ = package_.getParent();
 		}
 		return package_;
-	}
-
-	private void updateFullName()
-	{
-		String simpleName = getSimpleName();
-		if (simpleName != null)
-		{
-			String fullName;
-			Package parentPackage = getParent();
-			if (parentPackage != null)
-			{
-				fullName = parentPackage.getName() + PACKAGE_SEPARATOR + simpleName;
-			}
-			else
-			{
-				fullName = simpleName;
-			}
-			set(PackageMetadata.FULL_NAME, fullName);
-		}
 	}
 
 	@Override

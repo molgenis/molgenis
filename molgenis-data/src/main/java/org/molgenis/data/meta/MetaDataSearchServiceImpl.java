@@ -3,11 +3,10 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +47,10 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		else
 		{
 			// Search in packages
-			Query<Entity> q = new QueryImpl<>().search(searchTerm);
+			Query<Package> packageQuery = new QueryImpl<Package>().search(searchTerm);
 			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetadata.GROUP_MEMBER, q))
-			dataService.findAll(PACKAGE, q).forEach(packageEntity ->
+			dataService.findAll(PACKAGE, packageQuery, Package.class).forEach(p ->
 			{
-				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetadata.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
 				{
 					String matchDesc = "Matched: package '" + p.getName() + "'";
@@ -61,15 +59,15 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			});
 
 			// Search in entities
-			dataService.findAll(ENTITY_TYPE_META_DATA, q).forEach(EntityType ->
+			Query<EntityType> entityTypeQuery = new QueryImpl<EntityType>().search(searchTerm);
+			dataService.findAll(ENTITY_TYPE_META_DATA, entityTypeQuery, EntityType.class).forEach(EntityType ->
 			{
 				Package p = getRootPackage(EntityType);
 				if (p != null)
 				{
-					String matchDesc =
-							"Matched: entity '" + EntityType.getString(EntityTypeMetadata.SIMPLE_NAME) + "'";
+					String matchDesc = "Matched: entity '" + EntityType.getString(EntityTypeMetadata.SIMPLE_NAME) + "'";
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
-					if ((p != null) && !results.contains(item)) results.add(item);
+					if (!results.contains(item)) results.add(item);
 				}
 			});
 
@@ -93,23 +91,13 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	// Get the root package of an entity
-	private Package getRootPackage(Entity EntityType)
+	private Package getRootPackage(EntityType entityType)
 	{
-		Entity packageEntity = EntityType.getEntity(EntityTypeMetadata.PACKAGE);
-		if (packageEntity != null)
+		Package package_ = entityType.getPackage();
+		if (package_ != null)
 		{
-			String packageName = packageEntity.getString(PackageMetadata.FULL_NAME);
-			if (packageName != null)
-			{
-				Package p = metaDataService.getPackage(packageName);
-				if (p != null)
-				{
-					return p.getRootPackage();
-				}
-			}
+			return package_.getRootPackage();
 		}
-
 		return null;
 	}
-
 }

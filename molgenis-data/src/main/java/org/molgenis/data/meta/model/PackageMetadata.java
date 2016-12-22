@@ -11,7 +11,6 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -22,7 +21,7 @@ public class PackageMetadata extends SystemEntityType
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
 	public static final String ID = "id";
-	public static final String FULL_NAME = "fullName";
+	// TODO rename to NAME
 	public static final String SIMPLE_NAME = "name";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
@@ -46,7 +45,6 @@ public class PackageMetadata extends SystemEntityType
 		setDescription("Grouping of related entities");
 		setId(PACKAGE);
 		addAttribute(ID, ROLE_ID).setAuto(true);
-		addAttribute(FULL_NAME, ROLE_LABEL).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");

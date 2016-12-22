@@ -898,7 +898,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	public void testGetOutputMetaData()
 	{
 		EntityType sourceEMD = entityTypeFactory.create().setSimpleName("source");
-		sourceEMD.setPackage(packageFactory.create("package").setName("package"));
+		sourceEMD.setPackage(packageFactory.create("package").setSimpleName("package"));
 		sourceEMD.setBackend("TestBackend");
 
 		EntityType outputEMD = snpEffRunner.getTargetEntityType(sourceEMD);
