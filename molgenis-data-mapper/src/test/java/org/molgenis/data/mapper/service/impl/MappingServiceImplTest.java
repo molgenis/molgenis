@@ -3,8 +3,6 @@ package org.molgenis.data.mapper.service.impl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
@@ -21,7 +19,6 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -38,7 +35,6 @@ import org.testng.annotations.Test;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -54,7 +50,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
-@ContextConfiguration(classes = { MappingServiceImplTest.Config.class })
+@ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class })
 public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 {
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
@@ -108,7 +104,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private EntityType geneMetaData;
 
 	private Package package_;
-	private final UuidGenerator uuidGenerator = new UuidGenerator();
 
 	@BeforeClass
 	public void beforeClass()
@@ -120,7 +115,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void beforeMethod()
 	{
 		reset(dataService);
-		reset(idGenerator);
 		reset(mappingProjectRepo);
 		reset(permissionSystemService);
 		reset(hopRepo);
@@ -186,20 +180,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(hopRepo.query()).thenReturn(hopQ);
 		when(hopQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(hopQ);
 		when(hopQ.eq("source", SOURCE_EXON_ENTITY)).thenReturn(hopQ);
-		when(hopQ.findAll()).thenAnswer(new Answer<Stream>()
-		{
-			@Override
-			public Stream answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+		when(hopQ.findAll()).thenAnswer(invocation -> Stream.empty());
 
 		when(dataService.getEntityType(SOURCE_GENE_ENTITY)).thenReturn(geneMetaData);
 		when(dataService.getRepository(SOURCE_GENE_ENTITY)).thenReturn(geneRepo);
 		when(dataService.getEntityType(SOURCE_EXON_ENTITY)).thenReturn(exonMetaData);
 		when(dataService.getRepository(SOURCE_EXON_ENTITY)).thenReturn(exonRepo);
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 	}
 
 	@Test
@@ -284,8 +270,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = IllegalStateException.class)
 	public void testAddExistingTarget()
 	{
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
-
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, TARGET_HOP_ENTITY);
 		mappingProject.addTarget(hopMetaData);
 	}
@@ -297,7 +281,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void testApplyMappingsAdd()
 	{
 		String entityName = "addEntity";
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 		Repository<Entity> addEntityRepo = mock(Repository.class);
 		when(addEntityRepo.getName()).thenReturn(entityName);
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
@@ -323,23 +306,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		Query<Entity> addEntityQ = mock(Query.class);
 		when(addEntityRepo.query()).thenReturn(addEntityQ);
 		when(addEntityQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(addEntityQ);
-		when(addEntityQ.findAll()).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+		when(addEntityQ.findAll()).thenAnswer(invocation -> Stream.empty());
 
-		when(geneRepo.iterator()).thenAnswer(new Answer<Iterator<Entity>>()
-		{
-			@Override
-			public Iterator<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return sourceGeneEntities.iterator();
-			}
-		});
+		when(geneRepo.iterator()).thenAnswer(invocation -> sourceGeneEntities.iterator());
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
@@ -365,7 +334,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String entityName = "updateEntity";
 
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 		Repository<Entity> updateEntityRepo = mock(Repository.class);
 		when(updateEntityRepo.getName()).thenReturn(entityName);
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
@@ -393,23 +361,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		Query<Entity> addEntityQ = mock(Query.class);
 		when(updateEntityRepo.query()).thenReturn(addEntityQ);
 		when(addEntityQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(addEntityQ);
-		when(addEntityQ.findAll()).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return expectedEntities.stream();
-			}
-		});
+		when(addEntityQ.findAll()).thenAnswer(invocation -> expectedEntities.stream());
 
-		when(geneRepo.iterator()).thenAnswer(new Answer<Iterator<Entity>>()
-		{
-			@Override
-			public Iterator<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return sourceGeneEntities.iterator();
-			}
-		});
+		when(geneRepo.iterator()).thenAnswer(invocation -> sourceGeneEntities.iterator());
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
@@ -571,11 +525,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStringId()
 	{
-		reset(idGenerator);
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
-
 		mappingService.generateId(STRING, 1L);
-		verify(idGenerator).generateId();
 	}
 
 	private MappingTarget getManualMappingTarget(String identifier, Collection<EntityMapping> entityMappings)
@@ -589,7 +539,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.data.index.meta" })
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.data.index.meta",
+			"org.molgenis.data.populate" })
 	static class Config
 	{
 		@Bean
@@ -602,12 +553,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		public AlgorithmService algorithmService()
 		{
 			return mock(AlgorithmService.class);
-		}
-
-		@Bean
-		public IdGenerator idGenerator()
-		{
-			return mock(IdGenerator.class);
 		}
 
 		@Bean
@@ -638,13 +583,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		public AttributeFactory attributeFactory()
 		{
 			return new AttributeFactory(mock(EntityPopulator.class));
-		}
-
-		@Bean
-		public MappingService mappingService()
-		{
-			return new MappingServiceImpl(dataService(), algorithmService(), idGenerator(), mappingProjectRepository(),
-					permissionSystemService(), attributeFactory());
 		}
 	}
 }
