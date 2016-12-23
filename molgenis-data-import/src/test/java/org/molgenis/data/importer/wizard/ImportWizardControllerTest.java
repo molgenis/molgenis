@@ -61,7 +61,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -604,10 +603,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public Supplier<MailSender> mailSender()
+		public MailSender mailSender()
 		{
-			MailSender mailSender = mock(MailSender.class);
-			return () -> mailSender;
+			return mock(MailSender.class);
 		}
 
 		@Bean
