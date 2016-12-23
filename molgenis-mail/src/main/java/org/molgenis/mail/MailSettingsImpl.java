@@ -2,6 +2,7 @@ package org.molgenis.mail;
 
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
@@ -24,6 +25,26 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	@Component
 	public static class Meta extends DefaultSettingsEntityType
 	{
+		/**
+		 * For conversion: Pick up defaults from molgenis-server.properties file where these settings used to be defined.
+		 */
+		@Value("${mail.host:smtp.gmail.com}")
+		private String mailHost;
+		@Value("${mail.port:587}")
+		private String mailPort;
+		@Value("${mail.protocol:smtp}")
+		private String mailProtocol;
+		@Value("${mail.username}")
+		private String mailUsername;
+		@Value("${mail.password}")
+		private String mailPassword;
+		@Value("${mail.java.auth:true}")
+		private String mailJavaAuth;
+		@Value("${mail.java.starttls.enable:true}")
+		private String mailJavaStartTlsEnable;
+		@Value("${mail.java.quitwait:false}")
+		private String mailJavaQuitWait;
+
 		private static final String HOST = "host";
 		private static final String PORT = "port";
 		private static final String PROTOCOL = "protocol";
@@ -44,16 +65,16 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 			setLabel("Mail settings");
 			setDescription(
 					"Configuration properties for email support. Will be used to send email from Molgenis. See also the MailSenderProp entity.");
-			addAttribute(HOST).setDefaultValue("smtp.gmail.com").setNillable(false).setDescription("SMTP server host.");
-			addAttribute(PORT).setDataType(INT).setDefaultValue("587").setNillable(false)
+			addAttribute(HOST).setDefaultValue(mailHost).setNillable(false).setDescription("SMTP server host.");
+			addAttribute(PORT).setDataType(INT).setDefaultValue(mailPort).setNillable(false)
 					.setDescription("SMTP server port.");
-			addAttribute(PROTOCOL).setDefaultValue("smtp").setNillable(false)
+			addAttribute(PROTOCOL).setDefaultValue(mailProtocol).setNillable(false)
 					.setDescription("Protocol used by the SMTP server.");
-			addAttribute(USERNAME).setDescription("Login user of the SMTP server.");
-			addAttribute(PASSWORD).setDescription("Login password of the SMTP server.");
+			addAttribute(USERNAME).setDefaultValue(mailUsername).setDescription("Login user of the SMTP server.");
+			addAttribute(PASSWORD).setDefaultValue(mailPassword).setDescription("Login password of the SMTP server.");
 			addAttribute(DEFAULT_ENCODING).setDefaultValue("UTF-8").setNillable(false)
 					.setDescription("Default MimeMessage encoding.");
-			addAttribute(TEST_CONNECTION).setDataType(BOOL).setDefaultValue("true").setNillable(false)
+			addAttribute(TEST_CONNECTION).setDataType(BOOL).setDefaultValue("true").setNillable(true)
 					.setDescription("Test mail connection on startup.");
 		}
 	}
