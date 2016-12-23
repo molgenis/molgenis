@@ -7,6 +7,7 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserException;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -31,6 +31,8 @@ import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.auth.UserMetaData.*;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 
 @Service
 public class AccountServiceImpl implements AccountService
@@ -42,17 +44,18 @@ public class AccountServiceImpl implements AccountService
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final GroupMemberFactory groupMemberFactory;
+	private final IdGenerator idGenerator;
 
 	@Autowired
-	public AccountServiceImpl(DataService dataService, JavaMailSender mailSender,
-			UserService userService, AppSettings appSettings,
-			GroupMemberFactory groupMemberFactory)
+	public AccountServiceImpl(DataService dataService, JavaMailSender mailSender, UserService userService,
+			AppSettings appSettings, GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
 		this.groupMemberFactory = requireNonNull(groupMemberFactory);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class AccountServiceImpl implements AccountService
 		}
 
 		// collect activation info
-		String activationCode = UUID.randomUUID().toString();
+		String activationCode = idGenerator.generateId(SECURE_RANDOM);
 		List<String> activationEmailAddresses;
 		if (appSettings.getSignUpModeration())
 		{
@@ -85,8 +88,8 @@ public class AccountServiceImpl implements AccountService
 		else
 		{
 			String activationEmailAddress = user.getEmail();
-			if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new MolgenisDataException(
-					"User '" + user.getUsername() + "' is missing required email address");
+			if (activationEmailAddress == null || activationEmailAddress.isEmpty())
+				throw new MolgenisDataException("User '" + user.getUsername() + "' is missing required email address");
 			activationEmailAddresses = asList(activationEmailAddress);
 		}
 
@@ -141,8 +144,8 @@ public class AccountServiceImpl implements AccountService
 	@RunAsSystem
 	public void activateUser(String activationCode)
 	{
-		User user = dataService.query(USER, User.class).eq(ACTIVE, false).and()
-				.eq(ACTIVATIONCODE, activationCode).findOne();
+		User user = dataService.query(USER, User.class).eq(ACTIVE, false).and().eq(ACTIVATIONCODE, activationCode)
+				.findOne();
 
 		if (user != null)
 		{
@@ -187,7 +190,7 @@ public class AccountServiceImpl implements AccountService
 
 		if (user != null)
 		{
-			String newPassword = UUID.randomUUID().toString().substring(0, 8);
+			String newPassword = idGenerator.generateId(SHORT_SECURE_RANDOM);
 			user.setPassword(newPassword);
 			user.setChangePassword(true);
 			dataService.update(USER, user);
