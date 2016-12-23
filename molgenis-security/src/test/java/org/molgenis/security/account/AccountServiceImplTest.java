@@ -8,6 +8,7 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.user.MolgenisUserException;
@@ -31,7 +32,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.auth.UserMetaData.*;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration
@@ -53,7 +56,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	private AppSettings appSettings;
 
 	@Autowired
-	private SecureIdGenerator secureIdGenerator;
+	private IdGenerator idGenerator;
 
 	@BeforeClass
 	public void beforeClass()
@@ -65,7 +68,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void setUp()
 	{
-		reset(dataService, mailSender);
+		reset(dataService, idGenerator, mailSender);
 		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		Group allUsersGroup = mock(Group.class);
@@ -161,20 +164,20 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resetPassword()
 	{
-		when(secureIdGenerator.generatePassword()).thenReturn("3541db68");
+		User user = mock(User.class);
+		when(user.getPassword()).thenReturn("password");
+		when(idGenerator.generateId(SHORT_SECURE_RANDOM)).thenReturn("3541db68");
 
 		Query<User> q = mock(Query.class);
 		when(q.eq(EMAIL, "user@molgenis.org")).thenReturn(q);
 		when(q.findOne()).thenReturn(user);
 		when(dataService.query(USER, User.class)).thenReturn(q);
 
-		when(user.getPassword()).thenReturn("3541db68");
-
 		accountService.resetPassword("user@molgenis.org");
 
-		ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
-		verify(dataService).update(eq(USER), argument.capture());
-		assertEquals(argument.getValue().getPassword(), "3541db68");
+		verify(dataService).update(USER, user);
+		verify(user).setPassword("newPassword");
+		verify(javaMailSender).send(any(SimpleMailMessage.class));
 
 		SimpleMailMessage expected = new SimpleMailMessage();
 		expected.setTo("jan.jansen@activation.nl");
@@ -215,9 +218,8 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 
 		accountService.changePassword("test", "newpass");
 
-		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-		verify(dataService).update(eq(USER), captor.capture());
-		verify(captor.getValue()).setPassword("newpass");
+		verify(dataService).update(USER, user);
+		verify(user).setPassword("newpass");
 	}
 
 	@Configuration
@@ -227,7 +229,13 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		public AccountService accountService()
 		{
 			return new AccountServiceImpl(dataService(), mailSender(), molgenisUserService(), appSettings(),
-					secureIdGenerator(), molgenisGroupMemberFactory());
+					molgenisGroupMemberFactory(), idGenerator());
+		}
+
+		@Bean
+		public IdGenerator idGenerator()
+		{
+			return mock(IdGenerator.class);
 		}
 
 		@Bean
@@ -255,11 +263,6 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public SecureIdGenerator secureIdGenerator()
-		{
-			return mock(SecureIdGenerator.class);
-		}
-
 		public GroupMemberFactory molgenisGroupMemberFactory()
 		{
 			GroupMemberFactory groupMemberFactory = mock(GroupMemberFactory.class);

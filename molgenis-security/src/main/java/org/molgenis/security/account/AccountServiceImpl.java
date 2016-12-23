@@ -7,6 +7,7 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -31,6 +32,8 @@ import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.auth.UserMetaData.*;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 
 @Service
 public class AccountServiceImpl implements AccountService
@@ -41,19 +44,19 @@ public class AccountServiceImpl implements AccountService
 	private final MailSender mailSender;
 	private final UserService userService;
 	private final AppSettings appSettings;
-	private final SecureIdGenerator secureIdGenerator;
 	private final GroupMemberFactory groupMemberFactory;
+	private final IdGenerator idGenerator;
 
 	@Autowired
 	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
-			AppSettings appSettings, SecureIdGenerator secureIdGenerator, GroupMemberFactory groupMemberFactory)
+			AppSettings appSettings, GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
-		this.secureIdGenerator = requireNonNull(secureIdGenerator);
 		this.groupMemberFactory = requireNonNull(groupMemberFactory);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	@Override
@@ -75,7 +78,7 @@ public class AccountServiceImpl implements AccountService
 		}
 
 		// collect activation info
-		String activationCode = secureIdGenerator.generateActivationCode();
+		String activationCode = idGenerator.generateId(SECURE_RANDOM);
 		List<String> activationEmailAddresses;
 		if (appSettings.getSignUpModeration())
 		{
@@ -188,7 +191,7 @@ public class AccountServiceImpl implements AccountService
 
 		if (user != null)
 		{
-			String newPassword = secureIdGenerator.generatePassword();
+			String newPassword = idGenerator.generateId(SHORT_SECURE_RANDOM);
 			user.setPassword(newPassword);
 			user.setChangePassword(true);
 			dataService.update(USER, user);

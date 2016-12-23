@@ -10,6 +10,7 @@ public interface IdGenerator
 	 * <li>{@link #SEQUENTIAL_UUID}</li>
 	 * <li>{@link #SECURE_RANDOM}</li>
 	 * <li>{@link #SHORT_RANDOM}</li>
+	 * <li>{@link #SHORT_SECURE_RANDOM}</li>
 	 */
 	enum Strategy
 	{
@@ -24,7 +25,10 @@ public interface IdGenerator
 	SECURE_RANDOM, /**
 	 * Short IDs. 8 characters long, base32 encoded
 	 */
-	SHORT_RANDOM
+	SHORT_RANDOM, /**
+	 * Cryptographically safe random IDs, usable as a password. 8 characters long, base32 encoded
+	 */
+	SHORT_SECURE_RANDOM
 	}
 
 	/**
