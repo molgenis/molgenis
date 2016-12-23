@@ -10,7 +10,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.auth.UserMetaData.*;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration
 public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
@@ -142,7 +140,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void createUser() throws URISyntaxException, UsernameAlreadyExistsException, EmailAlreadyExistsException
 	{
-		when(secureIdGenerator.generateActivationCode()).thenReturn("3541db68-435b-416b-8c2c-cf2edf6ba435");
+		when(idGenerator.generateId(SECURE_RANDOM)).thenReturn("3541db68-435b-416b-8c2c-cf2edf6ba435");
 
 		accountService.createUser(user, "http://molgenis.org/activate");
 
@@ -164,9 +162,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resetPassword()
 	{
-		User user = mock(User.class);
-		when(user.getPassword()).thenReturn("password");
-		when(idGenerator.generateId(SHORT_SECURE_RANDOM)).thenReturn("3541db68");
+		when(idGenerator.generateId(SHORT_SECURE_RANDOM)).thenReturn("newPassword");
 
 		Query<User> q = mock(Query.class);
 		when(q.eq(EMAIL, "user@molgenis.org")).thenReturn(q);
@@ -177,13 +173,13 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 
 		verify(dataService).update(USER, user);
 		verify(user).setPassword("newPassword");
-		verify(javaMailSender).send(any(SimpleMailMessage.class));
+		when(user.getPassword()).thenReturn("newPassword");
 
 		SimpleMailMessage expected = new SimpleMailMessage();
 		expected.setTo("jan.jansen@activation.nl");
 		expected.setSubject("Your new password request");
 		expected.setText("Somebody, probably you, requested a new password for Molgenis title.\n"
-				+ "The new password is: 3541db68\n"
+				+ "The new password is: newPassword\n"
 				+ "Note: we strongly recommend you reset your password after log-in!");
 		verify(mailSender).send(expected);
 	}

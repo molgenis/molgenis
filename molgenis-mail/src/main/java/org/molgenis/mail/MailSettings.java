@@ -15,4 +15,6 @@ interface MailSettings
 	String getPassword();
 
 	Charset getDefaultEncoding();
+
+	boolean isTestConnection();
 }

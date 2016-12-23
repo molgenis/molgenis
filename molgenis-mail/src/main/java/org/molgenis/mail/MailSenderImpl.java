@@ -11,6 +11,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -35,6 +36,24 @@ public class MailSenderImpl implements MailSender
 		this.mailSettings = requireNonNull(mailSettings);
 	}
 
+	//	@PostConstruct
+	public void validateConnection()
+	{
+		if (mailSettings.isTestConnection())
+		{
+			try
+			{
+				JavaMailSenderImpl sender = createMailSender();
+				sender.testConnection();
+
+			}
+			catch (MessagingException ex)
+			{
+				throw new IllegalStateException(String.format("Unable to ping to %s", this.mailSettings.getHost()), ex);
+			}
+		}
+	}
+
 	@Override
 	public void send(SimpleMailMessage simpleMessage) throws MailException
 	{
@@ -51,7 +70,7 @@ public class MailSenderImpl implements MailSender
 		LOG.debug("Sent messages.");
 	}
 
-	private MailSender createMailSender()
+	private JavaMailSenderImpl createMailSender()
 	{
 		LOG.trace("createMailSender");
 		if (mailSettings.getUsername() == null || mailSettings.getPassword() == null)

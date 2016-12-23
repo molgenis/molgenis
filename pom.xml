@@ -710,6 +710,6 @@
         <module>molgenis-data-cache</module>
         <module>molgenis-data-platform</module>
         <module>molgenis-annotators-cmd</module>
-		<module>molgenis-mail</module>
+        <module>molgenis-mail</module>
     </modules>
 </project>

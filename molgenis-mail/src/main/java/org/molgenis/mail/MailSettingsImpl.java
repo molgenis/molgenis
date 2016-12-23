@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
 
+import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.INT;
 
 @Component
@@ -29,6 +30,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		private static final String USERNAME = "username";
 		private static final String PASSWORD = "password";
 		private static final String DEFAULT_ENCODING = "defaultEncoding";
+		private static final String TEST_CONNECTION = "testConnection";
 
 		public Meta()
 		{
@@ -51,6 +53,8 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 			addAttribute(PASSWORD).setDescription("Login password of the SMTP server.");
 			addAttribute(DEFAULT_ENCODING).setDefaultValue("UTF-8").setNillable(false)
 					.setDescription("Default MimeMessage encoding.");
+			addAttribute(TEST_CONNECTION).setDataType(BOOL).setDefaultValue("true").setNillable(false)
+					.setDescription("Test mail connection on startup.");
 		}
 	}
 
@@ -88,5 +92,11 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	public Charset getDefaultEncoding()
 	{
 		return Charset.forName(getString(Meta.DEFAULT_ENCODING));
+	}
+
+	@Override
+	public boolean isTestConnection()
+	{
+		return getBoolean(Meta.TEST_CONNECTION);
 	}
 }
