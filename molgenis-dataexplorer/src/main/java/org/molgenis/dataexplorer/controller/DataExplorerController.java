@@ -104,7 +104,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @param model              Spring MVC model
 	 * @throws Exception
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = GET)
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
 			throws Exception
 	{

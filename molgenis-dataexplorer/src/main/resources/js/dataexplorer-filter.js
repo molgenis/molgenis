@@ -76,7 +76,7 @@
             var attributeLabel = molgenis.getAttributeLabel(filter.attribute);
 
             items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-                + attributeLabel + ': ' + self.createFilterQueyUserReadable(filter)
+                + attributeLabel + ': ' + self.createFilterQueryUserReadable(filter)
                 + '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
                 + attributeLabel + ' filter" ><span class="glyphicon glyphicon-remove"></span></a></p>');
         });
@@ -87,7 +87,7 @@
     /**
      * Create the user simple representation of the query
      */
-    self.createFilterQueyUserReadable = function (filter) {
+    self.createFilterQueryUserReadable = function (filter) {
         if (filter.isType('complex')) {
             var complexFilterElements = filter.getComplexFilterElements();
             var addBracket = true;
@@ -125,7 +125,6 @@
                     addBracket = false;
                 }
             }
-
             if (addBracket) {
                 return '(' + items.join('') + ')';
             } else {
@@ -553,7 +552,7 @@
     }
 
     /**
-     * JavaScript filter representaion as an interface for filters
+     * JavaScript filter representation as an interface for filters
      */
     self.Filter = function () {
         this.operators = {'OR': 'OR', 'AND': 'AND'};
