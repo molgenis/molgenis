@@ -425,7 +425,6 @@ $.when($,
                 }
             }
 
-            // FIXME remove if clause as part of http://www.molgenis.org/ticket/3110
             if (state.query) {
                 delete cleanState.query;
                 for (let i = 0; i < state.query.q.length; ++i) {
@@ -517,8 +516,9 @@ $.when($,
             });
 
             $(document).on('updateAttributeFilters', function (e, data) {
-                // TODO create an RSQL format filter and add to state
+                let rules = []
                 $.each(data.filters, function () {
+                    rules.push(this.createQueryRule())
                     if (this.isEmpty()) {
                         delete attributeFilters[this.attribute.href];
                     } else {
@@ -526,12 +526,18 @@ $.when($,
                     }
                 });
 
+                // If there is an existing q, add the additional filter with an AND operator (',')
+                if (state.q !== undefined) {
+                    state.q = state.q + ',' + molgenis.createRsqlQuery(rules)
+                } else {
+                    state.q = molgenis.createRsqlQuery(rules)
+                }
+                pushState()
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
                 $(document).trigger('changeQuery', createEntityQuery());
             });
 
             $(document).on('removeAttributeFilter', function (e, data) {
-                // TODO create an RSQL format filter and add to state
                 delete attributeFilters[data.attributeUri];
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
                 $(document).trigger('changeQuery', createEntityQuery());
@@ -671,8 +677,7 @@ $.when($,
 
                 // q is the filters applied to various attributes
                 if (state.q) {
-                    // TODO option1: translate the RSQL format filter rules to existing simple or complex javascript objects
-                    // TODO option2: create new react filter component
+                    // TODO translate RSQL to javascript nested query
                 }
 
                 if (state.entity) {
