@@ -26,7 +26,7 @@ $.when($,
         let selectedAttributesTree = {};
         let searchQuery = null;
         let modules = [];
-        let q = null;
+        let q = undefined;
 
         let posAttribute;
         let chromosomeAttribute;
@@ -46,7 +46,7 @@ $.when($,
             attrs: null,
             mod: null,
             hideselect: 'false',
-            q: null
+            q: undefined
         };
 
         let state;
@@ -525,14 +525,8 @@ $.when($,
                         attributeFilters[this.attribute.href] = this;
                     }
                 });
+                addFilterToRsqlState(rules)
 
-                // If there is an existing q, add the additional filter with an AND operator (',')
-                if (state.q !== undefined) {
-                    state.q = state.q + ',' + molgenis.createRsqlQuery(rules)
-                } else {
-                    state.q = molgenis.createRsqlQuery(rules)
-                }
-                pushState()
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
                 $(document).trigger('changeQuery', createEntityQuery());
             });
@@ -540,6 +534,10 @@ $.when($,
             $(document).on('removeAttributeFilter', function (e, data) {
                 delete attributeFilters[data.attributeUri];
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
+
+                let attrName = data.attributeUri.split('/')[5]
+                removeFilterFromRsqlState(attrName)
+
                 $(document).trigger('changeQuery', createEntityQuery());
             });
 
@@ -648,6 +646,51 @@ $.when($,
                     }
                 });
             });
+
+            /**
+             * If there is an existing q, add the additional filter to the state
+             * with an AND operator (';')
+             *
+             * @param rules
+             */
+            function addFilterToRsqlState(rules) {
+                if (state.q !== undefined) {
+                    state.q = state.q + ';' + molgenis.createRsqlQuery(rules)
+                } else {
+                    state.q = molgenis.createRsqlQuery(rules)
+                }
+                pushState()
+            }
+
+            /**
+             * Based on the name of attribute, remove the filter for
+             * that attribute from the RSQL
+             *
+             * @param attrName
+             */
+            function removeFilterFromRsqlState(attrName) {
+                let rsqlFilterList = state.q.split(";")
+                let indicesOfFiltersToBeRemoved = []
+
+                // For each filter in the RSQL string
+                $.each(rsqlFilterList, function (index, rsqlFilter) {
+                    // If the attribute name equals the given attribute name
+                    let rsqlAttrName = rsqlFilter.split('=')[0].replace('(', '')
+
+                    // Add the index of that filter to a list of indicies
+                    if (rsqlAttrName === attrName) indicesOfFiltersToBeRemoved.push(index)
+                })
+
+                // Remove the filters that were found
+                while (indicesOfFiltersToBeRemoved.length) {
+                    rsqlFilterList.splice(indicesOfFiltersToBeRemoved.pop(), 1);
+                }
+
+                // Join the remaining filters back again
+                state.q = rsqlFilterList.join(";")
+
+                pushState()
+            }
 
             function init() {
                 // set entity in dropdown
