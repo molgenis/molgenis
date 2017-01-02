@@ -1,5 +1,6 @@
 package org.molgenis.util;
 
+import com.google.gson.Gson;
 import org.molgenis.data.Entity;
 import org.molgenis.gson.AutoValueTypeAdapterFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,5 +33,11 @@ public class GsonConfig
 		gsonFactoryBean.setSerializeNulls(false);
 		gsonFactoryBean.registerTypeAdapterFactory(new AutoValueTypeAdapterFactory());
 		return gsonFactoryBean;
+	}
+
+	@Bean
+	public Gson gson()
+	{
+		return new Gson();
 	}
 }

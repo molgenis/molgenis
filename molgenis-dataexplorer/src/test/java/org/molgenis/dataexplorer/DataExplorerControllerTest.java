@@ -1,11 +1,12 @@
 package org.molgenis.dataexplorer;
 
+import com.google.gson.Gson;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
@@ -34,27 +35,41 @@ import static org.testng.Assert.assertEquals;
 @ContextConfiguration(classes = { GsonConfig.class })
 public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 {
-	@InjectMocks
-	private DataExplorerController controller = new DataExplorerController();
+	@Mock
+	private DataExplorerSettings dataExplorerSettings;
 
 	@Mock
-	public AppSettings appSettings;
+	private GenomicDataSettings genomicDataSettings;
+
 	@Mock
-	DataExplorerSettings dataExplorerSettings;
+	private DataService dataService;
+
 	@Mock
-	GenomicDataSettings genomicDataSettings;
+	private FreeMarkerConfigurer freemarkerConfigurer;
+
 	@Mock
-	DataService dataService;
+	private MenuManagerService menuManager;
+
 	@Mock
-	FreeMarkerConfigurer freemarkerConfigurer;
+	private LanguageService languageService;
+
 	@Mock
-	MenuManagerService menuManager;
+	private MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+
 	@Mock
-	LanguageService languageService;
-	@Mock
-	MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+	private AttributeFactory attributeFactory;
+
+	@Autowired
+	private Gson gson;
+
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
+	@InjectMocks
+	private DataExplorerController controller = new DataExplorerController(dataExplorerSettings, genomicDataSettings,
+			dataService, molgenisPermissionService, freemarkerConfigurer, menuManager, gson, languageService,
+			attributeFactory);
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
