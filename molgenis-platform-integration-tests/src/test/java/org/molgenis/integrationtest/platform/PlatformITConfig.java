@@ -13,7 +13,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
-import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -72,13 +72,14 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
 		"org.molgenis.data.importer.emx", "org.molgenis.data.importer.config", "org.molgenis.data.excel" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, UuidGenerator.class, ExpressionValidator.class, PlatformConfig.class,
+		RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
-		org.molgenis.security.permission.PermissionSystemService.class, org.molgenis.data.importer.ImportServiceRegistrar.class })
+		org.molgenis.security.permission.PermissionSystemService.class,
+		org.molgenis.data.importer.ImportServiceRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final String INTEGRATION_TEST_DATABASE_NAME;
