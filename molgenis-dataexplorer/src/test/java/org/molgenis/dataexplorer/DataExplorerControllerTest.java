@@ -10,7 +10,6 @@ import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +46,6 @@ public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Mock
-	private MenuManagerService menuManager;
-
-	@Mock
 	private LanguageService languageService;
 
 	@Mock
@@ -75,7 +71,7 @@ public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 		when(molgenisPermissionService.hasPermissionOnEntity("no", WRITEMETA)).thenReturn(false);
 
 		controller = new DataExplorerController(dataExplorerSettings, genomicDataSettings, dataService,
-				molgenisPermissionService, freemarkerConfigurer, menuManager, gson, languageService, attributeFactory);
+				molgenisPermissionService, freemarkerConfigurer, gson, languageService, attributeFactory);
 
 		standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}

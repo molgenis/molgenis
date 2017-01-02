@@ -20,7 +20,6 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -68,15 +67,14 @@ public class DataExplorerController extends MolgenisPluginController
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
 	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
 	public static final String MOD_ANNOTATORS = "annotators";
-	public static final String MOD_ENTITIESREPORT = "entitiesreport";
-	public static final String MOD_DATA = "data";
+	private static final String MOD_ENTITIESREPORT = "entitiesreport";
+	private static final String MOD_DATA = "data";
 
 	private final DataExplorerSettings dataExplorerSettings;
 	private final GenomicDataSettings genomicDataSettings;
 	private final DataService dataService;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final FreeMarkerConfigurer freemarkerConfigurer;
-	private final MenuManagerService menuManager;
 	private final Gson gson;
 	private final LanguageService languageService;
 	private final AttributeFactory attrMetaFactory;
@@ -84,16 +82,16 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	public DataExplorerController(DataExplorerSettings dataExplorerSettings, GenomicDataSettings genomicDataSettings,
 			DataService dataService, MolgenisPermissionService molgenisPermissionService,
-			FreeMarkerConfigurer freemarkerConfigurer, MenuManagerService menuManager, Gson gson,
-			LanguageService languageService, AttributeFactory attrMetaFactory)
+			FreeMarkerConfigurer freemarkerConfigurer, Gson gson, LanguageService languageService,
+			AttributeFactory attrMetaFactory)
 	{
 		super(URI);
+
 		this.dataExplorerSettings = dataExplorerSettings;
 		this.genomicDataSettings = genomicDataSettings;
 		this.dataService = dataService;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.freemarkerConfigurer = freemarkerConfigurer;
-		this.menuManager = menuManager;
 		this.gson = gson;
 		this.languageService = languageService;
 		this.attrMetaFactory = attrMetaFactory;
@@ -356,7 +354,14 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		finally
 		{
-			csvFile.delete();
+			if (csvFile.delete())
+			{
+				System.out.println(csvFile.getName() + " is deleted!");
+			}
+			else
+			{
+				System.out.println("Delete operation failed.");
+			}
 		}
 
 		// store url and api key in session for subsequent galaxy export requests
