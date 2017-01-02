@@ -103,13 +103,12 @@ public class DataExplorerController extends MolgenisPluginController
 	 * Initializes the data explorer page
 	 *
 	 * @param selectedEntityName The selected entity
-	 * @param filterQuery        RSQL filter query
 	 * @param model              Spring MVC model
 	 * @throws Exception
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(value = "q", required = false) String filterQuery, Model model) throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
+			throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -141,12 +140,6 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
-
-		if (filterQuery != null)
-		{
-			System.out.println("filterQuery = " + filterQuery);
-			model.addAttribute("q", filterQuery);
-		}
 
 		return "view-dataexplorer";
 	}
