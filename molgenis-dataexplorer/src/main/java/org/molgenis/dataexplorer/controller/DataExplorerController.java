@@ -46,8 +46,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.Permission.*;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAuthenticated;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -169,11 +168,10 @@ public class DataExplorerController extends MolgenisPluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+				if (!molgenisPermissionService.hasPermissionOnEntity(entityName, WRITEMETA))
 				{
-					throw new MolgenisDataAccessException(
-							"No " + Permission.WRITEMETA + " permission on entity [" + entityName
-									+ "], this permission is necessary run the annotators.");
+					throw new MolgenisDataAccessException("No " + WRITEMETA + " permission on entity [" + entityName
+							+ "], this permission is necessary run the annotators.");
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
