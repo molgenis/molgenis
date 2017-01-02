@@ -26,6 +26,7 @@ $.when($,
         var selectedAttributesTree = {};
         var searchQuery = null;
         var modules = [];
+        let q = null;
 
         var posAttribute;
         var chromosomeAttribute;
@@ -44,6 +45,7 @@ $.when($,
             attrs: null,
             mod: null,
             hideselect: 'false'
+            q: null
         };
 
         var state;
@@ -468,6 +470,7 @@ $.when($,
                 attributeFilters = {};
                 selectedAttributes = [];
                 searchQuery = null;
+                q = null;
                 if ($('#data-table-container').length > 0) {
                     React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
                 }
@@ -652,6 +655,10 @@ $.when($,
 
                     // set filters in filter list
                     // FIXME implement as part of http://www.molgenis.org/ticket/3110
+                // q is the filters applied to various attributes
+                if (state.q) {
+                    // TODO option1: translate the RSQL format filter rules to existing simple or complex javascript objects
+                    // TODO option2: create new react filter component
                 }
 
                 if (state.entity) {
