@@ -68,7 +68,6 @@
 
         /**
          * Create filters JavaScript components from RSQL
-         * FIXME When a from or to filter is first, it is not added to the UI
          */
         self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
             let fromValue, toValue, value
@@ -91,13 +90,13 @@
 
                     // Creates groups for the three parts of a filter attribute, operator and filter value
                     // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
-                    const filterRegex = /(\w+)(=\w*=)(\w+)/g;
-                    let filterMatch;
+                    const filterRegex = /(\w+)(=\w*=)(\w+)/g
+                    let filterMatch
 
                     // Loop through a filter to match the attribute, operator and filter value
                     while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
                         if (filterMatch.index === filterRegex.lastIndex) {
-                            filterRegex.lastIndex++;
+                            filterRegex.lastIndex++
                         }
 
                         const attributeName = filterMatch[1]
@@ -108,7 +107,6 @@
                             // If a to or from value has been set, but the attribute has changed, create a filter
                             // For the previous attribute
                             if (fromValue !== undefined || toValue !== undefined) {
-                                console.log(fromValue, toValue)
                                 registerFilter(restApi, entityName, currentAttributeName, fromValue, toValue, value)
                             }
 
@@ -133,16 +131,16 @@
                                 break
                             default:
                                 throw 'This operator is currently not supported for bookmarkable filters [' + operator + ']';
-
                         }
 
+                        currentAttributeName = attributeName
                         if (fromValue === undefined && toValue === undefined && value !== undefined) {
                             registerFilter(restApi, entityName, attributeName, fromValue, toValue, value)
                         } else if (fromValue !== undefined && toValue !== undefined && value === undefined) {
                             registerFilter(restApi, entityName, attributeName, fromValue, toValue, value)
+                        } else if (rsqlMatch.length === 1) {
+                            registerFilter(restApi, entityName, attributeName, fromValue, toValue, value)
                         }
-
-                        currentAttributeName = attributeName
                     }
                 })
             }
