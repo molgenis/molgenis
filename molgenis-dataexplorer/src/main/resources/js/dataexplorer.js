@@ -684,25 +684,37 @@ $.when($,
              * @param attrName
              */
             function removeExistingFilterFromRsql(attrName) {
-                let rsqlFilterList = state.q.split(";")
-                let indicesOfFiltersToBeRemoved = []
+                const rsqlRegex = /[^;|\(.*\)]+/g
+                let rsqlMatch
 
-                // For each filter in the RSQL string
-                $.each(rsqlFilterList, function (index, rsqlFilter) {
-                    // If the attribute name equals the given attribute name
-                    let rsqlAttrName = rsqlFilter.split('=')[0].replace('(', '')
+                while ((rsqlMatch = rsqlRegex.exec(state.q)) !== null) {
+                    if (rsqlMatch.index === rsqlRegex.lastIndex) {
+                        rsqlRegex.lastIndex++
+                    }
 
-                    // Add the index of that filter to a list of indicies
-                    if (rsqlAttrName === attrName) indicesOfFiltersToBeRemoved.push(index)
-                })
+                    // empty the state
+                    state.q = ''
 
-                // Remove the filters that were found
-                while (indicesOfFiltersToBeRemoved.length) {
-                    rsqlFilterList.splice(indicesOfFiltersToBeRemoved.pop(), 1);
+                    rsqlMatch.forEach((outerMatch) => {
+                        const filterRegex = /(\w+)(=\w*=)(\w+)/g
+                        let filterMatch
+
+                        while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
+                            if (filterMatch.index === filterRegex.lastIndex) {
+                                filterRegex.lastIndex++
+                            }
+
+                            const rsqlAttribute = filterMatch[1]
+                            if (rsqlAttribute !== attrName) {
+                                if (state.q === '') {
+                                    state.q = outerMatch
+                                } else {
+                                    state.q = state.q + ';' + outerMatch
+                                }
+                            }
+                        }
+                    })
                 }
-
-                // Join the remaining filters back again
-                state.q = rsqlFilterList.join(";")
             }
 
             function init() {
