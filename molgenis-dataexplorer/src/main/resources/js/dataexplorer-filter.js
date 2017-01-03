@@ -148,13 +148,30 @@
 
         function registerFilter(restApi, entityName, attributeName, fromValue, toValue, value) {
             restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName).then(function (attribute) {
-                const attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
-                const complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
-                const complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
-                complexFilterElement.simpleFilter = attributeFilter;
-                complexFilterElement.operator = undefined;
-                complexFilter.addComplexFilterElement(complexFilterElement);
-                $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
+                getRefEntityLabelValuesAndCreateFilters(attribute.refEntity.href, attribute.refEntity.hrefCollection, restApi, value, attribute, fromValue, toValue)
+            })
+        }
+
+        function getRefEntityLabelValuesAndCreateFilters(href, hrefCollection, restApi, value, attribute, fromValue, toValue) {
+            restApi.getAsync(href).then(function (meta) {
+                const labelAttribute = meta.labelAttribute
+                restApi.getAsync(hrefCollection + '/' + value + '/' + labelAttribute).then(function (labelEntity) {
+
+                    // Create filters
+                    const attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
+                    const complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+                    const complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+
+                    attributeFilter.getLabels().push(labelEntity.label)
+
+                    // Add filter elements to complex filter
+                    complexFilterElement.simpleFilter = attributeFilter;
+                    complexFilterElement.operator = undefined;
+                    complexFilter.addComplexFilterElement(complexFilterElement);
+
+                    // Update attribute filters with created complexFilter
+                    $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
+                })
             })
         }
 
