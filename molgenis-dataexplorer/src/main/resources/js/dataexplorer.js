@@ -696,7 +696,7 @@ $.when($,
                     state.q = ''
 
                     rsqlMatch.forEach((outerMatch) => {
-                        const filterRegex = /(\w+)(=\w*=)(\w+)/g
+                        const filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
                         let filterMatch
 
                         while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {

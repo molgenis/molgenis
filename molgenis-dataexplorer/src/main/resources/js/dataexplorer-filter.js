@@ -90,7 +90,7 @@
 
                     // Creates groups for the three parts of a filter attribute, operator and filter value
                     // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
-                    const filterRegex = /(\w+)(=\w*=)(\w+)/g
+                    const filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
                     let filterMatch
 
                     // Loop through a filter to match the attribute, operator and filter value
