@@ -468,8 +468,7 @@ $.when($,
                 state = {
                     entity: entity,
                     attributes: [],
-                    mod: null,
-                    q: null
+                    mod: null
                 };
                 pushState();
 
@@ -478,7 +477,6 @@ $.when($,
                 attributeFilters = {};
                 selectedAttributes = [];
                 searchQuery = null;
-                q = null;
 
                 if ($('#data-table-container').length > 0) {
                     React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
@@ -654,10 +652,16 @@ $.when($,
              * @param rules
              */
             function addFilterToRsqlState(rules) {
+                const rsql = molgenis.createRsqlQuery(rules)
+
+                // TODO if there is already a filter for this attribute, overwrite that filter with the new one
+
                 if (state.q !== undefined) {
-                    state.q = state.q + ';' + molgenis.createRsqlQuery(rules)
+                    if (state.q.indexOf(rsql) === -1) {
+                        state.q = state.q + ';' + rsql
+                    }
                 } else {
-                    state.q = molgenis.createRsqlQuery(rules)
+                    state.q = rsql
                 }
                 pushState()
             }
@@ -706,7 +710,6 @@ $.when($,
                     $('#dataset-select-container').removeClass('hidden');
                 }
 
-                // query is the value in the google search box
                 if (state.query) {
                     // set query in searchbox
                     for (let i = 0; i < state.query.q.length; ++i) {
@@ -718,9 +721,9 @@ $.when($,
                     }
                 }
 
-                // q is the filters applied to various attributes
                 if (state.q) {
-                    // TODO translate RSQL to javascript nested query
+                    // Create filters based on RSQL
+                    var filters = molgenis.dataexplorer.filter.createFiltersFromRsql(state.q, restApi, state.entity);
                 }
 
                 if (state.entity) {

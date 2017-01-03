@@ -67,8 +67,33 @@
     };
 
     /**
+     * Create filters JavaScript components from RSQL
+     */
+    self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
+        // EXAMPLE: id==4;(count=ge=1;count=le=5)
+        const filters = rsql.split(';')
+        const first = filters[0]
+
+        const kv = first.split('=q=')
+        const attributeName = kv[0]
+        const filterValue = kv[1]
+
+        restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName).then(function(attribute) {
+            const fromValue = undefined
+            const toValue = undefined
+
+            const attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, filterValue);
+            const complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+            const complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+            complexFilterElement.simpleFilter = attributeFilter;
+            complexFilterElement.operator = undefined;
+            complexFilter.addComplexFilterElement(complexFilterElement);
+            $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
+        })
+    }
+
+    /**
      * Create the filter
-     *
      */
     self.createFilterQueryUserReadableList = function (attributeFilters) {
         var items = [];
@@ -812,7 +837,7 @@
     self.SimpleFilter.prototype = new self.Filter();
 
     /**
-     * JavaScript representation of een elementin a complex filter
+     * JavaScript representation of een element in a complex filter
      */
     self.ComplexFilterElement = function (attribute) {
         this.simpleFilter = null;
