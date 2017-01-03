@@ -656,7 +656,13 @@ $.when($,
              */
             function addFilterToRsqlState(rules) {
                 let rsql = molgenis.createRsqlQuery(rules)
-                const attrName = rsql.split('=')[0]
+                let attrName = rsql.split('=')[0]
+
+                // By changing a filter and adding an or statement, the rsql contains a '('
+                // at the start
+                while (attrName.charAt(0) === '(') {
+                    attrName = attrName.substr(1);
+                }
 
                 if (state.q !== undefined) {
                     removeExistingFilterFromRsql(attrName)
@@ -684,7 +690,7 @@ $.when($,
              * @param attrName
              */
             function removeExistingFilterFromRsql(attrName) {
-                const rsqlRegex = /[^;|\(.*\)]+/g
+                const rsqlRegex = /[^;,|\(.*\)]+/g
                 let rsqlMatch
 
                 while ((rsqlMatch = rsqlRegex.exec(state.q)) !== null) {
@@ -744,7 +750,7 @@ $.when($,
 
                 if (state.q) {
                     // Create filters based on RSQL
-                    var filters = molgenis.dataexplorer.filter.createFiltersFromRsql(state.q, restApi, state.entity);
+                    molgenis.dataexplorer.filter.createFiltersFromRsql(state.q, restApi, state.entity);
                 }
 
                 if (state.entity) {
