@@ -72,9 +72,10 @@
         self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
             let fromValue, toValue, value
 
-            // Creates groups for every filter e.g. id=q=1;age==20
-            // becomes g1 -> 'id=q=1' g2 -> 'age==20'
-            const rsqlRegex = /[^;|\(.*\)]+/g
+            // Creates groups for every filter e.g. id=q=1;(xstring=q=str1,xstring=q=str2);(count=ge=2;count=le=5);age==20
+            // Match 1 `id=q=1` Match 2 `xstring=q=str1` Match 3 `xstring=q=str2`
+            // Match 4 `count=ge=2` Match 5 `count=le=5` Match 6 `age==20`
+            const rsqlRegex = /[^;,|\(.*\)]+/g
             let rsqlMatch
 
             let currentAttributeName
@@ -87,7 +88,6 @@
                 }
 
                 rsqlMatch.forEach((outerMatch) => {
-
                     // Creates groups for the three parts of a filter attribute, operator and filter value
                     // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
                     const filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
