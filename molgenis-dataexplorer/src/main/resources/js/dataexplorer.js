@@ -646,23 +646,34 @@ $.when($,
             });
 
             /**
-             * If there is an existing q, add the additional filter to the state
-             * with an AND operator (';')
+             * - Create RSQL based on the query rules
+             * - Parse the attrName from the generated RSQL
+             * - If the state.q already contains a filter for the attribute, overwrite that filter
+             * - If the state.q is still undefined, add the RSQL to state.q
+             * - If the state.q does not contain the exact same RSQL, add it to state.q
              *
-             * @param rules
+             * @param rules Javascript query rules
              */
             function addFilterToRsqlState(rules) {
-                const rsql = molgenis.createRsqlQuery(rules)
-
-                // TODO if there is already a filter for this attribute, overwrite that filter with the new one
+                let rsql = molgenis.createRsqlQuery(rules)
+                const attrName = rsql.split('=')[0]
 
                 if (state.q !== undefined) {
-                    if (state.q.indexOf(rsql) === -1) {
+                    removeExistingFilterFromRsql(attrName)
+                    if (state.q === '') {
+                        state.q = rsql
+                    } else {
                         state.q = state.q + ';' + rsql
                     }
                 } else {
                     state.q = rsql
                 }
+
+                pushState()
+            }
+
+            function removeFilterFromRsqlState(attrName) {
+                removeExistingFilterFromRsql(attrName)
                 pushState()
             }
 
@@ -672,7 +683,7 @@ $.when($,
              *
              * @param attrName
              */
-            function removeFilterFromRsqlState(attrName) {
+            function removeExistingFilterFromRsql(attrName) {
                 let rsqlFilterList = state.q.split(";")
                 let indicesOfFiltersToBeRemoved = []
 
@@ -692,8 +703,6 @@ $.when($,
 
                 // Join the remaining filters back again
                 state.q = rsqlFilterList.join(";")
-
-                pushState()
             }
 
             function init() {
