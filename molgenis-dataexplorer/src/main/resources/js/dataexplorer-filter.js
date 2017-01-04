@@ -70,15 +70,11 @@
          * Create filters JavaScript components from RSQL
          */
         self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-            var fromValue, toValue, value
-
             // Creates groups for every filter e.g. id=q=1;(xstring=q=str1,xstring=q=str2);(count=ge=2;count=le=5);age==20
             // Match 1 `id=q=1` Match 2 `xstring=q=str1` Match 3 `xstring=q=str2`
             // Match 4 `count=ge=2` Match 5 `count=le=5` Match 6 `age==20`
-            var rsqlRegex = /[^;,|\(.*\)]+/g
+            var rsqlRegex = /[^()]+/g
             var rsqlMatch
-
-            var currentAttributeName
 
             // Loop through the RSQL to match all the different filters
             while ((rsqlMatch = rsqlRegex.exec(rsql)) !== null) {
@@ -87,100 +83,138 @@
                     rsqlRegex.lastIndex++
                 }
 
-                var outerMatch = rsqlMatch[0]
-                // Creates groups for the three parts of a filter attribute, operator and filter value
-                // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
-                var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
-                var filterMatch
+                var match = rsqlMatch[0]
+                if (match !== ';') {
 
-                // Loop through a filter to match the attribute, operator and filter value
-                while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
-                    if (filterMatch.index === filterRegex.lastIndex) {
-                        filterRegex.lastIndex++
-                    }
-
-                    var attributeName = filterMatch[1]
-                    var operator = filterMatch[2]
-                    var filterValue = filterMatch[3]
-
-                    if (attributeName !== currentAttributeName) {
-                        // If a to or from value has been set, but the attribute has changed, create a filter
-                        // For the previous attribute
-                        if (fromValue !== undefined || toValue !== undefined) {
-                            fetchAttribute(restApi, entityName, currentAttributeName, fromValue, toValue, value)
-                        }
-
-                        fromValue = undefined
-                        toValue = undefined
-                        value = undefined
-                    }
-
-                    switch (operator) {
-                        case '=ge=':
-                        case '=gt=' :
-                            fromValue = filterValue
-                            break
-                        case '=le=':
-                        case '=lt=':
-                            toValue = filterValue
-                            break
-                        case '=q=':
-                        case '==':
-                        case '=like=':
-                            value = filterValue
-                            break
-                        default:
-                            throw 'This operator is currently not supported for bookmarkable filters [' + operator + ']';
-                    }
-
-                    currentAttributeName = attributeName
-                    if (fromValue === undefined && toValue === undefined && value !== undefined) {
-                        fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
-                    } else if (fromValue !== undefined && toValue !== undefined && value === undefined) {
-                        fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
-                    } else if (rsqlMatch.length === 1) {
-                        fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
-                    }
+                    // Remove trailing and leading ;
+                    match = match.replace(/^;+|;+$/, '');
+                    createFilterForAttribute(match, restApi, entityName)
                 }
             }
         }
 
-        function fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value) {
+        /**
+         * Parse all filters for a single attribute e.g.:
+         * attributeRsql = (count=ge=1;count=le=5)
+         * attributeRsql = id=q=5
+         */
+        function createFilterForAttribute(attributeRsql, restApi, entityName) {
+            var rsqlParts = attributeRsql.split(';')
+            if (rsqlParts.length === 1) {
+                rsqlParts = rsqlParts[0].split(',')
+            }
+
+            var filterMatch, attributeName, operator, filterValue, values = [], filterElementMap = {}
+
+            // Creates groups for the three parts of a filter attribute, operator and filter value
+            // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
+            var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
+
+            $.each(rsqlParts, function (index) {
+                var rsqlPart = rsqlParts[index]
+
+                while ((filterMatch = filterRegex.exec(rsqlPart)) !== null) {
+                    if (filterMatch.index === filterRegex.lastIndex) {
+                        filterRegex.lastIndex++
+                    }
+
+                    attributeName = filterMatch[1]
+                    operator = filterMatch[2]
+                    filterValue = filterMatch[3]
+
+                    switch (operator) {
+                        case '=ge=':
+                        case '=gt=' :
+                            filterElementMap['fromValue'] = filterValue
+                            break
+                        case '=le=':
+                        case '=lt=':
+                            filterElementMap['toValue'] = filterValue
+                            break
+                        case '=q=':
+                        case '==':
+                        case '=like=':
+                            values.push(filterValue)
+                            break
+                        default:
+                            throw 'This operator is currently not supported for bookmarkable filters [' + operator + ']';
+                    }
+                }
+            })
+
+            filterElementMap['values'] = values
+            filterElementMap['attributeName'] = attributeName
+            fetchAttribute(restApi, entityName, filterElementMap)
+        }
+
+        /**
+         * Fetches the attribute
+         * Based on type, either fetches the value label first or registers the filter directly
+         */
+        function fetchAttribute(restApi, entityName, filterElementMap) {
+            var attributeName = filterElementMap.attributeName
             restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName).then(function (attribute) {
                 if (attribute.fieldType === 'MREF' || attribute.fieldType === 'XREF' ||
                     attribute.fieldType === 'FILE' || attribute.fieldType === 'CATEGORICAL_MREF' ||
                     attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'ONE_TO_MANY') {
 
-                    fetchLabels(attribute.refEntity.href, attribute.refEntity.hrefCollection, restApi, value, attribute, fromValue, toValue)
+                    fetchLabels(attribute.refEntity.href, attribute.refEntity.hrefCollection, restApi, attribute, filterElementMap)
                 } else {
-                    registerFilters(value, attribute, fromValue, toValue)
+                    registerFilters(attribute, undefined, filterElementMap)
                 }
             })
         }
 
-        function fetchLabels(href, hrefCollection, restApi, value, attribute, fromValue, toValue) {
+        /**
+         * Fetches label values for reference type filters
+         */
+        function fetchLabels(href, hrefCollection, restApi, attribute, filterElementMap) {
+            var value = filterElementMap.values[0]
             restApi.getAsync(href).then(function (meta) {
                 var labelAttribute = meta.labelAttribute
                 restApi.getAsync(hrefCollection + '/' + value + '/' + labelAttribute).then(function (labelEntity) {
-                    registerFilters(value, attribute, fromValue, toValue, labelEntity.label)
+                    registerFilters(attribute, labelEntity.label, filterElementMap)
                 })
             })
         }
 
-        function registerFilters(value, attribute, fromValue, toValue, label) {
-            // Create filters
-            var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
+        /**
+         * Registers the filter withing the JavaScript global scope
+         * Allows for the filter to be shown in the UI
+         */
+        function registerFilters(attribute, label, filterElementMap) {
+            if (filterElementMap.values.length === 0 && (filterElementMap.fromValue !== undefined || filterElementMap.toValue !== undefined)) {
+                // If values length === 0 and we have a to or from filter, create a numeric filter
+                createNumericFilter(attribute, filterElementMap.fromValue, filterElementMap.toValue)
+            } else {
+                var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+                var values = filterElementMap.values
+
+                $.each(values, function (index) {
+                    var value = values[index]
+                    var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, value);
+                    var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+                    complexFilterElement.simpleFilter = simpleFilter;
+                    complexFilter.addComplexFilterElement(complexFilterElement);
+                })
+
+                // Update attribute filters with created complexFilter
+                $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
+
+                // If we have values, create a SimpleFilter without values, and add them all later on
+                // if (label !== undefined) attributeFilter.getLabels().push(label)
+            }
+        }
+
+        function createNumericFilter(attribute, fromValue, toValue) {
+            var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue);
             var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
             var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
 
-            if (label !== undefined) attributeFilter.getLabels().push(label)
-
-            // Add filter elements to complex filter
             complexFilterElement.simpleFilter = attributeFilter;
             complexFilterElement.operator = undefined;
             complexFilter.addComplexFilterElement(complexFilterElement);
 
-            // Update attribute filters with created complexFilter
             $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
         }
 
