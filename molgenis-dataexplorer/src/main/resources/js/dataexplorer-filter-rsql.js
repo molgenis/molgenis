@@ -141,8 +141,8 @@
                 var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
                 complexFilterElement.simpleFilter = simpleFilter;
                 complexFilter.addComplexFilterElement(complexFilterElement);
-                complexFilters.push(complexFilter)
             })
+            complexFilters.push(complexFilter)
         }
         // Update attribute filters with created complexFilter
         $(document).trigger('updateAttributeFilters', {'filters': complexFilters});
