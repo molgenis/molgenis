@@ -750,7 +750,7 @@ $.when($,
 
                 if (state.q) {
                     // Create filters based on RSQL present in the URL
-                    molgenis.dataexplorer.filter.createFiltersFromRsql(state.q, restApi, state.entity);
+                    molgenis.dataexplorer.rsql.createFiltersFromRsql(state.q, restApi, state.entity);
                 }
 
                 if (state.entity) {
