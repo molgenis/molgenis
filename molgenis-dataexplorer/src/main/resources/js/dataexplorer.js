@@ -652,6 +652,8 @@ $.when($,
              * - If the state.q is still undefined, add the RSQL to state.q
              * - If the state.q does not contain the exact same RSQL, add it to state.q
              *
+             * TODO RSQL can be less encoded i.e. id=q=1 instead of id%3Dq%3D1
+             *
              * @param rules Javascript query rules
              */
             function addFilterToRsqlState(rules) {
@@ -674,7 +676,6 @@ $.when($,
                 } else {
                     state.q = rsql
                 }
-
                 pushState()
             }
 
