@@ -87,62 +87,61 @@
                     rsqlRegex.lastIndex++
                 }
 
-                $.each(rsqlMatch, function(outerMatch) {
-                    // Creates groups for the three parts of a filter attribute, operator and filter value
-                    // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
-                    var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
-                    var filterMatch
+                var outerMatch = rsqlMatch[0]
+                // Creates groups for the three parts of a filter attribute, operator and filter value
+                // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
+                var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
+                var filterMatch
 
-                    // Loop through a filter to match the attribute, operator and filter value
-                    while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
-                        if (filterMatch.index === filterRegex.lastIndex) {
-                            filterRegex.lastIndex++
-                        }
-
-                        var attributeName = filterMatch[1]
-                        var operator = filterMatch[2]
-                        var filterValue = filterMatch[3]
-
-                        if (attributeName !== currentAttributeName) {
-                            // If a to or from value has been set, but the attribute has changed, create a filter
-                            // For the previous attribute
-                            if (fromValue !== undefined || toValue !== undefined) {
-                                fetchAttribute(restApi, entityName, currentAttributeName, fromValue, toValue, value)
-                            }
-
-                            fromValue = undefined
-                            toValue = undefined
-                            value = undefined
-                        }
-
-                        switch (operator) {
-                            case '=ge=':
-                            case '=gt=' :
-                                fromValue = filterValue
-                                break
-                            case '=le=':
-                            case '=lt=':
-                                toValue = filterValue
-                                break
-                            case '=q=':
-                            case '==':
-                            case '=like=':
-                                value = filterValue
-                                break
-                            default:
-                                throw 'This operator is currently not supported for bookmarkable filters [' + operator + ']';
-                        }
-
-                        currentAttributeName = attributeName
-                        if (fromValue === undefined && toValue === undefined && value !== undefined) {
-                            fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
-                        } else if (fromValue !== undefined && toValue !== undefined && value === undefined) {
-                            fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
-                        } else if (rsqlMatch.length === 1) {
-                            fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
-                        }
+                // Loop through a filter to match the attribute, operator and filter value
+                while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
+                    if (filterMatch.index === filterRegex.lastIndex) {
+                        filterRegex.lastIndex++
                     }
-                })
+
+                    var attributeName = filterMatch[1]
+                    var operator = filterMatch[2]
+                    var filterValue = filterMatch[3]
+
+                    if (attributeName !== currentAttributeName) {
+                        // If a to or from value has been set, but the attribute has changed, create a filter
+                        // For the previous attribute
+                        if (fromValue !== undefined || toValue !== undefined) {
+                            fetchAttribute(restApi, entityName, currentAttributeName, fromValue, toValue, value)
+                        }
+
+                        fromValue = undefined
+                        toValue = undefined
+                        value = undefined
+                    }
+
+                    switch (operator) {
+                        case '=ge=':
+                        case '=gt=' :
+                            fromValue = filterValue
+                            break
+                        case '=le=':
+                        case '=lt=':
+                            toValue = filterValue
+                            break
+                        case '=q=':
+                        case '==':
+                        case '=like=':
+                            value = filterValue
+                            break
+                        default:
+                            throw 'This operator is currently not supported for bookmarkable filters [' + operator + ']';
+                    }
+
+                    currentAttributeName = attributeName
+                    if (fromValue === undefined && toValue === undefined && value !== undefined) {
+                        fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
+                    } else if (fromValue !== undefined && toValue !== undefined && value === undefined) {
+                        fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
+                    } else if (rsqlMatch.length === 1) {
+                        fetchAttribute(restApi, entityName, attributeName, fromValue, toValue, value)
+                    }
+                }
             }
         }
 

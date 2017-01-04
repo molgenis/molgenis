@@ -659,7 +659,7 @@ $.when($,
                 var attrName = rsql.split('=')[0]
 
                 // By changing a filter and adding an or statement, the rsql contains a '('
-                // at the start
+                // at the start, remove this
                 while (attrName.charAt(0) === '(') {
                     attrName = attrName.substr(1);
                 }
@@ -693,34 +693,34 @@ $.when($,
                 var rsqlRegex = /[^;,|\(.*\)]+/g
                 var rsqlMatch
 
+                var rsql = state.q
+
+                // id=q=1;(count=ge=1;count=l3=5) goes in
                 while ((rsqlMatch = rsqlRegex.exec(state.q)) !== null) {
                     if (rsqlMatch.index === rsqlRegex.lastIndex) {
                         rsqlRegex.lastIndex++
                     }
 
-                    // empty the state
-                    state.q = ''
+                    // 1. id=q=1
+                    // 2. (count=ge=1;count=l3=5)
+                    var outerMatch = rsqlMatch[0]
+                    var rsqlAttribute = outerMatch.split('=')[0]
 
-                    $.each(rsqlMatch, function(outerMatch) {
-                        var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
-                        var filterMatch
+                    if (rsqlAttribute === attrName) {
+                        // Remove the exact filter i.e. id=q=1, because this
+                        // filter is getting an update
+                        rsql = rsql.replace(outerMatch, '')
 
-                        while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
-                            if (filterMatch.index === filterRegex.lastIndex) {
-                                filterRegex.lastIndex++
-                            }
+                        // (count=ge=1;count=l3=5) gets replaced into (;)
+                        // (str=q=1,str=q=2) gets replaced into (,)
+                        // Remove these nonsense strings from the rsql
+                        rsql = rsql.replace(/\(;\)|\(,\)/, '')
+                    }
 
-                            var rsqlAttribute = filterMatch[1]
-                            if (rsqlAttribute !== attrName) {
-                                if (state.q === '') {
-                                    state.q = outerMatch
-                                } else {
-                                    state.q = state.q + ';' + outerMatch
-                                }
-                            }
-                        }
-                    })
+                    // Remove trailing and leading ;
+                    rsql = rsql.replace(/^;+|;+$/, '');
                 }
+                state.q = rsql
             }
 
             function init() {
@@ -749,7 +749,7 @@ $.when($,
                 }
 
                 if (state.q) {
-                    // Create filters based on RSQL
+                    // Create filters based on RSQL present in the URL
                     molgenis.dataexplorer.filter.createFiltersFromRsql(state.q, restApi, state.entity);
                 }
 
