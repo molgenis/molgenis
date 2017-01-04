@@ -4,7 +4,7 @@ $.when($,
 ).then(
     function ($, molgenis, settingsXhr) {
         "use strict";
-        const self = molgenis.dataexplorer = molgenis.dataexplorer || {};
+        var self = molgenis.dataexplorer = molgenis.dataexplorer || {};
 
         // module api
         self.getSelectedEntityMeta = getSelectedEntityMeta;
@@ -19,28 +19,28 @@ $.when($,
         self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
 
-        const restApi = new molgenis.RestClient();
-        let selectedEntityMetaData = null;
-        let attributeFilters = {};
-        let selectedAttributes = [];
-        let selectedAttributesTree = {};
-        let searchQuery = null;
-        let modules = [];
-        let q = undefined;
+        var restApi = new molgenis.RestClient();
+        var selectedEntityMetaData = null;
+        var attributeFilters = {};
+        var selectedAttributes = [];
+        var selectedAttributesTree = {};
+        var searchQuery = null;
+        var modules = [];
+        var q = undefined;
 
-        let posAttribute;
-        let chromosomeAttribute;
-        let identifierAttribute;
-        let patientAttribute;
+        var posAttribute;
+        var chromosomeAttribute;
+        var identifierAttribute;
+        var patientAttribute;
 
         if (settingsXhr[1] !== 'success') {
             molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
         }
 
-        const settings = settingsXhr[0]
+        var settings = settingsXhr[0]
         self.settings = settings;
 
-        const stateDefault = {
+        var stateDefault = {
             entity: null,
             query: null,
             attrs: null,
@@ -49,7 +49,7 @@ $.when($,
             q: undefined
         };
 
-        let state;
+        var state;
 
         /**
          * @memberOf molgenis.dataexplorer
@@ -94,10 +94,10 @@ $.when($,
          * @memberOf molgenis.dataexplorer
          */
         function createModuleNav(modules, entity, container) {
-            const items = [];
+            var items = [];
             items.push('<ul class="nav nav-tabs pull-left" style="width: 100%" role="tablist">');
             $.each(modules, function () {
-                const href = molgenis.getContextUrl() + '/module/' + this.id + '?entity=' + entity;
+                var href = molgenis.getContextUrl() + '/module/' + this.id + '?entity=' + entity;
                 items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-id="' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
             });
             items.push('<li class="pull-right">');
@@ -119,7 +119,7 @@ $.when($,
          * @memberOf molgenis.dataexplorer
          */
         function createEntityMetaTree(entityMetaData, attributes) {
-            const container = $('#feature-selection');
+            var container = $('#feature-selection');
             container.tree({
                 'entityMetaData': entityMetaData,
                 'selectedAttributes': attributes,
@@ -145,7 +145,7 @@ $.when($,
             $('#entity-class-name').html(entityMetaData.label);
 
             if (entityMetaData.description) {
-                const description = $('<span data-placement="bottom"></span>');
+                var description = $('<span data-placement="bottom"></span>');
                 description.html(abbreviate(entityMetaData.description, settings['header_abbreviate']));
                 description.attr('data-title', entityMetaData.description);
                 $('#entity-class-description').html(description.tooltip());
@@ -155,10 +155,10 @@ $.when($,
         }
 
         function getAttributeFromList(attributesString) {
-            let result;
-            const attrs = getSelectedEntityMeta().attributes;
-            const list = attributesString.split(",");
-            for (let item in list) {
+            var result;
+            var attrs = getSelectedEntityMeta().attributes;
+            var list = attributesString.split(",");
+            for (var item in list) {
                 result = attrs[list[item]];
                 if (result !== undefined) {
                     break;
@@ -197,23 +197,23 @@ $.when($,
          * @memberOf molgenis.dataexplorer
          */
         function createEntityQuery() {
-            let chromosome;
-            const entityCollectionRequest = {
+            var chromosome;
+            var entityCollectionRequest = {
                 q: []
             };
 
             // add rules for the search term to the query
             if (searchQuery) {
                 if (/\S/.test(searchQuery)) {
-                    const searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
+                    var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
 
                     if (searchQueryRegex && searchQuery.match(searchQueryRegex) && chromosomeAttribute !== undefined && posAttribute !== undefined) {
-                        const match = searchQueryRegex.exec(searchQuery);
+                        var match = searchQueryRegex.exec(searchQuery);
 
                         // only chromosome and position
                         if (match[3] === undefined) {
                             chromosome = match[1];
-                            const position = match[2];
+                            var position = match[2];
 
                             entityCollectionRequest.q =
                                 [{
@@ -237,8 +237,8 @@ $.when($,
                         } else if (match[3]) {
 
                             chromosome = match[1];
-                            const startPosition = match[2];
-                            const stopPosition = match[3];
+                            var startPosition = match[2];
+                            var stopPosition = match[3];
 
                             if (parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
                                 molgenis.createAlert([{message: 'The start position of the queried range is larger than the stop position. Please check the search query.'}], 'warning');
@@ -285,7 +285,7 @@ $.when($,
 
             // add rules for attribute filters to the query
             $.each(attributeFilters, function (attributeUri, filter) {
-                const rule = filter.createQueryRule();
+                var rule = filter.createQueryRule();
                 if (rule) {
                     if (entityCollectionRequest.q.length > 0) {
                         entityCollectionRequest.q.push({
@@ -321,7 +321,7 @@ $.when($,
             });
 
             // get entity meta data and update header and tree
-            const entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
+            var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
                 selectedEntityMetaData = entityMetaData;
                 self.createHeader(entityMetaData);
 
@@ -356,7 +356,7 @@ $.when($,
 
                 // For each selected attribute, check if it is expanded and fill the selectedAttributesTree map
                 $.each(selectedAttributes, function (index, attribute) {
-                    const key = attribute.name;
+                    var key = attribute.name;
                     selectedAttributesTree[key] = attribute.expanded === true ? {'*': null} : null;
                 });
 
@@ -369,12 +369,12 @@ $.when($,
 
             // get entity modules and load visible module
             $.get(molgenis.getContextUrl() + '/modules?entity=' + state.entity).done(function (data) {
-                const container = $('#module-nav');
+                var container = $('#module-nav');
                 modules = data.modules;
                 createModuleNav(data.modules, state.entity, container);
 
                 // select first tab
-                let moduleTab;
+                var moduleTab;
                 if (state.mod) {
                     moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', container);
                 } else {
@@ -415,10 +415,10 @@ $.when($,
 
         function pushState() {
             // shorten URL by removing attributes with null or undefined values
-            const cleanState = {};
-            for (let key in state) {
+            var cleanState = {};
+            for (var key in state) {
                 if (state.hasOwnProperty(key)) {
-                    const val = state[key];
+                    var val = state[key];
                     if (val) {
                         cleanState[key] = val;
                     }
@@ -427,8 +427,8 @@ $.when($,
 
             if (state.query) {
                 delete cleanState.query;
-                for (let i = 0; i < state.query.q.length; ++i) {
-                    const rule = state.query.q[i];
+                for (var i = 0; i < state.query.q.length; ++i) {
+                    var rule = state.query.q[i];
                     if (rule.field === undefined && rule.operator === 'SEARCH') {
                         cleanState.query = {q: [rule]};
                         break;
@@ -445,12 +445,12 @@ $.when($,
          */
         $(function () {
 
-            const googleSearchField = $("#observationset-search")
-            const entityTypeDropdown = $('#dataset-select');
+            var googleSearchField = $("#observationset-search")
+            var entityTypeDropdown = $('#dataset-select');
 
             // lazy load tab contents
             $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e) {
-                const target = $($(e.target).attr('data-target')), entityHref = encodeURI($(e.target).attr('href'));
+                var target = $($(e.target).attr('data-target')), entityHref = encodeURI($(e.target).attr('href'));
                 if (target.data('status') !== 'loaded') {
                     target.load(entityHref, function () {
                         target.data('status', 'loaded');
@@ -514,7 +514,7 @@ $.when($,
             });
 
             $(document).on('updateAttributeFilters', function (e, data) {
-                let rules = []
+                var rules = []
                 $.each(data.filters, function () {
                     rules.push(this.createQueryRule())
                     if (this.isEmpty()) {
@@ -533,19 +533,19 @@ $.when($,
                 delete attributeFilters[data.attributeUri];
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
 
-                let attrName = data.attributeUri.split('/')[5]
+                var attrName = data.attributeUri.split('/')[5]
                 removeFilterFromRsqlState(attrName)
 
                 $(document).trigger('changeQuery', createEntityQuery());
             });
 
             $(document).on('clickAttribute', function (e, data) {
-                const attr = data.attribute;
+                var attr = data.attribute;
                 if (attr.fieldType !== 'COMPOUND' && (!attr.refEntity || !attr.parent))
                     self.filter.dialog.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
             });
 
-            const container = $("#plugin-container");
+            var container = $("#plugin-container");
 
 
             if (entityTypeDropdown.length > 0) {
@@ -586,7 +586,7 @@ $.when($,
 
             $(container).on('click', '.feature-filter-edit', function (e) {
                 e.preventDefault();
-                const filter = attributeFilters[$(this).data('href')];
+                var filter = attributeFilters[$(this).data('href')];
                 self.filter.dialog.openFilterModal(filter.attribute, filter);
             });
 
@@ -655,8 +655,8 @@ $.when($,
              * @param rules Javascript query rules
              */
             function addFilterToRsqlState(rules) {
-                let rsql = molgenis.createRsqlQuery(rules)
-                let attrName = rsql.split('=')[0]
+                var rsql = molgenis.createRsqlQuery(rules)
+                var attrName = rsql.split('=')[0]
 
                 // By changing a filter and adding an or statement, the rsql contains a '('
                 // at the start
@@ -690,8 +690,8 @@ $.when($,
              * @param attrName
              */
             function removeExistingFilterFromRsql(attrName) {
-                const rsqlRegex = /[^;,|\(.*\)]+/g
-                let rsqlMatch
+                var rsqlRegex = /[^;,|\(.*\)]+/g
+                var rsqlMatch
 
                 while ((rsqlMatch = rsqlRegex.exec(state.q)) !== null) {
                     if (rsqlMatch.index === rsqlRegex.lastIndex) {
@@ -701,16 +701,16 @@ $.when($,
                     // empty the state
                     state.q = ''
 
-                    rsqlMatch.forEach((outerMatch) => {
-                        const filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
-                        let filterMatch
+                    $.each(rsqlMatch, function(outerMatch) {
+                        var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
+                        var filterMatch
 
                         while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
                             if (filterMatch.index === filterRegex.lastIndex) {
                                 filterRegex.lastIndex++
                             }
 
-                            const rsqlAttribute = filterMatch[1]
+                            var rsqlAttribute = filterMatch[1]
                             if (rsqlAttribute !== attrName) {
                                 if (state.q === '') {
                                     state.q = outerMatch
@@ -739,8 +739,8 @@ $.when($,
 
                 if (state.query) {
                     // set query in searchbox
-                    for (let i = 0; i < state.query.q.length; ++i) {
-                        const rule = state.query.q[i];
+                    for (var i = 0; i < state.query.q.length; ++i) {
+                        var rule = state.query.q[i];
                         if (rule.field === undefined && rule.operator === 'SEARCH') {
                             $('#observationset-search').val(rule.value).change();
                             break;
@@ -760,7 +760,7 @@ $.when($,
 
             // set state from url
             if (window.location.search && window.location.search.length > 0) {
-                const querystring = window.location.search.substring(1); // remove '?'
+                var querystring = window.location.search.substring(1); // remove '?'
                 if (querystring.length > 0) {
                     state = $.deparam(querystring);
                 }

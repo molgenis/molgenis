@@ -70,15 +70,15 @@
          * Create filters JavaScript components from RSQL
          */
         self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-            let fromValue, toValue, value
+            var fromValue, toValue, value
 
             // Creates groups for every filter e.g. id=q=1;(xstring=q=str1,xstring=q=str2);(count=ge=2;count=le=5);age==20
             // Match 1 `id=q=1` Match 2 `xstring=q=str1` Match 3 `xstring=q=str2`
             // Match 4 `count=ge=2` Match 5 `count=le=5` Match 6 `age==20`
-            const rsqlRegex = /[^;,|\(.*\)]+/g
-            let rsqlMatch
+            var rsqlRegex = /[^;,|\(.*\)]+/g
+            var rsqlMatch
 
-            let currentAttributeName
+            var currentAttributeName
 
             // Loop through the RSQL to match all the different filters
             while ((rsqlMatch = rsqlRegex.exec(rsql)) !== null) {
@@ -87,11 +87,11 @@
                     rsqlRegex.lastIndex++
                 }
 
-                rsqlMatch.forEach((outerMatch) => {
+                $.each(rsqlMatch, function(outerMatch) {
                     // Creates groups for the three parts of a filter attribute, operator and filter value
                     // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
-                    const filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
-                    let filterMatch
+                    var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
+                    var filterMatch
 
                     // Loop through a filter to match the attribute, operator and filter value
                     while ((filterMatch = filterRegex.exec(outerMatch)) !== null) {
@@ -99,9 +99,9 @@
                             filterRegex.lastIndex++
                         }
 
-                        const attributeName = filterMatch[1]
-                        const operator = filterMatch[2]
-                        const filterValue = filterMatch[3]
+                        var attributeName = filterMatch[1]
+                        var operator = filterMatch[2]
+                        var filterValue = filterMatch[3]
 
                         if (attributeName !== currentAttributeName) {
                             // If a to or from value has been set, but the attribute has changed, create a filter
@@ -161,7 +161,7 @@
 
         function fetchLabels(href, hrefCollection, restApi, value, attribute, fromValue, toValue) {
             restApi.getAsync(href).then(function (meta) {
-                const labelAttribute = meta.labelAttribute
+                var labelAttribute = meta.labelAttribute
                 restApi.getAsync(hrefCollection + '/' + value + '/' + labelAttribute).then(function (labelEntity) {
                     registerFilters(value, attribute, fromValue, toValue, labelEntity.label)
                 })
@@ -170,9 +170,9 @@
 
         function registerFilters(value, attribute, fromValue, toValue, label) {
             // Create filters
-            const attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
-            const complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
-            const complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+            var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
+            var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
 
             if (label !== undefined) attributeFilter.getLabels().push(label)
 
