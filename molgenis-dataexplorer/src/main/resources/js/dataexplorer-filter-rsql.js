@@ -41,9 +41,14 @@
     }
 
     /**
-     * Parse all filters for a single attribute e.g.:
-     * match = (count=ge=1;count=le=5)
-     * match = id=q=5
+     * Parse all filters for a single attribute
+     *
+     * Examples:
+     * match = (INT=ge=1;INT=le=5)
+     * match = (STRING=q=str1,STRING=q=str2)
+     * match = ((MREF=q=A,MREF=q=B);MREF=q=C)
+     * match = BOOL==false
+     * match = TEXT=q=This is a long text
      */
     function createFilterForAttribute(match, restApi, entityName) {
         var rsqlParts = match.split(';')
@@ -115,7 +120,7 @@
                     fetchLabels(meta.name, restApi, attribute, filterElementMap, idAttribute, labelAttribute)
                 })
             } else {
-                registerFilters(attribute, undefined, filterElementMap)
+                registerFilters(attribute, filterElementMap)
             }
         })
     }
@@ -129,13 +134,14 @@
 
         restApi.getAsync(uri).then(function (response) {
             var labels = []
+
             $.each(response.items, function (index) {
                 var item = response.items[index]
                 labels.push(item[labelAttribute])
             })
 
             if (labels.length === 0) labels = filterElementMap.values
-            registerFilters(attribute, labels, filterElementMap)
+            registerFilters(attribute, filterElementMap, labels)
         })
     }
 
@@ -143,52 +149,95 @@
      * Registers the filter within the JavaScript global scope
      * Allows for the filter to be shown in the UI
      */
-    function registerFilters(attribute, labels, filterElementMap) {
-        var complexFilters = []
-        if (filterElementMap.values.length === 0 && (filterElementMap.fromValue !== undefined || filterElementMap.toValue !== undefined)) {
-            // If values length === 0 and we have a to or from filter, create a numeric filter
-            complexFilters.push(createNumericFilter(attribute, filterElementMap.fromValue, filterElementMap.toValue))
-        } else {
-            complexFilters = createComplexFilter(attribute, filterElementMap.values, labels)
-        }
+    function registerFilters(attribute, filterElementMap, labels) {
+        var filters = [createFilters(attribute, filterElementMap, labels)]
 
         // Update attribute filters with created complexFilter
-        $(document).trigger('updateAttributeFilters', {'filters': complexFilters});
+        $(document).trigger('updateAttributeFilters', {'filters': filters})
+    }
+
+    function createFilters(attribute, filterElementMap, labels) {
+        var filters = []
+        var values = filterElementMap.values
+        var fromValue = filterElementMap.fromValue
+        var toValue = filterElementMap.toValue
+
+        switch (attribute.fieldType) {
+            case 'EMAIL':
+            case 'HTML':
+            case 'HYPERLINK':
+            case 'ENUM':
+            case 'SCRIPT':
+            case 'TEXT':
+            case 'STRING':
+                return createComplexFilterForString(attribute, values, labels, 'OR')
+            case 'DATE_TIME':
+            case 'DATE':
+            case 'DECIMAL':
+            case 'INT':
+            case 'LONG':
+                return createComplexFilter(attribute, values, labels, undefined, fromValue, toValue)
+            case 'MREF':
+            case 'ONE_TO_MANY':
+                return createComplexFilter(attribute, values, labels, undefined)
+            case 'FILE':
+            case 'XREF':
+                return createSimpleFilter(attribute, values, labels, 'OR')
+            case 'BOOL':
+            case 'CATEGORICAL':
+            case 'CATEGORICAL_MREF':
+                return createSimpleFilter(attribute, values)
+            case 'COMPOUND' :
+                throw 'Unsupported data type: ' + attribute.fieldType;
+            default:
+                throw 'Unknown data type: ' + attribute.fieldType;
+        }
     }
 
     /**
      * Creates complex filters with a list of values
      * For reference types, labels are added to the SimpleFilter objects
      */
-    function createComplexFilter(attribute, values, labels) {
-        var complexFilters = []
-        var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+    function createComplexFilter(attribute, values, labels, andOr, fromValue, toValue) {
+        var simpleFilter = createSimpleFilter(attribute, values, labels, andOr, fromValue, toValue)
 
-        $.each(values, function (index) {
-            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values[index]);
-            if (labels !== undefined) simpleFilter.getLabels().push(labels[index])
-
-            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
-            complexFilterElement.simpleFilter = simpleFilter;
-            complexFilter.addComplexFilterElement(complexFilterElement);
-        })
-        complexFilters.push(complexFilter)
-
-        return complexFilters
-    }
-
-    /**
-     * Creates filters with from and / or to values
-     */
-    function createNumericFilter(attribute, fromValue, toValue) {
-        var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue);
-        var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
         var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+        complexFilterElement.simpleFilter = simpleFilter;
+        complexFilterElement.operator = andOr;
 
-        complexFilterElement.simpleFilter = attributeFilter;
+        var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
         complexFilter.addComplexFilterElement(complexFilterElement);
 
         return complexFilter
+    }
+
+    function createComplexFilterForString(attribute, values, labels, andOr, fromValue, toValue) {
+        var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+
+        $.each(values, function (index) {
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, values[index]);
+            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+            complexFilterElement.simpleFilter = simpleFilter;
+
+            complexFilter.addComplexFilterElement(complexFilterElement);
+        })
+
+        return complexFilter
+    }
+
+    /**
+     * Creates a simple filter, corresponding to a single line in the filter forms
+     *
+     * @param attribute the attribute to filter on
+     * @param values the values to be compared to
+     * @param labels the labels of the values, only relevant for reference type attributes
+     * @param andor whether the comparisons in this filter are to be ANDed or ORred with each other, only relevant if more than one value is provided
+     */
+    function createSimpleFilter(attribute, values, labels, andor, fromValue, toValue) {
+        var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, values);
+        simpleFilter.operator = andor
+        simpleFilter.labels = labels
+        return simpleFilter
     }
 
     /**
@@ -197,11 +246,12 @@
      *
      * FIXME createRsqlQuery encodes AND jQuery.param() encodes, resulting in double
      * FIXME encoding for values and attributenames, and single encoding of operators
+     *
+     * FIXME FilterWizard creates an invalid RSQL entry with all attributes, having undefined values
      */
     self.translateFilterRulesToRSQL = function translateFilterRulesToRSQL(rules, existingRSQL) {
         var newFilterRSQL = molgenis.createRsqlQuery(rules)
         var newAttributeName = newFilterRSQL.split('=')[0]
-
         // By changing a filter and adding an or statement, the rsql contains a '('
         // at the start, remove this
         while (newAttributeName.charAt(0) === '(') {
