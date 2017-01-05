@@ -38,5 +38,20 @@ test('Test that multiple comparisons get mapped', assert => {
 
     assert.deepEqual(actual, expected);
     assert.end();
-});
+})
+
+test('Test selector in xref', assert => {
+    const actual = groupBySelector(parser.parse("xxref.label==ref2"))
+    const expected = {
+        "xxref.label": {
+            "selector": "xxref.label",
+            "comparison": "==",
+            "arguments": "ref2"
+        }
+
+    }
+
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
 
