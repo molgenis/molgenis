@@ -5,7 +5,7 @@
   "scripts": {
     "watch": "webpack -d --watch",
     "build": "webpack -d",
-    "test": "echo skipping tests....",
+    "test": "babel-node ./src/test/javascript/index.js | faucet",
     "webpack-stats": "webpack --profile --json > target/json.stats"
   },
   "repository": {
@@ -35,6 +35,7 @@
     "jquery.fancytree": "2.14.0",
     "moment": "2.11.2",
     "moment-duration-format": "^1.3.0",
+    "pegjs": "^0.10.0",
     "promise": "^6.1.0",
     "react": "0.13.3",
     "react-notification-system": "^0.1.17",
@@ -78,6 +79,21 @@
       "react",
       "es2015",
       "stage-0"
+    ],
+    "plugins": [
+      [
+        "babel-plugin-module-alias",
+        [
+          {
+            "src": "./src/main/javascript/modules/react-components",
+            "expose": "react-components"
+          },
+          {
+            "src": "./src/main/javascript/modules/rest-client",
+            "expose": "rest-client"
+          }
+        ]
+      ]
     ]
   }
 }
