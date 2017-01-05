@@ -4,9 +4,9 @@ import grammar from "./grammar";
 /**
  * Exports a parser for the rsql grammar
  *
- * import rsqlParser from 'rsqlParser'
+ * import parser from 'parser'
  *
- * <code>rsqlParser.parse("xbool==false")</code> returns
+ * <code>parser.parse("xbool==false")</code> returns
  * <code>{
         "selector": "xbool",
         "comparison": "==",
