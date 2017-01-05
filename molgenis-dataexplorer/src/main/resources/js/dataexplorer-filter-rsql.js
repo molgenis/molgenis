@@ -187,7 +187,7 @@
      *
      * @param rules Javascript query rules
      */
-    self.addFilterToRsqlState = function addFilterToRsqlState(rules) {
+    self.addFilterToRsqlState = function addFilterToRsqlState(rules, rsqlState) {
         var rsql = molgenis.createRsqlQuery(rules)
         var attrName = rsql.split('=')[0]
 
@@ -197,22 +197,21 @@
             attrName = attrName.substr(1);
         }
 
-        if (state.q !== undefined) {
-            removeExistingFilterFromRsql(attrName)
-            if (state.q === '') {
-                state.q = rsql
+        if (rsqlState !== undefined) {
+            removeExistingFilterFromRsql(attrName, rsqlState)
+            if (rsqlState === '') {
+                rsqlState = rsql
             } else {
-                state.q = state.q + ';' + rsql
+                rsqlState = rsqlState + ';' + rsql
             }
         } else {
-            state.q = rsql
+            rsqlState = rsql
         }
-        pushState()
+        return rsqlState
     }
 
-    self.removeFilterFromRsqlState = function removeFilterFromRsqlState(attrName) {
-        removeExistingFilterFromRsql(attrName)
-        pushState()
+    self.removeFilterFromRsqlState = function removeFilterFromRsqlState(attrName, rsqlState) {
+        return removeExistingFilterFromRsql(attrName, rsqlState)
     }
 
     /**
@@ -221,14 +220,14 @@
      *
      * @param attrName
      */
-    function removeExistingFilterFromRsql(attrName) {
+    function removeExistingFilterFromRsql(attrName, rsqlState) {
         var rsqlRegex = /[^;,|\(.*\)]+/g
         var rsqlMatch
 
-        var rsql = state.q
+        var rsql = rsqlState
 
         // id=q=1;(count=ge=1;count=l3=5) goes in
-        while ((rsqlMatch = rsqlRegex.exec(state.q)) !== null) {
+        while ((rsqlMatch = rsqlRegex.exec(rsqlState)) !== null) {
             if (rsqlMatch.index === rsqlRegex.lastIndex) {
                 rsqlRegex.lastIndex++
             }
@@ -254,7 +253,7 @@
         }
         console.log(rsql)
 
-        state.q = rsql
+       return rsql
     }
 
 }($, window.top.molgenis = window.top.molgenis || {}));

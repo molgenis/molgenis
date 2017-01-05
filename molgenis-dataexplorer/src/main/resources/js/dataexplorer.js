@@ -523,7 +523,8 @@ $.when($,
                         attributeFilters[this.attribute.href] = this;
                     }
                 });
-                molgenis.dataexplorer.rsql.addFilterToRsqlState(rules)
+                state.q = molgenis.dataexplorer.rsql.addFilterToRsqlState(rules, state.q)
+                pushState()
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
                 $(document).trigger('changeQuery', createEntityQuery());
@@ -534,7 +535,8 @@ $.when($,
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
 
                 var attrName = data.attributeUri.split('/')[5]
-                molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attrName)
+                state.q = molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attrName, state.q)
+                pushState()
 
                 $(document).trigger('changeQuery', createEntityQuery());
             });
