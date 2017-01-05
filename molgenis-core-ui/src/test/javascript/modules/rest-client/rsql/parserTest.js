@@ -10,7 +10,7 @@ test('Test if a simple equals comparison gets parsed', assert => {
     }
     assert.deepEqual(actual, expected);
     assert.end();
-});
+})
 
 test('Test if a nested rsql string gets parsed', assert => {
     const actual = parser.parse("xbool==false;xdate=ge=2017-01-11;(count=ge=1;count=le=5);age==20;number==2;(str1=q=3,str1=q=5)")
@@ -72,5 +72,5 @@ test('Test if a nested rsql string gets parsed', assert => {
 
     assert.deepEqual(actual,expected);
     assert.end();
-});
+})
 
