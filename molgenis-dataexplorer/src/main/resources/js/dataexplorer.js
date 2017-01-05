@@ -26,7 +26,7 @@ $.when($,
         var selectedAttributesTree = {};
         var searchQuery = null;
         var modules = [];
-        var q = undefined;
+        var filter = undefined;
 
         var posAttribute;
         var chromosomeAttribute;
@@ -46,7 +46,7 @@ $.when($,
             attrs: null,
             mod: null,
             hideselect: 'false',
-            q: undefined
+            filter: undefined
         };
 
         var state;
@@ -523,7 +523,8 @@ $.when($,
                         attributeFilters[this.attribute.href] = this;
                     }
                 });
-                state.q = molgenis.dataexplorer.rsql.addFilterToRsqlState(rules, state.q)
+
+                state.filter = molgenis.dataexplorer.rsql.addFilterToRsqlState(rules, state.filter)
                 pushState()
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
@@ -535,7 +536,7 @@ $.when($,
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
 
                 var attrName = data.attributeUri.split('/')[5]
-                state.q = molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attrName, state.q)
+                state.filter = molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attrName, state.filter)
                 pushState()
 
                 $(document).trigger('changeQuery', createEntityQuery());
@@ -672,9 +673,9 @@ $.when($,
                     }
                 }
 
-                if (state.q) {
+                if (state.filter) {
                     // Create filters based on RSQL present in the URL
-                    molgenis.dataexplorer.rsql.createFiltersFromRsql(state.q, restApi, state.entity);
+                    molgenis.dataexplorer.rsql.createFiltersFromRsql(state.filter, restApi, state.entity);
                 }
 
                 if (state.entity) {
