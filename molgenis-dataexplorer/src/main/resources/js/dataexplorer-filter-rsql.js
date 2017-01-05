@@ -156,10 +156,90 @@
         var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
 
         complexFilterElement.simpleFilter = attributeFilter;
-        complexFilterElement.operator = undefined;
         complexFilter.addComplexFilterElement(complexFilterElement);
 
         return complexFilter
+    }
+
+    /**
+     * - Create RSQL based on the query rules
+     * - Parse the attrName from the generated RSQL
+     * - If the state.q already contains a filter for the attribute, overwrite that filter
+     * - If the state.q is still undefined, add the RSQL to state.q
+     * - If the state.q does not contain the exact same RSQL, add it to state.q
+     *
+     * TODO RSQL can be less encoded i.e. id=q=1 instead of id%3Dq%3D1
+     *
+     * @param rules Javascript query rules
+     */
+    self.addFilterToRsqlState = function addFilterToRsqlState(rules) {
+        var rsql = molgenis.createRsqlQuery(rules)
+        var attrName = rsql.split('=')[0]
+
+        // By changing a filter and adding an or statement, the rsql contains a '('
+        // at the start, remove this
+        while (attrName.charAt(0) === '(') {
+            attrName = attrName.substr(1);
+        }
+
+        if (state.q !== undefined) {
+            removeExistingFilterFromRsql(attrName)
+            if (state.q === '') {
+                state.q = rsql
+            } else {
+                state.q = state.q + ';' + rsql
+            }
+        } else {
+            state.q = rsql
+        }
+        pushState()
+    }
+
+    self.removeFilterFromRsqlState = function removeFilterFromRsqlState(attrName) {
+        removeExistingFilterFromRsql(attrName)
+        pushState()
+    }
+
+    /**
+     * Based on the name of attribute, remove the filter for
+     * that attribute from the RSQL
+     *
+     * @param attrName
+     */
+    function removeExistingFilterFromRsql(attrName) {
+        var rsqlRegex = /[^;,|\(.*\)]+/g
+        var rsqlMatch
+
+        var rsql = state.q
+
+        // id=q=1;(count=ge=1;count=l3=5) goes in
+        while ((rsqlMatch = rsqlRegex.exec(state.q)) !== null) {
+            if (rsqlMatch.index === rsqlRegex.lastIndex) {
+                rsqlRegex.lastIndex++
+            }
+
+            // 1. id=q=1
+            // 2. (count=ge=1;count=l3=5)
+            var outerMatch = rsqlMatch[0]
+            var rsqlAttribute = outerMatch.split('=')[0]
+
+            if (rsqlAttribute === attrName) {
+                // Remove the exact filter i.e. id=q=1, because this
+                // filter is getting an update
+                rsql = rsql.replace(outerMatch, '')
+
+                // (count=ge=1;count=l3=5) gets replaced into (;)
+                // (str=q=1,str=q=2) gets replaced into (,)
+                // Remove these nonsense strings from the rsql
+                rsql = rsql.replace(/\(;\)|\(,\)/, '')
+            }
+
+            // Remove trailing and leading ;
+            rsql = rsql.replace(/^;+|;+$/, '');
+        }
+        console.log(rsql)
+
+        state.q = rsql
     }
 
 }($, window.top.molgenis = window.top.molgenis || {}));
