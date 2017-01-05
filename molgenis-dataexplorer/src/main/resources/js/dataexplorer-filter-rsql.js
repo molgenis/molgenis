@@ -2,6 +2,10 @@
  * Utility functions to:
  * - Parse RSQL into Javascript Filter components
  * - Parse ComplexFilters into RSQL
+ *
+ * TODO Fetch all data in one request
+ * TODO Create functions for duplicate code
+ *
  */
 (function ($, molgenis) {
 
@@ -95,7 +99,7 @@
 
     /**
      * Fetches the attribute
-     * Based on type, either fetches the value label first or registers the filter directly
+     * Based on type, either fetches the labels first or registers the filter directly
      */
     function fetchAttribute(restApi, entityName, filterElementMap) {
         var attributeName = filterElementMap.attributeName
@@ -105,8 +109,10 @@
                 attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'ONE_TO_MANY') {
 
                 restApi.getAsync(attribute.refEntity.href).then(function (meta) {
+                    var idAttribute = meta.idAttribute
                     var labelAttribute = meta.labelAttribute
-                    fetchLabels(attribute.refEntity.hrefCollection, restApi, attribute, filterElementMap)
+
+                    fetchLabels(meta.name, restApi, attribute, filterElementMap, idAttribute, labelAttribute)
                 })
             } else {
                 registerFilters(attribute, undefined, filterElementMap)
@@ -116,30 +122,36 @@
 
     /**
      * Fetches label values for reference type filters
-     * TODO For every value, retrieve the label
      */
-    function fetchLabels(hrefCollection, restApi, attribute, filterElementMap) {
-        var value = filterElementMap.values[0]
-        restApi.getAsync(hrefCollection + '/' + value + '/' + labelAttribute).then(function (labelEntity) {
-            registerFilters(attribute, labelEntity.label, filterElementMap)
+    function fetchLabels(refEntityName, restApi, attribute, filterElementMap, idAttribute, labelAttribute) {
+        var values = '(' + filterElementMap.values.join(",") + ')'
+        var uri = '/api/v2/' + refEntityName + '?q=' + idAttribute + '=in=' + values
+
+        restApi.getAsync(uri).then(function (response) {
+            var labels = []
+            $.each(response.items, function (index) {
+                var item = response.items[index]
+                labels.push(item[labelAttribute])
+            })
+
+            if (labels.length === 0) labels = filterElementMap.values
+            registerFilters(attribute, labels, filterElementMap)
         })
     }
 
     /**
      * Registers the filter within the JavaScript global scope
      * Allows for the filter to be shown in the UI
-     *
-     * TODO add labels if reference types
      */
     function registerFilters(attribute, labels, filterElementMap) {
         var complexFilters = []
-
         if (filterElementMap.values.length === 0 && (filterElementMap.fromValue !== undefined || filterElementMap.toValue !== undefined)) {
             // If values length === 0 and we have a to or from filter, create a numeric filter
             complexFilters.push(createNumericFilter(attribute, filterElementMap.fromValue, filterElementMap.toValue))
         } else {
             complexFilters = createComplexFilter(attribute, filterElementMap.values, labels)
         }
+
         // Update attribute filters with created complexFilter
         $(document).trigger('updateAttributeFilters', {'filters': complexFilters});
     }
@@ -154,7 +166,7 @@
 
         $.each(values, function (index) {
             var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values[index]);
-            if (labels !== undefined) simpleFilter.getLabels().push(labels)
+            if (labels !== undefined) simpleFilter.getLabels().push(labels[index])
 
             var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
             complexFilterElement.simpleFilter = simpleFilter;
