@@ -9,7 +9,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
