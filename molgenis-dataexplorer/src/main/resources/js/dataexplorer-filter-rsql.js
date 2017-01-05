@@ -10,36 +10,35 @@
      * Create filters JavaScript components from RSQL
      */
     self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-        // Creates groups for every filter e.g. id=q=1;(xstring=q=str1,xstring=q=str2);(count=ge=2;count=le=5);age==20
-        // Match 1 `id=q=1` Match 2 `xstring=q=str1` Match 3 `xstring=q=str2`
-        // Match 4 `count=ge=2` Match 5 `count=le=5` Match 6 `age==20`
-        var rsqlRegex = /[^()]+/g
-        var rsqlMatch
+        // https://regex101.com/r/zAT0Yc/1 regex matches all ';' not between '()'
+        const rsqlRegex = /\;(?![^\(]*\))/g;
+        var rsqlMatch, match
 
-        // Loop through the RSQL to match all the different filters
+        var previousIndex = 0
         while ((rsqlMatch = rsqlRegex.exec(rsql)) !== null) {
             if (rsqlMatch.index === rsqlRegex.lastIndex) {
                 // This is necessary to avoid infinite loops with zero-width matches
                 rsqlRegex.lastIndex++
             }
 
-            var match = rsqlMatch[0]
-            if (match !== ';') {
-
-                // Remove trailing and leading ;
-                match = match.replace(/^;+|;+$/, '');
-                createFilterForAttribute(match, restApi, entityName)
-            }
+            // Use the indices to determine RSQL filters
+            var currentIndex = rsqlMatch.index
+            match = rsql.substring(previousIndex, currentIndex)
+            previousIndex = currentIndex + 1
+            createFilterForAttribute(match, restApi, entityName)
         }
+        // Include the last attribute filter as well
+        match = rsql.substring(previousIndex, rsql.length)
+        createFilterForAttribute(match, restApi, entityName)
     }
 
     /**
      * Parse all filters for a single attribute e.g.:
-     * attributeRsql = (count=ge=1;count=le=5)
-     * attributeRsql = id=q=5
+     * match = (count=ge=1;count=le=5)
+     * match = id=q=5
      */
-    function createFilterForAttribute(attributeRsql, restApi, entityName) {
-        var rsqlParts = attributeRsql.split(';')
+    function createFilterForAttribute(match, restApi, entityName) {
+        var rsqlParts = match.split(';')
         if (rsqlParts.length === 1) {
             rsqlParts = rsqlParts[0].split(',')
         }
