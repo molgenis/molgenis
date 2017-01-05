@@ -10,7 +10,8 @@
      * Create filters JavaScript components from RSQL
      */
     self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-        // https://regex101.com/r/zAT0Yc/1 regex matches all ';' not between '()'
+        // https://regex101.com/r/zAT0Yc/1
+        // regex matches all ';' not between '()'
         const rsqlRegex = /\;(?![^\(]*\))/g;
         var rsqlMatch, match
 
@@ -21,12 +22,13 @@
                 rsqlRegex.lastIndex++
             }
 
-            // Use the indices to determine RSQL filters
+            // Use the indices to determine attribute filters
             var currentIndex = rsqlMatch.index
             match = rsql.substring(previousIndex, currentIndex)
             previousIndex = currentIndex + 1
             createFilterForAttribute(match, restApi, entityName)
         }
+
         // Include the last attribute filter as well
         match = rsql.substring(previousIndex, rsql.length)
         createFilterForAttribute(match, restApi, entityName)
@@ -45,12 +47,15 @@
 
         var filterMatch, attributeName, operator, filterValue, values = [], filterElementMap = {}
 
-        // Creates groups for the three parts of a filter attribute, operator and filter value
-        // e.g. id=q=1 becomes g1 -> 'id' g2 -> '=q=' g3 -> '1'
+        // https://regex101.com/r/P7SYDG/1
+        // Parses a piece of RSQL into attribute, operator, and value
         var filterRegex = /(\w+)(=\w*=)([\w|\W]+)/g
 
         $.each(rsqlParts, function (index) {
             var rsqlPart = rsqlParts[index]
+
+            // Remove trailing or leading braces
+            rsqlPart = rsqlPart.replace(/^\(+|\)+$/, '')
 
             while ((filterMatch = filterRegex.exec(rsqlPart)) !== null) {
                 if (filterMatch.index === filterRegex.lastIndex) {
@@ -97,7 +102,10 @@
                 attribute.fieldType === 'FILE' || attribute.fieldType === 'CATEGORICAL_MREF' ||
                 attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'ONE_TO_MANY') {
 
-                fetchLabels(attribute.refEntity.href, attribute.refEntity.hrefCollection, restApi, attribute, filterElementMap)
+                restApi.getAsync(attribute.refEntity.href).then(function (meta) {
+                    var labelAttribute = meta.labelAttribute
+                    fetchLabels(attribute.refEntity.hrefCollection, restApi, attribute, filterElementMap)
+                })
             } else {
                 registerFilters(attribute, undefined, filterElementMap)
             }
@@ -108,14 +116,10 @@
      * Fetches label values for reference type filters
      * TODO For every value, retrieve the label
      */
-    function fetchLabels(href, hrefCollection, restApi, attribute, filterElementMap) {
-
+    function fetchLabels(hrefCollection, restApi, attribute, filterElementMap) {
         var value = filterElementMap.values[0]
-        restApi.getAsync(href).then(function (meta) {
-            var labelAttribute = meta.labelAttribute
-            restApi.getAsync(hrefCollection + '/' + value + '/' + labelAttribute).then(function (labelEntity) {
-                registerFilters(attribute, labelEntity.label, filterElementMap)
-            })
+        restApi.getAsync(hrefCollection + '/' + value + '/' + labelAttribute).then(function (labelEntity) {
+            registerFilters(attribute, labelEntity.label, filterElementMap)
         })
     }
 
@@ -125,30 +129,41 @@
      *
      * TODO add labels if reference types
      */
-    function registerFilters(attribute, label, filterElementMap) {
+    function registerFilters(attribute, labels, filterElementMap) {
         var complexFilters = []
+
         if (filterElementMap.values.length === 0 && (filterElementMap.fromValue !== undefined || filterElementMap.toValue !== undefined)) {
             // If values length === 0 and we have a to or from filter, create a numeric filter
             complexFilters.push(createNumericFilter(attribute, filterElementMap.fromValue, filterElementMap.toValue))
         } else {
-            var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
-            var values = filterElementMap.values
-
-            $.each(values, function (index) {
-                var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values[index]);
-                // if (label !== undefined) simpleFilter.getLabels().push(label)
-                var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
-                complexFilterElement.simpleFilter = simpleFilter;
-                complexFilter.addComplexFilterElement(complexFilterElement);
-            })
-            complexFilters.push(complexFilter)
+            complexFilters = createComplexFilter(attribute, filterElementMap.values, labels)
         }
         // Update attribute filters with created complexFilter
         $(document).trigger('updateAttributeFilters', {'filters': complexFilters});
     }
 
     /**
-     * Creates filters with from and to values
+     * Creates complex filters with values
+     */
+    function createComplexFilter(attribute, values, labels) {
+        var complexFilters = []
+        var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+
+        $.each(values, function (index) {
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values[index]);
+            if (labels !== undefined) simpleFilter.getLabels().push(labels)
+
+            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+            complexFilterElement.simpleFilter = simpleFilter;
+            complexFilter.addComplexFilterElement(complexFilterElement);
+        })
+        complexFilters.push(complexFilter)
+
+        return complexFilters
+    }
+
+    /**
+     * Creates filters with from and / or to values
      */
     function createNumericFilter(attribute, fromValue, toValue) {
         var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue);
