@@ -524,7 +524,7 @@ $.when($,
                     }
                 });
 
-                state.filter = molgenis.dataexplorer.rsql.addFilterToRsqlState(rules, state.filter)
+                state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(rules, state.filter)
                 pushState()
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
