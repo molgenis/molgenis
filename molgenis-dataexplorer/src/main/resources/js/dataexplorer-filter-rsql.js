@@ -109,6 +109,22 @@
         }
 
         function createSimpleRefFilter(attribute, model) {
+            var simpleRefModel = molgenis.transformer.toSimpleRef(attribute, model)
+            var args = simpleRefModel.args
+
+            var values = []
+            var labels = []
+
+            $.each(args, function (index) {
+                var arg = args[index]
+                values.push(arg.value)
+                labels.push(arg.label)
+            })
+
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values);
+            simpleFilter.labels = labels
+
+            return simpleFilter
         }
 
         function createComplexRefFilter(attribute, model) {
