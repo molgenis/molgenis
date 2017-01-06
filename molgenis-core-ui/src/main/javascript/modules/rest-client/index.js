@@ -1,9 +1,7 @@
 import RestClientV1 from "./RestClientV1";
 import RestClientV2 from "./RestClientV2";
+import rsql from "./rsql"
 
-export const packageSeparator = '_';
+const packageSeparator = '_';
 
-export default {
-    RestClientV1: RestClientV1,
-    RestClientV2: RestClientV2
-}
+export { RestClientV1, RestClientV2, rsql, packageSeparator }
