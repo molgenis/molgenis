@@ -41,7 +41,7 @@ function toSimpleRef(attribute, labels, constraint) {
     return {
         'type': 'SIMPLE_REF',
         'attribute': attribute,
-        'args': (constraint.operands || [constraint]).map(o => {
+        'values': (constraint.operands || [constraint]).map(o => {
             const value = o.arguments
             return {'label': labels[value], value}
         })

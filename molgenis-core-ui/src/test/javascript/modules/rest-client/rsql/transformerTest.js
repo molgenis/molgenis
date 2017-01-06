@@ -145,7 +145,7 @@ test("Test toSimpleRef one value", assert => {
     const expected = {
         'type': 'SIMPLE_REF',
         'attribute': attribute,
-        'args': [{'label': 'label1', 'value': 'ref1'}]
+        'values': [{'label': 'label1', 'value': 'ref1'}]
     }
     assert.deepEqual(actual, expected);
     assert.end();
@@ -162,7 +162,7 @@ test("Test toSimpleRef two values", assert => {
     const expected = {
         'type': 'SIMPLE_REF',
         'attribute': attribute,
-        'args': [{'label': 'label1', 'value': 'ref1'}, {'label': 'label2', 'value': 'ref2'}]
+        'values': [{'label': 'label1', 'value': 'ref1'}, {'label': 'label2', 'value': 'ref2'}]
     }
     assert.deepEqual(actual, expected);
     assert.end();
