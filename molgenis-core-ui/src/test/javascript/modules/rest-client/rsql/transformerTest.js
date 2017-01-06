@@ -155,6 +155,16 @@ test("Test transformModelPart STRING two string values", assert => {
     assert.end();
 })
 
+test("Test transformModelPart STRING one string value", assert => {
+    const actual = transformModelPart("STRING", undefined, parser.parse("xstring=q=str1"))
+    const expected = {
+        'type': 'TEXT',
+        'lines': ['str1']
+    }
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
 test("Test transformModelPart XREF one value", assert => {
     const actual = transformModelPart("XREF", {"ref1": "label1"}, parser.parse("xxref==ref1"))
     const expected = {

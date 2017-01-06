@@ -89,7 +89,7 @@ export function toRangeLine(constraint) {
 function toText(constraint) {
     return {
         type: 'TEXT',
-        lines: constraint.operands.map(o => o.arguments)
+        lines: constraint.operands ? constraint.operands.map(o => o.arguments) : [constraint.arguments]
     }
 }
 
