@@ -60,10 +60,14 @@ export function transformModelPart(fieldType, labels, constraint) {
     }
 }
 
-// TODO: Write code to collect all arguments mentioned in a constraint
-// function getArguments(constraint) {
-//     return constraint.arguments || constraint.operands.
-// }
+export function getArguments(constraint) {
+    if (constraint.arguments) {
+        return new Set([constraint.arguments])
+    }
+    let result = new Set()
+    constraint.operands.map(o => getArguments(o).forEach(a => result.add(a)))
+    return result;
+}
 
 function toBool(constraint) {
     return {

@@ -1,10 +1,5 @@
 import {parser} from "rest-client/rsql";
-import {
-    toRangeLine,
-    groupBySelector,
-    toComplexLine,
-    transformModelPart
-} from "rest-client/rsql/transformer";
+import {toRangeLine, groupBySelector, toComplexLine, transformModelPart, getArguments} from "rest-client/rsql/transformer";
 import test from "tape";
 
 test('Test that a single comparison gets mapped', assert => {
@@ -241,5 +236,11 @@ test("Test MREF one value selected", assert => {
         'lines': [{'operator': undefined, 'values': [{'label': 'label1', 'value': 'ref1'}]}]
     }
     assert.deepEqual(actual, expected);
+    assert.end();
+})
+
+test("Test getArguments with nested MREF constraint", assert => {
+    const actual = getArguments(parser.parse("(((xmref==ref1;xmref==ref2);(xmref==ref3,xmref==ref4)),(xmref==ref5,xmref==ref1),((xmref==ref2;xmref==ref3);(xmref==ref4,xmref==ref5)))"))
+    assert.deepEqual(actual, new Set(['ref1', 'ref2', 'ref3', 'ref4', 'ref5']))
     assert.end();
 })
