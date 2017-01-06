@@ -52,23 +52,21 @@
     function parseModelPart(attribute, model) {
         var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, {
             'ref1': 'label1',
-            'ref2': 'label2'
+            'ref2': 'label2',
+            'ref3': 'label3',
+            'ref4': 'label4',
+            'ref5': 'label5'
         }, model)
         switch (specificModelPart.type) {
             case 'TEXT':
-                console.log(specificModelPart)
                 return createTextFilter(attribute, specificModelPart)
             case 'RANGE':
-                console.log(specificModelPart)
                 return createRangeFilter(attribute, specificModelPart)
             case 'SIMPLE_REF':
-                console.log(specificModelPart)
                 return createSimpleRefFilter(attribute, specificModelPart)
             case 'COMPLEX_REF':
-                console.log(specificModelPart)
                 return createComplexRefFilter(attribute, specificModelPart)
             case 'BOOL':
-                console.log(specificModelPart)
                 return createBoolFilter(attribute, specificModelPart)
         }
     }
@@ -80,14 +78,10 @@
      * @returns {ComplexFilter}
      */
     function createTextFilter(attribute, model) {
-        var lines = model.lines
-
         // Create a SimpleFilter for every line, operator between lines is always 'OR'
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
-        $.each(lines, function (index) {
-            var line = lines[index]
-
-            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, line)
+        $.each(model.lines, function () {
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, this)
             var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
 
             complexFilterElement.simpleFilter = simpleFilter
@@ -135,48 +129,31 @@
             simpleFilter.getValues().push(value.value)
             simpleFilter.getLabels().push(value.label)
         })
-
-        console.log(simpleFilter.getValues(), simpleFilter.getLabels())
-
         return simpleFilter
     }
 
     function createComplexRefFilter(attribute, model) {
         var lines = model.lines
+        lines.push('OR')
 
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
-        for (var index = 0; index < lines.length; index++) {
+        for (var index = 0; index < lines.length; index += 2) {
             var line = lines[index]
 
-            var simpleFilter
-            var complexFilterElement
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined)
+            $.each(line.values, function () {
+                simpleFilter.getValues().push(this.value)
+                simpleFilter.getLabels().push(this.label)
+            })
+            simpleFilter.operator = line.operator
 
-            if (line.operator !== undefined) {
-                var lineOperator = line.operator
-                var lineValues = line.values
+            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
+            complexFilterElement.simpleFilter = simpleFilter
+            complexFilterElement.operator = lines[index + 1]
 
-                var values = []
-                var labels = []
-
-                $.each(lineValues, function (index) {
-                    var lineValue = lineValues[index]
-                    values.push(lineValue.value)
-                    labels.push(lineValue.label)
-                })
-
-                simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values)
-                simpleFilter.labels = labels
-                simpleFilter.operator = lineOperator
-
-                complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
-                complexFilterElement.simpleFilter = simpleFilter
-            } else {
-                complexFilterElement.operator = line
-                complexFilter.addComplexFilterElement(complexFilterElement)
-            }
+            complexFilter.addComplexFilterElement(complexFilterElement)
         }
-
-        if (complexFilter.getComplexFilterElements().length === 0) complexFilter.addComplexFilterElement(complexFilterElement)
+        console.log(complexFilter)
         return complexFilter
     }
 
