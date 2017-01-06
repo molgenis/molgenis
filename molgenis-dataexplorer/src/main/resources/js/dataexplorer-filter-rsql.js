@@ -26,9 +26,9 @@
         var promises = []
 
         $.each(Object.keys(model), function () {
-            promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + this).then(function (metadata) {
+            promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + this).then(function (attribute) {
                 // Returns a simple or complex filter
-                filters.push(parseModelPart(metadata, model[this]))
+                filters.push(parseModelPart(attribute, model[this]))
             }));
         })
 
@@ -240,5 +240,4 @@
         return rsql
     }
 
-}
-($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top.molgenis = window.top.molgenis || {}));
