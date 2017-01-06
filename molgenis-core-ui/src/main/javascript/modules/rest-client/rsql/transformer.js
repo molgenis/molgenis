@@ -21,7 +21,7 @@ function findSelector(constraint) {
 }
 
 /**
- * Transforms a parsed RSQL constraint to a model element that
+ * Transforms a parsed RSQL constraint to a model element that reflects the way the filter editor looks.
  * @param fieldType the type of the attribute that is filtered upon
  * @param labels the label values to fill in for the arguments in the constraint
  * @param constraint the parsed RSQL constraint to transform

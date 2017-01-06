@@ -5,3 +5,4 @@
 // import './modules/react-components/jobs/JobsTest'
 import './modules/rest-client/rsql/parserTest'
 import './modules/rest-client/rsql/transformerTest'
+import './modules/rest-client/rsql/filtermetafetchTest'

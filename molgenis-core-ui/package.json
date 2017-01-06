@@ -20,6 +20,7 @@
   "homepage": "http://molgenis.github.io/",
   "dependencies": {
     "babel-polyfill": "^6.3.13",
+    "blue-tape": "^1.0.0",
     "bootbox": "4.4.0",
     "bootstrap": "3.3.6",
     "bootstrap-fileinput": "4.2.8",
