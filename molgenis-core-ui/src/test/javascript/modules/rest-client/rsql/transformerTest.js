@@ -115,6 +115,22 @@ test("Test toRange two int ranges", assert => {
     assert.end();
 })
 
+test("Test toRange one int range", assert => {
+    const attribute = {
+        name: "count",
+        label: "count label",
+        type: "INT"
+    }
+    const actual = toRange(attribute, parser.parse("(count=ge=1;count=le=5)"))
+    const expected = {
+        type: "RANGE",
+        attribute,
+        lines: [{from: "1", to: "5"}]
+    }
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
 test("Test toBool", assert => {
     const attribute = {
         name: "xbool",
@@ -254,3 +270,5 @@ test("Test toComplexRef one value selected", assert => {
     assert.deepEqual(actual, expected);
     assert.end();
 })
+
+test("Test toModelPart")

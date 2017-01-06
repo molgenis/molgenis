@@ -25,10 +25,11 @@ function toBool(attribute, constraint) {
 }
 
 function toRange(attribute, constraint) {
+    const operands = constraint.operator === 'OR' ? constraint.operands : [constraint]
     return {
         attribute,
         type: 'RANGE',
-        lines: constraint.operands.map(toRangeLine)
+        lines: operands.map(toRangeLine)
     }
 }
 
