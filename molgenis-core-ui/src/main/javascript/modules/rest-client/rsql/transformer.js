@@ -15,6 +15,43 @@ function findSelector(constraint) {
     return constraint.selector || findSelector(constraint.operands[0])
 }
 
+function transformModelPart(attribute, labels, constraint) {
+    switch (attribute.fieldType) {
+        case 'BOOL':
+            return toBool(attribute, constraint)
+        case 'EMAIL':
+        case 'HTML':
+        case 'HYPERLINK':
+        case 'ENUM':
+        case 'SCRIPT':
+        case 'TEXT':
+        case 'STRING':
+            return toText(attribute, constraint)
+        case 'DATE_TIME':
+        case 'DATE':
+        case 'DECIMAL':
+        case 'INT':
+        case 'LONG':
+            return toRange(attribute, constraint)
+        case 'FILE':
+        case 'XREF':
+        case 'CATEGORICAL':
+        case 'CATEGORICAL_MREF':
+            return toSimpleRef(attribute, labels, constraint)
+        case 'MREF':
+        case 'ONE_TO_MANY':
+            return toComplexRef(attribute, labels, constraint)
+        case 'COMPOUND':
+            throw 'Unsupported data type: ' + attribute.fieldType
+        default:
+            throw 'Unknown data type: ' + attribute.fieldType
+    }
+}
+
+// TODO: Write code to collect all arguments mentioned in a constraint
+// function getArguments(constraint) {
+//     return constraint.arguments || constraint.operands.
+// }
 
 function toBool(attribute, constraint) {
     return {
@@ -77,11 +114,11 @@ function toComplexRefAnd(labels, constraint) {
         // this is the bottom level
         return toComplexLine(labels, constraint)
     }
-    return intersperse((constraint.operands||[constraint]).map(o => toComplexLine(labels, o)), "AND")
+    return intersperse((constraint.operands || [constraint]).map(o => toComplexLine(labels, o)), "AND")
 }
 
 function toComplexRefOr(labels, constraint) {
-    return [].concat.apply([], intersperse((constraint.operands||[constraint]).map(o => toComplexRefAnd(labels, o)), "OR"))
+    return [].concat.apply([], intersperse((constraint.operands || [constraint]).map(o => toComplexRefAnd(labels, o)), "OR"))
 }
 
 function toComplexRef(attribute, labels, constraint) {
@@ -92,6 +129,19 @@ function toComplexRef(attribute, labels, constraint) {
     }
 }
 
-export {groupBySelector, toBool, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
+export {
+    groupBySelector,
+    toBool,
+    toRangeLine,
+    toRange,
+    toText,
+    toSimpleRef,
+    toComplexRef,
+    toComplexLine,
+    transformModelPart
+}
 
-export default {groupBySelector, toBool, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
+export default {
+    groupBySelector,
+    transformModelPart
+}
