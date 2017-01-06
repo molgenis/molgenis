@@ -1,10 +1,5 @@
 import {parser} from "rest-client/rsql";
-import {
-    toRangeLine,
-    groupBySelector,
-    toComplexLine,
-    transformModelPart
-} from "rest-client/rsql/transformer";
+import {toRangeLine, groupBySelector, toComplexLine, transformModelPart, getArguments} from "rest-client/rsql/transformer";
 import test from "tape";
 
 test('Test that a single comparison gets mapped', assert => {
@@ -63,6 +58,26 @@ test('Test that single OR comparison gets mapped', assert => {
         }
     }
 
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
+test('Test that single AND comparison gets mapped', assert => {
+    const actual = groupBySelector(parser.parse("(xint=ge=0;xint=le=5)"))
+    const expected = {
+        "xint": {
+            "operator": "AND",
+            "operands": [{
+                "selector": "xint",
+                "comparison": "=ge=",
+                "arguments": "0"
+            }, {
+                "selector": "xint",
+                "comparison": "=le=",
+                "arguments": "5"
+            }]
+        }
+    }
     assert.deepEqual(actual, expected);
     assert.end();
 })
@@ -130,6 +145,16 @@ test("Test transformModelPart STRING two string values", assert => {
     const expected = {
         'type': 'TEXT',
         'lines': ['str1', 'str2']
+    }
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
+test("Test transformModelPart STRING one string value", assert => {
+    const actual = transformModelPart("STRING", undefined, parser.parse("xstring=q=str1"))
+    const expected = {
+        'type': 'TEXT',
+        'lines': ['str1']
     }
     assert.deepEqual(actual, expected);
     assert.end();
@@ -211,5 +236,11 @@ test("Test MREF one value selected", assert => {
         'lines': [{'operator': undefined, 'values': [{'label': 'label1', 'value': 'ref1'}]}]
     }
     assert.deepEqual(actual, expected);
+    assert.end();
+})
+
+test("Test getArguments with nested MREF constraint", assert => {
+    const actual = getArguments(parser.parse("(((xmref==ref1;xmref==ref2);(xmref==ref3,xmref==ref4)),(xmref==ref5,xmref==ref1),((xmref==ref2;xmref==ref3);(xmref==ref4,xmref==ref5)))"))
+    assert.deepEqual(actual, new Set(['ref1', 'ref2', 'ref3', 'ref4', 'ref5']))
     assert.end();
 })

@@ -2,7 +2,12 @@
  * Transforms parsed filter RSQL to a map
  */
 export function groupBySelector(tree) {
-    const operands = tree.operator === 'AND' ? tree.operands : [tree]
+    let operands
+    if (tree.operands && new Set(tree.operands.map(o => findSelector(o))).size > 1) {
+        operands = tree.operands
+    } else {
+        operands = [tree]
+    }
     return operands.reduce(combine, {})
 }
 
@@ -55,10 +60,14 @@ export function transformModelPart(fieldType, labels, constraint) {
     }
 }
 
-// TODO: Write code to collect all arguments mentioned in a constraint
-// function getArguments(constraint) {
-//     return constraint.arguments || constraint.operands.
-// }
+export function getArguments(constraint) {
+    if (constraint.arguments) {
+        return new Set([constraint.arguments])
+    }
+    let result = new Set()
+    constraint.operands.map(o => getArguments(o).forEach(a => result.add(a)))
+    return result;
+}
 
 function toBool(constraint) {
     return {
@@ -84,7 +93,7 @@ export function toRangeLine(constraint) {
 function toText(constraint) {
     return {
         type: 'TEXT',
-        lines: constraint.operands.map(o => o.arguments)
+        lines: constraint.operands ? constraint.operands.map(o => o.arguments) : [constraint.arguments]
     }
 }
 
