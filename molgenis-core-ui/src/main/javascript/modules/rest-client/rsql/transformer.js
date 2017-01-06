@@ -82,3 +82,5 @@ function toComplexRef(attribute, labels, constraint) {
 }
 
 export {groupBySelector, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
+
+export default {groupBySelector, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
