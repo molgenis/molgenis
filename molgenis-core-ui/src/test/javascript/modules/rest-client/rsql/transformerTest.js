@@ -49,6 +49,27 @@ test('Test that multiple comparisons get mapped', assert => {
     assert.end();
 })
 
+test('Test that single OR comparison gets mapped', assert => {
+    const actual = groupBySelector(parser.parse("(xxref==ref1,xxref==ref2)"))
+    const expected = {
+        "xxref": {
+            "operator": "OR",
+            "operands": [{
+                "selector": "xxref",
+                "comparison": "==",
+                "arguments": "ref1"
+            }, {
+                "selector": "xxref",
+                "comparison": "==",
+                "arguments": "ref2"
+            }]
+        }
+    }
+
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
 test('Test selector in xref', assert => {
     const actual = groupBySelector(parser.parse("xxref.label==ref2"))
     const expected = {

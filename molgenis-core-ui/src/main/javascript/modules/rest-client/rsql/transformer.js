@@ -2,7 +2,8 @@
  * Transforms parsed filter RSQL to a map
  */
 function groupBySelector(tree) {
-    return (tree.operands || [tree]).reduce(combine, {})
+    const operands = tree.operator === 'AND' ? tree.operands : [tree]
+    return operands.reduce(combine, {})
 }
 
 function combine(acc, constraint) {
@@ -82,3 +83,5 @@ function toComplexRef(attribute, labels, constraint) {
 }
 
 export {groupBySelector, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
+
+export default {groupBySelector, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
