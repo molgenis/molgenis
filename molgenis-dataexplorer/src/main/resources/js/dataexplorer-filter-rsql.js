@@ -22,21 +22,23 @@
         var tree = molgenis.rsql.parser.parse(rsql)
         var model = molgenis.rsql.transformer.groupBySelector(tree)
 
-        var attributeQueryString = Object.keys(model).join(',')
+        var attributes = Object.keys(model)
+        var filters = []
+        var promises = []
 
-        restApi.getAsync('/api/v2/' + entityName + '?attrs=' + attributeQueryString).then(function (data) {
-            var attributes = data.meta.attributes
-            var filters = []
-
-            $.each(attributes, function (index) {
-                var attribute = attributes[index]
-                var filter = parseModelPart(attribute, model[attribute.name])
-
-                filters.push(filter)
-            })
-
-            $(document).trigger('updateAttributeFilters', {'filters': filters})
+        $.each(attributes, function (index) {
+            var attributeName = attributes[index]
+            promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName).then(function (metadata) {
+                // Returns a simple or complex filter
+                filters.push(parseModelPart(metadata, model[attributeName]))
+            }));
         })
+
+        Promise.all(promises).then(
+            function () {
+                $(document).trigger('updateAttributeFilters', {'filters': filters})
+            }
+        )
     }
 
     /**
@@ -45,20 +47,28 @@
      *
      * @param attribute
      * @param model
-     * @returns A SimpleFilter or a ComplexFilter
+     *
      */
     function parseModelPart(attribute, model) {
-        var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, undefined, model)
+        var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, {
+            'ref1': 'label1',
+            'ref2': 'label2'
+        }, model)
         switch (specificModelPart.type) {
             case 'TEXT':
+                console.log(specificModelPart)
                 return createTextFilter(attribute, specificModelPart)
             case 'RANGE':
+                console.log(specificModelPart)
                 return createRangeFilter(attribute, specificModelPart)
             case 'SIMPLE_REF':
+                console.log(specificModelPart)
                 return createSimpleRefFilter(attribute, specificModelPart)
             case 'COMPLEX_REF':
+                console.log(specificModelPart)
                 return createComplexRefFilter(attribute, specificModelPart)
             case 'BOOL':
+                console.log(specificModelPart)
                 return createBoolFilter(attribute, specificModelPart)
         }
     }
@@ -116,19 +126,17 @@
      * @returns {SimpleFilter}
      */
     function createSimpleRefFilter(attribute, model) {
-        var lines = model.values
+        var values = model.values
 
-        var values = []
-        var labels = []
+        var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined)
+        $.each(values, function (index) {
+            var value = values[index]
 
-        $.each(lines, function (index) {
-            var line = lines[index]
-            values.push(line.value)
-            labels.push(line.label)
+            simpleFilter.getValues().push(value.value)
+            simpleFilter.getLabels().push(value.label)
         })
 
-        var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, values)
-        simpleFilter.labels = labels
+        console.log(simpleFilter.getValues(), simpleFilter.getLabels())
 
         return simpleFilter
     }
@@ -137,11 +145,11 @@
         var lines = model.lines
 
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
-        $.each(lines, function (index) {
+        for (var index = 0; index < lines.length; index++) {
             var line = lines[index]
 
             var simpleFilter
-            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
+            var complexFilterElement
 
             if (line.operator !== undefined) {
                 var lineOperator = line.operator
@@ -160,14 +168,15 @@
                 simpleFilter.labels = labels
                 simpleFilter.operator = lineOperator
 
+                complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
                 complexFilterElement.simpleFilter = simpleFilter
-                complexFilter.addComplexFilterElement(complexFilterElement)
             } else {
-                complexFilterElement.simpleFilter = null
                 complexFilterElement.operator = line
                 complexFilter.addComplexFilterElement(complexFilterElement)
             }
-        })
+        }
+
+        if (complexFilter.getComplexFilterElements().length === 0) complexFilter.addComplexFilterElement(complexFilterElement)
         return complexFilter
     }
 
@@ -179,9 +188,7 @@
      * @returns {SimpleFilter}
      */
     function createBoolFilter(attribute, model) {
-        var value = model.args
-        var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, value);
-
+        var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, model.value);
         return simpleFilter
     }
 
