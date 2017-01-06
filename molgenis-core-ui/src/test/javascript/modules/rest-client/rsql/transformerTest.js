@@ -100,15 +100,9 @@ test("Test toRangeLine for int values one specified", assert => {
 })
 
 test("Test toRange two int ranges", assert => {
-    const attribute = {
-        name: "count",
-        label: "count label",
-        type: "INT"
-    }
-    const actual = toRange(attribute, parser.parse("(count=ge=1;count=le=5),(count=ge=8;count=le=10)"))
+    const actual = toRange(parser.parse("(count=ge=1;count=le=5),(count=ge=8;count=le=10)"))
     const expected = {
         type: "RANGE",
-        attribute,
         lines: [{from: "1", to: "5"}, {from: "8", to: "10"}]
     }
     assert.deepEqual(actual, expected);
@@ -116,15 +110,9 @@ test("Test toRange two int ranges", assert => {
 })
 
 test("Test toRange one int range", assert => {
-    const attribute = {
-        name: "count",
-        label: "count label",
-        type: "INT"
-    }
-    const actual = toRange(attribute, parser.parse("(count=ge=1;count=le=5)"))
+    const actual = toRange(parser.parse("(count=ge=1;count=le=5)"))
     const expected = {
         type: "RANGE",
-        attribute,
         lines: [{from: "1", to: "5"}]
     }
     assert.deepEqual(actual, expected);
@@ -132,15 +120,9 @@ test("Test toRange one int range", assert => {
 })
 
 test("Test toBool", assert => {
-    const attribute = {
-        name: "xbool",
-        label: "xbool label",
-        type: "BOOL"
-    }
-    const actual = toBool(attribute, parser.parse("xbool==false"))
+    const actual = toBool(parser.parse("xbool==false"))
     const expected = {
         'type': 'BOOL',
-        'attribute': attribute,
         'value': 'false'
     }
     assert.deepEqual(actual, expected);
@@ -148,19 +130,9 @@ test("Test toBool", assert => {
 })
 
 test("Test toText two string values", assert => {
-    const attribute = {
-        name: "xstring",
-        label: "xstring label",
-        type: "STRING"
-    }
-    const actual = toText(
-        attribute,
-        parser.parse("(xstring=q=str1,xstring=q=str2)")
-    )
-
+    const actual = toText(parser.parse("(xstring=q=str1,xstring=q=str2)"))
     const expected = {
         'type': 'TEXT',
-        'attribute': attribute,
         'lines': ['str1', 'str2']
     }
     assert.deepEqual(actual, expected);
@@ -168,15 +140,9 @@ test("Test toText two string values", assert => {
 })
 
 test("Test toSimpleRef one value", assert => {
-    const attribute = {
-        name: "xxref",
-        label: "xxref label",
-        type: "XREF"
-    }
-    const actual = toSimpleRef(attribute, {"ref1": "label1"}, parser.parse("xxref==ref1"))
+    const actual = toSimpleRef({"ref1": "label1"}, parser.parse("xxref==ref1"))
     const expected = {
         'type': 'SIMPLE_REF',
-        'attribute': attribute,
         'values': [{'label': 'label1', 'value': 'ref1'}]
     }
     assert.deepEqual(actual, expected);
@@ -184,16 +150,10 @@ test("Test toSimpleRef one value", assert => {
 })
 
 test("Test toSimpleRef two values", assert => {
-    const attribute = {
-        name: "xxref",
-        label: "xxref label",
-        type: "XREF"
-    }
-    const actual = toSimpleRef(attribute, {"ref1": "label1", "ref2": "label2"},
+    const actual = toSimpleRef({"ref1": "label1", "ref2": "label2"},
         parser.parse("(xxref==ref1,xxref==ref2)"))
     const expected = {
         'type': 'SIMPLE_REF',
-        'attribute': attribute,
         'values': [{'label': 'label1', 'value': 'ref1'}, {'label': 'label2', 'value': 'ref2'}]
     }
     assert.deepEqual(actual, expected);
@@ -208,13 +168,7 @@ test("Test toComplexLine one value selected", assert => {
 })
 
 test("Test toComplexRef five lines with random ANDs and ORs", assert => {
-    const attribute = {
-        name: "xmref",
-        label: "xmref label",
-        type: "MREF"
-    }
-
-    const actual = toComplexRef(attribute, {
+    const actual = toComplexRef({
             "ref1": "label1",
             "ref2": "label2",
             "ref3": "label3",
@@ -224,7 +178,6 @@ test("Test toComplexRef five lines with random ANDs and ORs", assert => {
         parser.parse("(((xmref==ref1;xmref==ref2);(xmref==ref3,xmref==ref4)),(xmref==ref5,xmref==ref1),((xmref==ref2;xmref==ref3);(xmref==ref4,xmref==ref5)))"))
     const expected = {
         'type': 'COMPLEX_REF',
-        'attribute': attribute,
         'lines': [
             {
                 operator: 'AND',
@@ -256,15 +209,9 @@ test("Test toComplexRef five lines with random ANDs and ORs", assert => {
 })
 
 test("Test toComplexRef one value selected", assert => {
-    const attribute = {
-        name: "xmref",
-        label: "xmref label",
-        type: "MREF"
-    }
-    const actual = toComplexRef(attribute, {"ref1": "label1"}, parser.parse("xmref==ref1"))
+    const actual = toComplexRef({"ref1": "label1"}, parser.parse("xmref==ref1"))
     const expected = {
         'type': 'COMPLEX_REF',
-        'attribute': attribute,
         'lines': [{'operator': undefined, 'values': [{'label': 'label1', 'value': 'ref1'}]}]
     }
     assert.deepEqual(actual, expected);
