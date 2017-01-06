@@ -6,7 +6,8 @@ import {
     toText,
     toSimpleRef,
     toComplexRef,
-    toComplexLine
+    toComplexLine,
+    toBool
 } from "rest-client/rsql/transformer";
 import test from "tape";
 
@@ -114,6 +115,37 @@ test("Test toRange two int ranges", assert => {
     assert.end();
 })
 
+test("Test toRange one int range", assert => {
+    const attribute = {
+        name: "count",
+        label: "count label",
+        type: "INT"
+    }
+    const actual = toRange(attribute, parser.parse("(count=ge=1;count=le=5)"))
+    const expected = {
+        type: "RANGE",
+        attribute,
+        lines: [{from: "1", to: "5"}]
+    }
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
+test("Test toBool", assert => {
+    const attribute = {
+        name: "xbool",
+        label: "xbool label",
+        type: "BOOL"
+    }
+    const actual = toBool(attribute, parser.parse("xbool==false"))
+    const expected = {
+        'type': 'BOOL',
+        'attribute': attribute,
+        'value': 'false'
+    }
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
 
 test("Test toText two string values", assert => {
     const attribute = {
@@ -238,3 +270,5 @@ test("Test toComplexRef one value selected", assert => {
     assert.deepEqual(actual, expected);
     assert.end();
 })
+
+test("Test toModelPart")
