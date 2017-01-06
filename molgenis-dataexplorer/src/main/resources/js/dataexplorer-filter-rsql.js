@@ -12,12 +12,16 @@
         var self = molgenis.dataexplorer.rsql = molgenis.dataexplorer.rsql || {};
 
         /**
-         * Create filters JavaScript components from RSQL
+         * Transform an RSQL query string to a set of Simple and Complex filters
+         *
+         * @param rsql
+         * @param restApi
+         * @param entityName
          */
         self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
             var tree = molgenis.rsql.parser.parse(rsql)
-            var model = molgenis.rsql.groupBySelector(tree)
-            console.log(model)
+            var model = molgenis.rsql.transformer.groupBySelector(tree)
+
             var attributeQueryString = Object.keys(model).join(',')
 
             restApi.getAsync('/api/v2/' + entityName + '?attrs=' + attributeQueryString).then(function (data) {
@@ -36,7 +40,6 @@
         }
 
         function parseModelPart(attribute, model) {
-            // Very simple filter e.g. BOOL == false
             switch (attribute.fieldType) {
                 case 'EMAIL':
                 case 'HTML':
@@ -54,13 +57,13 @@
                     return createRangeFilter(attribute, model)
                 case 'FILE':
                 case 'XREF':
+                case 'CATEGORICAL':
+                case 'CATEGORICAL_MREF':
                     return createSimpleRefFilter(attribute, model)
                 case 'MREF':
                 case 'ONE_TO_MANY':
                     return createComplexRefFilter(attribute, model)
                 case 'BOOL':
-                case 'CATEGORICAL':
-                case 'CATEGORICAL_MREF':
                     return createSimpleFilter(attribute, model.arguments)
                 case 'COMPOUND' :
                     throw 'Unsupported data type: ' + attribute.fieldType;
@@ -70,26 +73,39 @@
         }
 
         function createTextFilter(attribute, model) {
-            var operands = model.operands
-            var operator = model.operator
+            var textModel = molgenis.rsql.transformer.toText(attribute, model)
+            var lines = textModel.lines
 
+            // Create a SimpleFilter for every line, operator between lines is always 'OR'
             var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+            $.each(lines, function (index) {
+                var line = lines[index]
 
-            $.each(operands, function (index) {
-                var operand = operands[index]
-                var value = operand.arguments
-
-                var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
+                var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, line);
                 var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
 
                 complexFilterElement.simpleFilter = simpleFilter;
-                complexFilterElement.operator = operator;
                 complexFilter.addComplexFilterElement(complexFilterElement);
             })
             return complexFilter
         }
 
         function createRangeFilter(attribute, model) {
+            var rangeModel = molgenis.rsql.transformer.toRange(attribute, model)
+            var lines = rangeModel.lines
+
+            // Create one SimpleFilter for every from - to line, operator between lines is always 'OR'
+            var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+            $.each(lines, function (index) {
+                var line = lines[index]
+
+                var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, line.from, line.to);
+                var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+
+                complexFilterElement.simpleFilter = simpleFilter;
+                complexFilter.addComplexFilterElement(complexFilterElement);
+            })
+            return complexFilter
         }
 
         function createSimpleRefFilter(attribute, model) {
