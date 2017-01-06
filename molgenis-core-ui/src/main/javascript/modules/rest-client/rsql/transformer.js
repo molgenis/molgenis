@@ -15,10 +15,10 @@ function findSelector(constraint) {
     return constraint.selector || findSelector(constraint.operands[0])
 }
 
-function transformModelPart(attribute, labels, constraint) {
-    switch (attribute.fieldType) {
+function transformModelPart(fieldType, labels, constraint) {
+    switch (fieldType) {
         case 'BOOL':
-            return toBool(attribute, constraint)
+            return toBool(constraint)
         case 'EMAIL':
         case 'HTML':
         case 'HYPERLINK':
@@ -26,25 +26,25 @@ function transformModelPart(attribute, labels, constraint) {
         case 'SCRIPT':
         case 'TEXT':
         case 'STRING':
-            return toText(attribute, constraint)
+            return toText(constraint)
         case 'DATE_TIME':
         case 'DATE':
         case 'DECIMAL':
         case 'INT':
         case 'LONG':
-            return toRange(attribute, constraint)
+            return toRange(constraint)
         case 'FILE':
         case 'XREF':
         case 'CATEGORICAL':
         case 'CATEGORICAL_MREF':
-            return toSimpleRef(attribute, labels, constraint)
+            return toSimpleRef(labels, constraint)
         case 'MREF':
         case 'ONE_TO_MANY':
-            return toComplexRef(attribute, labels, constraint)
+            return toComplexRef(labels, constraint)
         case 'COMPOUND':
-            throw 'Unsupported data type: ' + attribute.fieldType
+            throw 'Unsupported data type: ' + fieldType
         default:
-            throw 'Unknown data type: ' + attribute.fieldType
+            throw 'Unknown data type: ' + fieldType
     }
 }
 
@@ -53,41 +53,37 @@ function transformModelPart(attribute, labels, constraint) {
 //     return constraint.arguments || constraint.operands.
 // }
 
-function toBool(attribute, constraint) {
+function toBool(constraint) {
     return {
-        attribute,
         type: "BOOL",
         value: constraint.arguments
     }
 }
 
-function toRange(attribute, constraint) {
+function toRange(constraint) {
     const operands = constraint.operator === 'OR' ? constraint.operands : [constraint]
     return {
-        attribute,
         type: 'RANGE',
         lines: operands.map(toRangeLine)
     }
 }
 
-function toRangeLine(constraint) {
+export function toRangeLine(constraint) {
     return (constraint.operands || [constraint]).reduce((acc, operand) => {
         return {...acc, [operand.comparison === "=ge=" ? "from" : "to"]: operand.arguments}
     }, {})
 }
 
-function toText(attribute, constraint) {
+export function toText(constraint) {
     return {
-        attribute,
         type: 'TEXT',
         lines: constraint.operands.map(o => o.arguments)
     }
 }
 
-function toSimpleRef(attribute, labels, constraint) {
+export function toSimpleRef(labels, constraint) {
     return {
         'type': 'SIMPLE_REF',
-        'attribute': attribute,
         'values': (constraint.operands || [constraint]).map(o => {
             const value = o.arguments
             return {'label': labels[value], value}
@@ -95,7 +91,7 @@ function toSimpleRef(attribute, labels, constraint) {
     }
 }
 
-function toComplexLine(labels, group) {
+export function toComplexLine(labels, group) {
     return {
         'operator': group.operator,
         'values': (group.operands || [group.arguments]).map(o => {
@@ -117,14 +113,13 @@ function toComplexRefAnd(labels, constraint) {
     return intersperse((constraint.operands || [constraint]).map(o => toComplexLine(labels, o)), "AND")
 }
 
-function toComplexRefOr(labels, constraint) {
+export function toComplexRefOr(labels, constraint) {
     return [].concat.apply([], intersperse((constraint.operands || [constraint]).map(o => toComplexRefAnd(labels, o)), "OR"))
 }
 
-function toComplexRef(attribute, labels, constraint) {
+export function toComplexRef(labels, constraint) {
     return {
         'type': 'COMPLEX_REF',
-        'attribute': attribute,
         'lines': toComplexRefOr(labels, constraint)
     }
 }
