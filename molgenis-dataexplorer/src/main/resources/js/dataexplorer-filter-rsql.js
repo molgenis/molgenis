@@ -39,42 +39,38 @@
             })
         }
 
+        /**
+         *
+         *
+         *
+         * @param attribute
+         * @param model
+         * @returns A SimpleFilter or a ComplexFilter
+         */
         function parseModelPart(attribute, model) {
-            switch (attribute.fieldType) {
-                case 'EMAIL':
-                case 'HTML':
-                case 'HYPERLINK':
-                case 'ENUM':
-                case 'SCRIPT':
+            var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute, undefined, model)
+            switch (specificModelPart.type) {
                 case 'TEXT':
-                case 'STRING':
-                    return createTextFilter(attribute, model)
-                case 'DATE_TIME':
-                case 'DATE':
-                case 'DECIMAL':
-                case 'INT':
-                case 'LONG':
-                    return createRangeFilter(attribute, model)
-                case 'FILE':
-                case 'XREF':
-                case 'CATEGORICAL':
-                case 'CATEGORICAL_MREF':
-                    return createSimpleRefFilter(attribute, model)
-                case 'MREF':
-                case 'ONE_TO_MANY':
-                    return createComplexRefFilter(attribute, model)
+                    return createTextFilter(attribute, specificModelPart)
+                case 'RANGE':
+                    return createRangeFilter(attribute, specificModelPart)
+                case 'SIMPLE_REF':
+                    return createSimpleRefFilter(attribute, specificModelPart)
+                case 'COMPLEX_REF':
+                    return createComplexRefFilter(attribute, specificModelPart)
                 case 'BOOL':
-                    return createSimpleFilter(attribute, model.arguments)
-                case 'COMPOUND' :
-                    throw 'Unsupported data type: ' + attribute.fieldType;
-                default:
-                    throw 'Unknown data type: ' + attribute.fieldType;
+                    return createBoolFilter(attribute, specificModelPart)
             }
         }
 
+        /**
+         *
+         * @param attribute
+         * @param model
+         * @returns {ComplexFilter}
+         */
         function createTextFilter(attribute, model) {
-            var textModel = molgenis.rsql.transformer.toText(attribute, model)
-            var lines = textModel.lines
+            var lines = model.lines
 
             // Create a SimpleFilter for every line, operator between lines is always 'OR'
             var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
@@ -90,9 +86,14 @@
             return complexFilter
         }
 
+        /**
+         *
+         * @param attribute
+         * @param model
+         * @returns {ComplexFilter}
+         */
         function createRangeFilter(attribute, model) {
-            var rangeModel = molgenis.rsql.transformer.toRange(attribute, model)
-            var lines = rangeModel.lines
+            var lines = model.lines
 
             // Create one SimpleFilter for every from - to line, operator between lines is always 'OR'
             var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
@@ -108,9 +109,14 @@
             return complexFilter
         }
 
+        /**
+         *
+         * @param attribute
+         * @param model
+         * @returns {SimpleFilter}
+         */
         function createSimpleRefFilter(attribute, model) {
-            var simpleRefModel = molgenis.transformer.toSimpleRef(attribute, model)
-            var args = simpleRefModel.args
+            var args = model.args
 
             var values = []
             var labels = []
@@ -128,40 +134,21 @@
         }
 
         function createComplexRefFilter(attribute, model) {
+
         }
 
         /**
-         * Creates a simple filter, corresponding to a single line in the filter forms
+         * Creates a simple filter for boolean attributes
          *
-         * @param attribute the attribute to filter on
-         * @param value the values to be compared to
-         * @param labels the labels of the values, only relevant for reference type attributes
-         * @param operator whether the comparisons in this filter are to be ANDed or ORred with each other,
-         * only relevant if more than one value is provided and these values are also within the same line (e.g. xref filters)
+         * @param attribute
+         * @param model
+         * @returns {SimpleFilter}
          */
-        function createSimpleFilter(attribute, value, fromValue, toValue, labels, operator) {
-            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, value);
-            simpleFilter.labels = labels
-            simpleFilter.operator = operator
+        function createBoolFilter(attribute, model) {
+            var value = model.args
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, value);
 
             return simpleFilter
-        }
-
-        /**
-         * Creates complex filters with a list of values
-         * For reference types, labels are added to the SimpleFilter objects
-         */
-        function createComplexFilter(attribute, values, labels, andOr, fromValue, toValue) {
-            var simpleFilter = createSimpleFilter(attribute, values, labels, andOr, fromValue, toValue)
-
-            var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
-            complexFilterElement.simpleFilter = simpleFilter;
-            complexFilterElement.operator = andOr;
-
-            var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
-            complexFilter.addComplexFilterElement(complexFilterElement);
-
-            return complexFilter
         }
 
         /**
