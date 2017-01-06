@@ -15,6 +15,15 @@ function findSelector(constraint) {
     return constraint.selector || findSelector(constraint.operands[0])
 }
 
+
+function toBool(attribute, constraint) {
+    return {
+        attribute,
+        type: "BOOL",
+        value: constraint.arguments
+    }
+}
+
 function toRange(attribute, constraint) {
     return {
         attribute,
@@ -82,6 +91,6 @@ function toComplexRef(attribute, labels, constraint) {
     }
 }
 
-export {groupBySelector, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
+export {groupBySelector, toBool, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
 
-export default {groupBySelector, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
+export default {groupBySelector, toBool, toRangeLine, toRange, toText, toSimpleRef, toComplexRef, toComplexLine}
