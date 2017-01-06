@@ -1,7 +1,7 @@
 /**
  * Transforms parsed filter RSQL to a map
  */
-function groupBySelector(tree) {
+export function groupBySelector(tree) {
     const operands = tree.operator === 'AND' ? tree.operands : [tree]
     return operands.reduce(combine, {})
 }
@@ -15,7 +15,14 @@ function findSelector(constraint) {
     return constraint.selector || findSelector(constraint.operands[0])
 }
 
-function transformModelPart(fieldType, labels, constraint) {
+/**
+ * Transforms a parsed RSQL constraint to a model element that
+ * @param fieldType the type of the attribute that is filtered upon
+ * @param labels the label values to fill in for the arguments in the constraint
+ * @param constraint the parsed RSQL constraint to transform
+ * @returns model element with a type
+ */
+export function transformModelPart(fieldType, labels, constraint) {
     switch (fieldType) {
         case 'BOOL':
             return toBool(constraint)
@@ -74,14 +81,14 @@ export function toRangeLine(constraint) {
     }, {})
 }
 
-export function toText(constraint) {
+function toText(constraint) {
     return {
         type: 'TEXT',
         lines: constraint.operands.map(o => o.arguments)
     }
 }
 
-export function toSimpleRef(labels, constraint) {
+function toSimpleRef(labels, constraint) {
     return {
         'type': 'SIMPLE_REF',
         'values': (constraint.operands || [constraint]).map(o => {
@@ -113,27 +120,15 @@ function toComplexRefAnd(labels, constraint) {
     return intersperse((constraint.operands || [constraint]).map(o => toComplexLine(labels, o)), "AND")
 }
 
-export function toComplexRefOr(labels, constraint) {
+function toComplexRefOr(labels, constraint) {
     return [].concat.apply([], intersperse((constraint.operands || [constraint]).map(o => toComplexRefAnd(labels, o)), "OR"))
 }
 
-export function toComplexRef(labels, constraint) {
+function toComplexRef(labels, constraint) {
     return {
         'type': 'COMPLEX_REF',
         'lines': toComplexRefOr(labels, constraint)
     }
-}
-
-export {
-    groupBySelector,
-    toBool,
-    toRangeLine,
-    toRange,
-    toText,
-    toSimpleRef,
-    toComplexRef,
-    toComplexLine,
-    transformModelPart
 }
 
 export default {

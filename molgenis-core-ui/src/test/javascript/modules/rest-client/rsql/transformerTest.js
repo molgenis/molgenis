@@ -1,13 +1,9 @@
 import {parser} from "rest-client/rsql";
 import {
-    toRange,
     toRangeLine,
     groupBySelector,
-    toText,
-    toSimpleRef,
-    toComplexRef,
     toComplexLine,
-    toBool
+    transformModelPart
 } from "rest-client/rsql/transformer";
 import test from "tape";
 
@@ -99,8 +95,8 @@ test("Test toRangeLine for int values one specified", assert => {
     assert.end();
 })
 
-test("Test toRange two int ranges", assert => {
-    const actual = toRange(parser.parse("(count=ge=1;count=le=5),(count=ge=8;count=le=10)"))
+test("Test transformModelPart INT two int ranges", assert => {
+    const actual = transformModelPart("INT", undefined, parser.parse("(count=ge=1;count=le=5),(count=ge=8;count=le=10)"))
     const expected = {
         type: "RANGE",
         lines: [{from: "1", to: "5"}, {from: "8", to: "10"}]
@@ -109,8 +105,8 @@ test("Test toRange two int ranges", assert => {
     assert.end();
 })
 
-test("Test toRange one int range", assert => {
-    const actual = toRange(parser.parse("(count=ge=1;count=le=5)"))
+test("Test transformModelPart INT one int range", assert => {
+    const actual = transformModelPart("INT", undefined, parser.parse("(count=ge=1;count=le=5)"))
     const expected = {
         type: "RANGE",
         lines: [{from: "1", to: "5"}]
@@ -119,8 +115,8 @@ test("Test toRange one int range", assert => {
     assert.end();
 })
 
-test("Test toBool", assert => {
-    const actual = toBool(parser.parse("xbool==false"))
+test("Test transformModelPart BOOL", assert => {
+    const actual = transformModelPart("BOOL", undefined, parser.parse("xbool==false"))
     const expected = {
         'type': 'BOOL',
         'value': 'false'
@@ -129,8 +125,8 @@ test("Test toBool", assert => {
     assert.end();
 })
 
-test("Test toText two string values", assert => {
-    const actual = toText(parser.parse("(xstring=q=str1,xstring=q=str2)"))
+test("Test transformModelPart STRING two string values", assert => {
+    const actual = transformModelPart("STRING", undefined, parser.parse("(xstring=q=str1,xstring=q=str2)"))
     const expected = {
         'type': 'TEXT',
         'lines': ['str1', 'str2']
@@ -139,8 +135,8 @@ test("Test toText two string values", assert => {
     assert.end();
 })
 
-test("Test toSimpleRef one value", assert => {
-    const actual = toSimpleRef({"ref1": "label1"}, parser.parse("xxref==ref1"))
+test("Test transformModelPart XREF one value", assert => {
+    const actual = transformModelPart("XREF", {"ref1": "label1"}, parser.parse("xxref==ref1"))
     const expected = {
         'type': 'SIMPLE_REF',
         'values': [{'label': 'label1', 'value': 'ref1'}]
@@ -149,8 +145,8 @@ test("Test toSimpleRef one value", assert => {
     assert.end();
 })
 
-test("Test toSimpleRef two values", assert => {
-    const actual = toSimpleRef({"ref1": "label1", "ref2": "label2"},
+test("Test transformModelPart XREF two values", assert => {
+    const actual = transformModelPart("XREF", {"ref1": "label1", "ref2": "label2"},
         parser.parse("(xxref==ref1,xxref==ref2)"))
     const expected = {
         'type': 'SIMPLE_REF',
@@ -168,7 +164,7 @@ test("Test toComplexLine one value selected", assert => {
 })
 
 test("Test toComplexRef five lines with random ANDs and ORs", assert => {
-    const actual = toComplexRef({
+    const actual = transformModelPart("MREF", {
             "ref1": "label1",
             "ref2": "label2",
             "ref3": "label3",
@@ -208,8 +204,8 @@ test("Test toComplexRef five lines with random ANDs and ORs", assert => {
     assert.end();
 })
 
-test("Test toComplexRef one value selected", assert => {
-    const actual = toComplexRef({"ref1": "label1"}, parser.parse("xmref==ref1"))
+test("Test MREF one value selected", assert => {
+    const actual = transformModelPart("MREF", {"ref1": "label1"}, parser.parse("xmref==ref1"))
     const expected = {
         'type': 'COMPLEX_REF',
         'lines': [{'operator': undefined, 'values': [{'label': 'label1', 'value': 'ref1'}]}]
@@ -217,5 +213,3 @@ test("Test toComplexRef one value selected", assert => {
     assert.deepEqual(actual, expected);
     assert.end();
 })
-
-test("Test toModelPart")
