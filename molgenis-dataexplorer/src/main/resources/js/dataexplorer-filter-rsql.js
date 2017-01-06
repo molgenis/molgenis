@@ -22,15 +22,13 @@
         var tree = molgenis.rsql.parser.parse(rsql)
         var model = molgenis.rsql.transformer.groupBySelector(tree)
 
-        var attributes = Object.keys(model)
         var filters = []
         var promises = []
 
-        $.each(attributes, function (index) {
-            var attributeName = attributes[index]
-            promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName).then(function (metadata) {
+        $.each(Object.keys(model), function () {
+            promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + this).then(function (metadata) {
                 // Returns a simple or complex filter
-                filters.push(parseModelPart(metadata, model[attributeName]))
+                filters.push(parseModelPart(metadata, model[this]))
             }));
         })
 
@@ -50,6 +48,8 @@
      *
      */
     function parseModelPart(attribute, model) {
+
+
         var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, {
             'ref1': 'label1',
             'ref2': 'label2',
@@ -57,6 +57,7 @@
             'ref4': 'label4',
             'ref5': 'label5'
         }, model)
+
         switch (specificModelPart.type) {
             case 'TEXT':
                 return createTextFilter(attribute, specificModelPart)
@@ -97,14 +98,10 @@
      * @returns {ComplexFilter}
      */
     function createRangeFilter(attribute, model) {
-        var lines = model.lines
-
         // Create one SimpleFilter for every from - to line, operator between lines is always 'OR'
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
-        $.each(lines, function (index) {
-            var line = lines[index]
-
-            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, line.from, line.to)
+        $.each(model.lines, function () {
+            var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, this.from, this.to)
             var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
 
             complexFilterElement.simpleFilter = simpleFilter
@@ -120,18 +117,20 @@
      * @returns {SimpleFilter}
      */
     function createSimpleRefFilter(attribute, model) {
-        var values = model.values
-
         var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined)
-        $.each(values, function (index) {
-            var value = values[index]
-
-            simpleFilter.getValues().push(value.value)
-            simpleFilter.getLabels().push(value.label)
+        $.each(model.values, function () {
+            simpleFilter.getValues().push(this.value)
+            simpleFilter.getLabels().push(this.label)
         })
         return simpleFilter
     }
 
+    /**
+     *
+     * @param attribute
+     * @param model
+     * @returns {ComplexFilter}
+     */
     function createComplexRefFilter(attribute, model) {
         var lines = model.lines
         lines.push('OR')
