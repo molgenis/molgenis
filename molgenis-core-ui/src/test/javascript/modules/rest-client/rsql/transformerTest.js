@@ -67,6 +67,26 @@ test('Test that single OR comparison gets mapped', assert => {
     assert.end();
 })
 
+test('Test that single AND comparison gets mapped', assert => {
+    const actual = groupBySelector(parser.parse("(xint=ge=0;xint=le=5)"))
+    const expected = {
+        "xint": {
+            "operator": "AND",
+            "operands": [{
+                "selector": "xint",
+                "comparison": "=ge=",
+                "arguments": "0"
+            }, {
+                "selector": "xint",
+                "comparison": "=le=",
+                "arguments": "5"
+            }]
+        }
+    }
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
+
 test('Test selector in xref', assert => {
     const actual = groupBySelector(parser.parse("xxref.label==ref2"))
     const expected = {

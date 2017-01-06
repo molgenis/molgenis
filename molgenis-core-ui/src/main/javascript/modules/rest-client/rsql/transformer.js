@@ -2,7 +2,12 @@
  * Transforms parsed filter RSQL to a map
  */
 export function groupBySelector(tree) {
-    const operands = tree.operator === 'AND' ? tree.operands : [tree]
+    let operands
+    if (tree.operands && new Set(tree.operands.map(o => findSelector(o))).size > 1) {
+        operands = tree.operands
+    } else {
+        operands = [tree]
+    }
     return operands.reduce(combine, {})
 }
 
