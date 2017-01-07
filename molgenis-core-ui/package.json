@@ -5,7 +5,7 @@
   "scripts": {
     "watch": "webpack -d --watch",
     "build": "webpack -d",
-    "test": "babel-node ./src/test/javascript/index.js | faucet",
+    "test": "NODE_ENV=test babel-node ./src/test/javascript/index.js",
     "webpack-stats": "webpack --profile --json > target/json.stats"
   },
   "repository": {
@@ -80,20 +80,24 @@
       "es2015",
       "stage-0"
     ],
-    "plugins": [
-      [
-        "babel-plugin-module-alias",
-        [
-          {
-            "src": "./src/main/javascript/modules/react-components",
-            "expose": "react-components"
-          },
-          {
-            "src": "./src/main/javascript/modules/rest-client",
-            "expose": "rest-client"
-          }
+    "env": {
+      "test": {
+        "plugins": [
+          [
+            "babel-plugin-module-alias",
+            [
+              {
+                "src": "./src/main/javascript/modules/react-components",
+                "expose": "react-components"
+              },
+              {
+                "src": "./src/main/javascript/modules/rest-client",
+                "expose": "rest-client"
+              }
+            ]
+          ]
         ]
-      ]
-    ]
+      }
+    }
   }
 }
