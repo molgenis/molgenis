@@ -20,7 +20,6 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -42,11 +41,12 @@ import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.Permission.*;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAuthenticated;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -67,48 +67,44 @@ public class DataExplorerController extends MolgenisPluginController
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
 	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
 	public static final String MOD_ANNOTATORS = "annotators";
-	public static final String MOD_ENTITIESREPORT = "entitiesreport";
-	public static final String MOD_DATA = "data";
+	private static final String MOD_ENTITIESREPORT = "entitiesreport";
+	private static final String MOD_DATA = "data";
+
+	private final DataExplorerSettings dataExplorerSettings;
+	private final GenomicDataSettings genomicDataSettings;
+	private final DataService dataService;
+	private final MolgenisPermissionService molgenisPermissionService;
+	private final FreeMarkerConfigurer freemarkerConfigurer;
+	private final Gson gson;
+	private final LanguageService languageService;
+	private final AttributeFactory attrMetaFactory;
 
 	@Autowired
-	private DataExplorerSettings dataExplorerSettings;
-
-	@Autowired
-	private GenomicDataSettings genomicDataSettings;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
-
-	@Autowired
-	private FreeMarkerConfigurer freemarkerConfigurer;
-
-	@Autowired
-	MenuManagerService menuManager;
-
-	@Autowired
-	private Gson gson;
-
-	@Autowired
-	private LanguageService languageService;
-
-	@Autowired
-	private AttributeFactory attrMetaFactory;
-
-	public DataExplorerController()
+	public DataExplorerController(DataExplorerSettings dataExplorerSettings, GenomicDataSettings genomicDataSettings,
+			DataService dataService, MolgenisPermissionService molgenisPermissionService,
+			FreeMarkerConfigurer freemarkerConfigurer, Gson gson, LanguageService languageService,
+			AttributeFactory attrMetaFactory)
 	{
 		super(URI);
+
+		this.dataExplorerSettings = dataExplorerSettings;
+		this.genomicDataSettings = genomicDataSettings;
+		this.dataService = dataService;
+		this.molgenisPermissionService = molgenisPermissionService;
+		this.freemarkerConfigurer = freemarkerConfigurer;
+		this.gson = gson;
+		this.languageService = languageService;
+		this.attrMetaFactory = attrMetaFactory;
 	}
 
 	/**
-	 * Show the explorer page
+	 * Initializes the data explorer page
 	 *
-	 * @param model
-	 * @return the view name
+	 * @param selectedEntityName The selected entity
+	 * @param model              Spring MVC model
+	 * @throws Exception
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = GET)
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
 			throws Exception
 	{
@@ -129,7 +125,7 @@ public class DataExplorerController extends MolgenisPluginController
 			{
 				StringBuilder message = new StringBuilder(
 						"Entity does not exist or you do not have permission on this entity");
-				if (!SecurityUtils.currentUserIsAuthenticated())
+				if (!currentUserIsAuthenticated())
 				{
 					message.append(", log in to view more entities");
 				}
@@ -150,31 +146,30 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
 			Model model)
 	{
-		if (moduleId.equals(MOD_DATA))
+		switch (moduleId)
 		{
-			model.addAttribute("genomicDataSettings", genomicDataSettings);
-			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-		}
-		else if (moduleId.equals(MOD_ENTITIESREPORT))
-		{
-			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
-		}
-		else if (moduleId.equals(MOD_ANNOTATORS))
-		{
-			// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
-			// self-explanatory
-			if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
-			{
-				throw new MolgenisDataAccessException(
-						"No " + Permission.WRITEMETA + " permission on entity [" + entityName
-								+ "], this permission is necessary run the annotators.");
-			}
-			Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
-					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
-							.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
-			model.addAttribute("annotationRun", annotationRun);
-			model.addAttribute("entityName", entityName);
+			case MOD_DATA:
+				model.addAttribute("genomicDataSettings", genomicDataSettings);
+				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				break;
+			case MOD_ENTITIESREPORT:
+				model.addAttribute("datasetRepository", dataService.getRepository(entityName));
+				model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
+				break;
+			case MOD_ANNOTATORS:
+				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
+				// self-explanatory
+				if (!molgenisPermissionService.hasPermissionOnEntity(entityName, WRITEMETA))
+				{
+					throw new MolgenisDataAccessException("No " + WRITEMETA + " permission on entity [" + entityName
+							+ "], this permission is necessary run the annotators.");
+				}
+				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
+						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
+								.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
+				model.addAttribute("annotationRun", annotationRun);
+				model.addAttribute("entityName", entityName);
+				break;
 		}
 
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -184,9 +179,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityName)
 	{
-		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
+		return molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
 				.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
-		return showCopy;
 	}
 
 	/**
@@ -310,8 +304,8 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
-		String fileName = "";
-		ServletOutputStream outputStream = null;
+		String fileName;
+		ServletOutputStream outputStream;
 
 		switch (dataRequest.getDownloadType())
 		{
@@ -360,7 +354,14 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		finally
 		{
-			csvFile.delete();
+			if (csvFile.delete())
+			{
+				System.out.println(csvFile.getName() + " is deleted!");
+			}
+			else
+			{
+				System.out.println("Delete operation failed.");
+			}
 		}
 
 		// store url and api key in session for subsequent galaxy export requests
@@ -440,7 +441,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public ErrorMessageResponse handleGalaxyDataExportException(GalaxyDataExportException e)
 	{
 		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+		return new ErrorMessageResponse(singletonList(new ErrorMessage(e.getMessage())));
 	}
 
 	@ExceptionHandler(RuntimeException.class)

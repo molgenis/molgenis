@@ -1,25 +1,21 @@
 package org.molgenis.dataexplorer;
 
-import org.mockito.InjectMocks;
+import com.google.gson.Gson;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.testng.annotations.BeforeMethod;
@@ -28,56 +24,68 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.MOD_ANNOTATORS;
+import static org.molgenis.security.core.Permission.WRITEMETA;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { GsonConfig.class })
 public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 {
-	@InjectMocks
-	private DataExplorerController controller = new DataExplorerController();
+	@Mock
+	private DataExplorerSettings dataExplorerSettings;
 
 	@Mock
-	public AppSettings appSettings;
+	private GenomicDataSettings genomicDataSettings;
+
 	@Mock
-	DataExplorerSettings dataExplorerSettings;
+	private DataService dataService;
+
 	@Mock
-	GenomicDataSettings genomicDataSettings;
+	private FreeMarkerConfigurer freemarkerConfigurer;
+
 	@Mock
-	DataService dataService;
+	private LanguageService languageService;
+
 	@Mock
-	FreeMarkerConfigurer freemarkerConfigurer;
+	private MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+
 	@Mock
-	MenuManagerService menuManager;
-	@Mock
-	LanguageService languageService;
-	@Mock
-	MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+	private AttributeFactory attributeFactory;
+
+	@Autowired
+	private Gson gson;
+
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
-	private MockMvc mockMvc;
+
+	private DataExplorerController controller;
 
 	@BeforeMethod
 	public void beforeTest()
 	{
-
 		initMocks(this);
-		when(molgenisPermissionService.hasPermissionOnEntity("yes", Permission.WRITEMETA)).thenReturn(true);
-		when(molgenisPermissionService.hasPermissionOnEntity("no", Permission.WRITEMETA)).thenReturn(false);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
+		when(molgenisPermissionService.hasPermissionOnEntity("yes", WRITEMETA)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntity("no", WRITEMETA)).thenReturn(false);
+
+		controller = new DataExplorerController(dataExplorerSettings, genomicDataSettings, dataService,
+				molgenisPermissionService, freemarkerConfigurer, gson, languageService, attributeFactory);
+
+		standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test
 	public void getAnnotatorModuleSuccess() throws Exception
 	{
-		assertEquals("view-dataexplorer-mod-" + DataExplorerController.MOD_ANNOTATORS,
-				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
+		assertEquals("view-dataexplorer-mod-" + MOD_ANNOTATORS,
+				controller.getModule(MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void getAnnotatorModuleFail() throws Exception
 	{
-		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
+		controller.getModule(MOD_ANNOTATORS, "no", mock(Model.class));
 	}
 }

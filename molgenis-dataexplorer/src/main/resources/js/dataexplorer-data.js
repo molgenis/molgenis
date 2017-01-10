@@ -388,7 +388,6 @@
                 }
                 Table.setProps(
                     {
-
                         attrs: treeAttrs,
                         onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null
                     }

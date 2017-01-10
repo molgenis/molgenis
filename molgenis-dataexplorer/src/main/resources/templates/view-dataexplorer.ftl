@@ -15,6 +15,7 @@
 "jquery.molgenis.tree.js",
 "jquery.molgenis.xrefmrefsearch.js",
 "dataexplorer.js",
+"dataexplorer-filter-rsql.js",
 "bootbox.min.js"]>
 
 <@header css js/>
