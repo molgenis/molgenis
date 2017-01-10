@@ -1,11 +1,3 @@
-/**
- * Utility functions to:
- * - Parse RSQL into Javascript Filter components
- * - Parse ComplexFilters into RSQL
- *
- * TODO Create functions for duplicate code
- *
- */
 (function ($, molgenis) {
 
     molgenis.dataexplorer = molgenis.dataexplorer || {};
@@ -28,7 +20,6 @@
         $.each(Object.keys(model), function () {
             var attributeName = this
             promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + this).then(function (attribute) {
-                // Returns a simple or complex filter
                 filters.push(parseModelPart(attribute, model[attributeName]))
             }));
         })
@@ -78,7 +69,6 @@
      * @returns {ComplexFilter}
      */
     function createTextFilter(attribute, model) {
-        // Create a SimpleFilter for every line, operator between lines is always 'OR'
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
         $.each(model.lines, function () {
             var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, this)
@@ -98,7 +88,6 @@
      * @returns {ComplexFilter}
      */
     function createRangeFilter(attribute, model) {
-        // Create one SimpleFilter for every from - to line, operator between lines is always 'OR'
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
         $.each(model.lines, function () {
             var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, this.from, this.to)
@@ -154,7 +143,6 @@
 
             complexFilter.addComplexFilterElement(complexFilterElement)
         }
-        console.log(complexFilter)
         return complexFilter
     }
 
@@ -166,8 +154,7 @@
      * @returns {SimpleFilter}
      */
     function createBoolFilter(attribute, model) {
-        var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, model.value);
-        return simpleFilter
+        return new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, model.value)
     }
 
     /**
