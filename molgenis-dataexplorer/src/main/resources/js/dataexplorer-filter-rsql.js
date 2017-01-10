@@ -158,75 +158,26 @@
     }
 
     /**
-     *
      * Translates a list of filter rules into RSQL
-     *
-     * FIXME createRsqlQuery encodes AND jQuery.param() encodes, resulting in double
-     * FIXME encoding for values and attributenames, and single encoding of operators
-     *
-     * FIXME FilterWizard creates an invalid RSQL entry with all attributes, having undefined values
      */
-    self.translateFilterRulesToRSQL = function translateFilterRulesToRSQL(rules, existingRSQL) {
-        var newFilterRSQL = molgenis.createRsqlQuery(rules)
-        var newAttributeName = newFilterRSQL.split('=')[0]
-        // By changing a filter and adding an or statement, the rsql contains a '('
-        // at the start, remove this
-        while (newAttributeName.charAt(0) === '(') {
-            newAttributeName = newAttributeName.substr(1);
-        }
+    self.translateFilterRulesToRSQL = function translateFilterRulesToRSQL(attributeFilterRSQL, existingRSQL) {
+        var existingModel = {}
+        if (existingRSQL) existingModel = molgenis.rsql.transformer.groupBySelector(molgenis.rsql.parser.parse(existingRSQL))
+        var attributeModel = molgenis.rsql.transformer.groupBySelector(molgenis.rsql.parser.parse(attributeFilterRSQL))
 
-        if (existingRSQL !== undefined) {
-            existingRSQL = removeExistingFilterFromRsql(newAttributeName, existingRSQL)
-            if (existingRSQL === '') {
-                existingRSQL = newFilterRSQL
-            } else {
-                existingRSQL = existingRSQL + ';' + newFilterRSQL
-            }
-        } else {
-            existingRSQL = newFilterRSQL
-        }
-        return existingRSQL
-    }
 
-    self.removeFilterFromRsqlState = function removeFilterFromRsqlState(newAttributeName, existingRSQL) {
-        return removeExistingFilterFromRsql(newAttributeName, existingRSQL)
+        // Merge existing model with attribute model, overwriting filters if the filter for that attribute already exists
+        $.extend(existingModel, attributeModel);
+        return molgenis.rsql.transformer.transformToRSQL(existingModel)
     }
 
     /**
      * Remove a filter from the existing RSQL based on the attribute name
      */
-    function removeExistingFilterFromRsql(newAttributeName, existingRSQL) {
-        var rsqlRegex = /\;(?![^\(]*\))/g;
-        var rsqlMatch, match, rsql = ''
-
-        var previousIndex = 0
-        while ((rsqlMatch = rsqlRegex.exec(existingRSQL)) !== null) {
-            if (rsqlMatch.index === rsqlRegex.lastIndex) {
-                rsqlRegex.lastIndex++
-            }
-
-            var currentIndex = rsqlMatch.index
-            match = existingRSQL.substring(previousIndex, currentIndex)
-            previousIndex = currentIndex + 1
-
-            var existingAttributeName = match.split('=')[0]
-            existingAttributeName = existingAttributeName.replace(/^\(+|\)+$/, '')
-
-            if (existingAttributeName !== newAttributeName) {
-                rsql = rsql + match + ';'
-            }
-        }
-
-        // Include the last attribute filter as well
-        match = existingRSQL.substring(previousIndex, existingRSQL.length)
-        var existingAttributeName = match.split('=')[0]
-        existingAttributeName = existingAttributeName.replace(/^\(+|\)+$/, '')
-
-        if (existingAttributeName !== newAttributeName) {
-            rsql = rsql + match
-        }
-
-        return rsql
+    self.removeFilterFromRsqlState = function removeFilterFromRsqlState(attribute, existingRSQL) {
+        var existingModel = molgenis.rsql.transformer.groupBySelector(molgenis.rsql.parser.parse(existingRSQL))
+        delete existingModel[attribute]
+        return molgenis.rsql.transformer.transformToRSQL(existingModel)
     }
 
 }($, window.top.molgenis = window.top.molgenis || {}));

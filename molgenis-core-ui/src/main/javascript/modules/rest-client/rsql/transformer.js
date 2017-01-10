@@ -1,4 +1,56 @@
 /**
+ * Transforms map to RSQL
+ * // TODO Make recursive for deeper nested mref filters
+ */
+export function transformToRSQL(constraint) {
+    let rsql
+
+    Object.keys(constraint).map(o => {
+        const group = constraint[o]
+        let constraintRSQL
+
+        if (group.operator) {
+            constraintRSQL = getRsqlFromComplexConstraint(group, constraintRSQL)
+        } else {
+            constraintRSQL = getRsqlFromSimpleConstraint(group)
+        }
+        rsql = rsql ? rsql + ';' + constraintRSQL : constraintRSQL
+    })
+
+    return rsql
+}
+
+function getRsqlFromSimpleConstraint(constraint) {
+    return constraint.selector + constraint.comparison + constraint.arguments
+}
+
+function getRsqlFromComplexConstraint(constraint, constraintRSQL) {
+    const outerOperator = constraint.operator === 'OR' ? ',' : ';'
+    let simpleConstraints = []
+
+    // outer operands
+    constraintRSQL = '('
+    constraint.operands.map(operand => {
+        if (operand.operator) {
+            const innerOperator = operand.operator === 'OR' ? ',' : ';'
+            let complexConstraints = []
+
+            // inner operands
+            constraintRSQL += '('
+            operand.operands.map(innerOperand => complexConstraints.push(getRsqlFromSimpleConstraint(innerOperand)))
+            constraintRSQL += complexConstraints.join(innerOperator)
+            constraintRSQL += ')' + outerOperator
+        } else {
+            simpleConstraints.push(getRsqlFromSimpleConstraint(operand))
+        }
+    })
+    constraintRSQL += simpleConstraints.join(outerOperator)
+    constraintRSQL += ')'
+
+    return constraintRSQL
+}
+
+/**
  * Transforms parsed filter RSQL to a map
  */
 export function groupBySelector(tree) {
@@ -142,5 +194,6 @@ function toComplexRef(labels, constraint) {
 
 export default {
     groupBySelector,
-    transformModelPart
+    transformModelPart,
+    transformToRSQL
 }
