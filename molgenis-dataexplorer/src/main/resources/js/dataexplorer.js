@@ -436,9 +436,13 @@ $.when($,
                 }
             }
 
+            // Prevent $.param double encoding RSQL attributes and values. The RestclientV2 also encodes the RSQL
+            var filter = state.filter
+            delete cleanState.filter
+
             // update browser state
-            // FIXME $.param and RestClientV2 cause double encoding, destroying RSQL
-            history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
+            if(filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState) + '&filter=' + filter);
+            else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
         }
 
         /**
@@ -543,7 +547,6 @@ $.when($,
                 queryRuleRSQL = queryRuleRSQL.replace(/\)(\w)/, ');$1')
                 queryRuleRSQL = queryRuleRSQL.replace(/(\w)\(/, '$1;(')
 
-                console.log(queryRuleRSQL)
                 state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
                 pushState()
 

@@ -165,7 +165,6 @@
         if (existingRSQL) existingModel = molgenis.rsql.transformer.groupBySelector(molgenis.rsql.parser.parse(existingRSQL))
         var attributeModel = molgenis.rsql.transformer.groupBySelector(molgenis.rsql.parser.parse(attributeFilterRSQL))
 
-
         // Merge existing model with attribute model, overwriting filters if the filter for that attribute already exists
         $.extend(existingModel, attributeModel);
         return molgenis.rsql.transformer.transformToRSQL(existingModel)
