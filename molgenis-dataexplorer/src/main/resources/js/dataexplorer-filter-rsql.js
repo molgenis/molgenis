@@ -26,9 +26,10 @@
         var promises = []
 
         $.each(Object.keys(model), function () {
+            var attributeName = this
             promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + this).then(function (attribute) {
                 // Returns a simple or complex filter
-                filters.push(parseModelPart(attribute, model[this]))
+                filters.push(parseModelPart(attribute, model[attributeName]))
             }));
         })
 
@@ -41,15 +42,13 @@
 
     /**
      *
-     *
+     * Uses a transformed model to create the correct type of filter
      *
      * @param attribute
      * @param model
      *
      */
     function parseModelPart(attribute, model) {
-
-
         var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, {
             'ref1': 'label1',
             'ref2': 'label2',
@@ -57,7 +56,6 @@
             'ref4': 'label4',
             'ref5': 'label5'
         }, model)
-
         switch (specificModelPart.type) {
             case 'TEXT':
                 return createTextFilter(attribute, specificModelPart)
@@ -73,6 +71,7 @@
     }
 
     /**
+     * Creates a complex filter for string, text etc..
      *
      * @param attribute
      * @param model
@@ -92,6 +91,7 @@
     }
 
     /**
+     * Creates a complex filter for int, long and decimal
      *
      * @param attribute
      * @param model
@@ -111,6 +111,7 @@
     }
 
     /**
+     * Creates a simple filter for xref, file, categorical and categorical_mref
      *
      * @param attribute
      * @param model
@@ -126,6 +127,7 @@
     }
 
     /**
+     * Creates a complex filter for mref and one_to_many
      *
      * @param attribute
      * @param model
@@ -157,7 +159,7 @@
     }
 
     /**
-     * Creates a simple filter for boolean attributes
+     * Creates a simple filter for boolean
      *
      * @param attribute
      * @param model
