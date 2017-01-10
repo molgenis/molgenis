@@ -516,7 +516,20 @@ $.when($,
             $(document).on('updateAttributeFilters', function (e, data) {
                 var rules = []
                 $.each(data.filters, function () {
-                    rules.push(this.createQueryRule())
+
+                    var rule = this.createQueryRule()
+                    if (rule.hasOwnProperty('value')) {
+                        if (rule.value !== undefined) {
+                            rules.push(rule)
+                        }
+                    }
+
+                    if (rule.hasOwnProperty('nestedRules')) {
+                        if (rule.nestedRules.length > 0) {
+                            rules.push(rule)
+                        }
+                    }
+
                     if (this.isEmpty()) {
                         delete attributeFilters[this.attribute.href];
                     } else {
