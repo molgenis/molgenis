@@ -437,6 +437,7 @@ $.when($,
             }
 
             // update browser state
+            // FIXME $.param and RestClientV2 cause double encoding, destroying RSQL
             history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
         }
 
@@ -516,7 +517,6 @@ $.when($,
             $(document).on('updateAttributeFilters', function (e, data) {
                 var rules = []
                 $.each(data.filters, function () {
-
                     var rule = this.createQueryRule()
                     if (rule.hasOwnProperty('value')) {
                         if (rule.value !== undefined) {
@@ -537,7 +537,14 @@ $.when($,
                     }
                 });
 
-                state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(rules, state.filter)
+                var queryRuleRSQL = molgenis.createRsqlQuery(rules)
+
+                // FIXME createRsqlQuery creates wrong RSQL: (count=ge=1;count=le=5)xbool==false <- missing ';' between count and xbool
+                queryRuleRSQL = queryRuleRSQL.replace(/\)(\w)/, ');$1')
+                queryRuleRSQL = queryRuleRSQL.replace(/(\w)\(/, '$1;(')
+
+                console.log(queryRuleRSQL)
+                state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
                 pushState()
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
@@ -548,8 +555,8 @@ $.when($,
                 delete attributeFilters[data.attributeUri];
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
 
-                var attrName = data.attributeUri.split('/')[5]
-                state.filter = molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attrName, state.filter)
+                var attribute = data.attributeUri.split('/')[5]
+                state.filter = molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attribute, state.filter)
                 pushState()
 
                 $(document).trigger('changeQuery', createEntityQuery());
