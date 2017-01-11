@@ -159,29 +159,58 @@
             var attributeName = this
             var constraint = constraintsBySelector[attributeName]
 
-            // Retrieve V1 metadata for every attribute so we support legacy javascript
-            promises.push(getAttribute(entityName, attributeName, restApi).then(function (attribute) {
+            // If attribute name contains '.' we need to query the refEntity
+            var seperatorPosition = attributeName.indexOf('.')
+            if (seperatorPosition !== -1) {
+                var referringAttributeName = attributeName.slice(0, seperatorPosition)
+                var referedAttributeName = attributeName.slice(seperatorPosition + 1, attributeName.length)
 
-                // Only retrieve labels if the attribute has a refEntity
-                if (attribute.refEntity) {
-                    var values = molgenis.rsql.transformer.getArguments(constraint)
+                promises.push(getAttribute(entityName, referringAttributeName, restApi).then(function (attribute) {
+                    var referedEntityName = attribute.refEntity.name
+                    return getAttribute(referedEntityName, referedAttributeName, restApi).then(function (referredAttribute) {
+                        var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, [], constraint)
 
-                    // Retrieve the items you want with an 'IN' query
-                    return getLabelValues(attribute.refEntity.name, attribute.refEntity.idAttribute, attribute.refEntity.labelAttribute, values, restApi).then(function (labels) {
-                        var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, labels, constraint)
+                        // getAttributeLabel uses an attribute.parent.label to create the complete label,
+                        // and attribute.parent.name to do the request to the server
+                        //
+                        // add these entries here
+                        referredAttribute.parent = {
+                            'name': referringAttributeName,
+                            'label': referringAttributeName
+                        }
+
+                        modelParts[attributeName] = {
+                            'attribute': referredAttribute,
+                            'model': model
+                        }
+                    })
+                }))
+            } else {
+                // Retrieve V1 metadata for every attribute so we support legacy javascript
+                promises.push(getAttribute(entityName, attributeName, restApi).then(function (attribute) {
+
+                    // Only retrieve labels if the attribute has a refEntity
+                    if (attribute.refEntity) {
+                        var values = molgenis.rsql.transformer.getArguments(constraint)
+
+                        // Retrieve the items you want with an 'IN' query
+                        return getLabelValues(attribute.refEntity.name, attribute.refEntity.idAttribute, attribute.refEntity.labelAttribute, values, restApi).then(function (labels) {
+                            var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, labels, constraint)
+                            modelParts[attributeName] = {
+                                'attribute': attribute,
+                                'model': model
+                            }
+                        })
+                    } else {
+                        var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, [], constraint)
                         modelParts[attributeName] = {
                             'attribute': attribute,
                             'model': model
                         }
-                    })
-                } else {
-                    var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, [], constraint)
-                    modelParts[attributeName] = {
-                        'attribute': attribute,
-                        'model': model
                     }
-                }
-            }))
+                }))
+            }
+
         })
 
         return Promise.all(promises).then(function () {
