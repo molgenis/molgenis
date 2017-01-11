@@ -73,7 +73,6 @@
         var items = [];
         $.each(attributeFilters, function (attributeUri, filter) {
             var attributeLabel = molgenis.getAttributeLabel(filter.attribute);
-
             items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
                 + attributeLabel + ': ' + self.createFilterQueryUserReadable(filter)
                 + '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '

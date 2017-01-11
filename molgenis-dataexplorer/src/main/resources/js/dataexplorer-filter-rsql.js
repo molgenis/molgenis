@@ -163,12 +163,12 @@
             var seperatorPosition = attributeName.indexOf('.')
             if (seperatorPosition !== -1) {
                 var referringAttributeName = attributeName.slice(0, seperatorPosition)
-                var referedAttributeName = attributeName.slice(seperatorPosition + 1, attributeName.length)
+                var referredAttributeName = attributeName.slice(seperatorPosition + 1, attributeName.length)
 
                 promises.push(getAttribute(entityName, referringAttributeName, restApi).then(function (attribute) {
                     var referedEntityName = attribute.refEntity.name
-                    return getAttribute(referedEntityName, referedAttributeName, restApi).then(function (referredAttribute) {
-                        var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, [], constraint)
+                    return getAttribute(referedEntityName, referredAttributeName, restApi).then(function (referredAttribute) {
+                        var model = molgenis.rsql.transformer.transformModelPart(referredAttribute.fieldType, [], constraint)
 
                         // getAttributeLabel uses an attribute.parent.label to create the complete label,
                         // and attribute.parent.name to do the request to the server
@@ -210,7 +210,6 @@
                     }
                 }))
             }
-
         })
 
         return Promise.all(promises).then(function () {
@@ -261,7 +260,20 @@
      */
     self.removeFilterFromRsqlState = function removeFilterFromRsqlState(attribute, existingRSQL) {
         var existingModel = molgenis.rsql.transformer.groupBySelector(molgenis.rsql.parser.parse(existingRSQL))
-        delete existingModel[attribute]
+
+        // Ensures that xref.value is deleted from map
+        if (attribute in existingModel) {
+            delete existingModel[attribute]
+        }
+        else {
+            $.each(Object.keys(existingModel), function () {
+                var key = this
+                if (key.indexOf('.' + attribute) !== -1) {
+                    delete existingModel[key]
+                }
+            })
+        }
+
         return molgenis.rsql.transformer.transformToRSQL(existingModel)
     }
 
