@@ -441,7 +441,7 @@ $.when($,
             delete cleanState.filter
 
             // update browser state
-            if(filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState) + '&filter=' + filter);
+            if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState) + '&filter=' + filter);
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
         }
 
@@ -541,9 +541,11 @@ $.when($,
                     }
                 });
 
-                var queryRuleRSQL = molgenis.createRsqlQuery(rules)
-                state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
-                pushState()
+                if (rules.length > 0) {
+                    var queryRuleRSQL = molgenis.createRsqlQuery(rules)
+                    state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
+                    pushState()
+                }
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
                 $(document).trigger('changeQuery', createEntityQuery());
