@@ -195,5 +195,6 @@ function toComplexRef(labels, constraint) {
 export default {
     groupBySelector,
     transformModelPart,
-    transformToRSQL
+    transformToRSQL,
+    getArguments
 }
