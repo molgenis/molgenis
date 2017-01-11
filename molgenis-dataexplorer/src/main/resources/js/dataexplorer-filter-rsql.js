@@ -11,11 +11,11 @@
      * @param entityName
      */
     self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-        fetchLabels(rsql, entityName, restApi).then(function (transformedModelPartsMap) {
+        fetchModelParts(rsql, entityName, restApi).then(function (modelParts) {
             var filters = []
-            $.each(Object.keys(transformedModelPartsMap), function () {
-                var transformedModelPart = transformedModelPartsMap[this]
-                filters.push(parseModelPart(transformedModelPart.attribute, transformedModelPart.model))
+            $.each(Object.keys(modelParts), function () {
+                var modelPart = modelParts[this]
+                filters.push(createFilter(modelPart.attribute, modelPart.model))
             })
             $(document).trigger('updateAttributeFilters', {'filters': filters})
         })
@@ -23,13 +23,13 @@
 
     /**
      *
-     * Uses a transformed model to create the correct type of filter
+     * Uses a model part to create the correct type of filter
      *
      * @param attribute
      * @param model
      *
      */
-    function parseModelPart(attribute, model) {
+    function createFilter(attribute, model) {
         switch (model.type) {
             case 'TEXT':
                 return createTextFilter(attribute, model)
@@ -141,18 +141,18 @@
     }
 
     /**
-     * Fetches labels for filters on reference type attributes
+     * Uses the RSQL to create model parts which can be used to create complex and simple filters
      *
      * @param rsql
      * @param entityName
      * @param restApi
-     * @returns {Promise}
+     * @returns {Promise.modelParts}
      */
-    function fetchLabels(rsql, entityName, restApi) {
+    function fetchModelParts(rsql, entityName, restApi) {
         var tree = molgenis.rsql.parser.parse(rsql)
         var constraintsBySelector = molgenis.rsql.transformer.groupBySelector(tree)
 
-        var transformedModelPartsMap = {}
+        var modelParts = {}
         var promises = []
 
         $.each(Object.keys(constraintsBySelector), function () { // per attribute in RSQL
@@ -160,23 +160,23 @@
             var constraint = constraintsBySelector[attributeName]
 
             // Retrieve V1 metadata for every attribute so we support legacy javascript
-            promises.push(getV1Attribute(entityName, attributeName, restApi).then(function (attribute) {
+            promises.push(getAttribute(entityName, attributeName, restApi).then(function (attribute) {
 
                 // Only retrieve labels if the attribute has a refEntity
                 if (attribute.refEntity) {
                     var values = molgenis.rsql.transformer.getArguments(constraint)
 
                     // Retrieve the items you want with an 'IN' query
-                    return getV2LabelValues(attribute.refEntity.name, attribute.refEntity.idAttribute, attribute.refEntity.labelAttribute, values, restApi).then(function (labels) {
+                    return getLabelValues(attribute.refEntity.name, attribute.refEntity.idAttribute, attribute.refEntity.labelAttribute, values, restApi).then(function (labels) {
                         var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, labels, constraint)
-                        transformedModelPartsMap[attributeName] = {
+                        modelParts[attributeName] = {
                             'attribute': attribute,
                             'model': model
                         }
                     })
                 } else {
                     var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, [], constraint)
-                    transformedModelPartsMap[attributeName] = {
+                    modelParts[attributeName] = {
                         'attribute': attribute,
                         'model': model
                     }
@@ -185,17 +185,24 @@
         })
 
         return Promise.all(promises).then(function () {
-            return transformedModelPartsMap
+            return modelParts
         })
     }
 
-    function getV1Attribute(entityName, attributeName, restApi) {
+    /**
+     * Fetches metadata for an attribute from the V1 RestClient
+     */
+    function getAttribute(entityName, attributeName, restApi) {
         return restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName + '?expand=refEntity')
     }
 
-    function getV2LabelValues(refEntityName, refEntityIdAttribute, refEntityLabelAttribute, values, restApi) {
+    /**
+     * Fetches labels for identifiers from the V2 RestClient
+     */
+    function getLabelValues(refEntityName, refEntityIdAttribute, refEntityLabelAttribute, values, restApi) {
         var ids = Array.from(values.values()).join(',')
         var requestUri = '/api/v2/' + refEntityName + '?q=' + refEntityIdAttribute + '=in=(' + ids + ')'
+
         return restApi.getAsync(requestUri).then(function (refEntityItems) {
             var labels = {}
             $.each(refEntityItems.items, function () {
