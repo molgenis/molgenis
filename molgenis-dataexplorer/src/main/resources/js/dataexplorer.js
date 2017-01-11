@@ -542,11 +542,6 @@ $.when($,
                 });
 
                 var queryRuleRSQL = molgenis.createRsqlQuery(rules)
-
-                // FIXME createRsqlQuery creates wrong RSQL: (count=ge=1;count=le=5)xbool==false <- missing ';' between count and xbool
-                queryRuleRSQL = queryRuleRSQL.replace(/\)(\w)/, ');$1')
-                queryRuleRSQL = queryRuleRSQL.replace(/(\w)\(/, '$1;(')
-
                 state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
                 pushState()
 
