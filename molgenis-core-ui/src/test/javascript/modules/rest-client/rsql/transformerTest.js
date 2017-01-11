@@ -111,9 +111,16 @@ test("Test that single AND comparison gets transformed back to RSQL", assert => 
     assert.end()
 })
 
-test("Test that really really complex filter gets transformed back tp RSQL", assert => {
+test("Test that really really complex filter gets transformed back to RSQL", assert => {
     const actual = transformToRSQL(groupBySelector(parser.parse('((xmref_value==ref1,xmref_value==ref2),xmref_value==ref3,(xmref_value==ref4;xmref_value==ref5));xbool==false;(xstring=q=str1,xstring=q=str2);(xint=ge=0;xint=le=5);xxref==ref1')))
-    const expected = '((xmref_value==ref1,xmref_value==ref2),(xmref_value==ref4;xmref_value==ref5),xmref_value==ref3);xbool==false;(xstring=q=str1,xstring=q=str2);(xint=ge=0;xint=le=5);xxref==ref1'
+    const expected = '((xmref_value==ref1,xmref_value==ref2),xmref_value==ref3,(xmref_value==ref4;xmref_value==ref5));xbool==false;(xstring=q=str1,xstring=q=str2);(xint=ge=0;xint=le=5);xxref==ref1'
+    assert.deepEqual(actual, expected)
+    assert.end()
+})
+
+test("Test that really complex MREF filter gets transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('((xmref_value==ref1,xmref_value==ref2),(xmref_value==ref3;(xmref_value==ref4,xmref_value==ref5)))')))
+    const expected = '((xmref_value==ref1,xmref_value==ref2),(xmref_value==ref3;(xmref_value==ref4,xmref_value==ref5)))'
     assert.deepEqual(actual, expected)
     assert.end()
 })

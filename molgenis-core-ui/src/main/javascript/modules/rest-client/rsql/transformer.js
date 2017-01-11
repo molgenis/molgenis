@@ -1,53 +1,41 @@
 /**
  * Transforms map to RSQL
- * // TODO Make recursive for deeper nested mref filters
  */
 export function transformToRSQL(constraint) {
-    let rsql
-
+    let rsql = ''
     Object.keys(constraint).map(o => {
-        const group = constraint[o]
-        let constraintRSQL
-
-        if (group.operator) {
-            constraintRSQL = getRsqlFromComplexConstraint(group, constraintRSQL)
-        } else {
-            constraintRSQL = getRsqlFromSimpleConstraint(group)
-        }
-        rsql = rsql ? rsql + ';' + constraintRSQL : constraintRSQL
+        const constraintBySelector = constraint[o]
+        rsql += getRsqlFromConstraint(constraintBySelector) + ';'
     })
 
-    return rsql
+    // Remove trailing 'AND' character
+    return rsql.replace(/;+$/, '')
+}
+
+function getRsqlFromConstraint(constraint) {
+    if (constraint.operator) {
+        return getRsqlFromComplexConstraint(constraint, '')
+    }
+    else return getRsqlFromSimpleConstraint(constraint)
 }
 
 function getRsqlFromSimpleConstraint(constraint) {
     return constraint.selector + constraint.comparison + constraint.arguments
 }
 
-function getRsqlFromComplexConstraint(constraint, constraintRSQL) {
-    const outerOperator = constraint.operator === 'OR' ? ',' : ';'
-    let simpleConstraints = []
+function getRsqlFromComplexConstraint(constraint, rsql) {
+    const operator = constraint.operator === 'OR' ? ',' : ';'
+    const rsqlParts = []
 
-    // outer operands
-    constraintRSQL = '('
     constraint.operands.map(operand => {
-        if (operand.operator) {
-            const innerOperator = operand.operator === 'OR' ? ',' : ';'
-            let complexConstraints = []
-
-            // inner operands
-            constraintRSQL += '('
-            operand.operands.map(innerOperand => complexConstraints.push(getRsqlFromSimpleConstraint(innerOperand)))
-            constraintRSQL += complexConstraints.join(innerOperator)
-            constraintRSQL += ')' + outerOperator
+        if (!operand.operator) {
+            rsqlParts.push(getRsqlFromSimpleConstraint(operand))
         } else {
-            simpleConstraints.push(getRsqlFromSimpleConstraint(operand))
+            rsqlParts.push(getRsqlFromComplexConstraint(operand, rsql))
         }
     })
-    constraintRSQL += simpleConstraints.join(outerOperator)
-    constraintRSQL += ')'
-
-    return constraintRSQL
+    rsql += '(' + rsqlParts.join(operator) + ')'
+    return rsql
 }
 
 /**

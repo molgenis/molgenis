@@ -214,7 +214,6 @@
         })
     }
 
-
     /**
      * Translates a list of filter rules into RSQL
      */
