@@ -11,24 +11,14 @@
      * @param entityName
      */
     self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-        var tree = molgenis.rsql.parser.parse(rsql)
-        var model = molgenis.rsql.transformer.groupBySelector(tree)
-
-        var filters = []
-        var promises = []
-
-        $.each(Object.keys(model), function () {
-            var attributeName = this
-            promises.push(restApi.getAsync('/api/v1/' + entityName + '/meta/' + this).then(function (attribute) {
-                filters.push(parseModelPart(attribute, model[attributeName]))
-            }));
+        fetchLabels(rsql, entityName, restApi).then(function (transformedModelPartsMap) {
+            var filters = []
+            $.each(Object.keys(transformedModelPartsMap), function () {
+                var transformedModelPart = transformedModelPartsMap[this]
+                filters.push(parseModelPart(transformedModelPart.attribute, transformedModelPart.model))
+            })
+            $(document).trigger('updateAttributeFilters', {'filters': filters})
         })
-
-        Promise.all(promises).then(
-            function () {
-                $(document).trigger('updateAttributeFilters', {'filters': filters})
-            }
-        )
     }
 
     /**
@@ -40,24 +30,17 @@
      *
      */
     function parseModelPart(attribute, model) {
-        var specificModelPart = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, {
-            'ref1': 'label1',
-            'ref2': 'label2',
-            'ref3': 'label3',
-            'ref4': 'label4',
-            'ref5': 'label5'
-        }, model)
-        switch (specificModelPart.type) {
+        switch (model.type) {
             case 'TEXT':
-                return createTextFilter(attribute, specificModelPart)
+                return createTextFilter(attribute, model)
             case 'RANGE':
-                return createRangeFilter(attribute, specificModelPart)
+                return createRangeFilter(attribute, model)
             case 'SIMPLE_REF':
-                return createSimpleRefFilter(attribute, specificModelPart)
+                return createSimpleRefFilter(attribute, model)
             case 'COMPLEX_REF':
-                return createComplexRefFilter(attribute, specificModelPart)
+                return createComplexRefFilter(attribute, model)
             case 'BOOL':
-                return createBoolFilter(attribute, specificModelPart)
+                return createBoolFilter(attribute, model)
         }
     }
 
@@ -156,6 +139,74 @@
     function createBoolFilter(attribute, model) {
         return new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined, model.value)
     }
+
+    /**
+     * Fetches labels for filters on reference type attributes
+     *
+     * @param rsql
+     * @param entityName
+     * @param restApi
+     * @returns {Promise}
+     */
+    function fetchLabels(rsql, entityName, restApi) {
+        var tree = molgenis.rsql.parser.parse(rsql)
+        var constraintsBySelector = molgenis.rsql.transformer.groupBySelector(tree)
+
+        var transformedModelPartsMap = {}
+        var promises = []
+
+        $.each(Object.keys(constraintsBySelector), function () { // per attribute in RSQL
+            var attributeName = this
+            var constraint = constraintsBySelector[attributeName]
+
+            // Retrieve V1 metadata for every attribute so we support legacy javascript
+            promises.push(getV1Attribute(entityName, attributeName, restApi).then(function (attribute) {
+
+                // Only retrieve labels if the attribute has a refEntity
+                if (attribute.refEntity) {
+                    var values = molgenis.rsql.transformer.getArguments(constraint)
+
+                    // Retrieve the items you want with an 'IN' query
+                    return getV2LabelValues(attribute.refEntity.name, attribute.refEntity.idAttribute, attribute.refEntity.labelAttribute, values, restApi).then(function (labels) {
+                        var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, labels, constraint)
+                        transformedModelPartsMap[attributeName] = {
+                            'attribute': attribute,
+                            'model': model
+                        }
+                    })
+                } else {
+                    var model = molgenis.rsql.transformer.transformModelPart(attribute.fieldType, [], constraint)
+                    transformedModelPartsMap[attributeName] = {
+                        'attribute': attribute,
+                        'model': model
+                    }
+                }
+            }))
+        })
+
+        return Promise.all(promises).then(function () {
+            return transformedModelPartsMap
+        })
+    }
+
+    function getV1Attribute(entityName, attributeName, restApi) {
+        return restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName + '?expand=refEntity')
+    }
+
+    function getV2LabelValues(refEntityName, refEntityIdAttribute, refEntityLabelAttribute, values, restApi) {
+        var ids = Array.from(values.values()).join(',')
+        var requestUri = '/api/v2/' + refEntityName + '?q=' + refEntityIdAttribute + '=in=(' + ids + ')'
+        return restApi.getAsync(requestUri).then(function (refEntityItems) {
+            var labels = {}
+            $.each(refEntityItems.items, function () {
+                var id = this[refEntityIdAttribute]
+                var label = this[refEntityLabelAttribute]
+                labels[id] = label
+            })
+            return labels
+        })
+    }
+
 
     /**
      * Translates a list of filter rules into RSQL
