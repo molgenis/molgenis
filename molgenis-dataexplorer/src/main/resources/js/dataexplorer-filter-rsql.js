@@ -184,6 +184,8 @@
                             'model': model
                         }
                     })
+                }, function (error) {
+                    throw 'An error has occurred: ' + attributeName + ' ' + error.statusText;
                 }))
             } else {
                 // Retrieve V1 metadata for every attribute so we support legacy javascript
@@ -208,6 +210,8 @@
                             'model': model
                         }
                     }
+                }, function (error) {
+                    throw 'An error has occurred: ' + attributeName + ' ' + error.statusText;
                 }))
             }
         })
@@ -239,6 +243,8 @@
                 labels[id] = label
             })
             return labels
+        }, function (error) {
+            throw 'An error has occurred: ' + error.statusText;
         })
     }
 
