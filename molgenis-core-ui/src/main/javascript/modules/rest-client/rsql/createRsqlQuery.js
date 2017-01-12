@@ -83,10 +83,6 @@ export function createRsqlQuery(rules) {
                 throw 'unknown query operator [' + rule.operator + ']';
         }
     }
-    // FIXME createRsqlQuery creates wrong RSQL: (count=ge=1;count=le=5)xbool==false <- missing ';' between count and xbool
-    rsql = rsql.replace(/\)(\w)/, ');$1')
-    rsql = rsql.replace(/(\w)\(/, '$1;(')
-    rsql = rsql.replace(/\)\(/, '\);\(')
     return rsql;
 }
 

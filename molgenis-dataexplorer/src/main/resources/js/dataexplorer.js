@@ -520,8 +520,12 @@ $.when($,
 
             $(document).on('updateAttributeFilters', function (e, data) {
                 var rules = []
-                $.each(data.filters, function () {
-                    var rule = this.createQueryRule()
+
+                for (var i = 0; i < Object.keys(data.filters).length; i++) {
+                    var key = Object.keys(data.filters)[i]
+                    var filter = data.filters[key]
+                    var rule = filter.createQueryRule()
+
                     if (rule.hasOwnProperty('value')) {
                         if (rule.value !== undefined) {
                             rules.push(rule)
@@ -534,12 +538,17 @@ $.when($,
                         }
                     }
 
-                    if (this.isEmpty()) {
-                        delete attributeFilters[this.attribute.href];
+                    if (filter.isEmpty()) {
+                        delete attributeFilters[filter.attribute.href];
                     } else {
-                        attributeFilters[this.attribute.href] = this;
+                        attributeFilters[filter.attribute.href] = filter;
                     }
-                });
+
+                    // Add an 'AND' operator between filters for every attribute
+                    if (i < data.filters.length - 1) {
+                        rules.push({'operator': 'AND'})
+                    }
+                }
 
                 if (rules.length > 0) {
                     var queryRuleRSQL = molgenis.createRsqlQuery(rules)
