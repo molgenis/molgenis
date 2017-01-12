@@ -1,4 +1,44 @@
 /**
+ * Transforms map to RSQL
+ */
+export function transformToRSQL(constraint) {
+    let rsql = ''
+    Object.keys(constraint).map(o => {
+        const constraintBySelector = constraint[o]
+        rsql += getRsqlFromConstraint(constraintBySelector) + ';'
+    })
+
+    // Remove trailing 'AND' character
+    return rsql.replace(/;+$/, '')
+}
+
+function getRsqlFromConstraint(constraint) {
+    if (constraint.operator) {
+        return getRsqlFromComplexConstraint(constraint, '')
+    }
+    else return getRsqlFromSimpleConstraint(constraint)
+}
+
+function getRsqlFromSimpleConstraint(constraint) {
+    return constraint.selector + constraint.comparison + constraint.arguments
+}
+
+function getRsqlFromComplexConstraint(constraint, rsql) {
+    const operator = constraint.operator === 'OR' ? ',' : ';'
+    const rsqlParts = []
+
+    constraint.operands.map(operand => {
+        if (!operand.operator) {
+            rsqlParts.push(getRsqlFromSimpleConstraint(operand))
+        } else {
+            rsqlParts.push(getRsqlFromComplexConstraint(operand, rsql))
+        }
+    })
+    rsql += '(' + rsqlParts.join(operator) + ')'
+    return rsql
+}
+
+/**
  * Transforms parsed filter RSQL to a map
  */
 export function groupBySelector(tree) {
@@ -142,5 +182,7 @@ function toComplexRef(labels, constraint) {
 
 export default {
     groupBySelector,
-    transformModelPart
+    transformModelPart,
+    transformToRSQL,
+    getArguments
 }

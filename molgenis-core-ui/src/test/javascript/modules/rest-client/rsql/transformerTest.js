@@ -1,5 +1,5 @@
 import {parser} from "rest-client/rsql";
-import {toRangeLine, groupBySelector, toComplexLine, transformModelPart, getArguments} from "rest-client/rsql/transformer";
+import {toRangeLine, groupBySelector, toComplexLine, transformModelPart, getArguments, transformToRSQL} from "rest-client/rsql/transformer";
 import test from "tape";
 
 test('Test that a single comparison gets mapped', assert => {
@@ -14,6 +14,13 @@ test('Test that a single comparison gets mapped', assert => {
     assert.deepEqual(actual, expected);
     assert.end();
 });
+
+test("Test that a single comparison get transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('xbool==false')))
+    const expected = 'xbool==false'
+    assert.deepEqual(actual, expected)
+    assert.end()
+})
 
 test('Test that multiple comparisons get mapped', assert => {
     const actual = groupBySelector(parser.parse("xbool==false;(xxref==ref1,xxref==ref2)"))
@@ -41,6 +48,13 @@ test('Test that multiple comparisons get mapped', assert => {
     assert.end();
 })
 
+test("Test that multiple comparisons get get transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('xbool==false;(xxref==ref1,xxref==ref2)')))
+    const expected = 'xbool==false;(xxref==ref1,xxref==ref2)'
+    assert.deepEqual(actual, expected)
+    assert.end()
+})
+
 test('Test that single OR comparison gets mapped', assert => {
     const actual = groupBySelector(parser.parse("(xxref==ref1,xxref==ref2)"))
     const expected = {
@@ -62,6 +76,14 @@ test('Test that single OR comparison gets mapped', assert => {
     assert.end();
 })
 
+test("Test that single OR comparison gets transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('(xxref==ref1,xxref==ref2)')))
+    const expected = '(xxref==ref1,xxref==ref2)'
+    assert.deepEqual(actual, expected)
+    assert.end()
+})
+
+
 test('Test that single AND comparison gets mapped', assert => {
     const actual = groupBySelector(parser.parse("(xint=ge=0;xint=le=5)"))
     const expected = {
@@ -80,6 +102,27 @@ test('Test that single AND comparison gets mapped', assert => {
     }
     assert.deepEqual(actual, expected);
     assert.end();
+})
+
+test("Test that single AND comparison gets transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('(xint=ge=0;xint=le=5)')))
+    const expected = '(xint=ge=0;xint=le=5)'
+    assert.deepEqual(actual, expected)
+    assert.end()
+})
+
+test("Test that really really complex filter gets transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('((xmref_value==ref1,xmref_value==ref2),xmref_value==ref3,(xmref_value==ref4;xmref_value==ref5));xbool==false;(xstring=q=str1,xstring=q=str2);(xint=ge=0;xint=le=5);xxref==ref1')))
+    const expected = '((xmref_value==ref1,xmref_value==ref2),xmref_value==ref3,(xmref_value==ref4;xmref_value==ref5));xbool==false;(xstring=q=str1,xstring=q=str2);(xint=ge=0;xint=le=5);xxref==ref1'
+    assert.deepEqual(actual, expected)
+    assert.end()
+})
+
+test("Test that really complex MREF filter gets transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('((xmref_value==ref1,xmref_value==ref2),(xmref_value==ref3;(xmref_value==ref4,xmref_value==ref5)))')))
+    const expected = '((xmref_value==ref1,xmref_value==ref2),(xmref_value==ref3;(xmref_value==ref4,xmref_value==ref5)))'
+    assert.deepEqual(actual, expected)
+    assert.end()
 })
 
 test('Test selector in xref', assert => {
