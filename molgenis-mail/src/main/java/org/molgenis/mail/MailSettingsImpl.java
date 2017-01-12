@@ -34,9 +34,9 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		private String mailPort;
 		@Value("${mail.protocol:smtp}")
 		private String mailProtocol;
-		@Value("${mail.username}")
+		@Value("${mail.username:#{null}}")
 		private String mailUsername;
-		@Value("${mail.password}")
+		@Value("${mail.password:#{null}}")
 		private String mailPassword;
 		@Value("${mail.java.auth:true}")
 		private String mailJavaAuth;
