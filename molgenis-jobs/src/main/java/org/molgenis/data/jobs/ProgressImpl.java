@@ -13,6 +13,7 @@ import org.springframework.mail.SimpleMailMessage;
 
 import java.util.Date;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecution.Status.*;
 
 /**
@@ -30,9 +31,9 @@ public class ProgressImpl implements Progress
 
 	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater, MailSender mailSender)
 	{
-		this.jobExecution = jobExecution;
-		this.mailSender = mailSender;
-		this.updater = updater;
+		this.jobExecution = requireNonNull(jobExecution);
+		this.mailSender = requireNonNull(mailSender);
+		this.updater = requireNonNull(updater);
 	}
 
 	private void update()

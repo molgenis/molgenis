@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -251,13 +250,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(AppSettings.class);
 		}
-
-		@Bean
-		public JavaMailSender mailSender()
-		{
-			return mock(JavaMailSender.class);
-		}
-
+		
 		@SuppressWarnings("unchecked")
 		@Bean
 		public DataService dataService()

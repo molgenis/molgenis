@@ -270,5 +270,10 @@
             <artifactId>molgenis-fair</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-mail</artifactId>
+			<version>${project.version}</version>
+		</dependency>
     </dependencies>
 </project>

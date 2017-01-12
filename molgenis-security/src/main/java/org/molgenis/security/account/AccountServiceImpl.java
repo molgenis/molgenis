@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +40,14 @@ public class AccountServiceImpl implements AccountService
 	private static final Logger LOG = LoggerFactory.getLogger(AccountServiceImpl.class);
 
 	private final DataService dataService;
-	private final JavaMailSender mailSender;
+	private final MailSender mailSender;
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final GroupMemberFactory groupMemberFactory;
 	private final IdGenerator idGenerator;
 
 	@Autowired
-	public AccountServiceImpl(DataService dataService, JavaMailSender mailSender, UserService userService,
+	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
 			AppSettings appSettings, GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);

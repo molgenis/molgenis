@@ -40,8 +40,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -182,40 +180,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		pspc.setIgnoreResourceNotFound(true);
 		pspc.setNullValue("@null");
 		return pspc;
-	}
-
-	@Value("${mail.host:smtp.gmail.com}")
-	private String mailHost;
-	@Value("${mail.port:587}")
-	private Integer mailPort;
-	@Value("${mail.protocol:smtp}")
-	private String mailProtocol;
-	@Value("${mail.username}")
-	private String mailUsername; // specify in molgenis-server.properties
-	@Value("${mail.password}")
-	private String mailPassword; // specify in molgenis-server.properties
-	@Value("${mail.java.auth:true}")
-	private String mailJavaAuth;
-	@Value("${mail.java.starttls.enable:true}")
-	private String mailJavaStartTlsEnable;
-	@Value("${mail.java.quitwait:false}")
-	private String mailJavaQuitWait;
-
-	@Bean
-	public JavaMailSender mailSender()
-	{
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost(mailHost);
-		mailSender.setPort(mailPort);
-		mailSender.setProtocol(mailProtocol);
-		mailSender.setUsername(mailUsername); // specify in molgenis-server.properties
-		mailSender.setPassword(mailPassword); // specify in molgenis-server.properties
-		Properties javaMailProperties = new Properties();
-		javaMailProperties.setProperty("mail.smtp.auth", mailJavaAuth);
-		javaMailProperties.setProperty("mail.smtp.starttls.enable", mailJavaStartTlsEnable);
-		javaMailProperties.setProperty("mail.smtp.quitwait", mailJavaQuitWait);
-		mailSender.setJavaMailProperties(javaMailProperties);
-		return mailSender;
 	}
 
 	@Bean
