@@ -15,8 +15,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.QueryUtils.containsAnyOperator;
-import static org.molgenis.data.QueryUtils.containsComputedAttribute;
+import static org.molgenis.data.QueryUtils.*;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
@@ -133,12 +132,12 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	}
 
 	/**
-	 * Checks if the underlying repository can handle this query. Queries with unsupported operators or queries that use
-	 * attributes with computed values are delegated to the index.
+	 * Checks if the underlying repository can handle this query. Queries with unsupported operators, queries that use
+	 * attributes with computed values or queries with nested query rule field are delegated to the index.
 	 */
 	private boolean querySupported(Query<Entity> q)
 	{
-		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityType());
-
+		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityType())
+				&& !containsNestedQueryRuleField(q);
 	}
 }
