@@ -1,21 +1,47 @@
-package org.molgenis.mail;
+package org.molgenis.settings.mail;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
+import org.molgenis.util.mail.MailSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
 
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.settings.PropertyType.KEY;
+import static org.molgenis.settings.mail.JavaMailPropertyType.JAVA_MAIL_PROPERTY;
+import static org.molgenis.settings.mail.JavaMailPropertyType.MAIL_SETTINGS_REF;
 
 @Component
 public class MailSettingsImpl extends DefaultSettingsEntity implements MailSettings
 {
 	private static final long serialVersionUID = 1L;
-
 	private static final String ID = "MailSettings";
+
+	private static final Logger LOG = LoggerFactory.getLogger(MailSettingsImpl.class);
+
+	public MailSettingsImpl(Entity entity)
+	{
+		super(ID);
+		set(entity);
+	}
 
 	public MailSettingsImpl()
 	{
@@ -25,6 +51,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	@Component
 	public static class Meta extends DefaultSettingsEntityType
 	{
+		public static final String MAIL_SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + ID;
 		/**
 		 * For conversion: Pick up defaults from molgenis-server.properties file where these settings used to be defined.
 		 */
@@ -51,11 +78,15 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		private static final String USERNAME = "username";
 		private static final String PASSWORD = "password";
 		private static final String DEFAULT_ENCODING = "defaultEncoding";
+		private static final String JAVA_MAIL_PROPS = "props";
 		private static final String TEST_CONNECTION = "testConnection";
+		private JavaMailPropertyType mailSenderPropertyType;
 
-		public Meta()
+		@Autowired
+		public Meta(JavaMailPropertyType mailSenderPropertyType)
 		{
 			super(ID);
+			this.mailSenderPropertyType = Objects.requireNonNull(mailSenderPropertyType);
 		}
 
 		@Override
@@ -66,7 +97,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 			setDescription(
 					"Configuration properties for email support. Will be used to send email from Molgenis. See also the MailSenderProp entity.");
 			addAttribute(HOST).setDefaultValue(mailHost).setNillable(false).setDescription("SMTP server host.");
-			addAttribute(PORT).setDataType(INT).setDefaultValue(mailPort).setNillable(false)
+			addAttribute(PORT).setDataType(AttributeType.INT).setDefaultValue(mailPort).setNillable(false)
 					.setDescription("SMTP server port.");
 			addAttribute(PROTOCOL).setDefaultValue(mailProtocol).setNillable(false)
 					.setDescription("Protocol used by the SMTP server.");
@@ -74,8 +105,20 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 			addAttribute(PASSWORD).setDefaultValue(mailPassword).setDescription("Login password of the SMTP server.");
 			addAttribute(DEFAULT_ENCODING).setDefaultValue("UTF-8").setNillable(false)
 					.setDescription("Default MimeMessage encoding.");
-			addAttribute(TEST_CONNECTION).setDataType(BOOL).setDefaultValue("true").setNillable(true)
-					.setDescription("Test mail connection on startup.");
+			Attribute refAttr = mailSenderPropertyType.getAttribute(MAIL_SETTINGS_REF);
+			addAttribute(JAVA_MAIL_PROPS).setDataType(AttributeType.ONE_TO_MANY).setRefEntity(mailSenderPropertyType)
+					.setMappedBy(refAttr).setOrderBy(new Sort(KEY)).setNillable(true).setLabel("Properties")
+					.setDescription("JavaMail properties. The default values are tuned to connect with Google mail."
+							+ "If you want to connect to a different provider, these properties should be edited in the Data Explorer."
+							+ "Select the " + JAVA_MAIL_PROPERTY + " entity.");
+			addAttribute(TEST_CONNECTION).setDataType(BOOL).setDefaultValue("true").setNillable(false).
+					setDescription("Indicates if the connection should be tested when saving these settings.");
+		}
+
+		@Override
+		public Set<SystemEntityType> getDependencies()
+		{
+			return Collections.singleton(mailSenderPropertyType);
 		}
 	}
 
@@ -113,6 +156,15 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	public Charset getDefaultEncoding()
 	{
 		return Charset.forName(getString(Meta.DEFAULT_ENCODING));
+	}
+
+	@Override
+	public Properties getJavaMailProperties()
+	{
+		Properties result = new Properties();
+		result.putAll(stream(getEntities(Meta.JAVA_MAIL_PROPS, JavaMailProperty.class).spliterator(), false)
+				.collect(toMap(JavaMailProperty::getKey, JavaMailProperty::getValue)));
+		return result;
 	}
 
 	@Override

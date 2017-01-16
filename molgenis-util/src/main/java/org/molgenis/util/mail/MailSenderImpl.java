@@ -1,7 +1,5 @@
-package org.molgenis.mail;
+package org.molgenis.util.mail;
 
-import org.molgenis.data.DataService;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +12,8 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 @Component
@@ -23,35 +21,26 @@ public class MailSenderImpl implements MailSender
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MailSenderImpl.class);
 
-	private final DataService dataService;
-	private final MailSettings mailSettings;
-	private Properties defaultProperties;
+	private static Properties defaultProperties = new Properties();
 
-	@Autowired
-	public MailSenderImpl(DataService dataService, MailSettings mailSettings) throws IOException
+	static
 	{
-		defaultProperties = new Properties();
-		defaultProperties.load(getClass().getResourceAsStream("mail-default.properties"));
-		this.dataService = requireNonNull(dataService);
-		this.mailSettings = requireNonNull(mailSettings);
+		try
+		{
+			defaultProperties.load(MailSenderImpl.class.getResourceAsStream("mail-default.properties"));
+		}
+		catch (IOException e)
+		{
+			throw new IllegalStateException("Default mail-default.properties not found!");
+		}
 	}
 
-	//	@PostConstruct
-	public void validateConnection()
-	{
-		if (mailSettings.isTestConnection())
-		{
-			try
-			{
-				JavaMailSenderImpl sender = createMailSender();
-				sender.testConnection();
+	private final MailSettings mailSettings;
 
-			}
-			catch (MessagingException ex)
-			{
-				throw new IllegalStateException(String.format("Unable to ping to %s", this.mailSettings.getHost()), ex);
-			}
-		}
+	@Autowired
+	public MailSenderImpl(MailSettings mailSettings) throws IOException
+	{
+		this.mailSettings = requireNonNull(mailSettings);
 	}
 
 	@Override
@@ -72,6 +61,11 @@ public class MailSenderImpl implements MailSender
 
 	private JavaMailSenderImpl createMailSender()
 	{
+		return createMailSender(mailSettings);
+	}
+
+	private static JavaMailSenderImpl createMailSender(MailSettings mailSettings)
+	{
 		LOG.trace("createMailSender");
 		if (mailSettings.getUsername() == null || mailSettings.getPassword() == null)
 		{
@@ -86,19 +80,30 @@ public class MailSenderImpl implements MailSender
 		mailSender.setUsername(mailSettings.getUsername());
 		mailSender.setPassword(mailSettings.getPassword());
 		mailSender.setDefaultEncoding(mailSettings.getDefaultEncoding().name());
-		mailSender.setJavaMailProperties(getProperties());
+		Properties properties = new Properties(defaultProperties);
+		properties.putAll(mailSettings.getJavaMailProperties());
+		LOG.debug("Mail properties: {}", properties);
+		mailSender.setJavaMailProperties(properties);
 		return mailSender;
 	}
 
-	private Properties getProperties()
+	public static void validateConnection(MailSettings mailSettings)
 	{
-		Properties result = new Properties(defaultProperties);
-		RunAsSystemProxy.runAsSystem(() ->
+		if (mailSettings.isTestConnection() && mailSettings.getUsername() != null && mailSettings.getPassword() != null)
 		{
-			result.putAll(dataService.findAll(MailSenderPropertyType.MAIL_SENDER_PROPERTY, MailSenderProperty.class)
-					.collect(Collectors.toMap(MailSenderProperty::getKey, MailSenderProperty::getValue)));
-		});
-		LOG.debug("Mail properties: {}", result);
-		return result;
+			LOG.info("Validating mail settings...");
+			try
+			{
+				JavaMailSenderImpl sender = createMailSender(mailSettings);
+				sender.testConnection();
+				LOG.info("OK.");
+			}
+			catch (MessagingException ex)
+			{
+				String message = format("Unable to ping to %s", mailSettings.getHost());
+				LOG.info(message, ex);
+				throw new IllegalStateException(message, ex);
+			}
+		}
 	}
 }

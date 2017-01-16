@@ -18,6 +18,7 @@ import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 /**
  * Base class for application and plugin settings entities. Settings are read/written from/to data source.
+ * TODO: Bring this class up to date with 2.0, see http://www.molgenis.org/ticket/4787
  */
 public abstract class DefaultSettingsEntity implements Entity
 {
@@ -40,10 +41,7 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	public EntityType getEntityType()
 	{
-		return RunAsSystemProxy.runAsSystem(() ->
-		{
-			return dataService.getEntityType(entityName);
-		});
+		return RunAsSystemProxy.runAsSystem(() -> dataService.getEntityType(entityName));
 	}
 
 	@Override
@@ -159,9 +157,7 @@ public abstract class DefaultSettingsEntity implements Entity
 	@Override
 	public void set(Entity values)
 	{
-		Entity entity = getEntity();
-		entity.set(values);
-		updateEntity(entity);
+		cachedEntity = values;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package org.molgenis.mail;
+package org.molgenis.settings.mail;
 
 import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.PackageMetadata;

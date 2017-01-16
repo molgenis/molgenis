@@ -1,8 +1,9 @@
-package org.molgenis.mail;
+package org.molgenis.util.mail;
 
 import java.nio.charset.Charset;
+import java.util.Properties;
 
-interface MailSettings
+public interface MailSettings
 {
 	String getHost();
 
@@ -15,6 +16,8 @@ interface MailSettings
 	String getPassword();
 
 	Charset getDefaultEncoding();
+
+	Properties getJavaMailProperties();
 
 	boolean isTestConnection();
 }

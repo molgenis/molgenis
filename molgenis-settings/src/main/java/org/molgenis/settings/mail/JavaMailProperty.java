@@ -1,25 +1,25 @@
-package org.molgenis.mail;
+package org.molgenis.settings.mail;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.meta.PropertyType.KEY;
-import static org.molgenis.data.meta.PropertyType.VALUE;
+import static org.molgenis.settings.PropertyType.KEY;
+import static org.molgenis.settings.PropertyType.VALUE;
 
-public class MailSenderProperty extends StaticEntity
+public class JavaMailProperty extends StaticEntity
 {
-	public MailSenderProperty(Entity entity)
+	public JavaMailProperty(Entity entity)
 	{
 		super(entity);
 	}
 
-	public MailSenderProperty(EntityType entityType)
+	public JavaMailProperty(EntityType entityType)
 	{
 		super(entityType);
 	}
 
-	public MailSenderProperty(String id, EntityType entityType)
+	public JavaMailProperty(String id, EntityType entityType)
 	{
 		super(entityType);
 		setKey(id);

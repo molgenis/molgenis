@@ -47,6 +47,11 @@
             <artifactId>molgenis-data-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-settings</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
