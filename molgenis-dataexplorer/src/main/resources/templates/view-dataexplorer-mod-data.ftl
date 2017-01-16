@@ -35,6 +35,9 @@
                     <a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal"
                        data-target="#galaxy-export-modal">Export to Galaxy</a>
                 </#if>
+                <#if plugin_settings.data_directory_export == true>
+                    <a id="directory-export-modal-button" class="btn btn-default" data-toggle="modal">Export to BBMRI Negotiator</a>
+                </#if>
                 </div>
             </div>
         </div>

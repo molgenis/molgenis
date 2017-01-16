@@ -11,6 +11,8 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.directory.DirectorySettings;
+import org.molgenis.dataexplorer.directory.NegotiatorQuery;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -18,6 +20,7 @@ import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menumanager.MenuManagerService;
@@ -26,22 +29,29 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
@@ -70,6 +80,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
 
+	private static final String API_URI = "/api/";
+
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
 
@@ -97,6 +109,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private AttributeFactory attrMetaFactory;
 
+	@Autowired
+	private DirectorySettings settings;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -109,8 +124,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
+			@RequestParam(required = false) String nToken, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -143,6 +158,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
+		if (nToken != null) model.addAttribute("nToken", nToken);
 		return "view-dataexplorer";
 	}
 
@@ -184,9 +200,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityName)
 	{
-		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
+		return molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
 				.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
-		return showCopy;
 	}
 
 	/**
@@ -366,6 +381,64 @@ public class DataExplorerController extends MolgenisPluginController
 		// store url and api key in session for subsequent galaxy export requests
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
+	}
+
+	@RequestMapping(value = "/directory/export", produces = "application/json")
+	@ResponseBody
+	@RunAsSystem
+	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
+	{
+		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+
+		String username = settings.getString(DirectorySettings.USERNAME);
+		String password = settings.getString(DirectorySettings.PASSWORD);
+		headers.set("Authorization", generateBase64Authentication(username, password));
+
+		HttpEntity entity = new HttpEntity(query, headers);
+
+		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
+
+		try
+		{
+			String redirectURL = restTemplate
+					.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity).toASCIIString();
+			LOG.trace("Redirecting to " + redirectURL);
+			return redirectURL;
+		}
+		catch (Exception e)
+		{
+			LOG.error("Posting to the directory went wrong: ", e);
+			throw e;
+		}
+	}
+
+	/**
+	 * Generate base64 authentication based on settings
+	 *
+	 * @return String
+	 */
+	public static String generateBase64Authentication(String username, String password)
+	{
+		requireNonNull(username, password);
+		String userPass = username + ":" + password;
+		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
+		return String.format("Basic %s", userPassBase64);
+	}
+
+	private static String getApiUrl(HttpServletRequest request)
+	{
+		String apiUrl;
+		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+		{
+			apiUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort() + API_URI;
+		}
+		else
+		{
+			apiUrl = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + API_URI;
+		}
+		return apiUrl;
 	}
 
 	/**

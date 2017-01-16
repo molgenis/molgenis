@@ -443,6 +443,34 @@
             download();
         });
 
+        $('#directory-export-modal-button').click(function () {
+            var nToken = undefined
+            var request = {
+                "query": [{
+                    'URL': window.location.href,
+                    'collections': [
+                        {
+                            'collectionID': '1',
+                            'biobankID': 'A'
+                        }
+                    ],
+                    'humanReadable': 'test'
+                }]
+            }
+
+            console.log(JSON.stringify(request))
+
+            $.ajax({
+                type: 'POST',
+                url: molgenis.getContextUrl() + '/directory/export',
+                data: JSON.stringify(request),
+                contentType: 'application/json',
+                success: function (response){
+                    console.log(response)
+                }
+            })
+        })
+
         $('form[name=galaxy-export-form]').validate({
             rules: {
                 galaxyUrl: {

@@ -59,9 +59,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String DATA_GALAXY_URL = "data_galaxy_url";
 		public static final String DATA_GALAXY_API_KEY = "data_galaxy_api_key";
 		public static final String DATA_GENOME_BROWSER = "data_genome_browser";
+		public static final String DATA_DIRECTORY_EXPORT = "data_directory_export";
 
 		private static final boolean DEFAULT_DATA_GALAXY_EXPORT = true;
 		private static final boolean DEFAULT_DATA_GENOME_BROWSER = true;
+		private static final boolean DEFAULT_DATA_DIRECTORY_EXPORT = false;
 
 		public static final String GENOMEBROWSER = "genomebrowser";
 		public static final String GENOMEBROWSER_INIT = "gb_init";
@@ -142,12 +144,18 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			Attribute dataAttr = addAttribute(DATA).setParent(modAttr).setDataType(COMPOUND).setLabel("Data")
 					.setVisibleExpression("$('" + MOD_DATA + "').eq(true).value()");
 
+			// Show Galaxy button + URL and API settings
 			addAttribute(DATA_GALAXY_EXPORT).setParent(dataAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_DATA_GALAXY_EXPORT)).setLabel("Galaxy export");
-			addAttribute(DATA_GALAXY_URL).setParent(dataAttr).setDataType(HYPERLINK).setNillable(true).setLabel("Galaxy URL")
-					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
+			addAttribute(DATA_GALAXY_URL).setParent(dataAttr).setDataType(HYPERLINK).setNillable(true)
+					.setLabel("Galaxy URL").setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 			addAttribute(DATA_GALAXY_API_KEY).setParent(dataAttr).setNillable(true).setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
+
+			// Show BBMRI Negotiator button
+			addAttribute(DATA_DIRECTORY_EXPORT).setParent(dataAttr).setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_DATA_DIRECTORY_EXPORT))
+					.setLabel("BBMRI Directory to Negotiator export");
 
 			// genome browser
 			Attribute genomeBrowserAttr = addAttribute(GENOMEBROWSER).setParent(dataAttr).setDataType(COMPOUND)
@@ -157,14 +165,16 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			Attribute genomeBrowserInitAttr = addAttribute(GENOMEBROWSER_INIT).setParent(genomeBrowserAttr)
 					.setDataType(COMPOUND).setLabel("Initialization");
 
-			addAttribute(GENOMEBROWSER_INIT_BROWSER_LINKS).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
-			addAttribute(GENOMEBROWSER_INIT_COORD_SYSTEM).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
-			addAttribute(GENOMEBROWSER_INIT_LOCATION).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION).setLabel("Location");
-			addAttribute(GENOMEBROWSER_INIT_SOURCES).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_SOURCES).setLabel("Sources");
+			addAttribute(GENOMEBROWSER_INIT_BROWSER_LINKS).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS)
+					.setLabel("Browser links");
+			addAttribute(GENOMEBROWSER_INIT_COORD_SYSTEM).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM)
+					.setLabel("Coordinate system");
+			addAttribute(GENOMEBROWSER_INIT_LOCATION).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION).setLabel("Location");
+			addAttribute(GENOMEBROWSER_INIT_SOURCES).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_SOURCES).setLabel("Sources");
 			addAttribute(GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setParent(genomeBrowserInitAttr).setNillable(false)
 					.setDataType(BOOL).setDefaultValue(String.valueOf(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION))
 					.setLabel("Highlight region");
@@ -190,9 +200,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		{
 			Attribute reportsAttr = addAttribute(REPORTS).setParent(modAttr).setDataType(COMPOUND).setLabel("Reports")
 					.setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
-			addAttribute(REPORTS_ENTITIES).setParent(reportsAttr).setNillable(true).setDataType(TEXT).setLabel("Reports")
-					.setDescription(
-							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
+			addAttribute(REPORTS_ENTITIES).setParent(reportsAttr).setNillable(true).setDataType(TEXT)
+					.setLabel("Reports").setDescription(
+					"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 		}
 	}
 
