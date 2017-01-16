@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -259,5 +260,35 @@ public class QueryUtilsTest
 		when(refAttr.getRefEntity()).thenReturn(refEntity);
 		when(entityType.getAttribute(refAttrName)).thenReturn(refAttr);
 		QueryUtils.getQueryRuleAttribute(queryRule, entityType);
+	}
+
+	@Test
+	public void containsNestedQueryRuleFieldTrue()
+	{
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		QueryRule nestedQueryRule0 = mock(QueryRule.class);
+		when(nestedQueryRule0.getField()).thenReturn("refAttr.attr");
+		QueryRule queryRule0 = mock(QueryRule.class);
+		when(queryRule0.getField()).thenReturn("attr");
+		QueryRule queryRule1 = mock(QueryRule.class);
+		when(queryRule1.getNestedRules()).thenReturn(singletonList(nestedQueryRule0));
+		when(q.getRules()).thenReturn(asList(queryRule0, queryRule1));
+		assertTrue(QueryUtils.containsNestedQueryRuleField(q));
+	}
+
+	@Test
+	public void containsNestedQueryRuleFieldFalse()
+	{
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		QueryRule nestedQueryRule0 = mock(QueryRule.class);
+		when(nestedQueryRule0.getField()).thenReturn("refAttr");
+		QueryRule queryRule0 = mock(QueryRule.class);
+		when(queryRule0.getField()).thenReturn("attr");
+		QueryRule queryRule1 = mock(QueryRule.class);
+		when(queryRule1.getNestedRules()).thenReturn(singletonList(nestedQueryRule0));
+		when(q.getRules()).thenReturn(asList(queryRule0, queryRule1));
+		assertFalse(QueryUtils.containsNestedQueryRuleField(q));
 	}
 }

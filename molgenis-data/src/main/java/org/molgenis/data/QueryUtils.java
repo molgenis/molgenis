@@ -14,6 +14,8 @@ import static java.util.stream.StreamSupport.stream;
 
 public class QueryUtils
 {
+	private static final char NESTED_ATTRIBUTE_SEPARATOR = '.';
+
 	public static boolean containsOperator(Query<Entity> q, Operator operator)
 	{
 		return containsAnyOperator(q, EnumSet.of(operator));
@@ -74,6 +76,37 @@ public class QueryUtils
 	}
 
 	/**
+	 * Returns {@code true} if a given query contains any query rule with a nested attribute field (e.g. refAttr.attr).
+	 *
+	 * @param q query
+	 * @return {@code true} if a given query contains any query rule with a nested attribute field
+	 */
+	public static boolean containsNestedQueryRuleField(Query<Entity> q)
+	{
+		return containsNestedQueryRuleFieldRec(q.getRules());
+	}
+
+	private static boolean containsNestedQueryRuleFieldRec(List<QueryRule> rules)
+	{
+		for (QueryRule rule : rules)
+		{
+			String queryRuleField = rule.getField();
+			if (queryRuleField != null && queryRuleField.indexOf(NESTED_ATTRIBUTE_SEPARATOR) != -1)
+			{
+				return true;
+			}
+
+			List<QueryRule> nestedRules = rule.getNestedRules();
+			if (nestedRules != null && containsNestedQueryRuleFieldRec(nestedRules))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns the attribute for a query rule field.
 	 *
 	 * @param queryRule  query rule
@@ -90,7 +123,7 @@ public class QueryUtils
 		}
 
 		Attribute attr = null;
-		String[] queryRuleFieldTokens = StringUtils.split(queryRuleField, '.');
+		String[] queryRuleFieldTokens = StringUtils.split(queryRuleField, NESTED_ATTRIBUTE_SEPARATOR);
 		EntityType entityTypeAtCurrentDepth = entityType;
 		for (int depth = 0; depth < queryRuleFieldTokens.length; ++depth)
 		{
