@@ -1,9 +1,6 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -119,24 +116,16 @@ public class QueryValidator
 		}
 	}
 
-	private static Attribute getQueryRuleAttribute(QueryRule queryRule, EntityType entityType)
+	private Attribute getQueryRuleAttribute(QueryRule queryRule, EntityType entityType)
 	{
-		String queryRuleField = queryRule.getField();
-		if (queryRuleField == null)
+		try
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Query rule with operator [%s] is missing required field",
-							queryRule.getOperator().toString())));
+			return QueryUtils.getQueryRuleAttribute(queryRule, entityType);
 		}
-
-		Attribute attr = entityType.getAttribute(queryRuleField);
-		if (attr == null)
+		catch (UnknownAttributeException e)
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Query rule field [%s] refers to unknown attribute in entity type [%s]", queryRuleField,
-							entityType.getName())));
+			throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
 		}
-		return attr;
 	}
 
 	private Object toQueryRuleValue(Object queryRuleValue, Attribute attr)
