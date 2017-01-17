@@ -12,7 +12,7 @@ public class DirectorySettings extends DefaultSettingsEntity
 	public static final String USERNAME = "username";
 	public static final String PASSWORD = "password";
 	private static final String NEGOTIATOR_URL_DEFAULT = "https://bbmri-demo.mitro.dkfz.de/demo/api/directory/create_query";
-	private static final String ID = DirectoryController.ID;
+	private static final String ID = "directory";
 
 	public DirectorySettings()
 	{
