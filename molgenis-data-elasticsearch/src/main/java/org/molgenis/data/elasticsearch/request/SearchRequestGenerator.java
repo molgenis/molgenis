@@ -4,6 +4,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
@@ -20,32 +21,34 @@ public class SearchRequestGenerator
 	private final List<? extends QueryPartGenerator> queryGenerators;
 	private final AggregateQueryGenerator aggregateQueryGenerator;
 
-	public SearchRequestGenerator()
+	public SearchRequestGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		aggregateQueryGenerator = new AggregateQueryGenerator();
-		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator());
+		queryGenerators = Arrays.asList(new QueryGenerator(documentIdGenerator), new SortGenerator(documentIdGenerator),
+				new LimitOffsetGenerator());
 	}
 
 	/**
 	 * Writes a query to a {@link SearchRequestBuilder}.
 	 *
 	 * @param searchRequestBuilder
-	 * @param entityName
+	 * @param documentType
 	 * @param searchType
 	 * @param aggAttr1             First Field to aggregate on
 	 * @param aggAttr2             Second Field to aggregate on
 	 * @param entityType
 	 */
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String documentType,
+			SearchType searchType,
 			Query<Entity> query, Attribute aggAttr1, Attribute aggAttr2,
 			Attribute aggAttrDistinct, EntityType entityType)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
-		if (entityName != null)
+		if (documentType != null)
 		{
-			searchRequestBuilder.setTypes(entityName);
+			searchRequestBuilder.setTypes(documentType);
 		}
 
 		// Generate query

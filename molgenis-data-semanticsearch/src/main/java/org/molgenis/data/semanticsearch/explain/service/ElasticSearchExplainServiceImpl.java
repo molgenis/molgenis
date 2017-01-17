@@ -8,6 +8,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.slf4j.Logger;
@@ -20,27 +21,32 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+import static java.util.Objects.requireNonNull;
 
 public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService
 {
-	private static final String DEFAULT_INDEX_NAME = "molgenis";
-	private final ExplainServiceHelper explainServiceHelper;
-	private final Client client;
-
-	private final QueryGenerator queryGenerator = new QueryGenerator();
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
 
+	private static final String DEFAULT_INDEX_NAME = "molgenis";
+
+	private final Client client;
+	private final ExplainServiceHelper explainServiceHelper;
+	private final DocumentIdGenerator documentIdGenerator;
+	private final QueryGenerator queryGenerator;
+
 	@Autowired
-	public ElasticSearchExplainServiceImpl(Client client, ExplainServiceHelper explainServiceHelper)
+	public ElasticSearchExplainServiceImpl(Client client, ExplainServiceHelper explainServiceHelper,
+			DocumentIdGenerator documentIdGenerator)
 	{
 		this.explainServiceHelper = explainServiceHelper;
 		this.client = client;
+		this.documentIdGenerator = requireNonNull(documentIdGenerator);
+		this.queryGenerator = new QueryGenerator(documentIdGenerator);
 	}
 
 	public Explanation explain(Query<Entity> q, EntityType entityType, String documentId)
 	{
-		String type = sanitizeMapperType(entityType.getName());
+		String type = documentIdGenerator.generateId(entityType);
 		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, DEFAULT_INDEX_NAME, type,
 				documentId);
 		QueryBuilder queryBuilder = queryGenerator.createQueryBuilder(q.getRules(), entityType);

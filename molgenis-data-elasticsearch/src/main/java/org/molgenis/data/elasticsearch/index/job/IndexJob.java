@@ -10,6 +10,7 @@ import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +35,16 @@ class IndexJob extends Job
 	private final String transactionId;
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final EntityTypeFactory entityTypeFactory;
 
 	IndexJob(Progress progress, Authentication authentication, String transactionId, DataService dataService,
-			SearchService searchService)
+			SearchService searchService, EntityTypeFactory entityTypeFactory)
 	{
 		super(progress, null, authentication);
 		this.transactionId = requireNonNull(transactionId);
 		this.dataService = requireNonNull(dataService);
 		this.searchService = requireNonNull(searchService);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
 	@Override
@@ -135,10 +138,11 @@ class IndexJob extends Job
 			}
 			else
 			{
-				if (searchService.hasMapping(fullName))
+				EntityType entityType = getEntityType(indexAction);
+				if (searchService.hasMapping(entityType))
 				{
 					progress.progress(progressCount, format("Dropping {0}", fullName));
-					searchService.delete(fullName);
+					searchService.delete(entityType);
 				}
 				else
 				{
@@ -229,5 +233,12 @@ class IndexJob extends Job
 		QueryImpl<IndexAction> q = new QueryImpl<>(rule);
 		q.setSort(new Sort(ACTION_ORDER));
 		return q;
+	}
+
+	private EntityType getEntityType(IndexAction indexAction)
+	{
+		EntityType entityType = entityTypeFactory.create(indexAction.getEntityFullName());
+		entityType.setSimpleName(indexAction.getEntityTypeName());
+		return entityType;
 	}
 }
