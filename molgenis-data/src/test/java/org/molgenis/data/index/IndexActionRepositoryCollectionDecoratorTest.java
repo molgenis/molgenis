@@ -38,7 +38,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	{
 		indexActionRepositoryCollectionDecorator.deleteRepository(entityType);
 		verify(decoratedRepositoryCollection, times(1)).deleteRepository(entityType);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.addAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityType, attribute);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.deleteAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityType, attribute);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 
 	@Test
@@ -66,6 +66,6 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	{
 		indexActionRepositoryCollectionDecorator.createRepository(entityType);
 		verify(decoratedRepositoryCollection, times(1)).createRepository(entityType);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 }
