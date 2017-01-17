@@ -446,24 +446,26 @@
         $('#directory-export-modal-button').click(function () {
             var nToken = undefined
             var request = {
-                "query": [{
-                    'URL': window.location.href,
-                    'collections': [
-                        {
-                            'collectionID': '1',
-                            'biobankID': 'A'
-                        }
-                    ],
-                    'humanReadable': 'test'
-                }]
+                URL: window.location.href,
+                collections: [
+                    {
+                        collectionID: '1',
+                        biobankID: 'A'
+                    }
+                ],
+                humanReadable: 'test',
+                nToken: null
             }
 
-            console.log(JSON.stringify(request))
+            console.log(request)
 
             $.ajax({
-                type: 'POST',
+                method: 'POST',
+                dataType: 'json',
+                processData: false,
                 url: molgenis.getContextUrl() + '/directory/export',
                 data: JSON.stringify(request),
+                async: true,
                 contentType: 'application/json',
                 success: function (response){
                     console.log(response)

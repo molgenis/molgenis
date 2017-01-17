@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer.directory;
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import java.util.Collection;
 import java.util.List;
 
 @AutoValue
