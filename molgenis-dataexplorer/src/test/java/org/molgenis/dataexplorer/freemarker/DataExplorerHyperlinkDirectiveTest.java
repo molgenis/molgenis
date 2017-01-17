@@ -1,8 +1,10 @@
 package org.molgenis.dataexplorer.freemarker;
 
-import com.google.common.collect.Maps;
 import freemarker.core.Environment;
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 import org.molgenis.data.DataService;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.ui.MolgenisPlugin;
@@ -12,9 +14,9 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -31,7 +33,7 @@ public class DataExplorerHyperlinkDirectiveTest
 	{
 		MolgenisPluginRegistry mpr = mock(MolgenisPluginRegistry.class);
 		when(mpr.getPlugin(DataExplorerController.ID))
-				.thenReturn(new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
+				.thenReturn(new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex", newHashMap()));
 
 		dataService = mock(DataService.class);
 		when(dataService.hasRepository("thedataset")).thenReturn(true);
@@ -47,20 +49,12 @@ public class DataExplorerHyperlinkDirectiveTest
 	{
 		when(dataService.hasRepository("thedataset")).thenReturn(true);
 
-		Map<String, String> params = Maps.newHashMap();
+		Map<String, String> params = newHashMap();
 		params.put("entityName", "thedataset");
 		params.put("class", "class1 class2");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
-				new TemplateDirectiveBody()
-				{
-					@Override
-					public void render(Writer out) throws TemplateException, IOException
-					{
-						out.write("explore data");
-					}
-
-				});
+				out -> out.write("explore data"));
 
 		assertEquals(envWriter.toString(),
 				"<a href='/menu/data/dataex?entity=thedataset' class='class1 class2' >explore data</a>");
@@ -71,21 +65,13 @@ public class DataExplorerHyperlinkDirectiveTest
 	{
 		when(dataService.hasRepository("thedataset")).thenReturn(false);
 
-		Map<String, String> params = Maps.newHashMap();
+		Map<String, String> params = newHashMap();
 		params.put("entityName", "thedataset");
 		params.put("class", "class1 class2");
 		params.put("alternativeText", "alt");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
-				new TemplateDirectiveBody()
-				{
-					@Override
-					public void render(Writer out) throws TemplateException, IOException
-					{
-						out.write("explore data");
-					}
-
-				});
+				out -> out.write("explore data"));
 
 		assertEquals(envWriter.toString(), "alt");
 	}

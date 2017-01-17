@@ -1,12 +1,13 @@
 package org.molgenis.framework.ui;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import static java.util.Collections.singleton;
+import static java.util.stream.StreamSupport.stream;
 
 public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 {
@@ -14,7 +15,7 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 
 	public MolgenisPluginRegistryImpl()
 	{
-		pluginFactories = new ArrayList<MolgenisPluginFactory>();
+		pluginFactories = new ArrayList<>();
 	}
 
 	@Override
@@ -24,14 +25,7 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 		{
 			throw new IllegalArgumentException(MolgenisPlugin.class.getSimpleName() + " cannot be null");
 		}
-		pluginFactories.add(new MolgenisPluginFactory()
-		{
-			@Override
-			public Iterator<MolgenisPlugin> iterator()
-			{
-				return Collections.singleton(molgenisPlugin).iterator();
-			}
-		});
+		pluginFactories.add(() -> singleton(molgenisPlugin).iterator());
 	}
 
 	@Override
@@ -53,13 +47,7 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 	@Override
 	public MolgenisPlugin getPlugin(final String id)
 	{
-		return Iterables.find(this, new Predicate<MolgenisPlugin>()
-		{
-			@Override
-			public boolean apply(MolgenisPlugin molgenisPlugin)
-			{
-				return molgenisPlugin.getId().equals(id);
-			}
-		}, null);
+		return stream(this.spliterator(), false).filter(molgenisPlugin -> molgenisPlugin.getId().equals(id)).findFirst()
+				.orElseGet(() -> null);
 	}
 }
