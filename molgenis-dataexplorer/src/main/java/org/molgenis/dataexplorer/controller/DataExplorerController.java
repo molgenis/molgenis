@@ -124,8 +124,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(required = false) String nToken, Model model) throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
+			throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
@@ -158,7 +158,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
-		if (nToken != null) model.addAttribute("nToken", nToken);
 		return "view-dataexplorer";
 	}
 

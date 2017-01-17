@@ -363,6 +363,49 @@
     }
 
     /**
+     * ONLY WORKS FOR BBMRI COLLECTIONS ENTITY
+     *
+     * Retrieves the collectionID and biobankID of all entities remaining after filtering
+     * Sends request to server, which posts to the negotiator
+     */
+    function sendNegotiatorRequest() {
+        var entityName = getEntity().name
+        var rsql = molgenis.createRsqlQuery(molgenis.dataexplorer.getFilterRules())
+        var uri = '/api/v2/' + entityName + '?q=' + rsql
+
+        var collections = []
+
+        restApi.getAsync(uri).then(function (response) {
+            $.each(response.items, function () {
+                var item = this
+                collections.push({
+                    collectionId: item.id,
+                    biobankId: item.biobank.id
+                })
+            })
+
+            var request = {
+                URL: window.location.href,
+                collections: collections,
+                humanReadable: 'a nice readable string',
+                nToken: molgenis.dataexplorer.getnToken()
+            }
+
+            $.ajax({
+                method: 'POST',
+                dataType: 'json',
+                url: molgenis.getContextUrl() + '/directory/export',
+                data: JSON.stringify(request),
+                async: true,
+                contentType: 'application/json',
+                success: function (response) {
+                    console.log(response)
+                }
+            })
+        })
+    }
+
+    /**
      * @memberOf molgenis.dataexplorer.data
      */
     $(function () {
@@ -443,32 +486,22 @@
             download();
         });
 
-        $('#directory-export-modal-button').click(function () {
-            var nToken = undefined
-            var request = {
-                URL: window.location.href,
-                collections: [
-                    {
-                        collectionID: '1',
-                        biobankID: 'A'
+        $('#directory-export-button').click(function () {
+            bootbox.confirm({
+                title: 'Send request to the BBMRI Negotiator?',
+                message: "Your current selection of biobanks along with your filtering criteria will be sent to the BBMRI Negotiator. Are you sure?",
+                buttons: {
+                    confirm: {
+                        label: 'Yes, Send to Negotiator'
+                    },
+                    cancel: {
+                        label: 'No, I want to keep filtering'
                     }
-                ],
-                humanReadable: 'test',
-                nToken: null
-            }
-
-            console.log(request)
-
-            $.ajax({
-                method: 'POST',
-                dataType: 'json',
-                processData: false,
-                url: molgenis.getContextUrl() + '/directory/export',
-                data: JSON.stringify(request),
-                async: true,
-                contentType: 'application/json',
-                success: function (response){
-                    console.log(response)
+                },
+                callback: function (result) {
+                    if (result) {
+                        sendNegotiatorRequest();
+                    }
                 }
             })
         })
