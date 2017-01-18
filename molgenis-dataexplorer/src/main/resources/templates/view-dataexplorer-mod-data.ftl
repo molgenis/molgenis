@@ -36,7 +36,7 @@
                        data-target="#galaxy-export-modal">Export to Galaxy</a>
                 </#if>
                 <#if plugin_settings.data_directory_export == true>
-                    <a id="directory-export-button" class="btn btn-default" data-toggle="modal">Export to BBMRI Negotiator</a>
+                    <a id="directory-export-button" class="btn btn-default">Export to BBMRI Negotiator</a>
                 </#if>
                 </div>
             </div>
@@ -154,7 +154,8 @@
     <#-- load js dependencies -->
     $.when(
             $.ajax("<@resource_href "/js/dalliance-compiled.min.js"/>", {'cache': true}),
-            $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
+            $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
+            $.ajax("<@resource_href "/js/dataexplorer-directory.js"/>", {'cache': true}))
             .done(function () {
                 molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomicDataSettings.start?js_string}', '${genomicDataSettings.chromosome?js_string}', '${genomicDataSettings.identifier?js_string}', '${genomicDataSettings.patient_id?js_string}');
             <#-- do *not* js escape values below -->

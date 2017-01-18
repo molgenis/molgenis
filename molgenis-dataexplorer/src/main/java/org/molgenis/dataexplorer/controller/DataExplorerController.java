@@ -1,6 +1,5 @@
 package org.molgenis.dataexplorer.controller;
 
-import com.google.api.client.util.Maps;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.molgenis.data.*;
@@ -12,8 +11,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.dataexplorer.directory.DirectorySettings;
-import org.molgenis.dataexplorer.directory.NegotiatorQuery;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -21,7 +18,6 @@ import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menumanager.MenuManagerService;
@@ -30,14 +26,10 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.servlet.ServletOutputStream;
@@ -47,11 +39,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
@@ -80,8 +70,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
 
-	private static final String API_URI = "/api/";
-
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
 
@@ -108,9 +96,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
-
-	@Autowired
-	private DirectorySettings settings;
 
 	public DataExplorerController()
 	{
@@ -380,57 +365,6 @@ public class DataExplorerController extends MolgenisPluginController
 		// store url and api key in session for subsequent galaxy export requests
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
-	}
-
-	@RequestMapping(value = "/directory/export", produces = "application/json")
-	@ResponseBody
-	@RunAsSystem
-	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
-	{
-		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
-
-		Map<String, Object> map = Maps.newHashMap();
-		map.put("URL", query.getURL());
-		map.put("collections", query.getCollections());
-		map.put("humanReadable", query.getHumanReadable());
-		map.put("nToken", query.getnToken());
-
-		String username = settings.getString(DirectorySettings.USERNAME);
-		String password = settings.getString(DirectorySettings.PASSWORD);
-
-		RestTemplate template = new RestTemplate();
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", generateBase64Authentication(username, password));
-
-		HttpEntity entity = new HttpEntity(map, headers);
-
-		try
-		{
-			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-			String redirectURL = template.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
-					.toASCIIString();
-			LOG.trace("Redirecting to " + redirectURL);
-			return redirectURL;
-		}
-		catch (Exception e)
-		{
-			LOG.error("Posting to the directory went wrong: ", e);
-			throw e;
-		}
-	}
-
-	/**
-	 * Generate base64 authentication based on settings
-	 *
-	 * @return String
-	 */
-	public static String generateBase64Authentication(String username, String password)
-	{
-		requireNonNull(username, password);
-		String userPass = username + ":" + password;
-		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
-		return "Basic " + userPassBase64;
 	}
 
 	/**
