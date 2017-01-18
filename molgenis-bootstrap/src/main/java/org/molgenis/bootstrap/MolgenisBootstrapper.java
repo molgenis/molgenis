@@ -5,6 +5,7 @@ import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
+import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
 import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -37,15 +38,15 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final JobBootstrapper jobBootstrapper;
 	private final AnnotatorBootstrapper annotatorBootstrapper;
 	private final IndexBootstrapper indexBootstrapper;
+	private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
 
 	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
-			RegistryBootstrapper registryBootstrapper,
-			SystemEntityTypeBootstrapper systemEntityTypeBootstrapper, RepositoryPopulator repositoryPopulator,
-			FileIngesterJobRegistrar fileIngesterJobRegistrar, JobBootstrapper jobBootstrapper,
-			AnnotatorBootstrapper annotatorBootstrapper,
-			IndexBootstrapper indexBootstrapper)
+			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
+			RepositoryPopulator repositoryPopulator, FileIngesterJobRegistrar fileIngesterJobRegistrar,
+			JobBootstrapper jobBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
+			IndexBootstrapper indexBootstrapper, EntityTypeRegistryPopulator entityTypeRegistryPopulator)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
@@ -56,6 +57,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
 		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
+		this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
 	}
 
 	@Transactional
@@ -101,6 +103,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Bootstrapping index ...");
 		indexBootstrapper.bootstrap();
 		LOG.debug("Bootstrapped index");
+
+		LOG.trace("Populating entity type registry ...");
+		entityTypeRegistryPopulator.populate();
+		LOG.debug("Populated entity type registry");
 
 		LOG.info("Bootstrapping application completed");
 	}

@@ -44,8 +44,10 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getJunctionTableOrderColumnName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 
@@ -490,7 +492,7 @@ class PostgreSqlRepository extends AbstractRepository
 				for (Entity val : refEntities)
 				{
 					Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
-					mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+					mref.put(getJunctionTableOrderColumnName(), seqNr.getAndIncrement());
 					mref.put(idAttr.getName(), entity.get(idAttr.getName()));
 					mref.put(attr.getName(), val);
 					mrefs.get(attr.getName()).add(mref);
@@ -567,7 +569,7 @@ class PostgreSqlRepository extends AbstractRepository
 	private void removeMrefs(final List<Object> ids, final Attribute attr)
 	{
 		final Attribute idAttr = attr.isMappedBy() ? attr.getMappedBy() : entityType.getIdAttribute();
-		String deleteMrefSql = getSqlDelete(getJunctionTableName(entityType, attr), idAttr);
+		String deleteMrefSql = getSqlDelete(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr), idAttr);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -700,7 +702,7 @@ class PostgreSqlRepository extends AbstractRepository
 				Entity mrefEntity = (Entity) mref.get(attr.getName());
 				idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute());
 			}
-			preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
+			preparedStatement.setInt(1, (int) mref.get(getJunctionTableOrderColumnName()));
 			preparedStatement.setObject(2, idValue0);
 			preparedStatement.setObject(3, idValue1);
 		}

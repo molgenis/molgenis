@@ -15,6 +15,7 @@ import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
+import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
@@ -67,6 +68,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
 		"org.molgenis.data.jobs", "org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
 		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
+		"org.molgenis.data.meta.util",
 		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
 		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
 		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
@@ -79,7 +81,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemService.class,
-		org.molgenis.data.importer.ImportServiceRegistrar.class })
+		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final String INTEGRATION_TEST_DATABASE_NAME;
@@ -233,6 +235,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Bootstrapping system entity types ...");
 					systemEntityTypeBootstrapper.bootstrap(event);
 					LOG.debug("Bootstrapped system entity types");
+
+					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 				});
 			}
 			catch (Exception unexpected)

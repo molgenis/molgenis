@@ -491,7 +491,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private boolean isTableExists(EntityType entityType)
 	{
-		return isTableExists(getTableName(entityType, false));
+		return isTableExists(PostgreSqlNameGenerator.getTableName(entityType, false));
 	}
 
 	private boolean isTableExists(String tableName)
