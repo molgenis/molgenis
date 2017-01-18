@@ -7,6 +7,6 @@ public class ElasticsearchEntityFactoryTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void ElasticsearchEntityFactory()
 	{
-		new ElasticsearchEntityFactory(null);
+		new ElasticsearchEntityFactory(null, null);
 	}
 }
