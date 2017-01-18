@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
+import com.google.api.client.util.Maps;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.molgenis.data.*;
@@ -32,15 +33,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
@@ -388,21 +388,28 @@ public class DataExplorerController extends MolgenisPluginController
 	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
 	{
 		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders headers = new HttpHeaders();
+
+		Map<String, Object> map = Maps.newHashMap();
+		map.put("URL", query.getURL());
+		map.put("collections", query.getCollections());
+		map.put("humanReadable", query.getHumanReadable());
+		map.put("nToken", query.getnToken());
 
 		String username = settings.getString(DirectorySettings.USERNAME);
 		String password = settings.getString(DirectorySettings.PASSWORD);
+
+		RestTemplate template = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", generateBase64Authentication(username, password));
 
-		HttpEntity entity = new HttpEntity(query, headers);
-
-		LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
+		HttpEntity entity = new HttpEntity(map, headers);
 
 		try
 		{
-			String redirectURL = restTemplate
-					.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity).toASCIIString();
+			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
+			String redirectURL = template.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
+					.toASCIIString();
 			LOG.trace("Redirecting to " + redirectURL);
 			return redirectURL;
 		}
@@ -423,21 +430,7 @@ public class DataExplorerController extends MolgenisPluginController
 		requireNonNull(username, password);
 		String userPass = username + ":" + password;
 		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
-		return String.format("Basic %s", userPassBase64);
-	}
-
-	private static String getApiUrl(HttpServletRequest request)
-	{
-		String apiUrl;
-		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
-		{
-			apiUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getLocalPort() + API_URI;
-		}
-		else
-		{
-			apiUrl = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + API_URI;
-		}
-		return apiUrl;
+		return "Basic " + userPassBase64;
 	}
 
 	/**

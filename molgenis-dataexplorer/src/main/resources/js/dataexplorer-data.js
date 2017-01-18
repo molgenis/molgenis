@@ -376,16 +376,26 @@
         var collections = []
 
         restApi.getAsync(uri).then(function (response) {
+            var collectionId, biobank, biobankId
             $.each(response.items, function () {
                 var item = this
+
+                collectionId = item.id
+                biobank = item.biobank
+                biobankId = biobank ? biobank.id : null
+
                 collections.push({
-                    collectionId: item.id,
-                    biobankId: item.biobank.id
+                    collectionId: collectionId,
+                    biobankId: biobankId
                 })
             })
 
+            // Remove the nToken from the URL to prevent duplication on their side
+            // When a query is edited more then once
+            var url = window.location.href.replace(/&nToken=\w{32}/, '')
+
             var request = {
-                URL: window.location.href,
+                URL: url,
                 collections: collections,
                 humanReadable: 'a nice readable string',
                 nToken: molgenis.dataexplorer.getnToken()
@@ -399,7 +409,7 @@
                 async: true,
                 contentType: 'application/json',
                 success: function (response) {
-                    console.log(response)
+                    window.location.href = response
                 }
             })
         })
