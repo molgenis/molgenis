@@ -184,8 +184,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityName)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
+		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
 				.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
+		return showCopy;
 	}
 
 	/**
