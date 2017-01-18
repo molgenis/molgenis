@@ -102,11 +102,12 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
 		IndexAction action = mock(IndexAction.class);
 		when(action.getEntityTypeName()).thenReturn("myEntityTypeName");
-		when(action.getEntityFullName()).thenReturn("myEntity");
+		when(action.getEntityFullName()).thenReturn("myEntityTypeName");
 		when(action.getEntityId()).thenReturn("myEntityId");
 		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("myEntityTypeName");
 		when(entityType.getSimpleName()).thenReturn("myEntityTypeName");
-		when(entityTypeFactory.create("myEntityTypeId")).thenReturn(entityType);
+		when(entityTypeFactory.create("myEntityTypeName")).thenReturn(entityType);
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class))
 				.thenReturn(Stream.of(indexJobExecution));
