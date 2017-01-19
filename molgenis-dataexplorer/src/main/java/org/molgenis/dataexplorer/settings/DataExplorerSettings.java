@@ -152,11 +152,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			addAttribute(DATA_GALAXY_API_KEY).setParent(dataAttr).setNillable(true).setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 
-			// Show BBMRI Negotiator button
-			addAttribute(DATA_DIRECTORY_EXPORT).setParent(dataAttr).setDataType(BOOL).setNillable(false)
-					.setDefaultValue(String.valueOf(DEFAULT_DATA_DIRECTORY_EXPORT))
-					.setLabel("BBMRI Directory to Negotiator export");
-
 			// genome browser
 			Attribute genomeBrowserAttr = addAttribute(GENOMEBROWSER).setParent(dataAttr).setDataType(COMPOUND)
 					.setLabel("Genome Browser")

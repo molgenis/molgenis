@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -44,7 +45,9 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.FULL_NAME;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
+import static org.molgenis.dataexplorer.directory.DirectorySettings.COLLECTION_ENTITY;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -75,6 +78,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private GenomicDataSettings genomicDataSettings;
+
+	@Autowired
+	private DirectorySettings directorySettings;
 
 	@Autowired
 	private DataService dataService;
@@ -143,6 +149,9 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
+		// Directory specific check if the configured collection entity equals to the currently selected entity
+		model.addAttribute("showDirectoryButton", showDirectoryButton(selectedEntityName));
+
 		return "view-dataexplorer";
 	}
 
@@ -154,6 +163,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+			model.addAttribute("showDirectoryButton", showDirectoryButton(entityName));
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
@@ -451,5 +461,12 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.error(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
+	}
+
+	private boolean showDirectoryButton(String selectedEntityName)
+	{
+		String collectionEntityName = directorySettings.getEntity(COLLECTION_ENTITY, EntityType.class)
+				.getString(FULL_NAME);
+		return collectionEntityName.equals(selectedEntityName);
 	}
 }
