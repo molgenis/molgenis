@@ -20,14 +20,6 @@ import static org.testng.Assert.*;
 
 public class PostgreSqlQueryUtilsTest
 {
-	@Test
-	public void getJunctionTableName() throws Exception
-	{
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityType, attr), "\"entity_attr\"");
-	}
-
 	@DataProvider(name = "getPersistedAttributesProvider")
 	public static Iterator<Object[]> getPersistedAttributesProvider()
 	{
@@ -118,15 +110,5 @@ public class PostgreSqlQueryUtilsTest
 	{
 		Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
 		assertFalse(PostgreSqlQueryUtils.isTableAttribute(attr));
-	}
-
-	@Test
-	public void getJunctionTableIndexName() throws Exception
-	{
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-		Attribute idxAttr = when(mock(Attribute.class).getName()).thenReturn("idxAttr").getMock();
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableIndexName(entityType, attr, idxAttr),
-				"\"entity_attr_idxAttr_idx\"");
 	}
 }
