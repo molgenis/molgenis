@@ -1,11 +1,3 @@
-/**
- * Data module
- *
- * Dependencies: dataexplorer.js
- *
- * @param $
- * @param molgenis
- */
 (function ($, molgenis) {
     "use strict";
 
@@ -13,8 +5,6 @@
     var restApi = new molgenis.RestClient();
 
     /**
-     * ONLY WORKS FOR BBMRI COLLECTIONS ENTITY
-     *
      * Retrieves the collectionID and biobankID of all entities remaining after filtering
      * Sends request to server, which posts to the negotiator
      */
@@ -64,9 +54,6 @@
         })
     }
 
-    /**
-     * @memberOf molgenis.dataexplorer.directory
-     */
     $(function () {
         $('#directory-export-button').on('click', function () {
             console.log('test')
