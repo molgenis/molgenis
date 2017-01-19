@@ -47,7 +47,7 @@
             var request = {
                 URL: url,
                 collections: collections,
-                humanReadable: 'a nice readable string',
+                humanReadable: molgenis.rsql.getHumanReadable(rsql),
                 nToken: molgenis.dataexplorer.getnToken()
             }
 
