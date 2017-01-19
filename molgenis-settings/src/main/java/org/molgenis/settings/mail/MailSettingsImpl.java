@@ -72,14 +72,14 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		@Value("${mail.java.quitwait:false}")
 		private String mailJavaQuitWait;
 
-		private static final String HOST = "host";
-		private static final String PORT = "port";
-		private static final String PROTOCOL = "protocol";
-		private static final String USERNAME = "username";
-		private static final String PASSWORD = "password";
-		private static final String DEFAULT_ENCODING = "defaultEncoding";
-		private static final String JAVA_MAIL_PROPS = "props";
-		private static final String TEST_CONNECTION = "testConnection";
+		public static final String HOST = "host";
+		public static final String PORT = "port";
+		public static final String PROTOCOL = "protocol";
+		public static final String USERNAME = "username";
+		public static final String PASSWORD = "password";
+		public static final String DEFAULT_ENCODING = "defaultEncoding";
+		public static final String JAVA_MAIL_PROPS = "props";
+		public static final String TEST_CONNECTION = "testConnection";
 		private JavaMailPropertyType mailSenderPropertyType;
 
 		@Autowired
