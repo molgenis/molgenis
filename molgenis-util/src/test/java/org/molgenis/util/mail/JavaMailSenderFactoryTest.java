@@ -78,4 +78,10 @@ public class JavaMailSenderFactoryTest
 		assertEquals(actualProperties.getProperty("mail.smtp.auth"), "true");
 		assertEquals(actualProperties.getProperty("mail.debug"), "true");
 	}
+
+	@Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Unable to ping to host")
+	public void testValidateConnectionInvalidConnection()
+	{
+		javaMailSenderFactory.validateConnection(mailSettings);
+	}
 }
