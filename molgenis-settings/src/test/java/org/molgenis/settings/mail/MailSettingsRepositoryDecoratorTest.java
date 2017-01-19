@@ -90,4 +90,49 @@ public class MailSettingsRepositoryDecoratorTest
 		}
 	}
 
+	@Test(dataProvider = "addDontTest")
+	public void testUpdateDontTestConnection(boolean testConnection, String username, String password)
+	{
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(testConnection);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn(username);
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn(password);
+		mailSettingsRepositoryDecorator.update(entity);
+		verify(mailSenderFactory, never()).validateConnection(any(MailSettingsImpl.class));
+		verify(decorated).update(entity);
+		verifyNoMoreInteractions(decorated);
+	}
+
+	@Test
+	public void testUpdateValidSettings()
+	{
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(true);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn("Username");
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn("password");
+
+		mailSettingsRepositoryDecorator.update(entity);
+		verify(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
+		verify(decorated).update(entity);
+		verifyNoMoreInteractions(decorated);
+	}
+
+	@Test
+	public void testUpdateInvalidSettings()
+	{
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(true);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn("Username");
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn("password");
+
+		doThrow(IllegalStateException.class).when(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
+
+		try
+		{
+			mailSettingsRepositoryDecorator.update(entity);
+			Assert.fail("Should've thrown exception.");
+		}
+		catch (IllegalStateException expected)
+		{
+			verifyZeroInteractions(decorated);
+		}
+	}
+
 }
