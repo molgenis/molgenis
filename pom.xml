@@ -711,5 +711,6 @@
         <module>molgenis-data-platform</module>
         <module>molgenis-annotators-cmd</module>
         <module>molgenis-mail</module>
+        <module>molgenis-swagger</module>
     </modules>
 </project>
