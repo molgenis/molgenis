@@ -22,9 +22,8 @@ paths:
     post:
       tags:
         - V1
-      summary: Logs in the user to MOLGENIS
-      description:
-        Awesome usage of the MOLGENIS v1 login thingy
+      summary: Logs into a MOLGENIS user account
+      description: Awesome usage of the MOLGENIS v1 login thingy
       parameters:
         - name: body
           in: body
@@ -41,13 +40,21 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /v2/version:
+    get:
+      tags:
+        - V2
+      summary: Retrieves the MOLGENIS version
+      description: Retrieves the MOLGENIS version
+      responses:
+        200:
+          description: Server version
   /v2/{entity_name}:
     get:
       tags:
         - V2
       summary: Retrieves an entity collection
-      description:
-        Retrieves an entity collection based on entity name
+      description: Retrieves an entity collection based on entity name
       parameters:
         - name: entity_name
           in: path
@@ -91,8 +98,7 @@ paths:
       tags:
         - V2
       summary: Retrieves an entity
-      description:
-        Retrieves an entity instance based on entity name and ID
+      description: Retrieves an entity instance based on entity name and ID
       parameters:
         - name: entity_name
           in: path
@@ -111,6 +117,52 @@ paths:
         - name: _method
           type: string
           in: query
+          description: Tunnel request through defined method over default API operation
+      responses:
+        200:
+          description: OK
+    delete:
+      tags:
+        - V2
+      summary: Deletes an entity
+      description: Deletes an entity instance based on entity name and ID
+      parameters:
+        - name: entity_name
+          in: path
+          type: string
+          description: Name of the entity
+          required: true
+        - name: id
+          in: path
+          type: string
+          description: ID of the user
+          required: true
+      responses:
+        204:
+          description: OK
+  /v2/{entity_name}/meta/{attribute_name}:
+    get:
+      tags:
+        - V2
+      summary: Retrieve attribute metadata
+      description: Retrieve attribute metadata based on entity name and attribute name
+      parameters:
+        - name: entity_name
+          in: path
+          type: string
+          description: Name of the entity
+          required: true
+        - name: attribute_name
+          in: path
+          type: string
+          description: Name of the attribute
+          required: true
+        - name: _method
+          type: string
+          in: query
+          enum:
+            - POST
+            - GET
           description: Tunnel request through defined method over default API operation
       responses:
         200:
