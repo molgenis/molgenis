@@ -8,6 +8,10 @@ host: molgenis01.gcc.rug.nl
 schemes:
   - https
 basePath: /api/
+consumes:
+  - application/json
+  - application/x-www-form-urlencoded
+  - multipart/form-data
 produces:
   - application/json
 security:
@@ -23,7 +27,6 @@ paths:
       tags:
         - V1
       summary: Logs into a MOLGENIS user account
-      description: Awesome usage of the MOLGENIS v1 login thingy
       parameters:
         - name: body
           in: body
@@ -66,39 +69,104 @@ paths:
             - ${entityType.getName()}
 </#list>
         - name: attrs
-          type: string
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
           in: query
-          description: Defines which fields from the Entity to select
+          description: Defines which fields from the Entity to select. For each attribute that references another entity, may be postfixed with the attrs to fetch for that entity, between (). Special attribute names are ~id and ~lbl for the idAttribute and labelAttribute respectively.
         - name: q
           type: string
           in: query
           description: RSQL query to filter the Entity collection response
-        - name: sort
+        - name: aggs
           type: string
           in: query
-          description: The name of the attribute to sort on. Optionally followed by :asc or :desc
+          description: "RSQL query to filter the Entity collection aggregates. The aggregation query supports the RSQL selectors 'x', 'y' and 'distinct' and the RSQL operator '=='. The selector 'x' defines the first aggregation attribute name, 'y' defines the second aggregation attribute name, 'distinct' defines the distinct aggregation attribute name."
+        - name: sort
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          in: query
+          description: "Sort specification. Format is a comma separated list of attribute names. Each name may be followed by :asc or :desc to indicate sort order. Default sort order is ascending."
         - name: start
-          type: number
-          format: integer
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
           in: query
           description: Offset in resource collection
         - name: num
-          type: number
-          format: integer
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+          maximum: 10000
           in: query
           description: Number of resources to retrieve starting at start
-        - name: _method
-          type: string
-          in: query
-          enum:
-            - POST
-            - GET
-          description: Tunnel request through defined method over default API operation
       responses:
         200:
           description: OK
           schema:
             $ref: "#/definitions/EntityCollectionResponseV2"
+        400:
+          description: "Bad request. Happens if arguments are invalid or conversions fail, or a MolgenisDataException is thrown during the execution of the request."
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+        401:
+          description: "The user should have READ or (in the case of aggs) COUNT permission on the entity."
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+        500:
+          description: "Internal Server Error. Happens if a RuntimeException is thrown during the execution of the request"
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+    post:
+      tags:
+        - V2
+      summary: Retrieves an entity collection
+      description: Retrieves an entity collection based on entity name
+      parameters:
+        - name: _method
+          type: string
+          in: query
+          enum:
+            - GET
+          description: Tunnels the GET method over a POST request, allowing you to put the request in the body
+          required: true
+        - name: entity_name
+          in: path
+          type: string
+          description: Name of the entity
+          required: true
+          enum:
+<#list entityTypes as entityType>
+            - ${entityType.getName()}
+</#list>
+        - name: body
+          in: body
+          description: Entity collection retrieval request
+          required: true
+          schema:
+            $ref: '#/definitions/EntityCollectionRequestV2'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/EntityCollectionResponseV2"
+        400:
+          description: "Bad request. Happens if arguments are invalid or conversions fail, or a MolgenisDataException is thrown during the execution of the request."
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+        401:
+          description: "The user should have READ or (in the case of aggs) COUNT permission on the entity."
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+        500:
+          description: "Internal Server Error. Happens if a RuntimeException is thrown during the execution of the request"
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
   /v2/{entity_name}/{id}:
     get:
       tags:
@@ -118,7 +186,7 @@ paths:
         - name: id
           in: path
           type: string
-          description: ID of the user
+          description: ID of the entity instance
           required: true
         - name: attrs
           type: string
@@ -145,7 +213,7 @@ paths:
         - name: id
           in: path
           type: string
-          description: ID of the user
+          description: ID of the entity instance
           required: true
       responses:
         204:
@@ -192,19 +260,48 @@ definitions:
         type: string
       username:
         type: string
+  EntityCollectionRequestV2:
+    type: object
+    properties:
+      q:
+        type: string
+      aggs:
+        type: string
+      sort:
+        type: string
+      attrs:
+        type: string
+      start:
+        type: integer
+        format: int32
+        default: 0
+        minimum: 0
+        in: query
+        description: Offset in resource collection
+      num:
+        type: integer
+        format: int32
+        default: 0
+        minimum: 0
+        maximum: 10000
+        in: query
+        description: Number of resources to retrieve starting at start
   EntityCollectionResponseV2:
     type: object
     properties:
       href:
         type: string
       meta:
-        "$ref": "#/definitions/EntityTypeResponseV2"
+        $ref: "#/definitions/EntityTypeResponseV2"
       start:
         type: integer
+        format: int32
       num:
         type: integer
+        format: int32
       total:
-        type: long
+        type: integer
+        format: int64
       prevHref:
         type: string
       nextHref:
@@ -238,7 +335,7 @@ definitions:
       labelAttribute:
         type: string
       idAttribute:
-        type: String
+        type: string
       lookupAttributes:
         type: array
         items:
@@ -268,6 +365,27 @@ definitions:
         type: string
       fieldType:
         type: string
+        enum:
+          - BOOL
+          - CATEGORICAL
+          - CATEGORICAL_MREF
+          - COMPOUND
+          - DATE
+          - DATE_TIME
+          - DECIMAL
+          - EMAIL
+          - ENUM
+          - FILE
+          - HTML
+          - HYPERLINK
+          - INT
+          - LONG
+          - MREF
+          - ONE_TO_MANY
+          - SCRIPT
+          - STRING
+          - TEXT
+          - XREF
       name:
         type: string
       label:
@@ -283,9 +401,9 @@ definitions:
         items:
           type: string
       maxLength:
-        type: long
+        type: integer
+        format: int64
       refEntity:
-        type: object
         $ref: "#/definitions/EntityTypeResponseV2"
       mappedBy:
         type: string
@@ -308,7 +426,6 @@ definitions:
       isAggregatable:
         type: boolean
       range:
-        type: object
         $ref: "#/definitions/Range"
       expression:
         type: string
@@ -333,10 +450,11 @@ definitions:
     type: object
     properties:
       min:
-        type: long
+        type: integer
+        format: int64
       max:
-        type: long
-#TODO
+        type: integer
+        format: int64
   Error:
     type: object
     properties:
@@ -347,3 +465,22 @@ definitions:
         type: string
       fields:
         type: string
+  ErrorMessageResponse:
+    type: object
+    properties:
+      errors:
+        type: array
+        items:
+          $ref: "#/definitions/ErrorMessage"
+    required:
+      - errors
+  ErrorMessage:
+    type: object
+    properties:
+      message:
+        type: string
+      code:
+        type: integer
+        format: int32
+    required:
+      - message
