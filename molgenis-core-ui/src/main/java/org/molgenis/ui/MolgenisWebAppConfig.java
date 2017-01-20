@@ -61,7 +61,7 @@ import java.util.Properties;
 import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
-@Import({PlatformConfig.class, RdfConverter.class})
+@Import({ PlatformConfig.class, RdfConverter.class })
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -101,6 +101,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
+
+		// Swag
+		registry.addResourceHandler("/swagger-ui/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/swagger-ui/2.2.8/");
 	}
 
 	@Value("${environment:production}")
