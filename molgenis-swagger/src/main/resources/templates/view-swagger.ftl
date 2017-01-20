@@ -54,6 +54,10 @@ paths:
           type: string
           description: Name of the entity
           required: true
+          enum:
+<#list entityTypes as entityType>
+            - ${entityType.getName()}
+</#list>
         - name: attrs
           type: string
           in: query
@@ -99,6 +103,10 @@ paths:
           type: string
           description: Name of the entity
           required: true
+          enum:
+<#list entityTypes as entityType>
+            - ${entityType.getName()}
+</#list>
         - name: id
           in: path
           type: string
