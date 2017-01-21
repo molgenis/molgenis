@@ -4,10 +4,11 @@ info:
   title: MOLGENIS REST API
   description: Documentation for the MOLGENIS Rest API V2
   version: "v2"
-host: molgenis01.gcc.rug.nl
+host: localhost
 schemes:
+  - http
   - https
-basePath: /api/
+basePath: :8080/api/
 consumes:
   - application/json
   - application/x-www-form-urlencoded
@@ -66,7 +67,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType.getName()}
+            - ${entityType}
 </#list>
         - name: attrs
           type: array
@@ -142,7 +143,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType.getName()}
+            - ${entityType}
 </#list>
         - name: body
           in: body
@@ -181,7 +182,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType.getName()}
+            - ${entityType}
 </#list>
         - name: id
           in: path
@@ -217,7 +218,7 @@ paths:
           required: true
       responses:
         204:
-          description: OK
+          description: No content
   /v2/{entity_name}/meta/{attribute_name}:
     get:
       tags:
@@ -245,7 +246,48 @@ paths:
       responses:
         200:
           description: OK
+  /v2/copy/{entity_name}:
+    post:
+      tags:
+        - V2
+      summary: Creates a copy of an entity.
+      description: The copy will be created in the same package and backend as the original entity, so both must be writable.
+      parameters:
+        - name: entity_name
+          in: path
+          type: string
+          description: Name of the entity
+          required: true
+          enum:
+<#list entityTypes as entityType>
+            - ${entityType}
+</#list>
+        - name: body
+          schema:
+            $ref: "#/definitions/CopyEntityRequest"
+          in: body
+          required: true
+      responses:
+        400:
+          description: For an unknown entity.
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+        401:
+          description: If the user lacks the proper permissions.
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
+        500:
+          description: If a runtime exception occurs.
+          schema:
+            $ref: "#/definitions/ErrorMessageResponse"
 definitions:
+  CopyEntityRequest:
+    type: object
+    properties:
+      newEntityName:
+        type: string
+    required:
+      - newEntityName
   LoginRequest:
     type: object
     properties:

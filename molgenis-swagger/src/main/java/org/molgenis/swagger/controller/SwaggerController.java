@@ -1,6 +1,7 @@
 package org.molgenis.swagger.controller;
 
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,7 +39,9 @@ public class SwaggerController extends MolgenisPluginController
 	@RequestMapping(path = "/swagger.yml", produces = "text/x-yaml")
 	public String swagger(Model model)
 	{
-		model.addAttribute("entityTypes", metaDataService.getEntityTypes().collect(Collectors.toList()));
+		model.addAttribute("entityTypes",
+				metaDataService.getEntityTypes().filter(e -> !e.isAbstract()).map(EntityType::getName).sorted()
+						.collect(Collectors.toList()));
 		// serveert onze mooie yml
 		return "view-swagger";
 	}
