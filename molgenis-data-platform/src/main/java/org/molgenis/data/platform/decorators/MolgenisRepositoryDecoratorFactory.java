@@ -40,6 +40,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.settings.mail.MailSettingsRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.mail.MailSenderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -85,6 +86,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final AttributeValidator attributeValidator;
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
+	private final MailSenderFactory mailSenderFactory;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -98,7 +100,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			PackageValidator packageValidator, TagValidator tagValidator, L3Cache l3Cache,
 			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
 			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager,
-			QueryValidator queryValidator)
+			QueryValidator queryValidator, MailSenderFactory mailSenderFactory)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -127,6 +129,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
+		this.mailSenderFactory = requireNonNull(mailSenderFactory);
 	}
 
 	@Override
@@ -225,7 +228,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			case I18N_STRING:
 				return new I18nStringDecorator(repo);
 			case MAIL_SETTINGS:
-				return new MailSettingsRepositoryDecorator(repo);
+				return new MailSettingsRepositoryDecorator(repo, mailSenderFactory);
 			default:
 				return repo;
 		}
