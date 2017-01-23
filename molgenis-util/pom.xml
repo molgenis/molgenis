@@ -9,13 +9,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>molgenis-mail</artifactId>
+    <artifactId>molgenis-util</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.0</version>
         </dependency>
     </dependencies>
 
