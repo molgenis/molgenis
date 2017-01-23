@@ -8,5 +8,5 @@ public interface EntityTypeRegistry
 
 	void unregisterEntityType(EntityType entityType);
 
-	EntityTypeDescription getEntityTypeDescription(String tableName);
+	EntityTypeDescription getEntityTypeDescription(String tableOrJunctionTableName);
 }

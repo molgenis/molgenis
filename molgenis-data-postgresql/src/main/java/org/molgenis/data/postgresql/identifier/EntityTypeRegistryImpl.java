@@ -49,8 +49,9 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	}
 
 	@Override
-	public EntityTypeDescription getEntityTypeDescription(String tableName)
+	public EntityTypeDescription getEntityTypeDescription(String tableOrJunctionTableName)
 	{
+		String tableName = getEntityTypeTableName(tableOrJunctionTableName);
 		Map<String, EntityTypeDescription> transactionEntityTypeDescriptionMap = transactionsEntityTypeDescriptionMap
 				.get(getTransactionId());
 		if (transactionEntityTypeDescriptionMap != null && transactionEntityTypeDescriptionMap.containsKey(tableName))
@@ -124,5 +125,11 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	private Map<String, EntityTypeDescription> getEntityTypeDescriptionMap()
 	{
 		return transactionsEntityTypeDescriptionMap.computeIfAbsent(getTransactionId(), k -> new HashMap<>());
+	}
+
+	private String getEntityTypeTableName(String tableOrJunctionTableName)
+	{
+		int idx = tableOrJunctionTableName.indexOf('_', tableOrJunctionTableName.indexOf('#'));
+		return idx != -1 ? tableOrJunctionTableName.substring(0, idx) : tableOrJunctionTableName;
 	}
 }
