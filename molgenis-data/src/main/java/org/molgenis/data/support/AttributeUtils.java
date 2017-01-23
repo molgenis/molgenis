@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import java.util.EnumSet;
 
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.springframework.util.StringUtils.capitalize;
 
 public class AttributeUtils
 {
@@ -15,7 +16,7 @@ public class AttributeUtils
 
 	public static String getI18nAttributeName(String attrName, String languageCode)
 	{
-		return attrName + '-' + languageCode;
+		return attrName + capitalize(languageCode.toLowerCase());
 	}
 
 	/**

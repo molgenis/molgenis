@@ -5,8 +5,10 @@ import org.molgenis.data.meta.model.Attribute;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,5 +34,21 @@ public class AttributeUtilsTest
 	{
 		Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(attrType).getMock();
 		assertEquals(AttributeUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
+	}
+
+	@DataProvider(name = "getI18nAttributeNameProvider")
+	public static Iterator<Object[]> getI18nAttributeNameProvider()
+	{
+		List<Object[]> dataList = new ArrayList<>();
+		dataList.add(new Object[] { "lang", "en", "langEn" });
+		dataList.add(new Object[] { "lang", "En", "langEn" });
+		dataList.add(new Object[] { "lang", "EN", "langEn" });
+		return dataList.iterator();
+	}
+
+	@Test(dataProvider = "getI18nAttributeNameProvider")
+	public void testGetI18nAttributeName(String attrName, String languageCode, String i18nAttrName)
+	{
+		assertEquals(AttributeUtils.getI18nAttributeName(attrName, languageCode), i18nAttrName);
 	}
 }

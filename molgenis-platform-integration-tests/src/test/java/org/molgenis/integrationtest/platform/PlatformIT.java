@@ -234,8 +234,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testLanguageService()
 	{
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getAttribute("label-en").getName(),
-				"label-en");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getAttribute("labelEn").getName(),
+				"labelEn");
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("en").getName(),
 				"simpleName");
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("pt").getName(),
@@ -251,17 +251,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		// NL
 		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("nl"));
-		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("label-nl"));
-		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("description-nl"));
-		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("label-nl"));
-		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("description-nl"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("labelNl"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("descriptionNl"));
+		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("labelNl"));
+		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("descriptionNl"));
 
 		// EN
 		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("en"));
-		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("label-en"));
-		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("description-en"));
-		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("label-en"));
-		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("description-en"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("labelEn"));
+		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("descriptionEn"));
+		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("labelEn"));
+		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("descriptionEn"));
 
 		Entity car = new DynamicEntity(i18nStringMetaData);
 		car.set(I18nStringMetaData.MSGID, "car");
