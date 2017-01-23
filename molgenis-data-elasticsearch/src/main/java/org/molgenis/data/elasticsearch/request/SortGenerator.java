@@ -10,9 +10,12 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Adds Sort to the SearchRequestBuilder object.
@@ -21,6 +24,12 @@ import org.molgenis.data.meta.model.EntityType;
  */
 public class SortGenerator implements QueryPartGenerator
 {
+	private final DocumentIdGenerator documentIdGenerator;
+
+	public SortGenerator(DocumentIdGenerator documentIdGenerator)
+	{
+		this.documentIdGenerator = requireNonNull(documentIdGenerator);
+	}
 
 	@Override
 	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityType entityType)
@@ -49,6 +58,7 @@ public class SortGenerator implements QueryPartGenerator
 	private String getSortField(Attribute attr)
 	{
 		String sortField;
+		String fieldName = documentIdGenerator.generateId(attr);
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
@@ -59,7 +69,7 @@ public class SortGenerator implements QueryPartGenerator
 			case INT:
 			case LONG:
 				// use indexed field for sorting
-				sortField = attr.getName();
+				sortField = fieldName;
 				break;
 			case EMAIL:
 			case ENUM:
@@ -69,17 +79,18 @@ public class SortGenerator implements QueryPartGenerator
 			case STRING:
 			case TEXT:
 				// use raw field for sorting
-				sortField = new StringBuilder(attr.getName()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
+				sortField = new StringBuilder(fieldName).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
 						.toString();
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
-			case MREF:
-			case XREF:
 			case FILE:
+			case MREF:
+			case ONE_TO_MANY:
+			case XREF:
 				// use nested field for sorting
 				String refSortField = getSortField(attr.getRefEntity().getLabelAttribute());
-				sortField = new StringBuilder(attr.getName()).append('.').append(refSortField).toString();
+				sortField = new StringBuilder(fieldName).append('.').append(refSortField).toString();
 				break;
 			case COMPOUND:
 				throw new UnsupportedOperationException();

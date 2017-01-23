@@ -1,5 +1,6 @@
 package org.molgenis.data.index;
 
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.runas.RunAsSystem;
 
 /**
@@ -18,10 +19,10 @@ public interface IndexActionRegisterService
 	/**
 	 * Log and create locks for an add/update/delete operation on a Repository
 	 *
-	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository}
+	 * @param entityType
 	 * @param entityId       the ID of the entity, may be null to indicate change to entire repository
 	 */
-	void register(String entityFullName, String entityId);
+	void register(EntityType entityType, String entityId);
 
 	/**
 	 * Stores the index actions in the repository.

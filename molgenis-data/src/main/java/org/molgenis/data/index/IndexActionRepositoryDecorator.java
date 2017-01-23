@@ -4,6 +4,7 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -45,14 +46,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	public void update(Entity entity)
 	{
 		delegate().update(entity);
-		indexActionRegisterService.register(getName(), entity.getIdValue().toString());
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
 		registerRefEntityIndexActions();
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		indexActionRegisterService.register(getName(), entity.getIdValue().toString());
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
 		registerRefEntityIndexActions(entity);
 		delegate().delete(entity);
 	}
@@ -60,7 +61,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void deleteById(Object id)
 	{
-		indexActionRegisterService.register(getName(), id.toString());
+		indexActionRegisterService.register(getEntityType(), id.toString());
 		registerRefEntityIndexActions();
 		delegate().deleteById(id);
 	}
@@ -68,7 +69,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void deleteAll()
 	{
-		indexActionRegisterService.register(getName(), null);
+		indexActionRegisterService.register(getEntityType(), null);
 		registerRefEntityIndexActions();
 		delegate().deleteAll();
 	}
@@ -77,14 +78,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	public void add(Entity entity)
 	{
 		delegate().add(entity);
-		indexActionRegisterService.register(getName(), entity.getIdValue().toString());
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
 		registerRefEntityIndexActions(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		indexActionRegisterService.register(getName(), null);
+		indexActionRegisterService.register(getEntityType(), null);
 		registerRefEntityIndexActions();
 		return delegate().add(entities);
 	}
@@ -92,7 +93,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		indexActionRegisterService.register(getName(), null);
+		indexActionRegisterService.register(getEntityType(), null);
 		registerRefEntityIndexActions();
 		delegate().update(entities);
 	}
@@ -100,7 +101,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		indexActionRegisterService.register(getName(), null);
+		indexActionRegisterService.register(getEntityType(), null);
 		registerRefEntityIndexActions();
 		delegate().delete(entities);
 	}
@@ -108,7 +109,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		indexActionRegisterService.register(getName(), null);
+		indexActionRegisterService.register(getEntityType(), null);
 		registerRefEntityIndexActions();
 		delegate().deleteAll(ids);
 	}
@@ -121,14 +122,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 		// bidirectional attribute: register indexing actions for other side
 		getEntityType().getMappedByAttributes().forEach(mappedByAttr ->
 		{
-			String refEntityName = mappedByAttr.getRefEntity().getName();
-			indexActionRegisterService.register(refEntityName, null);
+			EntityType refEntity = mappedByAttr.getRefEntity();
+			indexActionRegisterService.register(refEntity, null);
 		});
 
 		getEntityType().getInversedByAttributes().forEach(inversedByAttr ->
 		{
-			String refEntityName = inversedByAttr.getRefEntity().getName();
-			indexActionRegisterService.register(refEntityName, null);
+			EntityType refEntity = inversedByAttr.getRefEntity();
+			indexActionRegisterService.register(refEntity, null);
 		});
 	}
 
@@ -142,9 +143,9 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 		// bidirectional attribute: register indexing actions for other side
 		getEntityType().getMappedByAttributes().forEach(mappedByAttr ->
 		{
-			String refEntityName = mappedByAttr.getRefEntity().getName();
-			entity.getEntities(mappedByAttr.getName()).forEach(
-					refEntity -> indexActionRegisterService.register(refEntityName, refEntity.getIdValue().toString()));
+			EntityType mappedByAttrRefEntity = mappedByAttr.getRefEntity();
+			entity.getEntities(mappedByAttr.getName()).forEach(refEntity -> indexActionRegisterService
+					.register(mappedByAttrRefEntity, refEntity.getIdValue().toString()));
 		});
 
 		getEntityType().getInversedByAttributes().forEach(inversedByAttr ->
@@ -152,8 +153,8 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 			Entity refEntity = entity.getEntity(inversedByAttr.getName());
 			if (refEntity != null)
 			{
-				String refEntityName = inversedByAttr.getRefEntity().getName();
-				indexActionRegisterService.register(refEntityName, refEntity.getIdValue().toString());
+				EntityType inversedByAttrRefEntity = inversedByAttr.getRefEntity();
+				indexActionRegisterService.register(inversedByAttrRefEntity, refEntity.getIdValue().toString());
 			}
 		});
 	}

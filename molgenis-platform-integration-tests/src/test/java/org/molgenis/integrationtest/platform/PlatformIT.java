@@ -1543,8 +1543,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(entityTypeDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 
-			indexActionRegisterService.register(entityTypeDynamic.getName(), "1");
-			indexActionRegisterService.register(entityTypeDynamic.getName(), null);
+			indexActionRegisterService.register(entityTypeDynamic, "1");
+			indexActionRegisterService.register(entityTypeDynamic, null);
 
 			Query q = new QueryImpl();
 			q.eq(IndexActionMetaData.ENTITY_FULL_NAME, "sys_test_TypeTestDynamic");

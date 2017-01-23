@@ -1,6 +1,8 @@
 package org.molgenis.data.elasticsearch;
 
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
@@ -10,17 +12,7 @@ import java.util.stream.Stream;
 
 public interface SearchService
 {
-
-	/**
-	 * Returns all type names for this index
-	 *
-	 * @return
-	 */
-	Iterable<String> getTypes();
-
 	boolean hasMapping(EntityType entityType);
-
-	boolean hasMapping(String entityName);
 
 	void createMappings(EntityType entityType);
 
@@ -76,9 +68,9 @@ public interface SearchService
 	/**
 	 * Deletes data and meta data
 	 *
-	 * @param entityName
+	 * @param entityType entity type
 	 */
-	void delete(String entityName);
+	void delete(EntityType entityType);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query<Entity> q, EntityType entityType);
@@ -100,11 +92,6 @@ public interface SearchService
 	void flush();
 
 	void rebuildIndex(Repository<? extends Entity> repository);
-
-	/**
-	 * Optimize the index for faster search operations, remove documents that are marked as deleted.
-	 */
-	void optimizeIndex();
 
 	void refreshIndex();
 
