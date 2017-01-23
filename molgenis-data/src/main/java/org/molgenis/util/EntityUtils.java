@@ -242,11 +242,10 @@ public class EntityUtils
 		if (package_ == null && otherPackage != null) return false;
 		if (package_ != null && otherPackage == null) return false;
 
-		//FIXME
-		//if (!package_.getIdValue().equals(otherPackage.getIdValue()))
-		//{
-		//	return false;
-		//}
+		if (!package_.getIdValue().equals(otherPackage.getIdValue()))
+		{
+			return false;
+		}
 
 		// compare id attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
 		Attribute ownIdAttribute = entityType.getOwnIdAttribute();
