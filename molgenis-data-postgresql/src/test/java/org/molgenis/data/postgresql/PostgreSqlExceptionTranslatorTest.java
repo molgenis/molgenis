@@ -84,7 +84,7 @@ public class PostgreSqlExceptionTranslatorTest
 		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateDependentObjectsStillExist(new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Cannot delete entity 'myEntity' because entity 'myRefEntity' depends on it.");
+		assertEquals(e.getMessage(), "Cannot delete entity 'myRefEntity' because entity 'myEntity' depends on it.");
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class PostgreSqlExceptionTranslatorTest
 		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateDependentObjectsStillExist(new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Cannot delete entity 'myEntity' because entity 'myRefEntity' depends on it.");
+		assertEquals(e.getMessage(), "Cannot delete entity 'myRefEntity' because entity 'myEntity' depends on it.");
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class PostgreSqlExceptionTranslatorTest
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateDependentObjectsStillExist(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(),
-				"Cannot delete entity 'myEntity' because entities 'myRefEntity, myOtherRefEntity' depend on it.");
+				"Cannot delete entity 'myRefEntity' because entity 'myEntity' depends on it..Cannot delete entity 'myOtherRefEntity' because entity 'myEntity' depends on it.");
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class PostgreSqlExceptionTranslatorTest
 		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateDependentObjectsStillExist(new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Cannot delete entity 'myEntity' because entity 'myRefEntity' depends on it.");
+		assertEquals(e.getMessage(), "Cannot delete entity 'myRefEntity' because entity 'myEntity' depends on it.");
 	}
 
 	@Test
