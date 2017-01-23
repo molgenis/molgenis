@@ -2,8 +2,8 @@
 swagger: '2.0'
 info:
   title: MOLGENIS REST API
-  description: Documentation for the MOLGENIS Rest API V2
-  version: "v2"
+  description: Documentation for the MOLGENIS Rest API V1 and V2
+  version: "v1 and v2"
 host: localhost
 schemes:
   - http
