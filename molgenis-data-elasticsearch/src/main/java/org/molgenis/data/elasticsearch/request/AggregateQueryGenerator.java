@@ -111,7 +111,7 @@ public class AggregateQueryGenerator
 		if (attr.isNillable())
 		{
 			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
-			String missingAggFieldName = attr.getName();
+			String missingAggFieldName = getAggregateFieldName(attr);
 			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName)
 					.field(missingAggFieldName);
 			aggs.add(missingTermsAgg);
@@ -135,7 +135,7 @@ public class AggregateQueryGenerator
 			if (isNestedType(distinctAttr))
 			{
 				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
-				String nestedAggFieldName = distinctAttr.getName();
+				String nestedAggFieldName = getAggregatePathName(distinctAttr);
 				NestedBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
 				nestedBuilder.subAggregation(distinctAgg);
 
@@ -190,7 +190,7 @@ public class AggregateQueryGenerator
 		if (isNestedType(attr))
 		{
 			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
-			String nestedAggFieldName = attr.getName();
+			String nestedAggFieldName = getAggregatePathName(attr);
 			NestedBuilder nestedAgg = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
 			for (AggregationBuilder<?> agg : aggs)
 			{
@@ -217,6 +217,11 @@ public class AggregateQueryGenerator
 	public static boolean isNestedType(Attribute attr)
 	{
 		return isReferenceType(attr);
+	}
+
+	private String getAggregatePathName(Attribute attr)
+	{
+		return documentIdGenerator.generateId(attr);
 	}
 
 	private String getAggregateFieldName(Attribute attr)
