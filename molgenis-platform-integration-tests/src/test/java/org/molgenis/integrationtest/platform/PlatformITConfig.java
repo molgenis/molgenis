@@ -70,7 +70,8 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
 		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
 		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
-		"org.molgenis.data.importer.emx", "org.molgenis.data.importer.config", "org.molgenis.data.excel" })
+		"org.molgenis.data.importer.emx", "org.molgenis.data.importer.config", "org.molgenis.data.excel",
+		"org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
 		RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
