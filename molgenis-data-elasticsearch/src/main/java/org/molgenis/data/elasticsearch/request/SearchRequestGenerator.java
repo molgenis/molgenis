@@ -23,7 +23,7 @@ public class SearchRequestGenerator
 
 	public SearchRequestGenerator(DocumentIdGenerator documentIdGenerator)
 	{
-		aggregateQueryGenerator = new AggregateQueryGenerator();
+		aggregateQueryGenerator = new AggregateQueryGenerator(documentIdGenerator);
 		queryGenerators = Arrays.asList(new QueryGenerator(documentIdGenerator), new SortGenerator(documentIdGenerator),
 				new LimitOffsetGenerator());
 	}
