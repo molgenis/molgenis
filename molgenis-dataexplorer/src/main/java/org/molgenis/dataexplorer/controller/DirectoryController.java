@@ -42,8 +42,8 @@ public class DirectoryController
 	{
 		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
 
-		String username = settings.getString(DirectorySettings.USERNAME);
-		String password = settings.getString(DirectorySettings.PASSWORD);
+		String username = settings.getUsername();
+		String password = settings.getPassword();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -53,9 +53,8 @@ public class DirectoryController
 
 		try
 		{
-			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-			String redirectURL = restTemplate
-					.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity).toASCIIString();
+			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getNegotiatorURL());
+			String redirectURL = restTemplate.postForLocation(settings.getNegotiatorURL(), entity).toASCIIString();
 			LOG.trace("Redirecting to " + redirectURL);
 			return redirectURL;
 		}

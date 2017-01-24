@@ -48,4 +48,19 @@ public class DirectorySettings extends DefaultSettingsEntity
 					.setDataType(AttributeType.XREF).setRefEntity(entityTypeMetadata);
 		}
 	}
+
+	public String getUsername()
+	{
+		return getString(USERNAME);
+	}
+
+	public String getPassword()
+	{
+		return getString(PASSWORD);
+	}
+
+	public String getNegotiatorURL()
+	{
+		return getString(NEGOTIATOR_URL);
+	}
 }
