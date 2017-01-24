@@ -94,7 +94,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
 				entityTypeFactory, attributeFactory);
 
-		metaDataCanAnnotate = entityTypeFactory.create().setName("test").setSimpleName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setFullyQualifiedName("test").setName("test");
 		Attribute attributeChrom = vcfAttributes.getChromAttribute();
 		Attribute attributePos = vcfAttributes.getPosAttribute();
 		Attribute attributeRef = vcfAttributes.getRefAttribute();
@@ -105,7 +105,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeRef);
 		metaDataCanAnnotate.addAttribute(attributeAlt);
 
-		effectsEMD = entityTypeFactory.create().setSimpleName("test_EFFECTS");
+		effectsEMD = entityTypeFactory.create().setName("test_EFFECTS");
 		effectsEMD.addAttribute(attributeFactory.create().setName("ID").setAuto(true).setVisible(false));
 		effectsEMD.addAttribute(effectsMetaData.getAltAttr());
 		effectsEMD.addAttribute(effectsMetaData.getGeneNameAttr());
@@ -897,8 +897,8 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetOutputMetaData()
 	{
-		EntityType sourceEMD = entityTypeFactory.create().setSimpleName("source");
-		sourceEMD.setPackage(packageFactory.create("package").setName("package"));
+		EntityType sourceEMD = entityTypeFactory.create().setName("source");
+		sourceEMD.setPackage(packageFactory.create("package").setFullyQualifiedName("package"));
 		sourceEMD.setBackend("TestBackend");
 
 		EntityType outputEMD = snpEffRunner.getTargetEntityType(sourceEMD);

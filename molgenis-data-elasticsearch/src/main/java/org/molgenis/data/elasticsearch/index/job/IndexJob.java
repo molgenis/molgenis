@@ -238,7 +238,7 @@ class IndexJob extends Job
 	private EntityType getEntityType(IndexAction indexAction)
 	{
 		EntityType entityType = entityTypeFactory.create(indexAction.getEntityFullName());
-		entityType.setSimpleName(indexAction.getEntityTypeName());
+		entityType.setName(indexAction.getEntityTypeName());
 		return entityType;
 	}
 }

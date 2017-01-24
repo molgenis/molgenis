@@ -437,7 +437,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + rowIndex);
 
 			Package package_ = packageFactory.create();
-			package_.setName(name);
+			package_.setFullyQualifiedName(name);
 			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
 			package_.setLabel(packageEntity.getString(EMX_PACKAGE_LABEL));
 
@@ -449,12 +449,12 @@ public class EmxMetaDataParser implements MetaDataParser
 						"Inconsistent package structure. Package: '" + name + "', parent: '" + parentName + '\'');
 
 				String simpleName = name.substring(parentName.length() + 1); // subpackage_package
-				package_.setSimpleName(simpleName);
+				package_.setName(simpleName);
 				package_.setParent(intermediateResults.getPackage(parentName));
 			}
 			else
 			{
-				package_.setSimpleName(name);
+				package_.setName(name);
 			}
 
 			// Set package tags

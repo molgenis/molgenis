@@ -131,7 +131,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityType emd = entityTypeFactory.create().setName(name).setSimpleName(simpleName);
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName(name).setName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}

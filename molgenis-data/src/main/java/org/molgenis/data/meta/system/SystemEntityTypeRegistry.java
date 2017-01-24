@@ -49,7 +49,7 @@ public class SystemEntityTypeRegistry
 		String systemEntityTypeName = systemEntityType.getFullyQualifiedName();
 		if (systemEntityTypeName == null)
 		{
-			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setName()?",
+			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setFullyQualifiedName()?",
 					systemEntityType.getClass().getSimpleName()));
 		}
 

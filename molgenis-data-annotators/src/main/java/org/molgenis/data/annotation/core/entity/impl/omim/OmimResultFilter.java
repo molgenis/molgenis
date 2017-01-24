@@ -46,7 +46,7 @@ public class OmimResultFilter implements ResultFilter
 		}
 		Optional<Entity> firstResult = FluentIterable.from(results).first();
 
-		EntityType emd = entityTypeFactory.create().setName(OmimAnnotator.NAME);
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName(OmimAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
 

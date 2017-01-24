@@ -44,7 +44,7 @@ public class Package extends StaticEntity
 	public Package(String packageId, EntityType entityType)
 	{
 		super(entityType);
-		setSimpleName(packageId);
+		setName(packageId);
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class Package extends StaticEntity
 	public static Package newInstance(Package package_)
 	{
 		Package packageCopy = new Package(package_.getEntityType());
-		packageCopy.setName(package_.getFullyQualifiedName());
-		packageCopy.setSimpleName(package_.getName());
+		packageCopy.setFullyQualifiedName(package_.getFullyQualifiedName());
+		packageCopy.setName(package_.getName());
 		packageCopy.setLabel(package_.getLabel());
 		packageCopy.setDescription(package_.getDescription());
 		Package parent = package_.getParent();
@@ -77,7 +77,7 @@ public class Package extends StaticEntity
 		return getString(PackageMetadata.SIMPLE_NAME);
 	}
 
-	public Package setSimpleName(String simpleName)
+	public Package setName(String simpleName)
 	{
 		set(PackageMetadata.SIMPLE_NAME, simpleName);
 		updateFullName();
@@ -121,7 +121,7 @@ public class Package extends StaticEntity
 		return getString(PackageMetadata.FULL_NAME);
 	}
 
-	public Package setName(String fullName)
+	public Package setFullyQualifiedName(String fullName)
 	{
 		set(PackageMetadata.FULL_NAME, fullName);
 		return this;

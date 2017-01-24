@@ -739,9 +739,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setName(String fullName)
+		public EntityType setFullyQualifiedName(String fullName)
 		{
-			return entityType.setName(fullName);
+			return entityType.setFullyQualifiedName(fullName);
 		}
 
 		@Override
@@ -751,9 +751,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setSimpleName(String simpleName)
+		public EntityType setName(String simpleName)
 		{
-			return entityType.setSimpleName(simpleName);
+			return entityType.setName(simpleName);
 		}
 
 		@Override

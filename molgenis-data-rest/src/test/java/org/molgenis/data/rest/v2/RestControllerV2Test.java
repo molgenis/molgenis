@@ -145,12 +145,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		reset(dataService);
 		reset(repoCopier);
 
-		EntityType refRefEntityType = entityTypeFactory.create().setName(REF_REF_ENTITY_NAME)
+		EntityType refRefEntityType = entityTypeFactory.create().setFullyQualifiedName(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
-		EntityType selfRefEntityType = entityTypeFactory.create().setName(SELF_REF_ENTITY_NAME)
+		EntityType selfRefEntityType = entityTypeFactory.create().setFullyQualifiedName(SELF_REF_ENTITY_NAME)
 				.setLabel(SELF_REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		selfRefEntityType.addAttribute(
@@ -160,7 +160,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
-		EntityType refEntityType = entityTypeFactory.create().setName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
+		EntityType refEntityType = entityTypeFactory.create().setFullyQualifiedName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_VALUE_NAME)).addAttribute(
 						attributeFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
@@ -214,7 +214,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String enum2 = "enum2";
 
 		// required
-		EntityType entityType = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
+		EntityType entityType = entityTypeFactory.create().setFullyQualifiedName(ENTITY_NAME).setLabel(ENTITY_NAME);
 		Attribute attrId = attributeFactory.create().setName(attrIdName);
 		entityType.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		Attribute attrBool = createAttributeMeta(entityType, attrBoolName, BOOL).setNillable(false);

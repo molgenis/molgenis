@@ -162,7 +162,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetAttributeIdentifiers()
 	{
-		EntityType sourceEntityType = entityTypeFactory.create().setName("sourceEntityType");
+		EntityType sourceEntityType = entityTypeFactory.create().setFullyQualifiedName("sourceEntityType");
 		Entity EntityTypeEntity = mock(Entity.class);
 
 		when(dataService.findOne(ENTITY_TYPE_META_DATA,
