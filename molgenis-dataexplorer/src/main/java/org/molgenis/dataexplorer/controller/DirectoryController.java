@@ -1,12 +1,10 @@
 package org.molgenis.dataexplorer.controller;
 
-import com.google.api.client.util.Maps;
 import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.directory.NegotiatorQuery;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.dataexplorer.controller.DirectoryController.URI;
@@ -30,12 +27,13 @@ public class DirectoryController
 	private static final Logger LOG = LoggerFactory.getLogger(DirectoryController.class);
 	public static final String URI = "/directory";
 
-	private DirectorySettings settings;
+	private final DirectorySettings settings;
+	private final RestTemplate restTemplate;
 
-	@Autowired
-	public DirectoryController(DirectorySettings settings)
+	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate)
 	{
 		this.settings = requireNonNull(settings);
+		this.restTemplate = requireNonNull(restTemplate);
 	}
 
 	@RequestMapping(value = "/export", method = POST)
@@ -44,27 +42,20 @@ public class DirectoryController
 	{
 		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
 
-		Map<String, Object> map = Maps.newHashMap();
-		map.put("URL", query.getURL());
-		map.put("collections", query.getCollections());
-		map.put("humanReadable", query.getHumanReadable());
-		map.put("nToken", query.getnToken());
-
 		String username = settings.getString(DirectorySettings.USERNAME);
 		String password = settings.getString(DirectorySettings.PASSWORD);
 
-		RestTemplate template = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", generateBase64Authentication(username, password));
 
-		HttpEntity entity = new HttpEntity(map, headers);
+		HttpEntity entity = new HttpEntity(query, headers);
 
 		try
 		{
 			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getString(DirectorySettings.NEGOTIATOR_URL));
-			String redirectURL = template.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity)
-					.toASCIIString();
+			String redirectURL = restTemplate
+					.postForLocation(settings.getString(DirectorySettings.NEGOTIATOR_URL), entity).toASCIIString();
 			LOG.trace("Redirecting to " + redirectURL);
 			return redirectURL;
 		}
