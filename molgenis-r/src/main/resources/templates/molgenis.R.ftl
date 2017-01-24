@@ -7,6 +7,7 @@
 library('RCurl')
 library('rjson')
 library('httr')
+library('ff')
 
 #Prevent scientific notation
 options(scipen=999)
@@ -127,27 +128,32 @@ molgenis.add <- local(function(entity, ...) {
 #
 ####################################################################
 molgenis.addAll <- local(function(entity, rows) {
+  ids <- c()
   url <- paste0(molgenis.api.url.v2, entity)
-  rowJSON = gsub("\\", "", apply(rows, 1, rjson::toJSON), fixed=T)
-  entities <- paste0(rowJSON, collapse=",")
-  param =  paste0('{entities:[',entities,']}')
-  #dont use curl, use httr POST
-  response <- POST(url, add_headers('x-molgenis-token' = molgenis.token), body = param, content_type_json())
-  status <- status_code(response)
+  #only 1000 rows can be processed ad once, so make chunks of 1000
+  for(i in chunk(from = 1, to = nrow(rows), by = 1000)){
+    rowsChunk = rows[min(i):max(i), ]
+    rowJSON = gsub("\\", "", apply(rowsChunk, 1, rjson::toJSON), fixed=T)
+    entities <- paste0(rowJSON, collapse=",")
+    param =  paste0('{entities:[',entities,']}')
+    #dont use curl, use httr POST
+    response <- POST(url, add_headers('x-molgenis-token' = molgenis.token), body = param, content_type_json())
+    status <- status_code(response)
 
-  #On success the api returns httpcode 201 CREATED
-  if (status != "201") {
-    cat(status)
-    stop("Error creating entity")
+    #On success the api returns httpcode 201 CREATED
+    if (status != "201") {
+      cat(status)
+      stop("Error creating entity")
+    }
+
+    #The entity is created successfully, return the new id
+    resources <- sapply(content(response)$resources, function(r){
+      l <- strsplit(r$href, "/")[[1]]
+      return(l[length(l)])
+    })
+    ids <- c(ids, resources)
   }
-
-  #The entity is created successfully, return the new id
-  resources <- sapply(content(response)$resources, function(r){
-    l <- strsplit(r$href, "/")[[1]]
-    return(l[length(l)])
-  })
-
-  return (resources)
+  return (ids)
 }, molgenis.env)
 
 ######################################################################
