@@ -36,7 +36,11 @@ public class IndexActionMetaData extends SystemEntityType
 	public static final String ACTION_ORDER = "actionOrder";
 
 	/**
-	 * The full name of the entity that needs to be indexed.
+	 * The name of the entity type that needs to be indexed (e.g. myEntityType).
+	 */
+	public static final String ENTITY_TYPE_NAME = "entityTypeName";
+	/**
+	 * The fully qualified name of the entity type that needs to be indexed (e.g. myPackage_myEntityType)
 	 */
 	public static final String ENTITY_FULL_NAME = "entityFullName";
 
@@ -75,7 +79,11 @@ public class IndexActionMetaData extends SystemEntityType
 		addAttribute(ACTION_ORDER).setDataType(INT)
 				.setDescription("The order in which the action is registered within its IndexActionJob")
 				.setNillable(false);
-		addAttribute(ENTITY_FULL_NAME).setDescription("The full name of the entity that needs to be indexed.")
+		addAttribute(ENTITY_TYPE_NAME)
+				.setDescription("The name of the entity type that needs to be indexed (e.g. myEntityType).")
+				.setNillable(false);
+		addAttribute(ENTITY_FULL_NAME).setDescription(
+				"The fully qualified name of the entity type that needs to be indexed (e.g. myPackage_myEntityType).")
 				.setNillable(false);
 		addAttribute(ENTITY_ID)
 				.setDescription("Filled when only one row of the entity \"" + ENTITY_FULL_NAME + "\" is indexed")

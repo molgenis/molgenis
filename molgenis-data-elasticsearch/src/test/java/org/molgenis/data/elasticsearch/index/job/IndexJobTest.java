@@ -13,6 +13,7 @@ import org.molgenis.data.index.meta.*;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
@@ -65,8 +66,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private IndexActionGroupFactory indexActionGroupFactory;
 
+	@Autowired
+	private EntityTypeFactory entityTypeFactory;
 	private final String transactionId = "aabbcc";
-
 	private IndexJob indexJob;
 	private IndexActionGroup indexActionGroup;
 	private EntityType testEntityType;
@@ -77,7 +79,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 		config.resetMocks();
-		indexJob = new IndexJob(progress, authentication, transactionId, dataService, searchService);
+		indexJob = new IndexJob(progress, authentication, transactionId, dataService, searchService, entityTypeFactory);
 		indexActionGroup = indexActionGroupFactory.create(transactionId).setCount(0);
 		when(dataService.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class))
 				.thenReturn(indexActionGroup);
@@ -266,19 +268,25 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
+		String entityTypeId = "entityTypeId";
+		String entityTypeName = "entityTypeName";
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
+				.setEntityTypeName(entityTypeName)
 				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
 		when(dataService.hasRepository("test")).thenReturn(false);
-		when(searchService.hasMapping("test")).thenReturn(true);
+		when(searchService.hasMapping(any(EntityType.class))).thenReturn(true);
 
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(this.searchService).delete("test");
+		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
+		verify(this.searchService).delete(entityTypeCaptor.capture());
+		EntityType actualEntityType = entityTypeCaptor.getValue();
+		assertEquals(actualEntityType.getName(), entityTypeName);
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
@@ -341,6 +349,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@ComponentScan({ "org.molgenis.data.index", "org.molgenis.test.data" })
 	public static class Config
 	{
+		@Autowired
+		private EntityTypeFactory entityTypeFactory;
+
 		@Mock
 		private Progress progress;
 		@Mock
@@ -391,6 +402,5 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		{
 			reset(progress, authentication, searchService, mds, dataService);
 		}
-
 	}
 }

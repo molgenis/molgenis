@@ -97,7 +97,7 @@ public class OntologyImportService implements ImportService
 
 				if (searchService.hasMapping(emd))
 				{
-					searchService.delete(emd.getName());
+					searchService.delete(emd);
 				}
 			}
 
