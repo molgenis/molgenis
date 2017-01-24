@@ -36,8 +36,8 @@ public class SettingsPopulator
 		if (settingsEntity == null)
 		{
 			Entity defaultSettingsEntity = defaultSettingsEntityType.getDefaultSettings();
-			defaultSettingsEntity.set(ATTR_ID, defaultSettingsEntityType.getSimpleName());
-			dataService.add(defaultSettingsEntityType.getName(), defaultSettingsEntity);
+			defaultSettingsEntity.set(ATTR_ID, defaultSettingsEntityType.getName());
+			dataService.add(defaultSettingsEntityType.getFullyQualifiedName(), defaultSettingsEntity);
 		}
 	}
 }

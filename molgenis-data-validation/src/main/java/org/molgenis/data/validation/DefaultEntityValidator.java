@@ -9,7 +9,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +80,7 @@ public class DefaultEntityValidator implements EntityValidator
 					{
 						String message = String
 								.format("The attribute '%s' of entity '%s' with key '%s' can not be null.",
-										attr.getName(), meta.getName(),
+										attr.getName(), meta.getFullyQualifiedName(),
 										entity.getString(meta.getLabelAttribute().getName()));
 						violations.add(new ConstraintViolation(message, null, entity, attr, meta, rownr));
 					}
@@ -123,7 +122,7 @@ public class DefaultEntityValidator implements EntityValidator
 				// Create 'in' query, should find only find itself or nothing
 				if (!values.isEmpty())
 				{
-					String entityName = meta.getName();
+					String entityName = meta.getFullyQualifiedName();
 
 					long count = dataService.count(entityName, new QueryImpl<Entity>().in(attr.getName(), values));
 					if (count > 0)
@@ -149,7 +148,7 @@ public class DefaultEntityValidator implements EntityValidator
 								{
 									String message = String
 											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
-													attr.getName(), meta.getName(),
+													attr.getName(), meta.getFullyQualifiedName(),
 													entity.getString(meta.getLabelAttribute().getName()), value);
 									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
 								}

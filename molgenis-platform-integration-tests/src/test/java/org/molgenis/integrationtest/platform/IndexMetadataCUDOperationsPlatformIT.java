@@ -29,12 +29,12 @@ public class IndexMetadataCUDOperationsPlatformIT
 			EntityType entityTypeDynamic, MetaDataService metaDataService)
 	{
 		Query<Entity> q1 = new QueryImpl<>();
-		q1.eq(EntityTypeMetadata.FULL_NAME, entityTypeStatic.getName());
+		q1.eq(EntityTypeMetadata.FULL_NAME, entityTypeStatic.getFullyQualifiedName());
 		assertEquals(searchService.count(q1, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
 				1);
 
 		Query<Entity> q2 = new QueryImpl<>();
-		q2.eq(EntityTypeMetadata.FULL_NAME, entityTypeDynamic.getName());
+		q2.eq(EntityTypeMetadata.FULL_NAME, entityTypeDynamic.getFullyQualifiedName());
 		assertEquals(searchService.count(q2, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
 				1);
 	}
@@ -49,14 +49,14 @@ public class IndexMetadataCUDOperationsPlatformIT
 
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(EntityTypeMetadata.FULL_NAME, entityTypeDynamic.getName());
+		q.eq(EntityTypeMetadata.FULL_NAME, entityTypeDynamic.getFullyQualifiedName());
 		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
 				1);
 
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
 		runAsSystem(() ->
 		{
-			dataService.getMeta().deleteEntityType(entityTypeDynamic.getName());
+			dataService.getMeta().deleteEntityType(entityTypeDynamic.getFullyQualifiedName());
 		});
 		PlatformIT.waitForIndexToBeStable(EntityTypeMetadata.ENTITY_TYPE_META_DATA, indexService, LOG);
 		waitForWorkToBeFinished(indexService, LOG);
@@ -80,7 +80,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(EntityTypeMetadata.FULL_NAME, entityTypeDynamic.getName());
+		q.eq(EntityTypeMetadata.FULL_NAME, entityTypeDynamic.getFullyQualifiedName());
 		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
 				1);
 
@@ -109,7 +109,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		toUpdateAttribute.setDataType(EMAIL);
 		runAsSystem(() ->
 		{
-			metaDataService.deleteEntityType(entityTypeDynamic.getName());
+			metaDataService.deleteEntityType(entityTypeDynamic.getFullyQualifiedName());
 			metaDataService.addEntityType(entityTypeDynamic);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
@@ -123,7 +123,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(EntityTypeMetadata.FULL_NAME, emd.getName());
+		q.eq(EntityTypeMetadata.FULL_NAME, emd.getFullyQualifiedName());
 		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
 				1);
 

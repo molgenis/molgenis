@@ -19,7 +19,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 	private JsonElement serializeReference(Entity entity, JsonSerializationContext context)
 	{
 		JsonObject result = new JsonObject();
-		result.addProperty("__entityName", entity.getEntityType().getName());
+		result.addProperty("__entityName", entity.getEntityType().getFullyQualifiedName());
 		result.add("__idValue", context.serialize(entity.getIdValue()));
 		result.add("__labelValue", context.serialize(entity.getLabelValue()));
 		return result;
@@ -29,7 +29,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 	public JsonElement serialize(Entity entity, Type type, JsonSerializationContext context)
 	{
 		JsonObject result = new JsonObject();
-		result.addProperty("__entityName", entity.getEntityType().getName());
+		result.addProperty("__entityName", entity.getEntityType().getFullyQualifiedName());
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attributeName = attr.getName();

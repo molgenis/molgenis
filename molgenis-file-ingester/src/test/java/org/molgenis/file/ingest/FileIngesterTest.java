@@ -67,7 +67,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		importServiceMock = mock(ImportService.class);
 		progress = mock(Progress.class);
 
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("target").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("target").getMock();
 		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityType);
 		fileIngest.set(FileIngestMetaData.URL, url);

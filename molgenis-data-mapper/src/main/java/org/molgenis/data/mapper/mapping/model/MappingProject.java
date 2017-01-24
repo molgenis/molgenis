@@ -45,7 +45,7 @@ public class MappingProject
 		{
 			if (mappingTarget != null)
 			{
-				this.mappingTargets.put(mappingTarget.getTarget().getName(), mappingTarget);
+				this.mappingTargets.put(mappingTarget.getTarget().getFullyQualifiedName(), mappingTarget);
 			}
 		}
 	}
@@ -100,12 +100,12 @@ public class MappingProject
 
 	public MappingTarget addTarget(EntityType target)
 	{
-		if (mappingTargets.containsKey(target.getName()))
+		if (mappingTargets.containsKey(target.getFullyQualifiedName()))
 		{
 			throw new IllegalStateException("Cannot have multiple mappings for same target.");
 		}
 		MappingTarget result = new MappingTarget(target);
-		mappingTargets.put(target.getName(), result);
+		mappingTargets.put(target.getFullyQualifiedName(), result);
 		return result;
 	}
 

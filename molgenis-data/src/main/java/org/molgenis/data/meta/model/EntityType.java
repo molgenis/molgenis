@@ -106,7 +106,7 @@ public class EntityType extends StaticEntity
 			AttributeFactory attrFactory)
 	{
 		EntityType entityTypeCopy = new EntityType(entityType.getEntityType()); // do not deep-copy
-		entityTypeCopy.setSimpleName(entityType.getSimpleName());
+		entityTypeCopy.setSimpleName(entityType.getName());
 		entityTypeCopy.setPackage(entityType.getPackage()); // do not deep-copy
 		entityTypeCopy.setLabel(entityType.getLabel());
 		entityTypeCopy.setDescription(entityType.getDescription());
@@ -159,7 +159,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return fully qualified entity name
 	 */
-	public String getName()
+	public String getFullyQualifiedName()
 	{
 		return getString(FULL_NAME);
 	}
@@ -174,7 +174,7 @@ public class EntityType extends StaticEntity
 	public EntityType setName(String fullName)
 	{
 		set(FULL_NAME, fullName);
-		if (getSimpleName() == null)
+		if (getName() == null)
 		{
 			set(SIMPLE_NAME, fullName);
 		}
@@ -190,7 +190,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return entity name
 	 */
-	public String getSimpleName()
+	public String getName()
 	{
 		return getString(SIMPLE_NAME);
 	}
@@ -239,7 +239,7 @@ public class EntityType extends StaticEntity
 	{
 		if (label == null)
 		{
-			label = getSimpleName();
+			label = getName();
 		}
 		set(LABEL, label);
 		return this;
@@ -603,7 +603,7 @@ public class EntityType extends StaticEntity
 			{
 				throw new MolgenisDataException(
 						format("Entity [%s] already contains attribute with name [%s], duplicate attribute names are not allowed",
-								this.getName(), attr.getName()));
+								this.getFullyQualifiedName(), attr.getName()));
 			}
 		});
 
@@ -805,14 +805,14 @@ public class EntityType extends StaticEntity
 
 	private void updateFullName()
 	{
-		String simpleName = getSimpleName();
+		String simpleName = getName();
 		if (simpleName != null)
 		{
 			String fullName;
 			Package package_ = getPackage();
 			if (package_ != null)
 			{
-				fullName = package_.getName() + PACKAGE_SEPARATOR + simpleName;
+				fullName = package_.getFullyQualifiedName() + PACKAGE_SEPARATOR + simpleName;
 			}
 			else
 			{
@@ -850,6 +850,6 @@ public class EntityType extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "EntityType{" + "name=" + getName() + '}';
+		return "EntityType{" + "name=" + getFullyQualifiedName() + '}';
 	}
 }

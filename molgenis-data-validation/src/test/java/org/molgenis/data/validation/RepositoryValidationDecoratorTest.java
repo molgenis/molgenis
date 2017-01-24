@@ -69,7 +69,7 @@ public class RepositoryValidationDecoratorTest
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
 		refEntityType = mock(EntityType.class);
-		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getFullyQualifiedName()).thenReturn(refEntityName);
 		when(refEntityType.getLabel()).thenReturn(refEntityName);
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityType.getAtomicAttributes()).thenReturn(Arrays.asList(refIdAttr));
@@ -118,7 +118,7 @@ public class RepositoryValidationDecoratorTest
 		when(uniqueXrefAttr.isUnique()).thenReturn(true);
 
 		entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		when(entityType.getLabel()).thenReturn(entityName);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAttribute(attrIdName)).thenReturn(idAttr);

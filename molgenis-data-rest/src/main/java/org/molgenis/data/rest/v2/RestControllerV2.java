@@ -704,7 +704,7 @@ class RestControllerV2
 			Map<String, Object> responseData)
 	{
 		responseData
-				.put("_href", Href.concatEntityHref(BASE_URI, entity.getEntityType().getName(), entity.getIdValue()));
+				.put("_href", Href.concatEntityHref(BASE_URI, entity.getEntityType().getFullyQualifiedName(), entity.getIdValue()));
 		for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();

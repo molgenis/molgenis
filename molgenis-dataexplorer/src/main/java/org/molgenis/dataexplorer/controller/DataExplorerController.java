@@ -279,11 +279,11 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeEntities = new HashMap<>();
 		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
 			if (canRead || canWrite)
 			{
-				genomeEntities.put(entityType.getName(), entityType.getLabel());
+				genomeEntities.put(entityType.getFullyQualifiedName(), entityType.getLabel());
 			}
 		});
 		return genomeEntities;

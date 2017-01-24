@@ -570,7 +570,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
 	{
 		Package pack = mock(Package.class);
-		when(pack.getName()).thenReturn("org_molgenis_blah");
+		when(pack.getFullyQualifiedName()).thenReturn("org_molgenis_blah");
 
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("org_molgenis_blah_duplicateEntity")).thenReturn(true);

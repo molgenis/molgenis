@@ -35,7 +35,7 @@ public class SortGeneratorTest
 
 		sortGenerator = new SortGenerator(documentIdGenerator);
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		Attribute intAttr = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
 		when(intAttr.getDataType()).thenReturn(INT);
 		when(entityType.getAttribute("int")).thenReturn(intAttr);

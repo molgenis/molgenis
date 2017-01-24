@@ -100,12 +100,12 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		{
 			entityMapping.setIdentifier(idGenerator.generateId());
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
-			dataService.add(entityMappingMetaData.getName(), entityMappingEntity);
+			dataService.add(entityMappingMetaData.getFullyQualifiedName(), entityMappingEntity);
 		}
 		else
 		{
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
-			dataService.update(entityMappingMetaData.getName(), entityMappingEntity);
+			dataService.update(entityMappingMetaData.getFullyQualifiedName(), entityMappingEntity);
 		}
 		return entityMappingEntity;
 	}
@@ -117,7 +117,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, entityMapping.getName());
 		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE,
 				entityMapping.getTargetEntityType() != null ? entityMapping.getTargetEntityType()
-						.getName() : null);
+						.getFullyQualifiedName() : null);
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;
 	}

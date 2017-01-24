@@ -44,7 +44,7 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 	@RunAsSystem
 	public Entity getSettings()
 	{
-		return dataService.findOneById(getName(), getSimpleName());
+		return dataService.findOneById(getFullyQualifiedName(), getName());
 	}
 
 	public static String getSettingsEntityName(String id)

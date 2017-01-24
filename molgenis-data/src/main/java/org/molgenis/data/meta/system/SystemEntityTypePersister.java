@@ -126,17 +126,17 @@ public class SystemEntityTypePersister
 		{
 			return false;
 		}
-		if (package_.getName().equals(PACKAGE_SYSTEM))
+		if (package_.getFullyQualifiedName().equals(PACKAGE_SYSTEM))
 		{
 			return true;
 		}
 		Package rootPackage = package_.getRootPackage();
-		return rootPackage != null && rootPackage.getName().equals(PACKAGE_SYSTEM);
+		return rootPackage != null && rootPackage.getFullyQualifiedName().equals(PACKAGE_SYSTEM);
 	}
 
 	private boolean isNotExists(EntityType entityType)
 	{
-		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getName());
+		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getFullyQualifiedName());
 	}
 
 	/**

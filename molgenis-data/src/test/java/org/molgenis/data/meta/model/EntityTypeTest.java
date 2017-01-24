@@ -89,8 +89,8 @@ public class EntityTypeTest
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String name = "name";
 		entityType.setName(name);
+		assertEquals(entityType.getFullyQualifiedName(), name);
 		assertEquals(entityType.getName(), name);
-		assertEquals(entityType.getSimpleName(), name);
 		assertEquals(entityType.getLabel(), name);
 	}
 
@@ -104,8 +104,8 @@ public class EntityTypeTest
 		entityType.setLabel(label);
 		entityType.setSimpleName(simpleName);
 		entityType.setName(name);
-		assertEquals(entityType.getName(), name);
-		assertEquals(entityType.getSimpleName(), simpleName);
+		assertEquals(entityType.getFullyQualifiedName(), name);
+		assertEquals(entityType.getName(), simpleName);
 		assertEquals(entityType.getLabel(), label);
 	}
 
@@ -115,9 +115,9 @@ public class EntityTypeTest
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String simpleName = "simpleName";
 		entityType.setSimpleName(simpleName);
-		assertEquals(entityType.getSimpleName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
 		assertEquals(entityType.getName(), simpleName);
+		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getFullyQualifiedName(), simpleName);
 		assertEquals(entityType.getString(FULL_NAME), simpleName);
 		assertEquals(entityType.getLabel(), simpleName);
 		assertEquals(entityType.getString(LABEL), simpleName);
@@ -132,9 +132,9 @@ public class EntityTypeTest
 		entityType.setName("name");
 		entityType.setLabel(label);
 		entityType.setSimpleName(simpleName);
-		assertEquals(entityType.getSimpleName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
 		assertEquals(entityType.getName(), simpleName);
+		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getFullyQualifiedName(), simpleName);
 		assertEquals(entityType.getString(FULL_NAME), simpleName);
 		assertEquals(entityType.getLabel(), label);
 		assertEquals(entityType.getString(LABEL), label);
@@ -167,7 +167,7 @@ public class EntityTypeTest
 		EntityType entityTypeMeta = createEntityTypeMeta();
 
 		Package package_ = mock(Package.class);
-		when(package_.getName()).thenReturn("myPackage");
+		when(package_.getFullyQualifiedName()).thenReturn("myPackage");
 
 		EntityType extendsEntityType = mock(EntityType.class);
 
@@ -187,8 +187,8 @@ public class EntityTypeTest
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getEntityType()).thenReturn(entityTypeMeta);
-		when(entityType.getSimpleName()).thenReturn("myEntity");
-		when(entityType.getName()).thenReturn("myPackage_myEntity");
+		when(entityType.getName()).thenReturn("myEntity");
+		when(entityType.getFullyQualifiedName()).thenReturn("myPackage_myEntity");
 		when(entityType.getPackage()).thenReturn(package_);
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.getDescription()).thenReturn("description");
@@ -204,8 +204,8 @@ public class EntityTypeTest
 
 		EntityType entityTypeCopy = EntityType.newInstance(entityType);
 		assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
-		assertEquals(entityTypeCopy.getSimpleName(), "myEntity");
-		assertEquals(entityTypeCopy.getName(), "myPackage_myEntity");
+		assertEquals(entityTypeCopy.getName(), "myEntity");
+		assertEquals(entityTypeCopy.getFullyQualifiedName(), "myPackage_myEntity");
 		assertSame(entityTypeCopy.getPackage(), package_);
 		assertEquals(entityTypeCopy.getLabel(), "label");
 		assertEquals(entityTypeCopy.getDescription(), "description");

@@ -904,7 +904,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		EntityType outputEMD = snpEffRunner.getTargetEntityType(sourceEMD);
 
 		assertEquals(outputEMD.getBackend(), "TestBackend");
-		assertEquals(outputEMD.getName(), "package_source_EFFECTS");
+		assertEquals(outputEMD.getFullyQualifiedName(), "package_source_EFFECTS");
 	}
 
 	@Configuration

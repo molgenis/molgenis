@@ -95,7 +95,7 @@ public class AnnotatorController
 		Repository<Entity> repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
-			scheduleAnnotatorRun(repository.getEntityType().getName(), annotatorNames);
+			scheduleAnnotatorRun(repository.getEntityType().getFullyQualifiedName(), annotatorNames);
 		}
 		return entityName;
 	}

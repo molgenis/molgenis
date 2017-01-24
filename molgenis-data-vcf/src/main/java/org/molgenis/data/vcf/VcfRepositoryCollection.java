@@ -132,6 +132,6 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getName());
+		return hasRepository(entityType.getFullyQualifiedName());
 	}
 }

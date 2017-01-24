@@ -61,7 +61,7 @@ public class EntityMapping
 		{
 			return null;
 		}
-		return sourceEntityType.getName();
+		return sourceEntityType.getFullyQualifiedName();
 	}
 
 	public String getLabel()
