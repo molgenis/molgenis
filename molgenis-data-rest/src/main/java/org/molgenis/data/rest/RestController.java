@@ -726,10 +726,7 @@ public class RestController
 	{
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
-		Entity entity = dataService.findOneById(entityName, id);
-
 		dataService.deleteById(entityName, id);
-		restService.updateMappedByEntities(entity);
 	}
 
 	/**

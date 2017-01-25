@@ -207,10 +207,7 @@ class RestControllerV2
 	{
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
-		Entity entity = dataService.findOneById(entityName, id);
-
 		dataService.deleteById(entityName, id);
-		restService.updateMappedByEntities(entity);
 	}
 
 	/**
@@ -291,7 +288,6 @@ class RestControllerV2
 			entities.forEach(entity ->
 			{
 				restService.updateMappedByEntities(entity);
-
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
