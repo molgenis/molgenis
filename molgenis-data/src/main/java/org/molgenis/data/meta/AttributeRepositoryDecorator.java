@@ -271,7 +271,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 		// The validateDeleteAllowed check if querying the table in which we are deleting. Since the decorated repo only
 		// guarantees that the attributes are deleted after the operation completes we have to delete the attributes one
 		// by one
-		attributes.forEach(this::delete);
+		decoratedRepo.delete(attributes);
 	}
 
 	@Override
