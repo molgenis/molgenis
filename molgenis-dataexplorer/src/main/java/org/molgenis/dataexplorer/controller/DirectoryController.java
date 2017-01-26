@@ -51,7 +51,7 @@ public class DirectoryController
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", generateBase64Authentication(username, password));
 
-		HttpEntity entity = new HttpEntity(query, headers);
+		HttpEntity<NegotiatorQuery> entity = new HttpEntity<>(query, headers);
 
 		try
 		{
