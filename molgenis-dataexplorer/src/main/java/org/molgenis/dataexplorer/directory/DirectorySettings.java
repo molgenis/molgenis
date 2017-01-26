@@ -1,6 +1,7 @@
 package org.molgenis.dataexplorer.directory;
 
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
@@ -62,5 +63,10 @@ public class DirectorySettings extends DefaultSettingsEntity
 	public String getNegotiatorURL()
 	{
 		return getString(NEGOTIATOR_URL);
+	}
+
+	public EntityType getCollectionEntityType()
+	{
+		return getEntity(COLLECTION_ENTITY, EntityType.class);
 	}
 }

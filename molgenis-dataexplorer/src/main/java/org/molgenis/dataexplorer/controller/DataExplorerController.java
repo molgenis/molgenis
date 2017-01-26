@@ -45,9 +45,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.FULL_NAME;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
-import static org.molgenis.dataexplorer.directory.DirectorySettings.COLLECTION_ENTITY;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -465,8 +463,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean showDirectoryButton(String selectedEntityName)
 	{
-		String collectionEntityName = directorySettings.getEntity(COLLECTION_ENTITY, EntityType.class)
-				.getString(FULL_NAME);
-		return collectionEntityName.equals(selectedEntityName);
+		final EntityType collectionEntityType = directorySettings.getCollectionEntityType();
+		//TODO: change to getFullyQualifiedName once identifier PR is accepted
+		return collectionEntityType != null && collectionEntityType.getName().equals(selectedEntityName);
 	}
 }
