@@ -3,6 +3,7 @@ package org.molgenis.dataexplorer.directory;
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @AutoValue
@@ -15,9 +16,11 @@ public abstract class NegotiatorQuery
 
 	public abstract String getHumanReadable();
 
+	@Nullable
 	public abstract String getnToken();
 
-	public static NegotiatorQuery createQuery(String url, List<Collection> collections, String humanReadable, String nToken)
+	public static NegotiatorQuery createQuery(String url, List<Collection> collections, String humanReadable,
+			String nToken)
 	{
 		return new AutoValue_NegotiatorQuery(url, collections, humanReadable, nToken);
 	}
