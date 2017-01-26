@@ -36,10 +36,10 @@ public class EntityTypeDependencyResolverTest
 		GenericDependencyResolver genericDependencyResolver = new GenericDependencyResolver();
 		entityTypeDependencyResolver = new EntityTypeDependencyResolver(genericDependencyResolver);
 
-		entityType0 = when(mock(EntityType.class).getName()).thenReturn("entity0").getMock();
-		entityType1 = when(mock(EntityType.class).getName()).thenReturn("entity1").getMock();
-		entityType2 = when(mock(EntityType.class).getName()).thenReturn("entity2").getMock();
-		entityType3 = when(mock(EntityType.class).getName()).thenReturn("entity3").getMock();
+		entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity0").getMock();
+		entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity1").getMock();
+		entityType2 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity2").getMock();
+		entityType3 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity3").getMock();
 
 		attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
 		attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
@@ -176,7 +176,7 @@ public class EntityTypeDependencyResolverTest
 	@Test()
 	public void resolveDependenciesEntity()
 	{
-		EntityType entityType4 = when(mock(EntityType.class).getName()).thenReturn("entity4").getMock();
+		EntityType entityType4 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity4").getMock();
 		Attribute attr4 = when(mock(Attribute.class).getName()).thenReturn("attr4").getMock();
 		when(entityType4.getOwnAllAttributes()).thenReturn(singleton(attr4));
 
@@ -193,15 +193,15 @@ public class EntityTypeDependencyResolverTest
 	@Test()
 	public void resolveDependenciesEntityExtendedDependencies()
 	{
-		EntityType entityType4 = when(mock(EntityType.class).getName()).thenReturn("entity4").getMock();
+		EntityType entityType4 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity4").getMock();
 		Attribute attr4 = when(mock(Attribute.class).getName()).thenReturn("attr4").getMock();
 		when(entityType4.getOwnAllAttributes()).thenReturn(singleton(attr4));
 
-		EntityType entityType5 = when(mock(EntityType.class).getName()).thenReturn("entity5").getMock();
+		EntityType entityType5 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity5").getMock();
 		Attribute attr5 = when(mock(Attribute.class).getName()).thenReturn("attr5").getMock();
 		when(entityType5.getOwnAllAttributes()).thenReturn(singleton(attr5));
 
-		EntityType entityType6 = when(mock(EntityType.class).getName()).thenReturn("entity6").getMock();
+		EntityType entityType6 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity6").getMock();
 		Attribute attr6 = when(mock(Attribute.class).getName()).thenReturn("attr6").getMock();
 		when(entityType6.getOwnAllAttributes()).thenReturn(singleton(attr6));
 

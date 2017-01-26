@@ -54,7 +54,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -1089,7 +1088,7 @@ public class RestController
 		}
 
 		String attrHref = Href
-				.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(), refAttributeName);
+				.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(), refAttributeName);
 		switch (attr.getDataType())
 		{
 			case COMPOUND:
@@ -1188,7 +1187,7 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getName(), entity.getIdValue()));
+		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue()));
 
 		for (Attribute attr : meta.getAtomicAttributes())
 		{
@@ -1203,13 +1202,13 @@ public class RestController
 				if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					entityMap.put(attrName, new AttributeResponse(meta.getName(), meta, attr, subAttributesSet, null,
+					entityMap.put(attrName, new AttributeResponse(meta.getFullyQualifiedName(), meta, attr, subAttributesSet, null,
 							molgenisPermissionService, dataService, languageService));
 				}
 				else
 				{
 					entityMap.put(attrName, Collections.singletonMap("href",
-							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+							Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
 									attrName)));
 				}
 			}
@@ -1236,7 +1235,7 @@ public class RestController
 				if (refEntity != null)
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getName());
+					EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getFullyQualifiedName());
 					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityType, subAttributesSet, null);
 					entityMap.put(attrName, refEntityMap);
 				}
@@ -1244,7 +1243,7 @@ public class RestController
 			else if ((attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
 					&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 			{
-				EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getName());
+				EntityType refEntityType = dataService.getEntityType(attr.getRefEntity().getFullyQualifiedName());
 				Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
 
 				Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
@@ -1259,7 +1258,7 @@ public class RestController
 						(long) refEntityMaps.size(), mrefEntities);
 
 				EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
-						Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+						Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
 								attrName), null, molgenisPermissionService, dataService, languageService);
 
 				entityMap.put(attrName, ecr);
@@ -1270,7 +1269,7 @@ public class RestController
 			{
 				// Add href to ref field
 				Map<String, String> ref = new LinkedHashMap<String, String>();
-				ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+				ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
 						attrName));
 				entityMap.put(attrName, ref);
 			}

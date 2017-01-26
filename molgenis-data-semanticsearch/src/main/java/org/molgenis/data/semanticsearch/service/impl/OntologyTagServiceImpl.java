@@ -75,7 +75,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void removeAttributeTag(EntityType entityType, SemanticTag<Attribute, OntologyTerm, Ontology> removeTag)
 	{
 		Attribute attribute = removeTag.getSubject();
-		Entity attributeEntity = findAttributeEntity(entityType.getName(), attribute.getName());
+		Entity attributeEntity = findAttributeEntity(entityType.getFullyQualifiedName(), attribute.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
@@ -94,10 +94,10 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityType entityType, Attribute attribute)
 	{
 		Multimap<Relation, OntologyTerm> tags = create();
-		Entity entity = findAttributeEntity(entityType.getName(), attribute.getName());
+		Entity entity = findAttributeEntity(entityType.getFullyQualifiedName(), attribute.getName());
 		if (entity == null)
 		{
-			LOG.warn("Cannot find attribute {}.{}", entityType.getName(), attribute.getName());
+			LOG.warn("Cannot find attribute {}.{}", entityType.getFullyQualifiedName(), attribute.getName());
 			return tags;
 		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
@@ -115,7 +115,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + package_.getName() + "]");
+			throw new UnknownEntityException("Unknown package [" + package_.getFullyQualifiedName() + "]");
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
@@ -130,7 +130,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@Override
 	public void addAttributeTag(EntityType entityType, SemanticTag<Attribute, OntologyTerm, Ontology> tag)
 	{
-		Entity entity = findAttributeEntity(entityType.getName(), tag.getSubject().getName());
+		Entity entity = findAttributeEntity(entityType.getFullyQualifiedName(), tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{

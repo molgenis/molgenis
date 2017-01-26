@@ -71,8 +71,8 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	public void testGetEntityType()
 	{
 		EntityType expectedEntityType = entityTypeFactory.create();
-		expectedEntityType.setSimpleName("EntityNameSmall");
 		expectedEntityType.setName("EntityNameSmall");
+		expectedEntityType.setFullyQualifiedName("EntityNameSmall");
 		expectedEntityType.addAttribute(vcfAttrs.getChromAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getAltAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getPosAttribute());

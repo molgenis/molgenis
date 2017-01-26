@@ -47,7 +47,7 @@ public class AttributeValidatorTest
 	public void validateMappedByValidEntity()
 	{
 		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute attr = makeMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
@@ -62,7 +62,7 @@ public class AttributeValidatorTest
 	public void validateMappedByInvalidEntity()
 	{
 		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute attr = makeMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
@@ -77,7 +77,7 @@ public class AttributeValidatorTest
 	public void validateMappedByInvalidDataType()
 	{
 		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute attr = makeMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
@@ -92,7 +92,7 @@ public class AttributeValidatorTest
 	public void validateOrderByValid()
 	{
 		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute attr = makeMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
@@ -108,10 +108,10 @@ public class AttributeValidatorTest
 	public void validateOrderByInvalidRefAttribute()
 	{
 		String entityName = "entityName";
-		EntityType refEntity = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType refEntity = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute attr = makeMockAttribute("attrName");
 		EntityType entity = mock(EntityType.class);
-		when(entity.getName()).thenReturn("test");
+		when(entity.getFullyQualifiedName()).thenReturn("test");
 		when(attr.getEntityType()).thenReturn(entity);
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";

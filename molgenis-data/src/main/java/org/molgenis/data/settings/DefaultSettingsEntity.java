@@ -180,7 +180,7 @@ public abstract class DefaultSettingsEntity implements Entity
 				@Override
 				public Object getEntityId()
 				{
-					return getEntityType().getSimpleName();
+					return getEntityType().getName();
 				}
 			});
 		});
@@ -207,7 +207,7 @@ public abstract class DefaultSettingsEntity implements Entity
 				@Override
 				public Object getEntityId()
 				{
-					return getEntityType().getSimpleName();
+					return getEntityType().getName();
 				}
 			});
 		});
@@ -231,7 +231,7 @@ public abstract class DefaultSettingsEntity implements Entity
 	{
 		if (cachedEntity == null)
 		{
-			String id = getEntityType().getSimpleName();
+			String id = getEntityType().getName();
 			cachedEntity = RunAsSystemProxy.runAsSystem(() ->
 			{
 				Entity entity = dataService.findOneById(entityName, id);

@@ -42,6 +42,6 @@ public class EntityFactoryRegistry
 	 */
 	EntityFactory<? extends Entity, ?> getEntityFactory(EntityType entityType)
 	{
-		return staticEntityFactoryMap.get(entityType.getName());
+		return staticEntityFactoryMap.get(entityType.getFullyQualifiedName());
 	}
 }

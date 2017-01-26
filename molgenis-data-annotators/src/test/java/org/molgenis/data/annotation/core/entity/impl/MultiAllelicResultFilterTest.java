@@ -65,9 +65,9 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUp()
 	{
-		emd = entityTypeFactory.create().setName("entity");
+		emd = entityTypeFactory.create().setFullyQualifiedName("entity");
 
-		resultEmd = entityTypeFactory.create().setName("resultEntity");
+		resultEmd = entityTypeFactory.create().setFullyQualifiedName("resultEntity");
 
 		emd.addAttribute(vcfAttributes.getChromAttribute());
 		emd.addAttribute(vcfAttributes.getPosAttribute());
@@ -420,7 +420,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	{
 
 		String customAttrb = "MyAnnotation";
-		EntityType multiLineTestEMD = entityTypeFactory.create().setName("entity");
+		EntityType multiLineTestEMD = entityTypeFactory.create().setFullyQualifiedName("entity");
 
 		multiLineTestEMD.addAttribute(vcfAttributes.getChromAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getPosAttribute());

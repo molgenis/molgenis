@@ -152,14 +152,14 @@ public class EntityTypeValidator
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Entity [%s] ID attribute [%s] is not part of the entity attributes",
-								entityType.getName(), ownIdAttr.getName())));
+								entityType.getFullyQualifiedName(), ownIdAttr.getName())));
 			}
 
 			// Validate that ID attribute data type is allowed
 			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] type [%s] is not allowed", entityType.getName(),
+						format("Entity [%s] ID attribute [%s] type [%s] is not allowed", entityType.getFullyQualifiedName(),
 								ownIdAttr.getName(), ownIdAttr.getDataType().toString())));
 			}
 
@@ -167,7 +167,7 @@ public class EntityTypeValidator
 			if (!ownIdAttr.isUnique())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a unique attribute", entityType.getName(),
+						format("Entity [%s] ID attribute [%s] is not a unique attribute", entityType.getFullyQualifiedName(),
 								ownIdAttr.getName())));
 			}
 
@@ -175,7 +175,7 @@ public class EntityTypeValidator
 			if (ownIdAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getName(),
+						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getFullyQualifiedName(),
 								ownIdAttr.getName())));
 			}
 		}
@@ -184,7 +184,7 @@ public class EntityTypeValidator
 			if (!entityType.isAbstract() && entityType.getIdAttribute() == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] is missing required ID attribute", entityType.getName())));
+						format("Entity [%s] is missing required ID attribute", entityType.getFullyQualifiedName())));
 			}
 		}
 	}
@@ -207,7 +207,7 @@ public class EntityTypeValidator
 			if (attrMultiMap.get(attrName).size() > 1)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] contains multiple attributes with name [%s]", entityType.getName(),
+						format("Entity [%s] contains multiple attributes with name [%s]", entityType.getFullyQualifiedName(),
 								attrName)));
 			}
 		});
@@ -228,7 +228,7 @@ public class EntityTypeValidator
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
 							format("An attribute with name [%s] already exists in entity [%s] or one of its parents",
-									attr.getName(), extendsEntityType.getName())));
+									attr.getName(), extendsEntityType.getFullyQualifiedName())));
 				}
 			});
 		}
@@ -249,7 +249,7 @@ public class EntityTypeValidator
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("EntityType [%s] is not abstract; EntityType [%s] can't extend it",
-								entityType.getExtends().getName(), entityType.getName())));
+								entityType.getExtends().getFullyQualifiedName(), entityType.getFullyQualifiedName())));
 			}
 		}
 	}
@@ -265,12 +265,12 @@ public class EntityTypeValidator
 	private static void validateEntityName(EntityType entityType)
 	{
 		// validate entity name (e.g. illegal characters, length)
-		String name = entityType.getName();
+		String name = entityType.getFullyQualifiedName();
 		if (!name.equals(ATTRIBUTE_META_DATA) && !name.equals(ENTITY_TYPE_META_DATA) && !name.equals(PACKAGE))
 		{
 			try
 			{
-				validateName(entityType.getSimpleName());
+				validateName(entityType.getName());
 			}
 			catch (MolgenisDataException e)
 			{
@@ -282,20 +282,20 @@ public class EntityTypeValidator
 		Package package_ = entityType.getPackage();
 		if (package_ != null)
 		{
-			if (!(package_.getName() + Package.PACKAGE_SEPARATOR + entityType.getSimpleName()).equals(entityType.getName()))
+			if (!(package_.getFullyQualifiedName() + Package.PACKAGE_SEPARATOR + entityType.getName()).equals(entityType.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Qualified entity name [%s] not equal to entity package name [%s] underscore entity name [%s]",
-								entityType.getName(), package_.getName(), entityType.getSimpleName())));
+								entityType.getFullyQualifiedName(), package_.getFullyQualifiedName(), entityType.getName())));
 			}
 		}
 		else
 		{
-			if (!entityType.getSimpleName().equals(entityType.getName()))
+			if (!entityType.getName().equals(entityType.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Qualified entity name [%s] not equal to entity name [%s]", entityType.getName(),
-								entityType.getSimpleName())));
+						format("Qualified entity name [%s] not equal to entity name [%s]", entityType.getFullyQualifiedName(),
+								entityType.getName())));
 			}
 		}
 	}
@@ -311,11 +311,11 @@ public class EntityTypeValidator
 		if (package_ != null)
 		{
 			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry
-					.hasSystemEntityType(entityType.getName()))
+					.hasSystemEntityType(entityType.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getName(),
-								entityType.getPackage().getName())));
+						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getFullyQualifiedName(),
+								entityType.getPackage().getFullyQualifiedName())));
 			}
 		}
 	}

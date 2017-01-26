@@ -44,7 +44,7 @@ public class CombinedEntityCacheTest
 	public void beforeMethod()
 	{
 		reset(entityHydration, cache, entityType);
-		when(entityType.getName()).thenReturn("TestEntity");
+		when(entityType.getFullyQualifiedName()).thenReturn("TestEntity");
 	}
 
 	@Test

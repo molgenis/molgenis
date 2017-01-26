@@ -73,8 +73,8 @@ public class VcfImporterServiceTest
 		List<String> entityNames = Arrays.asList(entityName0);
 
 		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getFullyQualifiedName()).thenReturn(entityName0);
 		when(entityType0.getName()).thenReturn(entityName0);
-		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.getOwnAttributes()).thenReturn(emptyList());
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Entity entity0 = mock(Entity.class);
@@ -157,8 +157,8 @@ public class VcfImporterServiceTest
 
 		String sampleEntityName0 = "entity0sample";
 		EntityType sampleEntityType0 = mock(EntityType.class);
+		when(sampleEntityType0.getFullyQualifiedName()).thenReturn(sampleEntityName0);
 		when(sampleEntityType0.getName()).thenReturn(sampleEntityName0);
-		when(sampleEntityType0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityType0.getOwnAttributes()).thenReturn(emptyList());
 		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Repository<Entity> outSampleRepo0 = mock(Repository.class);
@@ -170,8 +170,8 @@ public class VcfImporterServiceTest
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getFullyQualifiedName()).thenReturn(entityName0);
 		when(entityType0.getName()).thenReturn(entityName0);
-		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
 		when(entityType0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -310,8 +310,8 @@ public class VcfImporterServiceTest
 		when(attr0.getName()).thenReturn(attrName0);
 
 		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getFullyQualifiedName()).thenReturn(entityName0);
 		when(entityType0.getName()).thenReturn(entityName0);
-		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.getOwnAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -351,8 +351,8 @@ public class VcfImporterServiceTest
 		when(attr0.getName()).thenReturn(attrName0);
 
 		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getFullyQualifiedName()).thenReturn(entityName0);
 		when(entityType0.getName()).thenReturn(entityName0);
-		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.getOwnAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -398,8 +398,8 @@ public class VcfImporterServiceTest
 
 		String sampleEntityName0 = "entity0sample";
 		EntityType sampleEntityType0 = mock(EntityType.class);
+		when(sampleEntityType0.getFullyQualifiedName()).thenReturn(sampleEntityName0);
 		when(sampleEntityType0.getName()).thenReturn(sampleEntityName0);
-		when(sampleEntityType0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityType0.getOwnAttributes()).thenReturn(emptyList());
 		when(sampleEntityType0.getAtomicAttributes()).thenReturn(singleton(sampleAttr0));
 		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -410,8 +410,8 @@ public class VcfImporterServiceTest
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 
 		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getFullyQualifiedName()).thenReturn(entityName0);
 		when(entityType0.getName()).thenReturn(entityName0);
-		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
 		when(entityType0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
@@ -462,8 +462,8 @@ public class VcfImporterServiceTest
 
 		String sampleEntityName0 = "entity0sample";
 		EntityType sampleEntityType0 = mock(EntityType.class);
+		when(sampleEntityType0.getFullyQualifiedName()).thenReturn(sampleEntityName0);
 		when(sampleEntityType0.getName()).thenReturn(sampleEntityName0);
-		when(sampleEntityType0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityType0.getOwnAttributes()).thenReturn(emptyList());
 		when(sampleEntityType0.getAtomicAttributes()).thenReturn(singleton(sampleAttr0));
 		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -474,8 +474,8 @@ public class VcfImporterServiceTest
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 
 		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getFullyQualifiedName()).thenReturn(entityName0);
 		when(entityType0.getName()).thenReturn(entityName0);
-		when(entityType0.getSimpleName()).thenReturn(entityName0);
 		when(entityType0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
 		when(entityType0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
@@ -539,7 +539,7 @@ public class VcfImporterServiceTest
 				{
 					return false;
 				}
-				return ((EntityType) item).getName().equals(expectedEntityType.getName());
+				return ((EntityType) item).getFullyQualifiedName().equals(expectedEntityType.getFullyQualifiedName());
 			}
 
 			@Override

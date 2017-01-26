@@ -21,14 +21,14 @@ public class PackageValidatorTest
 	{
 		systemPackageRegistry = mock(SystemPackageRegistry.class);
 		packageValidator = new PackageValidator(systemPackageRegistry);
-		systemPackage = when(mock(Package.class).getName()).thenReturn(PACKAGE_SYSTEM).getMock();
+		systemPackage = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM).getMock();
 	}
 
 	@Test
 	public void testValidateNonSystemPackage() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getName()).thenReturn("myPackage").getMock();
-		when(package_.getSimpleName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("myPackage").getMock();
+		when(package_.getName()).thenReturn("myPackage");
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
 		packageValidator.validate(package_);
 	}
@@ -36,8 +36,8 @@ public class PackageValidatorTest
 	@Test
 	public void testValidateSystemPackageInRegistry() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
-		when(package_.getSimpleName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
+		when(package_.getName()).thenReturn("myPackage");
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(true);
@@ -47,8 +47,8 @@ public class PackageValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Modifying system packages is not allowed")
 	public void testValidateSystemPackageNotInRegistry() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
-		when(package_.getSimpleName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
+		when(package_.getName()).thenReturn("myPackage");
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
@@ -58,8 +58,8 @@ public class PackageValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Qualified package name \\[myPackage\\] not equal to parent package name \\[sys\\] underscore package name \\[myPackage\\]")
 	public void testValidateNameInvalid() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getName()).thenReturn("myPackage").getMock();
-		when(package_.getSimpleName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("myPackage").getMock();
+		when(package_.getName()).thenReturn("myPackage");
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
 		packageValidator.validate(package_);

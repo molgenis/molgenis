@@ -105,7 +105,7 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 
 	private EntityTypeDescription createEntityTypeDescription(EntityType entityType)
 	{
-		String fullyQualifiedName = entityType.getName();
+		String fullyQualifiedName = entityType.getFullyQualifiedName();
 		ImmutableMap<String, AttributeDescription> attrDescriptionMap = ImmutableMap
 				.copyOf(createAttributeDescriptionMap(entityType));
 		return EntityTypeDescription.create(fullyQualifiedName, attrDescriptionMap);

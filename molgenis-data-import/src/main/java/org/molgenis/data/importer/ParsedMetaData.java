@@ -34,7 +34,7 @@ public final class ParsedMetaData
 		ImmutableMap.Builder<String, EntityType> builder = ImmutableMap.builder();
 		for (EntityType emd : entities)
 		{
-			builder.put(emd.getName(), emd);
+			builder.put(emd.getFullyQualifiedName(), emd);
 		}
 		this.entities = builder.build();
 		if (packages == null)

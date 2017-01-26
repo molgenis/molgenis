@@ -24,7 +24,7 @@ public class MetaUtils
 	 */
 	public static boolean isSystemPackage(Package package_)
 	{
-		return package_.getName().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null && package_
-				.getRootPackage().getName().equals(PACKAGE_SYSTEM));
+		return package_.getFullyQualifiedName().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null && package_
+				.getRootPackage().getFullyQualifiedName().equals(PACKAGE_SYSTEM));
 	}
 }

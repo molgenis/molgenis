@@ -64,7 +64,7 @@ public class SnpEffAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCanAnnotate()
 	{
-		EntityType sourceEMD = entityTypeFactory.create().setName("source");
+		EntityType sourceEMD = entityTypeFactory.create().setFullyQualifiedName("source");
 		when(dataService.hasRepository("source_EFFECTS")).thenReturn(true);
 		assertEquals(annotator.canAnnotate(sourceEMD), "already annotated with SnpEff");
 	}
