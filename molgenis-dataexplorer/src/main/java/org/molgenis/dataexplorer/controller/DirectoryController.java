@@ -5,6 +5,7 @@ import org.molgenis.dataexplorer.directory.NegotiatorQuery;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class DirectoryController
 	private final DirectorySettings settings;
 	private final RestTemplate restTemplate;
 
+	@Autowired
 	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate)
 	{
 		this.settings = requireNonNull(settings);
