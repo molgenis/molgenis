@@ -35,6 +35,7 @@ import static org.mockito.Mockito.eq;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
@@ -714,10 +715,14 @@ public class AttributeRepositoryDecoratorTest
 		String attributeId = "id";
 
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getAttribute(attributeName)).thenReturn(attribute)
+				.getMock();
+
 		when(attribute.getIdentifier()).thenReturn(attributeId);
 		when(attribute.getDataType()).thenReturn(BOOL);
-		when(attribute.getEntity()).thenReturn(mock(EntityType.class));
+		when(attribute.getEntity()).thenReturn(entityType);
 		when(systemEntityTypeRegistry.hasSystemAttribute(attributeId)).thenReturn(false);
+		when(dataService.getMeta().getEntityType(attribute.getEntity().getName())).thenReturn(entityType);
 
 		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
@@ -741,16 +746,24 @@ public class AttributeRepositoryDecoratorTest
 	public void deleteCompoundAttribute()
 	{
 		// Compound parent attribute
-		Attribute compound = when(mock(Attribute.class).getName()).thenReturn("compound").getMock();
-		when(compound.getDataType()).thenReturn(AttributeType.COMPOUND);
-		when(compound.getEntity()).thenReturn(mock(EntityType.class));
+		String compoundName = "compound";
+		String compoundId = "id";
+
+		Attribute compound = when(mock(Attribute.class).getName()).thenReturn(compoundName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getAttribute(compoundName)).thenReturn(compound).getMock();
+
+		when(compound.getIdentifier()).thenReturn(compoundId);
+		when(compound.getDataType()).thenReturn(COMPOUND);
+		when(compound.getEntity()).thenReturn(entityType);
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		when(dataService.getMeta().getEntityType(compound.getEntity().getName())).thenReturn(entityType);
 
 		// Child
 		Attribute child = when(mock(Attribute.class).getName()).thenReturn("child").getMock();
 		when(compound.getChildren()).thenReturn(newArrayList(child));
 		when(child.getParent()).thenReturn(mock(Attribute.class));
-		MetaDataService mds = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(mds);
 		when(mds.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)).thenReturn(mock(Repository.class));
 
 		@SuppressWarnings("unchecked")
