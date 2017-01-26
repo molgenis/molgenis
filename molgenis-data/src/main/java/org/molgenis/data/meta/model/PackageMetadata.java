@@ -10,8 +10,7 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -21,7 +20,10 @@ public class PackageMetadata extends SystemEntityType
 	private static final String SIMPLE_NAME_ = "Package";
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
+	public static final String ID = "id";
+	// TODO remove FULL_NAME field
 	public static final String FULL_NAME = "fullName";
+	// TODO rename to NAME
 	public static final String SIMPLE_NAME = "name";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
@@ -41,10 +43,12 @@ public class PackageMetadata extends SystemEntityType
 	@Override
 	public void init()
 	{
+		setId(PACKAGE);
 		setLabel("Package");
 		setDescription("Grouping of related entities");
-		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setLabel("Qualified name");
-		addAttribute(SIMPLE_NAME).setNillable(false).setReadOnly(true).setLabel("Name");
+
+		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
+		addAttribute(SIMPLE_NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		Attribute parentAttr = addAttribute(PARENT).setReadOnly(true).setDataType(XREF).setRefEntity(this)
@@ -53,8 +57,8 @@ public class PackageMetadata extends SystemEntityType
 				.setOrderBy(new Sort(LABEL)).setRefEntity(this).setLabel("Children");
 		addAttribute(ENTITY_TYPES).setReadOnly(true).setDataType(ONE_TO_MANY)
 				.setMappedBy(entityTypeMetadata.getAttribute(EntityTypeMetadata.PACKAGE))
-				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL)).setRefEntity(entityTypeMetadata)
-				.setLabel("Entity types");
+				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL))
+				.setRefEntity(entityTypeMetadata).setLabel("Entity types");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 	}
 

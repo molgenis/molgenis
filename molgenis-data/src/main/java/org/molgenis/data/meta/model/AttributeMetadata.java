@@ -76,6 +76,7 @@ public class AttributeMetadata extends SystemEntityType
 
 	public void init()
 	{
+		setId(ATTRIBUTE_META_DATA);
 		setLabel("Attribute");
 		setDescription("Meta data for attributes");
 

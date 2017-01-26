@@ -27,7 +27,10 @@ public class EntityTypeMetadata extends SystemEntityType
 	private PackageMetadata packageMetadata;
 	private TagMetadata tagMetadata;
 
+	public static final String ID = "id";
+	// TODO remove FULL_NAME field
 	public static final String FULL_NAME = "fullName";
+	// TODO rename to NAME and "name"
 	public static final String SIMPLE_NAME = "simpleName";
 	public static final String PACKAGE = "package";
 	public static final String LABEL = "label";
@@ -50,10 +53,11 @@ public class EntityTypeMetadata extends SystemEntityType
 	{
 		requireNonNull(backendEnumOptions, "backend enum options not set!");
 
+		setId(ENTITY_TYPE_META_DATA);
 		setLabel("Entity");
 		setDescription("Meta data for entity classes");
 
-		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
+		addAttribute(ID, ROLE_ID).setAuto(true);
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
