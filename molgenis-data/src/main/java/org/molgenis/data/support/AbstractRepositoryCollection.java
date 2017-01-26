@@ -57,6 +57,6 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	@Override
 	public Repository<Entity> getRepository(EntityType entityType)
 	{
-		return getRepository(entityType.getName());
+		return getRepository(entityType.getFullyQualifiedName());
 	}
 }

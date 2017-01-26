@@ -235,7 +235,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		{
 			throw new MolgenisDataAccessException(
 					"The attribute : " + attributeName + " does not exsit in EntityType : " + sourceEntityType
-							.getName());
+							.getFullyQualifiedName());
 		}
 		Explanation explanation = elasticSearchExplainService
 				.explain(new QueryImpl<Entity>(finalQueryRules), dataService.getEntityType(ATTRIBUTE_META_DATA),

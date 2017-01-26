@@ -9,7 +9,7 @@ public abstract class SystemPackage extends Package
 	protected SystemPackage(String packageName, PackageMetadata packageMetadata)
 	{
 		super(new BootstrapEntity(packageMetadata));
-		setSimpleName(packageName);
+		setName(packageName);
 	}
 
 	public void bootstrap()

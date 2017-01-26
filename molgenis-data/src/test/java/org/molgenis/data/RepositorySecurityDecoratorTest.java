@@ -32,7 +32,7 @@ public class RepositorySecurityDecoratorTest
 	{
 		entityName = "entity";
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getName()).thenReturn(entityName);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);

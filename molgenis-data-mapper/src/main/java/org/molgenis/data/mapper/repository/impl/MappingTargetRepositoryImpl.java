@@ -51,12 +51,12 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 		{
 			mappingTarget.setIdentifier(idGenerator.generateId());
 			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
-			dataService.add(mappingTargetMetaData.getName(), mappingTargetEntity);
+			dataService.add(mappingTargetMetaData.getFullyQualifiedName(), mappingTargetEntity);
 		}
 		else
 		{
 			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
-			dataService.update(mappingTargetMetaData.getName(), mappingTargetEntity);
+			dataService.update(mappingTargetMetaData.getFullyQualifiedName(), mappingTargetEntity);
 		}
 		return mappingTargetEntity;
 	}
@@ -68,7 +68,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	{
 		Entity mappingTargetEntity = new DynamicEntity(mappingTargetMetaData);
 		mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
-		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
+		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getFullyQualifiedName());
 		mappingTargetEntity.set(MappingTargetMetaData.ENTITY_MAPPINGS, entityMappingEntities);
 		return mappingTargetEntity;
 	}

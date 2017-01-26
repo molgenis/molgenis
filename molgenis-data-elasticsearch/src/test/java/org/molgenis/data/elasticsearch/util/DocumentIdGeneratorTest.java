@@ -40,7 +40,7 @@ public class DocumentIdGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getIdValue()).thenReturn(entityTypeId);
-		when(entityType.getSimpleName()).thenReturn(entityTypeName);
+		when(entityType.getName()).thenReturn(entityTypeName);
 		String id = documentIdGenerator.generateId(entityType);
 		assertEquals(id, expectedId);
 	}

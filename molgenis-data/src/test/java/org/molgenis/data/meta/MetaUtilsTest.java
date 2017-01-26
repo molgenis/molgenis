@@ -15,7 +15,7 @@ public class MetaUtilsTest
 	public void isSystemPackageFalse()
 	{
 		Package package_ = mock(Package.class);
-		when(package_.getName()).thenReturn("notSystem");
+		when(package_.getFullyQualifiedName()).thenReturn("notSystem");
 		assertFalse(MetaUtils.isSystemPackage(package_));
 	}
 
@@ -23,7 +23,7 @@ public class MetaUtilsTest
 	public void isSystemPackageTrue()
 	{
 		Package package_ = mock(Package.class);
-		when(package_.getName()).thenReturn(PACKAGE_SYSTEM);
+		when(package_.getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM);
 		assertTrue(MetaUtils.isSystemPackage(package_));
 	}
 
@@ -31,10 +31,10 @@ public class MetaUtilsTest
 	public void isSystemPackageTrueNested()
 	{
 		Package rootPackage_ = mock(Package.class);
-		when(rootPackage_.getName()).thenReturn(PACKAGE_SYSTEM);
+		when(rootPackage_.getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM);
 
 		Package package_ = mock(Package.class);
-		when(package_.getName()).thenReturn("systemChild");
+		when(package_.getFullyQualifiedName()).thenReturn("systemChild");
 		when(package_.getRootPackage()).thenReturn(rootPackage_);
 		assertTrue(MetaUtils.isSystemPackage(package_));
 	}

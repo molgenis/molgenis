@@ -71,13 +71,13 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		reset(l2Cache, transactionInformation, decoratedRepository);
 		when(decoratedRepository.getEntityType()).thenReturn(emd);
-		when(decoratedRepository.getName()).thenReturn(emd.getName());
+		when(decoratedRepository.getName()).thenReturn(emd.getFullyQualifiedName());
 	}
 
 	@Test
 	public void testFindOneByIdNotDirtyCacheableAndPresent()
 	{
-		when(transactionInformation.isEntireRepositoryDirty(emd.getName())).thenReturn(false);
+		when(transactionInformation.isEntireRepositoryDirty(emd.getFullyQualifiedName())).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
 		when(l2Cache.get(decoratedRepository, "0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0", new Fetch().field("id")), entities.get(0));
@@ -86,7 +86,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneByIdNotDirtyCacheableNotPresent()
 	{
-		when(transactionInformation.isEntireRepositoryDirty(emd.getName())).thenReturn(false);
+		when(transactionInformation.isEntireRepositoryDirty(emd.getFullyQualifiedName())).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
 		when(l2Cache.get(decoratedRepository, "abcde")).thenReturn(null);
 		assertNull(l2CacheRepositoryDecorator.findOneById("abcde"));
@@ -95,7 +95,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneByIdDirty()
 	{
-		when(transactionInformation.isEntireRepositoryDirty(emd.getName())).thenReturn(false);
+		when(transactionInformation.isEntireRepositoryDirty(emd.getFullyQualifiedName())).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(true);
 		when(decoratedRepository.findOneById("0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
@@ -104,7 +104,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneByIdEntireRepositoryDirty()
 	{
-		when(transactionInformation.isEntireRepositoryDirty(emd.getName())).thenReturn(true);
+		when(transactionInformation.isEntireRepositoryDirty(emd.getFullyQualifiedName())).thenReturn(true);
 		when(decoratedRepository.findOneById("0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
 	}
@@ -119,7 +119,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		// 2: Not dirty, present in cache
 		// 3: Not dirty, absence stored in cache
 
-		when(transactionInformation.isEntireRepositoryDirty(emd.getName())).thenReturn(false);
+		when(transactionInformation.isEntireRepositoryDirty(emd.getFullyQualifiedName())).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(true);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "1"))).thenReturn(true);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "2"))).thenReturn(false);
@@ -147,7 +147,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void testFindAllQueriesInBatches()
 	{
 		// repository is clean
-		when(transactionInformation.isEntireRepositoryDirty(emd.getName())).thenReturn(false);
+		when(transactionInformation.isEntireRepositoryDirty(emd.getFullyQualifiedName())).thenReturn(false);
 
 		// 2500 IDs make for 3 batches.
 		// one third is dirty and needs to be queried from the decorated repository

@@ -29,8 +29,8 @@ public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	public EntityType metaDataCanAnnotate = entityTypeFactory.create().setName("test");
-	public EntityType metaDataCantAnnotate = entityTypeFactory.create().setName("test");
+	public EntityType metaDataCanAnnotate = entityTypeFactory.create().setFullyQualifiedName("test");
+	public EntityType metaDataCantAnnotate = entityTypeFactory.create().setFullyQualifiedName("test");
 
 	public Attribute attributeChrom = attributeFactory.create().setName(CHROM)
 			.setDataType(STRING);

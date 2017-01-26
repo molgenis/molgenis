@@ -39,8 +39,8 @@ public class EntityTypeRegistryImplTest
 		String entityTypeName = "entityTypeName";
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getAllAttributes()).thenReturn(emptyList());
-		when(entityType.getName()).thenReturn(entityTypeName);
-		when(entityType.getSimpleName()).thenReturn("entityTypeSimpleName");
+		when(entityType.getFullyQualifiedName()).thenReturn(entityTypeName);
+		when(entityType.getName()).thenReturn("entityTypeSimpleName");
 		entityTypeRegistryImpl.registerEntityType(entityType);
 		String tableName = "entityTypeSimpleName#2b9f9eaf";
 		assertEquals(entityTypeRegistryImpl.getEntityTypeDescription(tableName),
@@ -53,8 +53,8 @@ public class EntityTypeRegistryImplTest
 		String entityTypeName = "entityTypeName";
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getAllAttributes()).thenReturn(emptyList());
-		when(entityType.getName()).thenReturn(entityTypeName);
-		when(entityType.getSimpleName()).thenReturn("entityTypeSimpleName");
+		when(entityType.getFullyQualifiedName()).thenReturn(entityTypeName);
+		when(entityType.getName()).thenReturn("entityTypeSimpleName");
 		entityTypeRegistryImpl.registerEntityType(entityType);
 		String tableName = "entityTypeSimpleName#2b9f9eaf_mrefattr";
 		assertEquals(entityTypeRegistryImpl.getEntityTypeDescription(tableName),

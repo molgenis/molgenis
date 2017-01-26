@@ -70,7 +70,7 @@ public class OntologyImportService implements ImportService
 
 					crudRepository.add(stream(repo.spliterator(), false));
 
-					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
+					List<String> entityNames = addedEntities.stream().map(emd -> emd.getFullyQualifiedName())
 							.collect(Collectors.toList());
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 					int count = 1;
@@ -90,9 +90,9 @@ public class OntologyImportService implements ImportService
 			// Remove created repositories
 			for (EntityType emd : addedEntities)
 			{
-				if (dataService.hasRepository(emd.getName()))
+				if (dataService.hasRepository(emd.getFullyQualifiedName()))
 				{
-					dataService.deleteAll(emd.getName());
+					dataService.deleteAll(emd.getFullyQualifiedName());
 				}
 
 				if (searchService.hasMapping(emd))

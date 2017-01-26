@@ -20,7 +20,7 @@ public abstract class EntityKey
 
 	public static EntityKey create(EntityType entityType, Object id)
 	{
-		return create(entityType.getName(), id);
+		return create(entityType.getFullyQualifiedName(), id);
 	}
 
 	public static EntityKey create(Entity entity)

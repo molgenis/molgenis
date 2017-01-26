@@ -32,7 +32,7 @@ public class AbstractRepositoryTest
 	public void beforeTest()
 	{
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		abstractRepository = Mockito.spy(new AbstractRepository()
 		{

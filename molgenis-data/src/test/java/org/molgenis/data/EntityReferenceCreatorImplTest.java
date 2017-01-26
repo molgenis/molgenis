@@ -34,7 +34,7 @@ public class EntityReferenceCreatorImplTest
 	public void getReference()
 	{
 		String entityName = "entity";
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
@@ -56,7 +56,7 @@ public class EntityReferenceCreatorImplTest
 	public void getReferences()
 	{
 		String entityName = "entity";
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Attribute lblAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);

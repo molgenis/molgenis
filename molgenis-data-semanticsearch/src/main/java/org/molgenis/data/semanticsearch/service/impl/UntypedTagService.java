@@ -49,7 +49,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findAttributeEntity(EntityType entityType, String attributeName)
 	{
-		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getName());
+		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getFullyQualifiedName());
 		Optional<Entity> result = stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
@@ -57,7 +57,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findEntity(EntityType emd)
 	{
-		return dataService.findOneById(ENTITY_TYPE_META_DATA, emd.getName());
+		return dataService.findOneById(ENTITY_TYPE_META_DATA, emd.getFullyQualifiedName());
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Entity entity = findEntity(entityType);
 		if (entity == null)
 		{
-			LOG.warn("No known entity with name " + entityType.getName() + ".");
+			LOG.warn("No known entity with name " + entityType.getFullyQualifiedName() + ".");
 		}
 		else
 		{
@@ -135,7 +135,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Entity entity = findEntity(tag.getSubject());
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getName() + "]");
+			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getFullyQualifiedName() + "]");
 		}
 		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityType, LabeledResource, LabeledResource>>copyOf(
 				getTagsForEntity(tag.getSubject()));
@@ -163,11 +163,11 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService
-				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetadata.FULL_NAME, p.getName()));
+				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetadata.FULL_NAME, p.getFullyQualifiedName()));
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + p.getName() + "]");
+			throw new UnknownEntityException("Unknown package [" + p.getFullyQualifiedName() + "]");
 		}
 
 		List<SemanticTag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();

@@ -52,7 +52,7 @@ class PostgreSqlQueryGenerator
 				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
 
 		// for self-referencing data or inversed attributes defer checking constraints until the end of the transaction
-		if (attr.getRefEntity().getName().equals(entityType.getName()))
+		if (attr.getRefEntity().getFullyQualifiedName().equals(entityType.getFullyQualifiedName()))
 		{
 			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
@@ -242,7 +242,7 @@ class PostgreSqlQueryGenerator
 				.append(") ON DELETE CASCADE");
 
 		// for self-referencing data defer checking constraints until the end of the transaction
-		if (attr.getRefEntity().getName().equals(entityType.getName()))
+		if (attr.getRefEntity().getFullyQualifiedName().equals(entityType.getFullyQualifiedName()))
 		{
 			sql.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
@@ -254,7 +254,7 @@ class PostgreSqlQueryGenerator
 					.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
 
 			// for self-referencing data defer checking constraints until the end of the transaction
-			if (attr.getRefEntity().getName().equals(entityType.getName()))
+			if (attr.getRefEntity().getFullyQualifiedName().equals(entityType.getFullyQualifiedName()))
 			{
 				sql.append(" DEFERRABLE INITIALLY DEFERRED");
 			}
@@ -406,7 +406,7 @@ class PostgreSqlQueryGenerator
 					if (attr == null)
 					{
 						throw new UnknownAttributeException(
-								format("Unknown attribute [%s] in entity [%s]", attrName, entityType.getName()));
+								format("Unknown attribute [%s] in entity [%s]", attrName, entityType.getFullyQualifiedName()));
 					}
 					if (isPersistedInOtherTable(attr))
 					{

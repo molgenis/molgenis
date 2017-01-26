@@ -48,7 +48,7 @@ public class HPORepository extends AbstractRepository
 	@Override
 	public EntityType getEntityType()
 	{
-		EntityType entityType = entityTypeFactory.create().setSimpleName("HPO");
+		EntityType entityType = entityTypeFactory.create().setName("HPO");
 		entityType.addAttribute(attributeFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
 		entityType.addAttribute(attributeFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
 		entityType.addAttribute(attributeFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);

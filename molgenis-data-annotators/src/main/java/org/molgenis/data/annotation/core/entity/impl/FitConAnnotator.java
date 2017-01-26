@@ -130,7 +130,7 @@ public class FitConAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 
-				EntityType repoMetaData = entityTypeFactory.create().setName(FITCON_TABIX_RESOURCE);
+				EntityType repoMetaData = entityTypeFactory.create().setFullyQualifiedName(FITCON_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());

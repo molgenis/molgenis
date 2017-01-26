@@ -723,7 +723,7 @@ public class Attribute extends StaticEntity
 	 */
 	public Attribute getInversedBy()
 	{
-		// FIXME besides checking mappedBy attr name also check attr.getRefEntity().getName
+		// FIXME besides checking mappedBy attr name also check attr.getRefEntity().getFullyQualifiedName
 		if (isReferenceType(this))
 		{
 			return stream(getRefEntity().getAtomicAttributes().spliterator(), false).filter(Attribute::isMappedBy)

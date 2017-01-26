@@ -286,7 +286,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		verify(this.searchService).delete(entityTypeCaptor.capture());
 		EntityType actualEntityType = entityTypeCaptor.getValue();
-		assertEquals(actualEntityType.getName(), entityTypeName);
+		assertEquals(actualEntityType.getFullyQualifiedName(), entityTypeName);
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
