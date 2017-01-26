@@ -244,34 +244,35 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	public void delete(Attribute attribute)
 	{
 		validateDeleteAllowed(attribute);
-
-		// If compound attribute is deleted then change the parent of children to null
-		// This will change the children attributes into regular attributes.
 		if (attribute.getDataType().equals(COMPOUND))
 		{
 			attribute.getChildren().forEach(childAttribute ->
 			{
 				if (childAttribute.getParent() != null)
 				{
+					// If compound attribute is deleted then change the parent of children to null
+					// This will change the children attributes into regular attributes.
 					dataService.getMeta().getRepository(ATTRIBUTE_META_DATA).update(childAttribute.setParent(null));
 				}
 			});
 		}
-
-		EntityType entityType = attribute.getEntity();
-		entityType.removeAttribute(attribute);
-		dataService.update(ENTITY_TYPE_META_DATA, entityType);
-
 		decoratedRepo.delete(attribute);
+
+		// Update bidirectional relation with the EntityType table
+		EntityType entityType = dataService.getMeta().getEntityType(attribute.getEntity().getName());
+		if (entityType.getAttribute(attribute.getName()) != null)
+		{
+			entityType.removeAttribute(attribute);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+		}
 	}
 
 	@Override
 	public void delete(Stream<Attribute> attributes)
 	{
-		// The validateDeleteAllowed check if querying the table in which we are deleting. Since the decorated repo only
-		// guarantees that the attributes are deleted after the operation completes we have to delete the attributes one
-		// by one
-		decoratedRepo.delete(attributes);
+		// The decorated repo only guarantees that the attributes are deleted after
+		// the operation completes, so we have to delete the attributes one by one
+		attributes.forEach(this::delete);
 	}
 
 	@Override
@@ -296,18 +297,23 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public void add(Attribute attribute)
 	{
-		EntityType entityType = dataService.getEntityType(attribute.getEntity().getName());
-		entityType.addAttribute(attribute);
-
-		dataService.update(ENTITY_TYPE_META_DATA, entityType);
 		decoratedRepo.add(attribute);
+
+		// Update bidirectional relation with the EntityType table
+		EntityType entityType = dataService.getMeta().getEntityType(attribute.getEntity().getName());
+		Attribute existingAttribute = entityType.getAttribute(attribute.getName());
+		if (existingAttribute == null)
+		{
+			entityType.addAttribute(attribute);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+		}
 	}
 
 	@Override
 	public Integer add(Stream<Attribute> attributes)
 	{
 		AtomicInteger count = new AtomicInteger();
-		attributes.filter(entity ->
+		attributes.filter(attribute ->
 		{
 			count.incrementAndGet();
 			return true;
