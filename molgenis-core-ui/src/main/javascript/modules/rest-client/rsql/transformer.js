@@ -2,14 +2,7 @@
  * Transforms map to RSQL
  */
 export function transformToRSQL(constraint) {
-    let rsql = ''
-    Object.keys(constraint).map(o => {
-        const constraintBySelector = constraint[o]
-        rsql += getRsqlFromConstraint(constraintBySelector) + ';'
-    })
-
-    // Remove trailing 'AND' character
-    return rsql.replace(/;+$/, '')
+    return Object.values(constraint).map(getRsqlFromConstraint).join(';');
 }
 
 function getRsqlFromConstraint(constraint) {
