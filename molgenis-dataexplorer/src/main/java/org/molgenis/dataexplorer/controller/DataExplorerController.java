@@ -77,6 +77,9 @@ public class DataExplorerController extends MolgenisPluginController
 	private GenomicDataSettings genomicDataSettings;
 
 	@Autowired
+	private DirectoryController directoryController;
+
+	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -154,6 +157,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
@@ -452,4 +456,5 @@ public class DataExplorerController extends MolgenisPluginController
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
+
 }
