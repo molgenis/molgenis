@@ -41,12 +41,16 @@ public class DirectorySettings extends DefaultSettingsEntity
 		{
 			super.init();
 			setLabel("Directory settings");
-			setDescription("Settings for the Directory");
-			addAttribute(NEGOTIATOR_URL).setLabel("Negotiator endpoint url").setDefaultValue(NEGOTIATOR_URL_DEFAULT);
-			addAttribute(USERNAME).setLabel("Username");
-			addAttribute(PASSWORD).setLabel("Password");
-			addAttribute(COLLECTION_ENTITY).setLabel("Entity containing BBMRI collection data")
-					.setDataType(AttributeType.XREF).setRefEntity(entityTypeMetadata);
+			setDescription("Settings for the Directory - Negotiator interaction.");
+			addAttribute(NEGOTIATOR_URL).setLabel("Negotiator endpoint url").setDefaultValue(NEGOTIATOR_URL_DEFAULT)
+					.setDescription("URL to post negotiator queries to.");
+			addAttribute(USERNAME).setLabel("Username")
+					.setDescription("Username to use in the basic authentication with the negotiator endbpoint.");
+			addAttribute(PASSWORD).setLabel("Password")
+					.setDescription("Password to use in the basic authentication with the negotiator endpoint.");
+			addAttribute(COLLECTION_ENTITY).setLabel("Collection entity")
+					.setDescription("Entity containing biobank collections.").setDataType(AttributeType.XREF)
+					.setRefEntity(entityTypeMetadata);
 		}
 	}
 
