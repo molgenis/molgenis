@@ -35,13 +35,14 @@ function getComplexFilterLineHumanReadableFragment(attribute, constraint, humanR
 
 function getComparisonHumanReadable(comparison) {
     switch (comparison) {
-        case '==':
         case '=q=':
-            return ' is equal to '
+            return ' contains '
+        case '==':
+            return ' equals '
         case '=ge=':
-            return ' is greater or equal then '
+            return ' is greater than or equal to '
         case '=le=':
-            return ' is less or equal then '
+            return ' is less than or equal to '
     }
 }
 
