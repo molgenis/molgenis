@@ -18,6 +18,8 @@ $.when($,
         self.getIdentifierAttribute = getIdentifierAttribute;
         self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
+        self.getRSQL = getRSQL;
+        self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
         var selectedEntityMetaData = null;
@@ -50,6 +52,20 @@ $.when($,
         };
 
         var state;
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getnToken() {
+            return state.nToken;
+        }
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getRSQL() {
+            return state.filter;
+        }
 
         /**
          * @memberOf molgenis.dataexplorer
@@ -520,7 +536,6 @@ $.when($,
 
             $(document).on('updateAttributeFilters', function (e, data) {
                 var rules = []
-
                 for (var i = 0; i < Object.keys(data.filters).length; i++) {
                     var key = Object.keys(data.filters)[i]
                     var filter = data.filters[key]

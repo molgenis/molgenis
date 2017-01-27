@@ -2,40 +2,25 @@
  * Transforms map to RSQL
  */
 export function transformToRSQL(constraint) {
-    let rsql = ''
-    Object.keys(constraint).map(o => {
-        const constraintBySelector = constraint[o]
-        rsql += getRsqlFromConstraint(constraintBySelector) + ';'
-    })
-
-    // Remove trailing 'AND' character
-    return rsql.replace(/;+$/, '')
+    return Object.keys(constraint)
+        .map(k => constraint[k])
+        .map(getRsqlFromConstraint)
+        .join(';');
 }
 
 function getRsqlFromConstraint(constraint) {
-    if (constraint.operator) {
-        return getRsqlFromComplexConstraint(constraint, '')
-    }
-    else return getRsqlFromSimpleConstraint(constraint)
+    return constraint.operator ? getRsqlFromComplexConstraint(constraint)
+        : getRsqlFromSimpleConstraint(constraint)
 }
 
 function getRsqlFromSimpleConstraint(constraint) {
     return constraint.selector + constraint.comparison + constraint.arguments
 }
 
-function getRsqlFromComplexConstraint(constraint, rsql) {
+function getRsqlFromComplexConstraint(constraint) {
     const operator = constraint.operator === 'OR' ? ',' : ';'
-    const rsqlParts = []
-
-    constraint.operands.map(operand => {
-        if (!operand.operator) {
-            rsqlParts.push(getRsqlFromSimpleConstraint(operand))
-        } else {
-            rsqlParts.push(getRsqlFromComplexConstraint(operand, rsql))
-        }
-    })
-    rsql += '(' + rsqlParts.join(operator) + ')'
-    return rsql
+    const rsqlParts = constraint.operands.map(getRsqlFromConstraint)
+    return '(' + rsqlParts.join(operator) + ')'
 }
 
 /**
