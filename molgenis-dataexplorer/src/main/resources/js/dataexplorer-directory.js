@@ -10,7 +10,7 @@
      */
     function sendNegotiatorRequest() {
         var entityName = molgenis.dataexplorer.getSelectedEntityMeta().name
-        var rsql = molgenis.createRsqlQuery(molgenis.dataexplorer.getFilterRules())
+        var rsql = molgenis.dataexplorer.getRSQL()
         var uri = '/api/v2/' + entityName + '?q=' + rsql
 
         var collections = []

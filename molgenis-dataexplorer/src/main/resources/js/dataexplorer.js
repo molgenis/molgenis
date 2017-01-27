@@ -18,7 +18,7 @@ $.when($,
         self.getIdentifierAttribute = getIdentifierAttribute;
         self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
-        self.getFilterRules = getFilterRules;
+        self.getRSQL = getRSQL;
         self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
@@ -28,7 +28,6 @@ $.when($,
         var selectedAttributesTree = {};
         var searchQuery = null;
         var modules = [];
-        var filterRules = [];
         var filter = undefined;
 
         var posAttribute;
@@ -64,8 +63,8 @@ $.when($,
         /**
          * @memberOf molgenis.dataexplorer
          */
-        function getFilterRules() {
-            return filterRules;
+        function getRSQL() {
+            return state.filter;
         }
 
         /**
@@ -569,7 +568,6 @@ $.when($,
                 if (rules.length > 0) {
                     var queryRuleRSQL = molgenis.createRsqlQuery(rules)
                     state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
-                    filterRules = rules
                     pushState()
                 }
 
