@@ -107,7 +107,7 @@ textObj.textContent = "..."; //can't place at all
     </#list>
 </#macro>
 
-<#macro entityName entityType>${entityType.name?replace("-", "_")?replace(" ", "_")?js_string}</#macro>
+<#macro entityName entityType>${entityType.fullyQualifiedName?replace("-", "_")?replace(" ", "_")?js_string}</#macro>
 
 <#macro listClasses package classes=[]>
     <#list package.entityTypes as entityType>
