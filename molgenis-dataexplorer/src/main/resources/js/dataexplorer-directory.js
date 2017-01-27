@@ -34,7 +34,7 @@
                 molgenis.createAlert([{message: 'Please make sure your filters result in at least 1 row'}], 'warning');
             } else {
                 // Remove the nToken from the URL to prevent duplication on the negotiator side
-                // When a query is edited more then once
+                // when a query is edited more than once
                 var url = window.location.href.replace(/&nToken=\w{32}/, '')
 
                 var request = {
@@ -47,7 +47,7 @@
                 $.ajax({
                     method: 'POST',
                     dataType: 'json',
-                    url: '/directory/export',
+                    url: '/plugin/directory/export',
                     data: JSON.stringify(request),
                     contentType: 'application/json',
                     success: function (response) {
@@ -60,7 +60,6 @@
 
     $(function () {
         $('#directory-export-button').on('click', function () {
-            console.log('test')
             bootbox.confirm({
                 title: 'Send request to the BBMRI Negotiator?',
                 message: "Your current selection of biobanks along with your filtering criteria will be sent to the BBMRI Negotiator. Are you sure?",

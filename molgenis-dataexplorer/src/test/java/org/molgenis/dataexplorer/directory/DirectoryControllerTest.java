@@ -4,20 +4,26 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.controller.DirectoryController;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URI;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 public class DirectoryControllerTest
 {
@@ -26,6 +32,10 @@ public class DirectoryControllerTest
 	private DirectorySettings directorySettings;
 	@Mock
 	private RestTemplate restTemplate;
+	@Mock
+	private MolgenisPermissionService permissions;
+	@Mock
+	private EntityType entityType;
 
 	@Captor
 	private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
@@ -33,8 +43,14 @@ public class DirectoryControllerTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		MockitoAnnotations.initMocks(this);
-		controller = new DirectoryController(directorySettings, restTemplate);
+		initMocks(this);
+	}
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		reset(directorySettings, restTemplate, permissions, entityType);
+		controller = new DirectoryController(directorySettings, restTemplate, permissions);
 	}
 
 	@Test
@@ -58,6 +74,43 @@ public class DirectoryControllerTest
 		headers.set("Authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
 		HttpEntity<NegotiatorQuery> posted = new HttpEntity<>(query, headers);
 		assertEquals(queryCaptor.getValue(), posted);
+	}
+
+	@Test
+	public void testShowButtonNoPermissionsOnPlugin()
+	{
+		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
+		
+		assertFalse(controller.showDirectoryButton("blah"));
+	}
+
+	@Test
+	public void testShowButtonPermissionsOnPluginButNoEntity()
+	{
+		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(true);
+		when(directorySettings.getCollectionEntityType()).thenReturn(null);
+
+		assertFalse(controller.showDirectoryButton("blah"));
+	}
+
+	@Test
+	public void testShowButtonPermissionsOnPluginButWrongEntity()
+	{
+		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
+		when(directorySettings.getCollectionEntityType()).thenReturn(entityType);
+		when(entityType.getName()).thenReturn("Other");
+
+		assertFalse(controller.showDirectoryButton("blah"));
+	}
+
+	@Test
+	public void testShowButtonPermissionsOnPluginEntityNameMatches()
+	{
+		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
+		when(directorySettings.getCollectionEntityType()).thenReturn(entityType);
+		when(entityType.getName()).thenReturn("blah");
+
+		assertFalse(controller.showDirectoryButton("blah"));
 	}
 
 }

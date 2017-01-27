@@ -1,7 +1,12 @@
 package org.molgenis.dataexplorer.controller;
 
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.directory.NegotiatorQuery;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,19 +28,36 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class DirectoryController
+public class DirectoryController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DirectoryController.class);
-	public static final String URI = "/directory";
+	public static final String ID = "directory";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final DirectorySettings settings;
 	private final RestTemplate restTemplate;
+	private final MolgenisPermissionService permissions;
 
 	@Autowired
-	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate)
+	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate,
+			MolgenisPermissionService permissions)
 	{
+		super(URI);
 		this.settings = requireNonNull(settings);
 		this.restTemplate = requireNonNull(restTemplate);
+		this.permissions = requireNonNull(permissions);
+	}
+
+	@RunAsSystem
+	public boolean showDirectoryButton(String selectedEntityName)
+	{
+		if (!permissions.hasPermissionOnPlugin(ID, Permission.READ))
+		{
+			return false;
+		}
+		final EntityType collectionEntityType = settings.getCollectionEntityType();
+		//TODO: change to getFullyQualifiedName once identifier PR is accepted
+		return collectionEntityType != null && collectionEntityType.getName().equals(selectedEntityName);
 	}
 
 	@RequestMapping(value = "/export", method = POST)
@@ -68,9 +90,9 @@ public class DirectoryController
 	}
 
 	/**
-	 * Generate base64 authentication based on settings
+	 * Generate base64 authentication based on username and password.
 	 *
-	 * @return String
+	 * @return Authentication header value.
 	 */
 	private static String generateBase64Authentication(String username, String password)
 	{

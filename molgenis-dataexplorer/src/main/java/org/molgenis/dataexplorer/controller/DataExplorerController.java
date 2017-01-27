@@ -11,7 +11,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -78,7 +77,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private GenomicDataSettings genomicDataSettings;
 
 	@Autowired
-	private DirectorySettings directorySettings;
+	private DirectoryController directoryController;
 
 	@Autowired
 	private DataService dataService;
@@ -147,9 +146,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
-		// Directory specific check if the configured collection entity equals to the currently selected entity
-		model.addAttribute("showDirectoryButton", showDirectoryButton(selectedEntityName));
-
 		return "view-dataexplorer";
 	}
 
@@ -161,7 +157,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-			model.addAttribute("showDirectoryButton", showDirectoryButton(entityName));
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
@@ -461,10 +457,4 @@ public class DataExplorerController extends MolgenisPluginController
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
-	private boolean showDirectoryButton(String selectedEntityName)
-	{
-		final EntityType collectionEntityType = directorySettings.getCollectionEntityType();
-		//TODO: change to getFullyQualifiedName once identifier PR is accepted
-		return collectionEntityType != null && collectionEntityType.getName().equals(selectedEntityName);
-	}
 }
