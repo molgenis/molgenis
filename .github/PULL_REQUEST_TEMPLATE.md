@@ -1,9 +1,7 @@
 #### Checklist
-- [ ] Functionality meets specifications
-- [ ] Functionality working
+- [ ] Functionality works & meets specifications
 - [ ] Code reviewed
-- [ ] Code tested
+- [ ] Code unit/integration/system tested
 - [ ] User documentation updated
 - [ ] Test plan template updated
 - [ ] Clean commits
-- [ ] Build passes ('All checks have passed' in pull request)
