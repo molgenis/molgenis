@@ -11,26 +11,23 @@ import {transformer, parser} from "../rsql";
 export function getHumanReadable(rsql) {
     const groupBySelectorConstraint = transformer.groupBySelector(parser.parse(rsql))
     return groupBySelectorConstraint && Object.keys(groupBySelectorConstraint)
-            .map(attribute => getHumanReadableFragment(attribute, groupBySelectorConstraint[attribute]) + '\n')
-            .join('')
+            .map(attributeName => getHumanReadableFragment(groupBySelectorConstraint[attributeName]))
+            .join('\n')
 }
 
-function getHumanReadableFragment(attribute, constraint) {
-    return constraint.operator ? getComplexFilterLineHumanReadableFragment(attribute, constraint, '')
-        : getSimpleFilterLineHumanReadableFragment(attribute, constraint.comparison, constraint.arguments)
+function getHumanReadableFragment(constraint) {
+    return constraint.operator ? getComplexFilterLineHumanReadableFragment(constraint)
+        : getSimpleFilterLineHumanReadableFragment(constraint)
 }
 
-function getSimpleFilterLineHumanReadableFragment(attribute, comparison, argument) {
-    return attribute + getComparisonHumanReadable(comparison) + argument
+function getSimpleFilterLineHumanReadableFragment(constraint) {
+    return constraint.selector + getComparisonHumanReadable(constraint.comparison) + constraint.arguments
 }
 
-function getComplexFilterLineHumanReadableFragment(attribute, constraint, humanReadableString) {
+function getComplexFilterLineHumanReadableFragment(constraint) {
     const operator = getOperatorHumanReadable(constraint.operator)
-    const humanReadableParts = []
-    constraint.operands.map(operand => operand.operator ? humanReadableParts.push(getComplexFilterLineHumanReadableFragment(attribute, operand, humanReadableString))
-        : humanReadableParts.push(getSimpleFilterLineHumanReadableFragment(attribute, operand.comparison, operand.arguments)))
-    humanReadableString += humanReadableParts.join(operator)
-    return humanReadableString
+    const humanReadableParts = constraint.operands.map(getHumanReadableFragment)
+    return humanReadableParts.join(operator)
 }
 
 function getComparisonHumanReadable(comparison) {
