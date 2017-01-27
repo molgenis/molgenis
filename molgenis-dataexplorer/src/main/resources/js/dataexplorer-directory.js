@@ -30,27 +30,31 @@
                 })
             })
 
-            // Remove the nToken from the URL to prevent duplication on the negotiator side
-            // When a query is edited more then once
-            var url = window.location.href.replace(/&nToken=\w{32}/, '')
+            if (collections.length === 0) {
+                molgenis.createAlert([{message: 'Please make sure your filters result in at least 1 row'}], 'warning');
+            } else {
+                // Remove the nToken from the URL to prevent duplication on the negotiator side
+                // When a query is edited more then once
+                var url = window.location.href.replace(/&nToken=\w{32}/, '')
 
-            var request = {
-                URL: url,
-                collections: collections,
-                humanReadable: molgenis.rsql.getHumanReadable(rsql),
-                nToken: molgenis.dataexplorer.getnToken()
-            }
-
-            $.ajax({
-                method: 'POST',
-                dataType: 'json',
-                url: '/directory/export',
-                data: JSON.stringify(request),
-                contentType: 'application/json',
-                success: function (response) {
-                    window.location.href = response
+                var request = {
+                    URL: url,
+                    collections: collections,
+                    humanReadable: molgenis.rsql.getHumanReadable(rsql),
+                    nToken: molgenis.dataexplorer.getnToken()
                 }
-            })
+
+                $.ajax({
+                    method: 'POST',
+                    dataType: 'json',
+                    url: '/directory/export',
+                    data: JSON.stringify(request),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        window.location.href = response
+                    }
+                })
+            }
         })
     }
 
