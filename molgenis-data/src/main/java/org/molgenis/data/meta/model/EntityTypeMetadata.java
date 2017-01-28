@@ -35,6 +35,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String ATTRIBUTES = "attributes";
 	public static final String IS_ABSTRACT = "isAbstract";
 	public static final String EXTENDS = "extends";
+	public static final String EXTENDED_BY = "extendedBy";
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
 
@@ -64,7 +65,10 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
 				.setReadOnly(true).setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
-		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
+		Attribute extendsAttr = addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true)
+				.setLabel("Extends");
+		addAttribute(EXTENDED_BY).setDataType(ONE_TO_MANY).setMappedBy(extendsAttr).setRefEntity(this).setReadOnly(true)
+				.setLabel("Extended by");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
 				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
