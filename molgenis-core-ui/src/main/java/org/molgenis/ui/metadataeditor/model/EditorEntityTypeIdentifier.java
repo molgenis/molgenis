@@ -9,10 +9,10 @@ import javax.annotation.Nullable;
 @AutoGson(autoValueClass = AutoValue_EditorEntityTypeIdentifier.class)
 public abstract class EditorEntityTypeIdentifier
 {
-	abstract String getId();
+	public abstract String getId();
 
 	@Nullable
-	abstract String getLabel();
+	public abstract String getLabel();
 
 	public static EditorEntityTypeIdentifier create(String id, @Nullable String label)
 	{

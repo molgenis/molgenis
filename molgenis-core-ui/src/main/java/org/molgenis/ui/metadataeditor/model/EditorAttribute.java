@@ -1,86 +1,86 @@
 package org.molgenis.ui.metadataeditor.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorAttribute.class)
 public abstract class EditorAttribute
 {
-	abstract String getId();
+	public abstract String getId();
 
-	abstract String getName();
+	public abstract String getName();
 
-	abstract String getType();
-
-	@Nullable
-	abstract EditorAttributeIdentifier getParent();
+	public abstract String getType();
 
 	@Nullable
-	abstract EditorEntityTypeIdentifier getRefEntityType();
+	public abstract EditorAttributeIdentifier getParent();
 
 	@Nullable
-	abstract EditorAttributeIdentifier getMappedByEntityType();
+	public abstract EditorEntityTypeIdentifier getRefEntityType();
 
 	@Nullable
-	abstract EditorSort getOrderBy();
+	public abstract EditorAttributeIdentifier getMappedByAttribute();
 
 	@Nullable
-	abstract String getExpression();
-
-	abstract boolean isNullable();
-
-	abstract boolean isAuto();
-
-	abstract boolean isVisible();
+	public abstract EditorSort getOrderBy();
 
 	@Nullable
-	abstract String getLabel();
+	public abstract String getExpression();
 
-	abstract ImmutableMap<String, String> getLabelI18n();
+	public abstract boolean isNullable();
 
-	@Nullable
-	abstract String getDescription();
+	public abstract boolean isAuto();
 
-	abstract ImmutableMap<String, String> getDescriptionI18n();
-
-	abstract boolean isAggregatable();
+	public abstract boolean isVisible();
 
 	@Nullable
-	abstract ImmutableList<String> getEnumOptions();
+	public abstract String getLabel();
+
+	public abstract Map<String, String> getLabelI18n();
 
 	@Nullable
-	abstract Long getRangeMin();
+	public abstract String getDescription();
+
+	public abstract Map<String, String> getDescriptionI18n();
+
+	public abstract boolean isAggregatable();
 
 	@Nullable
-	abstract Long getRangeMax();
-
-	abstract boolean isReadonly();
-
-	abstract boolean isUnique();
-
-	abstract ImmutableList<EditorTag> getTags();
+	public abstract List<String> getEnumOptions();
 
 	@Nullable
-	abstract String getVisibleExpression();
+	public abstract Long getRangeMin();
 
 	@Nullable
-	abstract String getValidationExpression();
+	public abstract Long getRangeMax();
+
+	public abstract boolean isReadonly();
+
+	public abstract boolean isUnique();
+
+	public abstract List<EditorTagIdentifier> getTags();
 
 	@Nullable
-	abstract String getDefaultValue();
+	public abstract String getVisibleExpression();
+
+	@Nullable
+	public abstract String getValidationExpression();
+
+	@Nullable
+	public abstract String getDefaultValue();
 
 	public static EditorAttribute create(String id, String name, String type, EditorAttributeIdentifier parent,
 			EditorEntityTypeIdentifier refEntityType, EditorAttributeIdentifier mappedByEntityType, EditorSort orderBy,
 			String expression, boolean nullable, boolean auto, boolean visible, @Nullable String label,
-			ImmutableMap<String, String> i18nLabel, @Nullable String description,
-			ImmutableMap<String, String> i18nDescription, boolean aggregatable, ImmutableList<String> enumOptions,
-			Long rangeMin, Long rangeMax, boolean readonly, boolean unique, ImmutableList<EditorTag> tags,
-			String visibleExpression, String validationExpression, String defaultValue)
+			Map<String, String> i18nLabel, @Nullable String description, Map<String, String> i18nDescription,
+			boolean aggregatable, @Nullable List<String> enumOptions, @Nullable Long rangeMin, @Nullable Long rangeMax,
+			boolean readonly, boolean unique, List<EditorTagIdentifier> tags, @Nullable String visibleExpression,
+			@Nullable String validationExpression, @Nullable String defaultValue)
 	{
 		return new AutoValue_EditorAttribute(id, name, type, parent, refEntityType, mappedByEntityType, orderBy,
 				expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription, aggregatable,

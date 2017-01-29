@@ -6,6 +6,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.metadataeditor.mapper.EntityTypeMapper;
 import org.molgenis.ui.metadataeditor.model.EditorEntityType;
 import org.molgenis.ui.metadataeditor.model.EditorEntityTypeResponse;
 import org.molgenis.util.ErrorMessageResponse;
@@ -63,7 +64,7 @@ public class MetadataEditorController extends MolgenisPluginController
 		{
 			throw new UnknownEntityException(String.format("Unknown entity [%s]", entityTypeId));
 		}
-		EditorEntityType editorEntityType = EntityTypeMapper.toEditorEntityType(entityType);
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType);
 		ImmutableList<String> languageCodes = ImmutableList.copyOf(getLanguageCodes().iterator());
 		return EditorEntityTypeResponse.create(editorEntityType, languageCodes);
 	}

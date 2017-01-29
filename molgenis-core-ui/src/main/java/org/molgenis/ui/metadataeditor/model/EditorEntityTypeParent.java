@@ -1,27 +1,27 @@
 package org.molgenis.ui.metadataeditor.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableList;
 import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorEntityTypeParent.class)
 public abstract class EditorEntityTypeParent
 {
-	abstract String getId();
+	public abstract String getId();
 
 	@Nullable
-	abstract String getLabel();
+	public abstract String getLabel();
 
-	abstract ImmutableList<EditorAttributeIdentifier> getAttributes();
+	public abstract List<EditorAttributeIdentifier> getAttributes();
 
 	@Nullable
-	abstract EditorEntityTypeParent getParent();
+	public abstract EditorEntityTypeParent getParent();
 
 	public static EditorEntityTypeParent create(String id, @Nullable String label,
-			ImmutableList<EditorAttributeIdentifier> attributes, @Nullable EditorEntityTypeParent parent)
+			List<EditorAttributeIdentifier> attributes, @Nullable EditorEntityTypeParent parent)
 	{
 		return new AutoValue_EditorEntityTypeParent(id, label, attributes, parent);
 	}
