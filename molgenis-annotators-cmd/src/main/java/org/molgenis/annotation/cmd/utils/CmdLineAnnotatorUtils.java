@@ -149,7 +149,9 @@ public class CmdLineAnnotatorUtils
 		List<Attribute> outputMetaData = newArrayList();
 		if (annotator instanceof EffectCreatingAnnotator || annotator instanceof EffectBasedAnnotator)
 		{
-			EntityType effectRefEntity = entityTypeFactory.create().setFullyQualifiedName(annotator.getSimpleName() + "_EFFECTS");
+			// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+			EntityType effectRefEntity = entityTypeFactory.create()
+					.setId(annotator.getSimpleName() + "_EFFECTS");
 			for (Attribute outputAttribute : annotator.getOutputAttributes())
 			{
 				effectRefEntity.addAttribute(outputAttribute);

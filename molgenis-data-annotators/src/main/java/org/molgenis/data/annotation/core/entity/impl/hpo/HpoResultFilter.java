@@ -67,7 +67,8 @@ public class HpoResultFilter implements ResultFilter
 			terms.append(hpoTerm);
 		}
 
-		EntityType emd = entityTypeFactory.create().setFullyQualifiedName(HPOAnnotator.NAME);
+		// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+		EntityType emd = entityTypeFactory.create().setId(HPOAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(hpoAnnotator.getIdsAttr(), hpoAnnotator.getTermsAttr()));
 		Entity aggregated = new DynamicEntity(emd);
 		aggregated.set(HPO_IDS, ids.toString());

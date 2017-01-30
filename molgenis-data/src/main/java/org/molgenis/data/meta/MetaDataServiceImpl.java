@@ -178,9 +178,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getFullyQualifiedName));
+		dataService
+				.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getFullyQualifiedName));
 
-		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(joining(",")));
+		LOG.info("Removed entities [{}]",
+				entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(joining(",")));
 	}
 
 	@Transactional
@@ -245,11 +247,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	 */
 	private static boolean hasNewMappedByAttrs(EntityType entityType, EntityType existingEntityType)
 	{
-		Set<String> mappedByAttrs = entityType.getOwnMappedByAttributes().map(Attribute::getName)
-				.collect(toSet());
+		Set<String> mappedByAttrs = entityType.getOwnMappedByAttributes().map(Attribute::getName).collect(toSet());
 
-		Set<String> existingMappedByAttrs = existingEntityType.getOwnMappedByAttributes()
-				.map(Attribute::getName).collect(toSet());
+		Set<String> existingMappedByAttrs = existingEntityType.getOwnMappedByAttributes().map(Attribute::getName)
+				.collect(toSet());
 		return !mappedByAttrs.equals(existingMappedByAttrs);
 	}
 
@@ -265,8 +266,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getFullyQualifiedName), getEntityTypeFetch(),
-						EntityType.class)
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getFullyQualifiedName),
+						getEntityTypeFetch(), EntityType.class)
 				.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
@@ -377,8 +378,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return dataService
-					.findOneById(ENTITY_TYPE_META_DATA, fullyQualifiedEntityName, getEntityTypeFetch(), EntityType.class);
+			return dataService.findOneById(ENTITY_TYPE_META_DATA, fullyQualifiedEntityName, getEntityTypeFetch(),
+					EntityType.class);
 		}
 	}
 
@@ -457,8 +458,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Stream<Repository<Entity>> getRepositories()
 	{
-		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(IS_ABSTRACT, false).fetch(getEntityTypeFetch())
-				.findAll().map(this::getRepository);
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(IS_ABSTRACT, false)
+				.fetch(getEntityTypeFetch()).findAll().map(this::getRepository);
 	}
 
 	/**
@@ -472,8 +473,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		// analyze both compound and atomic attributes owned by the entity
 		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(Attribute::getName, Function.identity()));
-		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(),
-				false).collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Function.identity()));
 
 		// determine attributes to add, update and delete
 		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
@@ -526,8 +527,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (dataService.hasRepository(entityName))
 		{
 			EntityType oldEntityType = dataService.getEntityType(entityName);
-			List<Attribute> oldAtomicAttributes = stream(oldEntityType.getAtomicAttributes().spliterator(),
-					false).collect(toList());
+			List<Attribute> oldAtomicAttributes = stream(oldEntityType.getAtomicAttributes().spliterator(), false)
+					.collect(toList());
 
 			LinkedHashMap<String, Attribute> newAtomicAttributesMap = newLinkedHashMap();
 			stream(newEntityType.getAtomicAttributes().spliterator(), false)
@@ -739,21 +740,15 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setFullyQualifiedName(String fullName)
-		{
-			return entityType.setFullyQualifiedName(fullName);
-		}
-
-		@Override
 		public String getName()
 		{
 			return entityType.getName();
 		}
 
 		@Override
-		public EntityType setName(String simpleName)
+		public EntityType setName(String name)
 		{
-			return entityType.setName(simpleName);
+			return entityType.setName(name);
 		}
 
 		@Override

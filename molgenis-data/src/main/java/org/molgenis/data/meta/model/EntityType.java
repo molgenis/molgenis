@@ -72,8 +72,7 @@ public class EntityType extends StaticEntity
 	{
 		super(entityType);
 		setDefaultValues();
-		//FIXME: This is incorrect, the ID value is the fully qualified name, not the simple name!
-		setName(entityId);
+		setId(entityId);
 	}
 
 	public enum AttributeCopyMode
@@ -154,6 +153,17 @@ public class EntityType extends StaticEntity
 		return stream(getEntities(ATTRIBUTES, Attribute.class).spliterator(), false).map(Attribute::getName)::iterator;
 	}
 
+	public String getId()
+	{
+		return getString(ID);
+	}
+
+	public EntityType setId(String id)
+	{
+		set(ID, id);
+		return this;
+	}
+
 	/**
 	 * Gets the fully qualified entity name.
 	 *
@@ -161,28 +171,7 @@ public class EntityType extends StaticEntity
 	 */
 	public String getFullyQualifiedName()
 	{
-		return getString(FULL_NAME);
-	}
-
-	/**
-	 * Sets the fully qualified entity name.
-	 * In case this entity simple name is null, assigns the fully qualified entity name to the simple name.
-	 *
-	 * @param fullName fully qualified entity name.
-	 * @return this entity meta data for chaining
-	 */
-	public EntityType setFullyQualifiedName(String fullName)
-	{
-		set(FULL_NAME, fullName);
-		if (getName() == null)
-		{
-			set(SIMPLE_NAME, fullName);
-		}
-		if (getLabel() == null)
-		{
-			set(LABEL, fullName);
-		}
-		return this;
+		return getPackage() == null ? getName() : getPackage().getFullyQualifiedName() + PACKAGE_SEPARATOR + getName();
 	}
 
 	/**
@@ -199,17 +188,16 @@ public class EntityType extends StaticEntity
 	 * Sets the entity name.
 	 * In case this entity label is null, assigns the entity name to the label.
 	 *
-	 * @param simpleName entity name.
+	 * @param name entity name.
 	 * @return this entity meta data for chaining
 	 */
-	public EntityType setName(String simpleName)
+	public EntityType setName(String name)
 	{
-		set(SIMPLE_NAME, simpleName);
-		updateFullName();
+		set(SIMPLE_NAME, name);
 
 		if (getLabel() == null)
 		{
-			setLabel(simpleName);
+			setLabel(name);
 		}
 		return this;
 	}
@@ -313,7 +301,6 @@ public class EntityType extends StaticEntity
 	public EntityType setPackage(Package package_)
 	{
 		set(PACKAGE, package_);
-		updateFullName();
 		return this;
 	}
 
@@ -800,25 +787,6 @@ public class EntityType extends StaticEntity
 				break;
 			default:
 				break;
-		}
-	}
-
-	private void updateFullName()
-	{
-		String simpleName = getName();
-		if (simpleName != null)
-		{
-			String fullName;
-			Package package_ = getPackage();
-			if (package_ != null)
-			{
-				fullName = package_.getFullyQualifiedName() + PACKAGE_SEPARATOR + simpleName;
-			}
-			else
-			{
-				fullName = simpleName;
-			}
-			set(FULL_NAME, fullName);
 		}
 	}
 
