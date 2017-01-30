@@ -15,6 +15,7 @@ import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -169,6 +170,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final AttributeValidator attributeValidator;
 	private final TagValidator tagValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final IdentifierLookupService identifierLookupService;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, EntityTypeDependencyResolver entityTypeDependencyResolver)
@@ -184,13 +186,14 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = null;
 		this.tagValidator = null;
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.identifierLookupService = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
 			I18nStringFactory i18nStringFactory, EntityTypeValidator entityTypeValidator,
 			AttributeValidator attributeValidator, TagValidator tagValidator,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
@@ -203,6 +206,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.tagValidator = requireNonNull(tagValidator);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.identifierLookupService = requireNonNull(identifierLookupService);
 	}
 
 	@Override
@@ -1204,7 +1208,9 @@ public class EmxMetaDataParser implements MetaDataParser
 		Package package_ = intermediateResults.getPackage(packageName);
 		if (package_ == null && dataService != null)
 		{
-			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageName, Package.class);
+			package_ = dataService
+					.findOneById(PackageMetadata.PACKAGE, identifierLookupService.getPackageId(packageName),
+							Package.class);
 		}
 		return package_;
 	}

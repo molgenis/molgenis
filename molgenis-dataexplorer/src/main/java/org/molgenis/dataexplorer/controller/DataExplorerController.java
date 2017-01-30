@@ -42,7 +42,7 @@ import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
@@ -114,8 +114,10 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		List<EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
-				.filter(entityType -> !entityType.isAbstract()).collect(toList());
+		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract())
+				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
+
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -280,7 +282,8 @@ public class DataExplorerController extends MolgenisPluginController
 		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
 		{
 			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
+			boolean canWrite = molgenisPermissionService
+					.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
 			if (canRead || canWrite)
 			{
 				genomeEntities.put(entityType.getFullyQualifiedName(), entityType.getLabel());
