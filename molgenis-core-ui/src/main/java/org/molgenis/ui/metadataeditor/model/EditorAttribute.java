@@ -13,8 +13,10 @@ public abstract class EditorAttribute
 {
 	public abstract String getId();
 
+	@Nullable
 	public abstract String getName();
 
+	@Nullable
 	public abstract String getType();
 
 	@Nullable
@@ -74,7 +76,8 @@ public abstract class EditorAttribute
 	@Nullable
 	public abstract String getDefaultValue();
 
-	public static EditorAttribute create(String id, String name, String type, EditorAttributeIdentifier parent,
+	public static EditorAttribute create(String id, @Nullable String name, @Nullable String type,
+			EditorAttributeIdentifier parent,
 			EditorEntityTypeIdentifier refEntityType, EditorAttributeIdentifier mappedByEntityType, EditorSort orderBy,
 			String expression, boolean nullable, boolean auto, boolean visible, @Nullable String label,
 			Map<String, String> i18nLabel, @Nullable String description, Map<String, String> i18nDescription,

@@ -13,6 +13,7 @@ public abstract class EditorEntityType
 {
 	public abstract String getId();
 
+	@Nullable
 	public abstract String getName();
 
 	@Nullable
@@ -49,7 +50,8 @@ public abstract class EditorEntityType
 
 	public abstract List<EditorAttributeIdentifier> getLookupAttributes();
 
-	public static EditorEntityType create(String id, String name, @Nullable String label, Map<String, String> i18nLabel,
+	public static EditorEntityType create(String id, @Nullable String name, @Nullable String label,
+			Map<String, String> i18nLabel,
 			@Nullable String description, Map<String, String> i18nDescription, boolean abstract_, String backend,
 			EditorPackageIdentifier package_,
 			@Nullable EditorEntityTypeParent entityTypeParent, List<EditorEntityTypeIdentifier> entityTypeChildren,

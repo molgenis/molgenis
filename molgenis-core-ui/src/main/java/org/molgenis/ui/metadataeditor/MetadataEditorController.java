@@ -6,7 +6,10 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.metadataeditor.mapper.AttributeMapper;
 import org.molgenis.ui.metadataeditor.mapper.EntityTypeMapper;
+import org.molgenis.ui.metadataeditor.model.EditorAttribute;
+import org.molgenis.ui.metadataeditor.model.EditorAttributeResponse;
 import org.molgenis.ui.metadataeditor.model.EditorEntityType;
 import org.molgenis.ui.metadataeditor.model.EditorEntityTypeResponse;
 import org.molgenis.util.ErrorMessageResponse;
@@ -37,13 +40,16 @@ public class MetadataEditorController extends MolgenisPluginController
 
 	private final MetaDataService metadataService;
 	private final EntityTypeMapper entityTypeMapper;
+	private final AttributeMapper attributeMapper;
 
 	@Autowired
-	public MetadataEditorController(MetaDataService metadataService, EntityTypeMapper entityTypeMapper)
+	public MetadataEditorController(MetaDataService metadataService, EntityTypeMapper entityTypeMapper,
+			AttributeMapper attributeMapper)
 	{
 		super(URI);
 		this.metadataService = requireNonNull(metadataService);
 		this.entityTypeMapper = requireNonNull(entityTypeMapper);
+		this.attributeMapper = requireNonNull(attributeMapper);
 	}
 
 	@RequestMapping(method = GET)
@@ -64,9 +70,14 @@ public class MetadataEditorController extends MolgenisPluginController
 		{
 			throw new UnknownEntityException(String.format("Unknown entity [%s]", entityTypeId));
 		}
-		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType);
-		ImmutableList<String> languageCodes = ImmutableList.copyOf(getLanguageCodes().iterator());
-		return EditorEntityTypeResponse.create(editorEntityType, languageCodes);
+		return createEntityTypeReponse(entityType);
+	}
+
+	@RequestMapping(value = "/entityType/create", method = GET)
+	@ResponseBody
+	public EditorEntityTypeResponse createEntityType()
+	{
+		return createEntityTypeReponse();
 	}
 
 	@RequestMapping(value = "/entityType", method = POST)
@@ -74,7 +85,14 @@ public class MetadataEditorController extends MolgenisPluginController
 	public void updateEntityType(@RequestBody EditorEntityType editorEntityType)
 	{
 		EntityType entityType = entityTypeMapper.toEntityType(editorEntityType);
-		metadataService.updateEntityType(entityType);
+		metadataService.upsertEntityType(entityType);
+	}
+
+	@RequestMapping(value = "/attribute/create", method = GET)
+	@ResponseBody
+	public EditorAttributeResponse createAttribute()
+	{
+		return createAttributeResponse();
 	}
 
 	@ExceptionHandler(UnknownEntityException.class)
@@ -85,5 +103,35 @@ public class MetadataEditorController extends MolgenisPluginController
 		LOG.debug("", e);
 		return new ErrorMessageResponse(
 				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+	}
+
+	private EditorEntityTypeResponse createEntityTypeReponse()
+	{
+		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
+		return createEntityTypeReponse(editorEntityType);
+	}
+
+	private EditorEntityTypeResponse createEntityTypeReponse(EntityType entityType)
+	{
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType);
+		return createEntityTypeReponse(editorEntityType);
+	}
+
+	private EditorEntityTypeResponse createEntityTypeReponse(EditorEntityType editorEntityType)
+	{
+		ImmutableList<String> languageCodes = ImmutableList.copyOf(getLanguageCodes().iterator());
+		return EditorEntityTypeResponse.create(editorEntityType, languageCodes);
+	}
+
+	private EditorAttributeResponse createAttributeResponse()
+	{
+		EditorAttribute editorAttribute = attributeMapper.createEditorAttribute();
+		return createAttributeResponse(editorAttribute);
+	}
+
+	private EditorAttributeResponse createAttributeResponse(EditorAttribute editorAttribute)
+	{
+		ImmutableList<String> languageCodes = ImmutableList.copyOf(getLanguageCodes().iterator());
+		return EditorAttributeResponse.create(editorAttribute, languageCodes);
 	}
 }

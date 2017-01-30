@@ -35,10 +35,6 @@ class TagMapper
 
 	private Tag toTagReference(EditorTagIdentifier editorTagIdentifier)
 	{
-		if (editorTagIdentifier == null)
-		{
-			return null;
-		}
 		return new Tag(new LazyEntity(tagFactory.getEntityType(), dataService, editorTagIdentifier.getId()));
 	}
 
