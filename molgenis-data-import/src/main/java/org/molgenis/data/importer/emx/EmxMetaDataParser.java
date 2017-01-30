@@ -231,7 +231,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (dataService != null)
 			{
 				List<EntityType> metadataList = new ArrayList<>();
-				for (String emxName : source.getEntityNames())
+				for (String emxName : source.getEntityIds())
 				{
 					String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
 					if (repoName == null) repoName = emxName;
@@ -274,7 +274,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		// FIXME: So if there is no attribute sheet, we assume it is already in the dataservice?
 		Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
 		if (attributeSourceRepository != null) return getEntityTypeFromSource(source).getEntityMap();
-		else return getEntityTypeFromDataService(dataService, source.getEntityNames());
+		else return getEntityTypeFromDataService(dataService, source.getEntityIds());
 	}
 
 	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
@@ -1317,7 +1317,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private MyEntitiesValidationReport generateEntityValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
 	{
-		for (String sheet : source.getEntityNames())
+		for (String sheet : source.getEntityIds())
 		{
 			if (EMX_PACKAGES.equals(sheet))
 			{

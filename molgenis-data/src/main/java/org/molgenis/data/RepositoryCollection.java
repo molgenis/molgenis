@@ -42,16 +42,16 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	Repository<Entity> createRepository(EntityType entityType);
 
 	/**
-	 * Get names of all the entities in this source
+	 * Get ids of all the entities in this source
 	 */
-	Iterable<String> getEntityNames();
+	Iterable<String> getEntityIds();
 
 	/**
-	 * Get a repository by entity name
+	 * Get a repository by entity id
 	 *
 	 * @throws UnknownEntityException if no repository exists for the given entity name
 	 */
-	Repository<Entity> getRepository(String name);
+	Repository<Entity> getRepository(String id);
 
 	/**
 	 * Get a repository for the given entity meta data
@@ -62,9 +62,9 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	Repository<Entity> getRepository(EntityType entityType);
 
 	/**
-	 * Check if a repository exists by entity name
+	 * Check if a repository exists by entity id
 	 */
-	boolean hasRepository(String name);
+	boolean hasRepository(String id);
 
 	boolean hasRepository(EntityType entityType);
 

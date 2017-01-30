@@ -131,7 +131,7 @@ public class VcfImporterServiceTest
 			}
 		});
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		String defaultPackage = "package";
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD, defaultPackage);
@@ -235,7 +235,7 @@ public class VcfImporterServiceTest
 			}
 		});
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		String defaultPackage = "package";
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD, defaultPackage);
@@ -263,7 +263,7 @@ public class VcfImporterServiceTest
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		when(dataService.hasRepository(entityName0)).thenReturn(true);
 		String defaultPackage = "package";
@@ -321,7 +321,7 @@ public class VcfImporterServiceTest
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertTrue(entitiesValidationReport.valid());
@@ -362,7 +362,7 @@ public class VcfImporterServiceTest
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		when(dataService.hasRepository(entityName0)).thenReturn(true);
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
@@ -422,7 +422,7 @@ public class VcfImporterServiceTest
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertTrue(entitiesValidationReport.valid());
@@ -486,7 +486,7 @@ public class VcfImporterServiceTest
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
-		when(source.getEntityNames()).thenReturn(entityNames);
+		when(source.getEntityIds()).thenReturn(entityNames);
 		when(source.getRepository(entityName0)).thenReturn(repo0);
 		when(dataService.hasRepository(entityName0)).thenReturn(true);
 		when(dataService.hasRepository(sampleEntityName0)).thenReturn(true);

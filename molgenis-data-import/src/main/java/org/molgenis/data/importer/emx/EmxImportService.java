@@ -11,7 +11,6 @@ import org.molgenis.data.support.GenericImporterExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -49,7 +48,7 @@ public class EmxImportService implements ImportService
 		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
 		if (GenericImporterExtensions.getEMX().contains(fileNameExtension.toLowerCase()))
 		{
-			for (String entityName : source.getEntityNames())
+			for (String entityName : source.getEntityIds())
 			{
 				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
 				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;

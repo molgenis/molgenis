@@ -6,11 +6,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeTraverser;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.ontology.core.meta.*;
@@ -306,8 +306,9 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
+		// FIXME 4714 decide how this should work with ids
 		return repositories.keySet();
 	}
 
@@ -337,7 +338,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> entityNames = getEntityNames().iterator();
+		Iterator<String> entityNames = getEntityIds().iterator();
 		while (entityNames.hasNext())
 		{
 			if (entityNames.next().equals(name)) return true;
@@ -348,6 +349,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
+		// FIXME 4714 decide how this should work with ids
 		return hasRepository(entityType.getFullyQualifiedName());
 	}
 }
