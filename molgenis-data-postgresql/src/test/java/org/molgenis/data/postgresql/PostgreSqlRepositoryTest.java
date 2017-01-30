@@ -96,8 +96,8 @@ public class PostgreSqlRepositoryTest
 
 		EntityType refEntityMeta = mock(EntityType.class);
 		String refEntityName = "RefEntity";
-		when(refEntityMeta.getName()).thenReturn("refEntityId");
-		when(refEntityMeta.getSimpleName()).thenReturn(refEntityName);
+		when(refEntityMeta.getFullyQualifiedName()).thenReturn("refEntityId");
+		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute(refIdAttrName)).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute(xrefAttrName)).thenReturn(xrefAttr);
@@ -118,8 +118,8 @@ public class PostgreSqlRepositoryTest
 
 		EntityType entityType = mock(EntityType.class);
 		String entityName = "Entity";
-		when(entityType.getName()).thenReturn("entityId");
-		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn("entityId");
+		when(entityType.getName()).thenReturn(entityName);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAttribute(idAttrName)).thenReturn(idAttr);
 		when(entityType.getAttribute(oneToManyAttrName)).thenReturn(oneToManyAttr);

@@ -145,7 +145,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getName().equals(TARGET_HOP_ENTITY);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(TARGET_HOP_ENTITY);
 			}
 		}))).thenReturn(hopRepo);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -153,7 +153,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getName().equals(SOURCE_GENE_ENTITY);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(SOURCE_GENE_ENTITY);
 			}
 		}))).thenReturn(geneRepo);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -161,7 +161,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getName().equals(SOURCE_EXON_ENTITY);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(SOURCE_EXON_ENTITY);
 			}
 		}))).thenReturn(exonRepo);
 
@@ -294,7 +294,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getName().equals(entityName);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(entityName);
 			}
 		}))).thenReturn(addEntityRepo);
 
@@ -349,7 +349,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getName().equals(entityName);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(entityName);
 			}
 		}))).thenReturn(updateEntityRepo);
 

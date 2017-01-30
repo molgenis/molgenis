@@ -23,7 +23,7 @@ public class PartialEntityTest
 	public void setUpBeforeMethod()
 	{
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		meta = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		meta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(meta.getIdAttribute()).thenReturn(idAttr);
 
 		originalEntity = mock(Entity.class);

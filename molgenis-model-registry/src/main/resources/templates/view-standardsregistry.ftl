@@ -52,7 +52,8 @@
 
 <script id="model-template" type="text/x-handlebars-template">
     <div class="well package" data-id="{{package.name}}">
-        <h3 style="margin-top: 0px;">{{#if package.label}}{{package.label}}{{else}}{{package.name}}{{/if}}</h3>
+        <h3 style="margin-top: 0px;">{{#if
+            package.label}}{{package.label}}{{else}}{{package.name}}{{/if}}</h3>
         <p>{{package.description}}</p>
         <p>
             {{#each tags}}
@@ -68,7 +69,8 @@
         {{/if}}
         <form class="form-inline">
             <div class="form-group">
-                <a class="btn btn-primary details-btn" href="?package={{package.name}}#" role="button">View Model
+                <a class="btn btn-primary details-btn" href="?package={{package.name}}#" role="button">View
+                    Model
                     Details</a>
             </div>
             <div class="form-group{{#unless entities.length}} hidden{{/unless}}">

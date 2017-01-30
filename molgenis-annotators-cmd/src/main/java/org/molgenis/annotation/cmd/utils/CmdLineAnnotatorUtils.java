@@ -149,7 +149,7 @@ public class CmdLineAnnotatorUtils
 		List<Attribute> outputMetaData = newArrayList();
 		if (annotator instanceof EffectCreatingAnnotator || annotator instanceof EffectBasedAnnotator)
 		{
-			EntityType effectRefEntity = entityTypeFactory.create().setName(annotator.getSimpleName() + "_EFFECTS");
+			EntityType effectRefEntity = entityTypeFactory.create().setFullyQualifiedName(annotator.getSimpleName() + "_EFFECTS");
 			for (Attribute outputAttribute : annotator.getOutputAttributes())
 			{
 				effectRefEntity.addAttribute(outputAttribute);

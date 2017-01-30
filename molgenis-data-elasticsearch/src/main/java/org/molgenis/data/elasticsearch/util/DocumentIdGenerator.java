@@ -40,7 +40,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 	public String generateId(EntityType entityType)
 	{
 		String idPart = generateHashcode(entityType.getIdValue().toString());
-		String namePart = truncateName(cleanName(entityType.getSimpleName()));
+		String namePart = truncateName(cleanName(entityType.getName()));
 		return namePart + SEPARATOR + idPart;
 	}
 

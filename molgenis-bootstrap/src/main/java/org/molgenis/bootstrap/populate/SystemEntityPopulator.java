@@ -60,6 +60,6 @@ public class SystemEntityPopulator
 
 	private void persist(EntityType entityType, Collection<Entity> entities)
 	{
-		dataService.add(entityType.getName(), entities.stream());
+		dataService.add(entityType.getFullyQualifiedName(), entities.stream());
 	}
 }

@@ -355,7 +355,7 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 			List<String> sourceNames = mappingTarget.getEntityMappings().stream()
-					.map(i -> i.getSourceEntityType().getName()).collect(Collectors.toList());
+					.map(i -> i.getSourceEntityType().getFullyQualifiedName()).collect(Collectors.toList());
 
 			EntityType targetEntityMeta = mappingTarget.getTarget();
 			for (Attribute attribute : targetEntityMeta.getAtomicAttributes())
@@ -544,7 +544,7 @@ public class MappingServiceController extends MolgenisPluginController
 		EntityType refEntityType = attributeMapping.getTargetAttribute().getRefEntity();
 		if (refEntityType != null)
 		{
-			Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getName()).iterator();
+			Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getFullyQualifiedName()).iterator();
 			model.addAttribute("categories", refEntities);
 		}
 
@@ -672,7 +672,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService
-					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getName());
+					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getFullyQualifiedName());
 
 			targetAttributeIdAttribute = dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -682,7 +682,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			targetAttributeEntities = dataService.findAll(dataService.getEntityType(target).getName());
+			targetAttributeEntities = dataService.findAll(dataService.getEntityType(target).getFullyQualifiedName());
 			targetAttributeIdAttribute = dataService.getEntityType(target).getIdAttribute().getName();
 			targetAttributeLabelAttribute = dataService.getEntityType(target).getLabelAttribute().getName();
 		}
@@ -708,7 +708,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService
-					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getName());
+					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getFullyQualifiedName());
 
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -718,7 +718,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			sourceAttributeEntities = dataService.findAll(dataService.getEntityType(source).getName());
+			sourceAttributeEntities = dataService.findAll(dataService.getEntityType(source).getFullyQualifiedName());
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getIdAttribute().getName();
 			sourceAttributeLabelAttribute = dataService.getEntityType(source).getLabelAttribute().getName();
 		}
@@ -873,7 +873,7 @@ public class MappingServiceController extends MolgenisPluginController
 	private List<EntityType> getWritableEntityTypes()
 	{
 		return getEntityTypes().stream().filter(emd -> !emd.isAbstract())
-				.filter(emd -> dataService.getCapabilities(emd.getName()).contains(RepositoryCapability.WRITABLE))
+				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName()).contains(RepositoryCapability.WRITABLE))
 				.collect(Collectors.toList());
 	}
 

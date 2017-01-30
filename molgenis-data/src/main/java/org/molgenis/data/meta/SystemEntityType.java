@@ -59,8 +59,8 @@ public abstract class SystemEntityType extends EntityType
 	public void bootstrap(EntityTypeMetadata entityTypeMetadata)
 	{
 		super.init(new BootstrapEntity(entityTypeMetadata));
-		setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
-		setSimpleName(entityName);
+		setFullyQualifiedName(systemPackageName + PACKAGE_SEPARATOR + entityName);
+		setName(entityName);
 		setDefaultValues();
 		init();
 	}
@@ -71,13 +71,13 @@ public abstract class SystemEntityType extends EntityType
 	protected abstract void init();
 
 	@Override
-	public String getName()
+	public String getFullyQualifiedName()
 	{
 		return systemPackageName + PACKAGE_SEPARATOR + entityName;
 	}
 
 	@Override
-	public String getSimpleName()
+	public String getName()
 	{
 		return entityName;
 	}

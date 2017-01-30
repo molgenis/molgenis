@@ -48,7 +48,7 @@ public class AnnotationJobTest
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		EntityType emd = when(mock(EntityType.class).getName()).thenReturn("repo").getMock();
+		EntityType emd = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("repo").getMock();
 		when(emd.getLabel()).thenReturn("My repo");
 
 		repository = new InMemoryRepository(emd);

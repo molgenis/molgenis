@@ -46,7 +46,7 @@ public class RepositoryCopier
 
 		// create copy of entity meta data
 		EntityType emd = EntityType.newInstance(repository.getEntityType(), DEEP_COPY_ATTRS, attrFactory);
-		emd.setSimpleName(simpleName);
+		emd.setName(simpleName);
 		emd.setPackage(pack);
 		emd.setLabel(label);
 		// create repository for copied entity meta data

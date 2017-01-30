@@ -32,7 +32,7 @@ public class LazyEntityTest
 	public void setUpBeforeMethod()
 	{
 		entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(ENTITY_NAME);
+		when(entityType.getFullyQualifiedName()).thenReturn(ENTITY_NAME);
 		idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);

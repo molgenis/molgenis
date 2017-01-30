@@ -43,7 +43,7 @@ public class IndexedRepositoryDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		String entityName = "entity";
 		repositoryEntityType = mock(EntityType.class);
-		when(repositoryEntityType.getName()).thenReturn(entityName);
+		when(repositoryEntityType.getFullyQualifiedName()).thenReturn(entityName);
 		idAttrName = "id";
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 
@@ -235,7 +235,7 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void getName()
 	{
-		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getName());
+		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getFullyQualifiedName());
 	}
 
 	@Test

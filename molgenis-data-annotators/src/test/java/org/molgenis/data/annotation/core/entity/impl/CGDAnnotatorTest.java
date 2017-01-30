@@ -66,7 +66,7 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateTestMatch()
 	{
-		EntityType emdIn = entityTypeFactory.create().setName("Test");
+		EntityType emdIn = entityTypeFactory.create().setFullyQualifiedName("Test");
 		emdIn.addAttribute(attributeFactory.create().setName(GENE.getAttributeName()));
 		emdIn.addAttribute(attributeFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		emdIn.addAttribute(attributeFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
@@ -118,7 +118,7 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateTestNoMatch()
 	{
-		EntityType emdIn = entityTypeFactory.create().setName("Test");
+		EntityType emdIn = entityTypeFactory.create().setFullyQualifiedName("Test");
 		emdIn.addAttribute(attributeFactory.create().setName(GENE.getAttributeName()));
 
 		Entity inputEntity = new DynamicEntity(emdIn);

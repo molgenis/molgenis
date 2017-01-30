@@ -25,7 +25,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 		String entityName = "entityName";
 		entityType = mock(EntityType.class);
 		when(entityType.getEntityType()).thenReturn(mock(EntityType.class));
-		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		updatedEntityType = mock(EntityType.class);
 		repoCollection = mock(RepositoryCollection.class);
 		entityTypeRegistry = mock(EntityTypeRegistry.class);
@@ -72,7 +72,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 	public void testUpdateAttribute()
 	{
 		String entityName = "entityName";
-		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		Attribute attr = mock(Attribute.class);
 
 		Attribute updatedAttr = mock(Attribute.class);
@@ -88,7 +88,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 	public void testDeleteAttribute()
 	{
 		String entityName = "entityName";
-		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		Attribute attr = mock(Attribute.class);
 
 		repoCollectionDecorator.deleteAttribute(entityType, attr);

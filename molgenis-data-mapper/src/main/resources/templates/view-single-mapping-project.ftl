@@ -177,7 +177,7 @@
                         <select name="source" id="source-entity-select" class="form-control" required="required"
                                 placeholder="Select source entity">
                         <#list entityTypes as entityType>
-                            <option value="${entityType.name?html}">${entityType.name?html}</option>
+                            <option value="${entityType.fullyQualifiedName?html}">${entityType.fullyQualifiedName?html}</option>
                         </#list>
                         </select>
                     </div>

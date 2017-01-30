@@ -99,7 +99,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	{
 		reset(repository, transactionInformation);
 		when(repository.getEntityType()).thenReturn(emd);
-		when(repository.getName()).thenReturn(emd.getName());
+		when(repository.getName()).thenReturn(emd.getFullyQualifiedName());
 
 		l2Cache = new L2Cache(molgenisTransactionManager, entityHydration, transactionInformation);
 	}
@@ -119,7 +119,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		verify(repository, times(1)).findOneById("2");
 
 		// Commit a transaction that has dirtied the repository
-		when(transactionInformation.getEntirelyDirtyRepositories()).thenReturn(singleton(emd.getName()));
+		when(transactionInformation.getEntirelyDirtyRepositories()).thenReturn(singleton(emd.getFullyQualifiedName()));
 		l2Cache.afterCommitTransaction("transactionID");
 
 		// get the entity a third time
