@@ -64,31 +64,34 @@ public class MetadataEditorController extends MolgenisPluginController
 	{
 		// FIXME metadataService.getEntityType does not return extendedBy
 		//EntityType entityType = metadataService.getEntityType(entityTypeId);
+		//		if (entityType == null)
+		//		{
+		//			throw new UnknownEntityException(String.format("Unknown entity [%s]", entityTypeId));
+		//		}
+
 		EntityType entityType = metadataService
 				.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class).findOneById(entityTypeId);
-		if (entityType == null)
-		{
-			throw new UnknownEntityException(String.format("Unknown entity [%s]", entityTypeId));
-		}
-		return createEntityTypeReponse(entityType);
+
+		return createEntityTypeResponse(entityType);
 	}
 
-	@RequestMapping(value = "/entityType/create", method = GET)
+	// FIXME currently throws an exception until entity type has an automatically generated identifier
+	@RequestMapping(value = "/create/entityType", method = GET)
 	@ResponseBody
 	public EditorEntityTypeResponse createEntityType()
 	{
-		return createEntityTypeReponse();
+		return createEntityTypeResponse();
 	}
 
 	@RequestMapping(value = "/entityType", method = POST)
 	@ResponseStatus(OK)
-	public void updateEntityType(@RequestBody EditorEntityType editorEntityType)
+	public void upsertEntityType(@RequestBody EditorEntityType editorEntityType)
 	{
 		EntityType entityType = entityTypeMapper.toEntityType(editorEntityType);
 		metadataService.upsertEntityType(entityType);
 	}
 
-	@RequestMapping(value = "/attribute/create", method = GET)
+	@RequestMapping(value = "/create/attribute", method = GET)
 	@ResponseBody
 	public EditorAttributeResponse createAttribute()
 	{
@@ -105,19 +108,29 @@ public class MetadataEditorController extends MolgenisPluginController
 				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
-	private EditorEntityTypeResponse createEntityTypeReponse()
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(
+				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+	}
+
+	private EditorEntityTypeResponse createEntityTypeResponse()
 	{
 		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
-		return createEntityTypeReponse(editorEntityType);
+		return createEntityTypeResponse(editorEntityType);
 	}
 
-	private EditorEntityTypeResponse createEntityTypeReponse(EntityType entityType)
+	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType)
 	{
 		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType);
-		return createEntityTypeReponse(editorEntityType);
+		return createEntityTypeResponse(editorEntityType);
 	}
 
-	private EditorEntityTypeResponse createEntityTypeReponse(EditorEntityType editorEntityType)
+	private EditorEntityTypeResponse createEntityTypeResponse(EditorEntityType editorEntityType)
 	{
 		ImmutableList<String> languageCodes = ImmutableList.copyOf(getLanguageCodes().iterator());
 		return EditorEntityTypeResponse.create(editorEntityType, languageCodes);
