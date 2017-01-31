@@ -76,10 +76,7 @@ public class MetadataEditorControllerTest extends AbstractTestNGSpringContextTes
 	{
 		EntityType entityType = mock(EntityType.class);
 
-		// see note in MetadataEditorController why we cannot do the following:
-		// when(metaDataService.getEntityType("1")).thenReturn(entityType);
-
-		// instead we have to do:
+		// metadataService.getEntityType is not used due to https://github.com/molgenis/molgenis/issues/5783
 		Repository<EntityType> repository = mock(Repository.class);
 		when(repository.findOneById("1")).thenReturn(entityType);
 		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);

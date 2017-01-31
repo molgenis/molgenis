@@ -62,13 +62,7 @@ public class MetadataEditorController extends MolgenisPluginController
 	@ResponseBody
 	public EditorEntityTypeResponse getEntityType(@PathVariable("id") String entityTypeId)
 	{
-		// FIXME metadataService.getEntityType does not return extendedBy
-		//EntityType entityType = metadataService.getEntityType(entityTypeId);
-		//		if (entityType == null)
-		//		{
-		//			throw new UnknownEntityException(String.format("Unknown entity [%s]", entityTypeId));
-		//		}
-
+		// metadataService.getEntityType cannot be used due to https://github.com/molgenis/molgenis/issues/5783
 		EntityType entityType = metadataService
 				.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class).findOneById(entityTypeId);
 
