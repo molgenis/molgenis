@@ -128,7 +128,7 @@
                             <#if source.getAttributeMapping(attribute.name)??>
                                 <#assign attributeMapping = source.getAttributeMapping(attribute.name)>
                                 <#list attributeMapping.sourceAttributes as mappedSourceAttribute>
-                                ${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+                                <#if mappedSourceAttribute??>${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if></#if>
                                     <#if attributeMapping.algorithmState??></#if>
                                 </#list>
                             <#elseif !attribute.nillable>
