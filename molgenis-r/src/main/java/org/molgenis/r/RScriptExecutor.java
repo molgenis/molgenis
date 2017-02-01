@@ -1,126 +1,146 @@
 package org.molgenis.r;
 
+import org.molgenis.script.ScriptException;
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.REngineException;
+import org.rosuda.REngine.Rserve.RConnection;
+import org.rosuda.REngine.Rserve.RserveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.util.UUID;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Executes a r script with the RScript executable in a new process.
+ * Executes an R script using an Rserve
  */
 @Service
 public class RScriptExecutor
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RScriptExecutor.class);
 
-	private final String rScriptExecutable;
-	/**
-	 * Path to R libraries
-	 */
-	private final String rLibs;
+	private final RSettings rSettings;
 
 	@Autowired
-	public RScriptExecutor(@Value("${r_script_executable:/usr/bin/Rscript}") String rScriptExecutable,
-			@Value("${r_libs:@null}") String rLibs)
+	public RScriptExecutor(RSettings rSettings)
 	{
-		this.rScriptExecutable = requireNonNull(rScriptExecutable);
-		if (rLibs == null)
-		{
-			this.rLibs = System.getProperty("user.home") + File.separator + "r-packages";
-		}
-		else
-		{
-			this.rLibs = rLibs;
-		}
+		this.rSettings = requireNonNull(rSettings);
 	}
 
-	/**
-	 * Execute a r script and wait for it to finish
-	 */
-	public void executeScript(String rScript, ROutputHandler outputHandler)
+	String executeScript(String script, String outputFile)
 	{
-		// Check if r is installed
-		File file = new File(rScriptExecutable);
-		if (!file.exists())
-		{
-			throw new MolgenisRException("File [" + rScriptExecutable + "] does not exist");
-		}
-
-		// Check if r has execution rights
-		if (!file.canExecute())
-		{
-			throw new MolgenisRException(
-					"Can not execute [" + rScriptExecutable + "]. Does it have executable permissions?");
-		}
-
-		Path tempFile = null;
+		RConnection rConnection = null;
 		try
 		{
-			tempFile = Files.createTempFile(null, ".R");
-			Files.write(tempFile, rScript.getBytes(UTF_8), StandardOpenOption.WRITE);
-			String tempScriptFilePath = tempFile.toAbsolutePath().toString();
-
-			// Create r process
-			LOG.info("Running r script [" + tempScriptFilePath + "]");
-			ProcessBuilder processBuilder = new ProcessBuilder(rScriptExecutable, tempScriptFilePath);
-			processBuilder.environment().put("R_LIBS", rLibs);
-			Process process = processBuilder.start();
-
-			// Capture the error output
-			final StringBuilder sb = new StringBuilder();
-			RStreamHandler errorHandler = new RStreamHandler(process.getErrorStream(),
-					output -> sb.append(output).append("\n"));
-			errorHandler.start();
-
-			// Capture r output if an r output handler is defined
-			if (outputHandler != null)
-			{
-				RStreamHandler streamHandler = new RStreamHandler(process.getInputStream(), outputHandler);
-				streamHandler.start();
-			}
-
-			// Wait until script is finished
-			process.waitFor();
-
-			// Check for errors
-			if (process.exitValue() > 0)
-			{
-				throw new MolgenisRException("Error running [" + tempScriptFilePath + "]." + sb.toString());
-			}
-
-			LOG.info("Script [" + tempScriptFilePath + "] done");
+			rConnection = new RConnection(rSettings.getHost(), rSettings.getPort());
+			return executeScript(script, outputFile, rConnection);
 		}
-		catch (IOException e)
+		catch (RserveException e)
 		{
-			throw new MolgenisRException("Exception executing RScipt.", e);
-		}
-		catch (InterruptedException e)
-		{
-			throw new MolgenisRException("Exception waiting for RScipt to finish", e);
+			throw new ScriptException(e);
 		}
 		finally
 		{
-			if (tempFile != null)
+			if (rConnection != null)
 			{
-				try
-				{
-					Files.delete(tempFile);
-				}
-				catch (IOException e)
-				{
-					LOG.error("", e);
-				}
+				rConnection.close();
 			}
 		}
+	}
+
+	private String executeScript(String script, String outputFile, RConnection rConnection)
+	{
+		if (outputFile != null)
+		{
+			String randomFileName = generateRandomString();
+			script = script.replace(outputFile, randomFileName); // TODO implement more robust solution
+			if (!script.endsWith("\n"))
+			{
+				script += '\n';
+			}
+			script += "r=readBin('" + randomFileName + "','raw',1024*1024); unlink('" + randomFileName + "'); r";
+		}
+
+		REXP rExp = executeScript(script, rConnection);
+
+		if (outputFile != null)
+		{
+			createFile(rExp, outputFile);
+			return null;
+		}
+		else
+		{
+			try
+			{
+				return rExp.asString();
+			}
+			catch (REXPMismatchException e)
+			{
+				throw new ScriptException(e);
+			}
+		}
+	}
+
+	private REXP executeScript(String script, RConnection rConnection)
+	{
+		REXP rResponseObject;
+		try
+		{
+			// see https://www.rforge.net/Rserve/faq.html#errors
+			rConnection.assign(".tmp.", script);
+			rResponseObject = rConnection.parseAndEval("try(eval(parse(text=.tmp.)),silent=TRUE)");
+			if (rResponseObject.inherits("try-error"))
+			{
+				String prefix = "Error in parse(text = .tmp.) : <text>:";
+				String errorMessage = rResponseObject.asString();
+				if (errorMessage.startsWith(prefix))
+				{
+					errorMessage = errorMessage.substring(prefix.length());
+				}
+				throw new ScriptException(errorMessage);
+			}
+			return rResponseObject;
+		}
+		catch (REngineException e)
+		{
+			throw new ScriptException(e.getMessage());
+		}
+		catch (REXPMismatchException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void createFile(REXP rExp, String outputFile)
+	{
+		byte[] bytes;
+		try
+		{
+			bytes = rExp.asBytes();
+		}
+		catch (REXPMismatchException e)
+		{
+			throw new RuntimeException(e);
+		}
+		try
+		{
+			Files.write(new File(outputFile).toPath(), bytes);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private String generateRandomString()
+	{
+		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
 }
