@@ -4,10 +4,9 @@ info:
   title: MOLGENIS REST API
   description: Documentation for the MOLGENIS Rest API V1 and V2
   version: "v1 and v2"
-host: localhost:8080
+host: ${host}
 schemes:
-  - http
-  - https
+  - ${scheme}
 basePath: /api/
 consumes:
   - application/json

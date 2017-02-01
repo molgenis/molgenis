@@ -80,6 +80,23 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 
 		this.mockMvc.perform(get("http://localhost:8080/plugin/swagger/swagger.yml")).andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith("text/yaml")).andExpect(content().encoding("UTF-8"))
+				.andExpect(content().string(containsString("host: localhost:8080")))
+				.andExpect(content().string(containsString("- http")))
+				.andExpect(content().string(containsString("- EntityType1")))
+				.andExpect(content().string(containsString("- abc_EntityType2ëæ")));
+	}
+
+	@Test
+	public void testYmlUrlServesSwaggerDefaultPortHttps() throws Exception
+	{
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.of(type1, type2));
+		when(type1.getName()).thenReturn("EntityType1");
+		when(type2.getName()).thenReturn("abc_EntityType2ëæ");
+
+		this.mockMvc.perform(get("https://localhost/plugin/swagger/swagger.yml")).andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith("text/yaml")).andExpect(content().encoding("UTF-8"))
+				.andExpect(content().string(containsString("host: localhost")))
+				.andExpect(content().string(containsString("- https")))
 				.andExpect(content().string(containsString("- EntityType1")))
 				.andExpect(content().string(containsString("- abc_EntityType2ëæ")));
 	}

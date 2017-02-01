@@ -45,6 +45,10 @@ public class SwaggerController extends MolgenisPluginController
 	{
 		response.setContentType("text/yaml");
 		response.setCharacterEncoding("UTF-8");
+		final ServletUriComponentsBuilder servletUriComponentsBuilder = ServletUriComponentsBuilder
+				.fromCurrentContextPath();
+		model.addAttribute("scheme", servletUriComponentsBuilder.build().getScheme());
+		model.addAttribute("host", servletUriComponentsBuilder.scheme(null).toUriString().substring(2));
 		model.addAttribute("entityTypes",
 				metaDataService.getEntityTypes().filter(e -> !e.isAbstract()).map(EntityType::getName).sorted()
 						.collect(Collectors.toList()));
