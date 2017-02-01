@@ -4,11 +4,11 @@ info:
   title: MOLGENIS REST API
   description: Documentation for the MOLGENIS Rest API V1 and V2
   version: "v1 and v2"
-host: localhost
+host: localhost:8080
 schemes:
   - http
   - https
-basePath: :8080/api/
+basePath: /api/
 consumes:
   - application/json
   - application/x-www-form-urlencoded
@@ -318,7 +318,6 @@ definitions:
         format: int32
         default: 0
         minimum: 0
-        in: query
         description: Offset in resource collection
       num:
         type: integer
@@ -326,7 +325,6 @@ definitions:
         default: 0
         minimum: 0
         maximum: 10000
-        in: query
         description: Number of resources to retrieve starting at start
   EntityCollectionResponseV2:
     type: object

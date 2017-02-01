@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.stream.Collectors;
 
 import static org.molgenis.swagger.controller.SwaggerController.URI;
@@ -32,17 +34,20 @@ public class SwaggerController extends MolgenisPluginController
 	@RequestMapping
 	public String init()
 	{
-		// TODO do not hardcode localhost
-		return "redirect:http://localhost:8080/swagger-ui/index.html?url=http://localhost:8080/menu/main/swagger/swagger.yml";
+		String swaggerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/plugin/swagger/swagger.yml")
+				.toUriString();
+		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().path("/swagger-ui/index.html")
+				.queryParam("url", swaggerUrl).toUriString();
 	}
 
-	@RequestMapping(path = "/swagger.yml", produces = "text/x-yaml")
-	public String swagger(Model model)
+	@RequestMapping(path = "/swagger.yml", produces = "text/yaml")
+	public String swagger(Model model, HttpServletResponse response)
 	{
+		response.setContentType("text/yaml");
+		response.setCharacterEncoding("UTF-8");
 		model.addAttribute("entityTypes",
 				metaDataService.getEntityTypes().filter(e -> !e.isAbstract()).map(EntityType::getName).sorted()
 						.collect(Collectors.toList()));
-		// serveert onze mooie yml
 		return "view-swagger";
 	}
 }
