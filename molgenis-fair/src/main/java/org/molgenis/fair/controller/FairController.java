@@ -7,13 +7,11 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
@@ -39,28 +37,17 @@ public class FairController
 		this.entityModelWriter = requireNonNull(entityModelWriter);
 	}
 
-	private static String getBaseUri(HttpServletRequest request)
+	private static UriComponentsBuilder getBaseUri()
 	{
-		String apiUrl;
-		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
-		{
-			apiUrl = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(BASE_URI).toUriString();
-		}
-		else
-		{
-			String scheme = request.getHeader("X-Forwarded-Proto");
-			if (scheme == null) scheme = request.getScheme();
-			apiUrl = scheme + "://" + request.getHeader("X-Forwarded-Host") + BASE_URI;
-		}
-		return apiUrl;
+		return ServletUriComponentsBuilder.fromCurrentContextPath().path(BASE_URI);
 	}
 
 	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE)
 	@ResponseBody
 	@RunAsSystem
-	public Model getMetadata(HttpServletRequest request)
+	public Model getMetadata()
 	{
-		String subjectIRI = getBaseUri(request);
+		String subjectIRI = getBaseUri().toUriString();
 		Entity subjectEntity = dataService.findOne("fdp_Metadata", new QueryImpl<>());
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
@@ -68,9 +55,9 @@ public class FairController
 	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}")
 	@ResponseBody
 	@RunAsSystem
-	public Model getCatalog(@PathVariable("catalogID") String catalogID, HttpServletRequest request)
+	public Model getCatalog(@PathVariable("catalogID") String catalogID)
 	{
-		String subjectIRI = getBaseUri(request) + '/' + catalogID;
+		String subjectIRI = getBaseUri().pathSegment(catalogID).toUriString();
 		Entity subjectEntity = dataService.findOneById("fdp_Catalog", catalogID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
@@ -78,10 +65,9 @@ public class FairController
 	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}")
 	@ResponseBody
 	@RunAsSystem
-	public Model getDataset(@PathVariable("catalogID") String catalogID, @PathVariable("datasetID") String datasetID,
-			HttpServletRequest request)
+	public Model getDataset(@PathVariable("catalogID") String catalogID, @PathVariable("datasetID") String datasetID)
 	{
-		String subjectIRI = getBaseUri(request) + '/' + catalogID + '/' + datasetID;
+		String subjectIRI = getBaseUri().pathSegment(catalogID, datasetID).toUriString();
 		Entity subjectEntity = dataService.findOneById("fdp_Dataset", datasetID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
@@ -90,11 +76,9 @@ public class FairController
 	@ResponseBody
 	@RunAsSystem
 	public Model getDistribution(@PathVariable("catalogID") String catalogID,
-			@PathVariable("datasetID") String datasetID, @PathVariable("distributionID") String distributionID,
-			HttpServletRequest request)
+			@PathVariable("datasetID") String datasetID, @PathVariable("distributionID") String distributionID)
 	{
-
-		String subjectIRI = getBaseUri(request) + '/' + catalogID + '/' + datasetID + '/' + distributionID;
+		String subjectIRI = getBaseUri().pathSegment(catalogID, datasetID, distributionID).toUriString();
 		Entity subjectEntity = dataService.findOneById("fdp_Distribution", distributionID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
