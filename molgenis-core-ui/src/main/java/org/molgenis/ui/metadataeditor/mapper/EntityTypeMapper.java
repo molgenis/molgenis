@@ -40,8 +40,8 @@ public class EntityTypeMapper
 
 	public EditorEntityType toEditorEntityType(EntityType entityType)
 	{
-		String id = entityType.getName();
-		String name = entityType.getSimpleName();
+		String id = entityType.getFullyQualifiedName();
+		String name = entityType.getName();
 		String label = entityType.getLabel();
 		ImmutableMap<String, String> i18nLabel = toI18nLabel(entityType);
 		String description = entityType.getDescription();
@@ -78,8 +78,8 @@ public class EntityTypeMapper
 	public EntityType toEntityType(EditorEntityType editorEntityType)
 	{
 		EntityType entityType = entityTypeFactory.create();
-		entityType.setName(editorEntityType.getId());
-		entityType.setSimpleName(editorEntityType.getName());
+		entityType.setFullyQualifiedName(editorEntityType.getId());
+		entityType.setName(editorEntityType.getName());
 		entityType.setPackage(packageMapper.toPackageReference(editorEntityType.getPackage()));
 		entityType.setLabel(editorEntityType.getLabel());
 		getLanguageCodes().forEach(

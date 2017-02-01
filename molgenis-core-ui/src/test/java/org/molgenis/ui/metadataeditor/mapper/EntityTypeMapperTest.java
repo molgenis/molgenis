@@ -108,8 +108,8 @@ public class EntityTypeMapperTest
 		when(attributeMapper.toAttributes(editorAttributes, editorEntityType)).thenReturn(attributes);
 		assertEquals(entityType, entityTypeMapper.toEntityType(editorEntityType));
 		// FIXME id label lookup attribute modifications
-		verify(entityType).setName(id);
-		verify(entityType).setSimpleName(name);
+		verify(entityType).setFullyQualifiedName(id);
+		verify(entityType).setName(name);
 		verify(entityType).setLabel(label);
 		verify(entityType).setLabel(i18nLabelLangEn, i18nLabelValue);
 		verify(entityType).setLabel("nl", null);
@@ -154,8 +154,8 @@ public class EntityTypeMapperTest
 		String backend = "backend";
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(id);
-		when(entityType.getSimpleName()).thenReturn(name);
+		when(entityType.getFullyQualifiedName()).thenReturn(id);
+		when(entityType.getName()).thenReturn(name);
 		when(entityType.getLabel()).thenReturn(label);
 		when(entityType.getString(getI18nAttributeName(EntityTypeMetadata.LABEL, i18nLabelLangEn)))
 				.thenReturn(i18nLabelValue);
