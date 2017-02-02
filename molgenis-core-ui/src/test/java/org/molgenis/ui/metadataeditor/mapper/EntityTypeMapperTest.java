@@ -232,7 +232,7 @@ public class EntityTypeMapperTest
 		List<Attribute> lookupAttributes = mock(List.class);
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(id);
+		when(entityType.getFullyQualifiedName()).thenReturn(id);
 		when(entityType.getBackend()).thenReturn(backend);
 		when(entityType.getOwnAllAttributes()).thenReturn(attributes);
 		when(entityType.getExtendedBy()).thenReturn(extendedBy);
