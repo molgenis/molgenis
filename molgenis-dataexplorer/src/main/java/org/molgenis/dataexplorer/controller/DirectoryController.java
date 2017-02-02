@@ -56,8 +56,7 @@ public class DirectoryController extends MolgenisPluginController
 			return false;
 		}
 		final EntityType collectionEntityType = settings.getCollectionEntityType();
-		//TODO: change to getFullyQualifiedName once identifier PR is accepted
-		return collectionEntityType != null && collectionEntityType.getName().equals(selectedEntityName);
+		return collectionEntityType != null && collectionEntityType.getFullyQualifiedName().equals(selectedEntityName);
 	}
 
 	@RequestMapping(value = "/export", method = POST)
