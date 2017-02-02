@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 
 import java.net.URI;
 
-import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withCreatedEntity;
 import static org.testng.Assert.assertEquals;
@@ -33,7 +32,7 @@ public class HttpClientConfigTest extends AbstractTestNGSpringContextTests
 	@BeforeClass
 	public void beforeClass()
 	{
-		server = MockRestServiceServer.bindTo(restTemplate).build();
+		server = MockRestServiceServer.createServer(restTemplate);
 	}
 
 	@Test
@@ -44,7 +43,7 @@ public class HttpClientConfigTest extends AbstractTestNGSpringContextTests
 		headers.set("Authorization", "Basic ABCDE");
 
 		HttpEntity<TestNegotiatorQuery> entity = new HttpEntity<>(testNegotiatorQuery, headers);
-		server.expect(once(), requestTo("http://directory.url/request")).andExpect(method(HttpMethod.POST))
+		server.expect(requestTo("http://directory.url/request")).andExpect(method(HttpMethod.POST))
 				.andExpect(content().string("{\"URL\":\"url\",\"nToken\":\"ntoken\"}"))
 				.andExpect(MockRestRequestMatchers.header("Authorization", "Basic ABCDE"))
 				.andRespond(withCreatedEntity(URI.create("http://directory.url/request/DEF")));
