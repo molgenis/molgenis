@@ -665,7 +665,15 @@ $(function () {
         // Iterate over all key=value pairs.
         $.each(text.replace(/\+/g, ' ').split('&'), function (index, pair) {
             // The key=value pair.
-            var kv = pair.split('=');
+            var kv = []
+
+            // Retrieve the key
+            kv.push(pair.split('=')[0])
+
+            // Retrieve the value, use substring instead of split because pair can
+            // also be RSQL format e.g. q=user==admin
+            kv.push(pair.substring(pair.indexOf('=') + 1 ))
+
             // The key, URI-decoded.
             var key = decode(kv[0]);
             // Abort if there's no key.

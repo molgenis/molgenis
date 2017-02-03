@@ -68,15 +68,13 @@
 
     /**
      * Create the filter
-     *
      */
     self.createFilterQueryUserReadableList = function (attributeFilters) {
         var items = [];
         $.each(attributeFilters, function (attributeUri, filter) {
             var attributeLabel = molgenis.getAttributeLabel(filter.attribute);
-
             items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-                + attributeLabel + ': ' + self.createFilterQueyUserReadable(filter)
+                + attributeLabel + ': ' + self.createFilterQueryUserReadable(filter)
                 + '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
                 + attributeLabel + ' filter" ><span class="glyphicon glyphicon-remove"></span></a></p>');
         });
@@ -87,7 +85,7 @@
     /**
      * Create the user simple representation of the query
      */
-    self.createFilterQueyUserReadable = function (filter) {
+    self.createFilterQueryUserReadable = function (filter) {
         if (filter.isType('complex')) {
             var complexFilterElements = filter.getComplexFilterElements();
             var addBracket = true;
@@ -125,7 +123,6 @@
                     addBracket = false;
                 }
             }
-
             if (addBracket) {
                 return '(' + items.join('') + ')';
             } else {
@@ -525,7 +522,10 @@
             case 'TEXT':
             case 'ENUM':
             case 'SCRIPT':
-                $controls.append(createInput(attribute, {'name': name, 'id': name}, values ? values[0] : undefined));
+                $controls.append(createInput(attribute, {
+                    'name': name,
+                    'id': name
+                }, values ? values[0] : undefined));
                 break;
             case 'XREF':
             case 'MREF':
@@ -553,7 +553,7 @@
     }
 
     /**
-     * JavaScript filter representaion as an interface for filters
+     * JavaScript filter representation as an interface for filters
      */
     self.Filter = function () {
         this.operators = {'OR': 'OR', 'AND': 'AND'};
@@ -813,7 +813,7 @@
     self.SimpleFilter.prototype = new self.Filter();
 
     /**
-     * JavaScript representation of een elementin a complex filter
+     * JavaScript representation of een element in a complex filter
      */
     self.ComplexFilterElement = function (attribute) {
         this.simpleFilter = null;
