@@ -105,6 +105,7 @@ public class EntityType extends StaticEntity
 			AttributeFactory attrFactory)
 	{
 		EntityType entityTypeCopy = new EntityType(entityType.getEntityType()); // do not deep-copy
+		entityTypeCopy.setId(entityType.getId());
 		entityTypeCopy.setName(entityType.getName());
 		entityTypeCopy.setPackage(entityType.getPackage()); // do not deep-copy
 		entityTypeCopy.setLabel(entityType.getLabel());
@@ -171,6 +172,9 @@ public class EntityType extends StaticEntity
 	 */
 	public String getFullyQualifiedName()
 	{
+		if(getName() == null){
+			System.out.println("");
+		}
 		return getPackage() == null ? getName() : getPackage().getFullyQualifiedName() + PACKAGE_SEPARATOR + getName();
 	}
 
