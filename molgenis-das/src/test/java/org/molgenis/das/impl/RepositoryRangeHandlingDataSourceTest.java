@@ -68,7 +68,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		EntityType metaData = entityTypeFactory.create().setFullyQualifiedName("dataset");
+		EntityType metaData =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("dataset");
 		when(dataService.getEntityType("dataset")).thenReturn(metaData);
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
 
@@ -96,7 +96,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		Query<Entity> q = new QueryImpl<>().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
-		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("DAS");
+		EntityType emd =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("DAS");
 		emd.addAttribute(attrMetaFactory.create().setName("STOP").setDataType(INT));
 		emd.addAttribute(attrMetaFactory.create().setName("linkout"));
 		emd.addAttribute(attrMetaFactory.create().setName("NAME"), ROLE_LABEL);

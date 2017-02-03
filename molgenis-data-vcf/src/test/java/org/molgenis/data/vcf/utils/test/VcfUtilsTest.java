@@ -67,9 +67,9 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		annotatedEntityType = entityTypeFactory.create().setFullyQualifiedName("test");
-		metaDataCanAnnotate = entityTypeFactory.create().setFullyQualifiedName("test");
-		metaDataCantAnnotate = entityTypeFactory.create().setFullyQualifiedName("test");
+		annotatedEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		metaDataCanAnnotate =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		metaDataCantAnnotate =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
 
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 		attributePos = attributeFactory.create().setName(POS).setDataType(INT);
@@ -169,7 +169,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		entities.add(entity2);
 		entities.add(entity3);
 
-		expectedEffectsEntityType = entityTypeFactory.create().setFullyQualifiedName("EFFECTannotations");
+		expectedEffectsEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("EFFECTannotations");
 		expectedEffectsEntityType
 				.addAttribute(attributeFactory.create().setName("identifier").setDataType(STRING), ROLE_ID);
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Alt_Allele").setDataType(STRING));

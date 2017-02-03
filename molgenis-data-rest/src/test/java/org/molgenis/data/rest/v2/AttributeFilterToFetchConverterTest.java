@@ -79,20 +79,20 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityType = entityTypeFactory.create().setFullyQualifiedName("SelfRefEntity");
+		selfRefEntityType = null; //FIXME entityTypeFactory.create().setFullyQualifiedName("SelfRefEntity");
 		Attribute selfRefIdAttr = attributeFactory.create().setName("id");
 		selfRefEntityType.addAttribute(selfRefIdAttr, ROLE_ID)
 				.addAttribute(attributeFactory.create().setName("label"), ROLE_LABEL).addAttribute(
 				attributeFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityType));
 
 		labelAttr = attributeFactory.create().setName(REF_LABEL_ATTR_NAME);
-		xrefEntityType = entityTypeFactory.create().setFullyQualifiedName("xrefEntity")
-				.addAttribute(attributeFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
-				.addAttribute(labelAttr, ROLE_LABEL).addAttribute(attributeFactory.create().setName(REF_ATTR_NAME));
+		xrefEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("xrefEntity")
+//				.addAttribute(attributeFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
+//				.addAttribute(labelAttr, ROLE_LABEL).addAttribute(attributeFactory.create().setName(REF_ATTR_NAME));
 
-		entityType = entityTypeFactory.create().setFullyQualifiedName("entity")
-				.addAttribute(attributeFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
-				.addAttribute(attributeFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
+		entityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("entity")
+//				.addAttribute(attributeFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
+//				.addAttribute(attributeFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 
 		Attribute compoundAttr = attributeFactory.create().setName(COMPOUND_ATTR_NAME).setDataType(COMPOUND);
 		Attribute compoundPartAttr = attributeFactory.create().setName(COMPOUND_PART_ATTR_NAME).setDataType(COMPOUND)

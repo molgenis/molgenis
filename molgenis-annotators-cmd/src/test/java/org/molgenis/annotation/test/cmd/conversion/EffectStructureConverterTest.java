@@ -77,10 +77,10 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		Attribute GTC = attributeFactory.create().setName("GTC").setDataType(STRING).setParent(INFO);
 		Attribute annoAttr = attributeFactory.create().setName("ANNO").setDataType(STRING).setParent(INFO);
 
-		annotatedEntityType = entityTypeFactory.create().setFullyQualifiedName("test");
-		vcfInputEntityType = entityTypeFactory.create().setFullyQualifiedName("test");
-		variantEntityType = entityTypeFactory.create().setFullyQualifiedName("test");
-		effectEntityType = entityTypeFactory.create().setFullyQualifiedName("test");
+		annotatedEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		vcfInputEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		variantEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		effectEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
 
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 		attributePos = attributeFactory.create().setName(POS).setDataType(INT);
