@@ -49,13 +49,13 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		{
 			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF));
 		}
-		else if (name.endsWith(EXTENSION_VCF_GZ))
+		else if (name.toLowerCase().endsWith(EXTENSION_VCF_GZ))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_GZ));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF_GZ));
 		}
-		else if (name.endsWith(EXTENSION_VCF_ZIP))
+		else if (name.toLowerCase().endsWith(EXTENSION_VCF_ZIP))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_ZIP));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF_ZIP));
 		}
 		else
 		{
