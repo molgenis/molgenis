@@ -17,3 +17,12 @@ test("Test translating a complex RSQL string into a human readable string", asse
     assert.deepEqual(actual, expected);
     assert.end();
 })
+
+//
+test("Test translating url encoded IDs decodes the encoded string", assert => {
+    const actual = getHumanReadable("biobank==bbmri-eric%3AID%3ASE_1721")
+    const expected = "biobank equals bbmri-eric:ID:SE_1721"
+
+    assert.deepEqual(actual, expected);
+    assert.end();
+})
