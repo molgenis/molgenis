@@ -1,4 +1,14 @@
-(function ($, molgenis) {
+var i18nDeferred = $.Deferred();
+window.top.molgenis.I18nStrings(
+    function(i18n){
+        i18nDeferred.resolve(i18n);
+    }
+);
+$.when($,
+    window.top.molgenis,
+    i18nDeferred.promise()
+).then(
+    function ($, molgenis, i18n) {
     "use strict";
 
     molgenis.dataexplorer = molgenis.dataexplorer || {};
@@ -61,14 +71,14 @@
     $(function () {
         $('#directory-export-button').on('click', function () {
             bootbox.confirm({
-                title: 'Send request to the BBMRI Negotiator?',
-                message: "Your current selection of biobanks along with your filtering criteria will be sent to the BBMRI Negotiator. Are you sure?",
+                title:  i18n.dataexplorer_directory_export_dialog_title,
+                message:  i18n.dataexplorer_directory_export_dialog_message,
                 buttons: {
                     confirm: {
-                        label: 'Yes, Send to Negotiator'
+                        label:  i18n.dataexplorer_directory_export_dialog_yes
                     },
                     cancel: {
-                        label: 'No, I want to keep filtering'
+                        label: i18n.dataexplorer_directory_export_dialog_no
                     }
                 },
                 callback: function (result) {
@@ -79,4 +89,4 @@
             })
         })
     })
-}($, window.top.molgenis = window.top.molgenis || {}));
+});

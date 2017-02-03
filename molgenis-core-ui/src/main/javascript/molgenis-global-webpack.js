@@ -21,6 +21,7 @@ import {
 } from "rest-client/AttributeFunctions";
 import {htmlEscape} from "utils/HtmlUtils";
 
+import {I18nStrings} from "i18n/I18nStrings";
 
 window.top.molgenis.RestClient = RestClientV1;
 window.top.molgenis.RestClientV2 = RestClientV2;
@@ -39,3 +40,5 @@ window.top.molgenis.isMrefAttr = isMrefAttr;
 window.top.molgenis.isCompoundAttr = isCompoundAttr;
 
 window.htmlEscape = htmlEscape;
+
+window.top.molgenis.I18nStrings = I18nStrings;
