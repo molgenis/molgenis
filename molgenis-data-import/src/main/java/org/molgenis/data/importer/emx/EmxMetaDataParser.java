@@ -210,7 +210,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	@Override
-	//FIXME The source is parsed twice!!! Once by dermineImportableEntities and once by doImport
+	//FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
 	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackageName)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
