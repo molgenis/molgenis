@@ -59,11 +59,11 @@ public class LongAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	public Object[][] invalidConversionTestCases()
 	{
 		return new Object[][] { { 2L, XREF, MolgenisValidationException.class,
-				"Unknown xref value '2' for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+				"Unknown xref value '2' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 2L, CATEGORICAL, MolgenisValidationException.class,
-						"Unknown xref value '2' for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+						"Unknown xref value '2' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 4L, ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 1L, DATE, MolgenisValidationException.class,
 						"Attribute data type update from [LONG] to [DATE] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
 				{ 1L, DATE_TIME, MolgenisValidationException.class,

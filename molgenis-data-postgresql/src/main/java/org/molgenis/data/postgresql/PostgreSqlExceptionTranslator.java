@@ -340,42 +340,44 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 */
 	MolgenisValidationException translateUniqueKeyViolation(PSQLException pSqlException)
 	{
-		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
-		String tableName = serverErrorMessage.getTable();
-		String detailMessage = serverErrorMessage.getDetail();
-		Matcher matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
-		boolean matches = matcher.matches();
-		if (matches)
-		{
-			// exception message when adding data that does not match constraint
-			String columnName = matcher.group(1);
-			String value = matcher.group(2);
-
-			ConstraintViolation constraintViolation = new ConstraintViolation(
-					format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value,
-							getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
-			return new MolgenisValidationException(singleton(constraintViolation));
-		}
-		else
-		{
-			// exception message when applying constraint on existing data
-			matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
-			matches = matcher.matches();
-			if (matches)
-			{
-				String columnName = matcher.group(1);
-				String value = matcher.group(2);
-
-				ConstraintViolation constraintViolation = new ConstraintViolation(
-						format("The attribute '%s' of entity '%s' contains duplicate value '%s'.",
-								getAttributeName(tableName, columnName), getEntityTypeName(tableName), value), null);
-				return new MolgenisValidationException(singleton(constraintViolation));
-			}
-			else
-			{
-				throw new RuntimeException("Error translating exception", pSqlException);
-			}
-		}
+		System.out.println(pSqlException);
+		return null;
+//		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
+//		String tableName = serverErrorMessage.getTable();
+//		String detailMessage = serverErrorMessage.getDetail();
+//		Matcher matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
+//		boolean matches = matcher.matches();
+//		if (matches)
+//		{
+//			// exception message when adding data that does not match constraint
+//			String columnName = matcher.group(1);
+//			String value = matcher.group(2);
+//
+//			ConstraintViolation constraintViolation = new ConstraintViolation(
+//					format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value,
+//							getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
+//			return new MolgenisValidationException(singleton(constraintViolation));
+//		}
+//		else
+//		{
+//			// exception message when applying constraint on existing data
+//			matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
+//			matches = matcher.matches();
+//			if (matches)
+//			{
+//				String columnName = matcher.group(1);
+//				String value = matcher.group(2);
+//
+//				ConstraintViolation constraintViolation = new ConstraintViolation(
+//						format("The attribute '%s' of entity '%s' contains duplicate value '%s'.",
+//								getAttributeName(tableName, columnName), getEntityTypeName(tableName), value), null);
+//				return new MolgenisValidationException(singleton(constraintViolation));
+//			}
+//			else
+//			{
+//				throw new RuntimeException("Error translating exception", pSqlException);
+//			}
+//		}
 	}
 
 	/**

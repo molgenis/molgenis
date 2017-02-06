@@ -38,7 +38,7 @@ public class MrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	@DataProvider(name = "validConversionData")
 	public Object[][] validConversionData()
 	{
-		List<Entity> entities = dataService.findAll("REFERENCE_ENTITY").collect(toList());
+		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
 		return new Object[][] {
 				{ entities, CATEGORICAL_MREF, newArrayList("label1", "email label", "hyperlink label") } };
 	}
@@ -61,7 +61,7 @@ public class MrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 		assertEquals(getActualDataType(), typeToConvertTo);
 
 		List<String> actualValues = newArrayList();
-		Entity entity1 = dataService.findOneById("MAIN_ENTITY", "1");
+		Entity entity1 = dataService.findOneById("MAINENTITY", "1");
 		entity1.getEntities("mainAttribute").forEach(entity -> actualValues.add(entity.getLabelValue().toString()));
 		assertEquals(actualValues, convertedValue);
 	}
@@ -69,7 +69,7 @@ public class MrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		List<Entity> entities = dataService.findAll("REFERENCE_ENTITY").collect(toList());
+		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
 		return new Object[][] { { entities, BOOL, MolgenisValidationException.class,
 				"Attribute data type update from [MREF] to [BOOL] not allowed, allowed types are [CATEGORICAL_MREF]" },
 				{ entities, STRING, MolgenisValidationException.class,

@@ -40,8 +40,8 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	private static final List<AttributeType> referencingTypes = newArrayList(MREF, XREF, CATEGORICAL, CATEGORICAL_MREF,
 			FILE);
 	private static final List<String> enumOptions = newArrayList("1", "2b", "abc");
-	private static final String MAIN_ENTITY = "MAIN_ENTITY";
-	private static final String REFERENCE_ENTITY = "REFERENCE_ENTITY";
+	private static final String MAIN_ENTITY = "MAINENTITY";
+	private static final String REFERENCE_ENTITY = "REFERENCEENTITY";
 	private static final String MAIN_ENTITY_ID_VALUE = "1";
 
 	@Autowired

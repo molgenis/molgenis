@@ -60,9 +60,9 @@ public class IntAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	public Object[][] invalidConversionTestCases()
 	{
 		return new Object[][] { { 10, XREF, MolgenisValidationException.class,
-				"Unknown xref value '10' for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+				"Unknown xref value '10' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 10, CATEGORICAL, MolgenisValidationException.class,
-						"Unknown xref value '10' for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+						"Unknown xref value '10' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 10, EMAIL, MolgenisValidationException.class,
 						"Attribute data type update from [INT] to [EMAIL] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
 				{ 10, HYPERLINK, MolgenisValidationException.class,
@@ -70,7 +70,7 @@ public class IntAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 				{ 10, HTML, MolgenisValidationException.class,
 						"Attribute data type update from [INT] to [HTML] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
 				{ 10, ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 10, DATE, MolgenisValidationException.class,
 						"Attribute data type update from [INT] to [DATE] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
 				{ 10, DATE_TIME, MolgenisValidationException.class,
