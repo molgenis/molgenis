@@ -275,7 +275,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	private ImmutableMap<String, EntityType> getEntityTypeMap(DataService dataService, RepositoryCollection source)
 	{
-		// If there is no attribute sheet, we assume the entity is already known in MOLGNEIS
+		// If there is no attribute sheet, we assume the entity is already known in MOLGENIS
 		Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
 		if (attributeSourceRepository != null) return getEntityTypeFromSource(source).getEntityMap();
 		else return getEntityTypeFromDataService(dataService, source.getEntityIds());
