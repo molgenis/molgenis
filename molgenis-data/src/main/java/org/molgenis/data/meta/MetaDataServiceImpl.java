@@ -266,13 +266,30 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(entityTypes);
 
-		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getId), getEntityTypeFetch(),
-						EntityType.class).collect(toMap(EntityType::getId, Function.identity()));
-
+		Map<String, EntityType> existingEntityTypeMap = getExisitingEntityTypeMap(entityTypes);
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 		addMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 
+	}
+
+	private Map<String, EntityType> getExisitingEntityTypeMap(Collection<EntityType> entityTypes)
+	{
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
+		entityTypes.forEach(entityType ->
+		{
+			String fullyQualifiedName = entityType.getFullyQualifiedName();
+			String entityId = identifierLookupService.getEntityTypeId(fullyQualifiedName);
+			if(entityId != null)
+			{
+				EntityType existingEntityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityId, EntityType.class);
+
+				if (existingEntityType != null)
+				{
+					existingEntityTypeMap.put(fullyQualifiedName, entityType);
+				}
+			}
+		});
+		return existingEntityTypeMap;
 	}
 
 	private void addMappedByAttributes(List<EntityType> resolvedEntityTypes,
@@ -305,7 +322,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 1st pass: create entities and attributes except for mappedBy attributes
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
