@@ -1100,7 +1100,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * re-iterate to map the mrefs/xref refEntity (or give error if not found)
-	 * TODO consider also those in existing db
 	 *
 	 * @param attributeRepo       the attributes {@link Repository}
 	 * @param intermediateResults {@link ParsedMetaData} to add the ref entities to
