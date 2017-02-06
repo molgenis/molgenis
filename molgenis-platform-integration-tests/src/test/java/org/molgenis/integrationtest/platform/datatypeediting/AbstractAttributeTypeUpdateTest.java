@@ -108,11 +108,11 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 		getContext().setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
 
 		entityType = entityTypeFactory.create("1");
-		//FIXME entityType.setFullyQualifiedName(MAIN_ENTITY);
+		entityType.setName(MAIN_ENTITY);
 		entityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		referenceEntityType = entityTypeFactory.create("2");
-		//FIXME referenceEntityType.setFullyQualifiedName(REFERENCE_ENTITY);
+		referenceEntityType.setName(REFERENCE_ENTITY);
 		referenceEntityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		Attribute mainIdAttribute = attributeFactory.create().setName(mainId).setIdAttribute(true);
