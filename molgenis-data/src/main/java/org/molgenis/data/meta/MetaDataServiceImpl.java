@@ -264,22 +264,22 @@ public class MetaDataServiceImpl implements MetaDataService
 			return;
 		}
 
-		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
+		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
 				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getId), getEntityTypeFetch(),
 						EntityType.class).collect(toMap(EntityType::getId, Function.identity()));
 
-		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
-		addMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
+		upsertEntityTypesSkipMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
+		addMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 
 	}
 
-	private void addMappedByAttributes(List<EntityType> resolvedEntityType,
+	private void addMappedByAttributes(List<EntityType> resolvedEntityTypes,
 			Map<String, EntityType> existingEntityTypeMap)
 	{
 		// 2nd pass: create mappedBy attributes and update entity
-		resolvedEntityType.forEach(entityType ->
+		resolvedEntityTypes.forEach(entityType ->
 		{
 			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 			if (existingEntityType == null)
