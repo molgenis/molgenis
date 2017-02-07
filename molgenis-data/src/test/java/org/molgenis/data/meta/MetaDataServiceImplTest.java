@@ -522,6 +522,8 @@ public class MetaDataServiceImplTest
 	@Test
 	public void addEntityTypesMappedByAttrs()
 	{
+		//FIXME: mock identifierservice
+
 		EntityType entityType0 = mock(EntityType.class);
 		when(entityType0.getFullyQualifiedName()).thenReturn("entity0");
 		when(entityType0.getName()).thenReturn("entity0");

@@ -477,7 +477,7 @@ public class ImportWizardController extends AbstractWizardController
 
 		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{
-			NameValidator.validateName(file.getName().replace("." + extension, ""));
+			NameValidator.validateEntityOrPackageName(file.getName().replace("." + extension, ""));
 			if (!DatabaseAction.ADD.equals(databaseAction))
 			{
 				throw new IllegalArgumentException(
