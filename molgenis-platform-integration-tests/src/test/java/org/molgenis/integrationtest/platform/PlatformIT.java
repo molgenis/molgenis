@@ -15,6 +15,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.test.data.staticentity.TestEntityStatic;
 import org.molgenis.util.EntityUtils;
@@ -77,6 +78,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private IndexService indexService;
 	@Autowired
 	private EntityTestHarness testHarness;
+	@Autowired
+	private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -144,28 +147,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		refEntityTypeStatic = testHarness.createStaticRefTestEntityType();
 		entityTypeStatic = testHarness.createStaticTestEntityType();
 		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
+
+		// Create a self refer entity
+		selfXrefEntityType = entitySelfXrefTestHarness.createDynamicEntityType();
 
 		runAsSystem(() ->
 		{
 			addDefaultLanguages();
 			metaDataService.addEntityType(refEntityTypeDynamic);
-			EntityType ref = dataService.getEntityType(refEntityTypeDynamic.getFullyQualifiedName());
-			entityTypeDynamic = testHarness.createDynamicTestEntityType(ref);
-		});
-
-		// Create a self refer entity
-		selfXrefEntityType = testHarness.createDynamicRefEntityType();
-
-		runAsSystem(() ->
-		{
 			metaDataService.addEntityType(entityTypeDynamic);
 			metaDataService.addEntityType(selfXrefEntityType);
-			EntityType self = dataService.getEntityType(selfXrefEntityType.getFullyQualifiedName());
-
-			testHarness.addSelfReference(self);
-			metaDataService.updateEntityType(self);
+			entitySelfXrefTestHarness.addSelfReference(selfXrefEntityType);
+			metaDataService.updateEntityType(selfXrefEntityType);
 		});
-
 		setAuthentication();
 		waitForWorkToBeFinished(indexService, LOG);
 	}
@@ -1145,16 +1140,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testCreateSelfXref()
 	{
-		selfXrefEntityType = testHarness.createDynamicRefEntityType();
-		dataService.add(selfXrefEntityType.getFullyQualifiedName(), selfXrefEntityType);
-		EntityType self = dataService.getEntityType(selfXrefEntityType.getFullyQualifiedName());
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityType, 1).collect(toList())
+				.get(0);
 
-		testHarness.addSelfReference(self);
 		//Create
-		dataService.update(selfXrefEntityType.getFullyQualifiedName(), selfXrefEntityType);
-		waitForIndexToBeStable(selfXrefEntityType.getFullyQualifiedName(), indexService, LOG);
-		Entity entity = dataService
-				.findOneById(selfXrefEntityType.getFullyQualifiedName(), selfXrefEntityType.getIdValue());
+		dataService.add(selfXrefEntityType.getName(), entitySelfXref);
+		waitForIndexToBeStable(selfXrefEntityType.getName(), indexService, LOG);
+		Entity entity = dataService.findOneById(selfXrefEntityType.getName(), entitySelfXref.getIdValue());
 		assertPresent(selfXrefEntityType, entity);
 
 		Query<Entity> q1 = new QueryImpl<>();
@@ -1168,8 +1160,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(q2, selfXrefEntityType), 0);
 
 		// Update
-		dataService.update(selfXrefEntityType.getFullyQualifiedName(), entity);
-		waitForIndexToBeStable(selfXrefEntityType.getFullyQualifiedName(), indexService, LOG);
+		dataService.update(selfXrefEntityType.getName(), entity);
+		waitForIndexToBeStable(selfXrefEntityType.getName(), indexService, LOG);
 		assertPresent(selfXrefEntityType, entity);
 
 		// Verify value in elasticsearch after update
@@ -1177,7 +1169,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(q1, selfXrefEntityType), 0);
 
 		// Verify value in PostgreSQL after update
-		entity = dataService.findOneById(selfXrefEntityType.getFullyQualifiedName(), entity.getIdValue());
+		entity = dataService.findOneById(selfXrefEntityType.getName(), entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "attr_string_new");
 
