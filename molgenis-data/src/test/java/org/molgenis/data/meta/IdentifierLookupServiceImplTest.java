@@ -80,7 +80,7 @@ public class IdentifierLookupServiceImplTest
 
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(q.eq(EntityTypeMetadata.SIMPLE_NAME, entityTypeName)).thenReturn(q);
+		when(q.eq(EntityTypeMetadata.NAME, entityTypeName)).thenReturn(q);
 		when(q.fetch(any(Fetch.class))).thenReturn(q);
 		when(q.findAll()).then(invocation -> Stream.of(entityType, entityTypeA, entityTypeB, entityTypeC));
 		when(dataService.query(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(q);
@@ -100,7 +100,7 @@ public class IdentifierLookupServiceImplTest
 
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(q.eq(EntityTypeMetadata.SIMPLE_NAME, entityTypeName)).thenReturn(q);
+		when(q.eq(EntityTypeMetadata.NAME, entityTypeName)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(EntityTypeMetadata.PACKAGE, null)).thenReturn(q);
 		when(q.fetch(any(Fetch.class))).thenReturn(q);
@@ -117,7 +117,7 @@ public class IdentifierLookupServiceImplTest
 
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(q.eq(EntityTypeMetadata.SIMPLE_NAME, entityTypeName)).thenReturn(q);
+		when(q.eq(EntityTypeMetadata.NAME, entityTypeName)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(EntityTypeMetadata.PACKAGE, null)).thenReturn(q);
 		when(q.fetch(any(Fetch.class))).thenReturn(q);
@@ -158,7 +158,7 @@ public class IdentifierLookupServiceImplTest
 
 		@SuppressWarnings("unchecked")
 		Query<Package> q = mock(Query.class);
-		when(q.eq(PackageMetadata.SIMPLE_NAME, myPackageName)).thenReturn(q);
+		when(q.eq(PackageMetadata.NAME, myPackageName)).thenReturn(q);
 		when(q.fetch(any(Fetch.class))).thenReturn(q);
 		when(q.findAll()).then(invocation -> Stream.of(packageA, packageB, packageC));
 		when(dataService.query(PACKAGE, Package.class)).thenReturn(q);
@@ -179,7 +179,7 @@ public class IdentifierLookupServiceImplTest
 
 		@SuppressWarnings("unchecked")
 		Query<Package> q = mock(Query.class);
-		when(q.eq(PackageMetadata.SIMPLE_NAME, myPackageName)).thenReturn(q);
+		when(q.eq(PackageMetadata.NAME, myPackageName)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(PackageMetadata.PARENT, null)).thenReturn(q);
 		when(q.fetch(any(Fetch.class))).thenReturn(q);
@@ -196,7 +196,7 @@ public class IdentifierLookupServiceImplTest
 
 		@SuppressWarnings("unchecked")
 		Query<Package> q = mock(Query.class);
-		when(q.eq(PackageMetadata.SIMPLE_NAME, packageName)).thenReturn(q);
+		when(q.eq(PackageMetadata.NAME, packageName)).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(PackageMetadata.PARENT, null)).thenReturn(q);
 		when(q.fetch(any(Fetch.class))).thenReturn(q);

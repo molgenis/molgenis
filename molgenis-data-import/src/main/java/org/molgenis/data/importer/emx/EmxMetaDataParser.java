@@ -687,7 +687,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		for (Entity pack : packageRepo)
 		{
-			String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+			String name = pack.getString(PackageMetadata.NAME);
 			String parentName = pack.getString(PackageMetadata.PARENT);
 
 			if (parentName == null)
@@ -712,7 +712,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				Entity parent = resolvedByName.get(pack.getString(PackageMetadata.PARENT));
 				if (parent != null)
 				{
-					String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+					String name = pack.getString(PackageMetadata.NAME);
 					ready.add(pack);
 					resolvedByName.put(name, pack);
 				}

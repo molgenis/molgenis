@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.support.StaticEntity;
 
 import static com.google.common.collect.Iterables.concat;
@@ -88,12 +89,12 @@ public class Package extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(PackageMetadata.SIMPLE_NAME);
+		return getString(PackageMetadata.NAME);
 	}
 
 	public Package setName(String name)
 	{
-		set(PackageMetadata.SIMPLE_NAME, name);
+		set(PackageMetadata.NAME, name);
 		return this;
 	}
 
@@ -130,7 +131,7 @@ public class Package extends StaticEntity
 	 */
 	public String getFullyQualifiedName()
 	{
-		return getParent() == null ? getName() : getParent().getFullyQualifiedName() + PACKAGE_SEPARATOR + getName();
+		return MetaUtils.getFullyQualyfiedName(getName(), getParent());
 	}
 
 	/**

@@ -141,8 +141,8 @@ public class ImportWriter
 			Map<String, EntityType> existingEntityTypeMap = dataService
 					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
 							entities.stream().map(EntityType::getFullyQualifiedName),
-							new Fetch().field(EntityTypeMetadata.FULL_NAME), EntityType.class)
-					.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+							new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.PACKAGE),
+							EntityType.class).collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
 					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
@@ -414,7 +414,7 @@ public class ImportWriter
 
 	private static Fetch createEntityTypeWithAttributesFetch()
 	{
-		return new Fetch().field(EntityTypeMetadata.FULL_NAME).field(EntityTypeMetadata.ATTRIBUTES,
+		return new Fetch().field(EntityTypeMetadata.PACKAGE).field(EntityTypeMetadata.ATTRIBUTES,
 				new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
 	}
 

@@ -657,7 +657,7 @@ public class MetaDataServiceImpl implements MetaDataService
 					if (existingEntityType != null)
 					{
 						return entity.getEntity(MAPPED_BY) == null
-								|| existingEntityType.getAttribute(entity.getString(NAME)) != null;
+								|| existingEntityType.getAttribute(entity.getString(AttributeMetadata.NAME)) != null;
 					}
 					else
 					{

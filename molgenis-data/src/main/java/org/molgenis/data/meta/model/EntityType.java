@@ -3,6 +3,7 @@ package org.molgenis.data.meta.model;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.ArrayList;
@@ -172,10 +173,7 @@ public class EntityType extends StaticEntity
 	 */
 	public String getFullyQualifiedName()
 	{
-		if(getName() == null){
-			System.out.println("");
-		}
-		return getPackage() == null ? getName() : getPackage().getFullyQualifiedName() + PACKAGE_SEPARATOR + getName();
+		return MetaUtils.getFullyQualyfiedName(getName(),getPackage());
 	}
 
 	/**
@@ -185,7 +183,7 @@ public class EntityType extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(SIMPLE_NAME);
+		return getString(NAME);
 	}
 
 	/**
@@ -197,7 +195,7 @@ public class EntityType extends StaticEntity
 	 */
 	public EntityType setName(String name)
 	{
-		set(SIMPLE_NAME, name);
+		set(NAME, name);
 
 		if (getLabel() == null)
 		{

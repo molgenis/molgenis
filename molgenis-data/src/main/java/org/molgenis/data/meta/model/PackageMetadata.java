@@ -21,10 +21,7 @@ public class PackageMetadata extends SystemEntityType
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
 	public static final String ID = "id";
-	// TODO remove FULL_NAME field
-	public static final String FULL_NAME = "fullName";
-	// TODO rename to NAME
-	public static final String SIMPLE_NAME = "name";
+	public static final String NAME = "name";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String PARENT = "parent";
@@ -48,7 +45,7 @@ public class PackageMetadata extends SystemEntityType
 		setDescription("Grouping of related entities");
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
-		addAttribute(SIMPLE_NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		Attribute parentAttr = addAttribute(PARENT).setReadOnly(true).setDataType(XREF).setRefEntity(this)
