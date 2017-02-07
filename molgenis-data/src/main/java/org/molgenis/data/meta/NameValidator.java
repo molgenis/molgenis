@@ -49,10 +49,10 @@ public class NameValidator
 					"Name [" + name + "] is too long: maximum length is " + MAX_ATTRIBUTE_LENGTH + " characters.");
 		}
 
-		if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$"))
+		if (!name.matches("[a-zA-Z0-9#]+(-[a-z]{2,3})??$"))
 		{
 			throw new MolgenisDataException("Invalid characters in: [" + name
-					+ "] Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.");
+					+ "] Only letters (a-z, A-Z), digits (0-9) and hashes (#) are allowed.");
 		}
 
 		if (Character.isDigit(name.charAt(0)))
