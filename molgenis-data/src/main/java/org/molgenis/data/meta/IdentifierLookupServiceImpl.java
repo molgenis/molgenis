@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 	}
 
 	@Override
+	@RunAsSystem
 	public String getEntityTypeId(String fullyQualifiedEntityName)
 	{
 		String[] entityNameTokens = StringUtils.split(fullyQualifiedEntityName, Package.PACKAGE_SEPARATOR);
@@ -46,6 +48,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 	}
 
 	@Override
+	@RunAsSystem
 	public String getPackageId(String fullyQualifiedPackageName)
 	{
 		String[] packagePath = fullyQualifiedPackageName.split(Package.PACKAGE_SEPARATOR);
