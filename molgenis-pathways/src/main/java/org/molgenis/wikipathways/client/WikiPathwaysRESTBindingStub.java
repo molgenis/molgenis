@@ -46,6 +46,7 @@ import java.util.Map;
  *
  * @author msk
  */
+@SuppressWarnings("unchecked")
 public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 {
 

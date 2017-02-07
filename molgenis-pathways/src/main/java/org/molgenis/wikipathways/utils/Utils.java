@@ -115,6 +115,7 @@ public class Utils
 		String score = searchResult.getChildText("score", WSNamespaces.NS2);
 		res.setScore(Double.parseDouble(score));
 
+		@SuppressWarnings("unchecked")
 		List<Element> fieldList = searchResult.getChildren("fields", WSNamespaces.NS2);
 		WSIndexField[] fields = new WSIndexField[fieldList.size()];
 		for (int i = 0; i < fieldList.size(); i++)
@@ -168,6 +169,7 @@ public class Utils
 		String species = hist.getChildText("species", WSNamespaces.NS2);
 		String revision = hist.getChildText("revision", WSNamespaces.NS2);
 
+		@SuppressWarnings("unchecked")
 		List<Element> list = hist.getChildren("history", WSNamespaces.NS2);
 		WSHistoryRow[] histRows = new WSHistoryRow[list.size()];
 		for (int i = 0; i < list.size(); i++)
