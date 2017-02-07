@@ -129,8 +129,7 @@ public class FitConAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				// FIXME 4714 refactor to work with auto id, setPackage() and setName()
-				EntityType repoMetaData = entityTypeFactory.create().setId(FITCON_TABIX_RESOURCE);
+				EntityType repoMetaData = entityTypeFactory.create().setName(FITCON_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
