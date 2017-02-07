@@ -49,8 +49,6 @@ public class SnpEffRunner
 	public static final String ENTITY_NAME_SUFFIX = "EFFECTS";
 
 	public static final String NAME = "snpEff";
-	public static final String LOF = "LOF";
-	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
 
 	private EffectsMetaData effectsMetaData = new EffectsMetaData();
