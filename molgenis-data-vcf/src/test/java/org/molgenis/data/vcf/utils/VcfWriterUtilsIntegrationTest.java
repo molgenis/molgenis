@@ -88,14 +88,14 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		annotatedEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
-		metaDataCanAnnotate =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
-		metaDataCantAnnotate =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
-		geneMeta =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName(GENES);
+		annotatedEntityType =  entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate =  entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate =  entityTypeFactory.create().setName("test");
+		geneMeta =  entityTypeFactory.create().setName(GENES);
 
-		effectMeta =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName(EFFECT);
-		vcfMeta =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("vcfMeta");
-		sampleEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("vcfSampleEntity");
+		effectMeta =  entityTypeFactory.create().setName(EFFECT);
+		vcfMeta =  entityTypeFactory.create().setName("vcfMeta");
+		sampleEntityType =  entityTypeFactory.create().setName("vcfSampleEntity");
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING).setIdAttribute(true);
 		attributePos = attributeFactory.create().setName(POS).setDataType(INT);
 		attributeRef = attributeFactory.create().setName(REF).setDataType(STRING);
@@ -226,14 +226,14 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		String idAttrName = "idAttr";
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		EntityType sampleEntityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("vcfSampleEntity");
+		EntityType sampleEntityType =  entityTypeFactory.create().setName("vcfSampleEntity");
 		Attribute sampleId = attributeFactory.create().setName(sampleIdAttrName).setIdAttribute(true);
 		sampleEntityType.addAttribute(sampleId);
 		sampleEntityType.addAttribute(attributeFactory.create().setName(formatDpAttrName));
 		sampleEntityType.addAttribute(attributeFactory.create().setName(formatEcAttrName));
 		sampleEntityType.addAttribute(attributeFactory.create().setName(formatGtAttrName));
 
-		EntityType entityType =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("vcfEntity");
+		EntityType entityType =  entityTypeFactory.create().setName("vcfEntity");
 		Attribute id = attributeFactory.create().setName(idAttrName).setIdAttribute(true);
 		entityType.addAttribute(id);
 		entityType.addAttribute(vcfAttributes.getChromAttribute());
