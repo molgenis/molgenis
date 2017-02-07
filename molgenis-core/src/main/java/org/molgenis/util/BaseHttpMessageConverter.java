@@ -29,9 +29,9 @@ public abstract class BaseHttpMessageConverter<T> extends AbstractHttpMessageCon
 
 	protected Charset getCharset(HttpHeaders headers)
 	{
-		if (headers != null && headers.getContentType() != null && headers.getContentType().getCharSet() != null)
+		if (headers != null && headers.getContentType() != null && headers.getContentType().getCharset() != null)
 		{
-			return headers.getContentType().getCharSet();
+			return headers.getContentType().getCharset();
 		}
 		return DEFAULT_CHARSET;
 	}
