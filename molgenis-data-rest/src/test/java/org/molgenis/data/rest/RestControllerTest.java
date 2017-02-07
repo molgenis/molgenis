@@ -98,6 +98,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		reset(metaDataService);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 
 		// test entity meta data
@@ -369,6 +370,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 
 		EntityType entityType = mock(EntityType.class);
@@ -393,6 +395,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		reset(dataService);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
@@ -478,6 +481,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoNotUpdateable() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		doThrow(new MolgenisDataException()).when(dataService).update(anyString(), any(Entity.class));
@@ -488,6 +492,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoIdAttributeIsNull() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		EntityType entityType = mock(EntityType.class);

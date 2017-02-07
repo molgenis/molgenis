@@ -482,6 +482,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		Package pack = mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -499,6 +500,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -514,6 +516,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -531,6 +534,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -549,6 +553,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -586,6 +591,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("org_molgenis_blah_newEntity");
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);

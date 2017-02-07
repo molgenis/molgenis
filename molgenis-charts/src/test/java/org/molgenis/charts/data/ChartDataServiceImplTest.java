@@ -66,6 +66,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		e2.set("probe", 1.6);
 		entities.add(e2);
 
+		@SuppressWarnings("unchecked")
 		final Repository<Entity> repo = mock(Repository.class);
 		when(repo.iterator()).thenReturn(entities.iterator());
 

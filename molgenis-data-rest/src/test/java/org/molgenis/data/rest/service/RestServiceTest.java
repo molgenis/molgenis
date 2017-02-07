@@ -163,7 +163,7 @@ public class RestServiceTest
 		when(entity.getEntityType()).thenReturn(entityMeta);
 		restService.updateMappedByEntities(entity);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(refEntityName), captor.capture());
 		List<Entity> refEntities = captor.getValue().collect(toList());
@@ -207,7 +207,7 @@ public class RestServiceTest
 
 		restService.updateMappedByEntities(entity, existingEntity);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(refEntityName), captor.capture());
 		List<Entity> refEntities = captor.getValue().collect(toList());

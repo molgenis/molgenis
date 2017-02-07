@@ -103,6 +103,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(ontologyTermEntity2.getString(ONTOLOGY_TERM_NAME)).thenReturn("Weight");
 		when(ontologyTermEntity2.get(ONTOLOGY_TERM_SYNONYM)).thenReturn(singletonList(synonymEntity4));
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
 		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
@@ -117,6 +118,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOntologyTerms()
 	{
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
 		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture())).thenReturn(Stream.of(ontologyTermEntity));
 

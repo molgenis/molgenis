@@ -154,6 +154,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 				+ "<DataNode TextLabel='&amp;quot;IPO4&amp;quot;' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
 				+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
 				+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
+		@SuppressWarnings("unchecked")
 		Repository<Entity> vcfRepo = mock(Repository.class);
 		Entity row1 = new DynamicEntity(vcf);
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
@@ -181,6 +182,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 						+ "<DataNode TextLabel='IPO4' Type='GeneProduct' GroupRef='bced7'>"
 						+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
 						+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
+		@SuppressWarnings("unchecked")
 		Repository<Entity> vcfRepo = mock(Repository.class);
 		Entity row1 = new DynamicEntity(vcf);
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
@@ -195,6 +197,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetPathwaysByGenes() throws ExecutionException
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> vcfRepo = mock(Repository.class);
 		Entity row1 = new DynamicEntity(vcf);
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
