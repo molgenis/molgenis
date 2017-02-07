@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
+@SuppressWarnings("deprecation")
 public class XmlMolgenisUiPluginTest
 {
 	private MolgenisPermissionService molgenisPermissionService;
@@ -82,8 +83,7 @@ public class XmlMolgenisUiPluginTest
 	@Test
 	public void getParentMenu()
 	{
-		assertEquals(
-				new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, molgenisPermissionService).getParentMenu(),
+		assertEquals(new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, molgenisPermissionService).getParentMenu(),
 				molgenisUiMenu);
 	}
 
