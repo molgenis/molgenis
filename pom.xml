@@ -486,7 +486,8 @@
                                 <nosuffix>false</nosuffix>
                                 <skipMerge>true</skipMerge>
                                 <skipMinify>false</skipMinify>
-                                <verbose>true</verbose>
+                                <!-- setting verbose to true will to output js warnings -->
+                                <verbose>false</verbose>
                             </configuration>
                         </execution>
                     </executions>
