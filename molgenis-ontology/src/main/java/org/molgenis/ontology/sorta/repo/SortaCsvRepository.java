@@ -58,7 +58,6 @@ public class SortaCsvRepository extends AbstractRepository
 					.getBean(AttributeFactory.class); // FIXME do not use application context
 
 			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS, attrMetaFactory);
-			// FIXME 4714 refactor to work with auto id, setPackage() and setName()
 			entityType.setId(entityName);
 			entityType.setName(entityName);
 			entityType.setLabel(entityLabel);

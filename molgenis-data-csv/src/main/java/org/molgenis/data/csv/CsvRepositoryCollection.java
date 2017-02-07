@@ -62,7 +62,6 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public Iterable<String> getEntityIds()
 	{
-		// FIXME 4714 decide how this should work with ids
 		return entityNames;
 	}
 
@@ -159,7 +158,6 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		// FIXME 4714 decide how this should work with ids
 		return hasRepository(entityType.getFullyQualifiedName());
 	}
 

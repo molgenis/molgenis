@@ -145,8 +145,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityType == null)
 		{
-			// FIXME 4714 refactor to work with auto id, setPackage() and setName()
-			EntityType entityType = entityTypeFactory.create().setId(sheet.getSheetName());
+			EntityType entityType = entityTypeFactory.create().setName(sheet.getSheetName());
 
 			if (colNamesMap == null)
 			{
