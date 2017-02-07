@@ -19,9 +19,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.dataexplorer.controller.DirectoryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -97,7 +97,7 @@ public class DirectoryController extends MolgenisPluginController
 	{
 		requireNonNull(username, password);
 		String userPass = username + ":" + password;
-		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
+		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(UTF_8));
 		return "Basic " + userPassBase64;
 	}
 

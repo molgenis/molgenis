@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -26,7 +27,7 @@ public class JavaMailSenderFactoryTest
 	{
 		MockitoAnnotations.initMocks(this);
 		javaMailSenderFactory = new JavaMailSenderFactory();
-		charset = Charset.forName("UTF-8");
+		charset = UTF_8;
 	}
 
 	@BeforeMethod
