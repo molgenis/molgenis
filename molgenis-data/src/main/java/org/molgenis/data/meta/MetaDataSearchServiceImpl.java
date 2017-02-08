@@ -96,11 +96,11 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	// Get the root package of an entity
 	private Package getRootPackage(EntityType entityType)
 	{
-		Entity packageEntity = entityType.getEntity(EntityTypeMetadata.PACKAGE);
+		Package packageEntity = entityType.getEntity(EntityTypeMetadata.PACKAGE, Package.class);
 
 		if (packageEntity != null)
 		{
-			String packageName = MetaUtils.getFullyQualyfiedName(packageEntity.getString(PackageMetadata.NAME), entityType.getPackage());
+			String packageName = packageEntity.getFullyQualifiedName();
 			if (packageName != null)
 			{
 				Package p = metaDataService.getPackage(packageName);
