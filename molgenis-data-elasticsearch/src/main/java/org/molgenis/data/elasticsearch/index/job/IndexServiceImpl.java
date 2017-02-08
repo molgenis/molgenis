@@ -97,7 +97,7 @@ public class IndexServiceImpl implements IndexService
 	/**
 	 * Cleans up successful IndexJobExecutions that finished longer than five minutes ago.
 	 */
-	@Scheduled(fixedRate = 5 * 60 * 1000)
+	//FIXME @Scheduled(fixedRate = 5 * 60 * 1000)
 	public void cleanupJobExecutions()
 	{
 		runAsSystem(() ->

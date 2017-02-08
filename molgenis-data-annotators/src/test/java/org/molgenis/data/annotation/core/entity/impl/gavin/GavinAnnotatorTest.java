@@ -80,8 +80,8 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	{
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();
-		emd = entityTypeFactory.create().setFullyQualifiedName("gavin");
-		entityType = entityTypeFactory.create().setFullyQualifiedName("test_variant");
+		emd = null; //FIXME  entityTypeFactory.create().setFullyQualifiedName("gavin");
+		entityType = null; //FIXME  entityTypeFactory.create().setFullyQualifiedName("test_variant");
 		List<Attribute> refAttributesList = Arrays.asList(CaddAnnotator.createCaddScaledAttr(attributeFactory),
 				ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
 		entityType.addAttributes(refAttributesList);

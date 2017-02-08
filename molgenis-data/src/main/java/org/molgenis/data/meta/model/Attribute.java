@@ -713,7 +713,7 @@ public class Attribute extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "Attribute{" + "name=" + getName() + '}';
+		return "Attribute{" + "name=" + getName() + " id="+ getIdValue()+'}';
 	}
 
 	/**

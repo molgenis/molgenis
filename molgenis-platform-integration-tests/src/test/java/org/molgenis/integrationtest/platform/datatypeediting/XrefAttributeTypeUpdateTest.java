@@ -34,7 +34,7 @@ public class XrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	@DataProvider(name = "validConversionData")
 	public Object[][] validConversionData()
 	{
-		Entity entity = dataService.findOneById("REFERENCE_ENTITY", "1");
+		Entity entity = dataService.findOneById("REFERENCEENTITY", "1");
 		return new Object[][] { { entity, STRING, "1" }, { entity, INT, 1 }, { entity, LONG, 1L },
 				{ entity, CATEGORICAL, "label1" } };
 	}
@@ -60,8 +60,8 @@ public class XrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		Entity entity1 = dataService.findOneById("REFERENCE_ENTITY", "1");
-		Entity entity2 = dataService.findOneById("REFERENCE_ENTITY", "molgenis@test.org");
+		Entity entity1 = dataService.findOneById("REFERENCEENTITY", "1");
+		Entity entity2 = dataService.findOneById("REFERENCEENTITY", "molgenis@test.org");
 		return new Object[][] { { entity1, BOOL, MolgenisValidationException.class,
 				"Attribute data type update from [XREF] to [BOOL] not allowed, allowed types are [CATEGORICAL, INT, LONG, STRING]" },
 				{ entity1, TEXT, MolgenisValidationException.class,

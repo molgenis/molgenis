@@ -36,7 +36,7 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 @Configuration
 public class ThousandGenomesAnnotator implements AnnotatorConfig
 {
-	public static final String NAME = "thousand_genomes";
+	public static final String NAME = "thousandgenomes";
 
 	public static final String THOUSAND_GENOME_AF = "Thousand_Genomes_AF";
 	public static final String THOUSAND_GENOME_AF_LABEL = "Thousand genome allele frequency";

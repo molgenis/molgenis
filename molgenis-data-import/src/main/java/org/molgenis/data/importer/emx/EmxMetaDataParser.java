@@ -210,7 +210,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	@Override
-	//FIXME The source is parsed twice!!! Once by dermineImportableEntities and once by doImport
+	//FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
 	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackageName)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
@@ -275,7 +275,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	private ImmutableMap<String, EntityType> getEntityTypeMap(DataService dataService, RepositoryCollection source)
 	{
-		// FIXME: So if there is no attribute sheet, we assume it is already in the dataservice?
+		// If there is no attribute sheet, we assume the entity is already known in MOLGENIS
 		Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
 		if (attributeSourceRepository != null) return getEntityTypeFromSource(source).getEntityMap();
 		else return getEntityTypeFromDataService(dataService, source.getEntityIds());
@@ -441,8 +441,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + rowIndex);
 
 			Package package_ = packageFactory.create();
-			//FIXME 4714 setId() and setPackage()
-			package_.setName(name);
 			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
 			package_.setLabel(packageEntity.getString(EMX_PACKAGE_LABEL));
 
@@ -689,7 +687,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		for (Entity pack : packageRepo)
 		{
-			String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+			String name = pack.getString(PackageMetadata.NAME);
 			String parentName = pack.getString(PackageMetadata.PARENT);
 
 			if (parentName == null)
@@ -714,7 +712,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				Entity parent = resolvedByName.get(pack.getString(PackageMetadata.PARENT));
 				if (parent != null)
 				{
-					String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+					String name = pack.getString(PackageMetadata.NAME);
 					ready.add(pack);
 					resolvedByName.put(name, pack);
 				}
@@ -1102,7 +1100,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * re-iterate to map the mrefs/xref refEntity (or give error if not found)
-	 * TODO consider also those in existing db
 	 *
 	 * @param attributeRepo       the attributes {@link Repository}
 	 * @param intermediateResults {@link ParsedMetaData} to add the ref entities to

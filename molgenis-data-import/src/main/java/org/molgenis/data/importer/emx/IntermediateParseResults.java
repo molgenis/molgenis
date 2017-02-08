@@ -120,20 +120,22 @@ public final class IntermediateParseResults
 		}
 	}
 
-	public EntityType addEntityType(String name)
+	public EntityType addEntityType(String fullyQualifiedName)
 	{
-		String simpleName = name;
-		for (String packageName : packages.keySet())
+		String simpleName = fullyQualifiedName;
+		Package pack = null;
+		for (Package p : packages.values())
 		{
-			if (name.toLowerCase().startsWith(packageName.toLowerCase()))
+			String packageName = p.getFullyQualifiedName();
+			if (fullyQualifiedName.toLowerCase().startsWith(packageName.toLowerCase()))
 			{
-				simpleName = name.substring(packageName.length() + 1);// package_entity
+				simpleName = fullyQualifiedName.substring(packageName.length() + 1);// package_entity
+				pack = p;
 			}
 		}
 
-		// FIXME 4714 refactor to work with auto id, setPackage() and setName()
-		EntityType emd = entityTypeFactory.create().setId(name).setName(simpleName);
-		entities.put(name, emd);
+		EntityType emd = entityTypeFactory.create().setName(simpleName).setPackage(pack);
+		entities.put(fullyQualifiedName, emd);
 		return emd;
 	}
 

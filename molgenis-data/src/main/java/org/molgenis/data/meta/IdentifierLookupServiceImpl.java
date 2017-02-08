@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 	}
 
 	@Override
+	@RunAsSystem
 	public String getEntityTypeId(String fullyQualifiedEntityName)
 	{
 		String[] entityNameTokens = StringUtils.split(fullyQualifiedEntityName, Package.PACKAGE_SEPARATOR);
@@ -46,6 +48,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 	}
 
 	@Override
+	@RunAsSystem
 	public String getPackageId(String fullyQualifiedPackageName)
 	{
 		String[] packagePath = fullyQualifiedPackageName.split(Package.PACKAGE_SEPARATOR);
@@ -65,7 +68,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 	private String getEntityTypeIdNoPackage(String entityName)
 	{
 		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
-				.eq(EntityTypeMetadata.SIMPLE_NAME, entityName).and().eq(EntityTypeMetadata.PACKAGE, null)
+				.eq(EntityTypeMetadata.NAME, entityName).and().eq(EntityTypeMetadata.PACKAGE, null)
 				.fetch(new Fetch().field(EntityTypeMetadata.ID)).findOne();
 		return entityType != null ? entityType.getId() : null;
 	}
@@ -76,7 +79,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 		String[] packageTokens = copyOfRange(entityNameTokens, 0, entityNameTokens.length - 1);
 
 		Stream<EntityType> entityTypeStream = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
-				.eq(EntityTypeMetadata.SIMPLE_NAME, entityName)
+				.eq(EntityTypeMetadata.NAME, entityName)
 				.fetch(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)).findAll();
 
 		return entityTypeStream.filter(entityType -> isMatch(entityType.getPackage(), packageTokens))
@@ -85,7 +88,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 
 	private String getPackageIdNoParentPackage(String packageName)
 	{
-		Package package_ = dataService.query(PACKAGE, Package.class).eq(PackageMetadata.SIMPLE_NAME, packageName).and()
+		Package package_ = dataService.query(PACKAGE, Package.class).eq(PackageMetadata.NAME, packageName).and()
 				.eq(PackageMetadata.PARENT, null).fetch(new Fetch().field(PackageMetadata.ID)).findOne();
 		return package_ != null ? package_.getId() : null;
 	}
@@ -94,7 +97,7 @@ public class IdentifierLookupServiceImpl implements IdentifierLookupService
 	{
 		String packageName = packagePath[packagePath.length - 1];
 		Stream<Package> packageStream = dataService.query(PACKAGE, Package.class)
-				.eq(PackageMetadata.SIMPLE_NAME, packageName)
+				.eq(PackageMetadata.NAME, packageName)
 				.fetch(new Fetch().field(PackageMetadata.ID).field(PackageMetadata.PARENT)).findAll();
 
 		return packageStream.filter(package_ -> isMatch(package_, packagePath)).map(Package::getId).findFirst()

@@ -264,22 +264,39 @@ public class MetaDataServiceImpl implements MetaDataService
 			return;
 		}
 
-		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
+		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(entityTypes);
 
-		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getId), getEntityTypeFetch(),
-						EntityType.class).collect(toMap(EntityType::getId, Function.identity()));
-
-		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
-		addMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
+		Map<String, EntityType> existingEntityTypeMap = getExistingEntityTypeMap(entityTypes);
+		upsertEntityTypesSkipMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
+		addMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 
 	}
 
-	private void addMappedByAttributes(List<EntityType> resolvedEntityType,
+	private Map<String, EntityType> getExistingEntityTypeMap(Collection<EntityType> entityTypes)
+	{
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
+		entityTypes.forEach(entityType ->
+		{
+			String fullyQualifiedName = entityType.getFullyQualifiedName();
+			String entityId = identifierLookupService.getEntityTypeId(fullyQualifiedName);
+			if(entityId != null)
+			{
+				EntityType existingEntityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityId, EntityType.class);
+
+				if (existingEntityType != null)
+				{
+					existingEntityTypeMap.put(fullyQualifiedName, entityType);
+				}
+			}
+		});
+		return existingEntityTypeMap;
+	}
+
+	private void addMappedByAttributes(List<EntityType> resolvedEntityTypes,
 			Map<String, EntityType> existingEntityTypeMap)
 	{
 		// 2nd pass: create mappedBy attributes and update entity
-		resolvedEntityType.forEach(entityType ->
+		resolvedEntityTypes.forEach(entityType ->
 		{
 			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 			if (existingEntityType == null)
@@ -305,7 +322,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 1st pass: create entities and attributes except for mappedBy attributes
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
@@ -398,14 +415,15 @@ public class MetaDataServiceImpl implements MetaDataService
 		// TODO replace with dataService.upsert once available in Repository
 		packages.forEach(package_ ->
 		{
-			Package existingPackage = dataService.findOneById(PACKAGE, package_.getId(), Package.class);
-			if (existingPackage == null)
+			String packageId = identifierLookupService.getPackageId(package_.getFullyQualifiedName());
+			if(packageId != null)
 			{
-				addPackage(package_);
+				package_.setId(packageId);
+				dataService.update(PACKAGE, package_);
 			}
 			else
 			{
-				dataService.update(PACKAGE, package_);
+				addPackage(package_);
 			}
 		});
 	}
@@ -639,7 +657,7 @@ public class MetaDataServiceImpl implements MetaDataService
 					if (existingEntityType != null)
 					{
 						return entity.getEntity(MAPPED_BY) == null
-								|| existingEntityType.getAttribute(entity.getString(NAME)) != null;
+								|| existingEntityType.getAttribute(entity.getString(AttributeMetadata.NAME)) != null;
 					}
 					else
 					{

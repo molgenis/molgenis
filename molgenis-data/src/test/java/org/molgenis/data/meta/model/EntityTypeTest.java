@@ -13,7 +13,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.SIMPLE_NAME;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
@@ -87,7 +87,7 @@ public class EntityTypeTest
 		String simpleName = "simpleName";
 		entityType.setName(simpleName);
 		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getString(NAME), simpleName);
 		assertEquals(entityType.getLabel(), simpleName);
 		assertEquals(entityType.getString(LABEL), simpleName);
 	}
@@ -101,7 +101,7 @@ public class EntityTypeTest
 		entityType.setLabel(label);
 		entityType.setName(simpleName);
 		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getString(NAME), simpleName);
 		assertEquals(entityType.getLabel(), label);
 		assertEquals(entityType.getString(LABEL), label);
 	}
@@ -219,8 +219,7 @@ public class EntityTypeTest
 		Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
 		Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.FULL_NAME)).thenReturn(strAttr);
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.SIMPLE_NAME)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.NAME)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.PACKAGE)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(LABEL)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.DESCRIPTION)).thenReturn(strAttr);

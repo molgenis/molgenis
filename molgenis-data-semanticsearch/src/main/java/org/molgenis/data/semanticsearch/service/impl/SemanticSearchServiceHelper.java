@@ -227,12 +227,12 @@ public class SemanticSearchServiceHelper
 	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
 		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
-				new QueryImpl<Entity>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityType.getFullyQualifiedName()));
+				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
 
 		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getFullyQualifiedName());
 
-		List<String> attributeIdentifiers = new ArrayList<String>();
+		List<String> attributeIdentifiers = new ArrayList<>();
 
 		recursivelyCollectAttributeIdentifiers(EntityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES),
 				attributeIdentifiers);

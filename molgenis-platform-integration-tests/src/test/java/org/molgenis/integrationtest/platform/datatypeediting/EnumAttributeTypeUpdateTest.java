@@ -88,7 +88,7 @@ public class EnumAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 				{ "1", BOOL, MolgenisValidationException.class,
 						"Attribute data type update from [ENUM] to [BOOL] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
 				{ "1b", STRING, MolgenisValidationException.class,
-						"Invalid [enum] value [1b] for attribute [mainAttribute] of entity [null] with type [MAIN_ENTITY]. Value must be one of [1, 2b, abc]" },
+						"Invalid [enum] value [1b] for attribute [mainAttribute] of entity [null] with type [MAINENTITY]. Value must be one of [1, 2b, abc]" },
 				{ "1", SCRIPT, MolgenisValidationException.class,
 						"Attribute data type update from [ENUM] to [SCRIPT] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
 				{ "1", ONE_TO_MANY, MolgenisValidationException.class,

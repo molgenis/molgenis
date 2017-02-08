@@ -206,8 +206,7 @@ public class EffectStructureConverter
 	private EntityType createEffectsEntityType(ArrayList<Attribute> effectFieldAttributeList, String effectEntityName,
 			List<Attribute> annotatorAttributes)
 	{
-		// FIXME 4714 refactor to work with auto id, setPackage() and setName()
-		EntityType effectsEntityType = entityTypeFactory.create().setId(effectEntityName);
+		EntityType effectsEntityType = entityTypeFactory.create().setName(effectEntityName);
 		effectsEntityType.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityType.AttributeRole.ROLE_ID);
 		effectsEntityType.addAttributes(effectFieldAttributeList);
