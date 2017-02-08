@@ -57,7 +57,7 @@ public class OntologyImportService implements ImportService
 		EntityImportReport report = new EntityImportReport();
 		try
 		{
-			Iterator<String> it = source.getEntityNames().iterator();
+			Iterator<String> it = source.getEntityIds().iterator();
 			while (it.hasNext())
 			{
 				String entityNameToImport = it.next();
@@ -131,7 +131,7 @@ public class OntologyImportService implements ImportService
 
 		if (ontologyExists) throw new MolgenisDataException("The ontology you are trying to import already exists");
 
-		Iterator<String> it = source.getEntityNames().iterator();
+		Iterator<String> it = source.getEntityIds().iterator();
 		while (it.hasNext())
 		{
 			String entityName = it.next();

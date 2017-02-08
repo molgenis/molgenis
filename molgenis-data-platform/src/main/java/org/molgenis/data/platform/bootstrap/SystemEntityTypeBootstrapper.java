@@ -42,7 +42,7 @@ public class SystemEntityTypeBootstrapper
 		LOG.trace("Internationalized system entity meta data");
 
 		LOG.trace("Persisting system entity meta data ...");
-		systemEntityTypePersister.persist(event);
+		systemEntityTypePersister.persist();
 		LOG.trace("Persisted system entity meta data");
 	}
 }

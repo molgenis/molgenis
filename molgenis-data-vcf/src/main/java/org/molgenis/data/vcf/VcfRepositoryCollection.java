@@ -70,8 +70,9 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
+		// FIXME 4714 decide how this should work with ids
 		return Collections.singleton(entityName);
 	}
 
@@ -100,7 +101,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	{
 		return new Iterator<Repository<Entity>>()
 		{
-			Iterator<String> it = getEntityNames().iterator();
+			Iterator<String> it = getEntityIds().iterator();
 
 			@Override
 			public boolean hasNext()
@@ -121,7 +122,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> entityNames = getEntityNames().iterator();
+		Iterator<String> entityNames = getEntityIds().iterator();
 		while (entityNames.hasNext())
 		{
 			if (entityNames.next().equals(name)) return true;
@@ -132,6 +133,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
+		// FIXME 4714 decide how this should work with ids
 		return hasRepository(entityType.getFullyQualifiedName());
 	}
 }

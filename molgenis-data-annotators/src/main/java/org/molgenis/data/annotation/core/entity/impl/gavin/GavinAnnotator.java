@@ -133,7 +133,8 @@ public class GavinAnnotator implements AnnotatorConfig
 			public List<Attribute> getRequiredAttributes()
 			{
 				List<Attribute> requiredAttributes = new ArrayList<>();
-				EntityType entityType = entityTypeFactory.create().setFullyQualifiedName(VARIANT);
+				// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+				EntityType entityType = entityTypeFactory.create().setId(VARIANT);
 				List<Attribute> refAttributesList = Arrays
 						.asList(createCaddScaledAttr(attributeFactory), getExacAFAttr(attributeFactory),
 								vcfAttributes.getAltAttribute());

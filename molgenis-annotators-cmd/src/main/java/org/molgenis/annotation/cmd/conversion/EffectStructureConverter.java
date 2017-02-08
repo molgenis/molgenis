@@ -24,9 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.data.meta.AttributeType.MREF;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.EFFECT;
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
@@ -208,7 +206,8 @@ public class EffectStructureConverter
 	private EntityType createEffectsEntityType(ArrayList<Attribute> effectFieldAttributeList, String effectEntityName,
 			List<Attribute> annotatorAttributes)
 	{
-		EntityType effectsEntityType = entityTypeFactory.create().setFullyQualifiedName(effectEntityName);
+		// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+		EntityType effectsEntityType = entityTypeFactory.create().setId(effectEntityName);
 		effectsEntityType.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityType.AttributeRole.ROLE_ID);
 		effectsEntityType.addAttributes(effectFieldAttributeList);

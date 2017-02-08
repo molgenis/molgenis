@@ -554,8 +554,10 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityType sourceMetaData)
 	{
-		EntityType resultEntityType = EntityType.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS, attrMetaFactory);
-		resultEntityType.setFullyQualifiedName(resultEntityName);
+		EntityType resultEntityType = EntityType
+				.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS, attrMetaFactory);
+		// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+		resultEntityType.setId(resultEntityName);
 		resultEntityType.setName(resultEntityName);
 		resultEntityType.setPackage(null);
 		resultEntityType.setAbstract(false);

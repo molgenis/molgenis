@@ -49,7 +49,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findAttributeEntity(EntityType entityType, String attributeName)
 	{
-		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getFullyQualifiedName());
+		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId());
 		Optional<Entity> result = stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
@@ -57,7 +57,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findEntity(EntityType emd)
 	{
-		return dataService.findOneById(ENTITY_TYPE_META_DATA, emd.getFullyQualifiedName());
+		return dataService.findOneById(ENTITY_TYPE_META_DATA, emd.getId());
 	}
 
 	@Override

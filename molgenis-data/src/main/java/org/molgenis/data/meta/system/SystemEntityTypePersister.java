@@ -9,13 +9,12 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -33,36 +32,40 @@ public class SystemEntityTypePersister
 {
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private final SystemPackageRegistry systemPackageRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	@Autowired
 	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, SystemPackageRegistry systemPackageRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
+		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
 
-	public void persist(ContextRefreshedEvent event)
+	public void persist()
 	{
-		// persist entity meta data meta data
-		persistMetadataMetadata(event.getApplicationContext());
+		// persist entity metadata metadata
+		persistMetadataMetadata();
 
-		// persist entity meta data
+		// persist Package entities
+		List<Package> systemPackages = systemPackageRegistry.getSystemPackages().collect(toList());
+		injectExistingPackageIdentifiers(systemPackages);
+		dataService.getMeta().upsertPackages(systemPackages.stream());
+
+		// persist EntityType entities
 		List<EntityType> metaEntityMetaSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
-
-		// inject attribute identifiers
-		injectExistingIdentifiers(metaEntityMetaSet);
-
-		// upsert entity types
+		injectExistingEntityTypeAttributeIdentifiers(metaEntityMetaSet);
 		dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
 
-		// remove entity meta data
-		removeNonExistingSystemEntities();
+		// remove non-existing metadata
+		removeNonExistingSystemEntityTypes();
+		removeNonExistingSystemPackages();
 	}
 
-	private void persistMetadataMetadata(ApplicationContext ctx)
+	private void persistMetadataMetadata()
 	{
 		MetaDataService metadataService = dataService.getMeta();
 
@@ -80,48 +83,35 @@ public class SystemEntityTypePersister
 				metadataRepoCollection.createRepository(metaEntityType);
 			}
 		});
-
-		// collect meta entities
-		Map<String, Package> packageMap = ctx.getBeansOfType(Package.class);
-		List<Package> packagesToAdd = packageMap.values().stream().filter(this::isNotPersisted).collect(toList());
-		if (!packagesToAdd.isEmpty())
-		{
-			persist(packagesToAdd);
-		}
-	}
-
-	private boolean isNotPersisted(Package package_)
-	{
-		return dataService.findOneById(PACKAGE, package_.getIdValue(), Package.class) == null;
-	}
-
-	private void persist(List<Package> packages)
-	{
-		dataService.add(PACKAGE, packages.stream());
 	}
 
 	/**
 	 * Package-private for testability
 	 */
-	void removeNonExistingSystemEntities()
+	void removeNonExistingSystemEntityTypes()
 	{
 		// get all system entities
-		List<EntityType> systemEntityMetaSet = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-				.filter(SystemEntityTypePersister::isSystemEntity).collect(toList());
+		List<EntityType> removedSystemEntityMetas = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
+				.filter(SystemEntityTypePersister::isSystemEntity).filter(this::isNotExists).collect(toList());
 
-		// determine removed system entities
-		List<EntityType> removedSystemEntityMetas = systemEntityMetaSet.stream().filter(this::isNotExists)
-				.collect(toList());
+		dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
+	}
 
-		if (!removedSystemEntityMetas.isEmpty())
-		{
-			dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
-		}
+	private void removeNonExistingSystemPackages()
+	{
+		Stream<Package> systemPackages = dataService.findAll(PACKAGE, Package.class)
+				.filter(SystemEntityTypePersister::isSystemPackage).filter(this::isNotExists);
+
+		dataService.delete(PACKAGE, systemPackages);
 	}
 
 	private static boolean isSystemEntity(EntityType entityType)
 	{
-		Package package_ = entityType.getPackage();
+		return isSystemPackage(entityType.getPackage());
+	}
+
+	private static boolean isSystemPackage(Package package_)
+	{
 		if (package_ == null)
 		{
 			return false;
@@ -139,23 +129,45 @@ public class SystemEntityTypePersister
 		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getFullyQualifiedName());
 	}
 
+	private boolean isNotExists(Package package_)
+	{
+		return !systemPackageRegistry.containsPackage(package_);
+	}
+
+	private void injectExistingPackageIdentifiers(List<Package> systemPackages)
+	{
+		Map<String, Package> existingPackageMap = dataService.findAll(PACKAGE, Package.class)
+				.collect(toMap(Package::getFullyQualifiedName, pack -> pack));
+
+		systemPackages.forEach(pack ->
+		{
+			Package existingPackage = existingPackageMap.get(pack.getFullyQualifiedName());
+
+			if (existingPackage != null)
+			{
+				pack.setId(existingPackage.getId());
+			}
+		});
+	}
+
 	/**
 	 * Inject existing attribute identifiers in system entity types
 	 *
 	 * @param entityTypes system entity types
 	 */
-	private void injectExistingIdentifiers(List<EntityType> entityTypes)
+	private void injectExistingEntityTypeAttributeIdentifiers(List<EntityType> entityTypes)
 	{
-
-		Map<Object, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getIdValue), EntityType.class)
-				.collect(toMap(EntityType::getIdValue, Function.identity()));
+		Map<String, EntityType> existingEntityTypeMap = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
+				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
 
 		entityTypes.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getIdValue());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
+
 			if (existingEntityType != null)
 			{
+				entityType.setId(existingEntityType.getId());
+
 				Map<String, Attribute> existingAttrs = stream(existingEntityType.getOwnAllAttributes().spliterator(),
 						false).collect(toMap(Attribute::getName, Function.identity()));
 				entityType.getOwnAllAttributes().forEach(attr ->

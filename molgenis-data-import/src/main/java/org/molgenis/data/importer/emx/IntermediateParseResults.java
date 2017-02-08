@@ -131,7 +131,8 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityType emd = entityTypeFactory.create().setFullyQualifiedName(name).setName(simpleName);
+		// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+		EntityType emd = entityTypeFactory.create().setId(name).setName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}
