@@ -15,10 +15,10 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 
 public class HPORepository extends AbstractRepository
@@ -96,8 +96,7 @@ public class HPORepository extends AbstractRepository
 		{
 			entitiesByGeneSymbol = new LinkedHashMap<>();
 
-			try (CSVReader csvReader = new CSVReader(
-					new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")), '\t',
+			try (CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(file), UTF_8), '\t',
 					CSVParser.DEFAULT_QUOTE_CHARACTER, 1))
 			{
 				String[] values = csvReader.readNext();

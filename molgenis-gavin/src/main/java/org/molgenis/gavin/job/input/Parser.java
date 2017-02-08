@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -19,6 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.gavin.job.input.Files.getLines;
 import static org.molgenis.gavin.job.input.model.LineType.*;
@@ -63,7 +63,7 @@ public class Parser
 	public Multiset<LineType> tryTransform(File inputFile, File output, File error) throws IOException
 	{
 		LOG.debug("Parsing {}...", inputFile.getAbsolutePath());
-		try (Stream<String> lines = getLines(inputFile.toPath(), StandardCharsets.UTF_8);
+		try (Stream<String> lines = getLines(inputFile.toPath(), UTF_8);
 				LineSink outputSink = new LineSink(output);
 				LineSink errorSink = new LineSink(error))
 		{

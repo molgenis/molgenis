@@ -4,8 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Some utilities for the migration steps that need to access molgenis-server.properties
@@ -44,7 +45,7 @@ public class MigrationUtils
 	public static Properties getMolgenisServerProperties()
 	{
 		try (InputStreamReader in = new InputStreamReader(new FileInputStream(getMolgenisServerPropertiesFile()),
-				StandardCharsets.UTF_8))
+				UTF_8))
 		{
 			Properties p = new Properties();
 			p.load(in);

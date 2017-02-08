@@ -269,6 +269,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 			return settings;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Bean
 		public DataService dataService()
 		{

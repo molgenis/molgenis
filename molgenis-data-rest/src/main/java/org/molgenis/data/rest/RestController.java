@@ -1138,6 +1138,7 @@ public class RestController
 	}
 
 	// Handles a Query
+	@SuppressWarnings("deprecation")
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{

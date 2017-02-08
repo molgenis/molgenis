@@ -458,7 +458,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
@@ -489,7 +489,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
@@ -529,7 +529,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),

@@ -14,14 +14,14 @@ import org.molgenis.util.CloseableIterator;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class CsvIterator implements CloseableIterator<Entity>
 {
-	private static final Charset CHARSET = Charset.forName("UTF-8");
 	private final String repositoryName;
 	private final EntityType entityType;
 	private ZipFile zipFile;
@@ -167,7 +167,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 	private CSVReader createCSVReader(String fileName, InputStream in)
 	{
-		Reader reader = new InputStreamReader(in, CHARSET);
+		Reader reader = new InputStreamReader(in, UTF_8);
 
 		if (null == separator)
 		{

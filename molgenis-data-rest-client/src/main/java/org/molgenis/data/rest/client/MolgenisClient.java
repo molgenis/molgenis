@@ -151,6 +151,7 @@ public class MolgenisClient
 				Object.class, apiHref, entityName, id, attributeName);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> get(String token, String entityName, Object id)
 	{
 		ResponseEntity<Map> responseEntity = template

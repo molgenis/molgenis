@@ -8,6 +8,7 @@ import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
@@ -695,13 +696,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.add(entityTypeDynamic.getFullyQualifiedName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getFullyQualifiedName(), indexService, LOG);
 
-		Query q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
+		Query<Entity> q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
 		q1.pageSize(1000);
 
-		Query q2 = new QueryImpl<>().eq(EntityTestHarness.ATTR_BOOL, true);
+		Query<Entity> q2 = new QueryImpl<>().eq(EntityTestHarness.ATTR_BOOL, true);
 		q2.pageSize(500);
 
-		Query q3 = new QueryImpl<>().eq(ATTR_DECIMAL, 1.123);
+		Query<Entity> q3 = new QueryImpl<>().eq(ATTR_DECIMAL, 1.123);
 
 		runAsSystem(() ->
 		{
@@ -1546,10 +1547,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			indexActionRegisterService.register(entityTypeDynamic, "1");
 			indexActionRegisterService.register(entityTypeDynamic, null);
 
-			Query q = new QueryImpl();
+			Query<IndexAction> q = new QueryImpl<>();
 			q.eq(IndexActionMetaData.ENTITY_FULL_NAME, "sys_test_TypeTestDynamic");
 			Stream<org.molgenis.data.index.meta.IndexAction> all = dataService
-					.findAll(IndexActionMetaData.INDEX_ACTION, q);
+					.findAll(IndexActionMetaData.INDEX_ACTION, q, IndexAction.class);
 			all.forEach(e ->
 			{
 				LOG.info(e.getEntityFullName() + "." + e.getEntityId());

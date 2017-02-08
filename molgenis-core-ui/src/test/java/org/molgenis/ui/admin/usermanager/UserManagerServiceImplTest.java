@@ -304,7 +304,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		groupMember = mock(GroupMember.class);
 		when(groupMember.getGroup()).thenReturn(group22);
 
-		List groupMemberships = new ArrayList<GroupMember>();
+		List<GroupMember> groupMemberships = new ArrayList<>();
 		groupMemberships.add(groupMember);
 
 		when(dataService.findAll(GROUP_MEMBER,
