@@ -266,13 +266,13 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(entityTypes);
 
-		Map<String, EntityType> existingEntityTypeMap = getExisitingEntityTypeMap(entityTypes);
+		Map<String, EntityType> existingEntityTypeMap = getExistingEntityTypeMap(entityTypes);
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 		addMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 
 	}
 
-	private Map<String, EntityType> getExisitingEntityTypeMap(Collection<EntityType> entityTypes)
+	private Map<String, EntityType> getExistingEntityTypeMap(Collection<EntityType> entityTypes)
 	{
 		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 		entityTypes.forEach(entityType ->
