@@ -528,8 +528,8 @@ public class RestService
 			{
 				throw new MolgenisDataException(
 						format("Updating [%s] with id [%s] not allowed: [%s] is already referred to by another [%s]",
-								attr.getRefEntity().getFullyQualifiedName(), refEntity.getIdValue().toString(), refAttr.getName(),
-								entity.getEntityType().getFullyQualifiedName()));
+								attr.getRefEntity().getFullyQualifiedName(), refEntity.getIdValue().toString(),
+								refAttr.getName(), entity.getEntityType().getFullyQualifiedName()));
 			}
 
 			refEntity.set(refAttr.getName(), entity);

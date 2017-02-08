@@ -142,7 +142,8 @@ public class CrudRepositoryAnnotator
 		String entityName;
 		if (annotator instanceof EffectCreatingAnnotator)
 		{
-			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getFullyQualifiedName();
+			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType())
+					.getFullyQualifiedName();
 		}
 		else
 		{

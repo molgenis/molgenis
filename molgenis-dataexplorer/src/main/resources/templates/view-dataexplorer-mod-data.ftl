@@ -36,7 +36,8 @@
                        data-target="#galaxy-export-modal">Export to Galaxy</a>
                 </#if>
                 <#if showDirectoryButton>
-                    <a id="directory-export-button" class="btn btn-default">${i18n.dataexplorer_directory_export_button?html}</a>
+                    <a id="directory-export-button"
+                       class="btn btn-default">${i18n.dataexplorer_directory_export_button?html}</a>
                 </#if>
                 </div>
             </div>

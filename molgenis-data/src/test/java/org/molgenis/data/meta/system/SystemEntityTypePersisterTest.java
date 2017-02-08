@@ -68,7 +68,8 @@ public class SystemEntityTypePersisterTest
 		Package systemPackage = mock(Package.class);
 		when(systemPackage.getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM);
 
-		EntityType refRemovedMeta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refRemoved").getMock();
+		EntityType refRemovedMeta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refRemoved")
+				.getMock();
 		when(refRemovedMeta.getPackage()).thenReturn(systemPackage);
 		when(refRemovedMeta.toString()).thenReturn("refRemoved");
 		when(refRemovedMeta.getAtomicAttributes()).thenReturn(emptyList());
@@ -79,7 +80,8 @@ public class SystemEntityTypePersisterTest
 		Attribute refAttr = when(mock(Attribute.class).getRefEntity()).thenReturn(refRemovedMeta).getMock();
 		when(removedMeta.getAtomicAttributes()).thenReturn(singletonList(refAttr));
 
-		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity").getMock();
+		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity")
+				.getMock();
 		when(refEntityType.getPackage()).thenReturn(systemPackage);
 		when(refEntityType.toString()).thenReturn("refEntity");
 		when(refEntityType.getAtomicAttributes()).thenReturn(emptyList());

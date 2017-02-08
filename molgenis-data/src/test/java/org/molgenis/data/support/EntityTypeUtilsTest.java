@@ -104,7 +104,8 @@ public class EntityTypeUtilsTest
 	@Test
 	public void buildFullNamePackageDefault()
 	{
-		Package defaultPackage = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_DEFAULT).getMock();
+		Package defaultPackage = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_DEFAULT)
+				.getMock();
 		assertEquals(EntityTypeUtils.buildFullName(defaultPackage, "simpleName"), PACKAGE_DEFAULT + "_simpleName");
 	}
 

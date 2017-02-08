@@ -179,7 +179,8 @@ public class LazyEntity implements Entity
 			if (entity == null)
 			{
 				throw new UnknownEntityException(
-						"entity [" + entityType.getFullyQualifiedName() + "] with " + entityType.getIdAttribute().getName() + " ["
+						"entity [" + entityType.getFullyQualifiedName() + "] with " + entityType.getIdAttribute()
+								.getName() + " ["
 								+ id.toString() + "] does not exist");
 			}
 		}

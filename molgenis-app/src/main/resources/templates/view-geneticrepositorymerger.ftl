@@ -31,7 +31,8 @@
                         <#list entitiesMeta as entityMeta>
                         <tr>
                             <td><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.fullyQualifiedName?html}</#if></td>
-                            <td><input type="checkbox" name="datasets" value="${entityMeta.fullyQualifiedName?html}" checked></td>
+                            <td><input type="checkbox" name="datasets" value="${entityMeta.fullyQualifiedName?html}"
+                                       checked></td>
                         </tr>
                         </#list>
                         </tbody>

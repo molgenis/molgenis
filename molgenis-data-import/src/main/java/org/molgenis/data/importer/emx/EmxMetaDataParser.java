@@ -1232,8 +1232,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		existingMetaData.forEach(emd ->
 		{
-			if (!allEntityTypeMap.containsKey(emd.getFullyQualifiedName())) allEntityTypeMap.put(emd.getFullyQualifiedName(), emd);
-			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getFullyQualifiedName()))) && emd instanceof SystemEntityType)
+			if (!allEntityTypeMap.containsKey(emd.getFullyQualifiedName()))
+				allEntityTypeMap.put(emd.getFullyQualifiedName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getFullyQualifiedName())))
+					&& emd instanceof SystemEntityType)
 			{
 				throw new MolgenisDataException(
 						"SystemEntityType in the database conflicts with the metadata for this import");

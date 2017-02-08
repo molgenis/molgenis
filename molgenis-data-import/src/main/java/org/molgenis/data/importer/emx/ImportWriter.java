@@ -106,7 +106,8 @@ public class ImportWriter
 		}
 		upsertEntityTypes(groupedEntityTypes);
 
-		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getFullyQualifiedName).forEach(importReport::addNewEntity);
+		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getFullyQualifiedName)
+				.forEach(importReport::addNewEntity);
 	}
 
 	private void validateEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
@@ -135,7 +136,8 @@ public class ImportWriter
 		return runAsSystem(() ->
 		{
 			Map<String, EntityType> existingEntityTypeMap = dataService
-					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entities.stream().map(EntityType::getFullyQualifiedName),
+					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+							entities.stream().map(EntityType::getFullyQualifiedName),
 							new Fetch().field(EntityTypeMetadata.FULL_NAME), EntityType.class)
 					.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
@@ -225,10 +227,12 @@ public class ImportWriter
 				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getFullyQualifiedName().toLowerCase()
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getFullyQualifiedName()
+						.toLowerCase()
 						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
-					emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName().substring(defaultPackage.length() + 1));
+					emxEntityRepo = source
+							.getRepository(entityType.getFullyQualifiedName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -384,8 +388,9 @@ public class ImportWriter
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, updatedEntityTypes.stream().map(EntityType::getFullyQualifiedName), entityTypeFetch,
-						EntityType.class).collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+				.findAll(ENTITY_TYPE_META_DATA, updatedEntityTypes.stream().map(EntityType::getFullyQualifiedName),
+						entityTypeFetch, EntityType.class)
+				.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 		// inject attribute identifiers in entity types to import
 		updatedEntityTypes.forEach(entityType ->

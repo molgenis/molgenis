@@ -37,7 +37,8 @@ public class JobBootstrapper
 
 	private void bootstrap(SystemEntityType systemEntityType)
 	{
-		dataService.query(systemEntityType.getFullyQualifiedName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll()
+		dataService.query(systemEntityType.getFullyQualifiedName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING)
+				.findAll()
 				.forEach(this::setFailed);
 	}
 

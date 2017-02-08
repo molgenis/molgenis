@@ -19,8 +19,10 @@
     <div class="col-md-12">
     <#-- Hidden fields containing information needed for ajax requests -->
         <input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
-        <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.fullyQualifiedName?html}"/>
-        <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.fullyQualifiedName?html}"/>
+        <input id="target" type="hidden" name="target"
+               value="${entityMapping.targetEntityType.fullyQualifiedName?html}"/>
+        <input id="source" type="hidden" name="source"
+               value="${entityMapping.sourceEntityType.fullyQualifiedName?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
                value="${attributeMapping.targetAttribute.name?html}"/>
         <input id="targetAttributeType" type="hidden" name="targetAttributeType"
@@ -49,7 +51,8 @@
 <div class="row">
     <div class="col-md-12 col-lg-12">
         <center><h4>Mapping to <i>${entityMapping.targetEntityType.fullyQualifiedName}
-            .${attributeMapping.targetAttribute.name}</i> from <i>${entityMapping.sourceEntityType.fullyQualifiedName}</i>
+            .${attributeMapping.targetAttribute.name}</i> from
+            <i>${entityMapping.sourceEntityType.fullyQualifiedName}</i>
         </h4></center>
     </div>
 </div>

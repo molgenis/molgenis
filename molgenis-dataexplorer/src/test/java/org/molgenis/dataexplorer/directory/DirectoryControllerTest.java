@@ -80,7 +80,7 @@ public class DirectoryControllerTest
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
 		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
-		
+
 		assertFalse(controller.showDirectoryButton("blah"));
 	}
 

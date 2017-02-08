@@ -330,7 +330,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		for (EntityType emd : aPackage.getEntityTypes())
 		{
-			entiesForThisPackage.add(new PackageResponse.Entity(emd.getFullyQualifiedName(), emd.getLabel(), emd.isAbstract()));
+			entiesForThisPackage
+					.add(new PackageResponse.Entity(emd.getFullyQualifiedName(), emd.getLabel(), emd.isAbstract()));
 		}
 		Iterable<Package> subPackages = aPackage.getChildren();
 		if (subPackages != null)

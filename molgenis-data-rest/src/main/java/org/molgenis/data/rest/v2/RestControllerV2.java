@@ -703,8 +703,8 @@ class RestControllerV2
 	private void createEntityValuesResponseRec(Entity entity, Iterable<Attribute> attrs, Fetch fetch,
 			Map<String, Object> responseData)
 	{
-		responseData
-				.put("_href", Href.concatEntityHref(BASE_URI, entity.getEntityType().getFullyQualifiedName(), entity.getIdValue()));
+		responseData.put("_href",
+				Href.concatEntityHref(BASE_URI, entity.getEntityType().getFullyQualifiedName(), entity.getIdValue()));
 		for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();

@@ -3,12 +3,7 @@ window.top.jQuery = require('jquery');
 window.top._ = require('underscore');
 window.top.molgenis = window.top.molgenis || {};
 
-import {
-    RestClientV1,
-    RestClientV2,
-    rsql,
-    packageSeparator
-} from "rest-client"
+import {RestClientV1, RestClientV2, rsql, packageSeparator} from "rest-client";
 import {
     getAtomicAttributes,
     getCompoundAttributes,
@@ -20,7 +15,6 @@ import {
     isCompoundAttr
 } from "rest-client/AttributeFunctions";
 import {htmlEscape} from "utils/HtmlUtils";
-
 import {I18nStrings} from "i18n/I18nStrings";
 
 window.top.molgenis.RestClient = RestClientV1;

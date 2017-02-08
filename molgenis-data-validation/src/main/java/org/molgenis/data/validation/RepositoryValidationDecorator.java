@@ -204,8 +204,9 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			validationResource.setRefEntitiesIds(refEntitiesIds);
 		}
 
-		validationResource.setSelfReferencing(refAttrs.stream()
-				.anyMatch(refAttr -> refAttr.getRefEntity().getFullyQualifiedName().equals(getEntityType().getFullyQualifiedName())));
+		validationResource.setSelfReferencing(refAttrs.stream().anyMatch(
+				refAttr -> refAttr.getRefEntity().getFullyQualifiedName()
+						.equals(getEntityType().getFullyQualifiedName())));
 		validationResource.setRefAttrs(refAttrs);
 	}
 
@@ -341,7 +342,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	{
 		validationResource.getRefAttrs().forEach(refAttr ->
 		{
-			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getFullyQualifiedName());
+			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds()
+					.get(refAttr.getRefEntity().getFullyQualifiedName());
 
 			Iterable<Entity> refEntities;
 			if (isSingleReferenceType(refAttr))
@@ -365,7 +367,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			{
 				if (!refEntityIds.contains(refEntity.getIdValue()))
 				{
-					boolean selfReference = entity.getEntityType().getFullyQualifiedName().equals(refAttr.getRefEntity().getFullyQualifiedName());
+					boolean selfReference = entity.getEntityType().getFullyQualifiedName()
+							.equals(refAttr.getRefEntity().getFullyQualifiedName());
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",

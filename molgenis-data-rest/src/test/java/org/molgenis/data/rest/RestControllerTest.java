@@ -398,7 +398,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 
 		// entity meta data
-		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity").getMock();
+		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity")
+				.getMock();
 
 		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(attrId.getLabel()).thenReturn("id");

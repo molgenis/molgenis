@@ -44,7 +44,8 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	@Test
 	public void addAttribute()
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME)
+				.getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.addAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityType, attribute);
@@ -54,7 +55,8 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	@Test
 	public void deleteAttribute()
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME)
+				.getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.deleteAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityType, attribute);

@@ -36,7 +36,8 @@ public class PackageValidatorTest
 	@Test
 	public void testValidateSystemPackageInRegistry() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
+		Package package_ = when(mock(Package.class).getFullyQualifiedName())
+				.thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
 		when(package_.getName()).thenReturn("myPackage");
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);
@@ -47,7 +48,8 @@ public class PackageValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Modifying system packages is not allowed")
 	public void testValidateSystemPackageNotInRegistry() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
+		Package package_ = when(mock(Package.class).getFullyQualifiedName())
+				.thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
 		when(package_.getName()).thenReturn("myPackage");
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);

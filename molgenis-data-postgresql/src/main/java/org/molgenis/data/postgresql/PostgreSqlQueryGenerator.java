@@ -405,8 +405,8 @@ class PostgreSqlQueryGenerator
 					Attribute attr = entityType.getAttribute(attrName);
 					if (attr == null)
 					{
-						throw new UnknownAttributeException(
-								format("Unknown attribute [%s] in entity [%s]", attrName, entityType.getFullyQualifiedName()));
+						throw new UnknownAttributeException(format("Unknown attribute [%s] in entity [%s]", attrName,
+								entityType.getFullyQualifiedName()));
 					}
 					if (isPersistedInOtherTable(attr))
 					{

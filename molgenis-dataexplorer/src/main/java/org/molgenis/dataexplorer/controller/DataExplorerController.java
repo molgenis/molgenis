@@ -284,7 +284,8 @@ public class DataExplorerController extends MolgenisPluginController
 		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
 		{
 			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
+			boolean canWrite = molgenisPermissionService
+					.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
 			if (canRead || canWrite)
 			{
 				genomeEntities.put(entityType.getFullyQualifiedName(), entityType.getLabel());

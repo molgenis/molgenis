@@ -171,8 +171,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 		// convert referencing entity names to index actions
 		Stream<IndexAction> referencingEntityIndexActions = referencingEntityMap.values().stream()
-				.map(referencingEntity -> indexActionFactory.create()
-						.setEntityTypeName(referencingEntity.getName())
+				.map(referencingEntity -> indexActionFactory.create().setEntityTypeName(referencingEntity.getName())
 						.setEntityFullName(referencingEntity.getFullyQualifiedName())
 						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
 

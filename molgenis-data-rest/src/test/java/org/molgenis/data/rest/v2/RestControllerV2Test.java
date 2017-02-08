@@ -160,7 +160,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
-		EntityType refEntityType = entityTypeFactory.create().setFullyQualifiedName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
+		EntityType refEntityType = entityTypeFactory.create().setFullyQualifiedName(REF_ENTITY_NAME)
+				.setLabel(REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_VALUE_NAME)).addAttribute(
 						attributeFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)

@@ -388,7 +388,8 @@ public class EntityUtils
 		EntityType otherRefEntity = otherAttr.getRefEntity();
 		if (refEntity == null && otherRefEntity != null) return false;
 		if (refEntity != null && otherRefEntity == null) return false;
-		if (refEntity != null && otherRefEntity != null && !refEntity.getFullyQualifiedName().equals(otherRefEntity.getFullyQualifiedName()))
+		if (refEntity != null && otherRefEntity != null && !refEntity.getFullyQualifiedName()
+				.equals(otherRefEntity.getFullyQualifiedName()))
 			return false;
 
 		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression())) return false;
@@ -427,7 +428,8 @@ public class EntityUtils
 	{
 		if (entity == null && otherEntity != null) return false;
 		if (entity != null && otherEntity == null) return false;
-		if (!entity.getEntityType().getFullyQualifiedName().equals(otherEntity.getEntityType().getFullyQualifiedName())) return false;
+		if (!entity.getEntityType().getFullyQualifiedName().equals(otherEntity.getEntityType().getFullyQualifiedName()))
+			return false;
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attrName = attr.getName();

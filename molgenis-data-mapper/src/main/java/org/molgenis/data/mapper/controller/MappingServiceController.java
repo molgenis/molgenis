@@ -671,8 +671,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
 		{
-			targetAttributeEntities = dataService
-					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getFullyQualifiedName());
+			targetAttributeEntities = dataService.findAll(
+					dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
+							.getFullyQualifiedName());
 
 			targetAttributeIdAttribute = dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -707,8 +708,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
 		{
-			sourceAttributeEntities = dataService
-					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getFullyQualifiedName());
+			sourceAttributeEntities = dataService.findAll(
+					dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
+							.getFullyQualifiedName());
 
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -873,7 +875,8 @@ public class MappingServiceController extends MolgenisPluginController
 	private List<EntityType> getWritableEntityTypes()
 	{
 		return getEntityTypes().stream().filter(emd -> !emd.isAbstract())
-				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName()).contains(RepositoryCapability.WRITABLE))
+				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName())
+						.contains(RepositoryCapability.WRITABLE))
 				.collect(Collectors.toList());
 	}
 

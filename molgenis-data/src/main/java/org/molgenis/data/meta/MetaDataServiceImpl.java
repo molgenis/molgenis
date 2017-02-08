@@ -178,9 +178,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getFullyQualifiedName));
+		dataService
+				.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getFullyQualifiedName));
 
-		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(joining(",")));
+		LOG.info("Removed entities [{}]",
+				entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(joining(",")));
 	}
 
 	@Transactional
@@ -265,8 +267,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getFullyQualifiedName), getEntityTypeFetch(),
-						EntityType.class)
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getFullyQualifiedName),
+						getEntityTypeFetch(), EntityType.class)
 				.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);

@@ -71,7 +71,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 				of("code", 4, "label", "Never + fewer than once a week"));
 		Entity targetEntity5 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityType.getFullyQualifiedName())).thenAnswer(new Answer<Stream<Entity>>()
+		Mockito.when(dataService.findAll(targetRefEntityType.getFullyQualifiedName()))
+				.thenAnswer(new Answer<Stream<Entity>>()
 		{
 			@Override
 			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
@@ -98,7 +99,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity6 = new DynamicEntity(targetRefEntityType, of("code", 6, "label", "4-5 days per week"));
 		Entity sourceEntity7 = new DynamicEntity(targetRefEntityType, of("code", 7, "label", "6-7 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType.getFullyQualifiedName())).thenAnswer(new Answer<Stream<Entity>>()
+		Mockito.when(dataService.findAll(sourceRefEntityType.getFullyQualifiedName()))
+				.thenAnswer(new Answer<Stream<Entity>>()
 		{
 			@Override
 			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
@@ -127,7 +129,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity15 = new DynamicEntity(targetRefEntityType, of("code", 8, "label", "4-5 per day"));
 		Entity sourceEntity16 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "6+ per day"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType1.getFullyQualifiedName())).thenAnswer(new Answer<Stream<Entity>>()
+		Mockito.when(dataService.findAll(sourceRefEntityType1.getFullyQualifiedName()))
+				.thenAnswer(new Answer<Stream<Entity>>()
 		{
 			@Override
 			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
@@ -147,7 +150,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity18 = new DynamicEntity(targetRefEntityType, of("code", 2, "label", "no"));
 		Entity sourceEntity19 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType2.getFullyQualifiedName())).thenAnswer(new Answer<Stream<Entity>>()
+		Mockito.when(dataService.findAll(sourceRefEntityType2.getFullyQualifiedName()))
+				.thenAnswer(new Answer<Stream<Entity>>()
 		{
 			@Override
 			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable

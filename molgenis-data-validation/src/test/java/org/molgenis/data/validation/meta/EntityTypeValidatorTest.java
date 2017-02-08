@@ -172,7 +172,8 @@ public class EntityTypeValidatorTest
 	@Test
 	public void testValidateAttributeNotOwnedByExtendedEntity()
 	{
-		EntityType extendsEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType extendsEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity")
+				.getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
@@ -182,7 +183,8 @@ public class EntityTypeValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "An attribute with name \\[idAttr\\] already exists in entity \\[extendsEntity\\] or one of its parents")
 	public void testValidateAttributeOwnedByExtendedEntity()
 	{
-		EntityType extendsEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("extendsEntity").getMock();
+		EntityType extendsEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("extendsEntity")
+				.getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(singletonList(idAttr));
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);

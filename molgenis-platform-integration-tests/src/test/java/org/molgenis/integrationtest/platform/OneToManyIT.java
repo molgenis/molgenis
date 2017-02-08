@@ -140,8 +140,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		try
 		{
 			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
-			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_2);
+			Entity author1 = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
+			Entity author2 = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_2);
 
 			book1.set(BookMetaData1.AUTHOR, author2);
 			dataService.update(book1.getEntityType().getFullyQualifiedName(), book1);
@@ -175,8 +177,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		try
 		{
 			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
-			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_2);
+			Entity author1 = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
+			Entity author2 = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_2);
 
 			book1.set(BookMetaData1.AUTHOR, author2);
 			dataService.update(book1.getEntityType().getFullyQualifiedName(), Stream.of(book1));
@@ -210,9 +214,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		try
 		{
 			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
+			Entity author1 = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
 
-		dataService.delete(book1.getEntityType().getFullyQualifiedName(), book1);
+			dataService.delete(book1.getEntityType().getFullyQualifiedName(), book1);
 
 			Entity author1RetrievedAgain = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), author1.getIdValue());
@@ -234,7 +239,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		try
 		{
 			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
+			Entity author1 = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), AUTHOR_1);
 
 			dataService.delete(book1.getEntityType().getFullyQualifiedName(), Stream.of(book1));
 
@@ -421,8 +427,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(testCase);
 		runAsSystem(() ->
 		{
-			dataService.add(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), authorsAndBooks.getAuthors().stream());
-			dataService.add(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), authorsAndBooks.getBooks().stream());
+			dataService.add(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(),
+					authorsAndBooks.getAuthors().stream());
+			dataService.add(authorsAndBooks.getBookMetaData().getFullyQualifiedName(),
+					authorsAndBooks.getBooks().stream());
 			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), indexService, LOG);
 			waitForIndexToBeStable(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), indexService, LOG);
 		});

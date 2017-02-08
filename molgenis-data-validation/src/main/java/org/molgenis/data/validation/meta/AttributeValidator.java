@@ -299,7 +299,8 @@ public class AttributeValidator
 					{
 						throw new MolgenisDataException(
 								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getFullyQualifiedName(), refAttrName, attr.getEntityType().getFullyQualifiedName(),
+										refEntity.getFullyQualifiedName(), refAttrName,
+										attr.getEntityType().getFullyQualifiedName(),
 										attr.getName(), orderBy.toSortString()));
 					}
 				}

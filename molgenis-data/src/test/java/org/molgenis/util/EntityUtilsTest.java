@@ -55,7 +55,8 @@ public class EntityUtilsTest
 	@Test
 	public void doesExtend()
 	{
-		EntityType grandfather = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("grandfather").getMock();
+		EntityType grandfather = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("grandfather")
+				.getMock();
 		assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
 
 		EntityType father = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("father").getMock();
