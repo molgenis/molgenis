@@ -185,7 +185,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			refAttrs.forEach(refAttr ->
 			{
 				EntityType refEntityType = refAttr.getRefEntity();
-				String refEntityName = refEntityType.getName();
+				String refEntityName = refEntityType.getFullyQualifiedName();
 				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
 				if (refEntityIds == null)
 				{
@@ -204,8 +204,9 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			validationResource.setRefEntitiesIds(refEntitiesIds);
 		}
 
-		validationResource.setSelfReferencing(refAttrs.stream()
-				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityType().getName())));
+		validationResource.setSelfReferencing(refAttrs.stream().anyMatch(
+				refAttr -> refAttr.getRefEntity().getFullyQualifiedName()
+						.equals(getEntityType().getFullyQualifiedName())));
 		validationResource.setRefAttrs(refAttrs);
 	}
 
@@ -341,7 +342,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	{
 		validationResource.getRefAttrs().forEach(refAttr ->
 		{
-			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getName());
+			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds()
+					.get(refAttr.getRefEntity().getFullyQualifiedName());
 
 			Iterable<Entity> refEntities;
 			if (isSingleReferenceType(refAttr))
@@ -365,7 +367,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			{
 				if (!refEntityIds.contains(refEntity.getIdValue()))
 				{
-					boolean selfReference = entity.getEntityType().getName().equals(refAttr.getRefEntity().getName());
+					boolean selfReference = entity.getEntityType().getFullyQualifiedName()
+							.equals(refAttr.getRefEntity().getFullyQualifiedName());
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",

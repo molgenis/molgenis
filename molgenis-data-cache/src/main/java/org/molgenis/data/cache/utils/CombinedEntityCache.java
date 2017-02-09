@@ -82,7 +82,7 @@ public class CombinedEntityCache
 	 */
 	public void put(Entity entity)
 	{
-		String entityName = entity.getEntityType().getName();
+		String entityName = entity.getEntityType().getFullyQualifiedName();
 		cache.put(EntityKey.create(entityName, entity.getIdValue()), Optional.of(entityHydration.dehydrate(entity)));
 	}
 

@@ -18,7 +18,9 @@ import org.springframework.transaction.TransactionException;
 import javax.sql.DataSource;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +29,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toCollection;
 import static org.molgenis.data.meta.AttributeType.*;
 
 /**
@@ -157,33 +160,41 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		Matcher matcher = Pattern.compile("constraint (.+) on table \"?([^\"]+)\"? depends on table \"?([^\"]+)\"?\n?")
 				.matcher(detail);
 
-		String tableName = null;
-		Set<String> dependentTables = new LinkedHashSet<>();
+		Map<String, Set<String>> entityTypeDependencyMap = new LinkedHashMap<>();
 		while (matcher.find())
 		{
-			tableName = matcher.group(2);
-			dependentTables.add(matcher.group(3));
+			String tableName = matcher.group(2);
+			String dependentTableName = matcher.group(3);
+
+			String entityTypeName = getEntityTypeName(tableName);
+			String dependentEntityTypeName = getEntityTypeName(dependentTableName);
+			Set<String> dependentTableNames = entityTypeDependencyMap
+					.computeIfAbsent(dependentEntityTypeName, k -> new LinkedHashSet<>());
+			dependentTableNames.add(entityTypeName);
 		}
 
-		if (tableName == null) // no matches
+		if (entityTypeDependencyMap.isEmpty()) // no matches
 		{
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 
-		String message;
-		if (dependentTables.size() == 1)
+		Set<ConstraintViolation> constraintViolations = entityTypeDependencyMap.entrySet().stream().map(entry ->
 		{
-			message = format("Cannot delete entity '%s' because entity '%s' depends on it.",
-					getEntityTypeName(tableName), getEntityTypeName(dependentTables.iterator().next()));
-		}
-		else
-		{
-			message = format("Cannot delete entity '%s' because entities '%s' depend on it.",
-					getEntityTypeName(tableName),
-					dependentTables.stream().map(this::getEntityTypeName).collect(joining(", ")));
-		}
-		ConstraintViolation constraintViolation = new ConstraintViolation(message, null);
-		return new MolgenisValidationException(singleton(constraintViolation));
+			String message;
+			if (entry.getValue().size() == 1)
+			{
+				message = format("Cannot delete entity '%s' because entity '%s' depends on it.", entry.getKey(),
+						entry.getValue().iterator().next());
+			}
+			else
+			{
+				message = format("Cannot delete entity '%s' because entities '%s' depend on it.", entry.getKey(),
+						entry.getValue().stream().collect(joining(", ")));
+			}
+			return new ConstraintViolation(message, null);
+		}).collect(toCollection(LinkedHashSet::new));
+
+		return new MolgenisValidationException(constraintViolations);
 	}
 
 	/**

@@ -44,20 +44,22 @@ public class PackageValidator
 		Package parentPackage = package_.getParent();
 		if (parentPackage != null)
 		{
-			if (!(parentPackage.getName() + '_' + package_.getSimpleName()).equals(package_.getName()))
+			if (!(parentPackage.getFullyQualifiedName() + '_' + package_.getName())
+					.equals(package_.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Qualified package name [%s] not equal to parent package name [%s] underscore package name [%s]",
-								package_.getName(), parentPackage.getName(), package_.getSimpleName())));
+								package_.getFullyQualifiedName(), parentPackage.getFullyQualifiedName(),
+								package_.getName())));
 			}
 		}
 		else
 		{
-			if (!package_.getSimpleName().equals(package_.getName()))
+			if (!package_.getName().equals(package_.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Qualified package name [%s] not equal to package name [%s]", package_.getName(),
-								package_.getSimpleName())));
+						format("Qualified package name [%s] not equal to package name [%s]",
+								package_.getFullyQualifiedName(), package_.getName())));
 			}
 		}
 	}

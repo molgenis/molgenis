@@ -32,7 +32,7 @@ public class EntityTypeValidatorTest
 	private EntityTypeValidator entityTypeValidator;
 	private DataService dataService;
 
-	private EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+	private EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 	private Attribute idAttr;
 	private Attribute labelAttr;
 	private Query<EntityType> entityQ;
@@ -54,7 +54,7 @@ public class EntityTypeValidatorTest
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
 
 		// valid entity meta
-		entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 
 		idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("#idAttr");
@@ -84,11 +84,11 @@ public class EntityTypeValidatorTest
 		when(attrQ1.findOne()).thenReturn(null);
 
 		String packageName = "package";
-		Package package_ = when(mock(Package.class).getName()).thenReturn(packageName).getMock();
+		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(packageName).getMock();
 		when(entityType.getPackage()).thenReturn(package_);
 		String name = "name";
-		when(entityType.getName()).thenReturn(packageName + PACKAGE_SEPARATOR + name);
-		when(entityType.getSimpleName()).thenReturn(name);
+		when(entityType.getFullyQualifiedName()).thenReturn(packageName + PACKAGE_SEPARATOR + name);
+		when(entityType.getName()).thenReturn(name);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
@@ -102,21 +102,21 @@ public class EntityTypeValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[logout\\] is not allowed because it is a reserved keyword.")
 	public void testValidateNameIsReservedKeyword() throws Exception
 	{
-		when(entityType.getSimpleName()).thenReturn("logout");
+		when(entityType.getName()).thenReturn("logout");
 		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[attributeWithNameExceedingMaxSize\\] is too long: maximum length is 30 characters.")
 	public void testValidateNameIsTooLong() throws Exception
 	{
-		when(entityType.getSimpleName()).thenReturn("attributeWithNameExceedingMaxSize");
+		when(entityType.getName()).thenReturn("attributeWithNameExceedingMaxSize");
 		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Qualified entity name \\[package_name\\] not equal to entity package name \\[package\\] underscore entity name \\[invalidName\\]")
 	public void testValidateFullNameDoesNotMatchPackageAndSimpleName()
 	{
-		when(entityType.getSimpleName()).thenReturn("invalidName");
+		when(entityType.getName()).thenReturn("invalidName");
 		entityTypeValidator.validate(entityType);
 	}
 
@@ -124,8 +124,8 @@ public class EntityTypeValidatorTest
 	public void testValidateFullNameDoesNotMatchSimpleName()
 	{
 		when(entityType.getPackage()).thenReturn(null);
-		when(entityType.getName()).thenReturn("name");
-		when(entityType.getSimpleName()).thenReturn("invalidName");
+		when(entityType.getFullyQualifiedName()).thenReturn("name");
+		when(entityType.getName()).thenReturn("invalidName");
 		entityTypeValidator.validate(entityType);
 	}
 
@@ -172,7 +172,8 @@ public class EntityTypeValidatorTest
 	@Test
 	public void testValidateAttributeNotOwnedByExtendedEntity()
 	{
-		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType extendsEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity")
+				.getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
@@ -182,7 +183,8 @@ public class EntityTypeValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "An attribute with name \\[idAttr\\] already exists in entity \\[extendsEntity\\] or one of its parents")
 	public void testValidateAttributeOwnedByExtendedEntity()
 	{
-		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("extendsEntity").getMock();
+		EntityType extendsEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("extendsEntity")
+				.getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(singletonList(idAttr));
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
@@ -269,7 +271,7 @@ public class EntityTypeValidatorTest
 	public void testValidateExtendsFromAbstract()
 	{
 		EntityType extendsEntityType = mock(EntityType.class);
-		when(extendsEntityType.getName()).thenReturn("abstractEntity");
+		when(extendsEntityType.getFullyQualifiedName()).thenReturn("abstractEntity");
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
@@ -280,7 +282,7 @@ public class EntityTypeValidatorTest
 	public void testValidateExtendsFromNonAbstract()
 	{
 		EntityType extendsEntityType = mock(EntityType.class);
-		when(extendsEntityType.getName()).thenReturn("concreteEntity");
+		when(extendsEntityType.getFullyQualifiedName()).thenReturn("concreteEntity");
 		when(extendsEntityType.isAbstract()).thenReturn(false);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
@@ -292,12 +294,12 @@ public class EntityTypeValidatorTest
 	{
 		String packageName = PACKAGE_SYSTEM;
 		Package rootSystemPackage = mock(Package.class);
-		when(rootSystemPackage.getName()).thenReturn(packageName);
+		when(rootSystemPackage.getFullyQualifiedName()).thenReturn(packageName);
 
 		String entityName = "entity";
 		String qualifiedEntityName = packageName + '_' + entityName;
-		when(entityType.getName()).thenReturn(qualifiedEntityName);
-		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(qualifiedEntityName);
+		when(entityType.getName()).thenReturn(entityName);
 		when(entityType.getPackage()).thenReturn(rootSystemPackage);
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(qualifiedEntityName)).thenReturn(true);
@@ -309,12 +311,12 @@ public class EntityTypeValidatorTest
 	{
 		String packageName = PACKAGE_SYSTEM;
 		Package rootSystemPackage = mock(Package.class);
-		when(rootSystemPackage.getName()).thenReturn(packageName);
+		when(rootSystemPackage.getFullyQualifiedName()).thenReturn(packageName);
 
 		String entityName = "myEntity";
 		String qualifiedEntityName = packageName + '_' + entityName;
-		when(entityType.getName()).thenReturn(qualifiedEntityName);
-		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(qualifiedEntityName);
+		when(entityType.getName()).thenReturn(entityName);
 		when(entityType.getPackage()).thenReturn(rootSystemPackage);
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(qualifiedEntityName)).thenReturn(false);

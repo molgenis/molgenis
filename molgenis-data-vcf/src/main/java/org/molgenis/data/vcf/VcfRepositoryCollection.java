@@ -45,17 +45,17 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		this.file = requireNonNull(file);
 
 		String name = file.getName();
-		if (name.endsWith(EXTENSION_VCF))
+		if (name.toLowerCase().endsWith(EXTENSION_VCF))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF));
 		}
-		else if (name.endsWith(EXTENSION_VCF_GZ))
+		else if (name.toLowerCase().endsWith(EXTENSION_VCF_GZ))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_GZ));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF_GZ));
 		}
-		else if (name.endsWith(EXTENSION_VCF_ZIP))
+		else if (name.toLowerCase().endsWith(EXTENSION_VCF_ZIP))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_ZIP));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF_ZIP));
 		}
 		else
 		{
@@ -132,6 +132,6 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getName());
+		return hasRepository(entityType.getFullyQualifiedName());
 	}
 }

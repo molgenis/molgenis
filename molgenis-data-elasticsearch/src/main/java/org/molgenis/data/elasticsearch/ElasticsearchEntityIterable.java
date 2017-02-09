@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.DataConverter.convert;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 /**
  * Retrieve search results in batches. Note: We do not use Elasticsearch scan & scroll, because scrolling is not
@@ -29,16 +28,15 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	private static final int BATCH_SIZE = 1000;
 
 	private final EntityType entityType;
+	private final ElasticsearchUtils elasticsearchFacade;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final SearchRequestGenerator searchRequestGenerator;
 	private final String indexName;
-
-	private final String type;
-	private final ElasticsearchUtils elasticsearchFacade;
+	private final String documentType;
 
 	ElasticsearchEntityIterable(Query<Entity> q, EntityType entityType, ElasticsearchUtils elasticsearchFacade,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, SearchRequestGenerator searchRequestGenerator,
-			String indexName)
+			String indexName, String documentType)
 	{
 		super(BATCH_SIZE, q);
 		this.entityType = requireNonNull(entityType);
@@ -46,17 +44,16 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 		this.searchRequestGenerator = requireNonNull(searchRequestGenerator);
 		this.indexName = requireNonNull(indexName);
-
-		this.type = sanitizeMapperType(entityType.getName());
+		this.documentType = requireNonNull(documentType);
 	}
 
 	@Override
 	protected List<Entity> getBatch(Query<Entity> q)
 	{
 		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, null, null, null,
+				.buildSearchRequest(searchRequestBuilder, documentType, SearchType.QUERY_AND_FETCH, q, null, null, null,
 						entityType);
-		return elasticsearchFacade.searchForIds(searchRequestBuilderConsumer, q.toString(), type, indexName)
+		return elasticsearchFacade.searchForIds(searchRequestBuilderConsumer, q.toString(), documentType, indexName)
 				.map(idString -> convert(idString, entityType.getIdAttribute()))
 				.map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject)).collect(toList());
 	}

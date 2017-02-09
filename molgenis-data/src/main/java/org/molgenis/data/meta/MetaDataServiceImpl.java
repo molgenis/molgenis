@@ -119,7 +119,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (entityType.isAbstract())
 		{
 			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getName()));
+					format("Can't create repository for abstract entity [%s]", entityType.getFullyQualifiedName()));
 		}
 		addEntityType(entityType);
 		return getRepository(entityType);
@@ -131,7 +131,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (entityType.isAbstract())
 		{
 			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getName()));
+					format("Can't create repository for abstract entity [%s]", entityType.getFullyQualifiedName()));
 		}
 		addEntityType(entityType);
 		return getRepository(entityType, entityClass);
@@ -178,9 +178,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getName));
+		dataService
+				.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getFullyQualifiedName));
 
-		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getName).collect(joining(",")));
+		LOG.info("Removed entities [{}]",
+				entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(joining(",")));
 	}
 
 	@Transactional
@@ -227,10 +229,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void updateEntityType(EntityType entityType)
 	{
 		EntityType existingEntityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
-				.eq(FULL_NAME, entityType.getName()).fetch(getEntityTypeFetch()).findOne();
+				.eq(FULL_NAME, entityType.getFullyQualifiedName()).fetch(getEntityTypeFetch()).findOne();
 		if (existingEntityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getName()));
+			throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getFullyQualifiedName()));
 		}
 
 		updateEntityType(entityType, existingEntityType);
@@ -265,9 +267,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> resolvedEntityType = entityTypeDependencyResolver.resolve(entityTypes);
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getName), getEntityTypeFetch(),
-						EntityType.class)
-				.collect(toMap(EntityType::getName, Function.identity()));
+				.findAll(ENTITY_TYPE_META_DATA, entityTypes.stream().map(EntityType::getFullyQualifiedName),
+						getEntityTypeFetch(), EntityType.class)
+				.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
 		addMappedByAttributes(resolvedEntityType, existingEntityTypeMap);
@@ -280,7 +282,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 2nd pass: create mappedBy attributes and update entity
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
@@ -304,7 +306,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 1st pass: create entities and attributes except for mappedBy attributes
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
@@ -342,7 +344,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(Attribute attr)
 	{
-		EntityType entityType = dataService.getEntityType(attr.getEntity().getName());
+		EntityType entityType = dataService.getEntityType(attr.getEntity().getFullyQualifiedName());
 		entityType.addAttribute(attr);
 
 		// Update repository state
@@ -396,7 +398,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// TODO replace with dataService.upsert once available in Repository
 		packages.forEach(package_ ->
 		{
-			Package existingPackage = dataService.findOneById(PACKAGE, package_.getName(), Package.class);
+			Package existingPackage = dataService.findOneById(PACKAGE, package_.getFullyQualifiedName(), Package.class);
 			if (existingPackage == null)
 			{
 				addPackage(package_);
@@ -522,7 +524,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean isEntityTypeCompatible(EntityType newEntityType)
 	{
-		String entityName = newEntityType.getName();
+		String entityName = newEntityType.getFullyQualifiedName();
 		if (dataService.hasRepository(entityName))
 		{
 			EntityType oldEntityType = dataService.getEntityType(entityName);
@@ -553,7 +555,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean isMetaEntityType(EntityType entityType)
 	{
-		switch (entityType.getName())
+		switch (entityType.getFullyQualifiedName())
 		{
 			case ENTITY_TYPE_META_DATA:
 			case ATTRIBUTE_META_DATA:
@@ -733,27 +735,27 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
+		public String getFullyQualifiedName()
+		{
+			return entityType.getFullyQualifiedName();
+		}
+
+		@Override
+		public EntityType setFullyQualifiedName(String fullName)
+		{
+			return entityType.setFullyQualifiedName(fullName);
+		}
+
+		@Override
 		public String getName()
 		{
 			return entityType.getName();
 		}
 
 		@Override
-		public EntityType setName(String fullName)
+		public EntityType setName(String simpleName)
 		{
-			return entityType.setName(fullName);
-		}
-
-		@Override
-		public String getSimpleName()
-		{
-			return entityType.getSimpleName();
-		}
-
-		@Override
-		public EntityType setSimpleName(String simpleName)
-		{
-			return entityType.setSimpleName(simpleName);
+			return entityType.setName(simpleName);
 		}
 
 		@Override

@@ -3,8 +3,6 @@ package org.molgenis.data.mapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.controller.MappingServiceController;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -12,6 +10,8 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,12 +100,12 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		{
 			entityMapping.setIdentifier(idGenerator.generateId());
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
-			dataService.add(entityMappingMetaData.getName(), entityMappingEntity);
+			dataService.add(entityMappingMetaData.getFullyQualifiedName(), entityMappingEntity);
 		}
 		else
 		{
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
-			dataService.update(entityMappingMetaData.getName(), entityMappingEntity);
+			dataService.update(entityMappingMetaData.getFullyQualifiedName(), entityMappingEntity);
 		}
 		return entityMappingEntity;
 	}
@@ -117,7 +117,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, entityMapping.getName());
 		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE,
 				entityMapping.getTargetEntityType() != null ? entityMapping.getTargetEntityType()
-						.getName() : null);
+						.getFullyQualifiedName() : null);
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;
 	}

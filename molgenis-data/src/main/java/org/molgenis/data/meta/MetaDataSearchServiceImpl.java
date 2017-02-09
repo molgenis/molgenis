@@ -55,7 +55,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetadata.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
 				{
-					String matchDesc = "Matched: package '" + p.getName() + "'";
+					String matchDesc = "Matched: package '" + p.getFullyQualifiedName() + "'";
 					results.add(new PackageSearchResultItem(p, matchDesc));
 				}
 			});
@@ -83,7 +83,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		while (it.hasNext())
 		{
 			PackageSearchResultItem item = it.next();
-			if (item.getPackageFound().getName().equals("default"))
+			if (item.getPackageFound().getFullyQualifiedName().equals("default"))
 			{
 				it.remove();
 			}

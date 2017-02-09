@@ -66,25 +66,27 @@ public class SystemEntityTypePersisterTest
 	public void removeNonExistingSystemEntities() throws Exception
 	{
 		Package systemPackage = mock(Package.class);
-		when(systemPackage.getName()).thenReturn(PACKAGE_SYSTEM);
+		when(systemPackage.getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM);
 
-		EntityType refRemovedMeta = when(mock(EntityType.class).getName()).thenReturn("refRemoved").getMock();
+		EntityType refRemovedMeta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refRemoved")
+				.getMock();
 		when(refRemovedMeta.getPackage()).thenReturn(systemPackage);
 		when(refRemovedMeta.toString()).thenReturn("refRemoved");
 		when(refRemovedMeta.getAtomicAttributes()).thenReturn(emptyList());
 
-		EntityType removedMeta = when(mock(EntityType.class).getName()).thenReturn("removed").getMock();
+		EntityType removedMeta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("removed").getMock();
 		when(removedMeta.getPackage()).thenReturn(systemPackage);
 		when(removedMeta.toString()).thenReturn("removed");
 		Attribute refAttr = when(mock(Attribute.class).getRefEntity()).thenReturn(refRemovedMeta).getMock();
 		when(removedMeta.getAtomicAttributes()).thenReturn(singletonList(refAttr));
 
-		EntityType refEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity")
+				.getMock();
 		when(refEntityType.getPackage()).thenReturn(systemPackage);
 		when(refEntityType.toString()).thenReturn("refEntity");
 		when(refEntityType.getAtomicAttributes()).thenReturn(emptyList());
 
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getPackage()).thenReturn(systemPackage);
 		when(entityType.toString()).thenReturn("entity");
 		when(entityType.getAtomicAttributes()).thenReturn(emptyList());

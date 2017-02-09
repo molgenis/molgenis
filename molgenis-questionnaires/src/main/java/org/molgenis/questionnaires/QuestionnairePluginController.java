@@ -135,7 +135,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 			entity = entityManager.create(entityType, POPULATE);
 			entity.set(OWNER_USERNAME, getCurrentUsername());
 			entity.set(ATTR_STATUS, status.toString());
-			dataService.add(entityType.getName(), entity);
+			dataService.add(entityType.getFullyQualifiedName(), entity);
 		}
 		return entity;
 	}
@@ -143,7 +143,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType entityType)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return new Questionnaire(entityType.getName(),
+		return new Questionnaire(entityType.getFullyQualifiedName(),
 				entityType.getLabel(languageService.getCurrentUserLanguageCode()), status,
 				entityType.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}

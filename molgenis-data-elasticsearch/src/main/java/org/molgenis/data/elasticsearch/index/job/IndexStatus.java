@@ -102,8 +102,9 @@ public class IndexStatus
 			return true;
 		}
 		Set<String> referencedEntityNames = stream(emd.getAtomicAttributes().spliterator(), false)
-				.map(Attribute::getRefEntity).filter(e -> e != null).map(EntityType::getName).collect(toSet());
-		referencedEntityNames.add(emd.getName());
+				.map(Attribute::getRefEntity).filter(e -> e != null).map(EntityType::getFullyQualifiedName)
+				.collect(toSet());
+		referencedEntityNames.add(emd.getFullyQualifiedName());
 		return referencedEntityNames.stream().noneMatch(actionCountsPerEntity::containsKey);
 	}
 

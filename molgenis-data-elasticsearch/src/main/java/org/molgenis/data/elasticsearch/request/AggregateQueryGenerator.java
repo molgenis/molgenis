@@ -8,6 +8,7 @@ import org.elasticsearch.search.aggregations.bucket.nested.NestedBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
@@ -17,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static java.lang.Integer.MAX_VALUE;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 public class AggregateQueryGenerator
@@ -26,6 +28,13 @@ public class AggregateQueryGenerator
 	public static final String AGGREGATION_NESTED_POSTFIX = "_nested";
 	public static final String AGGREGATION_DISTINCT_POSTFIX = "_distinct";
 	public static final String AGGREGATION_TERMS_POSTFIX = "_terms";
+
+	private final DocumentIdGenerator documentIdGenerator;
+
+	public AggregateQueryGenerator(DocumentIdGenerator documentIdGenerator)
+	{
+		this.documentIdGenerator = requireNonNull(documentIdGenerator);
+	}
 
 	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1,
 			Attribute aggAttr2, Attribute aggAttrDistinct)
@@ -102,7 +111,7 @@ public class AggregateQueryGenerator
 		if (attr.isNillable())
 		{
 			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
-			String missingAggFieldName = attr.getName();
+			String missingAggFieldName = getAggregateFieldName(attr);
 			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName)
 					.field(missingAggFieldName);
 			aggs.add(missingTermsAgg);
@@ -126,7 +135,7 @@ public class AggregateQueryGenerator
 			if (isNestedType(distinctAttr))
 			{
 				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
-				String nestedAggFieldName = distinctAttr.getName();
+				String nestedAggFieldName = getAggregatePathName(distinctAttr);
 				NestedBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
 				nestedBuilder.subAggregation(distinctAgg);
 
@@ -181,7 +190,7 @@ public class AggregateQueryGenerator
 		if (isNestedType(attr))
 		{
 			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
-			String nestedAggFieldName = attr.getName();
+			String nestedAggFieldName = getAggregatePathName(attr);
 			NestedBuilder nestedAgg = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
 			for (AggregationBuilder<?> agg : aggs)
 			{
@@ -210,9 +219,14 @@ public class AggregateQueryGenerator
 		return isReferenceType(attr);
 	}
 
+	private String getAggregatePathName(Attribute attr)
+	{
+		return documentIdGenerator.generateId(attr);
+	}
+
 	private String getAggregateFieldName(Attribute attr)
 	{
-		String attrName = attr.getName();
+		String fieldName = documentIdGenerator.generateId(attr);
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
@@ -220,7 +234,7 @@ public class AggregateQueryGenerator
 			case INT:
 			case LONG:
 			case DECIMAL:
-				return attrName;
+				return fieldName;
 			case DATE:
 			case DATE_TIME:
 			case EMAIL:
@@ -231,14 +245,15 @@ public class AggregateQueryGenerator
 			case STRING:
 			case TEXT:
 				// use non-analyzed field
-				return attrName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
+				return fieldName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
 			case MREF:
 			case FILE:
+			case ONE_TO_MANY:
 				// use id attribute of nested field
-				return attrName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
+				return fieldName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			default:

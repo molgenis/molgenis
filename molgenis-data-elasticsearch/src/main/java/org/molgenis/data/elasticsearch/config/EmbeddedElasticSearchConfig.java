@@ -8,6 +8,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +45,9 @@ public class EmbeddedElasticSearchConfig
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
+	@Autowired
+	private DocumentIdGenerator documentIdGenerator;
+
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
 	{
@@ -78,6 +82,7 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory().create(dataService, elasticsearchEntityFactory);
+		return embeddedElasticSearchServiceFactory()
+				.create(dataService, elasticsearchEntityFactory, documentIdGenerator);
 	}
 }

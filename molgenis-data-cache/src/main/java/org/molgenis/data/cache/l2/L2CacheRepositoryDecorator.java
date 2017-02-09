@@ -123,7 +123,7 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private List<Entity> findAllBatch(List<Object> ids)
 	{
-		String entityName = getEntityType().getName();
+		String entityName = getEntityType().getFullyQualifiedName();
 		Multimap<Boolean, Object> partitionedIds = Multimaps
 				.index(ids, id -> transactionInformation.isEntityDirty(EntityKey.create(entityName, id)));
 		Collection<Object> cleanIds = partitionedIds.get(false);

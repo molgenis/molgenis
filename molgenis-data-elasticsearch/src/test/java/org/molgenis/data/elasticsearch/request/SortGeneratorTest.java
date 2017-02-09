@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -28,9 +29,13 @@ public class SortGeneratorTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		sortGenerator = new SortGenerator();
+		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
+		when(documentIdGenerator.generateId(any(Attribute.class)))
+				.thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
+
+		sortGenerator = new SortGenerator(documentIdGenerator);
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		Attribute intAttr = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
 		when(intAttr.getDataType()).thenReturn(INT);
 		when(entityType.getAttribute("int")).thenReturn(intAttr);

@@ -112,7 +112,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testgetTagsForAttribute()
 	{
-		EntityType emd = entityTypeFactory.create().setName("org.molgenis.SNP");
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("org.molgenis.SNP");
 		Attribute attribute = attrFactory.create().setName("Chr");
 
 		Relation instanceOf = Relation.valueOf("instanceOf");
@@ -175,7 +175,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAddAttributeTag()
 	{
-		EntityType emd = entityTypeFactory.create().setName("org.molgenis.SNP");
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("org.molgenis.SNP");
 		Attribute attribute = attrFactory.create().setName("Chr");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
@@ -205,7 +205,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testRemoveAttributeTag()
 	{
-		EntityType emd = entityTypeFactory.create().setName("org.molgenis.SNP");
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("org.molgenis.SNP");
 		Attribute attribute = attrFactory.create().setName("Chr");
 
 		Attribute attributeEntity = attrFactory.create();
@@ -231,8 +231,8 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		Package p = packageFactory.create("test", "desc");
 
 		Package pack = packageFactory.create();
+		pack.setFullyQualifiedName("test");
 		pack.setName("test");
-		pack.setSimpleName("test");
 		pack.setTags(singletonList(chromosomeNameTagEntity));
 
 		when(dataService.findOneById(PACKAGE, "test")).thenReturn(pack);
@@ -248,7 +248,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	public void testRemoveAllTagsFromEntity()
 	{
 		// FIXME This does not make sense...
-		EntityType emd = entityTypeFactory.create().setName("test");
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("test");
 		Attribute amd = attrFactory.create().setName("Chr");
 
 		emd.addAttribute(amd);
@@ -272,7 +272,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		Map<String, OntologyTag> attributeTagMap = Maps.newHashMap();
 		Map<Attribute, OntologyTerm> tags = Maps.newHashMap();
 
-		EntityType emd = entityTypeFactory.create().setName("org.molgenis.SNP");
+		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("org.molgenis.SNP");
 		Attribute attribute = attrFactory.create().setName("Chr");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);

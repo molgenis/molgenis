@@ -88,9 +88,9 @@ public class EntityTypeTest
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String name = "name";
-		entityType.setName(name);
+		entityType.setFullyQualifiedName(name);
+		assertEquals(entityType.getFullyQualifiedName(), name);
 		assertEquals(entityType.getName(), name);
-		assertEquals(entityType.getSimpleName(), name);
 		assertEquals(entityType.getLabel(), name);
 	}
 
@@ -102,10 +102,10 @@ public class EntityTypeTest
 		String simpleName = "simpleName";
 		String name = "name";
 		entityType.setLabel(label);
-		entityType.setSimpleName(simpleName);
-		entityType.setName(name);
-		assertEquals(entityType.getName(), name);
-		assertEquals(entityType.getSimpleName(), simpleName);
+		entityType.setName(simpleName);
+		entityType.setFullyQualifiedName(name);
+		assertEquals(entityType.getFullyQualifiedName(), name);
+		assertEquals(entityType.getName(), simpleName);
 		assertEquals(entityType.getLabel(), label);
 	}
 
@@ -114,10 +114,10 @@ public class EntityTypeTest
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String simpleName = "simpleName";
-		entityType.setSimpleName(simpleName);
-		assertEquals(entityType.getSimpleName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		entityType.setName(simpleName);
 		assertEquals(entityType.getName(), simpleName);
+		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getFullyQualifiedName(), simpleName);
 		assertEquals(entityType.getString(FULL_NAME), simpleName);
 		assertEquals(entityType.getLabel(), simpleName);
 		assertEquals(entityType.getString(LABEL), simpleName);
@@ -129,12 +129,12 @@ public class EntityTypeTest
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String label = "label";
 		String simpleName = "simpleName";
-		entityType.setName("name");
+		entityType.setFullyQualifiedName("name");
 		entityType.setLabel(label);
-		entityType.setSimpleName(simpleName);
-		assertEquals(entityType.getSimpleName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		entityType.setName(simpleName);
 		assertEquals(entityType.getName(), simpleName);
+		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getFullyQualifiedName(), simpleName);
 		assertEquals(entityType.getString(FULL_NAME), simpleName);
 		assertEquals(entityType.getLabel(), label);
 		assertEquals(entityType.getString(LABEL), label);
@@ -155,7 +155,7 @@ public class EntityTypeTest
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String simpleName = "simpleName";
-		entityType.setSimpleName(simpleName);
+		entityType.setName(simpleName);
 		entityType.setLabel(null);
 		assertEquals(entityType.getLabel(), simpleName);
 		assertEquals(entityType.getString(LABEL), simpleName);
@@ -167,7 +167,7 @@ public class EntityTypeTest
 		EntityType entityTypeMeta = createEntityTypeMeta();
 
 		Package package_ = mock(Package.class);
-		when(package_.getName()).thenReturn("myPackage");
+		when(package_.getFullyQualifiedName()).thenReturn("myPackage");
 
 		EntityType extendsEntityType = mock(EntityType.class);
 
@@ -187,8 +187,8 @@ public class EntityTypeTest
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getEntityType()).thenReturn(entityTypeMeta);
-		when(entityType.getSimpleName()).thenReturn("myEntity");
-		when(entityType.getName()).thenReturn("myPackage_myEntity");
+		when(entityType.getName()).thenReturn("myEntity");
+		when(entityType.getFullyQualifiedName()).thenReturn("myPackage_myEntity");
 		when(entityType.getPackage()).thenReturn(package_);
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.getDescription()).thenReturn("description");
@@ -204,8 +204,8 @@ public class EntityTypeTest
 
 		EntityType entityTypeCopy = EntityType.newInstance(entityType);
 		assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
-		assertEquals(entityTypeCopy.getSimpleName(), "myEntity");
-		assertEquals(entityTypeCopy.getName(), "myPackage_myEntity");
+		assertEquals(entityTypeCopy.getName(), "myEntity");
+		assertEquals(entityTypeCopy.getFullyQualifiedName(), "myPackage_myEntity");
 		assertSame(entityTypeCopy.getPackage(), package_);
 		assertEquals(entityTypeCopy.getLabel(), "label");
 		assertEquals(entityTypeCopy.getDescription(), "description");
@@ -239,7 +239,7 @@ public class EntityTypeTest
 	public void addAttributeWithDuplicateName()
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
-		entityType.setName("myEntity");
+		entityType.setFullyQualifiedName("myEntity");
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
 		entityType.addAttribute(attr0);

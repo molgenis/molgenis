@@ -437,7 +437,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + rowIndex);
 
 			Package package_ = packageFactory.create();
-			package_.setName(name);
+			package_.setFullyQualifiedName(name);
 			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
 			package_.setLabel(packageEntity.getString(EMX_PACKAGE_LABEL));
 
@@ -449,12 +449,12 @@ public class EmxMetaDataParser implements MetaDataParser
 						"Inconsistent package structure. Package: '" + name + "', parent: '" + parentName + '\'');
 
 				String simpleName = name.substring(parentName.length() + 1); // subpackage_package
-				package_.setSimpleName(simpleName);
+				package_.setName(simpleName);
 				package_.setParent(intermediateResults.getPackage(parentName));
 			}
 			else
 			{
-				package_.setSimpleName(name);
+				package_.setName(name);
 			}
 
 			// Set package tags
@@ -1232,8 +1232,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		existingMetaData.forEach(emd ->
 		{
-			if (!allEntityTypeMap.containsKey(emd.getName())) allEntityTypeMap.put(emd.getName(), emd);
-			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getName()))) && emd instanceof SystemEntityType)
+			if (!allEntityTypeMap.containsKey(emd.getFullyQualifiedName()))
+				allEntityTypeMap.put(emd.getFullyQualifiedName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getFullyQualifiedName())))
+					&& emd instanceof SystemEntityType)
 			{
 				throw new MolgenisDataException(
 						"SystemEntityType in the database conflicts with the metadata for this import");

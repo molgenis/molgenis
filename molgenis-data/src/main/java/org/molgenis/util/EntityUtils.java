@@ -135,7 +135,7 @@ public class EntityUtils
 		List<Pair<EntityType, List<Attribute>>> referencingEntityType = newArrayList();
 
 		// get entity types that referencing the given entity (including self)
-		String entityName = entityType.getName();
+		String entityName = entityType.getFullyQualifiedName();
 		dataService.getEntityNames().forEach(otherEntityName ->
 		{
 			EntityType otherEntityType = dataService.getEntityType(otherEntityName);
@@ -145,7 +145,7 @@ public class EntityUtils
 			for (Attribute attribute : otherEntityType.getAtomicAttributes())
 			{
 				EntityType refEntityType = attribute.getRefEntity();
-				if (refEntityType != null && refEntityType.getName().equals(entityName))
+				if (refEntityType != null && refEntityType.getFullyQualifiedName().equals(entityName))
 				{
 					if (referencingAttributes == null) referencingAttributes = newArrayList();
 					referencingAttributes.add(attribute);
@@ -194,7 +194,7 @@ public class EntityUtils
 		EntityType parent = entityType.getExtends();
 		while (parent != null)
 		{
-			if (parent.getName().equalsIgnoreCase(entityName)) return true;
+			if (parent.getFullyQualifiedName().equalsIgnoreCase(entityName)) return true;
 			parent = parent.getExtends();
 		}
 		return false;
@@ -222,8 +222,8 @@ public class EntityUtils
 	{
 		if (entityType == null && otherEntityType != null) return false;
 		if (entityType != null && otherEntityType == null) return false;
+		if (!entityType.getFullyQualifiedName().equals(otherEntityType.getFullyQualifiedName())) return false;
 		if (!entityType.getName().equals(otherEntityType.getName())) return false;
-		if (!entityType.getSimpleName().equals(otherEntityType.getSimpleName())) return false;
 		if (!Objects.equals(entityType.getLabel(), otherEntityType.getLabel())) return false;
 		if (!Objects.equals(entityType.getDescription(), otherEntityType.getDescription())) return false;
 		if (entityType.isAbstract() != otherEntityType.isAbstract()) return false;
@@ -282,8 +282,8 @@ public class EntityUtils
 		EntityType otherExtendsEntityType = otherEntityType.getExtends();
 		if (extendsEntityType == null && otherExtendsEntityType != null) return false;
 		if (extendsEntityType != null && otherExtendsEntityType == null) return false;
-		if (extendsEntityType != null && otherExtendsEntityType != null && !extendsEntityType.getName()
-				.equals(otherExtendsEntityType.getName())) return false;
+		if (extendsEntityType != null && otherExtendsEntityType != null && !extendsEntityType.getFullyQualifiedName()
+				.equals(otherExtendsEntityType.getFullyQualifiedName())) return false;
 
 		// compare attributes
 		if (!equals(entityType.getOwnAttributes(), otherEntityType.getOwnAttributes())) return false;
@@ -388,7 +388,8 @@ public class EntityUtils
 		EntityType otherRefEntity = otherAttr.getRefEntity();
 		if (refEntity == null && otherRefEntity != null) return false;
 		if (refEntity != null && otherRefEntity == null) return false;
-		if (refEntity != null && otherRefEntity != null && !refEntity.getName().equals(otherRefEntity.getName()))
+		if (refEntity != null && otherRefEntity != null && !refEntity.getFullyQualifiedName()
+				.equals(otherRefEntity.getFullyQualifiedName()))
 			return false;
 
 		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression())) return false;
@@ -427,7 +428,8 @@ public class EntityUtils
 	{
 		if (entity == null && otherEntity != null) return false;
 		if (entity != null && otherEntity == null) return false;
-		if (!entity.getEntityType().getName().equals(otherEntity.getEntityType().getName())) return false;
+		if (!entity.getEntityType().getFullyQualifiedName().equals(otherEntity.getEntityType().getFullyQualifiedName()))
+			return false;
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attrName = attr.getName();
@@ -556,7 +558,7 @@ public class EntityUtils
 			h += Objects.hashCode(attrName) ^ hValue;
 		}
 
-		int result = entity.getEntityType().getName().hashCode();
+		int result = entity.getEntityType().getFullyQualifiedName().hashCode();
 		return 31 * result + h;
 	}
 

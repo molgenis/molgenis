@@ -47,7 +47,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void before() throws IOException
 	{
-		repoMetaData = entityTypeFactory.create().setSimpleName("TabixTest");
+		repoMetaData = entityTypeFactory.create().setName("TabixTest");
 		repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());

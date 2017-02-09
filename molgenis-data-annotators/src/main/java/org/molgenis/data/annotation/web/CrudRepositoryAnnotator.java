@@ -75,7 +75,7 @@ public class CrudRepositoryAnnotator
 			if (annotator instanceof EffectCreatingAnnotator)
 			{
 				targetMetaData = ((EffectCreatingAnnotator) annotator).getTargetEntityType(entityType);
-				if (!dataService.hasRepository(targetMetaData.getName()))
+				if (!dataService.hasRepository(targetMetaData.getFullyQualifiedName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
@@ -119,15 +119,15 @@ public class CrudRepositoryAnnotator
 			{
 				runAsSystem(() ->
 				{
-					dataService.deleteAll(targetMetaData.getName());
-					dataService.getMeta().deleteEntityType(targetMetaData.getName());
+					dataService.deleteAll(targetMetaData.getFullyQualifiedName());
+					dataService.getMeta().deleteEntityType(targetMetaData.getFullyQualifiedName());
 				});
 			}
 		}
 		catch (Exception ex)
 		{
 			// log the problem but throw the original exception
-			LOG.error("Failed to remove result entity: %s", targetMetaData.getName());
+			LOG.error("Failed to remove result entity: %s", targetMetaData.getFullyQualifiedName());
 		}
 	}
 
@@ -142,7 +142,8 @@ public class CrudRepositoryAnnotator
 		String entityName;
 		if (annotator instanceof EffectCreatingAnnotator)
 		{
-			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getName();
+			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType())
+					.getFullyQualifiedName();
 		}
 		else
 		{

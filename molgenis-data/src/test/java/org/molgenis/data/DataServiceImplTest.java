@@ -66,9 +66,9 @@ public class DataServiceImplTest
 		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
 		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
 		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn("Entity1").getMock();
-		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn("Entity2").getMock();
-		EntityType entityType3 = when(mock(EntityType.class).getName()).thenReturn("Entity3").getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity1").getMock();
+		EntityType entityType2 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity2").getMock();
+		EntityType entityType3 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity3").getMock();
 
 		when(metaDataService.getEntityTypes()).thenAnswer(new Answer<Stream<EntityType>>()
 		{

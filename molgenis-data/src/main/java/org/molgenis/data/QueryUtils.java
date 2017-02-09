@@ -133,7 +133,7 @@ public class QueryUtils
 			{
 				throw new UnknownAttributeException(
 						format("Query rule field [%s] refers to unknown attribute [%s] in entity type [%s]",
-								queryRuleField, attrName, entityTypeAtCurrentDepth.getName()));
+								queryRuleField, attrName, entityTypeAtCurrentDepth.getFullyQualifiedName()));
 			}
 			if (depth + 1 < queryRuleFieldTokens.length)
 			{

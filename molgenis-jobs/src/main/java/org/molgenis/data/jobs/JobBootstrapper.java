@@ -37,7 +37,8 @@ public class JobBootstrapper
 
 	private void bootstrap(SystemEntityType systemEntityType)
 	{
-		dataService.query(systemEntityType.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll()
+		dataService.query(systemEntityType.getFullyQualifiedName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING)
+				.findAll()
 				.forEach(this::setFailed);
 	}
 
@@ -53,11 +54,11 @@ public class JobBootstrapper
 		}
 		log.append("FAILED - Application terminated unexpectedly");
 		jobExecutionEntity.set(LOG, log.toString());
-		dataService.update(jobExecutionEntity.getEntityType().getName(), jobExecutionEntity);
+		dataService.update(jobExecutionEntity.getEntityType().getFullyQualifiedName(), jobExecutionEntity);
 	}
 
 	private boolean isJobExecution(EntityType entityType)
 	{
-		return entityType.getExtends() != null && entityType.getExtends().getName().equals(JOB_EXECUTION);
+		return entityType.getExtends() != null && entityType.getExtends().getFullyQualifiedName().equals(JOB_EXECUTION);
 	}
 }

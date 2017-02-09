@@ -318,8 +318,7 @@ public class SnpEffRunner
 	 */
 	public EntityType getTargetEntityType(EntityType sourceEntityType)
 	{
-		EntityType entityType = entityTypeFactory.create()
-				.setSimpleName(sourceEntityType.getSimpleName() + ENTITY_NAME_SUFFIX)
+		EntityType entityType = entityTypeFactory.create().setName(sourceEntityType.getName() + ENTITY_NAME_SUFFIX)
 				.setPackage(sourceEntityType.getPackage());
 		entityType.setBackend(sourceEntityType.getBackend());
 		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false)

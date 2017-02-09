@@ -18,6 +18,8 @@ $.when($,
         self.getIdentifierAttribute = getIdentifierAttribute;
         self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
+        self.getRSQL = getRSQL;
+        self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
         var selectedEntityMetaData = null;
@@ -50,6 +52,20 @@ $.when($,
         };
 
         var state;
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getnToken() {
+            return state.nToken;
+        }
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getRSQL() {
+            return state.filter;
+        }
 
         /**
          * @memberOf molgenis.dataexplorer
@@ -520,33 +536,25 @@ $.when($,
 
             $(document).on('updateAttributeFilters', function (e, data) {
                 var rules = []
-
                 for (var i = 0; i < Object.keys(data.filters).length; i++) {
                     var key = Object.keys(data.filters)[i]
                     var filter = data.filters[key]
                     var rule = filter.createQueryRule()
 
-                    if (rule.hasOwnProperty('value')) {
-                        if (rule.value !== undefined) {
-                            rules.push(rule)
-                        }
-                    }
+                    if ((rule.hasOwnProperty('value') && rule.value !== undefined) ||
+                        (rule.hasOwnProperty('nestedRules') && rule.nestedRules.length > 0)) {
 
-                    if (rule.hasOwnProperty('nestedRules')) {
-                        if (rule.nestedRules.length > 0) {
-                            rules.push(rule)
+                        if (rules.length > 0) {
+                            // Add an 'AND' operator between filters for every attribute
+                            rules.push({'operator': 'AND'})
                         }
+                        rules.push(rule)
                     }
 
                     if (filter.isEmpty()) {
                         delete attributeFilters[filter.attribute.href];
                     } else {
                         attributeFilters[filter.attribute.href] = filter;
-                    }
-
-                    // Add an 'AND' operator between filters for every attribute
-                    if (i < data.filters.length - 1) {
-                        rules.push({'operator': 'AND'})
                     }
                 }
 
