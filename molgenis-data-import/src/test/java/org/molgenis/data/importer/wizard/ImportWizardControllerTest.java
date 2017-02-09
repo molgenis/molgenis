@@ -15,6 +15,7 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
@@ -122,6 +123,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		ValidationResultWizardPage validationResultWizardPage = mock(ValidationResultWizardPage.class);
 		ImportResultsWizardPage importResultsWizardPage = mock(ImportResultsWizardPage.class);
 		PackageWizardPage packageWizardPage = mock(PackageWizardPage.class);
+		IdentifierLookupService identifierLookupService = mock(IdentifierLookupService.class);
 		importServiceFactory = mock(ImportServiceFactory.class);
 		fileStore = mock(FileStore.class);
 		fileRepositoryCollectionFactory = mock(FileRepositoryCollectionFactory.class);
@@ -134,7 +136,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
 				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
 				userAccountService, importServiceFactory, fileStore, fileRepositoryCollectionFactory, importRunService,
-				executorService, groupAuthorityFactory);
+				executorService, groupAuthorityFactory, identifierLookupService);
 
 		List<GroupAuthority> authorities = Lists.newArrayList();
 

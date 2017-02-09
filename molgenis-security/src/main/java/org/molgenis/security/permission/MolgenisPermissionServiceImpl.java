@@ -1,5 +1,6 @@
 package org.molgenis.security.permission;
 
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
@@ -13,6 +14,13 @@ import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 {
+	private final IdentifierLookupService identifierLookupService;
+
+	public MolgenisPermissionServiceImpl(IdentifierLookupService identifierLookupService)
+	{
+		this.identifierLookupService = identifierLookupService;
+	}
+
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginId, Permission permission)
 	{
@@ -20,9 +28,10 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 	}
 
 	@Override
-	public boolean hasPermissionOnEntity(String entityName, Permission permission)
+	public boolean hasPermissionOnEntity(String entityTypeName, Permission permission)
 	{
-		return hasPermission(entityName, permission, AUTHORITY_ENTITY_PREFIX);
+		String entityTypeId = identifierLookupService.getEntityTypeId(entityTypeName);
+		return hasPermission(entityTypeId, permission, AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private boolean hasPermission(String authorityId, Permission permission, String authorityPrefix)

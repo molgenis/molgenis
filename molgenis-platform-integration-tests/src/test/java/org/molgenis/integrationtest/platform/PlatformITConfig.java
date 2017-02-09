@@ -9,6 +9,7 @@ import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -107,6 +108,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private EntityFactoryRegistrar entityFactoryRegistrar;
 	@Autowired
 	private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
+	@Autowired
+	private IdentifierLookupService identifierLookupService;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -196,7 +199,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public MolgenisPermissionService molgenisPermissionService()
 	{
-		return new MolgenisPermissionServiceImpl();
+		return new MolgenisPermissionServiceImpl(identifierLookupService);
 	}
 
 	// FIXME The bootstrapping of the data platform should be delegated to a specific bootstrapper so that updates

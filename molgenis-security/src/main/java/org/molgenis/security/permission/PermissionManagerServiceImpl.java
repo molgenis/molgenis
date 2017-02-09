@@ -4,6 +4,9 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -70,9 +74,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public List<String> getEntityClassIds()
+	public List<Object> getEntityClassIds()
 	{
-		return dataService.getEntityNames().collect(toList());
+		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue()).collect(toList());
 	}
 
 	@Override
@@ -288,12 +292,16 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		}
 		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
 		{
-			List<String> entityClassIds = this.getEntityClassIds();
+			List<Object> entityClassIds = this.getEntityClassIds();
+			List<EntityType> entityTypes = dataService
+					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityClassIds.stream(),
+							new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+									.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
 			if (entityClassIds != null)
 			{
 				Map<String, String> entityClassMap = new TreeMap<String, String>();
-				for (String entityClassId : entityClassIds)
-					entityClassMap.put(entityClassId, entityClassId);
+				for (EntityType entityType : entityTypes)
+					entityClassMap.put(entityType.getId(), entityType.getFullyQualifiedName());
 				permissions.setEntityIds(entityClassMap);
 			}
 		}

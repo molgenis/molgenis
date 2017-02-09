@@ -34,147 +34,147 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.iterator();
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.close();
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.COUNT);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.COUNT);
 		return decoratedRepository.count(q);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query<Entity> q)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.findOne(q);
 	}
 
 	@Override
 	public Entity findOneById(Object id)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
 	public Entity findOneById(Object id, Fetch fetch)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.READ);
 		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
 	public long count()
 	{
-		validatePermission(decoratedRepository.getName(), Permission.COUNT);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.COUNT);
 		return decoratedRepository.count();
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.update(entity);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.deleteAll();
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		decoratedRepository.add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.WRITE);
 		return decoratedRepository.add(entities);
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		validatePermission(decoratedRepository.getName(), Permission.COUNT);
+		validatePermission(decoratedRepository.getEntityType().getId(), Permission.COUNT);
 		return decoratedRepository.aggregate(aggregateQuery);
 	}
 }
