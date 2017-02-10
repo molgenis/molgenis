@@ -228,17 +228,21 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 				dataService.getEntityType(dataSet));
 		//Query for chromosome
 		Query<Entity> q = new QueryImpl<>().eq(chromosomeAttribute, segmentId);
-		//add postion queryparts, those should be nested
+		//Add postion queryparts, those should be nested
 		q.and().nest();
-		//add start position querypart
-//		q.nest().ge(posAttr, browserStart).and().le(posAttr, browserStop).unnest();
-		q.ge(posAttr, browserStart).and().le(posAttr, browserStop).unnest();
-		//if stop is configured: add stop querypart
+		//Add start position to queryparts
+		q.le(posAttr, browserStop);
+		//If stop is configured: add stop querypart, else the position should also be greater than browserstart
 		if (stopAttr != "")
 		{
-			q.or().nest().ge(stopAttr, browserStart).and().le(stopAttr, browserStop).unnest();
+			//or is used because a variant can also partly be located in the window
+			q.or().ge(stopAttr, browserStart);
+		}else
+		{
+			//and is used because one position is known, so the position should be located in the window
+			q.and().ge(posAttr, browserStart);
 		}
-//		q.unnest();
+		q.unnest();
 		//add pagesize based on maxbins of das query
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
