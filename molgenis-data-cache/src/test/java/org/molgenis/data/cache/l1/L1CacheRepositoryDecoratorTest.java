@@ -90,8 +90,8 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		authorMetaData = entityTypeFactory.create(authorEntityName);
-		bookMetaData = entityTypeFactory.create(bookEntityName);
+		authorMetaData = entityTypeFactory.create(authorEntityName).setName(authorEntityName);
+		bookMetaData = entityTypeFactory.create(bookEntityName).setName(bookEntityName);
 
 		authorMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		authorMetaData.addAttribute(attributeFactory.create().setName("name"));

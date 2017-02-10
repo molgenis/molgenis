@@ -26,7 +26,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
-import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -279,13 +280,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			String fullyQualifiedName = entityType.getFullyQualifiedName();
 			String entityId = identifierLookupService.getEntityTypeId(fullyQualifiedName);
-			if(entityId != null)
+			if (entityId != null)
 			{
-				EntityType existingEntityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityId, EntityType.class);
+				EntityType existingEntityType = dataService
+						.findOneById(ENTITY_TYPE_META_DATA, entityId, EntityType.class);
 
 				if (existingEntityType != null)
 				{
-					existingEntityTypeMap.put(fullyQualifiedName, entityType);
+					existingEntityTypeMap.put(entityType.getId(), existingEntityType);
 				}
 			}
 		});
@@ -322,7 +324,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 1st pass: create entities and attributes except for mappedBy attributes
 		resolvedEntityType.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 			if (existingEntityType == null)
 			{
 				if (entityType.hasMappedByAttributes())
@@ -416,7 +418,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		packages.forEach(package_ ->
 		{
 			String packageId = identifierLookupService.getPackageId(package_.getFullyQualifiedName());
-			if(packageId != null)
+			if (packageId != null)
 			{
 				package_.setId(packageId);
 				dataService.update(PACKAGE, package_);

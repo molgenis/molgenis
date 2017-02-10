@@ -64,7 +64,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateIterable()
 	{
-		EntityType sourceMeta =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("clinvar");
+		EntityType sourceMeta = entityTypeFactory.create().setName("clinvar");
 		sourceMeta.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		sourceMeta.addAttribute(vcfAttributes.getPosAttribute());
 		sourceMeta.addAttribute(vcfAttributes.getRefAttribute());

@@ -67,7 +67,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		when(contextMock.getMergedJobDataMap()).thenReturn(jobDataMap);
 
 		EntityType targetEntity = entityTypeFactory.create();
-		//FIXME targetEntity.setFullyQualifiedName("org_molgenis_test_TypeTest");
+		targetEntity.setName("TypeTest");
 
 		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.setFailureEmail("x@y.z");

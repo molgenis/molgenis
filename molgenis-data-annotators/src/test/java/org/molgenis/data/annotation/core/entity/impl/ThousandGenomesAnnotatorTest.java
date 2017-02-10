@@ -68,7 +68,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotate()
 	{
-		EntityType emdIn =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		EntityType emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
@@ -98,7 +98,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotateNegative()
 	{
-		EntityType emdIn =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("test");
+		EntityType emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());

@@ -18,7 +18,6 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.EntityPopulator;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -63,9 +62,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private AlgorithmService algorithmService;
-
-	@Autowired
-	private IdGenerator idGenerator;
 
 	@Autowired
 	private MappingProjectRepository mappingProjectRepo;
@@ -124,17 +120,18 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		user = userFactory.create();
 		user.setUsername(USERNAME);
 
-		package_ = packageFactory.create("package");
+		package_ = packageFactory.create("package").setName("package");
 
-		hopMetaData = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
+		hopMetaData = entityTypeFactory.create(TARGET_HOP_ENTITY).setName(TARGET_HOP_ENTITY).setPackage(package_);
 		hopMetaData.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
 		hopMetaData.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
 
-		geneMetaData = entityTypeFactory.create(SOURCE_GENE_ENTITY).setPackage(package_);
+		geneMetaData = entityTypeFactory.create(SOURCE_GENE_ENTITY).setName(SOURCE_GENE_ENTITY).setPackage(package_);
 		geneMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 		geneMetaData.addAttribute(attrMetaFactory.create().setName("length").setDataType(DECIMAL).setNillable(false));
 
-		EntityType exonMetaData = entityTypeFactory.create(SOURCE_EXON_ENTITY).setPackage(package_);
+		EntityType exonMetaData = entityTypeFactory.create(SOURCE_EXON_ENTITY).setName(SOURCE_EXON_ENTITY)
+				.setPackage(package_);
 		exonMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 		exonMetaData
 				.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
@@ -145,7 +142,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(TARGET_HOP_ENTITY);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName()
+						.equals(hopMetaData.getFullyQualifiedName());
 			}
 		}))).thenReturn(hopRepo);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -153,7 +151,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(SOURCE_GENE_ENTITY);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName()
+						.equals(geneMetaData.getFullyQualifiedName());
 			}
 		}))).thenReturn(geneRepo);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -161,29 +160,30 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(SOURCE_EXON_ENTITY);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName()
+						.equals(SOURCE_EXON_ENTITY);
 			}
 		}))).thenReturn(exonRepo);
 
 		when(hopRepo.getName()).thenReturn(TARGET_HOP_ENTITY);
 		when(hopRepo.getEntityType()).thenReturn(hopMetaData);
-		when(geneRepo.getName()).thenReturn(SOURCE_GENE_ENTITY);
+		when(geneRepo.getName()).thenReturn(geneMetaData.getFullyQualifiedName());
 		when(geneRepo.iterator()).thenReturn(Collections.<Entity>emptyList().iterator());
 		when(geneRepo.getEntityType()).thenReturn(geneMetaData);
 		when(exonRepo.getName()).thenReturn(SOURCE_EXON_ENTITY);
 		when(exonRepo.iterator()).thenReturn(Collections.<Entity>emptyList().iterator());
 		when(exonRepo.getEntityType()).thenReturn(exonMetaData);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		when(dataService.getEntityType(TARGET_HOP_ENTITY)).thenReturn(hopMetaData);
+		when(dataService.getEntityType(hopMetaData.getFullyQualifiedName())).thenReturn(hopMetaData);
 		when(dataService.getRepository(TARGET_HOP_ENTITY)).thenReturn(hopRepo);
 		Query<Entity> hopQ = mock(Query.class);
 		when(hopRepo.query()).thenReturn(hopQ);
-		when(hopQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(hopQ);
+		when(hopQ.eq("source", geneMetaData.getFullyQualifiedName())).thenReturn(hopQ);
 		when(hopQ.eq("source", SOURCE_EXON_ENTITY)).thenReturn(hopQ);
 		when(hopQ.findAll()).thenAnswer(invocation -> Stream.empty());
 
-		when(dataService.getEntityType(SOURCE_GENE_ENTITY)).thenReturn(geneMetaData);
-		when(dataService.getRepository(SOURCE_GENE_ENTITY)).thenReturn(geneRepo);
+		when(dataService.getEntityType(geneMetaData.getFullyQualifiedName())).thenReturn(geneMetaData);
+		when(dataService.getRepository(geneMetaData.getFullyQualifiedName())).thenReturn(geneRepo);
 		when(dataService.getEntityType(SOURCE_EXON_ENTITY)).thenReturn(exonMetaData);
 		when(dataService.getRepository(SOURCE_EXON_ENTITY)).thenReturn(exonRepo);
 	}
@@ -192,7 +192,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void testAddMappingProject()
 	{
 		String projectName = "test_project";
-		MappingProject mappingProject = mappingService.addMappingProject(projectName, user, TARGET_HOP_ENTITY);
+		MappingProject mappingProject = mappingService
+				.addMappingProject(projectName, user, hopMetaData.getFullyQualifiedName());
 		verify(mappingProjectRepo, times(1)).add(mappingProject);
 		assertEquals(mappingProject.getName(), projectName);
 		assertEquals(mappingProject.getOwner(), user);
@@ -207,9 +208,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String projectName = "test_project";
 
 		MappingProject actualAddedMappingProject = mappingService
-				.addMappingProject(projectName, user, TARGET_HOP_ENTITY);
+				.addMappingProject(projectName, user, hopMetaData.getFullyQualifiedName());
 
-		String mappingTargetIdentifier = actualAddedMappingProject.getMappingTarget(TARGET_HOP_ENTITY).getIdentifier();
+		String mappingTargetIdentifier = actualAddedMappingProject.getMappingTarget(hopMetaData.getFullyQualifiedName())
+				.getIdentifier();
 		MappingTarget expectedMappingTarget = getManualMappingTarget(mappingTargetIdentifier, emptyList());
 
 		String mappingProjectIdentifier = actualAddedMappingProject.getIdentifier();
@@ -218,7 +220,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		Entity mappingTargetEntity = mock(Entity.class);
 		when(mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER)).thenReturn(mappingTargetIdentifier);
-		when(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)).thenReturn(TARGET_HOP_ENTITY);
+		when(mappingTargetEntity.getString(MappingTargetMetaData.TARGET))
+				.thenReturn(hopMetaData.getFullyQualifiedName());
 		when(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS)).thenReturn(null);
 		when(dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)))
 				.thenReturn(hopMetaData);
@@ -270,7 +273,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = IllegalStateException.class)
 	public void testAddExistingTarget()
 	{
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, TARGET_HOP_ENTITY);
+		MappingProject mappingProject = mappingService
+				.addMappingProject("Test123", user, hopMetaData.getFullyQualifiedName());
 		mappingProject.addTarget(hopMetaData);
 	}
 
@@ -283,7 +287,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String entityName = "addEntity";
 		Repository<Entity> addEntityRepo = mock(Repository.class);
 		when(addEntityRepo.getName()).thenReturn(entityName);
-		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
+		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setName(TARGET_HOP_ENTITY)
+				.setPackage(package_);
 		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
 		targetMeta.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
 		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
@@ -305,7 +310,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		Query<Entity> addEntityQ = mock(Query.class);
 		when(addEntityRepo.query()).thenReturn(addEntityQ);
-		when(addEntityQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(addEntityQ);
+		when(addEntityQ.eq("source", geneMetaData.getFullyQualifiedName())).thenReturn(addEntityQ);
 		when(addEntityQ.findAll()).thenAnswer(invocation -> Stream.empty());
 
 		when(geneRepo.iterator()).thenAnswer(invocation -> sourceGeneEntities.iterator());
@@ -315,7 +320,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		// apply mapping again
 		String generatedEntityName = mappingService
-				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName, true);
+				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName, true);
 		assertEquals(generatedEntityName, entityName);
 
 		//noinspection unchecked
@@ -360,7 +365,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		Query<Entity> addEntityQ = mock(Query.class);
 		when(updateEntityRepo.query()).thenReturn(addEntityQ);
-		when(addEntityQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(addEntityQ);
+		when(addEntityQ.eq("source", geneMetaData.getFullyQualifiedName())).thenReturn(addEntityQ);
 		when(addEntityQ.findAll()).thenAnswer(invocation -> expectedEntities.stream());
 
 		when(geneRepo.iterator()).thenAnswer(invocation -> sourceGeneEntities.iterator());
@@ -370,7 +375,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		// apply mapping again
 		String generatedEntityName = mappingService
-				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName);
+				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName);
 		assertEquals(generatedEntityName, entityName);
 
 		//noinspection unchecked
@@ -438,10 +443,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String targetRepositoryRefEntityName = "target_repository_ref";
 		String mappingTargetRefEntityName = "mapping_target_ref";
 
-		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName);
+		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName)
+				.setName(targetRepositoryRefEntityName);
 
 		Repository<Entity> targetRepository = mock(Repository.class);
-		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
+		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName)
+				.setName(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(
 				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(targetRefEntity));
@@ -450,9 +457,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
-		EntityType mappingTargetRefEntity = entityTypeFactory.create(mappingTargetRefEntityName);
+		EntityType mappingTargetRefEntity = entityTypeFactory.create(mappingTargetRefEntityName)
+				.setName(mappingTargetRefEntityName);
 
-		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
+		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target").setName("mapping_target");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(
 				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(mappingTargetRefEntity));
@@ -494,15 +502,16 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			Entity expectedEntity = new DynamicEntity(targetMeta);
 			expectedEntity.set("identifier", String.valueOf(i));
 			expectedEntity.set("height", i * 2d);
-			expectedEntity.set("source", SOURCE_GENE_ENTITY);
+			expectedEntity.set("source", geneMetaData.getFullyQualifiedName());
 			expectedEntities.add(expectedEntity);
 		}
 	}
 
 	private MappingProject createMappingProjectWithMappings()
 	{
-		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, TARGET_HOP_ENTITY);
-		MappingTarget target = mappingProject.getMappingTarget(TARGET_HOP_ENTITY);
+		MappingProject mappingProject = mappingService
+				.addMappingProject("TestRun", user, hopMetaData.getFullyQualifiedName());
+		MappingTarget target = mappingProject.getMappingTarget(hopMetaData.getFullyQualifiedName());
 
 		EntityMapping mapping = target.addSource(geneMetaData);
 
