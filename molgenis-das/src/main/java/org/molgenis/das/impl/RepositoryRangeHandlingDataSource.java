@@ -136,14 +136,16 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			if (stopAttribute != null)
 			{
 				try
-				{
-					if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.INT)
+				{	if(entity.getEntityType().getAttribute("stopAttribute") != null)
 					{
-						valueStop = entity.getInt(stopAttribute);
-					}
-					else if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.LONG)
-					{
-						valueStop = toIntExact(entity.getLong(stopAttribute));
+						if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.INT)
+						{
+							valueStop = entity.getInt(stopAttribute);
+						}
+						else if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.LONG)
+						{
+							valueStop = toIntExact(entity.getLong(stopAttribute));
+						}
 					}
 				}
 				catch (ClassCastException e)
@@ -229,13 +231,14 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		//add postion queryparts, those should be nested
 		q.and().nest();
 		//add start position querypart
-		q.nest().ge(posAttr, browserStart).and().le(posAttr, browserStop).unnest();
+//		q.nest().ge(posAttr, browserStart).and().le(posAttr, browserStop).unnest();
+		q.ge(posAttr, browserStart).and().le(posAttr, browserStop).unnest();
 		//if stop is configured: add stop querypart
-		if (stopAttr != null)
+		if (stopAttr != "")
 		{
 			q.or().nest().ge(stopAttr, browserStart).and().le(stopAttr, browserStop).unnest();
 		}
-		q.unnest();
+//		q.unnest();
 		//add pagesize based on maxbins of das query
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
