@@ -452,12 +452,13 @@ $.when($,
                 }
             }
 
-            // Prevent $.param double encoding RSQL attributes and values. The RestclientV2 also encodes the RSQL
+            // Use special encoding for the rsql
             var filter = state.filter
             delete cleanState.filter
 
             // update browser state
-            if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState) + '&filter=' + filter);
+            if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
+                + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
         }
 
