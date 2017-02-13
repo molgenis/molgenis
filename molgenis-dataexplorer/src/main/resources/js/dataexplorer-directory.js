@@ -70,12 +70,6 @@ $.when($,
 
     $(function () {
         $('#directory-export-button').on('click', function () {
-            if( !molgenis.dataexplorer.getRSQL() ) {
-                // no filters selected yet
-                bootbox.alert(i18n.dataexplorer_directory_export_no_filters);
-                return;
-            }
-
             bootbox.confirm({
                 title:  i18n.dataexplorer_directory_export_dialog_title,
                 message:  i18n.dataexplorer_directory_export_dialog_message,
