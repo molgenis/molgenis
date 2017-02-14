@@ -64,7 +64,7 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();
 
-		emd =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("gonl");
+		emd = entityTypeFactory.create().setName("gonl");
 		emd.addAttribute(vcfAttributes.getChromAttribute());
 		emd.addAttribute(vcfAttributes.getPosAttribute());
 		emd.addAttribute(vcfAttributes.getRefAttribute());

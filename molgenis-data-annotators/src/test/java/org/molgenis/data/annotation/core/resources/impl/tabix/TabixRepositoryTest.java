@@ -46,7 +46,7 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		repoMetaData =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("CaddTest");
+		repoMetaData = entityTypeFactory.create().setName("CaddTest");
 		repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getRefAttribute());

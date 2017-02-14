@@ -65,9 +65,9 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUp()
 	{
-		emd =  null; //FIXME entityTypeFactory.create().setFullyQualifiedName("entity");
+		emd = entityTypeFactory.create().setName("entity");
 
-		resultEmd = null; //FIXME  entityTypeFactory.create().setFullyQualifiedName("resultEntity");
+		resultEmd = entityTypeFactory.create().setName("resultEntity");
 
 		emd.addAttribute(vcfAttributes.getChromAttribute());
 		emd.addAttribute(vcfAttributes.getPosAttribute());
@@ -367,8 +367,8 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsMergeMultilineMismatchChrom()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
-				true, vcfAttributes);
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)), true,
+				vcfAttributes);
 		try
 		{
 			filter.filterResults(Arrays.asList(resultEntity10, entityMismatchChrom), entity10, false);
@@ -385,8 +385,8 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsMergeMultilineMismatchPos()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
-				true, vcfAttributes);
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)), true,
+				vcfAttributes);
 		try
 		{
 			filter.filterResults(Arrays.asList(entityMismatchPos, resultEntity10), entity10, false);
@@ -420,7 +420,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	{
 
 		String customAttrb = "MyAnnotation";
-		EntityType multiLineTestEMD = null; //FIXME  entityTypeFactory.create().setFullyQualifiedName("entity");
+		EntityType multiLineTestEMD = entityTypeFactory.create().setName("entity");
 
 		multiLineTestEMD.addAttribute(vcfAttributes.getChromAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getPosAttribute());
