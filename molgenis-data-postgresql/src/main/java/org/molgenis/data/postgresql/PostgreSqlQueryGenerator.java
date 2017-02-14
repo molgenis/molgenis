@@ -609,7 +609,7 @@ class PostgreSqlQueryGenerator
 		return "DROP TABLE " + tableName;
 	}
 
-	private static <E extends Entity> String getSqlWhere(EntityType entityType, Query<E> q, List<Object> parameters,
+	static <E extends Entity> String getSqlWhere(EntityType entityType, Query<E> q, List<Object> parameters,
 			AtomicInteger mrefFilterIndex)
 	{
 		StringBuilder result = new StringBuilder();
