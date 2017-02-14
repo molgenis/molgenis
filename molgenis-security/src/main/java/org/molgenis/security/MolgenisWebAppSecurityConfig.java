@@ -343,12 +343,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
-	public MolgenisPermissionService molgenisPermissionService()
-	{
-		return new MolgenisPermissionServiceImpl(identifierLookupService);
-	}
-
-	@Bean
 	public LoginUrlAuthenticationEntryPoint authenticationEntryPoint()
 	{
 		return new AjaxAwareLoginUrlAuthenticationEntryPoint("/login");

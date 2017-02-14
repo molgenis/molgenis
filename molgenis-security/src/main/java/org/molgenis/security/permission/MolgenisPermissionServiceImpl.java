@@ -4,18 +4,22 @@ import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
+@Component
 public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 {
-	private final IdentifierLookupService identifierLookupService;
+	private IdentifierLookupService identifierLookupService;
 
+	@Autowired
 	public MolgenisPermissionServiceImpl(IdentifierLookupService identifierLookupService)
 	{
 		this.identifierLookupService = identifierLookupService;
