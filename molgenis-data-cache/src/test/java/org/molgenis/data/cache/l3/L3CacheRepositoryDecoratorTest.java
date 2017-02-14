@@ -80,7 +80,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityType = entityTypeFactory.create(repositoryName);
+		entityType = entityTypeFactory.create(repositoryName).setName(repositoryName);
 		entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
 

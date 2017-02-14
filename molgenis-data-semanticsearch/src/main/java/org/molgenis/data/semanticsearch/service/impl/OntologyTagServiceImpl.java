@@ -26,7 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.LinkedHashMultimap.create;
 import static java.util.Collections.emptyList;
@@ -242,11 +244,11 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	 */
 	private void updateEntityTypeEntityWithNewAttributeEntity(String entity, String attribute, Entity attributeEntity)
 	{
-		Entity entityEntity = dataService
-				.findOneById(ENTITY_TYPE_META_DATA, identifierLookupService.getEntityTypeId(entity));
-		Iterable<Entity> attributes = entityEntity.getEntities(ATTRIBUTES);
-		entityEntity.set(ATTRIBUTES, Iterables.transform(attributes,
-				att -> att.getString(AttributeMetadata.NAME).equals(attribute) ? attributeEntity : att));
+		EntityType entityEntity = dataService
+				.findOneById(ENTITY_TYPE_META_DATA, identifierLookupService.getEntityTypeId(entity), EntityType.class);
+		Iterable<Attribute> attributes = entityEntity.getOwnAllAttributes();
+		entityEntity.set(ATTRIBUTES, StreamSupport.stream(attributes.spliterator(), false)
+				.map(att -> att.getName().equals(attribute) ? attributeEntity : att).collect(Collectors.toList()));
 		dataService.update(ENTITY_TYPE_META_DATA, entityEntity);
 	}
 
