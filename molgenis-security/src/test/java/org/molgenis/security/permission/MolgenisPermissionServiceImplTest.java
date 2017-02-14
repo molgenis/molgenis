@@ -21,7 +21,8 @@ import static org.testng.Assert.assertTrue;
 public class MolgenisPermissionServiceImplTest
 {
 	private static Authentication AUTHENTICATION;
-	private static IdentifierLookupService identifierLookupService;
+
+	private static MolgenisPermissionServiceImpl molgenisPermissionService;
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
@@ -47,11 +48,14 @@ public class MolgenisPermissionServiceImplTest
 				Arrays.<GrantedAuthority>asList(authority1, authority2, authority3, authority4, authority5,
 						authority6));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		identifierLookupService = mock(IdentifierLookupService.class);
+
+		IdentifierLookupService identifierLookupService = mock(IdentifierLookupService.class);
 		when(identifierLookupService.getEntityTypeId("entity1")).thenReturn("entity1");
 		when(identifierLookupService.getEntityTypeId("entity2")).thenReturn("entity2");
 		when(identifierLookupService.getEntityTypeId("entity3")).thenReturn("entity3");
 		when(identifierLookupService.getEntityTypeId("entity-unknown")).thenReturn("entity-unknown");
+
+		molgenisPermissionService = new MolgenisPermissionServiceImpl(identifierLookupService);
 	}
 
 	@AfterClass
@@ -63,34 +67,34 @@ public class MolgenisPermissionServiceImplTest
 	@Test
 	public void hasPermissionOnEntity()
 	{
-		assertTrue(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity1", Permission.READ));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity1", Permission.WRITE));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity1", Permission.COUNT));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity2", Permission.READ));
-		assertTrue(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity2", Permission.WRITE));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity2", Permission.COUNT));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity3", Permission.READ));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity3", Permission.WRITE));
-		assertTrue(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity3", Permission.COUNT));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity-unknown", Permission.READ));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity-unknown", Permission.WRITE));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnEntity("entity-unknown", Permission.COUNT));
+		assertTrue(molgenisPermissionService.hasPermissionOnEntity("entity1", Permission.READ));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity1", Permission.WRITE));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity1", Permission.COUNT));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity2", Permission.READ));
+		assertTrue(molgenisPermissionService.hasPermissionOnEntity("entity2", Permission.WRITE));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity2", Permission.COUNT));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity3", Permission.READ));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity3", Permission.WRITE));
+		assertTrue(molgenisPermissionService.hasPermissionOnEntity("entity3", Permission.COUNT));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity-unknown", Permission.READ));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity-unknown", Permission.WRITE));
+		assertFalse(molgenisPermissionService.hasPermissionOnEntity("entity-unknown", Permission.COUNT));
 	}
 
 	@Test
 	public void hasPermissionOnPlugin()
 	{
-		assertTrue(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin1", Permission.READ));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin1", Permission.WRITE));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin1", Permission.COUNT));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin2", Permission.READ));
-		assertTrue(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin2", Permission.WRITE));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin2", Permission.COUNT));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin3", Permission.READ));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin3", Permission.WRITE));
-		assertTrue(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin3", Permission.COUNT));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin-unknown", Permission.READ));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin-unknown", Permission.WRITE));
-		assertFalse(new MolgenisPermissionServiceImpl(identifierLookupService).hasPermissionOnPlugin("plugin-unknown", Permission.COUNT));
+		assertTrue(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.READ));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.COUNT));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.READ));
+		assertTrue(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.WRITE));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.COUNT));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.READ));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.WRITE));
+		assertTrue(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.COUNT));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin-unknown", Permission.READ));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin-unknown", Permission.WRITE));
+		assertFalse(molgenisPermissionService.hasPermissionOnPlugin("plugin-unknown", Permission.COUNT));
 	}
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.test.data.OneToManyTestHarness;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookMetaData1;
@@ -54,6 +55,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	private OneToManyTestHarness oneToManyTestHarness;
 	@Autowired
 	private DataService dataService;
+	@Autowired
+	private IdentifierLookupService identifierLookupService;
 
 	@BeforeClass
 	public void setUp()
@@ -61,9 +64,9 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		List<GrantedAuthority> authorities = newArrayList();
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Author" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true));
+			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Author" + i, true, true, true, identifierLookupService));
+			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true, identifierLookupService));
+			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true, identifierLookupService));
 		}
 
 		SecurityContextHolder.getContext()

@@ -11,6 +11,7 @@ import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
@@ -104,6 +105,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private AttributeFactory attributeFactory;
 	@Autowired
 	private IndexActionRegisterServiceImpl indexActionRegisterService;
+	@Autowired
+	private IdentifierLookupService identifierLookupService;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -165,12 +168,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	static List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count)
+	static List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count, IdentifierLookupService identifierLookupService)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
-		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName));
-		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityName));
-		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityName));
+		String entityId = identifierLookupService.getEntityTypeId(entityName);
+		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityId));
+		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityId));
+		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityId));
 		return authorities;
 	}
 
@@ -181,15 +185,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE));
-		authorities.addAll(makeAuthorities(refEntityTypeStatic.getFullyQualifiedName(), true, true, true));
-		authorities.addAll(makeAuthorities(entityTypeStatic.getFullyQualifiedName(), true, true, true));
-		authorities.addAll(makeAuthorities(entityTypeDynamic.getFullyQualifiedName(), true, true, true));
-		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getFullyQualifiedName(), false, true, true));
-		authorities.addAll(makeAuthorities(selfXrefEntityType.getFullyQualifiedName(), true, true, true));
-		authorities.addAll(makeAuthorities(languageMetadata.getFullyQualifiedName(), true, true, true));
-		authorities.addAll(makeAuthorities(attributeMetadata.getFullyQualifiedName(), true, true, true));
-		authorities.addAll(makeAuthorities(i18nStringMetaData.getFullyQualifiedName(), true, false, false));
-		authorities.addAll(makeAuthorities(entityTypeMetadata.getFullyQualifiedName(), true, true, true));
+		authorities.addAll(makeAuthorities(refEntityTypeStatic.getFullyQualifiedName(), true, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(entityTypeStatic.getFullyQualifiedName(), true, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(entityTypeDynamic.getFullyQualifiedName(), true, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getFullyQualifiedName(), false, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(selfXrefEntityType.getFullyQualifiedName(), true, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(languageMetadata.getFullyQualifiedName(), true, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(attributeMetadata.getFullyQualifiedName(), true, true, true, identifierLookupService));
+		authorities.addAll(makeAuthorities(i18nStringMetaData.getFullyQualifiedName(), true, false, false, identifierLookupService));
+		authorities.addAll(makeAuthorities(entityTypeMetadata.getFullyQualifiedName(), true, true, true, identifierLookupService));
 
 		SecurityContextHolder.getContext()
 				.setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
