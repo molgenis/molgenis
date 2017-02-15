@@ -62,7 +62,6 @@ import java.util.regex.Pattern;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -727,15 +726,7 @@ public class RestController
 	{
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
-
-		if (ATTRIBUTE_META_DATA.equals(entityName))
-		{
-			dataService.getMeta().deleteAttributeById(id);
-		}
-		else
-		{
-			dataService.deleteById(entityName, id);
-		}
+		dataService.deleteById(entityName, id);
 	}
 
 	/**
@@ -1031,15 +1022,7 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityName);
 		Entity entity = this.restService.toEntity(entityType, entityMap);
 
-		if (ATTRIBUTE_META_DATA.equals(entityName))
-		{
-			dataService.getMeta().addAttribute(new Attribute(entity));
-		}
-		else
-		{
-			dataService.add(entityName, entity);
-		}
-
+		dataService.add(entityName, entity);
 		restService.updateMappedByEntities(entity);
 
 		Object id = entity.getIdValue();
@@ -1216,8 +1199,7 @@ public class RestController
 			else if (attrType == DATE)
 			{
 				Date date = entity.getDate(attrName);
-				entityMap.put(attrName,
-						date != null ? MolgenisDateFormat.getDateFormat().format(date) : null);
+				entityMap.put(attrName, date != null ? MolgenisDateFormat.getDateFormat().format(date) : null);
 			}
 			else if (attrType == DATE_TIME)
 			{

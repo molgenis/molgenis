@@ -4,7 +4,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
@@ -14,6 +13,7 @@ import org.molgenis.util.EntityUtils;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -21,6 +21,9 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -238,35 +241,38 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	}
 
 	@Override
-	public void delete(Attribute attr)
+	public void delete(Attribute attribute)
 	{
-		validateDeleteAllowed(attr);
-
-		// If compound attribute is deleted then change the parent of children to null
-		// This will change the children attributes into regular attributes.
-		if (AttributeType.COMPOUND.equals(attr.getDataType()))
+		validateDeleteAllowed(attribute);
+		if (attribute.getDataType().equals(COMPOUND))
 		{
-			attr.getChildren().forEach(e ->
+			attribute.getChildren().forEach(childAttribute ->
 			{
-				if (null != e.getParent())
+				if (childAttribute.getParent() != null)
 				{
-					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)
-							.update(e.setParent(null));
+					// If compound attribute is deleted then change the parent of children to null
+					// This will change the children attributes into regular attributes.
+					dataService.getMeta().getRepository(ATTRIBUTE_META_DATA).update(childAttribute.setParent(null));
 				}
 			});
 		}
+		decoratedRepo.delete(attribute);
 
-		// remove this attribute
-		decoratedRepo.delete(attr);
+		// Update bidirectional relation with the EntityType table
+		EntityType entityType = dataService.getMeta().getEntityType(attribute.getEntity().getName());
+		if (entityType.getAttribute(attribute.getName()) != null)
+		{
+			entityType.removeAttribute(attribute);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+		}
 	}
 
 	@Override
-	public void delete(Stream<Attribute> attrs)
+	public void delete(Stream<Attribute> attributes)
 	{
-		// The validateDeleteAllowed check if querying the table in which we are deleting. Since the decorated repo only
-		// guarantees that the attributes are deleted after the operation completes we have to delete the attributes one
-		// by one
-		attrs.forEach(this::delete);
+		// The decorated repo only guarantees that the attributes are deleted after
+		// the operation completes, so we have to delete the attributes one by one
+		attributes.forEach(this::delete);
 	}
 
 	@Override
@@ -289,15 +295,30 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	}
 
 	@Override
-	public void add(Attribute attr)
+	public void add(Attribute attribute)
 	{
-		decoratedRepo.add(attr);
+		decoratedRepo.add(attribute);
+
+		// Update bidirectional relation with the EntityType table
+		EntityType entityType = dataService.getMeta().getEntityType(attribute.getEntity().getName());
+		Attribute existingAttribute = entityType.getAttribute(attribute.getName());
+		if (existingAttribute == null)
+		{
+			entityType.addAttribute(attribute);
+			dataService.update(ENTITY_TYPE_META_DATA, entityType);
+		}
 	}
 
 	@Override
-	public Integer add(Stream<Attribute> attrs)
+	public Integer add(Stream<Attribute> attributes)
 	{
-		return decoratedRepo.add(attrs);
+		AtomicInteger count = new AtomicInteger();
+		attributes.filter(attribute ->
+		{
+			count.incrementAndGet();
+			return true;
+		}).forEach(this::add);
+		return count.get();
 	}
 
 	/**

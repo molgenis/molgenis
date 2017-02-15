@@ -41,10 +41,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -209,15 +209,7 @@ class RestControllerV2
 	{
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
-
-		if (ATTRIBUTE_META_DATA.equals(entityName))
-		{
-			dataService.getMeta().deleteAttributeById(id);
-		}
-		else
-		{
-			dataService.deleteById(entityName, id);
-		}
+		dataService.deleteById(entityName, id);
 	}
 
 	/**
@@ -311,22 +303,12 @@ class RestControllerV2
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
 					.collect(Collectors.toList());
 			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
-			final List<String> ids = new ArrayList<String>();
+			final List<String> ids = newArrayList();
 
-			// Add all entities
-			if (ATTRIBUTE_META_DATA.equals(entityName))
-			{
-				this.dataService.getMeta().addAttributes(entityName, entities.stream().map(a -> (Attribute) a));
-			}
-			else
-			{
-				this.dataService.add(entityName, entities.stream());
-			}
-
+			dataService.add(entityName, entities.stream());
 			entities.forEach(entity ->
 			{
 				restService.updateMappedByEntities(entity);
-
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(

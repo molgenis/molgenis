@@ -34,6 +34,8 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.eq;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
@@ -709,27 +711,34 @@ public class AttributeRepositoryDecoratorTest
 	@Test
 	public void delete()
 	{
-		String attrName = "attrName";
-		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
-		String attrIdentifier = "id";
-		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
+		String attributeName = "attrName";
+		String attributeId = "id";
+
+		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getAttribute(attributeName)).thenReturn(attribute)
+				.getMock();
+
+		when(attribute.getIdentifier()).thenReturn(attributeId);
+		when(attribute.getDataType()).thenReturn(BOOL);
+		when(attribute.getEntity()).thenReturn(entityType);
+		when(systemEntityTypeRegistry.hasSystemAttribute(attributeId)).thenReturn(false);
+		when(dataService.getMeta().getEntityType(attribute.getEntity().getName())).thenReturn(entityType);
 
 		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
-		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
+		when(entityQ.eq(ATTRIBUTES, attribute)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
 		@SuppressWarnings("unchecked")
 		Query<Attribute> attrQ = mock(Query.class);
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
-		when(attrQ.eq(CHILDREN, attr)).thenReturn(attrQ);
+		when(attrQ.eq(CHILDREN, attribute)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
 
-		repo.delete(attr);
+		repo.delete(attribute);
 
-		verify(decoratedRepo).delete(attr);
+		verify(decoratedRepo).delete(attribute);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -737,16 +746,37 @@ public class AttributeRepositoryDecoratorTest
 	public void deleteCompoundAttribute()
 	{
 		// Compound parent attribute
-		Attribute compound = when(mock(Attribute.class).getName()).thenReturn("compound").getMock();
-		when(compound.getDataType()).thenReturn(AttributeType.COMPOUND);
+		String compoundName = "compound";
+		String compoundId = "id";
+
+		Attribute compound = when(mock(Attribute.class).getName()).thenReturn(compoundName).getMock();
+		EntityType entityType = when(mock(EntityType.class).getAttribute(compoundName)).thenReturn(compound).getMock();
+
+		when(compound.getIdentifier()).thenReturn(compoundId);
+		when(compound.getDataType()).thenReturn(COMPOUND);
+		when(compound.getEntity()).thenReturn(entityType);
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		when(dataService.getMeta().getEntityType(compound.getEntity().getName())).thenReturn(entityType);
 
 		// Child
 		Attribute child = when(mock(Attribute.class).getName()).thenReturn("child").getMock();
 		when(compound.getChildren()).thenReturn(newArrayList(child));
 		when(child.getParent()).thenReturn(mock(Attribute.class));
-		MetaDataService mds = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(mds);
 		when(mds.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)).thenReturn(mock(Repository.class));
+
+		@SuppressWarnings("unchecked")
+		Query<EntityType> entityQ = mock(Query.class);
+		when(entityQ.eq(ATTRIBUTES, attribute)).thenReturn(entityQ);
+		when(entityQ.findOne()).thenReturn(null);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
+
+		@SuppressWarnings("unchecked")
+		Query<Attribute> attrQ = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
+		when(attrQ.eq(CHILDREN, attribute)).thenReturn(attrQ);
+		when(attrQ.findOne()).thenReturn(null);
 
 		repo.delete(compound);
 
@@ -771,11 +801,35 @@ public class AttributeRepositoryDecoratorTest
 	{
 		AttributeRepositoryDecorator repoSpy = spy(repo);
 		doNothing().when(repoSpy).delete(any(Attribute.class));
-		Attribute attr0 = mock(Attribute.class);
-		Attribute attr1 = mock(Attribute.class);
-		repoSpy.delete(Stream.of(attr0, attr1));
-		verify(repoSpy).delete(attr0);
-		verify(repoSpy).delete(attr1);
+
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		when(attr0.getIdentifier()).thenReturn("id1");
+		when(attr0.getDataType()).thenReturn(BOOL);
+		when(attr0.getEntity()).thenReturn(mock(EntityType.class));
+		when(systemEntityTypeRegistry.hasSystemAttribute("id1")).thenReturn(false);
+
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
+		when(attr1.getIdentifier()).thenReturn("id2");
+		when(attr1.getDataType()).thenReturn(BOOL);
+		when(attr1.getEntity()).thenReturn(mock(EntityType.class));
+		when(systemEntityTypeRegistry.hasSystemAttribute("id2")).thenReturn(false);
+
+		@SuppressWarnings("unchecked")
+		Query<EntityType> entityQ = mock(Query.class);
+		when(entityQ.eq(ATTRIBUTES, attribute)).thenReturn(entityQ);
+		when(entityQ.findOne()).thenReturn(null);
+		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
+
+		@SuppressWarnings("unchecked")
+		Query<Attribute> attrQ = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
+		when(attrQ.eq(CHILDREN, attribute)).thenReturn(attrQ);
+		when(attrQ.findOne()).thenReturn(null);
+
+		Stream<Attribute> attributes = Stream.of(attr0, attr1);
+
+		repoSpy.delete(attributes);
+		verify(repoSpy).delete(attributes);
 	}
 
 	private static void setSuAuthentication()
