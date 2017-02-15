@@ -49,7 +49,7 @@ public class FileTypeEditing extends AbstractTestNGSpringContextTests
 	public void testNoConversionsAllowed()
 	{
 		EntityType entityType = entityTypeFactory.create("1");
-		//FIXME entityType.setFullyQualifiedName("FileEntity");
+		entityType.setName("FileEntity");
 		entityType.setBackend("PostgreSQL");
 
 		entityType.addAttribute(attributeFactory.create().setName("id").setIdAttribute(true), ROLE_ID);
