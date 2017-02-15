@@ -7,8 +7,10 @@ import org.molgenis.das.RangeHandlingDataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
@@ -23,6 +25,7 @@ import javax.servlet.ServletContext;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.lang.Math.toIntExact;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
@@ -33,6 +36,8 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 	private DasType mutationType;
 	private DasMethod method;
 	private String type;
+
+	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RepositoryRangeHandlingDataSource.class);
 
 	@Override
 	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
@@ -80,7 +85,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		{
 			maxbins = 1000;
 		}
-		Stream<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
+		Stream<Entity> entityIterable = queryDataSet(segmentId, start, stop, dataSet, maxbins);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
 		Integer score = 0;
@@ -111,16 +116,45 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 			try
 			{
-				valueStart = entity.getInt(posAttribute);
+				if (entity.getEntityType().getAttribute(posAttribute).getDataType() == AttributeType.INT)
+				{
+					valueStart = entity.getInt(posAttribute);
+				}
+				else if (entity.getEntityType().getAttribute(posAttribute).getDataType() == AttributeType.LONG)
+				{
+					valueStart = toIntExact(entity.getLong(posAttribute));
+				}
 			}
 			catch (ClassCastException e)
 			{
 				// start of identifier not correctly specified? exclude this mutation fore it can not be plotted
+				LOG.debug("genomic entity has an empty start value");
 				break;
 			}
 			// no end position? assume mutation of 1 position, so stop == start
 			List<String> attributes = Lists.newArrayList(entity.getAttributeNames().iterator());
-			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
+			if (stopAttribute != null)
+			{
+				try
+				{	if(entity.getEntityType().getAttribute("stopAttribute") != null)
+					{
+						if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.INT)
+						{
+							valueStop = entity.getInt(stopAttribute);
+						}
+						else if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.LONG)
+						{
+							valueStop = toIntExact(entity.getLong(stopAttribute));
+						}
+					}
+				}
+				catch (ClassCastException e)
+				{
+					LOG.trace("genomic entity has an empty stop value");
+					break;
+				}
+
+			}
 			valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
 					.getString(descriptionAttribute) : "";
 			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
@@ -135,43 +169,39 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			if (StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute + "~" + valueRef);
 			if (StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute + "~" + valueAlt);
 
-			if (valueStart != null && ((valueStart >= start && valueStart <= stop) || (valueStop >= start
-					&& valueStop <= stop)))
+			DasType type;// used for label colours in Dalliance
+			if (!StringUtils.isEmpty(valueRef) && !StringUtils.isEmpty(valueAlt))
 			{
-				DasType type;// used for label colours in Dalliance
-				if (!StringUtils.isEmpty(valueRef) && !StringUtils.isEmpty(valueAlt))
+				if (valueRef.length() == 1 && valueAlt.length() == 1) type = new DasType(valueAlt, "", "", "");
+				else if (valueRef.length() == 1 && valueAlt.length() > 1)
 				{
-					if (valueRef.length() == 1 && valueAlt.length() == 1) type = new DasType(valueAlt, "", "", "");
-					else if (valueRef.length() == 1 && valueAlt.length() > 1)
-					{
-						type = new DasType("insert", "", "", "");
-					}
-					else if (valueRef.length() > 1 && valueAlt.length() == 1)
-					{
-						type = new DasType("delete", "", "", "");
-					}
-					else
-					{
-						type = new DasType("delete", "", "", "");
-					}
+					type = new DasType("insert", "", "", "");
 				}
-				else if (patients.containsKey(valuePatient))
+				else if (valueRef.length() > 1 && valueAlt.length() == 1)
 				{
-					type = patients.get(valuePatient);
+					type = new DasType("delete", "", "", "");
 				}
 				else
 				{
-					type = new DasType(score.toString(), "", "", "");
-					patients.put(valuePatient, type);
-					++score;
+					type = new DasType("delete", "", "", "");
 				}
-
-				Object labelValue = entity.getLabelValue();
-				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
-						labelValue != null ? labelValue.toString() : null, valueDescription, valueLink, type, method,
-						dataSet, valuePatient, notes);
-				features.add(feature);
 			}
+			else if (patients.containsKey(valuePatient))
+			{
+				type = patients.get(valuePatient);
+			}
+			else
+			{
+				type = new DasType(score.toString(), "", "", "");
+				patients.put(valuePatient, type);
+				++score;
+			}
+
+			Object labelValue = entity.getLabelValue();
+			feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
+					labelValue != null ? labelValue.toString() : null, valueDescription, valueLink, type, method,
+					dataSet, valuePatient, notes);
+			features.add(feature);
 		}
 		DasAnnotatedSegment segment = new DasAnnotatedSegment(segmentId, start, stop, "1.00", segmentId, features);
 		return segment;
@@ -186,12 +216,34 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		return attribute;
 	}
 
-	protected Stream<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+	protected Stream<Entity> queryDataSet(String segmentId, int browserStart, int browserStop, String dataSet,
+			int maxbins)
 	{
 
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityType(dataSet));
-		Query<Entity> q = new QueryImpl<Entity>().eq(chromosomeAttribute, segmentId);
+		String posAttr = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS,
+				dataService.getEntityType(dataSet));
+		String stopAttr = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_STOP,
+				dataService.getEntityType(dataSet));
+		//Query for chromosome
+		Query<Entity> q = new QueryImpl<>().eq(chromosomeAttribute, segmentId);
+		//Add postion queryparts, those should be nested
+		q.and().nest();
+		//Add start position to queryparts
+		q.le(posAttr, browserStop);
+		//If stop is configured: add stop querypart, else the position should also be greater than browserstart
+		if (stopAttr != "")
+		{
+			//or is used because a variant can also partly be located in the window
+			q.or().ge(stopAttr, browserStart);
+		}else
+		{
+			//and is used because one position is known, so the position should be located in the window
+			q.and().ge(posAttr, browserStart);
+		}
+		q.unnest();
+		//add pagesize based on maxbins of das query
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
 	}
