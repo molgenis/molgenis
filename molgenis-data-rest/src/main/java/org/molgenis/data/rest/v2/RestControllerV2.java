@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
@@ -216,6 +218,25 @@ class RestControllerV2
 		{
 			dataService.deleteById(entityName, id);
 		}
+	}
+
+	/**
+	 * Delete multiple entities of the given entity type
+	 */
+	@RequestMapping(value = "/{entityName}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteEntityCollection(@PathVariable("entityName") String entityName,
+			@RequestBody @Valid EntityCollectionDeleteRequestV2 request)
+	{
+		EntityType entityType = dataService.getEntityType(entityName);
+		if (entityType.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Cannot delete entities because type [%s] is abstract.", entityName));
+		}
+		Attribute idAttribute = entityType.getIdAttribute();
+		Stream<Object> typedIds = request.getEntityIds().stream().map(entityId -> getTypedValue(entityId, idAttribute));
+		dataService.deleteAll(entityName, typedIds);
 	}
 
 	/**
@@ -521,6 +542,16 @@ class RestControllerV2
 		return id;
 	}
 
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(BAD_REQUEST)
+	public
+	@ResponseBody
+	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
+	{
+		LOG.debug("Invalid request body.", exception);
+		return new ErrorMessageResponse(new ErrorMessage("Invalid request body."));
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
 	public
@@ -703,8 +734,8 @@ class RestControllerV2
 	private void createEntityValuesResponseRec(Entity entity, Iterable<Attribute> attrs, Fetch fetch,
 			Map<String, Object> responseData)
 	{
-		responseData
-				.put("_href", Href.concatEntityHref(BASE_URI, entity.getEntityType().getFullyQualifiedName(), entity.getIdValue()));
+		responseData.put("_href",
+				Href.concatEntityHref(BASE_URI, entity.getEntityType().getFullyQualifiedName(), entity.getIdValue()));
 		for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();
