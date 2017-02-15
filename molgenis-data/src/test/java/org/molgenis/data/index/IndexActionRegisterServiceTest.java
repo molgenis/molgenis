@@ -69,6 +69,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeName("entityTypeName")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeName()).thenReturn("entityTypeName");
+		when(indexAction.setEntityTypeId("entityTypeName")).thenReturn(indexAction);
+		when(indexAction.getEntityTypeId()).thenReturn("entityTypeName");
 		when(indexAction.setEntityFullName("TestEntityName")).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn("TestEntityName");
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
@@ -107,6 +109,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeName("entityTypeName")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeName()).thenReturn("entityTypeName");
+		when(indexAction.setEntityTypeId("entityTypeName")).thenReturn(indexAction);
+		when(indexAction.getEntityTypeId()).thenReturn("entityTypeName");
 		when(indexAction.getEntityFullName()).thenReturn("");
 		when(indexAction.setEntityFullName("TestEntityName")).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn("");
@@ -139,6 +143,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeName("entityTypeName")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeName()).thenReturn("entityTypeName");
+		when(indexAction.setEntityTypeId("entityTypeName")).thenReturn(indexAction);
+		when(indexAction.getEntityTypeId()).thenReturn("entityTypeName");
 		when(indexAction.setEntityFullName("ABC")).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn("ABC");
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
@@ -169,6 +175,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeName(entityTypeName)).thenReturn(indexAction);
 		when(indexAction.getEntityTypeName()).thenReturn(entityTypeName);
+		when(indexAction.setEntityTypeId(entityTypeName)).thenReturn(indexAction);
+		when(indexAction.getEntityTypeId()).thenReturn(entityTypeName);
 		when(indexAction.setEntityFullName(entityName)).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn(entityName);
 		when(indexAction.setEntityId(entityIdString)).thenReturn(indexAction);
@@ -199,6 +207,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeName(entityTypeName)).thenReturn(indexAction);
 		when(indexAction.getEntityTypeName()).thenReturn(entityTypeName);
+		when(indexAction.setEntityTypeId(entityTypeName)).thenReturn(indexAction);
+		when(indexAction.getEntityTypeId()).thenReturn(entityTypeName);
 		when(indexAction.setEntityFullName(entityName)).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn(entityName);
 		when(indexAction.setEntityId(entityId1)).thenReturn(indexAction);

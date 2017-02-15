@@ -39,6 +39,11 @@ public class IndexActionMetaData extends SystemEntityType
 	 * The name of the entity type that needs to be indexed (e.g. myEntityType).
 	 */
 	public static final String ENTITY_TYPE_NAME = "entityTypeName";
+
+	/**
+	 * The name of the entity type ID that needs to be indexed
+	 */
+	public static final String ENTITY_TYPE_ID = "entityTypeId";
 	/**
 	 * The fully qualified name of the entity type that needs to be indexed (e.g. myPackage_myEntityType)
 	 */
@@ -78,6 +83,9 @@ public class IndexActionMetaData extends SystemEntityType
 				.setDataType(XREF).setRefEntity(indexActionGroupMetaData);
 		addAttribute(ACTION_ORDER).setDataType(INT)
 				.setDescription("The order in which the action is registered within its IndexActionJob")
+				.setNillable(false);
+		addAttribute(ENTITY_TYPE_ID)
+				.setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
 				.setNillable(false);
 		addAttribute(ENTITY_TYPE_NAME)
 				.setDescription("The name of the entity type that needs to be indexed (e.g. myEntityType).")
