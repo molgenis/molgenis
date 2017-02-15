@@ -235,11 +235,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		//If stop is configured: add stop querypart, else the position should also be greater than browserstart
 		if (stopAttr != "")
 		{
-			//or is used because a variant can also partly be located in the window
-			q.or().ge(stopAttr, browserStart);
+			q.and().ge(stopAttr, browserStart);
 		}else
 		{
-			//and is used because one position is known, so the position should be located in the window
 			q.and().ge(posAttr, browserStart);
 		}
 		q.unnest();
