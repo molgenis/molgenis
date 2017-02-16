@@ -12,7 +12,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -51,7 +50,7 @@ public class AnnotatorController
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			MolgenisPermissionService molgenisPermissionService, PermissionSystemService permissionSystemService,
+			MolgenisPermissionService molgenisPermissionService,
 			UserAccountService userAccountService, AnnotationJobFactory annotationJobFactory,
 			ExecutorService taskExecutor, AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{

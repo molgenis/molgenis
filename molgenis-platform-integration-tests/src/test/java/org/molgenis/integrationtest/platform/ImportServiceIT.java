@@ -76,8 +76,8 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest")));
 
 		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"),
-				ImmutableMap.<String, Integer>builder().put("TestCategorical_1", 50).put("TestMref1", 50)
-						.put("TestXref_2", 50).put("TestXref_1", 50)
+				ImmutableMap.<String, Integer>builder().put("TestCategorical1", 50).put("TestMref1", 50)
+						.put("TestXref2", 50).put("TestXref1", 50)
 						.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity2", 50).build(),
 				ImmutableSet.of("TestCategorical1", "TestMref1", "TestXref2", "TestXref1", "TestEntity0",
 						"advanced_TestEntity1", "advanced_p_TestEntity2")));

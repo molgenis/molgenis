@@ -48,8 +48,8 @@ public class FileTypeEditing extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[FILE\\] to \\[STRING\\] not allowed, allowed types are \\[\\]")
 	public void testNoConversionsAllowed()
 	{
-		EntityType entityType = entityTypeFactory.create("1");
-		//FIXME entityType.setFullyQualifiedName("FileEntity");
+		EntityType entityType = entityTypeFactory.create("FileEntity");
+		entityType.setName("FileEntity");
 		entityType.setBackend("PostgreSQL");
 
 		entityType.addAttribute(attributeFactory.create().setName("id").setIdAttribute(true), ROLE_ID);

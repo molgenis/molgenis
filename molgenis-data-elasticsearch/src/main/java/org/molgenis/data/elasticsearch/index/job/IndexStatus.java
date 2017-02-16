@@ -125,6 +125,7 @@ public class IndexStatus
 
 	private boolean isAllIndicesStable()
 	{
+		//FIXME?
 		return actionCountsPerEntity.isEmpty();
 	}
 

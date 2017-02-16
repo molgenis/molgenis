@@ -138,11 +138,16 @@ public class ImportWriter
 	{
 		return runAsSystem(() ->
 		{
-			Map<String, EntityType> existingEntityTypeMap = dataService
-					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-							entities.stream().map(EntityType::getFullyQualifiedName),
-							new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.PACKAGE),
-							EntityType.class).collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+			for (EntityType entityType : entities)
+			{
+				EntityType existing = dataService.findOne(ENTITY_TYPE_META_DATA,
+						new QueryImpl<EntityType>().eq(EntityTypeMetadata.NAME, entityType.getName()).and()
+								.eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()), EntityType.class);
+				if(existing != null){
+					existingEntityTypeMap.put(entityType.getFullyQualifiedName(),entityType);
+				}
+			}
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
 					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
@@ -389,11 +394,18 @@ public class ImportWriter
 
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
-		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, updatedEntityTypes.stream().map(EntityType::getId), entityTypeFetch,
-						EntityType.class).collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+		for (EntityType entityType : updatedEntityTypes)
+		{
+			EntityType existing = dataService.findOne(ENTITY_TYPE_META_DATA,
+					new QueryImpl<EntityType>().eq(EntityTypeMetadata.NAME, entityType.getName()).and()
+							.eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()), EntityType.class);
+			if(existing != null){
+				existingEntityTypeMap.put(entityType.getFullyQualifiedName(),existing);
+			}
+		}
 
-		// inject attribute identifiers in entity types to import
+		// inject attribute and entityType identifiers in entity types to import
 		updatedEntityTypes.forEach(entityType ->
 		{
 			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
@@ -403,12 +415,15 @@ public class ImportWriter
 				if (existingAttr != null)
 				{
 					ownAttr.setIdentifier(existingAttr.getIdentifier());
+					ownAttr.setEntity(existingEntityType);
 				}
 			});
+			entityType.setId(existingEntityType.getId());
 		});
 
 		// add or update entity types
 		List<EntityType> entityTypes = newArrayList(concat(updatedEntityTypes, groupedEntityTypes.getNewEntityTypes()));
+		entityTypes.stream().forEach(entity -> System.out.println("c = [" + entity.getName() +"-"+ entity.getId() + "]"));
 		runAsSystem(() -> dataService.getMeta().upsertEntityTypes(entityTypes));
 	}
 

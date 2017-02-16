@@ -329,4 +329,6 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Get names of all the entities in this source
 	 */
 	Stream<String> getEntityNames();
+
+	Stream<Object> getEntityIds();
 }

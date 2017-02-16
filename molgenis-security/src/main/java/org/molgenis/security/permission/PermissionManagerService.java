@@ -19,7 +19,7 @@ public interface PermissionManagerService
 
 	List<MolgenisPlugin> getPlugins();
 
-	List<String> getEntityClassIds();
+	List<Object> getEntityClassIds();
 
 	Permissions getGroupPluginPermissions(String groupId);
 
