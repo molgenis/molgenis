@@ -523,20 +523,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		return mappingProject;
 	}
 
-	@Test
-	public void testNumericId()
-	{
-		assertEquals(mappingService.generateId(INT, 1L), "2");
-		assertEquals(mappingService.generateId(DECIMAL, 2L), "3");
-		assertEquals(mappingService.generateId(LONG, 3L), "4");
-	}
-
-	@Test
-	public void testStringId()
-	{
-		mappingService.generateId(STRING, 1L);
-	}
-
 	private MappingTarget getManualMappingTarget(String identifier, Collection<EntityMapping> entityMappings)
 	{
 		return new MappingTarget(identifier, hopMetaData, entityMappings);

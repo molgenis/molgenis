@@ -85,6 +85,4 @@ public interface MappingService
 	 * @return cloned {@link MappingProject}
 	 */
 	MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName);
-
-	String generateId(AttributeType dataType, Long count);
 }
