@@ -304,7 +304,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void addEntityType(EntityType entityType)
 	{
-		validatePermission(entityType.getFullyQualifiedName(), Permission.WRITEMETA);
+		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		// add row to entities table
 		decoratedRepo.add(entityType);
@@ -365,7 +365,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	{
 		String entityName = entityType.getFullyQualifiedName();
 		String entityId = identifierLookupService.getEntityTypeId(entityName);
-		validatePermission(entityId, Permission.WRITEMETA);
+		validatePermission(entityId, entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
 		//FIXME: should only be possible to update system entities during bootstrap!
@@ -398,7 +398,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void validateDeleteAllowed(EntityType entityType)
 	{
 		String entityName = entityType.getFullyQualifiedName();
-		validatePermission(entityName, Permission.WRITEMETA);
+		validatePermission(entityName, entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityName);
 		if (isSystem)
