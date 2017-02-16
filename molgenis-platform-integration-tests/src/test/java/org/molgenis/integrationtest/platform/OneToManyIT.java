@@ -55,8 +55,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	private OneToManyTestHarness oneToManyTestHarness;
 	@Autowired
 	private DataService dataService;
-	@Autowired
-	private IdentifierLookupService identifierLookupService;
 
 	@BeforeClass
 	public void setUp()
@@ -64,9 +62,9 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		List<GrantedAuthority> authorities = newArrayList();
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Author" + i, true, true, true, identifierLookupService));
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true, identifierLookupService));
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true, identifierLookupService));
+			authorities.addAll(makeSystemAuthorities("sys" + PACKAGE_SEPARATOR + "Author" + i, true, true, true));
+			authorities.addAll(makeSystemAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true));
+			authorities.addAll(makeSystemAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true));
 		}
 
 		SecurityContextHolder.getContext()

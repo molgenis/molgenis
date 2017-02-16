@@ -178,6 +178,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		return authorities;
 	}
 
+	static List<GrantedAuthority> makeSystemAuthorities(String entityName, boolean write, boolean read, boolean count)
+	{
+		List<GrantedAuthority> authorities = newArrayList();
+		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName));
+		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityName));
+		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityName));
+		return authorities;
+	}
+
 	private void setAuthentication()
 	{
 		List<GrantedAuthority> authorities = newArrayList();

@@ -108,8 +108,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private EntityFactoryRegistrar entityFactoryRegistrar;
 	@Autowired
 	private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
-	@Autowired
-	private IdentifierLookupService identifierLookupService;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
