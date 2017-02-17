@@ -14,11 +14,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
@@ -595,5 +597,110 @@ public class PostgreSqlQueryGeneratorTest
 		when(entityType.getIdAttribute()).thenReturn(idxAttr);
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTableIndex(entityType, attr),
 				"CREATE INDEX \"entity_attr_idAttr_idx\" ON \"entity_attr\" (\"idAttr\")");
+	}
+
+	@Test
+	public void getSqlFrom()
+	{
+		Package eric = createPackage("eu_bbmri_eric");
+		Attribute collectionsIdAttribute = createIdAttribute("collectionsId");
+		EntityType collectionsEntity = createMockEntityWithIdAttribute("eu_bbmri_eric_collections",
+				collectionsIdAttribute, "collectionsId");
+		Attribute typeIdAttribute = createIdAttribute("typeId");
+		EntityType typeEntity = createMockEntityWithIdAttribute("eu_bbmri_eric_type", typeIdAttribute, "typeId");
+		Attribute categoryIdAttribute = createIdAttribute("categoryId");
+		EntityType categoryEntity = createMockEntityWithIdAttribute("eu_bbmri_eric_category", categoryIdAttribute,
+				"categoryId");
+
+		Attribute typeAttribute = createMrefAttribute("type", typeEntity);
+		Attribute categoryAttribute = createMrefAttribute("category", categoryEntity);
+
+		when(collectionsEntity.getName()).thenReturn("collections");
+		when(collectionsEntity.getPackage()).thenReturn(eric);
+		when(collectionsEntity.getAttribute("type")).thenReturn(typeAttribute);
+		when(collectionsEntity.getAttribute("category")).thenReturn(categoryAttribute);
+		when(collectionsEntity.getAtomicAttributes())
+				.thenReturn(asList(collectionsIdAttribute, typeAttribute, categoryAttribute));
+
+		QueryImpl<Entity> q = new QueryImpl<>();
+
+		List<Object> parameters = Lists.newArrayList();
+
+		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(collectionsEntity, q, parameters, true);
+		assertEquals(sqlSelect,
+				"SELECT this.\"collectionsId\", (SELECT array_agg(DISTINCT ARRAY[\"type\".\"order\"::TEXT,\"type\".\"type\"::TEXT]) FROM \"collections_type\" AS \"type\" WHERE this.\"collectionsId\" = \"type\".\"collectionsId\") AS \"type\", (SELECT array_agg(DISTINCT ARRAY[\"category\".\"order\"::TEXT,\"category\".\"category\"::TEXT]) FROM \"collections_category\" AS \"category\" WHERE this.\"collectionsId\" = \"category\".\"collectionsId\") AS \"category\" FROM \"collections\" AS this");
+	}
+
+	@Test
+	public void getSqlWhere()
+	{
+		Package eric = createPackage("eu_bbmri_eric");
+		Attribute collectionsIdAttribute = createIdAttribute("collectionsId");
+		EntityType collectionsEntity = createMockEntityWithIdAttribute("eu_bbmri_eric_collections",
+				collectionsIdAttribute, "collectionsId");
+		Attribute typeIdAttribute = createIdAttribute("typeId");
+		EntityType typeEntity = createMockEntityWithIdAttribute("eu_bbmri_eric_type", typeIdAttribute, "typeId");
+		Attribute categoryIdAttribute = createIdAttribute("categoryId");
+		EntityType categoryEntity = createMockEntityWithIdAttribute("eu_bbmri_eric_category", categoryIdAttribute,
+				"categoryId");
+
+		Attribute typeAttribute = createMrefAttribute("type", typeEntity);
+		Attribute categoryAttribute = createMrefAttribute("data_categories", categoryEntity);
+
+		when(collectionsEntity.getName()).thenReturn("collections");
+		when(collectionsEntity.getPackage()).thenReturn(eric);
+		when(collectionsEntity.getAttribute("type")).thenReturn(typeAttribute);
+		when(collectionsEntity.getAttribute("data_categories")).thenReturn(categoryAttribute);
+		when(collectionsEntity.getAtomicAttributes())
+				.thenReturn(asList(collectionsIdAttribute, typeAttribute, categoryAttribute));
+
+		QueryRule typeRule = new QueryRule(NESTED,
+				newArrayList(new QueryRule("type", EQUALS, "POPULATION_BASED"), new QueryRule(OR),
+						new QueryRule("type", EQUALS, "QUALITY_CONTROL")));
+		QueryRule categoryRule = new QueryRule(NESTED,
+				newArrayList(new QueryRule("data_categories", EQUALS, "MEDICAL_RECORDS"), new QueryRule(OR),
+						new QueryRule("data_categories", EQUALS, "NATIONAL_REGISTRIES")));
+
+		QueryImpl<Entity> q = new QueryImpl<>(
+				new QueryRule(NESTED, newArrayList(newArrayList(typeRule, new QueryRule(AND), categoryRule))));
+
+		List<Object> parameters = Lists.newArrayList();
+
+		String sqlWhere = PostgreSqlQueryGenerator.getSqlWhere(collectionsEntity, q, parameters, new AtomicInteger());
+		assertEquals(sqlWhere, "((\"type_filter1\".\"type\" = ?  OR \"type_filter2\".\"type\" = ?)" + " AND "
+				+ "(\"data_categories_filter3\".\"data_categories\" = ?  OR \"data_categories_filter4\".\"data_categories\" = ?))");
+	}
+
+	private Attribute createIdAttribute(String idAttributeName)
+	{
+		final String idAttributeIdentifier = idAttributeName + "AttrId";
+		Attribute idAttribute = when(mock(Attribute.class).getName()).thenReturn(idAttributeName).getMock();
+		when(idAttribute.getIdentifier()).thenReturn(idAttributeIdentifier);
+		when(idAttribute.getDataType()).thenReturn(STRING);
+		return idAttribute;
+	}
+
+	private EntityType createMockEntityWithIdAttribute(String entityName, Attribute idAttribute, String idAttributeName)
+	{
+		EntityType result = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(result.getName()).thenReturn(entityName);
+		when(result.getIdAttribute()).thenReturn(idAttribute);
+		when(result.getAttribute(idAttributeName)).thenReturn(idAttribute);
+		return result;
+	}
+
+	private Attribute createMrefAttribute(String attributeName, EntityType refEntityMeta)
+	{
+		String attributeIdentifier = attributeName + "AttrId";
+		Attribute result = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
+		when(result.getIdentifier()).thenReturn(attributeIdentifier);
+		when(result.getDataType()).thenReturn(MREF);
+		when(result.getRefEntity()).thenReturn(refEntityMeta);
+		return result;
+	}
+
+	public Package createPackage(String packageName)
+	{
+		return when(mock(Package.class).getName()).thenReturn(packageName).getMock();
 	}
 }

@@ -446,7 +446,7 @@ class PostgreSqlQueryGenerator
 		// from
 		StringBuilder result = new StringBuilder().append(select).append(getSqlFrom(entityType, q));
 		// where
-		String where = getSqlWhere(entityType, q, parameters, 0);
+		String where = getSqlWhere(entityType, q, parameters, new AtomicInteger());
 		if (where.length() > 0)
 		{
 			result.append(" WHERE ").append(where);
@@ -514,7 +514,7 @@ class PostgreSqlQueryGenerator
 			}
 
 			String from = getSqlFrom(entityType, q);
-			String where = getSqlWhere(entityType, q, parameters, 0);
+			String where = getSqlWhere(entityType, q, parameters, new AtomicInteger());
 			sqlBuilder.append(from).append(" WHERE ").append(where);
 		}
 		return sqlBuilder.toString();
@@ -609,8 +609,8 @@ class PostgreSqlQueryGenerator
 		return "DROP TABLE " + tableName;
 	}
 
-	private static <E extends Entity> String getSqlWhere(EntityType entityType, Query<E> q, List<Object> parameters,
-			int mrefFilterIndex)
+	static <E extends Entity> String getSqlWhere(EntityType entityType, Query<E> q, List<Object> parameters,
+			AtomicInteger mrefFilterIndex)
 	{
 		StringBuilder result = new StringBuilder();
 		for (QueryRule r : q.getRules())
@@ -625,7 +625,7 @@ class PostgreSqlQueryGenerator
 				}
 				if (isPersistedInOtherTable(attr))
 				{
-					mrefFilterIndex++;
+					mrefFilterIndex.incrementAndGet();
 				}
 			}
 
@@ -648,7 +648,7 @@ class PostgreSqlQueryGenerator
 					String columnName;
 					if (isPersistedInOtherTable(attr))
 					{
-						columnName = getFilterColumnName(attr, mrefFilterIndex);
+						columnName = getFilterColumnName(attr, mrefFilterIndex.get());
 					}
 					else
 					{
@@ -696,7 +696,7 @@ class PostgreSqlQueryGenerator
 
 					if (isPersistedInOtherTable(attr))
 					{
-						result.append(getFilterColumnName(attr, mrefFilterIndex));
+						result.append(getFilterColumnName(attr, mrefFilterIndex.get()));
 					}
 					else
 					{
@@ -726,7 +726,7 @@ class PostgreSqlQueryGenerator
 					StringBuilder column = new StringBuilder();
 					if (isPersistedInOtherTable(attr))
 					{
-						column.append(getFilterColumnName(attr, mrefFilterIndex));
+						column.append(getFilterColumnName(attr, mrefFilterIndex.get()));
 					}
 					else
 					{
@@ -744,7 +744,7 @@ class PostgreSqlQueryGenerator
 
 					if (isPersistedInOtherTable(attr))
 					{
-						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
+						predicate.append(getFilterColumnName(attr, mrefFilterIndex.get()));
 					}
 					else
 					{
@@ -799,7 +799,7 @@ class PostgreSqlQueryGenerator
 				case LESS_EQUAL:
 					if (isPersistedInOtherTable(attr))
 					{
-						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
+						predicate.append(getFilterColumnName(attr, mrefFilterIndex.get()));
 					}
 					else
 					{
