@@ -45,11 +45,9 @@ public class OneToManyTypeEditing extends AbstractTestNGSpringContextTests
 	public void testNoConversionsAllowed()
 	{
 		EntityType entityType = entityTypeFactory.create("1");
-		//FIXME entityType.setFullyQualifiedName("oneToManyEntity");
 		entityType.setBackend("PostgreSQL");
 
 		EntityType refEntity = entityTypeFactory.create("2");
-		//FIXME refEntity.setFullyQualifiedName("refEntity");
 		refEntity.setBackend("PostgreSQL");
 
 		entityType.addAttribute(attributeFactory.create().setName("id").setIdAttribute(true), ROLE_ID);
