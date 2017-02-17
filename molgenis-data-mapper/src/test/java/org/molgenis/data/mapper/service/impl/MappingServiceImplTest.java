@@ -134,7 +134,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType exonMetaData = entityTypeFactory.create(SOURCE_EXON_ENTITY).setName(SOURCE_EXON_ENTITY)
 				.setPackage(package_);
 		exonMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
-		exonMetaData.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
+		exonMetaData
+				.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = mock(MetaDataService.class);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()

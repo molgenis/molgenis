@@ -221,9 +221,11 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		UserDetails userDetails = mock(UserDetails.class);
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
+		when((Collection<GrantedAuthority>) userDetails.getAuthorities())
+				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities())
+				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 
 		DateFormat format = new SimpleDateFormat("MM-DD-yyyy");
 		date = format.parse("01-01-2016");
