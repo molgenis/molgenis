@@ -107,6 +107,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		initMocks(this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -133,8 +134,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType exonMetaData = entityTypeFactory.create(SOURCE_EXON_ENTITY).setName(SOURCE_EXON_ENTITY)
 				.setPackage(package_);
 		exonMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
-		exonMetaData
-				.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
+		exonMetaData.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = mock(MetaDataService.class);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -285,6 +285,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void testApplyMappingsAdd()
 	{
 		String entityName = "addEntity";
+		@SuppressWarnings("unchecked")
 		Repository<Entity> addEntityRepo = mock(Repository.class);
 		when(addEntityRepo.getName()).thenReturn(entityName);
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setName(TARGET_HOP_ENTITY)
@@ -308,6 +309,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		List<Entity> expectedEntities = newArrayList();
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
 
+		@SuppressWarnings("unchecked")
 		Query<Entity> addEntityQ = mock(Query.class);
 		when(addEntityRepo.query()).thenReturn(addEntityQ);
 		when(addEntityQ.eq("source", geneMetaData.getFullyQualifiedName())).thenReturn(addEntityQ);
@@ -323,7 +325,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName, true);
 		assertEquals(generatedEntityName, entityName);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
 		verify(geneRepo).forEachBatched(consumerCaptor.capture(), any(Integer.class));
 
@@ -339,6 +341,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String entityName = "updateEntity";
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> updateEntityRepo = mock(Repository.class);
 		when(updateEntityRepo.getName()).thenReturn(entityName);
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
@@ -363,6 +366,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		List<Entity> expectedEntities = newArrayList();
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
 
+		@SuppressWarnings("unchecked")
 		Query<Entity> addEntityQ = mock(Query.class);
 		when(updateEntityRepo.query()).thenReturn(addEntityQ);
 		when(addEntityQ.eq("source", geneMetaData.getFullyQualifiedName())).thenReturn(addEntityQ);
@@ -378,7 +382,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName);
 		assertEquals(generatedEntityName, entityName);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
 		verify(geneRepo).forEachBatched(consumerCaptor.capture(), any(Integer.class));
 
@@ -390,6 +394,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String targetRepositoryName = "target_repository";
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
@@ -415,6 +420,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String targetRepositoryName = "target_repository";
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
@@ -446,6 +452,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName)
 				.setName(targetRepositoryRefEntityName);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName)
 				.setName(targetRepositoryName);

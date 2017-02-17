@@ -101,6 +101,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		config.resetMocks();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() throws Exception
 	{

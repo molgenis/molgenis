@@ -193,6 +193,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	 * @param repo entity repository
 	 * @return decorated entity repository
 	 */
+	@SuppressWarnings("unchecked")
 	private Repository<Entity> applyCustomRepositoryDecorators(Repository<Entity> repo)
 	{
 		switch (repo.getName())

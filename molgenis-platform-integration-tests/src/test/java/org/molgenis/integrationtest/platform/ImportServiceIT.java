@@ -17,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -42,7 +42,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * Test the Importer test cases
  */
-@TransactionConfiguration(defaultRollback = false)
+@Rollback(value = false)
 @ContextConfiguration(classes = { PlatformITConfig.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class ImportServiceIT extends AbstractTestNGSpringContextTests

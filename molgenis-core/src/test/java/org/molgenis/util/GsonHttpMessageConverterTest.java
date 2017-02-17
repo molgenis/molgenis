@@ -26,7 +26,7 @@ public class GsonHttpMessageConverterTest
 		for (MediaType mediaType : gsonHttpMessageConverter.getSupportedMediaTypes())
 		{
 			if (mediaType.getType().equals("application") && mediaType.getSubtype().equals("json")
-					&& mediaType.getCharSet() == null)
+					&& mediaType.getCharset() == null)
 			{
 				containsApplicationJsonWithoutCharset = true;
 				break;

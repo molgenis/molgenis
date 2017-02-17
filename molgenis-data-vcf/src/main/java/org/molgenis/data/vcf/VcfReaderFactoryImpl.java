@@ -8,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 public class VcfReaderFactoryImpl implements VcfReaderFactory
@@ -47,7 +47,7 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 				ZipEntry entry = (ZipEntry) e.nextElement(); // your only file
 				inputStream = zipFile.getInputStream(entry);
 			}
-			VcfReader reader = new VcfReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+			VcfReader reader = new VcfReader(new InputStreamReader(inputStream, UTF_8));
 			// bootstrap reader so close() can close all readers
 			vcfReaderRegistry.add(reader);
 			return reader;

@@ -36,6 +36,7 @@ public class EntityModelWriterTest
 	private IRI ref_iri2;
 	private IRI molgenis_iri;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeTest() throws DatatypeConfigurationException
 	{
@@ -90,6 +91,7 @@ public class EntityModelWriterTest
 		when(iri1.toString()).thenReturn("iri1");
 		when(literal1.toString()).thenReturn("literal1");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap1 = mock(Multimap.class);
 
 		LabeledResource tag1 = mock(LabeledResource.class);
@@ -138,6 +140,7 @@ public class EntityModelWriterTest
 		when(iri2.toString()).thenReturn("iri2");
 		when(literal2.toString()).thenReturn("literal2");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap2 = mock(Multimap.class);
 
 		LabeledResource tag2 = mock(LabeledResource.class);
@@ -190,6 +193,7 @@ public class EntityModelWriterTest
 		when(iri3.toString()).thenReturn("iri3");
 		when(literal3.toString()).thenReturn("literal3");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap3 = mock(Multimap.class);
 
 		LabeledResource tag3 = mock(LabeledResource.class);
@@ -249,6 +253,7 @@ public class EntityModelWriterTest
 		when(iri4.toString()).thenReturn("iri4");
 		when(literal4.toString()).thenReturn("literal4");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap4 = mock(Multimap.class);
 
 		LabeledResource tag4 = mock(LabeledResource.class);
@@ -301,6 +306,7 @@ public class EntityModelWriterTest
 		when(iri5.toString()).thenReturn("iri5");
 		when(literal5.toString()).thenReturn("literal5");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap5 = mock(Multimap.class);
 
 		LabeledResource tag5 = mock(LabeledResource.class);
@@ -353,6 +359,7 @@ public class EntityModelWriterTest
 		when(iri6.toString()).thenReturn("iri6");
 		when(literal6.toString()).thenReturn("literal6");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap6 = mock(Multimap.class);
 
 		LabeledResource tag6 = mock(LabeledResource.class);
@@ -402,6 +409,7 @@ public class EntityModelWriterTest
 		Literal literal7 = mock(Literal.class);
 		when(iri7.toString()).thenReturn("iri7");
 		when(literal7.toString()).thenReturn("literal7");
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap7 = mock(Multimap.class);
 		LabeledResource tag7 = mock(LabeledResource.class);
 
@@ -455,6 +463,7 @@ public class EntityModelWriterTest
 
 		when(iri8.toString()).thenReturn("iri8");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap8 = mock(Multimap.class);
 
 		LabeledResource tag8 = mock(LabeledResource.class);
@@ -515,6 +524,7 @@ public class EntityModelWriterTest
 		when(literal9a.toString()).thenReturn("literal9a");
 		when(literal9b.toString()).thenReturn("literal9b");
 		when(literal9c.toString()).thenReturn("literal9c");
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap9 = mock(Multimap.class);
 		LabeledResource tag9 = mock(LabeledResource.class);
 
@@ -568,6 +578,7 @@ public class EntityModelWriterTest
 		Literal literal10 = mock(Literal.class);
 		when(iri10.toString()).thenReturn("iri10");
 		when(literal10.toString()).thenReturn("literal10");
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap10 = mock(Multimap.class);
 		LabeledResource tag10 = mock(LabeledResource.class);
 
@@ -631,7 +642,9 @@ public class EntityModelWriterTest
 		when(iri12.toString()).thenReturn("iri12");
 		when(literal12.toString()).thenReturn("literal12");
 
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap11 = mock(Multimap.class);
+		@SuppressWarnings("unchecked")
 		Multimap<Relation, LabeledResource> multiMap12 = mock(Multimap.class);
 
 		LabeledResource tag11 = mock(LabeledResource.class);

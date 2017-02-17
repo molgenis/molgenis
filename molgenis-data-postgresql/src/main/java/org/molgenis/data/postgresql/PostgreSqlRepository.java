@@ -275,7 +275,7 @@ class PostgreSqlRepository extends AbstractRepository
 		LOG.trace("SQL: {}", allRowsSelect);
 		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
 		template.query(allRowsSelect,
-				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
+				(ResultSetExtractor<Object>) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
 						resultSet));
 		LOG.debug("Streamed entire repository in batches of size {} in {}.", batchSize, stopwatch);
 	}

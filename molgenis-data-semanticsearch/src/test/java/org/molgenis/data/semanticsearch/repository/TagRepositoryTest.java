@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.repository;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
@@ -61,6 +61,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		tag.setRelationLabel("instanceOf");
 		tag.setCodeSystem("http://edamontology.org");
 
+		@SuppressWarnings("unchecked")
 		Query<Tag> q = mock(Query.class);
 		when(q.eq(anyString(), any())).thenReturn(q);
 		when(q.and()).thenReturn(q);
@@ -85,7 +86,8 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		tag.setRelationLabel("instanceOf");
 		tag.setCodeSystem("http://edamontology.org");
 
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Tag> q = mock(Query.class);
 		when(q.eq(OBJECT_IRI, "http://edamontology.org/data_3031")).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.eq(RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf")).thenReturn(q);

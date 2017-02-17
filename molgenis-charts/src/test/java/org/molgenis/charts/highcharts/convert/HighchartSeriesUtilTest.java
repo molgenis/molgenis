@@ -89,6 +89,7 @@ public class HighchartSeriesUtilTest
 		assertEquals(highchartSeriesUtil.convertValue(fieldTypeEnum, value), value);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void parseXYDataToList()
 	{

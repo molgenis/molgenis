@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
@@ -44,18 +45,17 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -482,6 +482,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		Package pack = mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -499,6 +500,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -514,6 +516,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -531,6 +534,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -549,6 +553,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -586,6 +591,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("org_molgenis_blah_newEntity");
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
@@ -807,6 +813,78 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
 				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
+	}
+
+	@DataProvider(name = "testDeleteEntityCollection")
+	public static Iterator<Object[]> testDeleteEntityCollectionProvider() throws ParseException
+	{
+		return Arrays.asList(new Object[] { STRING, asList("0", "1") }, new Object[] { INT, asList(0, 1) },
+				new Object[] { LONG, asList(0L, 1L) }, new Object[] { EMAIL, asList("0", "1") },
+				new Object[] { HYPERLINK, asList("0", "1") }).iterator();
+	}
+
+	@Test(dataProvider = "testDeleteEntityCollection")
+	public void testDeleteEntityCollection(AttributeType idAttrType, List<Object> expectedIds) throws Exception
+	{
+		EntityType entityType = mock(EntityType.class);
+		Attribute idAttr = when(mock(Attribute.class).getDataType()).thenReturn(idAttrType).getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(dataService.getEntityType("MyEntityType")).thenReturn(entityType);
+		this.mockMvc.perform(
+				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"0\",\"1\"]}"))
+				.andExpect(status().isNoContent());
+
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
+		assertEquals(captor.getValue().collect(toList()), expectedIds);
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Exception
+	{
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		when(dataService.getEntityType("MyEntityType")).thenReturn(entityType);
+
+		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
+				+ "      \"message\": \"Cannot delete entities because type [MyEntityType] is abstract.\"\n" + "    }\n"
+				+ "  ]\n" + "}";
+		this.mockMvc.perform(
+				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
+	{
+		when(dataService.getEntityType("MyEntityType"))
+				.thenThrow(new UnknownEntityException("Unknown entity [MyEntityType]"));
+
+		String expectedContent =
+				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Unknown entity [MyEntityType]\"\n"
+						+ "    }\n" + "  ]\n" + "}";
+		this.mockMvc.perform(
+				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionNoEntitiesToDelete() throws Exception
+	{
+		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
+				+ "      \"message\": \"Please provide at least one entity in the entityIds property.\"\n" + "    }\n"
+				+ "  ]\n" + "}";
+		this.mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[]}"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionInvalidRequestBody() throws Exception
+	{
+		String expectedContent =
+				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Invalid request body.\"\n" + "    }\n"
+						+ "  ]\n" + "}";
+		this.mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("invalid"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
 	}
 
 	@Test

@@ -439,12 +439,12 @@ public class PostgreSqlRepositoryCollectionTest
 		when(entityType1.getExtends()).thenReturn(abstractEntityType);
 		when(entityType1.isAbstract()).thenReturn(false);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ0 = mock(Query.class);
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ1 = mock(Query.class);
 		when(entityQ.eq(EXTENDS, abstractEntityType)).thenReturn(entityQ0);
 		when(entityQ.eq(EXTENDS, entityType0)).thenReturn(entityQ1);

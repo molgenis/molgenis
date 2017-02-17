@@ -260,6 +260,7 @@ public class VcfImporterServiceTest
 		String entityName0 = "entity0";
 		List<String> entityNames = Arrays.asList(entityName0);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		RepositoryCollection source = mock(RepositoryCollection.class);
@@ -316,6 +317,7 @@ public class VcfImporterServiceTest
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
@@ -357,6 +359,7 @@ public class VcfImporterServiceTest
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
@@ -417,6 +420,7 @@ public class VcfImporterServiceTest
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
@@ -481,6 +485,7 @@ public class VcfImporterServiceTest
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityType()).thenReturn(entityType0);

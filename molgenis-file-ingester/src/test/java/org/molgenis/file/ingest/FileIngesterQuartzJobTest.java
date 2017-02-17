@@ -74,6 +74,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		fileIngest.setTargetEntity(targetEntity);
 		when(dataService.findOneById(FileIngestMetaData.FILE_INGEST, "abcde", FileIngest.class)).thenReturn(fileIngest);
 
+		@SuppressWarnings("unchecked")
 		Query<User> queryMock = Mockito.mock(Query.class);
 		User admin = userFactory.create();
 		admin.setUsername("admin");

@@ -3,8 +3,8 @@ package org.molgenis.util;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.testng.Assert.assertEquals;
 
 public class ResourceUtilsTest
@@ -19,7 +19,7 @@ public class ResourceUtilsTest
 	@Test
 	public void getStringClassStringCharset() throws IOException
 	{
-		assertEquals(ResourceUtils.getString(getClass(), "/resource.txt", Charset.forName("UTF-8")),
+		assertEquals(ResourceUtils.getString(getClass(), "/resource.txt", UTF_8),
 				"example resource");
 	}
 

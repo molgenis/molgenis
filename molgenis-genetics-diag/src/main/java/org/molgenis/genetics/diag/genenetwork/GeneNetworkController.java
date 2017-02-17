@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,7 +61,7 @@ public class GeneNetworkController extends MolgenisPluginController
 			Scanner hpoScanner = new Scanner(scanner.nextLine());
 			List<String> hpoTerms = createHpoTermList(hpoScanner);
 			Map<String, String> geneMap = createEnsembleHugoMap(geneMappingFile);
-			List<Entity> entities = new ArrayList();
+			List<Entity> entities = new ArrayList<>();
 			int rowNr = 0;
 			while (scanner.hasNext())
 			{
@@ -79,7 +82,7 @@ public class GeneNetworkController extends MolgenisPluginController
 		String gene = null;
 		if (rowScanner.hasNext()) gene = rowScanner.next();
 		int i = 0;
-		List<Entity> entities = new ArrayList();
+		List<Entity> entities = new ArrayList<>();
 		while (rowScanner.hasNext())
 		{
 			createEntities(hpoTerms, geneMap, rowScanner, gene, i, entities);

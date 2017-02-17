@@ -45,7 +45,7 @@ public class PostgreSqlRepositoryTest
 		String oneToManyAttrName = "oneToManyAttr";
 		EntityType entityType = createEntityMetaOneToMany(oneToManyAttrName);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		int queryValue = 2;
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
@@ -64,14 +64,14 @@ public class PostgreSqlRepositoryTest
 		String oneToManyAttrName = "oneToManyAttr";
 		EntityType entityType = createEntityMetaOneToMany(oneToManyAttrName);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		int queryValue = 2;
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
 		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"RefEntity#07f902bf\" WHERE this.\"entityId\" = \"RefEntity#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity#fc2928f6\" AS this LEFT JOIN \"RefEntity#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
 		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
 		Entity entity0 = mock(Entity.class);

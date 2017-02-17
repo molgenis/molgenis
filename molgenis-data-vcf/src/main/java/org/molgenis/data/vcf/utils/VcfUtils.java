@@ -1,8 +1,5 @@
 package org.molgenis.data.vcf.utils;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -10,9 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
@@ -21,16 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.molgenis.data.meta.AttributeType.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
-import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
 @Component
 public class VcfUtils
@@ -66,7 +58,7 @@ public class VcfUtils
 		{
 			throw new RuntimeException(e);
 		}
-		byte[] md5Hash = messageDigest.digest(idStr.getBytes(Charset.forName("UTF-8")));
+		byte[] md5Hash = messageDigest.digest(idStr.getBytes(UTF_8));
 
 		// convert MD5 hash to string ids that can be safely used in URLs
 

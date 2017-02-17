@@ -21,7 +21,7 @@ function getHumanReadableFragment(constraint) {
 }
 
 function getSimpleFilterLineHumanReadableFragment(constraint) {
-    return constraint.selector + getComparisonHumanReadable(constraint.comparison) + decodeURIComponent(constraint.arguments)
+    return constraint.selector + getComparisonHumanReadable(constraint.comparison) + constraint.arguments
 }
 
 function getComplexFilterLineHumanReadableFragment(constraint) {
