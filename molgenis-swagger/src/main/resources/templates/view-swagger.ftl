@@ -405,26 +405,9 @@ definitions:
       fieldType:
         type: string
         enum:
-          - BOOL
-          - CATEGORICAL
-          - CATEGORICAL_MREF
-          - COMPOUND
-          - DATE
-          - DATE_TIME
-          - DECIMAL
-          - EMAIL
-          - ENUM
-          - FILE
-          - HTML
-          - HYPERLINK
-          - INT
-          - LONG
-          - MREF
-          - ONE_TO_MANY
-          - SCRIPT
-          - STRING
-          - TEXT
-          - XREF
+<#list attributeTypes as attributeType>
+          - ${attributeType?upper_case}
+</#list>
       name:
         type: string
       label:

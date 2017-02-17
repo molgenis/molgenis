@@ -1,6 +1,7 @@
 package org.molgenis.swagger.controller;
 
 import org.mockito.Mock;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.token.TokenService;
@@ -15,6 +16,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -41,7 +44,7 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 	private SwaggerController swaggerController;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
 		initMocks(this);
 		reset(metaDataService, type1, type2, tokenService);
@@ -88,6 +91,25 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 		verify(model).addAttribute("scheme", "http");
 		verify(model).addAttribute("host", "localhost");
 		verify(model).addAttribute("entityTypes", newArrayList("abc_EntityType1ëæ", "abc_EntityType2ëæ"));
+		verify(model).addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
 		verifyNoMoreInteractions(model);
+	}
+
+	@Test
+	public void testSwaggerHostAddsPort() throws URISyntaxException
+	{
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setMethod("GET");
+		request.setServletPath("/plugin/swagger/");
+		request.setServerPort(8080);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		assertEquals("view-swagger", swaggerController.swagger(model, response));
+
+		verify(model).addAttribute("scheme", "http");
+		verify(model).addAttribute("host", "localhost:8080");
 	}
 }

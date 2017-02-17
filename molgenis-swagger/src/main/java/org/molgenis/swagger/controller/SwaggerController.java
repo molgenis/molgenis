@@ -1,5 +1,6 @@
 package org.molgenis.swagger.controller;
 
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.token.TokenService;
@@ -10,8 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -26,7 +29,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping(URI)
 public class SwaggerController extends MolgenisPluginController
 {
-
 	private static final String ID = "swagger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
@@ -34,7 +36,7 @@ public class SwaggerController extends MolgenisPluginController
 	private final TokenService tokenService;
 
 	@Autowired
-	public SwaggerController(MetaDataService metaDataService, TokenService tokenService)
+	public SwaggerController(MetaDataService metaDataService, TokenService tokenService) throws IOException
 	{
 		super(URI);
 		this.metaDataService = requireNonNull(metaDataService);
@@ -46,11 +48,11 @@ public class SwaggerController extends MolgenisPluginController
 	 * Sets the url parameter to the swagger yaml that describes the REST API.
 	 * Creates an apiKey token for the current user.
 	 */
-	@RequestMapping
+	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
 		model.addAttribute("url",
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("/plugin/swagger/swagger.yml").toUriString());
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(URI + "/swagger.yml").toUriString());
 		final String currentUsername = SecurityUtils.getCurrentUsername();
 		if (currentUsername != null)
 		{
@@ -69,12 +71,18 @@ public class SwaggerController extends MolgenisPluginController
 	{
 		response.setContentType("text/yaml");
 		response.setCharacterEncoding("UTF-8");
-		final ServletUriComponentsBuilder servletUriComponentsBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
-		model.addAttribute("scheme", servletUriComponentsBuilder.build().getScheme());
-		model.addAttribute("host", servletUriComponentsBuilder.replacePath(null).scheme(null).toUriString().substring(2));
+		final UriComponents uriComponents = ServletUriComponentsBuilder.fromCurrentContextPath().build();
+		model.addAttribute("scheme", uriComponents.getScheme());
+		String host = uriComponents.getHost();
+		if (uriComponents.getPort() >= 0)
+		{
+			host += ":" + uriComponents.getPort();
+		}
+		model.addAttribute("host", host);
 		model.addAttribute("entityTypes",
 				metaDataService.getEntityTypes().filter(e -> !e.isAbstract()).map(EntityType::getFullyQualifiedName)
 						.sorted().collect(Collectors.toList()));
+		model.addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
 		return "view-swagger";
 	}
 }
