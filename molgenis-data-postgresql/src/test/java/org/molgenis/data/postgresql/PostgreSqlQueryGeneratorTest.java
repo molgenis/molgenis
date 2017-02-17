@@ -682,7 +682,7 @@ public class PostgreSqlQueryGeneratorTest
 
 	private EntityType createMockEntityWithIdAttribute(String entityName, Attribute idAttribute, String idAttributeName)
 	{
-		EntityType result = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
+		EntityType result = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
 		when(result.getName()).thenReturn(entityName);
 		when(result.getIdAttribute()).thenReturn(idAttribute);
 		when(result.getAttribute(idAttributeName)).thenReturn(idAttribute);
@@ -701,6 +701,6 @@ public class PostgreSqlQueryGeneratorTest
 
 	public Package createPackage(String packageName)
 	{
-		return when(mock(Package.class).getFullyQualifiedName()).thenReturn(packageName).getMock();
+		return when(mock(Package.class).getName()).thenReturn(packageName).getMock();
 	}
 }
