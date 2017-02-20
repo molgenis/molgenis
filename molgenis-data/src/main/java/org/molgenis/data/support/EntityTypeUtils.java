@@ -313,7 +313,7 @@ public class EntityTypeUtils
 		if (package_ != null)
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.append(package_.getName());
+			sb.append(package_.getFullyQualifiedName());
 			sb.append(PACKAGE_SEPARATOR);
 			sb.append(simpleName);
 			return sb.toString();

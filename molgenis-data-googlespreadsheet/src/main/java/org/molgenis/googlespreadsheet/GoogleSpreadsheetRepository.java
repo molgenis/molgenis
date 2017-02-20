@@ -130,7 +130,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			EntityType entityType = entityTypeFactory.create().setSimpleName(feed.getTitle().getPlainText());
+			EntityType entityType = entityTypeFactory.create().setName(feed.getTitle().getPlainText());
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{

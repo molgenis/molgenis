@@ -26,7 +26,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailSender;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -182,7 +181,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		when(oldJobDir.getName()).thenReturn("ASDFASDFASDF");
 
 		gavinController.cleanUp();
-		verify(fileStore).deleteDirectory("gavin-app/ASDFASDFASDF");
+		verify(fileStore).deleteDirectory("gavin-app" + File.separator + "ASDFASDFASDF");
 		assertTrue(fileFilterCaptor.getValue().accept(oldJobDir),
 				"cleanUp should remove files that are more than 24 hours old");
 		assertFalse(fileFilterCaptor.getValue().accept(newJobDir),
@@ -257,12 +256,6 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		JobExecutionUpdater jobExecutionUpdater()
 		{
 			return mock(JobExecutionUpdater.class);
-		}
-
-		@Bean
-		MailSender mailSender()
-		{
-			return mock(MailSender.class);
 		}
 
 		@Bean

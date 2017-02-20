@@ -34,7 +34,7 @@ public class InMemoryRepository implements Repository<Entity>
 	@Override
 	public String getName()
 	{
-		return metadata.getName();
+		return metadata.getFullyQualifiedName();
 	}
 
 	public EntityType getEntityType()

@@ -32,7 +32,7 @@ public class EntitySerializerTest
 	public void testSerialize() throws Exception
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getFullyQualifiedName()).thenReturn("entity");
 
 		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
@@ -45,7 +45,7 @@ public class EntitySerializerTest
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
 
 		EntityType refEntityType = mock(EntityType.class);
-		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getFullyQualifiedName()).thenReturn("refEntity");
 
 		String oneToManyEntity0IdValue = "oneToManyEntity0";
 		String oneToManyEntity0LabelValue = "oneToManyEntityLabel0";

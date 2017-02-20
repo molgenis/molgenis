@@ -52,7 +52,7 @@ public class EntityTypeResponse
 	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
-		String name = meta.getName();
+		String name = meta.getFullyQualifiedName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
 		this.languageCode = languageService.getCurrentUserLanguageCode();

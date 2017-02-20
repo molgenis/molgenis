@@ -156,9 +156,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -194,7 +194,8 @@ public class AttributeRepositoryDecoratorTest
 	private void countQuerySuOrSystem() throws Exception
 	{
 		long count = 123L;
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Attribute> q = mock(Query.class);
 		when(decoratedRepo.count(q)).thenReturn(count);
 		assertEquals(repo.count(q), 123L);
 	}
@@ -204,9 +205,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -214,7 +215,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
 		when(attr1.getEntity()).thenReturn(entityType1);
 		Query<Attribute> q = new QueryImpl<>();
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
@@ -242,7 +243,8 @@ public class AttributeRepositoryDecoratorTest
 	{
 		Attribute attr0 = mock(Attribute.class);
 		Attribute attr1 = mock(Attribute.class);
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Attribute> q = mock(Query.class);
 		when(decoratedRepo.findAll(q)).thenReturn(Stream.of(attr0, attr1));
 		assertEquals(repo.findAll(q).collect(toList()), asList(attr0, attr1));
 	}
@@ -252,9 +254,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -262,6 +264,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
 		when(attr1.getEntity()).thenReturn(entityType1);
 		Query<Attribute> q = new QueryImpl<>();
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
@@ -276,18 +279,20 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
 		String attr1Name = "entity1attr0";
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn(attr1Name).getMock();
 		when(attr1.getEntity()).thenReturn(entityType1);
+		@SuppressWarnings("unchecked")
 		Query<Attribute> q = mock(Query.class);
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
@@ -324,9 +329,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -356,6 +361,7 @@ public class AttributeRepositoryDecoratorTest
 	private void forEachBatchedSuOrSystem() throws Exception
 	{
 		Fetch fetch = mock(Fetch.class);
+		@SuppressWarnings("unchecked")
 		Consumer<List<Attribute>> consumer = mock(Consumer.class);
 		repo.forEachBatched(fetch, consumer, 10);
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
@@ -382,10 +388,10 @@ public class AttributeRepositoryDecoratorTest
 		when(attribute3.getEntity()).thenReturn(entityType3);
 		when(attribute4.getEntity()).thenReturn(entityType4);
 
-		when(entityType1.getName()).thenReturn("EntityType1");
-		when(entityType2.getName()).thenReturn("EntityType2");
-		when(entityType3.getName()).thenReturn("EntityType3");
-		when(entityType4.getName()).thenReturn("EntityType4");
+		when(entityType1.getFullyQualifiedName()).thenReturn("EntityType1");
+		when(entityType2.getFullyQualifiedName()).thenReturn("EntityType2");
+		when(entityType3.getFullyQualifiedName()).thenReturn("EntityType3");
+		when(entityType4.getFullyQualifiedName()).thenReturn("EntityType4");
 
 		repo.forEachBatched(attributes::addAll, 2);
 
@@ -419,7 +425,8 @@ public class AttributeRepositoryDecoratorTest
 	private void findOneQuerySuOrSystem() throws Exception
 	{
 		Attribute attr0 = mock(Attribute.class);
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Attribute> q = mock(Query.class);
 		when(decoratedRepo.findOne(q)).thenReturn(attr0);
 		assertEquals(repo.findOne(q), attr0);
 	}
@@ -429,7 +436,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -444,7 +451,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -481,7 +488,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -496,7 +503,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attrCompoundattr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -514,7 +521,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -551,7 +558,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -567,7 +574,7 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -606,9 +613,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -651,9 +658,9 @@ public class AttributeRepositoryDecoratorTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -708,13 +715,13 @@ public class AttributeRepositoryDecoratorTest
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
 		when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<EntityType> entityQ = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		Query<Attribute> attrQ = mock(Query.class);
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(CHILDREN, attr)).thenReturn(attrQ);
@@ -725,6 +732,7 @@ public class AttributeRepositoryDecoratorTest
 		verify(decoratedRepo).delete(attr);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deleteCompoundAttribute()
 	{

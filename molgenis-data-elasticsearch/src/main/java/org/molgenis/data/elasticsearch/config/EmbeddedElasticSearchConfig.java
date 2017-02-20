@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch.config;
 
+import com.google.common.collect.Maps;
 import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.logging.slf4j.Slf4jESLoggerFactory;
 import org.molgenis.data.DataService;
@@ -7,14 +8,16 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.File;
-import java.util.Collections;
+import java.util.Map;
 
 /**
  * Spring config for embedded elastic search server. Use this in your own app by importing this in your spring config:
@@ -33,11 +36,17 @@ public class EmbeddedElasticSearchConfig
 		ESLoggerFactory.setDefaultFactory(new Slf4jESLoggerFactory());
 	}
 
+	@Value("${elasticsearch.transport.tcp.port:@null}")
+	private String elasticsearchTransportTcpPort;
+
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
+
+	@Autowired
+	private DocumentIdGenerator documentIdGenerator;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
@@ -61,12 +70,19 @@ public class EmbeddedElasticSearchConfig
 			}
 		}
 
-		return new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", molgenisDataDirStr));
+		Map<String, String> providedSettings = Maps.newHashMapWithExpectedSize(2);
+		providedSettings.put("path.data", molgenisDataDirStr);
+		if (elasticsearchTransportTcpPort != null)
+		{
+			providedSettings.put("transport.tcp.port", elasticsearchTransportTcpPort);
+		}
+		return new EmbeddedElasticSearchServiceFactory(providedSettings);
 	}
 
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory().create(dataService, elasticsearchEntityFactory);
+		return embeddedElasticSearchServiceFactory()
+				.create(dataService, elasticsearchEntityFactory, documentIdGenerator);
 	}
 }

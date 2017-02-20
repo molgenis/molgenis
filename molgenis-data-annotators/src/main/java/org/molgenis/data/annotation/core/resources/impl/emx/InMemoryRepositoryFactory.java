@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.core.resources.impl.emx;
 
 import com.google.common.collect.ImmutableMap;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
@@ -40,7 +41,7 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 	}
 
 	@Override
-	public Repository createRepository(File file) throws IOException
+	public Repository<Entity> createRepository(File file) throws IOException
 	{
 		try
 		{

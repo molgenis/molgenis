@@ -31,9 +31,10 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 
 	/**
 	 * Constructs a new entity factory that creates entities of the given type, meta data type and id type
-	 *  @param entityClass      entity type
+	 *
+	 * @param entityClass      entity type
 	 * @param systemEntityType entity meta data type
-	 * @param entityPopulator
+	 * @param entityPopulator  entity populator
 	 */
 	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityType, EntityPopulator entityPopulator)
 	{
@@ -54,7 +55,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 	@Override
 	public String getEntityName()
 	{
-		return systemEntityType.getName();
+		return systemEntityType.getFullyQualifiedName();
 	}
 
 	@Override
@@ -81,6 +82,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		return entity;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public E create(Entity entity)
 	{

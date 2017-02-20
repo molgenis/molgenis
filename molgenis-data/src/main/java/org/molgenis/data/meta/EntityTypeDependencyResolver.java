@@ -71,9 +71,9 @@ public class EntityTypeDependencyResolver
 		else
 		{
 			Map<String, EntityType> entityTypeMap = entityTypes.stream()
-					.collect(toMap(EntityType::getName, Function.identity()));
+					.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 			return resolvedEntityMetas.stream()
-					.filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getName()))
+					.filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getFullyQualifiedName()))
 					.collect(toList());
 		}
 	}
@@ -83,37 +83,33 @@ public class EntityTypeDependencyResolver
 	 *
 	 * @return dependencies of the entity meta data node
 	 */
-	private static Function getDependencies()
+	private static Function<EntityTypeNode, Set<EntityTypeNode>> getDependencies()
 	{
-		return new Function<EntityTypeNode, Set<EntityTypeNode>>()
+		return entityTypeNode ->
 		{
-			@Override
-			public Set<EntityTypeNode> apply(EntityTypeNode entityTypeNode)
-			{
-				// get referenced entities excluding entities of mappedBy attributes
-				EntityType entityType = entityTypeNode.getEntityType();
-				Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
-						.flatMap(attr ->
+			// get referenced entities excluding entities of mappedBy attributes
+			EntityType entityType = entityTypeNode.getEntityType();
+			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
+					.flatMap(attr ->
+					{
+						EntityType refEntity = attr.getRefEntity();
+						if (refEntity != null && !attr.isMappedBy() && !refEntity.getFullyQualifiedName()
+								.equals(entityType.getFullyQualifiedName()))
 						{
-							EntityType refEntity = attr.getRefEntity();
-							if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
-									.equals(entityType.getName()))
-							{
-								return Stream.of(new EntityTypeNode(refEntity));
-							}
-							else
-							{
-								return Stream.empty();
-							}
-						}).collect(toCollection(HashSet::new));
+							return Stream.of(new EntityTypeNode(refEntity));
+						}
+						else
+						{
+							return Stream.empty();
+						}
+					}).collect(toCollection(HashSet::new));
 
-				EntityType extendsEntityMeta = entityType.getExtends();
-				if (extendsEntityMeta != null)
-				{
-					refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
-				}
-				return refEntityMetaSet;
+			EntityType extendsEntityMeta = entityType.getExtends();
+			if (extendsEntityMeta != null)
+			{
+				refEntityMetaSet.add(new EntityTypeNode(extendsEntityMeta));
 			}
+			return refEntityMetaSet;
 		};
 	}
 
@@ -128,7 +124,7 @@ public class EntityTypeDependencyResolver
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("expandEntityTypeDependencies(EntityTypeNode entityTypeNode) --- entity: [{}], skip: [{}]",
-					entityTypeNode.getEntityType().getName(), entityTypeNode.isSkip());
+					entityTypeNode.getEntityType().getFullyQualifiedName(), entityTypeNode.isSkip());
 		}
 
 		if (!entityTypeNode.isSkip())
@@ -139,8 +135,8 @@ public class EntityTypeDependencyResolver
 					.flatMap(attr ->
 					{
 						EntityType refEntity = attr.getRefEntity();
-						if (refEntity != null && !attr.isMappedBy() && !refEntity.getName()
-								.equals(entityType.getName()))
+						if (refEntity != null && !attr.isMappedBy() && !refEntity.getFullyQualifiedName()
+								.equals(entityType.getFullyQualifiedName()))
 						{
 							EntityTypeNode nodeRef = new EntityTypeNode(refEntity, entityTypeNode.getStack());
 							Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
@@ -212,19 +208,19 @@ public class EntityTypeDependencyResolver
 			if (o == null || getClass() != o.getClass()) return false;
 
 			EntityTypeNode that = (EntityTypeNode) o;
-			return entityType.getName().equals(that.entityType.getName());
+			return entityType.getFullyQualifiedName().equals(that.entityType.getFullyQualifiedName());
 		}
 
 		@Override
 		public int hashCode()
 		{
-			return entityType.getName().hashCode();
+			return entityType.getFullyQualifiedName().hashCode();
 		}
 
 		@Override
 		public String toString()
 		{
-			return entityType.getName();
+			return entityType.getFullyQualifiedName();
 		}
 
 		private Set<EntityTypeNode> getStack()

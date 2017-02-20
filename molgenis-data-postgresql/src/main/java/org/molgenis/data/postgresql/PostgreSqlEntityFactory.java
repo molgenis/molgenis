@@ -17,10 +17,15 @@ import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getColumnName;
 
 @Component
 class PostgreSqlEntityFactory
@@ -91,7 +96,7 @@ class PostgreSqlEntityFactory
 		 */
 		private Object mapValue(ResultSet resultSet, Attribute attr) throws SQLException
 		{
-			return mapValue(resultSet, attr, attr.getName());
+			return mapValue(resultSet, attr, getColumnName(attr, false));
 		}
 
 		/**
@@ -106,66 +111,75 @@ class PostgreSqlEntityFactory
 		 */
 		private Object mapValue(ResultSet resultSet, Attribute attr, String colName) throws SQLException
 		{
-			Object value;
-			switch (attr.getDataType())
+			try
 			{
-				case BOOL:
-					boolean boolValue = resultSet.getBoolean(colName);
-					value = resultSet.wasNull() ? null : boolValue;
-					break;
-				case CATEGORICAL:
-				case FILE:
-				case XREF:
-					EntityType xrefEntityType = attr.getRefEntity();
-					Object refIdValue = mapValue(resultSet, xrefEntityType.getIdAttribute(), colName);
-					value = refIdValue != null ? entityManager.getReference(xrefEntityType, refIdValue) : null;
-					break;
-				case CATEGORICAL_MREF:
-				case MREF:
-					EntityType mrefEntityMeta = attr.getRefEntity();
-					Array mrefArrayValue = resultSet.getArray(colName);
-					value = resultSet.wasNull() ? null : mapValueMref(mrefArrayValue, mrefEntityMeta);
-					break;
-				case ONE_TO_MANY:
-					Array oneToManyArrayValue = resultSet.getArray(colName);
-					value = resultSet.wasNull() ? null : mapValueOneToMany(oneToManyArrayValue, attr);
-					break;
-				case COMPOUND:
-					throw new RuntimeException(
-							format("Value mapping not allowed for attribute type [%s]", attr.getDataType().toString()));
-				case DATE:
-					// valid, because java.sql.Date extends required type java.util.Date
-					value = resultSet.getDate(colName);
-					break;
-				case DATE_TIME:
-					// valid, because java.sql.Timestamp extends required type java.util.Date
-					value = resultSet.getTimestamp(colName);
-					break;
-				case DECIMAL:
-					BigDecimal bigDecimalValue = resultSet.getBigDecimal(colName);
-					value = bigDecimalValue != null ? bigDecimalValue.doubleValue() : null;
-					break;
-				case EMAIL:
-				case ENUM:
-				case HTML:
-				case HYPERLINK:
-				case SCRIPT:
-				case STRING:
-				case TEXT:
-					value = resultSet.getString(colName);
-					break;
-				case INT:
-					int intValue = resultSet.getInt(colName);
-					value = resultSet.wasNull() ? null : intValue;
-					break;
-				case LONG:
-					long longValue = resultSet.getLong(colName);
-					value = resultSet.wasNull() ? null : longValue;
-					break;
-				default:
-					throw new RuntimeException(format("Unknown attribute type [%s]", attr.getDataType().toString()));
+				Object value;
+				switch (attr.getDataType())
+				{
+					case BOOL:
+						boolean boolValue = resultSet.getBoolean(colName);
+						value = resultSet.wasNull() ? null : boolValue;
+						break;
+					case CATEGORICAL:
+					case FILE:
+					case XREF:
+						EntityType xrefEntityType = attr.getRefEntity();
+						Object refIdValue = mapValue(resultSet, xrefEntityType.getIdAttribute(), colName);
+						value = refIdValue != null ? entityManager.getReference(xrefEntityType, refIdValue) : null;
+						break;
+					case CATEGORICAL_MREF:
+					case MREF:
+						EntityType mrefEntityMeta = attr.getRefEntity();
+						Array mrefArrayValue = resultSet.getArray(colName);
+						value = resultSet.wasNull() ? null : mapValueMref(mrefArrayValue, mrefEntityMeta);
+						break;
+					case ONE_TO_MANY:
+						Array oneToManyArrayValue = resultSet.getArray(colName);
+						value = resultSet.wasNull() ? null : mapValueOneToMany(oneToManyArrayValue, attr);
+						break;
+					case COMPOUND:
+						throw new RuntimeException(format("Value mapping not allowed for attribute type [%s]",
+								attr.getDataType().toString()));
+					case DATE:
+						LocalDate localDate = resultSet.getObject(colName, LocalDate.class);
+						value = localDate != null ? Date
+								.from(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant()) : null;
+						break;
+					case DATE_TIME:
+						// valid, because java.sql.Timestamp extends required type java.util.Date
+						value = resultSet.getTimestamp(colName);
+						break;
+					case DECIMAL:
+						BigDecimal bigDecimalValue = resultSet.getBigDecimal(colName);
+						value = bigDecimalValue != null ? bigDecimalValue.doubleValue() : null;
+						break;
+					case EMAIL:
+					case ENUM:
+					case HTML:
+					case HYPERLINK:
+					case SCRIPT:
+					case STRING:
+					case TEXT:
+						value = resultSet.getString(colName);
+						break;
+					case INT:
+						int intValue = resultSet.getInt(colName);
+						value = resultSet.wasNull() ? null : intValue;
+						break;
+					case LONG:
+						long longValue = resultSet.getLong(colName);
+						value = resultSet.wasNull() ? null : longValue;
+						break;
+					default:
+						throw new RuntimeException(
+								format("Unknown attribute type [%s]", attr.getDataType().toString()));
+				}
+				return value;
 			}
-			return value;
+			catch (SQLException e)
+			{
+				throw e;
+			}
 		}
 
 		/**
@@ -220,14 +234,16 @@ class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
+				Arrays.sort(mrefIdsAndOrder, comparing(o -> Integer.valueOf(o[0])));
+
 				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
-				for (String[] mrefIdAndOrder : mrefIdsAndOrder)
+				for (int i = 0; i < mrefIdsAndOrder.length; ++i)
 				{
-					Integer seqNr = Integer.valueOf(mrefIdAndOrder[0]);
+					String[] mrefIdAndOrder = mrefIdsAndOrder[i];
 					String mrefIdStr = mrefIdAndOrder[1];
 					Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
-					mrefIds[seqNr] = mrefId;
+					mrefIds[i] = mrefId;
 				}
 
 				// convert ids to (lazy) entities

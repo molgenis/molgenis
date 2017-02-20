@@ -37,7 +37,7 @@ public class PackageSearchResultItem
 	@Override
 	public int hashCode()
 	{
-		return packageFound.getName().hashCode();
+		return packageFound.getFullyQualifiedName().hashCode();
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class PackageSearchResultItem
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		PackageSearchResultItem other = (PackageSearchResultItem) obj;
-		return packageFound.getName().equals(other.getPackageFound().getName());
+		return packageFound.getFullyQualifiedName().equals(other.getPackageFound().getFullyQualifiedName());
 	}
 
 }

@@ -557,6 +557,18 @@ var TableBody = React.createClass({
         }
         return result;
     },
+    /**
+     * Recursively creates the data rows for the data table body
+     *
+     * @param item One entire entity row for all columns (Object)
+     * @param entity Metadata of the entity (Object)
+     * @param attrs All attributes selected in the filter tree (array)
+     * @param selectedAttrs All attributes selected in the filter tree (object)
+     * @param Cols Array of React components
+     * @param path Array of strings containing the names of attribute columns being created recursively at the moment
+     * @param expanded boolean for reference types that are expanded or not
+     * @param behindMref True if attribute is an MREF
+     */
     _createColsRec: function (item, entity, attrs, selectedAttrs, Cols, path, expanded, behindMref) {
         if (_.size(selectedAttrs) > 0) {
             for (var j = 0; j < attrs.length; ++j) {
@@ -565,7 +577,8 @@ var TableBody = React.createClass({
                     if (attr.visible === true) {
                         var attrPath = path.concat(attr.name);
                         if (isCompoundAttr(attr)) {
-                            this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, behindMref);
+                            var expandedSelectedAttrs = $.extend({'*': null}, selectedAttrs)
+                            this._createColsRec(item, entity, attr.attributes, expandedSelectedAttrs, Cols, path, expanded, behindMref);
                         } else {
                             behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF' || attr.fieldType === 'ONE_TO_MANY';
                             if (this._isExpandedAttr(attr, selectedAttrs)) {

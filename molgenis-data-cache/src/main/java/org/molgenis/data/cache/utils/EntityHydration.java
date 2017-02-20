@@ -46,9 +46,10 @@ public class EntityHydration
 	 * @param dehydratedEntity map with key value pairs representing this entity
 	 * @return hydrated entity
 	 */
+	@SuppressWarnings("unchecked")
 	public Entity hydrate(Map<String, Object> dehydratedEntity, EntityType entityType)
 	{
-		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getName());
+		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getFullyQualifiedName());
 
 		Entity hydratedEntity = entityManager.create(entityType, NO_POPULATE);
 

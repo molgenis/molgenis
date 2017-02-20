@@ -14,7 +14,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
@@ -188,7 +188,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		IdGenerator idGenerator()
 		{
-			return new UuidGenerator();
+			return new IdGeneratorImpl();
 		}
 
 		@Bean

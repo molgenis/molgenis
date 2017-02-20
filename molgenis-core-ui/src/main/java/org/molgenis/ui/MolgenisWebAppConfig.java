@@ -16,6 +16,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.ui.menu.MenuMolgenisUi;
@@ -39,8 +40,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -62,7 +61,7 @@ import java.util.Properties;
 import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
-@Import(PlatformConfig.class)
+@Import({PlatformConfig.class, RdfConverter.class})
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -73,6 +72,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
+	@Autowired
+	private RdfConverter rdfConverter;
 
 	@Autowired
 	private LanguageService languageService;
@@ -111,6 +113,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
 		converters.add(new ResourceHttpMessageConverter());
+		converters.add(rdfConverter);
 	}
 
 	@Override
@@ -128,8 +131,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		 *
 		 * See https://jira.spring.io/browse/SPR-10655
 		 */
-		String corsInterceptPattern = "/api/**";
-		return new MappedInterceptor(new String[] { corsInterceptPattern }, corsInterceptor());
+		return new MappedInterceptor(new String[] { "/api/**", "/fdp/**" }, corsInterceptor());
 	}
 
 	@Override
@@ -178,40 +180,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		pspc.setIgnoreResourceNotFound(true);
 		pspc.setNullValue("@null");
 		return pspc;
-	}
-
-	@Value("${mail.host:smtp.gmail.com}")
-	private String mailHost;
-	@Value("${mail.port:587}")
-	private Integer mailPort;
-	@Value("${mail.protocol:smtp}")
-	private String mailProtocol;
-	@Value("${mail.username}")
-	private String mailUsername; // specify in molgenis-server.properties
-	@Value("${mail.password}")
-	private String mailPassword; // specify in molgenis-server.properties
-	@Value("${mail.java.auth:true}")
-	private String mailJavaAuth;
-	@Value("${mail.java.starttls.enable:true}")
-	private String mailJavaStartTlsEnable;
-	@Value("${mail.java.quitwait:false}")
-	private String mailJavaQuitWait;
-
-	@Bean
-	public JavaMailSender mailSender()
-	{
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost(mailHost);
-		mailSender.setPort(mailPort);
-		mailSender.setProtocol(mailProtocol);
-		mailSender.setUsername(mailUsername); // specify in molgenis-server.properties
-		mailSender.setPassword(mailPassword); // specify in molgenis-server.properties
-		Properties javaMailProperties = new Properties();
-		javaMailProperties.setProperty("mail.smtp.auth", mailJavaAuth);
-		javaMailProperties.setProperty("mail.smtp.starttls.enable", mailJavaStartTlsEnable);
-		javaMailProperties.setProperty("mail.smtp.quitwait", mailJavaQuitWait);
-		mailSender.setJavaMailProperties(javaMailProperties);
-		return mailSender;
 	}
 
 	@Bean

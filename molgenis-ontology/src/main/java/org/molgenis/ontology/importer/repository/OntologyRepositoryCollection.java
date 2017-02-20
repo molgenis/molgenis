@@ -348,6 +348,6 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getName());
+		return hasRepository(entityType.getFullyQualifiedName());
 	}
 }

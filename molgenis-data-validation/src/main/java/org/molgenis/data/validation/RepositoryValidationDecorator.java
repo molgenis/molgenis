@@ -95,6 +95,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT);
 		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
+		boolean validateReadonly = !getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT);
 
 		// add validation operation to stream
 		return entities.filter(entity ->
@@ -121,7 +122,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 			validateEntityValueReferences(entity, validationResource);
 
-			if (validationMode == ValidationMode.UPDATE)
+			if (validateReadonly && validationMode == ValidationMode.UPDATE)
 			{
 				validateEntityValueReadOnly(entity, validationResource);
 			}
@@ -184,7 +185,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			refAttrs.forEach(refAttr ->
 			{
 				EntityType refEntityType = refAttr.getRefEntity();
-				String refEntityName = refEntityType.getName();
+				String refEntityName = refEntityType.getFullyQualifiedName();
 				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
 				if (refEntityIds == null)
 				{
@@ -204,7 +205,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		}
 
 		validationResource.setSelfReferencing(refAttrs.stream()
-				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityType().getName())));
+				.anyMatch(refAttr -> refAttr.getRefEntity().getFullyQualifiedName().equals(getEntityType().getFullyQualifiedName())));
 		validationResource.setRefAttrs(refAttrs);
 	}
 
@@ -262,12 +263,15 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
-		String idAttrName = getEntityType().getIdAttribute().getName();
-		List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
-						.getName().equals(idAttrName)).collect(toList());
+		if (!getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT))
+		{
+			String idAttrName = getEntityType().getIdAttribute().getName();
+			List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
+							.getName().equals(idAttrName)).collect(toList());
 
-		validationResource.setReadonlyAttrs(readonlyAttrs);
+			validationResource.setReadonlyAttrs(readonlyAttrs);
+		}
 	}
 
 	private void validateEntityValueRequired(Entity entity, ValidationResource validationResource)
@@ -337,7 +341,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	{
 		validationResource.getRefAttrs().forEach(refAttr ->
 		{
-			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getName());
+			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getFullyQualifiedName());
 
 			Iterable<Entity> refEntities;
 			if (isSingleReferenceType(refAttr))
@@ -361,7 +365,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			{
 				if (!refEntityIds.contains(refEntity.getIdValue()))
 				{
-					boolean selfReference = entity.getEntityType().getName().equals(refAttr.getRefEntity().getName());
+					boolean selfReference = entity.getEntityType().getFullyQualifiedName().equals(refAttr.getRefEntity().getFullyQualifiedName());
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",

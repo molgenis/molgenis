@@ -301,7 +301,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void addEntityType(EntityType entityType)
 	{
-		validatePermission(entityType.getName(), Permission.WRITEMETA);
+		validatePermission(entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		// add row to entities table
 		decoratedRepo.add(entityType);
@@ -360,7 +360,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	 */
 	private void validateUpdateAllowed(EntityType entityType)
 	{
-		String entityName = entityType.getName();
+		String entityName = entityType.getFullyQualifiedName();
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
@@ -393,7 +393,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void validateDeleteAllowed(EntityType entityType)
 	{
-		String entityName = entityType.getName();
+		String entityName = entityType.getFullyQualifiedName();
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityName);
@@ -420,7 +420,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void deleteEntityPermissions(EntityType entityType)
 	{
-		String entityName = entityType.getName();
+		String entityName = entityType.getFullyQualifiedName();
 		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
 
 		// User permissions
@@ -468,7 +468,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
 		return EntityTypeStream
-				.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getName(), permission));
+				.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), permission));
 	}
 
 	private static class FilteredConsumer
@@ -485,7 +485,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 		public void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
-					.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getName(), READ))
+					.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ))
 					.collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}

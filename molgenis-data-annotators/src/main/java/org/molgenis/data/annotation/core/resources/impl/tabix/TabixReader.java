@@ -34,9 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class TabixReader
 {
@@ -182,7 +183,7 @@ public class TabixReader
 			{
 				byte[] b = new byte[i - j];
 				System.arraycopy(buf, j, b, 0, b.length);
-				String s = new String(b, Charset.forName("UTF-8"));
+				String s = new String(b, UTF_8);
 				mChr2tid.put(s, k);
 				mSeq[k++] = s;
 				j = i + 1;

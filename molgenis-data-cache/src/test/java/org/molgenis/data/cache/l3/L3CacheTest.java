@@ -80,6 +80,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 		entity3.set(COUNTRY, "GB");
 	}
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{

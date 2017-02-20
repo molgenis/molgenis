@@ -35,6 +35,7 @@ public class DataServiceImplTest
 	private DataServiceImpl dataService;
 	private MetaDataService metaDataService;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -65,9 +66,9 @@ public class DataServiceImplTest
 		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
 		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
 		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
-		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn("Entity1").getMock();
-		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn("Entity2").getMock();
-		EntityType entityType3 = when(mock(EntityType.class).getName()).thenReturn("Entity3").getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity1").getMock();
+		EntityType entityType2 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity2").getMock();
+		EntityType entityType3 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity3").getMock();
 
 		when(metaDataService.getEntityTypes()).thenAnswer(new Answer<Stream<EntityType>>()
 		{
@@ -241,6 +242,7 @@ public class DataServiceImplTest
 	public void findAllStreamStringQuery()
 	{
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query);
@@ -252,6 +254,7 @@ public class DataServiceImplTest
 	{
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);

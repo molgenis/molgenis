@@ -15,8 +15,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.QueryUtils.containsAnyOperator;
-import static org.molgenis.data.QueryUtils.containsComputedAttribute;
+import static org.molgenis.data.QueryUtils.*;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
@@ -58,13 +57,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		if (querySupported(q))
 		{
-			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
+			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.findOne(q);
 		}
 		else
 		{
-			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
+			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
 					INDEX_REPOSITORY);
 			return searchService.findOne(q, getEntityType());
 		}
@@ -76,13 +75,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		if (querySupported(q))
 		{
-			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
+			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.findAll(q);
 		}
 		else
 		{
-			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
+			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
 					INDEX_REPOSITORY);
 			return searchService.searchAsStream(q, getEntityType());
 		}
@@ -114,13 +113,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		// TODO check if the index is stable. If index is stable you can better check index for count results
 		if (querySupported(q))
 		{
-			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
+			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.count(q);
 		}
 		else
 		{
-			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getName(),
+			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
 					INDEX_REPOSITORY);
 			return searchService.count(q, getEntityType());
 		}
@@ -133,12 +132,12 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	}
 
 	/**
-	 * Checks if the underlying repository can handle this query. Queries with unsupported operators or queries that use
-	 * attributes with computed values are delegated to the index.
+	 * Checks if the underlying repository can handle this query. Queries with unsupported operators, queries that use
+	 * attributes with computed values or queries with nested query rule field are delegated to the index.
 	 */
 	private boolean querySupported(Query<Entity> q)
 	{
-		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityType());
-
+		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityType())
+				&& !containsNestedQueryRuleField(q);
 	}
 }

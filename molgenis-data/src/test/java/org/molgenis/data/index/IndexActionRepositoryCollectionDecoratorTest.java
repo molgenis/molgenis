@@ -26,7 +26,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		Repository<Entity> repository = (Repository<Entity>) mock(Repository.class);
 		when(decoratedRepositoryCollection.getRepository(REPOSITORY_NAME)).thenReturn(repository);
 		entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn("repo");
+		when(entityType.getFullyQualifiedName()).thenReturn("repo");
 		when(repository.getEntityType()).thenReturn(entityType);
 		indexActionRegisterService = mock(IndexActionRegisterService.class);
 		indexActionRepositoryCollectionDecorator = new IndexActionRepositoryCollectionDecorator(
@@ -38,27 +38,27 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	{
 		indexActionRepositoryCollectionDecorator.deleteRepository(entityType);
 		verify(decoratedRepositoryCollection, times(1)).deleteRepository(entityType);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 
 	@Test
 	public void addAttribute()
 	{
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME).getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.addAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityType, attribute);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 
 	@Test
 	public void deleteAttribute()
 	{
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME).getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.deleteAttribute(entityType, attribute);
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityType, attribute);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 
 	@Test
@@ -66,6 +66,6 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	{
 		indexActionRepositoryCollectionDecorator.createRepository(entityType);
 		verify(decoratedRepositoryCollection, times(1)).createRepository(entityType);
-		verify(indexActionRegisterService).register("repo", null);
+		verify(indexActionRegisterService).register(entityType, null);
 	}
 }

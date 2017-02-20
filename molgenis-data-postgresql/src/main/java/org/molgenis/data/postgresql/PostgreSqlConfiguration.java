@@ -2,6 +2,8 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.util.EntityTypeCopier;
+import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,12 @@ public class PostgreSqlConfiguration
 	@Autowired
 	private PostgreSqlExceptionTranslator postgreSqlExceptionTranslator;
 
+	@Autowired
+	private EntityTypeRegistry entityTypeRegistry;
+
+	@Autowired
+	private EntityTypeCopier entityTypeCopier;
+
 	@Bean
 	public JdbcTemplate jdbcTemplate()
 	{
@@ -35,6 +43,8 @@ public class PostgreSqlConfiguration
 	@Bean
 	public RepositoryCollection postgreSqlRepositoryCollection()
 	{
-		return new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate(), dataService);
+		return new PostgreSqlRepositoryCollectionDecorator(
+				new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate(), dataService),
+				entityTypeRegistry, entityTypeCopier);
 	}
 }

@@ -6,6 +6,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentGenerator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -29,11 +30,13 @@ public class ElasticsearchEntityFactory
 	private static final int MAX_INDEXING_DEPTH = 1;
 
 	private final EntityManager entityManager;
+	private final DocumentIdGenerator documentIdGenerator;
 
 	@Autowired
-	public ElasticsearchEntityFactory(EntityManager entityManager)
+	public ElasticsearchEntityFactory(EntityManager entityManager, DocumentIdGenerator documentIdGenerator)
 	{
 		this.entityManager = requireNonNull(entityManager);
+		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
 	/**
@@ -64,7 +67,7 @@ public class ElasticsearchEntityFactory
 	{
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
-			generator.writeFieldName(attr.getName());
+			generator.writeFieldName(documentIdGenerator.generateId(attr));
 			createRec(entity, attr, generator, depth, maxDepth);
 		}
 	}

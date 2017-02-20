@@ -2,7 +2,6 @@ package org.molgenis.data.aggregation;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.aggregation.*;
 import org.molgenis.data.settings.AppSettings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -17,10 +16,10 @@ public class AggregateAnonymizerRepositoryDecoratorTest
 	private AggregateAnonymizer aggregateAnonymizer;
 	private AppSettings appSettings;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		//noinspection unchecked
 		decoratedRepo = mock(Repository.class);
 		aggregateAnonymizer = mock(AggregateAnonymizer.class);
 		appSettings = mock(AppSettings.class);

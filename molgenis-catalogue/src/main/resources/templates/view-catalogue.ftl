@@ -20,7 +20,7 @@
             <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdown-menu-entities">
                 <#list entitiesMeta as entityMeta>
                     <li role="presentation">
-                        <a role="menuitem" tabindex="-1" href="#" id="/api/v1/${entityMeta.name?html}"
+                        <a role="menuitem" tabindex="-1" href="#" id="/api/v1/${entityMeta.fullyQualifiedName?html}"
                            class="entity-dropdown-item">${entityMeta.label?html}</a>
                     </li>
                 </#list>

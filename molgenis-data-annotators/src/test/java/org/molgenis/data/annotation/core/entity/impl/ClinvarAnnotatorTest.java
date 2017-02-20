@@ -64,7 +64,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateIterable()
 	{
-		EntityType sourceMeta = entityTypeFactory.create().setName("clinvar");
+		EntityType sourceMeta = entityTypeFactory.create().setFullyQualifiedName("clinvar");
 		sourceMeta.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		sourceMeta.addAttribute(vcfAttributes.getPosAttribute());
 		sourceMeta.addAttribute(vcfAttributes.getRefAttribute());
@@ -269,6 +269,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 			return settings;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Bean
 		public DataService dataService()
 		{

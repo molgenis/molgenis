@@ -127,7 +127,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		for (PackageSearchResultItem searchResult : searchResults)
 		{
 			Package p = searchResult.getPackageFound();
-			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getName());
+			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getFullyQualifiedName());
 			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists
 					.newArrayList(Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
 					{
@@ -150,7 +150,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 						}
 					}));
 
-			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getLabel(), p.getDescription(),
+			PackageResponse pr = new PackageResponse(p.getName(), p.getLabel(), p.getDescription(),
 					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
@@ -184,7 +184,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		if (selectedPackageName == null)
 		{
 			List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
-			selectedPackageName = packages.get(0).getName();
+			selectedPackageName = packages.get(0).getFullyQualifiedName();
 		}
 		model.addAttribute("tagService", tagService);
 		model.addAttribute("selectedPackageName", selectedPackageName);
@@ -213,8 +213,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
 
-		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getLabel(),
-				molgenisPackage.getDescription(), null, getEntitiesInPackage(molgenisPackage.getName()),
+		return new PackageResponse(molgenisPackage.getFullyQualifiedName(), molgenisPackage.getLabel(),
+				molgenisPackage.getDescription(), null, getEntitiesInPackage(molgenisPackage.getFullyQualifiedName()),
 				getTagsForPackage(molgenisPackage));
 	}
 
@@ -231,8 +231,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	private PackageTreeNode createPackageTreeNode(Package package_)
 	{
-		String title = package_.getLabel() != null ? package_.getLabel() : package_.getSimpleName();
-		String key = package_.getName();
+		String title = package_.getLabel() != null ? package_.getLabel() : package_.getName();
+		String key = package_.getFullyQualifiedName();
 		String tooltip = package_.getDescription();
 		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
 		boolean folder = true;
@@ -257,7 +257,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private PackageTreeNode createPackageTreeNode(EntityType emd)
 	{
 		String title = emd.getLabel();
-		String key = emd.getName();
+		String key = emd.getFullyQualifiedName();
 		String tooltip = emd.getDescription();
 		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
 		boolean folder = true;
@@ -265,7 +265,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "entity");
-		data.put("href", "/api/v1/" + emd.getName() + "/meta");
+		data.put("href", "/api/v1/" + emd.getFullyQualifiedName() + "/meta");
 
 		for (Attribute amd : emd.getAttributes())
 		{
@@ -286,7 +286,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "attribute");
-		data.put("href", "/api/v1/" + emd.getName() + "/meta/" + amd.getName());
+		data.put("href", "/api/v1/" + emd.getFullyQualifiedName() + "/meta/" + amd.getName());
 		data.put("tags", tagService.getTagsForAttribute(emd, amd));
 
 		if (amd.getDataType() == AttributeType.COMPOUND)
@@ -330,7 +330,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		for (EntityType emd : aPackage.getEntityTypes())
 		{
-			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel(), emd.isAbstract()));
+			entiesForThisPackage.add(new PackageResponse.Entity(emd.getFullyQualifiedName(), emd.getLabel(), emd.isAbstract()));
 		}
 		Iterable<Package> subPackages = aPackage.getChildren();
 		if (subPackages != null)

@@ -9,8 +9,8 @@ import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +35,16 @@ class IndexJob extends Job
 	private final String transactionId;
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final EntityTypeFactory entityTypeFactory;
 
 	IndexJob(Progress progress, Authentication authentication, String transactionId, DataService dataService,
-			SearchService searchService)
+			SearchService searchService, EntityTypeFactory entityTypeFactory)
 	{
 		super(progress, null, authentication);
 		this.transactionId = requireNonNull(transactionId);
 		this.dataService = requireNonNull(dataService);
 		this.searchService = requireNonNull(searchService);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
 	@Override
@@ -93,14 +95,14 @@ class IndexJob extends Job
 		}
 		catch (Exception ex)
 		{
-			LOG.error("Error performing indexActions", ex);
+			LOG.error("Error performing index actions", ex);
 			throw ex;
 		}
 		finally
 		{
-			progress.status("refreshIndex...");
+			progress.status("Refresh index start");
 			searchService.refreshIndex();
-			progress.status("refreshIndex done.");
+			progress.status("Refresh index done");
 		}
 	}
 
@@ -115,33 +117,38 @@ class IndexJob extends Job
 	private boolean performAction(Progress progress, int progressCount, IndexAction indexAction)
 	{
 		requireNonNull(indexAction);
+		String fullName = indexAction.getEntityFullName();
 		updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.STARTED);
 
 		try
 		{
-			if (indexAction.getEntityId() != null)
+			if (dataService.hasRepository(fullName))
 			{
-				progress.progress(progressCount,
-						format("Indexing {0}.{1}", indexAction.getEntityFullName(), indexAction.getEntityId()));
-				rebuildIndexOneEntity(indexAction.getEntityFullName(), indexAction.getEntityId());
-			}
-			else
-			{
-				final String entityFullName = indexAction.getEntityFullName();
-				final boolean actualEntityExists = dataService.hasRepository(entityFullName);
-
-				if (!actualEntityExists)
+				if (indexAction.getEntityId() != null)
 				{
-					progress.progress(progressCount,
-							format("Dropping index of repository {0}.", indexAction.getEntityFullName()));
-					searchService.delete(indexAction.getEntityFullName());
+					progress.progress(progressCount, format("Indexing {0}.{1}", fullName, indexAction.getEntityId()));
+					rebuildIndexOneEntity(fullName, indexAction.getEntityId());
 				}
 				else
 				{
-					progress.progress(progressCount,
-							format("Indexing repository {0}", indexAction.getEntityFullName()));
-					final Repository<Entity> repository = dataService.getRepository(entityFullName);
+					progress.progress(progressCount, format("Indexing {0}", fullName));
+					final Repository<Entity> repository = dataService.getRepository(fullName);
 					searchService.rebuildIndex(repository);
+				}
+			}
+			else
+			{
+				EntityType entityType = getEntityType(indexAction);
+				if (searchService.hasMapping(entityType))
+				{
+					progress.progress(progressCount, format("Dropping {0}", fullName));
+					searchService.delete(entityType);
+				}
+				else
+				{
+					// Index Job is finished, here we concluded that we don't have enough info to continue the index job
+					progress.progress(progressCount,
+							format("Skip index entity {0}.{1}", fullName, indexAction.getEntityId()));
 				}
 			}
 			updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
@@ -226,5 +233,12 @@ class IndexJob extends Job
 		QueryImpl<IndexAction> q = new QueryImpl<>(rule);
 		q.setSort(new Sort(ACTION_ORDER));
 		return q;
+	}
+
+	private EntityType getEntityType(IndexAction indexAction)
+	{
+		EntityType entityType = entityTypeFactory.create(indexAction.getEntityFullName());
+		entityType.setName(indexAction.getEntityTypeName());
+		return entityType;
 	}
 }

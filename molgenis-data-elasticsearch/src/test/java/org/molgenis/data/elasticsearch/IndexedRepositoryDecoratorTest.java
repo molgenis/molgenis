@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
@@ -42,7 +43,7 @@ public class IndexedRepositoryDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		String entityName = "entity";
 		repositoryEntityType = mock(EntityType.class);
-		when(repositoryEntityType.getName()).thenReturn(entityName);
+		when(repositoryEntityType.getFullyQualifiedName()).thenReturn(entityName);
 		idAttrName = "id";
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 
@@ -234,7 +235,7 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void getName()
 	{
-		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getName());
+		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getFullyQualifiedName());
 	}
 
 	@Test
@@ -305,6 +306,7 @@ public class IndexedRepositoryDecoratorTest
 	public void forEachBatched()
 	{
 		Fetch fetch = new Fetch();
+		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		indexedRepositoryDecorator.forEachBatched(fetch, consumer, 12);
 		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 12);
@@ -391,6 +393,28 @@ public class IndexedRepositoryDecoratorTest
 
 		when(sort.spliterator()).thenReturn(newArrayList(o1, o2).spliterator());
 
+		indexedRepositoryDecorator.count(q);
+		verify(searchService).count(q, repositoryEntityType);
+		verify(decoratedRepo, never()).count(q);
+	}
+
+	@Test
+	public void unsupportedQueryWithNestedQueryRuleField()
+	{
+		String refAttrName = "refAttr";
+		String attrName = "attr";
+		String queryRuleField = refAttrName + '.' + attrName;
+		Attribute refAttr = mock(Attribute.class);
+		EntityType refEntityType = mock(EntityType.class);
+		Attribute attr = mock(Attribute.class);
+		when(refEntityType.getAttribute(attrName)).thenReturn(attr);
+		when(refAttr.getRefEntity()).thenReturn(refEntityType);
+		when(repositoryEntityType.getAttribute(refAttrName)).thenReturn(refAttr);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		QueryRule queryRule = mock(QueryRule.class);
+		when(queryRule.getField()).thenReturn(queryRuleField);
+		when(q.getRules()).thenReturn(singletonList(queryRule));
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(q, repositoryEntityType);
 		verify(decoratedRepo, never()).count(q);

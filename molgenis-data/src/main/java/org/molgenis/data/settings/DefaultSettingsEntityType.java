@@ -9,6 +9,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
@@ -43,12 +44,12 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 	@RunAsSystem
 	public Entity getSettings()
 	{
-		return dataService.findOneById(getName(), getSimpleName());
+		return dataService.findOneById(getFullyQualifiedName(), getName());
 	}
 
 	public static String getSettingsEntityName(String id)
 	{
-		return PACKAGE_SETTINGS + '_' + id;
+		return PACKAGE_SETTINGS + PACKAGE_SEPARATOR + id;
 	}
 
 	Entity getDefaultSettings()

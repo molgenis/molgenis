@@ -42,28 +42,28 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	@Override
 	public void deleteRepository(EntityType entityType)
 	{
-		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.indexActionRegisterService.register(entityType, null);
 		this.decorated.deleteRepository(entityType);
 	}
 
 	@Override
 	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
-		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.indexActionRegisterService.register(entityType, null);
 		this.decorated.addAttribute(entityType, attribute);
 	}
 
 	@Override
 	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.indexActionRegisterService.register(entityType, null);
 		this.decorated.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Override
 	public void deleteAttribute(EntityType entityType, Attribute attr)
 	{
-		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.indexActionRegisterService.register(entityType, null);
 		this.decorated.deleteAttribute(entityType, attr);
 	}
 
@@ -76,7 +76,7 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		this.indexActionRegisterService.register(entityType.getName(), null);
+		this.indexActionRegisterService.register(entityType, null);
 		return this.decorated.createRepository(entityType);
 	}
 

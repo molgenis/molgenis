@@ -12,6 +12,7 @@ import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
+import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
@@ -65,7 +67,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		importServiceMock = mock(ImportService.class);
 		progress = mock(Progress.class);
 
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("target").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("target").getMock();
 		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityType);
 		fileIngest.set(FileIngestMetaData.URL, url);
@@ -128,7 +130,9 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		@Bean
 		public FileMetaFactory fileMetaFactory()
 		{
-			return mock(FileMetaFactory.class);
+			FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
+			when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
+			return fileMetaFactory;
 		}
 	}
 }

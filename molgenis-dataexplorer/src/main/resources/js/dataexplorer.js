@@ -18,6 +18,8 @@ $.when($,
         self.getIdentifierAttribute = getIdentifierAttribute;
         self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
+        self.getRSQL = getRSQL;
+        self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
         var selectedEntityMetaData = null;
@@ -26,6 +28,7 @@ $.when($,
         var selectedAttributesTree = {};
         var searchQuery = null;
         var modules = [];
+        var filter = undefined;
 
         var posAttribute;
         var chromosomeAttribute;
@@ -35,7 +38,8 @@ $.when($,
         if (settingsXhr[1] !== 'success') {
             molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
         }
-        var settings = settingsXhr[0];
+
+        var settings = settingsXhr[0]
         self.settings = settings;
 
         var stateDefault = {
@@ -43,10 +47,25 @@ $.when($,
             query: null,
             attrs: null,
             mod: null,
-            hideselect: 'false'
+            hideselect: 'false',
+            filter: undefined
         };
 
         var state;
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getnToken() {
+            return state.nToken;
+        }
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getRSQL() {
+            return state.filter;
+        }
 
         /**
          * @memberOf molgenis.dataexplorer
@@ -120,9 +139,9 @@ $.when($,
             container.tree({
                 'entityMetaData': entityMetaData,
                 'selectedAttributes': attributes,
-                'onAttributesSelect': function (selects) {
+                'onAttributesSelect': function () {
                     selectedAttributes = container.tree('getSelectedAttributes');
-                    selectedAttributesTree = container.tree('getSelectedAttributesTree')
+                    selectedAttributesTree = container.tree('getSelectedAttributesTree');
                     $(document).trigger('changeAttributeSelection', {
                         'attributes': selectedAttributes,
                         'attributesTree': selectedAttributesTree,
@@ -176,21 +195,25 @@ $.when($,
 
         function getPosAttribute() {
             return posAttribute
-        };
+        }
+
         function getChromosomeAttribute() {
             return chromosomeAttribute
-        };
+        }
+
         function getIdentifierAttribute() {
             return identifierAttribute
-        };
+        }
+
         function getPatientAttribute() {
             return patientAttribute
-        };
+        }
 
         /**
          * @memberOf molgenis.dataexplorer
          */
         function createEntityQuery() {
+            var chromosome;
             var entityCollectionRequest = {
                 q: []
             };
@@ -205,7 +228,7 @@ $.when($,
 
                         // only chromosome and position
                         if (match[3] === undefined) {
-                            var chromosome = match[1];
+                            chromosome = match[1];
                             var position = match[2];
 
                             entityCollectionRequest.q =
@@ -229,7 +252,7 @@ $.when($,
                             // chromosome:startPos - endPos
                         } else if (match[3]) {
 
-                            var chromosome = match[1];
+                            chromosome = match[1];
                             var startPosition = match[2];
                             var stopPosition = match[3];
 
@@ -350,8 +373,7 @@ $.when($,
                 // For each selected attribute, check if it is expanded and fill the selectedAttributesTree map
                 $.each(selectedAttributes, function (index, attribute) {
                     var key = attribute.name;
-                    var value = attribute.expanded === true ? {'*': null} : null;
-                    selectedAttributesTree[key] = value;
+                    selectedAttributesTree[key] = attribute.expanded === true ? {'*': null} : null;
                 });
 
                 createEntityMetaTree(entityMetaData, selectedAttributes);
@@ -419,7 +441,6 @@ $.when($,
                 }
             }
 
-            // FIXME remove if clause as part of http://www.molgenis.org/ticket/3110
             if (state.query) {
                 delete cleanState.query;
                 for (var i = 0; i < state.query.q.length; ++i) {
@@ -431,14 +452,24 @@ $.when($,
                 }
             }
 
+            // Use special encoding for the rsql
+            var filter = state.filter
+            delete cleanState.filter
+
             // update browser state
-            history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
+            if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
+                + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
+            else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
         }
 
         /**
          * @memberOf molgenis.dataexplorer
          */
         $(function () {
+
+            var googleSearchField = $("#observationset-search")
+            var entityTypeDropdown = $('#dataset-select');
+
             // lazy load tab contents
             $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e) {
                 var target = $($(e.target).attr('data-target')), entityHref = encodeURI($(e.target).attr('href'));
@@ -468,11 +499,12 @@ $.when($,
                 attributeFilters = {};
                 selectedAttributes = [];
                 searchQuery = null;
+
                 if ($('#data-table-container').length > 0) {
                     React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
                 }
-                $('#feature-filters p').remove();
-                $("#observationset-search").val("");
+                $('#feature-filters').find('p').remove();
+                googleSearchField.val("");
                 $('#data-table-pager').empty();
 
                 // reset: unbind existing event handlers
@@ -504,13 +536,35 @@ $.when($,
             });
 
             $(document).on('updateAttributeFilters', function (e, data) {
-                $.each(data.filters, function () {
-                    if (this.isEmpty()) {
-                        delete attributeFilters[this.attribute.href];
-                    } else {
-                        attributeFilters[this.attribute.href] = this;
+                var rules = []
+                for (var i = 0; i < Object.keys(data.filters).length; i++) {
+                    var key = Object.keys(data.filters)[i]
+                    var filter = data.filters[key]
+                    var rule = filter.createQueryRule()
+
+                    if ((rule.hasOwnProperty('value') && rule.value !== undefined) ||
+                        (rule.hasOwnProperty('nestedRules') && rule.nestedRules.length > 0)) {
+
+                        if (rules.length > 0) {
+                            // Add an 'AND' operator between filters for every attribute
+                            rules.push({'operator': 'AND'})
+                        }
+                        rules.push(rule)
                     }
-                });
+
+                    if (filter.isEmpty()) {
+                        delete attributeFilters[filter.attribute.href];
+                    } else {
+                        attributeFilters[filter.attribute.href] = filter;
+                    }
+                }
+
+                if (rules.length > 0) {
+                    var queryRuleRSQL = molgenis.createRsqlQuery(rules)
+                    state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
+                    pushState()
+                }
+
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
                 $(document).trigger('changeQuery', createEntityQuery());
             });
@@ -518,6 +572,11 @@ $.when($,
             $(document).on('removeAttributeFilter', function (e, data) {
                 delete attributeFilters[data.attributeUri];
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
+
+                var attribute = data.attributeUri.split('/')[5]
+                state.filter = molgenis.dataexplorer.rsql.removeFilterFromRsqlState(attribute, state.filter)
+                pushState()
+
                 $(document).trigger('changeQuery', createEntityQuery());
             });
 
@@ -529,14 +588,15 @@ $.when($,
 
             var container = $("#plugin-container");
 
-            if ($('#dataset-select').length > 0) {
-                $('#dataset-select').select2({width: 'resolve'});
-                $('#dataset-select').change(function () {
+
+            if (entityTypeDropdown.length > 0) {
+                entityTypeDropdown.select2({width: 'resolve'});
+                entityTypeDropdown.change(function () {
                     $(document).trigger('changeEntity', $(this).val());
                 });
             }
 
-            $("#observationset-search").change(function (e) {
+            googleSearchField.change(function (e) {
                 searchQuery = $(this).val().trim();
                 $(document).trigger('changeQuery', createEntityQuery());
             });
@@ -547,14 +607,14 @@ $.when($,
 
                     if (event.which == 13) {
                         $(document).trigger('changeQuery', createEntityQuery());
-                        $("#observationset-search").change();
+                        googleSearchField.change();
                     }
                 }
             });
 
             $('#search-clear-button').click(function () {
-                $("#observationset-search").val('');
-                $("#observationset-search").change();
+                googleSearchField.val('');
+                googleSearchField.change();
             });
 
             $('#filter-wizard-btn').click(function () {
@@ -629,7 +689,7 @@ $.when($,
             function init() {
                 // set entity in dropdown
                 if (!state.entity) {
-                    state.entity = $('#dataset-select option:not(:empty)').first().val();
+                    state.entity = $('#dataset-select').find('option:not(:empty)').first().val();
                 }
                 $('#dataset-select').select2('val', state.entity);
 
@@ -649,9 +709,11 @@ $.when($,
                             break;
                         }
                     }
+                }
 
-                    // set filters in filter list
-                    // FIXME implement as part of http://www.molgenis.org/ticket/3110
+                if (state.filter) {
+                    // Create filters based on RSQL present in the URL
+                    molgenis.dataexplorer.rsql.createFiltersFromRsql(state.filter, restApi, state.entity);
                 }
 
                 if (state.entity) {

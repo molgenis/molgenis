@@ -44,8 +44,10 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getJunctionTableOrderColumnName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 
@@ -70,7 +72,7 @@ class PostgreSqlRepository extends AbstractRepository
 	 */
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
 			EnumSet.of(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
-					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE));
+					VALIDATE_NOTNULL_CONSTRAINT, VALIDATE_READONLY_CONSTRAINT, CACHEABLE));
 
 	/**
 	 * Supported query operators
@@ -273,7 +275,7 @@ class PostgreSqlRepository extends AbstractRepository
 		LOG.trace("SQL: {}", allRowsSelect);
 		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
 		template.query(allRowsSelect,
-				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
+				(ResultSetExtractor<Object>) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
 						resultSet));
 		LOG.debug("Streamed entire repository in batches of size {} in {}.", batchSize, stopwatch);
 	}
@@ -481,7 +483,7 @@ class PostgreSqlRepository extends AbstractRepository
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
 							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getName(), entity.getIdValue().toString())));
+									attr.getName(), attr.getEntity().getFullyQualifiedName(), entity.getIdValue().toString())));
 				}
 
 				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
@@ -490,7 +492,7 @@ class PostgreSqlRepository extends AbstractRepository
 				for (Entity val : refEntities)
 				{
 					Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
-					mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+					mref.put(getJunctionTableOrderColumnName(), seqNr.getAndIncrement());
 					mref.put(idAttr.getName(), entity.get(idAttr.getName()));
 					mref.put(attr.getName(), val);
 					mrefs.get(attr.getName()).add(mref);
@@ -505,7 +507,8 @@ class PostgreSqlRepository extends AbstractRepository
 	{
 		final Attribute idAttr = entityType.getIdAttribute();
 		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
-		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType)
+				.filter(attr -> !attr.isReadOnly()).collect(toList());
 		final String updateSql = getSqlUpdate(entityType);
 
 		// update values in entity table
@@ -546,7 +549,7 @@ class PostgreSqlRepository extends AbstractRepository
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", entityType.getName(), attr.getName())));
+					format("Entity [%s] attribute [%s] value cannot be null", entityType.getFullyQualifiedName(), attr.getName())));
 		}
 
 		final Attribute idAttr = entityType.getIdAttribute();
@@ -566,7 +569,7 @@ class PostgreSqlRepository extends AbstractRepository
 	private void removeMrefs(final List<Object> ids, final Attribute attr)
 	{
 		final Attribute idAttr = attr.isMappedBy() ? attr.getMappedBy() : entityType.getIdAttribute();
-		String deleteMrefSql = getSqlDelete(getJunctionTableName(entityType, attr), idAttr);
+		String deleteMrefSql = getSqlDelete(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr), idAttr);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -699,7 +702,7 @@ class PostgreSqlRepository extends AbstractRepository
 				Entity mrefEntity = (Entity) mref.get(attr.getName());
 				idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute());
 			}
-			preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
+			preparedStatement.setInt(1, (int) mref.get(getJunctionTableOrderColumnName()));
 			preparedStatement.setObject(2, idValue0);
 			preparedStatement.setObject(3, idValue1);
 		}

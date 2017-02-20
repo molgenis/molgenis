@@ -2,7 +2,7 @@ package org.molgenis.data.platform.decorators;
 
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.auth.UserDecorator;
+import org.molgenis.auth.UserRepositoryDecorator;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateAnonymizer;
 import org.molgenis.data.aggregation.AggregateAnonymizerRepositoryDecorator;
@@ -38,7 +38,9 @@ import org.molgenis.data.validation.*;
 import org.molgenis.data.validation.meta.*;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
+import org.molgenis.settings.mail.MailSettingsRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.mail.MailSenderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -53,6 +55,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.owned.OwnedEntityType.OWNED;
+import static org.molgenis.settings.mail.MailSettingsImpl.Meta.MAIL_SETTINGS;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
@@ -83,6 +86,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final AttributeValidator attributeValidator;
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
+	private final MailSenderFactory mailSenderFactory;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -96,7 +100,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			PackageValidator packageValidator, TagValidator tagValidator, L3Cache l3Cache,
 			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
 			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager,
-			QueryValidator queryValidator)
+			QueryValidator queryValidator, MailSenderFactory mailSenderFactory)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -125,6 +129,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
+		this.mailSenderFactory = requireNonNull(mailSenderFactory);
 	}
 
 	@Override
@@ -188,52 +193,45 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	 * @param repo entity repository
 	 * @return decorated entity repository
 	 */
+	@SuppressWarnings("unchecked")
 	private Repository<Entity> applyCustomRepositoryDecorators(Repository<Entity> repo)
 	{
-		if (repo.getName().equals(USER))
+		switch (repo.getName())
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new UserDecorator(
-					(Repository<User>) (Repository<? extends Entity>) repo, userAuthorityFactory, dataService,
-					passwordEncoder);
+			case USER:
+				return (Repository<Entity>) (Repository<? extends Entity>) new UserRepositoryDecorator(
+						(Repository<User>) (Repository<? extends Entity>) repo, userAuthorityFactory, dataService,
+						passwordEncoder);
+			case ATTRIBUTE_META_DATA:
+				repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryDecorator(
+						(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry,
+						dataService, permissionService);
+				return (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryValidationDecorator(
+						(Repository<Attribute>) (Repository<? extends Entity>) repo, attributeValidator);
+			case ENTITY_TYPE_META_DATA:
+				repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
+						(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService,
+						systemEntityTypeRegistry, permissionService);
+				return (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
+						(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
+			case PACKAGE:
+				repo = (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryDecorator(
+						(Repository<Package>) (Repository<? extends Entity>) repo, dataService,
+						entityTypeDependencyResolver);
+				return (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryValidationDecorator(
+						(Repository<Package>) (Repository<? extends Entity>) repo, packageValidator);
+			case TAG:
+				return (Repository<Entity>) (Repository<? extends Entity>) new TagRepositoryValidationDecorator(
+						(Repository<Tag>) (Repository<? extends Entity>) repo, tagValidator);
+			case LANGUAGE:
+				return (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
+						(Repository<Language>) (Repository<? extends Entity>) repo, languageService);
+			case I18N_STRING:
+				return new I18nStringDecorator(repo);
+			case MAIL_SETTINGS:
+				return new MailSettingsRepositoryDecorator(repo, mailSenderFactory);
+			default:
+				return repo;
 		}
-		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
-		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryDecorator(
-					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry, dataService,
-					permissionService);
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryValidationDecorator(
-					(Repository<Attribute>) (Repository<? extends Entity>) repo, attributeValidator);
-		}
-		else if (repo.getName().equals(ENTITY_TYPE_META_DATA))
-		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
-					(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService, systemEntityTypeRegistry,
-					permissionService);
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
-					(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
-		}
-		else if (repo.getName().equals(PACKAGE))
-		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryDecorator(
-					(Repository<Package>) (Repository<? extends Entity>) repo, dataService,
-					entityTypeDependencyResolver);
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryValidationDecorator(
-					(Repository<Package>) (Repository<? extends Entity>) repo, packageValidator);
-		}
-		else if (repo.getName().equals(TAG))
-		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new TagRepositoryValidationDecorator(
-					(Repository<Tag>) (Repository<? extends Entity>) repo, tagValidator);
-		}
-		else if (repo.getName().equals(LANGUAGE))
-		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
-					(Repository<Language>) (Repository<? extends Entity>) repo, languageService);
-		}
-		else if (repo.getName().equals(I18N_STRING))
-		{
-			repo = new I18nStringDecorator(repo);
-		}
-		return repo;
 	}
 }

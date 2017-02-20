@@ -9,16 +9,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.model.AttributeMetadata;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.meta.model.TagMetadata;
-import org.molgenis.data.populate.AutoValuePopulator;
-import org.molgenis.data.populate.DefaultValuePopulator;
-import org.molgenis.data.populate.EntityPopulator;
-import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.populate.*;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +80,6 @@ public class CommandLineAnnotatorConfig
 		return new VcfUtils();
 	}
 
-
 	@Bean
 	EffectStructureConverter effectStructureConverter()
 	{
@@ -143,7 +135,7 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public AutoValuePopulator autoValuePopulator()
 	{
-		return new AutoValuePopulator(uuidGenerator());
+		return new AutoValuePopulator(idGenerator());
 	}
 
 	@Bean
@@ -171,9 +163,9 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
-	public UuidGenerator uuidGenerator()
+	public IdGenerator idGenerator()
 	{
-		return new UuidGenerator();
+		return new IdGeneratorImpl();
 	}
 
 	@Bean

@@ -6,6 +6,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.mockito.Matchers;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -17,22 +19,28 @@ public class SearchRequestGeneratorTest
 {
 	private SearchRequestBuilder searchRequestBuilderMock;
 	private EntityType entityType;
+	private SearchRequestGenerator searchRequestGenerator;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		searchRequestBuilderMock = mock(SearchRequestBuilder.class);
 		entityType = mock(EntityType.class);
+
+		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
+		when(documentIdGenerator.generateId(any(Attribute.class)))
+				.thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
+		searchRequestGenerator = new SearchRequestGenerator(documentIdGenerator);
 	}
 
 	@Test
 	public void testBuildSearchRequest()
 	{
 		when(entityType.getBackend()).thenReturn("notElasticsearch");
-		SearchRequestGenerator gen = new SearchRequestGenerator();
+
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
-		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType,
+		searchRequestGenerator.buildSearchRequest(searchRequestBuilderMock, entityName, searchType,
 				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null,
 				null, entityType);
 		verify(searchRequestBuilderMock).setFrom(0);
@@ -46,11 +54,12 @@ public class SearchRequestGeneratorTest
 	public void testBuildSearchRequestNoFetch()
 	{
 		when(entityType.getBackend()).thenReturn("notElasticsearch");
-		SearchRequestGenerator gen = new SearchRequestGenerator();
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
 
-		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl<>().search("test"), null,
+		searchRequestGenerator
+				.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl<>().search("test"),
+						null,
 				null, null, entityType);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);

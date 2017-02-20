@@ -24,7 +24,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 
 	private boolean disableHtmlEscaping = false;
 
-	private String dateFormatPattern = MolgenisDateFormat.DATEFORMAT_DATETIME;
+	private String dateFormatPattern = MolgenisDateFormat.getDateTimeFormat().toPattern();
 
 	private List<TypeAdapterFactory> typeAdapterFactoryList;
 

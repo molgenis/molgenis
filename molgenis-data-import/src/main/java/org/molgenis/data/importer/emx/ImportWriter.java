@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -41,6 +42,7 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -104,7 +106,7 @@ public class ImportWriter
 		}
 		upsertEntityTypes(groupedEntityTypes);
 
-		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getName).forEach(importReport::addNewEntity);
+		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getFullyQualifiedName).forEach(importReport::addNewEntity);
 	}
 
 	private void validateEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
@@ -114,7 +116,7 @@ public class ImportWriter
 
 	private void validateEntityTypePermission(EntityType entityType)
 	{
-		String entityTypeName = entityType.getName();
+		String entityTypeName = entityType.getFullyQualifiedName();
 		if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeName, Permission.READ))
 		{
 			throw new MolgenisValidationException(
@@ -124,7 +126,7 @@ public class ImportWriter
 
 	private void createEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
 	{
-		List<String> entityTypeNames = entityTypes.stream().map(EntityType::getName).collect(toList());
+		List<String> entityTypeNames = entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(toList());
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityTypeNames);
 	}
 
@@ -133,16 +135,16 @@ public class ImportWriter
 		return runAsSystem(() ->
 		{
 			Map<String, EntityType> existingEntityTypeMap = dataService
-					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entities.stream().map(EntityType::getName),
+					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entities.stream().map(EntityType::getFullyQualifiedName),
 							new Fetch().field(EntityTypeMetadata.FULL_NAME), EntityType.class)
-					.collect(toMap(EntityType::getName, Function.identity()));
+					.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
-					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getName()))
+					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
 					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
 			ImmutableCollection<EntityType> existingEntityTypes = entities.stream()
-					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getName()))
+					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
 					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
 			return new GroupedEntityTypes(newEntityTypes, existingEntityTypes);
@@ -213,20 +215,20 @@ public class ImportWriter
 	{
 		for (final EntityType entityType : resolved)
 		{
-			String name = entityType.getName();
+			String name = entityType.getFullyQualifiedName();
 
 			// Languages and i18nstrings are already done
 			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(I18N_STRING) && dataService
 					.hasRepository(name))
 			{
 				Repository<Entity> repository = dataService.getRepository(name);
-				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getName());
+				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getName().toLowerCase()
-						.startsWith(defaultPackage.toLowerCase() + "_"))
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getFullyQualifiedName().toLowerCase()
+						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
-					emxEntityRepo = source.getRepository(entityType.getName().substring(defaultPackage.length() + 1));
+					emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -382,13 +384,13 @@ public class ImportWriter
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
 		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, updatedEntityTypes.stream().map(EntityType::getName), entityTypeFetch,
-						EntityType.class).collect(toMap(EntityType::getName, Function.identity()));
+				.findAll(ENTITY_TYPE_META_DATA, updatedEntityTypes.stream().map(EntityType::getFullyQualifiedName), entityTypeFetch,
+						EntityType.class).collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
 
 		// inject attribute identifiers in entity types to import
 		updatedEntityTypes.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
 			entityType.getOwnAllAttributes().forEach(ownAttr ->
 			{
 				Attribute existingAttr = existingEntityType.getAttribute(ownAttr.getName());
@@ -544,7 +546,13 @@ public class ImportWriter
 				break;
 			}
 			case UPDATE:
-				repo.update(stream(entities.spliterator(), false));
+				AtomicInteger atomicCount = new AtomicInteger(0);
+				repo.update(stream(entities.spliterator(), false).filter(entity ->
+				{
+					atomicCount.incrementAndGet();
+					return true;
+				}));
+				count = atomicCount.get();
 				break;
 			default:
 				throw new RuntimeException(format("Unknown database action [%s]", dbAction.toString()));

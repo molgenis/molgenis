@@ -12,8 +12,8 @@
 </#macro>
 
 <#macro renderPackage package>
-<h2 id="package-${package.name?replace(" ", "_")?html}" class="page-header">${package.simpleName?html}
-    <small>(${package.name?html})</small>
+<h2 id="package-${package.fullyQualifiedName?replace(" ", "_")?html}" class="page-header">${package.name?html}
+    <small>(${package.fullyQualifiedName?html})</small>
 </h2>
 <div class="package-container">
     <p><#if package.description?has_content>${package.description}</#if></p>
@@ -25,20 +25,22 @@
         <ul class="list-group">
             <#list package.children as subPackage>
                 <li class="list-group-item"><a
-                        href="#package-${subPackage.name?replace(" ", "_")?html}">${subPackage.name?html}</a></li>
+                        href="#package-${subPackage.fullyQualifiedName?replace(" ", "_")?html}">${subPackage.fullyQualifiedName?html}</a>
+                </li>
             </#list>
         </ul>
     </#if>
 
 <#-- Entities index -->
     <#if package.entityTypes?has_content>
-        <h4 id="entities-${package.name?replace(" ", "_")?html}">Entities</h4>
+        <h4 id="entities-${package.fullyQualifiedName?replace(" ", "_")?html}">Entities</h4>
         <div class="row">
             <div class="col-md-4">
                 <ul class="list-group">
                     <#list package.entityTypes as entity>
                         <li class="list-group-item"><a
-                                href="#entity-${entity.name?replace(" ", "_")?html}">${entity.label?html}</a></li>
+                                href="#entity-${entity.fullyQualifiedName?replace(" ", "_")?html}">${entity.label?html}</a>
+                        </li>
                     </#list>
                 </ul>
                 <a href="#package-index">
@@ -49,7 +51,7 @@
 
     <#-- Entities -->
         <#list package.entityTypes as entity>
-            <div class="panel" id="entity-${entity.name?replace(" ", "_")?html}">
+            <div class="panel" id="entity-${entity.fullyQualifiedName?replace(" ", "_")?html}">
                 <div class="panel-heading">
                     <h3 class="panel-title">${entity.label?html}
                         <small class="panel-title"><#if entity.extends?has_content>
@@ -80,7 +82,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <a href="#entities-${package.name?replace(" ", "_")?html}">
+                    <a href="#entities-${package.fullyQualifiedName?replace(" ", "_")?html}">
                         <small>back to entities</small>
                     </a>
                 </div>
@@ -104,7 +106,7 @@
 <#macro renderAttribute attribute entity depth>
     <#assign nextDepth = depth + ["x"]/>
     <#assign dataType=attribute.type>
-<tr id="attribute-${entity.name?replace(" ", "_")?html}${attribute.name?replace(" ", "_")?html}">
+<tr id="attribute-${entity.fullyQualifiedName?replace(" ", "_")?html}${attribute.name?replace(" ", "_")?html}">
     <td><#list depth as lvl>
         &nbsp;</#list>${attribute.label?html}<#if attribute.isIdAttribute()>
         <em>(id attribute)</em></#if><#if attribute.isLabelAttribute()> <em>(label
@@ -112,7 +114,7 @@
         <em>(lookup attribute)</em></#if></td>
     <td><#if attribute.defaultValue?has_content>${attribute.defaultValue?html}</#if></td>
     <td>${dataType?html}<#if dataType == "CATEGORICAL" || dataType == "CATEGORICAL_MREF" || dataType == "MREF" || dataType == "XREF">
-        (<a href="#entity-${attribute.refEntityType.name?replace(" ", "_")?html}">${attribute.refEntityType.label?html}</a>)</#if>
+        (<a href="#entity-${attribute.refEntityType.fullyQualifiedName?replace(" ", "_")?html}">${attribute.refEntityType.label?html}</a>)</#if>
     </td>
     <td>
         <#assign constraints = []>
@@ -146,7 +148,7 @@
 </#macro>
 
 <#macro createPackageListItem package>
-<li><a href="#package-${package.name?replace(" ", "_")?html}">${package.name?html}</a></li>
+<li><a href="#package-${package.fullyQualifiedName?replace(" ", "_")?html}">${package.fullyQualifiedName?html}</a></li>
     <#if package.children?has_content>
     <li>
         <ul>

@@ -87,7 +87,7 @@ public class DynamicEntity implements Entity
 		if (idAttr == null)
 		{
 			throw new IllegalArgumentException(
-					format("Entity [%s] doesn't have an id attribute", entityType.getName()));
+					format("Entity [%s] doesn't have an id attribute", entityType.getFullyQualifiedName()));
 		}
 		set(idAttr.getName(), id);
 	}
@@ -163,26 +163,26 @@ public class DynamicEntity implements Entity
 		return (Entity) get(attrName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> E getEntity(String attrName, Class<E> clazz)
 	{
-		//noinspection unchecked
 		return (E) get(attrName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<Entity> getEntities(String attrName)
 	{
 		Object value = get(attrName);
-		//noinspection unchecked
 		return value != null ? (Iterable<Entity>) value : emptyList();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attrName, Class<E> clazz)
 	{
 		Object value = get(attrName);
-		//noinspection unchecked
 		return value != null ? (Iterable<E>) value : emptyList();
 	}
 
@@ -308,7 +308,7 @@ public class DynamicEntity implements Entity
 	@Override
 	public String toString()
 	{
-		StringBuilder strBuilder = new StringBuilder(entityType.getName()).append('{');
+		StringBuilder strBuilder = new StringBuilder(entityType.getFullyQualifiedName()).append('{');
 		strBuilder.append(stream(entityType.getAtomicAttributes().spliterator(), false).map(attr ->
 		{
 			StringBuilder attrStrBuilder = new StringBuilder(attr.getName()).append('=');

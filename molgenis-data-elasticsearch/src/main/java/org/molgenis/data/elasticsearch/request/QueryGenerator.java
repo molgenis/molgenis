@@ -1,22 +1,32 @@
 package org.molgenis.data.elasticsearch.request;
 
-import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.*;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.MolgenisDateFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.index.MappingsBuilder.FIELD_NOT_ANALYZED;
 
 /**
  * Creates Elasticsearch query from MOLGENIS query
@@ -24,6 +34,14 @@ import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DE
 public class QueryGenerator implements QueryPartGenerator
 {
 	static final String ATTRIBUTE_SEPARATOR = ".";
+
+	private final DocumentIdGenerator documentIdGenerator;
+
+	public QueryGenerator(DocumentIdGenerator documentIdGenerator)
+	{
+
+		this.documentIdGenerator = requireNonNull(documentIdGenerator);
+	}
 
 	@Override
 	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityType entityType)
@@ -68,6 +86,7 @@ public class QueryGenerator implements QueryPartGenerator
 					Operator occurOperator = occurQueryRule.getOperator();
 					if (occurOperator == null) throw new MolgenisQueryException("Missing expected occur operator");
 
+					//noinspection EnumSwitchStatementWhichMissesCases
 					switch (occurOperator)
 					{
 						case AND:
@@ -79,7 +98,6 @@ public class QueryGenerator implements QueryPartGenerator
 							}
 							occur = occurOperator;
 							break;
-						// $CASES-OMITTED$
 						default:
 							throw new MolgenisQueryException(
 									"Expected query occur operator instead of [" + occurOperator + "]");
@@ -90,6 +108,7 @@ public class QueryGenerator implements QueryPartGenerator
 				if (queryPartBuilder == null) continue; // skip SHOULD and DIS_MAX query rules
 
 				// add query part to query
+				//noinspection EnumSwitchStatementWhichMissesCases
 				switch (occur)
 				{
 					case AND:
@@ -101,7 +120,6 @@ public class QueryGenerator implements QueryPartGenerator
 					case NOT:
 						boolQuery.mustNot(queryPartBuilder);
 						break;
-					// $CASES-OMITTED$
 					default:
 						throw new MolgenisQueryException("Unknown occurence operator [" + occur + "]");
 				}
@@ -111,585 +129,573 @@ public class QueryGenerator implements QueryPartGenerator
 		return queryBuilder;
 	}
 
-	/**
-	 * Create query clause for query rule
-	 *
-	 * @param queryRule
-	 * @param entityType
-	 * @return query class or null for SHOULD and DIS_MAX query rules
-	 */
-	@SuppressWarnings("unchecked")
 	private QueryBuilder createQueryClause(QueryRule queryRule, EntityType entityType)
 	{
-		// create query rule
-		String queryField = queryRule.getField();
 		Operator queryOperator = queryRule.getOperator();
-		Object queryValue = queryRule.getValue();
-
-		QueryBuilder queryBuilder;
-
 		switch (queryOperator)
 		{
+			case DIS_MAX:
+				return createQueryClauseDisMax(queryRule, entityType);
+			case EQUALS:
+				return createQueryClauseEquals(queryRule, entityType);
+			case FUZZY_MATCH:
+				return createQueryClauseFuzzyMatch(queryRule, entityType);
+			case FUZZY_MATCH_NGRAM:
+				return createQueryClauseFuzzyMatchNgram(queryRule, entityType);
+			case GREATER:
+			case GREATER_EQUAL:
+			case LESS:
+			case LESS_EQUAL:
+				return createQueryClauseRangeOpen(queryRule, entityType);
+			case IN:
+				return createQueryClauseIn(queryRule, entityType);
+			case LIKE:
+				return createQueryClauseLike(queryRule, entityType);
+			case NESTED:
+				return createQueryClauseNested(queryRule, entityType);
+			case RANGE:
+				return createQueryClauseRangeClosed(queryRule, entityType);
+			case SEARCH:
+				return createQueryClauseSearch(queryRule, entityType);
+			case SHOULD:
+				return createQueryClauseShould(queryRule, entityType);
 			case AND:
 			case OR:
 			case NOT:
-				throw new MolgenisQueryException("Unexpected query operator [" + queryOperator + ']');
-			case SHOULD:
-				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-				for (QueryRule subQuery : queryRule.getNestedRules())
-				{
-					boolQueryBuilder.should(createQueryClause(subQuery, entityType));
-				}
-				queryBuilder = boolQueryBuilder;
-				break;
-			case DIS_MAX:
-				DisMaxQueryBuilder disMaxQueryBuilder = QueryBuilders.disMaxQuery();
-				for (QueryRule subQuery : queryRule.getNestedRules())
-				{
-					disMaxQueryBuilder.add(createQueryClause(subQuery, entityType));
-				}
-				disMaxQueryBuilder.tieBreaker((float) 0.0);
-				if (queryRule.getValue() != null)
-				{
-					disMaxQueryBuilder.boost(Float.parseFloat(queryRule.getValue().toString()));
-				}
-				queryBuilder = disMaxQueryBuilder;
-				break;
-			case EQUALS:
-			{
-				// As a general rule, filters should be used instead of queries:
-				// - for binary yes/no searches
-				// - for queries on exact values
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValue instanceof Date)
-				{
-					String[] attributePath = parseAttributePath(queryField);
-
-					Attribute attr = getAttribute(entityType, attributePath);
-					queryValue = getESDateQueryValue((Date) queryValue, attr);
-				}
-
-				FilterBuilder filterBuilder;
-				String[] attributePath = parseAttributePath(queryField);
-				Attribute attr = getAttribute(entityType, attributePath);
-
-				// construct query part
-				if (queryValue != null)
-				{
-					AttributeType attrType = attr.getDataType();
-					switch (attrType)
-					{
-						case BOOL:
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case INT:
-						case LONG:
-						{
-							filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
-							filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-							break;
-						}
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-						{
-							filterBuilder = FilterBuilders
-									.termFilter(queryField + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
-							filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-							break;
-						}
-						case CATEGORICAL:
-						case CATEGORICAL_MREF:
-						case XREF:
-						case MREF:
-						case FILE:
-						case ONE_TO_MANY:
-						{
-							if (attributePath.length > 1)
-								throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-
-							// support both entity as entity id as value
-							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue)
-									.getIdValue() : queryValue;
-
-							Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
-							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
-
-							filterBuilder = FilterBuilders
-									.nestedFilter(queryField, FilterBuilders.termFilter(indexFieldName, queryIdValue));
-							break;
-						}
-						case COMPOUND:
-							throw new MolgenisQueryException(
-									format("Illegal attribute type [%s]", attrType.toString()));
-						default:
-							throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
-					}
-				}
-				else
-				{
-					AttributeType dataType = attr.getDataType();
-					switch (dataType)
-					{
-						case BOOL:
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case INT:
-						case LONG:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-							filterBuilder = FilterBuilders.missingFilter(queryField).existence(true).nullValue(true);
-							break;
-						case CATEGORICAL:
-						case CATEGORICAL_MREF:
-						case FILE:
-						case MREF:
-						case XREF:
-							Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
-							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
-
-							// see https://github.com/elastic/elasticsearch/issues/3495
-							filterBuilder = FilterBuilders.notFilter(FilterBuilders
-									.nestedFilter(queryField, FilterBuilders.existsFilter(indexFieldName)));
-							break;
-						case COMPOUND:
-							throw new MolgenisQueryException(
-									"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
-
-					}
-				}
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-				break;
-			}
-			case GREATER:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityType);
-
-				String[] attributePath = parseAttributePath(queryField);
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValue instanceof Date)
-				{
-					Attribute attr = getAttribute(entityType, attributePath);
-					queryValue = getESDateQueryValue((Date) queryValue, attr);
-				}
-
-				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gt(queryValue);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-
-				break;
-			}
-			case GREATER_EQUAL:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityType);
-
-				String[] attributePath = parseAttributePath(queryField);
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValue instanceof Date)
-				{
-					Attribute attr = getAttribute(entityType, attributePath);
-					queryValue = getESDateQueryValue((Date) queryValue, attr);
-				}
-				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-
-				break;
-			}
-			case IN:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				if (!(queryValue instanceof Iterable<?>))
-				{
-					throw new MolgenisQueryException(
-							"Query value must be a Iterable instead of [" + queryValue.getClass().getSimpleName()
-									+ "]");
-				}
-				Iterable<?> iterable = (Iterable<?>) queryValue;
-
-				String[] attributePath = parseAttributePath(queryField);
-				Attribute attr = getAttribute(entityType, attributePath);
-				AttributeType dataType = attr.getDataType();
-
-				FilterBuilder filterBuilder;
-				switch (dataType)
-				{
-					case BOOL:
-					case DATE:
-					case DATE_TIME:
-					case DECIMAL:
-					case EMAIL:
-					case ENUM:
-					case HTML:
-					case HYPERLINK:
-					case INT:
-					case LONG:
-					case SCRIPT:
-					case STRING:
-					case TEXT:
-						// note: inFilter expects array, not iterable
-						filterBuilder = FilterBuilders
-								.inFilter(getFieldName(attr, queryField), Iterables.toArray(iterable, Object.class));
-						filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-						break;
-					case CATEGORICAL:
-					case CATEGORICAL_MREF:
-					case MREF:
-					case XREF:
-					case FILE:
-						if (attributePath.length > 1)
-							throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-
-						// support both entity iterable as entity id iterable as value
-						Iterable<Object> idValues;
-						if (isEntityIterable(iterable))
-						{
-							idValues = Iterables.transform((Iterable<Entity>) iterable, Entity::getIdValue);
-						}
-						else
-						{
-							idValues = (Iterable<Object>) iterable;
-						}
-
-						// note: inFilter expects array, not iterable
-						filterBuilder = FilterBuilders.nestedFilter(queryField, FilterBuilders.inFilter(
-								getXRefEqualsInSearchFieldName(attr.getRefEntity().getIdAttribute(), queryField),
-								Iterables.toArray(idValues, Object.class)));
-						break;
-					case COMPOUND:
-						throw new MolgenisQueryException(
-								"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-					default:
-						throw new RuntimeException("Unknown data type [" + dataType + "]");
-				}
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-				break;
-			}
-			case LESS:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityType);
-
-				String[] attributePath = parseAttributePath(queryField);
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValue instanceof Date)
-				{
-					Attribute attr = getAttribute(entityType, attributePath);
-					queryValue = getESDateQueryValue((Date) queryValue, attr);
-				}
-				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-				break;
-			}
-			case LESS_EQUAL:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityType);
-
-				String[] attributePath = parseAttributePath(queryField);
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValue instanceof Date)
-				{
-					Attribute attr = getAttribute(entityType, attributePath);
-					queryValue = getESDateQueryValue((Date) queryValue, attr);
-				}
-				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-				break;
-			}
-			case RANGE:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				if (!(queryValue instanceof Iterable<?>))
-				{
-					throw new MolgenisQueryException(
-							"Query value must be a Iterable instead of [" + queryValue.getClass().getSimpleName()
-									+ "]");
-				}
-				Iterable<?> iterable = (Iterable<?>) queryValue;
-
-				validateNumericalQueryField(queryField, entityType);
-
-				Iterator<?> iterator = iterable.iterator();
-
-				String[] attributePath = parseAttributePath(queryField);
-				Attribute attr = getAttribute(entityType, attributePath);
-
-				Object queryValueFrom = iterator.next();
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValueFrom instanceof Date)
-				{
-					queryValueFrom = getESDateQueryValue((Date) queryValueFrom, attr);
-				}
-
-				Object queryValueTo = iterator.next();
-
-				// Workaround for Elasticsearch Date to String conversion issue
-				if (queryValueTo instanceof Date)
-				{
-					queryValueTo = getESDateQueryValue((Date) queryValueTo, attr);
-				}
-
-				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValueFrom)
-						.lte(queryValueTo);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-				break;
-			}
-			case NESTED:
-				List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
-				if (nestedQueryRules == null || nestedQueryRules.isEmpty())
-				{
-					throw new MolgenisQueryException("Missing nested rules for nested query");
-				}
-				queryBuilder = createQueryBuilder(nestedQueryRules, entityType);
-				break;
-			case LIKE:
-			{
-				String[] attributePath = parseAttributePath(queryField);
-				Attribute attr = getAttribute(entityType, attributePath);
-
-				// construct query part
-				AttributeType dataType = attr.getDataType();
-				switch (dataType)
-				{
-					case BOOL:
-					case DATE:
-					case DATE_TIME:
-					case DECIMAL:
-					case COMPOUND:
-					case INT:
-					case LONG:
-						throw new MolgenisQueryException(
-								"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-					case CATEGORICAL:
-					case CATEGORICAL_MREF:
-					case MREF:
-					case XREF:
-					case FILE:
-					case SCRIPT: // due to size would result in large amount of ngrams
-					case TEXT: // due to size would result in large amount of ngrams
-					case HTML: // due to size would result in large amount of ngrams
-						throw new UnsupportedOperationException(
-								"Query with operator [" + queryOperator + "] and data type [" + dataType
-										+ "] not supported");
-					case EMAIL:
-					case ENUM:
-					case HYPERLINK:
-					case STRING:
-						queryBuilder = QueryBuilders
-								.matchQuery(queryField + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue)
-								.analyzer(DEFAULT_ANALYZER);
-						queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
-						break;
-					default:
-						throw new RuntimeException("Unknown data type [" + dataType + "]");
-				}
-				break;
-			}
-			case SEARCH:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-
-				// 1. attribute: search in attribute
-				// 2. no attribute: search in all
-				if (queryField == null)
-				{
-					queryBuilder = QueryBuilders.matchPhraseQuery("_all", queryValue).slop(10);
-				}
-				else
-				{
-					String[] attributePath = parseAttributePath(queryField);
-
-					Attribute attr = getAttribute(entityType, attributePath);
-
-					// construct query part
-					AttributeType dataType = attr.getDataType();
-					switch (dataType)
-					{
-						case BOOL:
-							throw new MolgenisQueryException(
-									"Cannot execute search query on [" + dataType + "] attribute");
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case INT:
-						case LONG:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-							queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
-							queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
-							break;
-						case CATEGORICAL:
-						case CATEGORICAL_MREF:
-						case MREF:
-						case XREF:
-						case FILE:
-							if (attributePath.length > 1)
-								throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-
-							queryBuilder = QueryBuilders.nestedQuery(queryField,
-									QueryBuilders.matchQuery(queryField + '.' + "_all", queryValue));
-							break;
-						case COMPOUND:
-							throw new MolgenisQueryException(
-									"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
-					}
-
-				}
-
-				break;
-			}
-			case FUZZY_MATCH:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-
-				if (queryField == null)
-				{
-					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
-				}
-				else
-				{
-					Attribute attr = entityType.getAttribute(queryField);
-					if (attr == null) throw new UnknownAttributeException(queryField);
-					// construct query part
-					AttributeType dataType = attr.getDataType();
-					switch (dataType)
-					{
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case INT:
-						case LONG:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-							queryBuilder = QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")");
-							break;
-						case MREF:
-						case XREF:
-						case CATEGORICAL:
-						case CATEGORICAL_MREF:
-						case FILE:
-							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
-							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
-									QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
-									.scoreMode("max");
-							break;
-						case BOOL:
-						case COMPOUND:
-							throw new MolgenisQueryException(
-									"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
-					}
-				}
-				break;
-			}
-			case FUZZY_MATCH_NGRAM:
-			{
-				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-
-				if (queryField == null)
-				{
-					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
-				}
-				else
-				{
-					Attribute attr = entityType.getAttribute(queryField);
-					if (attr == null) throw new UnknownAttributeException(queryField);
-					// construct query part
-					AttributeType dataType = attr.getDataType();
-					switch (dataType)
-					{
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case INT:
-						case LONG:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-							queryField = queryField + ".ngram";
-							queryBuilder = QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")");
-							break;
-						case MREF:
-						case XREF:
-							queryField =
-									attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName() + ".ngram";
-							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
-									QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
-									.scoreMode("max");
-							break;
-						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
-					}
-				}
-				break;
-			}
+				throw new MolgenisQueryException(format("Unexpected query operator [%s]", queryOperator.toString()));
 			default:
-				throw new MolgenisQueryException("Unknown query operator [" + queryOperator + "]");
+				throw new MolgenisQueryException(format("Unknown query operator [%s]", queryOperator.toString()));
+		}
+	}
+
+	private QueryBuilder createQueryClauseDisMax(QueryRule queryRule, EntityType entityType)
+	{
+		DisMaxQueryBuilder disMaxQueryBuilder = QueryBuilders.disMaxQuery();
+		for (QueryRule nestedQueryRule : queryRule.getNestedRules())
+		{
+			disMaxQueryBuilder.add(createQueryClause(nestedQueryRule, entityType));
+		}
+		disMaxQueryBuilder.tieBreaker((float) 0.0);
+		if (queryRule.getValue() != null)
+		{
+			disMaxQueryBuilder.boost(Float.parseFloat(queryRule.getValue().toString()));
+		}
+		return disMaxQueryBuilder;
+	}
+
+	private QueryBuilder createQueryClauseEquals(QueryRule queryRule, EntityType entityType)
+	{
+		FilterBuilder filterBuilder;
+		if (queryRule.getValue() != null)
+		{
+			filterBuilder = createQueryClauseEqualsValue(queryRule, entityType);
+		}
+		else
+		{
+			filterBuilder = createQueryClauseEqualsNoValue(queryRule, entityType);
+		}
+		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+	}
+
+	private FilterBuilder createQueryClauseEqualsValue(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+		Object queryValue = getQueryValue(attr, queryRule.getValue());
+
+		String fieldName = getQueryFieldName(attributePath);
+		AttributeType attrType = attr.getDataType();
+		switch (attrType)
+		{
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				if (useNotAnalyzedField(attr))
+				{
+					fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
+				}
+				return nestedFilterBuilder(attributePath, FilterBuilders.termFilter(fieldName, queryValue));
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case XREF:
+			case MREF:
+			case FILE:
+			case ONE_TO_MANY:
+				if (attributePath.size() > 1)
+				{
+					throw new MolgenisQueryException("Can not filter on references deeper than 1.");
+				}
+
+				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
+				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
+				String indexFieldName = getQueryFieldName(refAttributePath);
+				if (useNotAnalyzedField(refIdAttr))
+				{
+					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
+				}
+				return FilterBuilders.nestedFilter(fieldName, FilterBuilders.termFilter(indexFieldName, queryValue));
+			case COMPOUND:
+				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	private FilterBuilder createQueryClauseEqualsNoValue(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+
+		String fieldName = getQueryFieldName(attributePath);
+		Attribute attr = attributePath.get(0);
+		AttributeType attrType = attr.getDataType();
+		switch (attrType)
+		{
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				return FilterBuilders.missingFilter(fieldName).existence(true).nullValue(true);
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case FILE:
+			case MREF:
+			case ONE_TO_MANY:
+			case XREF:
+				if (attributePath.size() > 1)
+				{
+					throw new MolgenisQueryException("Can not filter on references deeper than 1.");
+				}
+
+				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
+				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
+				String indexFieldName = getQueryFieldName(refAttributePath);
+
+				// see https://github.com/elastic/elasticsearch/issues/3495
+				return FilterBuilders
+						.notFilter(FilterBuilders.nestedFilter(fieldName, FilterBuilders.existsFilter(indexFieldName)));
+			case COMPOUND:
+				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	private QueryBuilder createQueryClauseFuzzyMatch(QueryRule queryRule, EntityType entityType)
+	{
+		String queryField = queryRule.getField();
+		Object queryValue = queryRule.getValue();
+
+		QueryBuilder queryBuilder;
+		if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+
+		if (queryField == null)
+		{
+			queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+		}
+		else
+		{
+			Attribute attr = entityType.getAttribute(queryField);
+			if (attr == null) throw new UnknownAttributeException(queryField);
+			// construct query part
+			AttributeType dataType = attr.getDataType();
+			switch (dataType)
+			{
+				case DATE:
+				case DATE_TIME:
+				case DECIMAL:
+				case EMAIL:
+				case ENUM:
+				case HTML:
+				case HYPERLINK:
+				case INT:
+				case LONG:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					queryBuilder = QueryBuilders.queryStringQuery(getQueryFieldName(attr) + ":(" + queryValue + ")");
+					break;
+				case MREF:
+				case XREF:
+				case CATEGORICAL:
+				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
+				case FILE:
+					queryField =
+							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute());
+					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
+							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")")).scoreMode("max");
+					break;
+				case BOOL:
+				case COMPOUND:
+					throw new MolgenisQueryException(
+							"Illegal data type [" + dataType + "] for operator [" + Operator.FUZZY_MATCH + "]");
+				default:
+					throw new RuntimeException("Unknown data type [" + dataType + "]");
+			}
 		}
 		return queryBuilder;
 	}
 
-	private String getFieldName(Attribute attr, String queryField)
+	private QueryBuilder createQueryClauseFuzzyMatchNgram(QueryRule queryRule, EntityType entityType)
 	{
-		AttributeType dataType = attr.getDataType();
+		String queryField = queryRule.getField();
+		Object queryValue = queryRule.getValue();
 
+		QueryBuilder queryBuilder;
+		if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+
+		if (queryField == null)
+		{
+			queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+		}
+		else
+		{
+			Attribute attr = entityType.getAttribute(queryField);
+			if (attr == null) throw new UnknownAttributeException(queryField);
+			// construct query part
+			AttributeType dataType = attr.getDataType();
+			switch (dataType)
+			{
+				case DATE:
+				case DATE_TIME:
+				case DECIMAL:
+				case EMAIL:
+				case ENUM:
+				case HTML:
+				case HYPERLINK:
+				case INT:
+				case LONG:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					queryField = getQueryFieldName(attr) + ".ngram";
+					queryBuilder = QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")");
+					break;
+				case MREF:
+				case XREF:
+					queryField =
+							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute())
+									+ ".ngram";
+					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
+							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")")).scoreMode("max");
+					break;
+				default:
+					throw new RuntimeException("Unknown data type [" + dataType + "]");
+			}
+		}
+		return queryBuilder;
+	}
+
+	private QueryBuilder createQueryClauseIn(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+
+		Object queryRuleValue = queryRule.getValue();
+		if (queryRuleValue == null)
+		{
+			throw new MolgenisQueryException("Query value cannot be null");
+		}
+		if (!(queryRuleValue instanceof Iterable<?>))
+		{
+			throw new MolgenisQueryException(
+					"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
+		}
+		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
+				.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
+
+		FilterBuilder filterBuilder;
+		String fieldName = getQueryFieldName(attr);
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
-			case XREF:
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				if (useNotAnalyzedField(attr))
+				{
+					fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
+				}
+				// note: inFilter expects array, not iterable
+				filterBuilder = FilterBuilders.inFilter(fieldName, queryValues);
+				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case MREF:
+			case XREF:
 			case FILE:
-				return queryField;
+			case ONE_TO_MANY:
+				if (attributePath.size() > 1)
+				{
+					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+				}
+
+				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
+				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
+				String indexFieldName = getQueryFieldName(refAttributePath);
+				if (useNotAnalyzedField(refIdAttr))
+				{
+					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
+				}
+				filterBuilder = FilterBuilders.inFilter(indexFieldName, queryValues);
+				filterBuilder = FilterBuilders.nestedFilter(fieldName, filterBuilder);
+				break;
+			case COMPOUND:
+				throw new MolgenisQueryException(
+						"Illegal data type [" + dataType + "] for operator [" + Operator.IN + "]");
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
+		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+	}
+
+	private QueryBuilder createQueryClauseLike(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+		Object queryValue = getQueryValue(attr, queryRule.getValue());
+
+		String fieldName = getQueryFieldName(attributePath);
+		AttributeType attrType = attr.getDataType();
+		switch (attrType)
+		{
+			case EMAIL:
+			case ENUM:
+			case HYPERLINK:
+			case STRING:
+				return nestedQueryBuilder(attributePath,
+						QueryBuilders.matchQuery(fieldName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue)
+								.analyzer(DEFAULT_ANALYZER));
+			case BOOL:
+			case COMPOUND:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case INT:
+			case LONG:
+				throw new MolgenisQueryException(format("Illegal data type [%s] for operator [%s]", attrType, LIKE));
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case FILE:
+			case HTML: // due to size would result in large amount of ngrams
+			case MREF:
+			case ONE_TO_MANY:
+			case SCRIPT: // due to size would result in large amount of ngrams
+			case TEXT: // due to size would result in large amount of ngrams
+			case XREF:
+				throw new UnsupportedOperationException(
+						format("Unsupported data type [%s] for operator [%s]", attrType, LIKE));
+			default:
+				throw new RuntimeException("Unknown data type [" + attrType + "]");
+		}
+	}
+
+	private QueryBuilder createQueryClauseNested(QueryRule queryRule, EntityType entityType)
+	{
+		List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
+		if (nestedQueryRules == null || nestedQueryRules.isEmpty())
+		{
+			throw new MolgenisQueryException("Missing nested rules for nested query");
+		}
+		return createQueryBuilder(nestedQueryRules, entityType);
+	}
+
+	private QueryBuilder createQueryClauseRangeClosed(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+		validateNumericalQueryField(attr);
+		String fieldName = getQueryFieldName(attributePath);
+
+		Object queryValue = getQueryValue(attr, queryRule.getValue());
+		if (queryValue == null)
+		{
+			throw new MolgenisQueryException("Query value cannot be null");
+		}
+		if (!(queryValue instanceof Iterable<?>))
+		{
+			throw new MolgenisQueryException(
+					format("Query value must be a Iterable instead of [%s]", queryValue.getClass().getSimpleName()));
+		}
+		Iterator<?> queryValuesIterator = ((Iterable<?>) queryValue).iterator();
+		Object queryValueFrom = getQueryValue(attr, queryValuesIterator.next());
+		Object queryValueTo = getQueryValue(attr, queryValuesIterator.next());
+
+		FilterBuilder filterBuilder = FilterBuilders.rangeFilter(fieldName).gte(queryValueFrom).lte(queryValueTo);
+		filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+	}
+
+	private QueryBuilder createQueryClauseRangeOpen(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+		validateNumericalQueryField(attr);
+		String fieldName = getQueryFieldName(attributePath);
+
+		Object queryValue = getQueryValue(attr, queryRule.getValue());
+		if (queryValue == null)
+		{
+			throw new MolgenisQueryException("Query value cannot be null");
+		}
+
+		RangeFilterBuilder filterBuilder = FilterBuilders.rangeFilter(fieldName);
+		Operator operator = queryRule.getOperator();
+		switch (operator)
+		{
+			case GREATER:
+				filterBuilder = filterBuilder.gt(queryValue);
+				break;
+			case GREATER_EQUAL:
+				filterBuilder = filterBuilder.gte(queryValue);
+				break;
+			case LESS:
+				filterBuilder = filterBuilder.lt(queryValue);
+				break;
+			case LESS_EQUAL:
+				filterBuilder = filterBuilder.lte(queryValue);
+				break;
+			case AND:
+			case DIS_MAX:
+			case EQUALS:
+			case FUZZY_MATCH:
+			case FUZZY_MATCH_NGRAM:
+			case IN:
+			case LIKE:
+			case NESTED:
+			case NOT:
+			case OR:
+			case RANGE:
+			case SEARCH:
+			case SHOULD:
+				throw new MolgenisQueryException(format("Illegal query rule operator [%s]", operator.toString()));
+			default:
+				throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
+		}
+
+		return QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), nestedFilterBuilder(attributePath, filterBuilder));
+	}
+
+	private QueryBuilder createQueryClauseSearch(QueryRule queryRule, EntityType entityType)
+	{
+		if (queryRule.getValue() == null)
+		{
+			throw new MolgenisQueryException("Query value cannot be null");
+		}
+
+		if (queryRule.getField() == null)
+		{
+			return createQueryClauseSearchAll(queryRule);
+		}
+		else
+		{
+			return createQueryClauseSearchAttribute(queryRule, entityType);
+		}
+	}
+
+	private QueryBuilder createQueryClauseSearchAll(QueryRule queryRule)
+	{
+		return QueryBuilders.matchPhraseQuery("_all", queryRule.getValue()).slop(10);
+	}
+
+	private QueryBuilder createQueryClauseSearchAttribute(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+		Object queryValue = getQueryValue(attr, queryRule.getValue());
+
+		String fieldName = getQueryFieldName(attributePath);
+		AttributeType dataType = attr.getDataType();
+		switch (dataType)
+		{
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				return nestedQueryBuilder(attributePath, QueryBuilders.matchQuery(fieldName, queryValue));
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case MREF:
+			case ONE_TO_MANY:
+			case XREF:
+			case FILE:
+				if (attributePath.size() > 1)
+				{
+					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+				}
+				return QueryBuilders
+						.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue));
+			case BOOL:
+				throw new MolgenisQueryException("Cannot execute search query on [" + dataType + "] attribute");
+			case COMPOUND:
+				throw new MolgenisQueryException(
+						"Illegal data type [" + dataType + "] for operator [" + Operator.SEARCH + "]");
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
+	}
+
+	private QueryBuilder createQueryClauseShould(QueryRule queryRule, EntityType entityType)
+	{
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		for (QueryRule subQuery : queryRule.getNestedRules())
+		{
+			boolQueryBuilder.should(createQueryClause(subQuery, entityType));
+		}
+		return boolQueryBuilder;
+	}
+
+	private boolean useNotAnalyzedField(Attribute attr)
+	{
+		AttributeType attrType = attr.getDataType();
+		switch (attrType)
+		{
 			case BOOL:
 			case DATE:
 			case DATE_TIME:
 			case DECIMAL:
 			case INT:
 			case LONG:
-				return queryField;
+				return false;
 			case EMAIL:
 			case ENUM:
 			case HTML:
@@ -697,25 +703,24 @@ public class QueryGenerator implements QueryPartGenerator
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				return new StringBuilder(queryField).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED).toString();
+				return true;
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case XREF:
+			case MREF:
+			case FILE:
+			case ONE_TO_MANY:
+				return useNotAnalyzedField(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
-				throw new MolgenisQueryException("Illegal data type [" + dataType + "] not supported");
+				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 	}
 
-	private String getXRefEqualsInSearchFieldName(Attribute refIdAttr, String queryField)
+	private void validateNumericalQueryField(Attribute attr)
 	{
-		String indexFieldName = queryField + '.' + refIdAttr.getName();
-		return getFieldName(refIdAttr, indexFieldName);
-	}
-
-	private void validateNumericalQueryField(String queryField, EntityType entityType)
-	{
-		String[] attributePath = parseAttributePath(queryField);
-
-		AttributeType dataType = getAttribute(entityType, attributePath).getDataType();
+		AttributeType dataType = attr.getDataType();
 
 		switch (dataType)
 		{
@@ -735,6 +740,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case HTML:
 			case HYPERLINK:
 			case MREF:
+			case ONE_TO_MANY:
 			case SCRIPT:
 			case STRING:
 			case TEXT:
@@ -745,31 +751,47 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	private boolean isEntityIterable(Iterable<?> iterable)
+	private List<Attribute> getAttributePath(String queryRuleField, EntityType entityType)
 	{
-		Iterator<?> it = iterable.iterator();
-		boolean isEntity = it.hasNext() && (it.next() instanceof Entity);
-		return isEntity;
-	}
+		String[] queryRuleFieldTokens = queryRuleField.split("\\" + ATTRIBUTE_SEPARATOR);
+		List<Attribute> attributePath = new ArrayList<>(queryRuleFieldTokens.length);
+		EntityType entityTypeAtCurrentDepth = entityType;
+		for (int depth = 0; depth < queryRuleFieldTokens.length; ++depth)
+		{
+			Attribute attribute = entityTypeAtCurrentDepth.getAttribute(queryRuleFieldTokens[depth]);
+			if (attribute == null)
+			{
+				throw new UnknownAttributeException(format("Unknown attribute [%s]", queryRuleFieldTokens[depth]));
+			}
+			attributePath.add(attribute);
 
-	private String[] parseAttributePath(String queryField)
-	{
-		return queryField.split("\\" + ATTRIBUTE_SEPARATOR);
+			if (depth + 1 < queryRuleFieldTokens.length)
+			{
+				entityTypeAtCurrentDepth = attribute.getRefEntity();
+				if (entityTypeAtCurrentDepth == null)
+				{
+					throw new MolgenisQueryException(
+							format("Invalid query field [%s]: attribute [%s] does not refer to another entity",
+									queryRuleField, attribute.getName()));
+				}
+			}
+		}
+		return attributePath;
 	}
 
 	/**
 	 * Wraps the filter in a nested filter when a query is done on a reference entity. Returns the original filter when
 	 * it is applied to the current entity.
 	 */
-	private FilterBuilder nestedFilterBuilder(String[] attributePath, FilterBuilder filterBuilder)
+	private FilterBuilder nestedFilterBuilder(List<Attribute> attributePath, FilterBuilder filterBuilder)
 	{
-		if (attributePath.length == 1)
+		if (attributePath.size() == 1)
 		{
 			return filterBuilder;
 		}
-		else if (attributePath.length == 2)
+		else if (attributePath.size() == 2)
 		{
-			return FilterBuilders.nestedFilter(attributePath[0], filterBuilder);
+			return FilterBuilders.nestedFilter(getQueryFieldName(attributePath.get(0)), filterBuilder);
 		}
 		else
 		{
@@ -781,15 +803,15 @@ public class QueryGenerator implements QueryPartGenerator
 	 * Wraps the query in a nested query when a query is done on a reference entity. Returns the original query when it
 	 * is applied to the current entity.
 	 */
-	private QueryBuilder nestedQueryBuilder(String[] attributePath, QueryBuilder queryBuilder)
+	private QueryBuilder nestedQueryBuilder(List<Attribute> attributePath, QueryBuilder queryBuilder)
 	{
-		if (attributePath.length == 1)
+		if (attributePath.size() == 1)
 		{
 			return queryBuilder;
 		}
-		else if (attributePath.length == 2)
+		else if (attributePath.size() == 2)
 		{
-			return QueryBuilders.nestedQuery(attributePath[0], queryBuilder);
+			return QueryBuilders.nestedQuery(getQueryFieldName(attributePath.get(0)), queryBuilder);
 		}
 		else
 		{
@@ -797,30 +819,93 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	/**
-	 * Returns the target attribute. Looks in the reference entity when it is a nested query.
-	 */
-	private Attribute getAttribute(EntityType entityType, String[] attributePath)
+	private String getFieldName(QueryRule queryRule, EntityType entityType)
 	{
-		if (attributePath.length > 2)
-			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-		if (attributePath.length == 0) throw new MolgenisQueryException("Attribute path length is 0!");
-
-		if (attributePath.length == 1)
+		String queryRuleFieldName = queryRule.getField();
+		if (queryRuleFieldName == null)
 		{
-			Attribute attr = entityType.getAttribute(attributePath[0]);
-			if (attr == null) throw new UnknownAttributeException(attributePath[0]);
-			return attr;
+			return null;
 		}
-		else
+
+		StringBuilder fieldNameBuilder = new StringBuilder();
+		String[] queryRuleFieldNameTokens = StringUtils.split(queryRuleFieldName, '.');
+		EntityType entityTypeAtDepth = entityType;
+		for (int depth = 0; depth < queryRuleFieldNameTokens.length; ++depth)
 		{
-			Attribute attr = entityType.getAttribute(attributePath[0]);
-			if (attr == null) throw new UnknownAttributeException(attributePath[0]);
+			String attrName = queryRuleFieldNameTokens[depth];
+			Attribute attr = entityTypeAtDepth.getAttribute(attrName);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException(
+						format("Unknown attribute [%s] of entity type [%s]", attrName, entityTypeAtDepth.getFullyQualifiedName()));
+			}
+			if (depth > 0)
+			{
+				fieldNameBuilder.append(ATTRIBUTE_SEPARATOR);
+			}
+			fieldNameBuilder.append(getQueryFieldName(attr));
 
-			attr = attr.getRefEntity().getAttribute(attributePath[1]);
-			if (attr == null) throw new UnknownAttributeException(attributePath[0] + "." + attributePath[1]);
+			if (depth < queryRuleFieldNameTokens.length - 1)
+			{
+				entityTypeAtDepth = attr.getRefEntity();
+			}
+		}
+		return fieldNameBuilder.toString();
+	}
 
-			return attr;
+	private String getQueryFieldName(List<Attribute> attributePath)
+	{
+		return attributePath.stream().map(this::getQueryFieldName).collect(joining(ATTRIBUTE_SEPARATOR));
+	}
+
+	private String getQueryFieldName(Attribute attribute)
+	{
+		return documentIdGenerator.generateId(attribute);
+	}
+
+	private Object getQueryValue(Attribute attribute, Object queryRuleValue)
+	{
+		AttributeType attrType = attribute.getDataType();
+		switch (attrType)
+		{
+			case BOOL:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				return queryRuleValue;
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case FILE:
+			case MREF:
+			case ONE_TO_MANY:
+			case XREF:
+				return queryRuleValue instanceof Entity ? ((Entity) queryRuleValue).getIdValue() : queryRuleValue;
+			case DATE:
+			case DATE_TIME:
+				if (queryRuleValue instanceof Date)
+				{
+					return getESDateQueryValue((Date) queryRuleValue, attribute);
+				}
+				else if (queryRuleValue instanceof String)
+				{
+					return queryRuleValue;
+				}
+				else
+				{
+					throw new MolgenisQueryException(format("Query value must be of type Date instead of [%s]",
+							queryRuleValue.getClass().getSimpleName()));
+				}
+			case COMPOUND:
+				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 	}
 

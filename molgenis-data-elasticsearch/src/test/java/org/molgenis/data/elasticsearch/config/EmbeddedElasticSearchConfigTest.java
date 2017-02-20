@@ -8,6 +8,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.converter.SourceToEntityConverter;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.jobs.JobExecutionUpdater;
@@ -96,6 +97,12 @@ public class EmbeddedElasticSearchConfigTest
 		public IndexActionRegisterService indexActionRegisterService()
 		{
 			return mock(IndexActionRegisterServiceImpl.class);
+		}
+
+		@Bean
+		public DocumentIdGenerator documentIdGenerator()
+		{
+			return mock(DocumentIdGenerator.class);
 		}
 	}
 

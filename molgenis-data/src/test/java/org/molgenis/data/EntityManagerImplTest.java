@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static freemarker.template.utility.Collections12.singletonList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
@@ -62,7 +62,7 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesNoFetch()
 	{
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 
 		Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
 		Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
@@ -75,7 +75,7 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesStreamNoFetch()
 	{
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("labelAttr").getMock();
 		when(labelAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getLabelAttribute()).thenReturn(labelAttr);

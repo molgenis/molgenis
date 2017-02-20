@@ -43,6 +43,11 @@ public enum RepositoryCapability
 	VALIDATE_NOTNULL_CONSTRAINT,
 
 	/**
+	 * Repository can validate if readonly values haven't changed
+	 */
+	VALIDATE_READONLY_CONSTRAINT,
+
+	/**
 	 * Repositoy can be cached in L1 and L2 cache
 	 */
 	CACHEABLE

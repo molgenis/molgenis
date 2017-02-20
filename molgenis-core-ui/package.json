@@ -1,11 +1,11 @@
 {
   "name": "MOLGENIS",
-  "version": "2.1.0-SNAPSHOT",
+  "version": "3.0.0-SNAPSHOT",
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
     "watch": "webpack -d --watch",
     "build": "webpack -d",
-    "test": "echo skipping tests....",
+    "test": "cross-env NODE_ENV=test babel-node ./src/test/javascript/index.js",
     "webpack-stats": "webpack --profile --json > target/json.stats"
   },
   "repository": {
@@ -33,8 +33,10 @@
     "jquery-validation": "1.14.0",
     "jquery.cookie": "^1.4.1",
     "jquery.fancytree": "2.14.0",
+    "mdurl": "^1.0.1",
     "moment": "2.11.2",
     "moment-duration-format": "^1.3.0",
+    "pegjs": "^0.10.0",
     "promise": "^6.1.0",
     "react": "0.13.3",
     "react-notification-system": "^0.1.17",
@@ -53,6 +55,7 @@
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "^6.3.13",
+    "cross-env": "^3.1.4",
     "css-loader": "^0.23.1",
     "expect": "^1.6.0",
     "express": "^4.13.3",
@@ -78,6 +81,25 @@
       "react",
       "es2015",
       "stage-0"
-    ]
+    ],
+    "env": {
+      "test": {
+        "plugins": [
+          [
+            "babel-plugin-module-alias",
+            [
+              {
+                "src": "./src/main/javascript/modules/react-components",
+                "expose": "react-components"
+              },
+              {
+                "src": "./src/main/javascript/modules/rest-client",
+                "expose": "rest-client"
+              }
+            ]
+          ]
+        ]
+      }
+    }
   }
 }

@@ -12,7 +12,7 @@
 <script>
     $(function () {
         var ProgressBar = React.render(molgenis.ui.jobs.JobContainer({
-            'jobHref': '/api/v1/sys_AnnotationJobExecution/${annotationRun.identifier}'
+            'jobHref': '/api/v1/sys.AnnotationJobExecution/${annotationRun.identifier}'
         }), $('#annotateRun')[0]);
     });
 </script>

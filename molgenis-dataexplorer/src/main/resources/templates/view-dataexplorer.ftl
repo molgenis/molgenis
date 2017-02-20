@@ -15,6 +15,7 @@
 "jquery.molgenis.tree.js",
 "jquery.molgenis.xrefmrefsearch.js",
 "dataexplorer.js",
+"dataexplorer-filter-rsql.js",
 "bootbox.min.js"]>
 
 <@header css js/>
@@ -32,8 +33,8 @@
                             <option value=""></option><#-- Required for placeholder to work with select2 -->
                         <#if entitiesMeta?has_content>
                             <#list entitiesMeta as entityMeta>
-                                <option value="${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)>
-                                        selected</#if>>${entityMeta.simpleName?html}</option>
+                                <option value="${entityMeta.fullyQualifiedName?html}"<#if selectedEntityName?? && (entityMeta.fullyQualifiedName == selectedEntityName)>
+                                        selected</#if>>${entityMeta.name?html}</option>
                             </#list>
                         </#if>
                         </select>

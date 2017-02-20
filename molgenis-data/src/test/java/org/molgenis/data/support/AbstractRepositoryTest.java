@@ -32,7 +32,7 @@ public class AbstractRepositoryTest
 	public void beforeTest()
 	{
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		abstractRepository = Mockito.spy(new AbstractRepository()
 		{
@@ -86,6 +86,7 @@ public class AbstractRepositoryTest
 		abstractRepository.findOneById(Integer.valueOf(0), new Fetch());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void findAllStream()
 	{
@@ -101,6 +102,7 @@ public class AbstractRepositoryTest
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void findAllStreamFetch()
 	{

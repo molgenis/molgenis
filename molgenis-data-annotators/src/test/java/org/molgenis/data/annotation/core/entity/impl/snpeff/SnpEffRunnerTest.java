@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.populate.UuidGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -89,12 +89,12 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	{
 		jarRunner = mock(JarRunnerImpl.class);
 
-		IdGenerator idGenerator = new UuidGenerator();
+		IdGenerator idGenerator = new IdGeneratorImpl();
 
 		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
 				entityTypeFactory, attributeFactory);
 
-		metaDataCanAnnotate = entityTypeFactory.create().setName("test").setSimpleName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setFullyQualifiedName("test").setName("test");
 		Attribute attributeChrom = vcfAttributes.getChromAttribute();
 		Attribute attributePos = vcfAttributes.getPosAttribute();
 		Attribute attributeRef = vcfAttributes.getRefAttribute();
@@ -105,7 +105,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeRef);
 		metaDataCanAnnotate.addAttribute(attributeAlt);
 
-		effectsEMD = entityTypeFactory.create().setSimpleName("test_EFFECTS");
+		effectsEMD = entityTypeFactory.create().setName("test_EFFECTS");
 		effectsEMD.addAttribute(attributeFactory.create().setName("ID").setAuto(true).setVisible(false));
 		effectsEMD.addAttribute(effectsMetaData.getAltAttr());
 		effectsEMD.addAttribute(effectsMetaData.getGeneNameAttr());
@@ -897,14 +897,14 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetOutputMetaData()
 	{
-		EntityType sourceEMD = entityTypeFactory.create().setSimpleName("source");
-		sourceEMD.setPackage(packageFactory.create("package").setName("package"));
+		EntityType sourceEMD = entityTypeFactory.create().setName("source");
+		sourceEMD.setPackage(packageFactory.create("package").setFullyQualifiedName("package"));
 		sourceEMD.setBackend("TestBackend");
 
 		EntityType outputEMD = snpEffRunner.getTargetEntityType(sourceEMD);
 
 		assertEquals(outputEMD.getBackend(), "TestBackend");
-		assertEquals(outputEMD.getName(), "package_source_EFFECTS");
+		assertEquals(outputEMD.getFullyQualifiedName(), "package_source_EFFECTS");
 	}
 
 	@Configuration

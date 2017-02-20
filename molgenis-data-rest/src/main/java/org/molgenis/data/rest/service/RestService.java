@@ -305,7 +305,7 @@ public class RestService
 				{
 					throw new MolgenisDataException(
 							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATETIME));
+									paramStrValue, MolgenisDateFormat.getDateTimeFormat().toPattern()));
 				}
 			}
 			else
@@ -343,7 +343,7 @@ public class RestService
 				{
 					throw new MolgenisDataException(
 							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATE));
+									paramStrValue, MolgenisDateFormat.getDateFormat().toPattern()));
 				}
 			}
 			else
@@ -528,8 +528,8 @@ public class RestService
 			{
 				throw new MolgenisDataException(
 						format("Updating [%s] with id [%s] not allowed: [%s] is already referred to by another [%s]",
-								attr.getRefEntity().getName(), refEntity.getIdValue().toString(), refAttr.getName(),
-								entity.getEntityType().getName()));
+								attr.getRefEntity().getFullyQualifiedName(), refEntity.getIdValue().toString(), refAttr.getName(),
+								entity.getEntityType().getFullyQualifiedName()));
 			}
 
 			refEntity.set(refAttr.getName(), entity);
@@ -555,7 +555,7 @@ public class RestService
 
 		if (!updatedRefEntities.isEmpty())
 		{
-			dataService.update(attr.getRefEntity().getName(), updatedRefEntities.stream());
+			dataService.update(attr.getRefEntity().getFullyQualifiedName(), updatedRefEntities.stream());
 		}
 	}
 }
