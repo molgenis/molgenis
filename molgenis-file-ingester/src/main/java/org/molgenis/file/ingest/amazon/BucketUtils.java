@@ -1,15 +1,18 @@
 package org.molgenis.file.ingest.amazon;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class BucketUtils
 {
@@ -18,36 +21,35 @@ public class BucketUtils
 		return new AmazonS3Client(new ProfileCredentialsProvider(profile).getCredentials());
 	}
 
-	public static void displayTextInputStream(InputStream input) throws IOException
+	public static void uploadFile(AmazonS3 s3client, File file, String bucketName, String keyName)
+			throws AmazonClientException
 	{
-		// Read one text line at a time and display.
-		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-		while (true)
+		System.out.println("Uploading a new object to S3 from a file\n");
+		ObjectMetadata objectMetadata = new ObjectMetadata();
+		// Request server-side encryption.
+		objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
+		PutObjectRequest putRequest = new PutObjectRequest(bucketName, keyName, file);
+		putRequest.setMetadata(objectMetadata);
+
+		s3client.putObject(putRequest);
+
+	}
+
+	public static File downloadFile(AmazonS3 s3Client, File file, String bucketName, String keyName, boolean overwrite)
+			throws IOException, AmazonClientException
+	{
+		S3Object s3Object = s3Client.getObject(new GetObjectRequest(bucketName, keyName));
+		InputStream in = s3Object.getObjectContent();
+		Path path = file.toPath();
+		if (!Files.exists(path) || overwrite)
 		{
-			String line = reader.readLine();
-			if (line == null) break;
-
-			System.out.println("    " + line);
+			if (Files.exists(path)) Files.delete(path);
+			Files.copy(in, path);
 		}
-		System.out.println();
-	}
-
-	public static void handleAmazonClientException(AmazonClientException ace)
-	{
-		System.out.println("Caught an AmazonClientException, which means" + " the client encountered "
-				+ "an internal error while trying to " + "communicate with S3, "
-				+ "such as not being able to access the network.");
-		System.out.println("Error Message: " + ace.getMessage());
-	}
-
-	public static void handleAmazonServiceException(AmazonServiceException ase)
-	{
-		System.out.println("Caught an AmazonServiceException, which" + " means your request made it "
-				+ "to Amazon S3, but was rejected with an error response" + " for some reason.");
-		System.out.println("Error Message:    " + ase.getMessage());
-		System.out.println("HTTP Status Code: " + ase.getStatusCode());
-		System.out.println("AWS Error Code:   " + ase.getErrorCode());
-		System.out.println("Error Type:       " + ase.getErrorType());
-		System.out.println("Request ID:       " + ase.getRequestId());
+		else
+		{
+			throw new FileAlreadyExistsException("The specified file already exists use '-o' to overwrite.");
+		}
+		return path.toFile();
 	}
 }

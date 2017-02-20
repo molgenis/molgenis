@@ -28,13 +28,7 @@ public class FileIngesterConfig
 	public void init()
 	{
 		// Decorate FileIngest repository
-		repositoryDecoratorRegistry.addFactory(FILE_INGEST, new RepositoryDecoratorFactory()
-		{
-			@Override
-			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
-			{
-				return new FileIngestRepositoryDecorator(repository, fileIngesterJobScheduler, dataService);
-			}
-		});
+		repositoryDecoratorRegistry.addFactory(FILE_INGEST,
+				repository -> new FileIngestRepositoryDecorator(repository, fileIngesterJobScheduler, dataService));
 	}
 }

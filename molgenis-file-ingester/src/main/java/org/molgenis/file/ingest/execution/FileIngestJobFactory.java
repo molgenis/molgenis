@@ -8,6 +8,7 @@ import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
+import org.molgenis.file.ingest.meta.FileIngestType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
@@ -58,8 +59,12 @@ public class FileIngestJobFactory
 		String url = fileIngestEntity.getString(FileIngestMetaData.URL);
 		String loader = fileIngestEntity.getString(FileIngestMetaData.LOADER);
 		String failureEmail = fileIngestEntity.getString(FileIngestMetaData.FAILURE_EMAIL);
+		String bucket = fileIngestEntity.getString(FileIngestMetaData.BUCKET);
+		String key = fileIngestEntity.getString(FileIngestMetaData.KEY);
+		String profile = fileIngestEntity.getString(FileIngestMetaData.PROFILE);
+		FileIngestType type = FileIngestType.toEnum(fileIngestEntity.getString(FileIngestMetaData.TYPE));
 
 		return new FileIngestJob(progress, transactionTemplate, runAsAuthentication, fileIngester, targetEntityName,
-				url, loader, failureEmail, fileIngestJobExecution.getIdentifier());
+				url, loader, failureEmail, fileIngestJobExecution.getIdentifier(), bucket, key, profile, type);
 	}
 }

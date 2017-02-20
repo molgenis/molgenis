@@ -13,6 +13,7 @@ import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMeta;
+import org.molgenis.file.ingest.meta.FileIngestType;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +85,8 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT))
 				.thenReturn(report);
 
-		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
+		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com", null, null, null,
+				FileIngestType.DOWNLOAD);
 
 	}
 
@@ -94,7 +96,8 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		Exception e = new RuntimeException();
 		when(fileStoreDownloadMock.downloadFile(url, identifier, entityName + ".csv")).thenThrow(e);
 
-		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
+		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com", null, null, null,
+				FileIngestType.DOWNLOAD);
 	}
 
 	@Configuration

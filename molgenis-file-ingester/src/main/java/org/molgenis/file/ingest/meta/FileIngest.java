@@ -105,7 +105,7 @@ public class FileIngest extends StaticEntity
 	public boolean isActive()
 	{
 		Boolean active = getBoolean(ACTIVE);
-		return active != null ? active.booleanValue() : false;
+		return active != null && active.booleanValue();
 	}
 
 	public void setFailureEmail(String failureEmail)
@@ -116,5 +116,45 @@ public class FileIngest extends StaticEntity
 	public String getFailureEmail()
 	{
 		return getString(FAILURE_EMAIL);
+	}
+
+	public void setBucket(String bucket)
+	{
+		set(BUCKET, bucket);
+	}
+
+	public String getBucket()
+	{
+		return getString(BUCKET);
+	}
+
+	public void setKey(String key)
+	{
+		set(KEY, key);
+	}
+
+	public String getKey()
+	{
+		return getString(KEY);
+	}
+
+	public void setProfile(String profile)
+	{
+		set(PROFILE, profile);
+	}
+
+	public String getProfile()
+	{
+		return getString(PROFILE);
+	}
+
+	public void setType(String type)
+	{
+		set(TYPE, type);
+	}
+
+	public String getType()
+	{
+		return getString(TYPE);
 	}
 }
