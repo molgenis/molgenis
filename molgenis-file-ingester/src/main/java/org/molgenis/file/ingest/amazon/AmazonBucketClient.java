@@ -21,11 +21,6 @@ public class AmazonBucketClient
 	private static final String PROFILE = "profile";
 	private static final String MODE = "mode";
 
-	//	private static String key = "lab1/testfile17feb.txt";
-	//	private static String bucketName = "com.cartagenia.consortium.vkgl";
-	//	private static String keyName = "lab1/testfile17feb.txt";
-	//	private static String uploadFileName = "testfile17feb.txt";
-
 	/*
 	*
 	* Install the amazon web services command line interface Instruction here: https://aws.amazon.com/cli/
