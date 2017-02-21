@@ -34,7 +34,8 @@
             });
         }
 
-        if (attributeMetadata.fieldType === 'CATEGORICAL') {
+        var type = attributeMetadata.fieldType
+        if (type === 'CATEGORICAL' || type === 'CATEGORICAL_MREF' || type === 'MREF' || type === 'XREF') {
             var panel = $('<div class="panel"></div>');
             container.append(panel);
 
