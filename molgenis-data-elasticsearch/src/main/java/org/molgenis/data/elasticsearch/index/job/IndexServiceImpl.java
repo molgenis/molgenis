@@ -96,7 +96,7 @@ public class IndexServiceImpl implements IndexService
 
 	/**
 	 * Cleans up successful IndexJobExecutions that finished longer than five minutes ago.
-	 * dealy for a minute to allow the transaction manager to become available
+	 * delay for a minute to allow the transaction manager to become available
 	 */
 	@Scheduled(initialDelay = 1 * 60 * 1000, fixedRate = 5 * 60 * 1000)
 	public void cleanupJobExecutions()

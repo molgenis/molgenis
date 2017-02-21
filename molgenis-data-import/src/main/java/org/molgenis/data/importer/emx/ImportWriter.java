@@ -423,7 +423,6 @@ public class ImportWriter
 
 		// add or update entity types
 		List<EntityType> entityTypes = newArrayList(concat(updatedEntityTypes, groupedEntityTypes.getNewEntityTypes()));
-		entityTypes.stream().forEach(entity -> System.out.println("c = [" + entity.getName() +"-"+ entity.getId() + "]"));
 		runAsSystem(() -> dataService.getMeta().upsertEntityTypes(entityTypes));
 	}
 

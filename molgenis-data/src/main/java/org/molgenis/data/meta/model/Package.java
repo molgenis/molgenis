@@ -47,10 +47,6 @@ public class Package extends StaticEntity
 		setId(packageId);
 	}
 
-	public void setFullyQualifiedName()
-	{
-	}
-
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityType)})
 	 *
