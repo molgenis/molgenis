@@ -184,10 +184,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 						.collect(Collectors.toList());
 				break;
 			case DATE:
-				convertedValue = value != null ? new Date(parseLong(value.toString())) : null;
+				convertedValue = value != null ? new Date(Double.valueOf(value.toString()).longValue()) : null;
 				break;
 			case DATE_TIME:
-				convertedValue = value != null ? new Timestamp(parseLong(value.toString())) : null;
+				convertedValue = value != null ? new Timestamp(Double.valueOf(value.toString()).longValue()) : null;
 				break;
 			case DECIMAL:
 				convertedValue = value != null ? parseDouble(value.toString()) : null;
