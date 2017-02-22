@@ -12,6 +12,7 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
@@ -57,6 +58,7 @@ public class ImportWriter
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final EntityManager entityManager;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final IdentifierLookupService identifierLookupService;
 
 	/**
 	 * Creates the ImportWriter
@@ -68,13 +70,14 @@ public class ImportWriter
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
 			MolgenisPermissionService molgenisPermissionService, EntityManager entityManager,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.entityManager = requireNonNull(entityManager);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.identifierLookupService = requireNonNull(identifierLookupService);
 	}
 
 	@Transactional
@@ -106,7 +109,8 @@ public class ImportWriter
 		}
 		upsertEntityTypes(groupedEntityTypes);
 
-		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getFullyQualifiedName).forEach(importReport::addNewEntity);
+		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getFullyQualifiedName)
+				.forEach(importReport::addNewEntity);
 	}
 
 	private void validateEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
@@ -134,10 +138,16 @@ public class ImportWriter
 	{
 		return runAsSystem(() ->
 		{
-			Map<String, EntityType> existingEntityTypeMap = dataService
-					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entities.stream().map(EntityType::getFullyQualifiedName),
-							new Fetch().field(EntityTypeMetadata.FULL_NAME), EntityType.class)
-					.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+			for (EntityType entityType : entities)
+			{
+				EntityType existing = dataService.findOne(ENTITY_TYPE_META_DATA,
+						new QueryImpl<EntityType>().eq(EntityTypeMetadata.NAME, entityType.getName()).and()
+								.eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()), EntityType.class);
+				if(existing != null){
+					existingEntityTypeMap.put(entityType.getFullyQualifiedName(),entityType);
+				}
+			}
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
 					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
@@ -225,10 +235,11 @@ public class ImportWriter
 				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getFullyQualifiedName().toLowerCase()
-						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getFullyQualifiedName()
+						.toLowerCase().startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
-					emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName().substring(defaultPackage.length() + 1));
+					emxEntityRepo = source
+							.getRepository(entityType.getFullyQualifiedName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -383,11 +394,18 @@ public class ImportWriter
 
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
-		Map<String, EntityType> existingEntityTypeMap = dataService
-				.findAll(ENTITY_TYPE_META_DATA, updatedEntityTypes.stream().map(EntityType::getFullyQualifiedName), entityTypeFetch,
-						EntityType.class).collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+		for (EntityType entityType : updatedEntityTypes)
+		{
+			EntityType existing = dataService.findOne(ENTITY_TYPE_META_DATA,
+					new QueryImpl<EntityType>().eq(EntityTypeMetadata.NAME, entityType.getName()).and()
+							.eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()), EntityType.class);
+			if(existing != null){
+				existingEntityTypeMap.put(entityType.getFullyQualifiedName(),existing);
+			}
+		}
 
-		// inject attribute identifiers in entity types to import
+		// inject attribute and entityType identifiers in entity types to import
 		updatedEntityTypes.forEach(entityType ->
 		{
 			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
@@ -397,8 +415,10 @@ public class ImportWriter
 				if (existingAttr != null)
 				{
 					ownAttr.setIdentifier(existingAttr.getIdentifier());
+					ownAttr.setEntity(existingEntityType);
 				}
 			});
+			entityType.setId(existingEntityType.getId());
 		});
 
 		// add or update entity types
@@ -408,7 +428,7 @@ public class ImportWriter
 
 	private static Fetch createEntityTypeWithAttributesFetch()
 	{
-		return new Fetch().field(EntityTypeMetadata.FULL_NAME).field(EntityTypeMetadata.ATTRIBUTES,
+		return new Fetch().field(EntityTypeMetadata.PACKAGE).field(EntityTypeMetadata.ATTRIBUTES,
 				new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
 	}
 

@@ -1,5 +1,6 @@
 package org.molgenis.data.platform.decorators;
 
+import jdk.nashorn.internal.runtime.Debug;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.auth.UserRepositoryDecorator;
@@ -22,10 +23,7 @@ import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.AttributeRepositoryDecorator;
-import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
-import org.molgenis.data.meta.PackageRepositoryDecorator;
+import org.molgenis.data.meta.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -87,6 +85,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
 	private final MailSenderFactory mailSenderFactory;
+	private final IdentifierLookupService identifierLookupService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -100,7 +99,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			PackageValidator packageValidator, TagValidator tagValidator, L3Cache l3Cache,
 			LanguageService languageService, EntityTypeDependencyResolver entityTypeDependencyResolver,
 			AttributeValidator attributeValidator, PlatformTransactionManager transactionManager,
-			QueryValidator queryValidator, MailSenderFactory mailSenderFactory)
+			QueryValidator queryValidator, MailSenderFactory mailSenderFactory, IdentifierLookupService identifierLookupService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -130,6 +129,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
 		this.mailSenderFactory = requireNonNull(mailSenderFactory);
+		this.identifierLookupService = requireNonNull(identifierLookupService);
 	}
 
 	@Override
@@ -211,7 +211,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			case ENTITY_TYPE_META_DATA:
 				repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
 						(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService,
-						systemEntityTypeRegistry, permissionService);
+						systemEntityTypeRegistry, permissionService, identifierLookupService);
 				return (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
 						(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
 			case PACKAGE:

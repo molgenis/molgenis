@@ -133,7 +133,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			public List<Attribute> getRequiredAttributes()
 			{
 				List<Attribute> requiredAttributes = new ArrayList<>();
-				EntityType entityType = entityTypeFactory.create().setFullyQualifiedName(VARIANT);
+				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
 				List<Attribute> refAttributesList = Arrays
 						.asList(createCaddScaledAttr(attributeFactory), getExacAFAttr(attributeFactory),
 								vcfAttributes.getAltAttribute());

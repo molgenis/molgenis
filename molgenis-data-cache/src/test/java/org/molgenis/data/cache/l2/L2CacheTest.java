@@ -74,7 +74,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
-		emd = entityTestHarness.createDynamicTestEntityType();
+		emd = entityTestHarness.createDynamicTestEntityType(refEntityType);
 		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 2);
 		testEntities = entityTestHarness.createTestEntities(emd, 4, refEntities).collect(toList());
 

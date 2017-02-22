@@ -13,11 +13,11 @@ import java.util.List;
 
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
-public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
+abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 {
 	private final DataService dataService;
 
-	public AbstractCategoryAlgorithmGenerator(DataService dataService)
+	AbstractCategoryAlgorithmGenerator(DataService dataService)
 	{
 		this.dataService = Preconditions.checkNotNull(dataService);
 	}
@@ -27,7 +27,7 @@ public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGen
 		return isSingleReferenceType(attribute);
 	}
 
-	public List<Category> convertToCategory(Attribute attribute)
+	List<Category> convertToCategory(Attribute attribute)
 	{
 		List<Category> categories = new ArrayList<>();
 		EntityType refEntity = attribute.getRefEntity();

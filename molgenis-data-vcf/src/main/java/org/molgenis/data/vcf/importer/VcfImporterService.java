@@ -58,7 +58,7 @@ public class VcfImporterService implements ImportService
 		List<EntityType> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
 
-		Iterator<String> it = source.getEntityNames().iterator();
+		Iterator<String> it = source.getEntityIds().iterator();
 		if (it.hasNext())
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
@@ -82,7 +82,7 @@ public class VcfImporterService implements ImportService
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
-		Iterator<String> it = source.getEntityNames().iterator();
+		Iterator<String> it = source.getEntityIds().iterator();
 		if (it.hasNext())
 		{
 			String entityName = it.next();

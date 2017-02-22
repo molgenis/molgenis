@@ -58,7 +58,7 @@ public class SortaCsvRepository extends AbstractRepository
 					.getBean(AttributeFactory.class); // FIXME do not use application context
 
 			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS, attrMetaFactory);
-			entityType.setFullyQualifiedName(entityName);
+			entityType.setId(entityName);
 			entityType.setName(entityName);
 			entityType.setLabel(entityLabel);
 			entityType.setBackend("PostgreSQL"); // FIXME do not hardcode backend name

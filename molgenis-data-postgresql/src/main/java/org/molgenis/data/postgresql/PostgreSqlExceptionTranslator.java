@@ -9,6 +9,8 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -38,6 +40,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 @Component
 class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator implements TransactionExceptionTranslator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlExceptionTranslator.class);
 	private final EntityTypeRegistry entityTypeRegistry;
 
 	@Autowired
@@ -136,6 +139,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		boolean matches = matcher.matches();
 		if (!matches)
 		{
+			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String colName = matcher.group(1);
@@ -175,6 +179,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 		if (entityTypeDependencyMap.isEmpty()) // no matches
 		{
+			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 
@@ -304,11 +309,13 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		Matcher m = Pattern.compile("\\((.*?)\\)").matcher(detailMessage);
 		if (!m.find())
 		{
+			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String colName = m.group(1);
 		if (!m.find())
 		{
+			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String value = m.group(1);
@@ -373,6 +380,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			}
 			else
 			{
+				LOG.error("Error translating postgres exception: ", pSqlException);
 				throw new RuntimeException("Error translating exception", pSqlException);
 			}
 		}

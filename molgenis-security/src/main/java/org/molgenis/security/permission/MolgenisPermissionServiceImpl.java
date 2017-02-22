@@ -1,18 +1,30 @@
 package org.molgenis.security.permission;
 
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
+@Component
 public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 {
+	private IdentifierLookupService identifierLookupService;
+
+	@Autowired
+	public MolgenisPermissionServiceImpl(IdentifierLookupService identifierLookupService)
+	{
+		this.identifierLookupService = identifierLookupService;
+	}
+
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginId, Permission permission)
 	{
@@ -20,9 +32,10 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 	}
 
 	@Override
-	public boolean hasPermissionOnEntity(String entityName, Permission permission)
+	public boolean hasPermissionOnEntity(String entityTypeName, Permission permission)
 	{
-		return hasPermission(entityName, permission, AUTHORITY_ENTITY_PREFIX);
+		String entityTypeId = identifierLookupService.getEntityTypeId(entityTypeName);
+		return hasPermission(entityTypeId, permission, AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private boolean hasPermission(String authorityId, Permission permission, String authorityPrefix)

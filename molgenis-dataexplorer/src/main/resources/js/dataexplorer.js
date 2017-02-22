@@ -655,7 +655,7 @@ $.when($,
                     "<li>Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.</li>" +
                     "</ul>" +
                     "<br/>By pushing the ok button you will create an new entity with copied data.</div>",
-                    value: selectedEntityMetaData.label + '_',
+                    value: selectedEntityMetaData.label + 'Copy',
                     callback: function (result) {
                         if (result !== null) {
                             $.ajax({

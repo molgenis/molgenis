@@ -4,6 +4,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Package;
 
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class MetaUtils
@@ -11,7 +12,7 @@ public class MetaUtils
 	public static Fetch getEntityTypeFetch()
 	{
 		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
-		return new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
+		return new Fetch().field(ID).field(NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
 				.field(ATTRIBUTES).field(IS_ABSTRACT).field(EXTENDS).field(TAGS).field(BACKEND);
 	}
 
@@ -26,5 +27,10 @@ public class MetaUtils
 	{
 		return package_.getFullyQualifiedName().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null && package_
 				.getRootPackage().getFullyQualifiedName().equals(PACKAGE_SYSTEM));
+	}
+
+	public static String getFullyQualyfiedName(String name, Package aPackage)
+	{
+		return aPackage == null ? name : aPackage.getFullyQualifiedName() + PACKAGE_SEPARATOR + name;
 	}
 }

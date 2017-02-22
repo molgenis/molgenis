@@ -82,7 +82,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	{
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
 
-		EntityType refEntityType = entityTypeFactory.create().setFullyQualifiedName("ref_entity");
+		EntityType refEntityType = entityTypeFactory.create().setName("ref_entity");
 		refEntityType.addAttribute(attrFactory.create().setName(refIdAttributeName), ROLE_ID);
 		refEntityType.addAttribute(attrFactory.create().setName(refBoolAttributeName).setDataType(BOOL));
 		refEntityType.addAttribute(attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
@@ -115,7 +115,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 				attrFactory.create().setName(refXrefAttributeName).setDataType(XREF).setRefEntity(refEntityType)
 						.setNillable(true));
 
-		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("entity");
+		EntityType emd = entityTypeFactory.create().setName("entity");
 		emd.addAttribute(attrFactory.create().setName(idAttributeName), ROLE_ID);
 		emd.addAttribute(attrFactory.create().setName(stringAttributeName).setUnique(true), ROLE_LABEL);
 		emd.addAttribute(attrFactory.create().setName(mrefAttributeName).setDataType(MREF).setNillable(true)
