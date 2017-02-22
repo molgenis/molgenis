@@ -174,8 +174,8 @@ public class MappingServiceImpl implements MappingService
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetaData.setPackage(null);
+		targetMetaData.setId(idGenerator.generateId());
 		targetMetaData.setName(entityName);
-		targetMetaData.setFullyQualifiedName(entityName);
 		targetMetaData.setLabel(entityName);
 		if (addSourceAttribute)
 		{
@@ -345,20 +345,5 @@ public class MappingServiceImpl implements MappingService
 		String targetAttributeName = attributeMapping.getTargetAttribute().getName();
 		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType);
 		target.set(targetAttributeName, typedValue);
-	}
-
-	@Override
-	public String generateId(AttributeType dataType, Long count)
-	{
-		Object id;
-		if (dataType == INT || dataType == LONG || dataType == DECIMAL)
-		{
-			id = count + 1;
-		}
-		else
-		{
-			id = idGenerator.generateId();
-		}
-		return id.toString();
 	}
 }

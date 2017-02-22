@@ -136,7 +136,8 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			if (stopAttribute != null)
 			{
 				try
-				{	if(entity.getEntityType().getAttribute("stopAttribute") != null)
+				{
+					if (entity.getEntityType().getAttribute("stopAttribute") != null)
 					{
 						if (entity.getEntityType().getAttribute(stopAttribute).getDataType() == AttributeType.INT)
 						{
@@ -236,7 +237,8 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		if (stopAttr != "")
 		{
 			q.and().ge(stopAttr, browserStart);
-		}else
+		}
+		else
 		{
 			q.and().ge(posAttr, browserStart);
 		}

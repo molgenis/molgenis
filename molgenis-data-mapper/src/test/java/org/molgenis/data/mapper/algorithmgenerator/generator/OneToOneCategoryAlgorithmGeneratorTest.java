@@ -66,7 +66,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Mockito.when(dataService.findAll(targetRefEntityType.getFullyQualifiedName()))
 				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
-		targetEntityType = entityTypeFactory.create("target");
+		targetEntityType = entityTypeFactory.create("target").setName("target");
 		targetEntityType.addAttribute(targetAttribute);
 
 		EntityType sourceRefEntityType = createCategoricalRefEntityType("LifeLines_POTATO_REF");
@@ -88,7 +88,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
 						sourceEntity7, sourceEntity8));
 
-		sourceEntityType = entityTypeFactory.create("source");
+		sourceEntityType = entityTypeFactory.create("source").setName("source");
 		sourceEntityType.addAttributes(Lists.newArrayList(sourceAttribute));
 	}
 
@@ -142,7 +142,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 
 	private EntityType createCategoricalRefEntityType(String entityName)
 	{
-		EntityType targetRefEntityType = entityTypeFactory.create(entityName);
+		EntityType targetRefEntityType = entityTypeFactory.create(entityName).setName(entityName);
 		Attribute targetCodeAttribute = attrMetaFactory.create().setName("code").setDataType(INT);
 		Attribute targetLabelAttribute = attrMetaFactory.create().setName("label");
 		targetRefEntityType.addAttribute(targetCodeAttribute, ROLE_ID);

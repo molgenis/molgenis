@@ -117,6 +117,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 *
 	 * @param entityName entity name
 	 * @param q          query
+	 * @param clazz      entity class
 	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz);
@@ -328,4 +329,6 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Get names of all the entities in this source
 	 */
 	Stream<String> getEntityNames();
+
+	Stream<Object> getEntityIds();
 }

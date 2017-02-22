@@ -97,9 +97,9 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		owner.setFirstName("Flup");
 		owner.setLastName("de Flap");
 
-		EntityType target1 = entityTypeFactory.create("target1");
+		EntityType target1 = entityTypeFactory.create("target1").setName("target1");
 		target1.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
-		EntityType target2 = entityTypeFactory.create("target2");
+		EntityType target2 = entityTypeFactory.create("target2").setName("target2");
 		target2.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);

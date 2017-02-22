@@ -66,7 +66,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityType = entityTypeFactory.create(repository);
+		entityType = entityTypeFactory.create(repository).setName(repository);
 		entityType.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName("ATTRIBUTE_1"));
 

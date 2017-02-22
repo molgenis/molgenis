@@ -5,7 +5,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -62,11 +61,12 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private List<Questionnaire> getQuestionnaires()
 	{
-		List<Questionnaire> questionnaires;
-		List<Entity> questionnaireMeta = runAsSystem(() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
-		questionnaires = questionnaireMeta.stream()
-				.map(entityType -> entityType.getString(EntityTypeMetadata.FULL_NAME))
+		List<Questionnaire> questionnaires;
+		List<EntityType> questionnaireMeta = runAsSystem(
+				() -> findQuestionnairesMetaData(dataService).collect(toList()));
+
+		questionnaires = questionnaireMeta.stream().map(EntityType::getFullyQualifiedName)
 				.filter(name -> currentUserIsSu() || currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name))
 				.map(name ->
 				{

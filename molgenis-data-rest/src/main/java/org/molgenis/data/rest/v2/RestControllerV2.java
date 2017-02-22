@@ -366,7 +366,7 @@ class RestControllerV2
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityName);
 
 		// Validate the new name
-		NameValidator.validateName(request.getNewEntityName());
+		NameValidator.validateEntityOrPackageName(request.getNewEntityName());
 
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils

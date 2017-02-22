@@ -89,7 +89,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityFullName(entityType.getFullyQualifiedName()).setEntityTypeName(entityType.getName())
+					.setEntityFullName(entityType.getFullyQualifiedName()).setEntityTypeId(entityType.getId()).setEntityTypeName(entityType.getName())
 					.setEntityId(entityId).setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
@@ -172,7 +172,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		// convert referencing entity names to index actions
 		Stream<IndexAction> referencingEntityIndexActions = referencingEntityMap.values().stream()
 				.map(referencingEntity -> indexActionFactory.create()
-						.setEntityTypeName(referencingEntity.getName())
+						.setEntityTypeId(referencingEntity.getId()).setEntityTypeName(entityType.getName())
 						.setEntityFullName(referencingEntity.getFullyQualifiedName())
 						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
 

@@ -10,61 +10,75 @@ public class NameValidatorTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateNameTooLong()
 	{
-		NameValidator.validateName("ThisNameIsTooLongToUseAsAnAttributeName");
+		NameValidator.validateEntityOrPackageName("ThisNameIsTooLongToUseAsAnAttributeName");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateNameInvalidCharacters()
 	{
-		NameValidator.validateName("Invalid.Name");
+		NameValidator.validateEntityOrPackageName("Invalid.Name");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateNameStartsWithDigit()
 	{
-		NameValidator.validateName("6invalid");
+		NameValidator.validateEntityOrPackageName("6invalid");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testReservedKeyword()
 	{
-		NameValidator.validateName("base");
+		NameValidator.validateEntityOrPackageName("base");
 	}
 
-	@Test
-	public void testI18nName()
-	{
-		NameValidator.validateName("test-en");
-		NameValidator.validateName("test-eng");
-	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testI18nNameMilti()
 	{
-		NameValidator.validateName("test-en-nl");
+		NameValidator.validateEntityOrPackageName("test-en-nl");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testI18nTooLong()
 	{
-		NameValidator.validateName("test-xxxx");
+		NameValidator.validateEntityOrPackageName("test-xxxx");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testI18nMissing()
 	{
-		NameValidator.validateName("test-");
+		NameValidator.validateEntityOrPackageName("test-");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testI18nUpperCase()
 	{
-		NameValidator.validateName("test-NL");
+		NameValidator.validateEntityOrPackageName("test-NL");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testI18nNumber()
 	{
-		NameValidator.validateName("test-n2");
+		NameValidator.validateEntityOrPackageName("test-n2");
 	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testUnderscore()
+	{
+		NameValidator.validateEntityOrPackageName("test_test");
+	}
+
+	@Test
+	public void testI18nName()
+	{
+		NameValidator.validateAttributeName("test-en");
+		NameValidator.validateAttributeName("test-eng");
+	}
+
+	@Test
+	public void testUnderscoreAttr()
+	{
+		NameValidator.validateAttributeName("test_test");
+	}
+
 }

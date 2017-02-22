@@ -132,7 +132,8 @@ public class DannAnnotator implements AnnotatorConfig
 			{
 
 				String idAttrName = "id";
-				EntityType repoMetaData = entityTypeFactory.create().setFullyQualifiedName(DANN_TABIX_RESOURCE);
+				// FIXME 4714 refactor to work with auto id, setPackage() and setName()
+				EntityType repoMetaData = entityTypeFactory.create().setName(DANN_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());

@@ -24,12 +24,12 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 	{
 		super(dataService);
 
-		List<CategoryRule> rules = getRules(dataService);
+		List<CategoryRule> rules = getRules();
 		this.lexicalCategoryMapper = new LexicalCategoryMapper(rules);
 		this.frequencyCategoryMapper = new FrequencyCategoryMapper(rules);
 	}
 
-	private List<CategoryRule> getRules(DataService dataService)
+	private List<CategoryRule> getRules()
 	{
 		return Lists.newArrayList(new NegativeCategoryRule(), new PositiveCategoryRule(), new MissingCategoryRule());
 	}
@@ -68,7 +68,7 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 		return mapAlgorithm;
 	}
 
-	public String mapCategories(Attribute sourceAttribute, List<Category> targetCategories,
+	private String mapCategories(Attribute sourceAttribute, List<Category> targetCategories,
 			List<Category> sourceCategories, CategoryMapper categoryMapper)
 	{
 		StringBuilder stringBuilder = new StringBuilder();

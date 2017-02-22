@@ -55,7 +55,7 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		emd = entityTypeFactory.create().setFullyQualifiedName("resourceName");
+		emd = entityTypeFactory.create().setName("resourceName");
 		Attribute attr = attributeFactory.create().setName("id").setIdAttribute(true).setLabelAttribute(true);
 		emd.addAttribute(attr);
 

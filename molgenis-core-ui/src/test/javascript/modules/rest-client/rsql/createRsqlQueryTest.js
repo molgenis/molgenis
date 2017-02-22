@@ -50,7 +50,11 @@ test('createRsqlQuery', assert => {
                 {operator: 'EQUALS', field: 'field', value: 6}]
         },
         {operator: 'AND'},
-        {operator: 'EQUALS', field: 'field', value: 7}]), "(field==5,field==6);field==7", "(field==5,field==6);field==7")
+        {
+            operator: 'EQUALS',
+            field: 'field',
+            value: 7
+        }]), "(field==5,field==6);field==7", "(field==5,field==6);field==7")
     assert.end()
 })
 

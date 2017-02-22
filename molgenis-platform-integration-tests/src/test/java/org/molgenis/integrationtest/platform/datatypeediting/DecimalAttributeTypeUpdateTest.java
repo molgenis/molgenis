@@ -63,7 +63,7 @@ public class DecimalAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateT
 				{ 2.0, CATEGORICAL, MolgenisValidationException.class,
 						"Attribute data type update from [DECIMAL] to [CATEGORICAL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
 				{ 4.0, ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ 1.0, DATE, MolgenisValidationException.class,
 						"Attribute data type update from [DECIMAL] to [DATE] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
 				{ 1.0, DATE_TIME, MolgenisValidationException.class,

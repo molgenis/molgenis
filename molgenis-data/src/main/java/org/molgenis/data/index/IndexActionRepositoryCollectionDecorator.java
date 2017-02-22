@@ -34,9 +34,9 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 		return this.decorated.getName();
 	}
 
-	public boolean hasRepository(String name)
+	public boolean hasRepository(String id)
 	{
-		return this.decorated.hasRepository(name);
+		return this.decorated.hasRepository(id);
 	}
 
 	@Override
@@ -81,9 +81,9 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
-		return this.decorated.getEntityNames();
+		return this.decorated.getEntityIds();
 	}
 
 	@Override

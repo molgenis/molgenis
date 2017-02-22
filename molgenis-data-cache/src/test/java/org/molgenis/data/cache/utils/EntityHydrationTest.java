@@ -56,12 +56,12 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	public void beforeClass() throws ParseException
 	{
 		initMocks(this);
-		// create metadata
-		entityType = entityTestHarness.createDynamicTestEntityType();
 
 		// create referenced entities
 		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
 		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 1);
+
+		entityType = entityTestHarness.createDynamicTestEntityType(refEntityType);
 
 		// create hydrated entity
 		hydratedEntity = entityTestHarness.createTestEntities(entityType, 1, refEntities).collect(toList()).get(0);

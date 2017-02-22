@@ -38,7 +38,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	public void createQueryEntity()
 	{
 		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true).setIdAttribute(true);
-		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("testEntity");
+		EntityType emd = entityTypeFactory.create().setName("testEntity");
 		emd.addAttributes(Arrays.asList(idAttr, vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute()));
 		Entity entity = new DynamicEntity(emd);
 		entity.set(VcfAttributes.CHROM, "3");
@@ -51,8 +51,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getRequiredAttributes()
 	{
-		Iterator<Attribute> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes()
-				.iterator();
+		Iterator<Attribute> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes().iterator();
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getChromAttribute());
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getPosAttribute());
 	}
