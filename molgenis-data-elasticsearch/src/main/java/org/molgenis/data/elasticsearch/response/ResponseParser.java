@@ -36,8 +36,7 @@ public class ResponseParser
 		this.aggregateResponseParser = new AggregateResponseParser();
 	}
 
-	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response, EntityType entityType,
-			DataService dataService)
+	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response, DataService dataService)
 	{
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
@@ -54,6 +53,7 @@ public class ResponseParser
 		List<Hit> searchHits = new ArrayList<Hit>();
 		long totalCount = response.getHits().totalHits();
 
+		EntityType entityType = request.getEntityType();
 		for (SearchHit hit : response.getHits().hits())
 		{
 			Map<String, Object> columnValueMap = new LinkedHashMap<String, Object>();
@@ -129,8 +129,8 @@ public class ResponseParser
 		if (aggregations != null)
 		{
 			aggregate = aggregateResponseParser
-					.parseAggregateResponse(request.getAggregateField1(), request.getAggregateField2(),
-							request.getAggregateFieldDistinct(), aggregations, dataService);
+					.parseAggregateResponse(request.getAggregateAttribute1(), request.getAggregateAttribute2(),
+							request.getAggregateAttributeDistinct(), aggregations, dataService);
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);

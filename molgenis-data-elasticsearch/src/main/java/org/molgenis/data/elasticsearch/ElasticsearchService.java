@@ -83,16 +83,8 @@ public class ElasticsearchService implements SearchService
 
 	private SearchResult search(SearchRequest request)
 	{
-		// TODO : A quick fix now! Need to find a better way to get
-		// EntityType in ElasticSearchService, because ElasticSearchService should not be
-		// aware of DataService. E.g. Put EntityType in the SearchRequest object
-		EntityType entityType = (request.getDocumentType() != null && dataService != null && dataService
-				.hasRepository(request.getDocumentType())) ? dataService
-				.getEntityType(request.getDocumentType()) : null;
-		String documentType = request.getDocumentType() == null ? null : request.getDocumentType();
-		SearchResponse response = elasticsearchFacade
-				.search(SearchType.QUERY_AND_FETCH, request, entityType, documentType, indexName);
-		return responseParser.parseSearchResponse(request, response, entityType, dataService);
+		SearchResponse response = elasticsearchFacade.search(SearchType.QUERY_AND_FETCH, request, indexName);
+		return responseParser.parseSearchResponse(request, response, dataService);
 	}
 
 	@Override
@@ -365,11 +357,11 @@ public class ElasticsearchService implements SearchService
 
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
 		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, documentType, SearchType.QUERY_AND_FETCH, query, null, null,
-						null, entityType);
+				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_AND_FETCH, entityType, query, null, null,
+						null);
 
+		String documentType = documentIdGenerator.generateId(entityType);
 		return elasticsearchFacade
 				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), documentType, indexName)
 				.map(idString -> convert(idString, entityType.getIdAttribute()))
@@ -383,8 +375,7 @@ public class ElasticsearchService implements SearchService
 		Attribute xAttr = aggregateQuery.getAttributeX();
 		Attribute yAttr = aggregateQuery.getAttributeY();
 		Attribute distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(documentIdGenerator.generateId(entityType), q, xAttr, yAttr,
-				distinctAttr);
+		SearchRequest searchRequest = SearchRequest.create(entityType, q, xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
 	}

@@ -25,9 +25,11 @@ public class SearchRequestGeneratorTest
 	public void beforeMethod()
 	{
 		searchRequestBuilderMock = mock(SearchRequestBuilder.class);
-		entityType = mock(EntityType.class);
+		entityType = when(mock(EntityType.class).getId()).thenReturn("test").getMock();
 
 		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
+		when(documentIdGenerator.generateId(any(EntityType.class)))
+				.thenAnswer(invocation -> ((EntityType) invocation.getArguments()[0]).getId());
 		when(documentIdGenerator.generateId(any(Attribute.class)))
 				.thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
 		searchRequestGenerator = new SearchRequestGenerator(documentIdGenerator);
@@ -40,9 +42,10 @@ public class SearchRequestGeneratorTest
 
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
-		searchRequestGenerator.buildSearchRequest(searchRequestBuilderMock, entityName, searchType,
+
+		searchRequestGenerator.buildSearchRequest(searchRequestBuilderMock, searchType, entityType,
 				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null,
-				null, entityType);
+				null);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityName);
@@ -58,9 +61,8 @@ public class SearchRequestGeneratorTest
 		SearchType searchType = SearchType.COUNT;
 
 		searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl<>().search("test"),
-						null,
-				null, null, entityType);
+				.buildSearchRequest(searchRequestBuilderMock, searchType, entityType, new QueryImpl<>().search("test"),
+						null, null, null);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityName);
