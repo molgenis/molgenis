@@ -11,6 +11,8 @@ import org.molgenis.data.meta.model.EntityType;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Builds a ElasticSearch search request
  *
@@ -18,11 +20,13 @@ import java.util.List;
  */
 public class SearchRequestGenerator
 {
-	private final List<? extends QueryPartGenerator> queryGenerators;
+	private final DocumentIdGenerator documentIdGenerator;
 	private final AggregateQueryGenerator aggregateQueryGenerator;
+	private final List<? extends QueryPartGenerator> queryGenerators;
 
 	public SearchRequestGenerator(DocumentIdGenerator documentIdGenerator)
 	{
+		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 		aggregateQueryGenerator = new AggregateQueryGenerator(documentIdGenerator);
 		queryGenerators = Arrays.asList(new QueryGenerator(documentIdGenerator), new SortGenerator(documentIdGenerator),
 				new LimitOffsetGenerator());
@@ -30,24 +34,22 @@ public class SearchRequestGenerator
 
 	/**
 	 * Writes a query to a {@link SearchRequestBuilder}.
-	 *
-	 * @param searchRequestBuilder
-	 * @param documentType
+	 *  @param searchRequestBuilder
 	 * @param searchType
+	 * @param entityType
 	 * @param aggAttr1             First Field to aggregate on
 	 * @param aggAttr2             Second Field to aggregate on
-	 * @param entityType
 	 */
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String documentType,
-			SearchType searchType,
-			Query<Entity> query, Attribute aggAttr1, Attribute aggAttr2,
-			Attribute aggAttrDistinct, EntityType entityType)
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, SearchType searchType,
+			EntityType entityType, Query<Entity> query, Attribute aggAttr1, Attribute aggAttr2,
+			Attribute aggAttrDistinct)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
-		if (documentType != null)
+		if (entityType != null)
 		{
+			String documentType = documentIdGenerator.generateId(entityType);
 			searchRequestBuilder.setTypes(documentType);
 		}
 
