@@ -29,6 +29,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -203,6 +204,7 @@ class RestControllerV2
 		return createEntityResponse(entity, fetch, true);
 	}
 
+	@Transactional
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
@@ -295,6 +297,7 @@ class RestControllerV2
 	 * @return EntityCollectionCreateResponseBodyV2
 	 * @throws Exception
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
