@@ -5,6 +5,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.MolgenisValidationException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -12,12 +14,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
@@ -78,6 +81,62 @@ public class PostgreSqlRepositoryTest
 		when(jdbcTemplate.query(sql, new Object[] { queryValue }, rowMapper)).thenReturn(singletonList(entity0));
 		postgreSqlRepo.setEntityType(entityType);
 		assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
+	}
+
+	@Test
+	public void testUpdateEntitiesExist()
+	{
+		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getName()).thenReturn("attr");
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
+		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getAttribute("attr")).thenReturn(idAttr);
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("id0");
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getIdValue()).thenReturn("id1");
+
+		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class)))
+				.thenReturn(new int[] { 2 });
+		postgreSqlRepo.setEntityType(entityType);
+
+		postgreSqlRepo.update(Stream.of(entity0, entity1));
+		verify(jdbcTemplate).batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class));
+		verifyNoMoreInteractions(jdbcTemplate);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Cannot update \\[entity\\] with id \\[id1\\] because it does not exist")
+	public void testUpdateEntityDoesNotExist()
+	{
+		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getName()).thenReturn("attr");
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
+		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getAttribute("attr")).thenReturn(idAttr);
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("id0");
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getIdValue()).thenReturn("id1");
+
+		when(jdbcTemplate.query(any(String.class), any(Object[].class), any(RowMapper.class)))
+				.thenReturn(singletonList(entity0));
+		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class)))
+				.thenReturn(new int[] { 1 });
+		postgreSqlRepo.setEntityType(entityType);
+
+		postgreSqlRepo.update(Stream.of(entity0, entity1));
 	}
 
 	private static EntityType createEntityMetaOneToMany(String oneToManyAttrName)
