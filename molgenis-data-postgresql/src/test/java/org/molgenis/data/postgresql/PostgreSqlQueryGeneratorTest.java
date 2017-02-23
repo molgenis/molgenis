@@ -32,11 +32,12 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.isNillable()).thenReturn(true);
 		assertEquals(PostgreSqlQueryGenerator.getSqlSetNotNull(entityType, attr),
-				"ALTER TABLE \"entity#65a8f5cd\" ALTER COLUMN \"attr\" SET NOT NULL");
+				"ALTER TABLE \"entity#fc2928f6\" ALTER COLUMN \"attr\" SET NOT NULL");
 	}
 
 	@Test
@@ -45,11 +46,12 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.isNillable()).thenReturn(false);
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropNotNull(entityType, attr),
-				"ALTER TABLE \"entity#65a8f5cd\" ALTER COLUMN \"attr\" DROP NOT NULL");
+				"ALTER TABLE \"entity#fc2928f6\" ALTER COLUMN \"attr\" DROP NOT NULL");
 	}
 
 	@Test
@@ -64,6 +66,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(refEntityTypeString.getFullyQualifiedName()).thenReturn("refEntityStr");
 		when(refEntityTypeString.getName()).thenReturn("refEntityStr");
 		when(refEntityTypeString.getFullyQualifiedName()).thenReturn("refEntityStr");
+		when(refEntityTypeString.getIdValue()).thenReturn("refEntityStr");
 		when(refEntityTypeString.getIdAttribute()).thenReturn(refIdAttrStr);
 
 		// ref entity with int id attribute
@@ -74,6 +77,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType refEntityTypeInt = mock(EntityType.class);
 		when(refEntityTypeInt.getFullyQualifiedName()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getName()).thenReturn("refEntityInt");
+		when(refEntityTypeInt.getIdValue()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getFullyQualifiedName()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getIdAttribute()).thenReturn(refIdAttrInt);
 
@@ -81,6 +85,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		when(idAttr.getDataType()).thenReturn(STRING);
@@ -143,7 +148,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(entityType.getAtomicAttributes()).thenReturn(atomicAttrs);
 
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateTable(entityType),
-				"CREATE TABLE \"entity#65a8f5cd\"(\"id\" character varying(255),\"bool\" boolean NOT NULL,\"categorical\" character varying(255) NOT NULL,\"date\" date NOT NULL,\"date_time\" timestamp NOT NULL,\"decimal\" double precision NOT NULL,\"email\" character varying(255) NOT NULL,\"enum\" character varying(255) NOT NULL,\"file\" integer NOT NULL,\"html\" text NOT NULL,\"hyperlink\" character varying(255) NOT NULL,\"int\" integer NOT NULL,\"long\" bigint NOT NULL,\"script\" text NOT NULL,\"string\" character varying(255) NOT NULL,\"text\" text NOT NULL,\"xref\" integer NOT NULL,\"bool_nillable\" boolean,\"categorical_nillable\" character varying(255),\"date_nillable\" date,\"date_time_nillable\" timestamp,\"decimal_nillable\" double precision,\"email_nillable\" character varying(255),\"enum_nillable\" character varying(255),\"file_nillable\" integer,\"html_nillable\" text,\"hyperlink_nillable\" character varying(255),\"int_nillable\" integer,\"long_nillable\" bigint,\"script_nillable\" text,\"string_nillable\" character varying(255),\"text_nillable\" text,\"xref_nillable\" integer,\"bool_unique\" boolean NOT NULL,\"categorical_unique\" character varying(255) NOT NULL,\"date_unique\" date NOT NULL,\"date_time_unique\" timestamp NOT NULL,\"decimal_unique\" double precision NOT NULL,\"email_unique\" character varying(255) NOT NULL,\"enum_unique\" character varying(255) NOT NULL,\"file_unique\" integer NOT NULL,\"html_unique\" text NOT NULL,\"hyperlink_unique\" character varying(255) NOT NULL,\"int_unique\" integer NOT NULL,\"long_unique\" bigint NOT NULL,\"script_unique\" text NOT NULL,\"string_unique\" character varying(255) NOT NULL,\"text_unique\" text NOT NULL,\"xref_unique\" integer NOT NULL,\"bool_unique_nillable\" boolean,\"categorical_unique_nillable\" character varying(255),\"date_unique_nillable\" date,\"date_time_unique_nillable\" timestamp,\"decimal_unique_nillable\" double precision,\"email_unique_nillable\" character varying(255),\"enum_unique_nillable\" character varying(255),\"file_unique_nillable\" integer,\"html_unique_nillable\" text,\"hyperlink_unique_nillable\" character varying(255),\"int_unique_nillable\" integer,\"long_unique_nillable\" bigint,\"script_unique_nillable\" text,\"string_unique_nillable\" character varying(255),\"text_unique_nillable\" text,\"xref_unique_nillable\" integer,CONSTRAINT \"entity#65a8f5cd_id_pkey\" PRIMARY KEY (\"id\"),CONSTRAINT \"entity#65a8f5cd_categorical_fkey\" FOREIGN KEY (\"categorical\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#65a8f5cd_enum_chk\" CHECK (\"enum\" IN ('enum0','enum1')),CONSTRAINT \"entity#65a8f5cd_file_fkey\" FOREIGN KEY (\"file\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_xref_fkey\" FOREIGN KEY (\"xref\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_categorical_nillable_fkey\" FOREIGN KEY (\"categorical_nillable\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#65a8f5cd_enum_nillable_chk\" CHECK (\"enum_nillable\" IN ('enum0','enum1')),CONSTRAINT \"entity#65a8f5cd_file_nillable_fkey\" FOREIGN KEY (\"file_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_xref_nillable_fkey\" FOREIGN KEY (\"xref_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_bool_unique_key\" UNIQUE (\"bool_unique\"),CONSTRAINT \"entity#65a8f5cd_categorical_unique_fkey\" FOREIGN KEY (\"categorical_unique\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#65a8f5cd_categorical_unique_key\" UNIQUE (\"categorical_unique\"),CONSTRAINT \"entity#65a8f5cd_date_unique_key\" UNIQUE (\"date_unique\"),CONSTRAINT \"entity#65a8f5cd_date_time_unique_key\" UNIQUE (\"date_time_unique\"),CONSTRAINT \"entity#65a8f5cd_decimal_unique_key\" UNIQUE (\"decimal_unique\"),CONSTRAINT \"entity#65a8f5cd_email_unique_key\" UNIQUE (\"email_unique\"),CONSTRAINT \"entity#65a8f5cd_enum_unique_key\" UNIQUE (\"enum_unique\"),CONSTRAINT \"entity#65a8f5cd_enum_unique_chk\" CHECK (\"enum_unique\" IN ('enum0','enum1')),CONSTRAINT \"entity#65a8f5cd_file_unique_fkey\" FOREIGN KEY (\"file_unique\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_file_unique_key\" UNIQUE (\"file_unique\"),CONSTRAINT \"entity#65a8f5cd_html_unique_key\" UNIQUE (\"html_unique\"),CONSTRAINT \"entity#65a8f5cd_hyperlink_unique_key\" UNIQUE (\"hyperlink_unique\"),CONSTRAINT \"entity#65a8f5cd_int_unique_key\" UNIQUE (\"int_unique\"),CONSTRAINT \"entity#65a8f5cd_long_unique_key\" UNIQUE (\"long_unique\"),CONSTRAINT \"entity#65a8f5cd_script_unique_key\" UNIQUE (\"script_unique\"),CONSTRAINT \"entity#65a8f5cd_string_unique_key\" UNIQUE (\"string_unique\"),CONSTRAINT \"entity#65a8f5cd_text_unique_key\" UNIQUE (\"text_unique\"),CONSTRAINT \"entity#65a8f5cd_xref_unique_fkey\" FOREIGN KEY (\"xref_unique\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_xref_unique_key\" UNIQUE (\"xref_unique\"),CONSTRAINT \"entity#65a8f5cd_bool_unique_nillable_key\" UNIQUE (\"bool_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_categorical_unique_nillable_fkey\" FOREIGN KEY (\"categorical_unique_nillable\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#65a8f5cd_categorical_unique_nillable_key\" UNIQUE (\"categorical_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_date_unique_nillable_key\" UNIQUE (\"date_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_date_time_unique_nillable_key\" UNIQUE (\"date_time_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_decimal_unique_nillable_key\" UNIQUE (\"decimal_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_email_unique_nillable_key\" UNIQUE (\"email_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_enum_unique_nillable_key\" UNIQUE (\"enum_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_enum_unique_nillable_chk\" CHECK (\"enum_unique_nillable\" IN ('enum0','enum1')),CONSTRAINT \"entity#65a8f5cd_file_unique_nillable_fkey\" FOREIGN KEY (\"file_unique_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_file_unique_nillable_key\" UNIQUE (\"file_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_html_unique_nillable_key\" UNIQUE (\"html_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_hyperlink_unique_nillable_key\" UNIQUE (\"hyperlink_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_int_unique_nillable_key\" UNIQUE (\"int_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_long_unique_nillable_key\" UNIQUE (\"long_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_script_unique_nillable_key\" UNIQUE (\"script_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_string_unique_nillable_key\" UNIQUE (\"string_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_text_unique_nillable_key\" UNIQUE (\"text_unique_nillable\"),CONSTRAINT \"entity#65a8f5cd_xref_unique_nillable_fkey\" FOREIGN KEY (\"xref_unique_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#65a8f5cd_xref_unique_nillable_key\" UNIQUE (\"xref_unique_nillable\"))");
+				"CREATE TABLE \"entity#fc2928f6\"(\"id\" character varying(255),\"bool\" boolean NOT NULL,\"categorical\" character varying(255) NOT NULL,\"date\" date NOT NULL,\"date_time\" timestamp NOT NULL,\"decimal\" double precision NOT NULL,\"email\" character varying(255) NOT NULL,\"enum\" character varying(255) NOT NULL,\"file\" integer NOT NULL,\"html\" text NOT NULL,\"hyperlink\" character varying(255) NOT NULL,\"int\" integer NOT NULL,\"long\" bigint NOT NULL,\"script\" text NOT NULL,\"string\" character varying(255) NOT NULL,\"text\" text NOT NULL,\"xref\" integer NOT NULL,\"bool_nillable\" boolean,\"categorical_nillable\" character varying(255),\"date_nillable\" date,\"date_time_nillable\" timestamp,\"decimal_nillable\" double precision,\"email_nillable\" character varying(255),\"enum_nillable\" character varying(255),\"file_nillable\" integer,\"html_nillable\" text,\"hyperlink_nillable\" character varying(255),\"int_nillable\" integer,\"long_nillable\" bigint,\"script_nillable\" text,\"string_nillable\" character varying(255),\"text_nillable\" text,\"xref_nillable\" integer,\"bool_unique\" boolean NOT NULL,\"categorical_unique\" character varying(255) NOT NULL,\"date_unique\" date NOT NULL,\"date_time_unique\" timestamp NOT NULL,\"decimal_unique\" double precision NOT NULL,\"email_unique\" character varying(255) NOT NULL,\"enum_unique\" character varying(255) NOT NULL,\"file_unique\" integer NOT NULL,\"html_unique\" text NOT NULL,\"hyperlink_unique\" character varying(255) NOT NULL,\"int_unique\" integer NOT NULL,\"long_unique\" bigint NOT NULL,\"script_unique\" text NOT NULL,\"string_unique\" character varying(255) NOT NULL,\"text_unique\" text NOT NULL,\"xref_unique\" integer NOT NULL,\"bool_unique_nillable\" boolean,\"categorical_unique_nillable\" character varying(255),\"date_unique_nillable\" date,\"date_time_unique_nillable\" timestamp,\"decimal_unique_nillable\" double precision,\"email_unique_nillable\" character varying(255),\"enum_unique_nillable\" character varying(255),\"file_unique_nillable\" integer,\"html_unique_nillable\" text,\"hyperlink_unique_nillable\" character varying(255),\"int_unique_nillable\" integer,\"long_unique_nillable\" bigint,\"script_unique_nillable\" text,\"string_unique_nillable\" character varying(255),\"text_unique_nillable\" text,\"xref_unique_nillable\" integer,CONSTRAINT \"entity#fc2928f6_id_pkey\" PRIMARY KEY (\"id\"),CONSTRAINT \"entity#fc2928f6_categorical_fkey\" FOREIGN KEY (\"categorical\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#fc2928f6_enum_chk\" CHECK (\"enum\" IN ('enum0','enum1')),CONSTRAINT \"entity#fc2928f6_file_fkey\" FOREIGN KEY (\"file\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_xref_fkey\" FOREIGN KEY (\"xref\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_categorical_nillable_fkey\" FOREIGN KEY (\"categorical_nillable\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#fc2928f6_enum_nillable_chk\" CHECK (\"enum_nillable\" IN ('enum0','enum1')),CONSTRAINT \"entity#fc2928f6_file_nillable_fkey\" FOREIGN KEY (\"file_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_xref_nillable_fkey\" FOREIGN KEY (\"xref_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_bool_unique_key\" UNIQUE (\"bool_unique\"),CONSTRAINT \"entity#fc2928f6_categorical_unique_fkey\" FOREIGN KEY (\"categorical_unique\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#fc2928f6_categorical_unique_key\" UNIQUE (\"categorical_unique\"),CONSTRAINT \"entity#fc2928f6_date_unique_key\" UNIQUE (\"date_unique\"),CONSTRAINT \"entity#fc2928f6_date_time_unique_key\" UNIQUE (\"date_time_unique\"),CONSTRAINT \"entity#fc2928f6_decimal_unique_key\" UNIQUE (\"decimal_unique\"),CONSTRAINT \"entity#fc2928f6_email_unique_key\" UNIQUE (\"email_unique\"),CONSTRAINT \"entity#fc2928f6_enum_unique_key\" UNIQUE (\"enum_unique\"),CONSTRAINT \"entity#fc2928f6_enum_unique_chk\" CHECK (\"enum_unique\" IN ('enum0','enum1')),CONSTRAINT \"entity#fc2928f6_file_unique_fkey\" FOREIGN KEY (\"file_unique\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_file_unique_key\" UNIQUE (\"file_unique\"),CONSTRAINT \"entity#fc2928f6_html_unique_key\" UNIQUE (\"html_unique\"),CONSTRAINT \"entity#fc2928f6_hyperlink_unique_key\" UNIQUE (\"hyperlink_unique\"),CONSTRAINT \"entity#fc2928f6_int_unique_key\" UNIQUE (\"int_unique\"),CONSTRAINT \"entity#fc2928f6_long_unique_key\" UNIQUE (\"long_unique\"),CONSTRAINT \"entity#fc2928f6_script_unique_key\" UNIQUE (\"script_unique\"),CONSTRAINT \"entity#fc2928f6_string_unique_key\" UNIQUE (\"string_unique\"),CONSTRAINT \"entity#fc2928f6_text_unique_key\" UNIQUE (\"text_unique\"),CONSTRAINT \"entity#fc2928f6_xref_unique_fkey\" FOREIGN KEY (\"xref_unique\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_xref_unique_key\" UNIQUE (\"xref_unique\"),CONSTRAINT \"entity#fc2928f6_bool_unique_nillable_key\" UNIQUE (\"bool_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_categorical_unique_nillable_fkey\" FOREIGN KEY (\"categorical_unique_nillable\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\"),CONSTRAINT \"entity#fc2928f6_categorical_unique_nillable_key\" UNIQUE (\"categorical_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_date_unique_nillable_key\" UNIQUE (\"date_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_date_time_unique_nillable_key\" UNIQUE (\"date_time_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_decimal_unique_nillable_key\" UNIQUE (\"decimal_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_email_unique_nillable_key\" UNIQUE (\"email_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_enum_unique_nillable_key\" UNIQUE (\"enum_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_enum_unique_nillable_chk\" CHECK (\"enum_unique_nillable\" IN ('enum0','enum1')),CONSTRAINT \"entity#fc2928f6_file_unique_nillable_fkey\" FOREIGN KEY (\"file_unique_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_file_unique_nillable_key\" UNIQUE (\"file_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_html_unique_nillable_key\" UNIQUE (\"html_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_hyperlink_unique_nillable_key\" UNIQUE (\"hyperlink_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_int_unique_nillable_key\" UNIQUE (\"int_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_long_unique_nillable_key\" UNIQUE (\"long_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_script_unique_nillable_key\" UNIQUE (\"script_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_string_unique_nillable_key\" UNIQUE (\"string_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_text_unique_nillable_key\" UNIQUE (\"text_unique_nillable\"),CONSTRAINT \"entity#fc2928f6_xref_unique_nillable_fkey\" FOREIGN KEY (\"xref_unique_nillable\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\"),CONSTRAINT \"entity#fc2928f6_xref_unique_nillable_key\" UNIQUE (\"xref_unique_nillable\"))");
 	}
 
 	@Test
@@ -152,6 +157,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
@@ -159,11 +165,11 @@ public class PostgreSqlQueryGeneratorTest
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
 		when(attr1.getIdentifier()).thenReturn("attr1Id");
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		String expectedSql = "CREATE FUNCTION \"validate_update_entity#65a8f5cd\"() RETURNS TRIGGER AS $$\n" + "BEGIN\n"
+		String expectedSql = "CREATE FUNCTION \"validate_update_entity#fc2928f6\"() RETURNS TRIGGER AS $$\n" + "BEGIN\n"
 				+ "  IF OLD.\"attr0\" <> NEW.\"attr0\" THEN\n"
-				+ "    RAISE EXCEPTION 'Updating read-only column \"attr0\" of table \"entity#65a8f5cd\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
+				+ "    RAISE EXCEPTION 'Updating read-only column \"attr0\" of table \"entity#fc2928f6\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
 				+ "  END IF;\n" + "  IF OLD.\"attr1\" <> NEW.\"attr1\" THEN\n"
-				+ "    RAISE EXCEPTION 'Updating read-only column \"attr1\" of table \"entity#65a8f5cd\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
+				+ "    RAISE EXCEPTION 'Updating read-only column \"attr1\" of table \"entity#fc2928f6\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
 				+ "  END IF;\n" + "  RETURN NEW;\n" + "END;\n" + "$$ LANGUAGE plpgsql;";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateFunctionValidateUpdate(entityType, asList(attr0, attr1)),
 				expectedSql);
@@ -175,7 +181,8 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
-		String expectedSql = "DROP FUNCTION \"validate_update_entity#65a8f5cd\"();";
+		when(entityType.getIdValue()).thenReturn("entityId");
+		String expectedSql = "DROP FUNCTION \"validate_update_entity#fc2928f6\"();";
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropFunctionValidateUpdate(entityType), expectedSql);
 	}
 
@@ -185,21 +192,23 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getIdentifier()).thenReturn("attr0Id");
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
 		when(attr1.getIdentifier()).thenReturn("attr1Id");
-		String expectedSql = "CREATE TRIGGER \"update_trigger_entity#65a8f5cd\" AFTER UPDATE ON \"entity#65a8f5cd\" FOR EACH ROW WHEN (OLD.\"attr0\" IS DISTINCT FROM NEW.\"attr0\" OR OLD.\"attr1\" IS DISTINCT FROM NEW.\"attr1\") EXECUTE PROCEDURE \"validate_update_entity#65a8f5cd\"();";
+		String expectedSql = "CREATE TRIGGER \"update_trigger_entity#fc2928f6\" AFTER UPDATE ON \"entity#fc2928f6\" FOR EACH ROW WHEN (OLD.\"attr0\" IS DISTINCT FROM NEW.\"attr0\" OR OLD.\"attr1\" IS DISTINCT FROM NEW.\"attr1\") EXECUTE PROCEDURE \"validate_update_entity#fc2928f6\"();";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateUpdateTrigger(entityType, asList(attr0, attr1)), expectedSql);
 	}
 
 	@Test
 	public void getSqlDropUpdateTrigger()
 	{
-		String expectedSql = "DROP TRIGGER \"update_trigger_entity#65a8f5cd\" ON \"entity#65a8f5cd\"";
+		String expectedSql = "DROP TRIGGER \"update_trigger_entity#fc2928f6\" ON \"entity#fc2928f6\"";
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropUpdateTrigger(entityType), expectedSql);
 	}
 
@@ -210,18 +219,20 @@ public class PostgreSqlQueryGeneratorTest
 		when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
 		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity").getMock();
 		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdValue()).thenReturn("entityId");
 		when(refEntityType.getFullyQualifiedName()).thenReturn("refEntityId");
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getName()).thenReturn("entity");
 		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(refAttr.getIdentifier()).thenReturn("refAttrId");
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getRefEntity()).thenReturn(refEntityType);
 
-		String expectedSql = "ALTER TABLE \"entity#65a8f5cd\" ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity#07f902bf\"(\"refIdAttr\")";
+		String expectedSql = "ALTER TABLE \"entity#fc2928f6\" ADD CONSTRAINT \"entity#fc2928f6_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity#fc2928f6\"(\"refIdAttr\")";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityType, refAttr), expectedSql);
 	}
 
@@ -234,6 +245,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
 		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -241,7 +253,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getRefEntity()).thenReturn(entityType);
 
-		String expectedSql = "ALTER TABLE \"entity#65a8f5cd\" ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"entity#65a8f5cd\"(\"idAttr\") DEFERRABLE INITIALLY DEFERRED";
+		String expectedSql = "ALTER TABLE \"entity#fc2928f6\" ADD CONSTRAINT \"entity#fc2928f6_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"entity#fc2928f6\"(\"idAttr\") DEFERRABLE INITIALLY DEFERRED";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityType, refAttr), expectedSql);
 	}
 
@@ -258,12 +270,13 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(refAttr.getIdentifier()).thenReturn("refAttrId");
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getRefEntity()).thenReturn(refEntityType);
 
-		String expectedSql = "ALTER TABLE \"entity#65a8f5cd\" DROP CONSTRAINT \"entity#65a8f5cd_attr_fkey\"";
+		String expectedSql = "ALTER TABLE \"entity#fc2928f6\" DROP CONSTRAINT \"entity#fc2928f6_attr_fkey\"";
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropForeignKey(entityType, refAttr), expectedSql);
 	}
 
@@ -273,11 +286,12 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.getDataType()).thenReturn(STRING);
 
-		String expectedSql = "ALTER TABLE \"entity#65a8f5cd\" ADD CONSTRAINT \"entity#65a8f5cd_attr_key\" UNIQUE (\"attr\")";
+		String expectedSql = "ALTER TABLE \"entity#fc2928f6\" ADD CONSTRAINT \"entity#fc2928f6_attr_key\" UNIQUE (\"attr\")";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateUniqueKey(entityType, attr), expectedSql);
 	}
 
@@ -287,11 +301,12 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.getDataType()).thenReturn(STRING);
 
-		String expectedSql = "ALTER TABLE \"entity#65a8f5cd\" DROP CONSTRAINT \"entity#65a8f5cd_attr_key\"";
+		String expectedSql = "ALTER TABLE \"entity#fc2928f6\" DROP CONSTRAINT \"entity#fc2928f6_attr_key\"";
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropUniqueKey(entityType, attr), expectedSql);
 	}
 
@@ -300,13 +315,14 @@ public class PostgreSqlQueryGeneratorTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getName()).thenReturn("entity");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.getDataType()).thenReturn(ENUM);
 		when(attr.getEnumOptions()).thenReturn(newArrayList("enum0", "enum1", "enum2"));
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateCheckConstraint(entityType, attr),
-				"ALTER TABLE \"entity#65a8f5cd\" ADD CONSTRAINT \"entity#65a8f5cd_attr_chk\" CHECK (\"attr\" IN ('enum0','enum1','enum2'))");
+				"ALTER TABLE \"entity#fc2928f6\" ADD CONSTRAINT \"entity#fc2928f6_attr_chk\" CHECK (\"attr\" IN ('enum0','enum1','enum2'))");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -314,6 +330,7 @@ public class PostgreSqlQueryGeneratorTest
 	{
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getName()).thenReturn("entity");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
@@ -327,12 +344,13 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.getDataType()).thenReturn(ENUM);
 		when(attr.getEnumOptions()).thenReturn(newArrayList("enum0", "enum1", "enum2"));
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropCheckConstraint(entityType, attr),
-				"ALTER TABLE \"entity#65a8f5cd\" DROP CONSTRAINT \"entity#65a8f5cd_attr_chk\"");
+				"ALTER TABLE \"entity#fc2928f6\" DROP CONSTRAINT \"entity#fc2928f6_attr_chk\"");
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -356,11 +374,13 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity").getMock();
 		when(refEntityType.getFullyQualifiedName()).thenReturn("refEntityId");
 		when(refEntityType.getName()).thenReturn("refEntity");
+		when(refEntityType.getIdValue()).thenReturn("refEntityId");
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		when(idAttr.getDataType()).thenReturn(STRING);
@@ -370,7 +390,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityType);
 
-		String expectedSql = "CREATE TABLE \"entity#65a8f5cd_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity#65a8f5cd\"(\"idAttr\") ON DELETE CASCADE, FOREIGN KEY (\"attr\") REFERENCES \"refEntity#07f902bf\"(\"refIdAttr\") ON DELETE CASCADE, UNIQUE (\"idAttr\",\"attr\"), UNIQUE (\"order\",\"idAttr\"))";
+		String expectedSql = "CREATE TABLE \"entity#fc2928f6_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity#fc2928f6\"(\"idAttr\") ON DELETE CASCADE, FOREIGN KEY (\"attr\") REFERENCES \"refEntity#07f902bf\"(\"refIdAttr\") ON DELETE CASCADE, UNIQUE (\"idAttr\",\"attr\"), UNIQUE (\"order\",\"idAttr\"))";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityType, attr), expectedSql);
 	}
 
@@ -380,6 +400,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		when(idAttr.getDataType()).thenReturn(STRING);
@@ -389,7 +410,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(entityType);
 
-		String expectedSql = "CREATE TABLE \"entity#65a8f5cd_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity#65a8f5cd\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY (\"attr\") REFERENCES \"entity#65a8f5cd\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, UNIQUE (\"idAttr\",\"attr\"), UNIQUE (\"order\",\"idAttr\"))";
+		String expectedSql = "CREATE TABLE \"entity#fc2928f6_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity#fc2928f6\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY (\"attr\") REFERENCES \"entity#fc2928f6\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, UNIQUE (\"idAttr\",\"attr\"), UNIQUE (\"order\",\"idAttr\"))";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityType, attr), expectedSql);
 	}
 
@@ -399,6 +420,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityName");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -415,6 +437,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -422,7 +445,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(MREF);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		assertEquals(PostgreSqlQueryGenerator.getSqlInsertJunction(entityType, attr),
-				"INSERT INTO \"entityName#65a8f5cd_attr\" (\"order\",\"idAttr\",\"attr\") VALUES (?,?,?)");
+				"INSERT INTO \"entityName#fc2928f6_attr\" (\"order\",\"idAttr\",\"attr\") VALUES (?,?,?)");
 	}
 
 	@Test
@@ -431,6 +454,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -439,7 +463,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.isInversedBy()).thenReturn(true);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		assertEquals(PostgreSqlQueryGenerator.getSqlInsertJunction(entityType, attr),
-				"INSERT INTO \"entityName#65a8f5cd_attr\" (\"order\",\"idAttr\",\"attr\") VALUES (?,?,?)");
+				"INSERT INTO \"entityName#fc2928f6_attr\" (\"order\",\"idAttr\",\"attr\") VALUES (?,?,?)");
 	}
 
 	@Test
@@ -457,6 +481,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
@@ -464,7 +489,7 @@ public class PostgreSqlQueryGeneratorTest
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
-				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityName#65a8f5cd\" AS this");
+				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityName#fc2928f6\" AS this");
 		assertEquals(parameters, Collections.emptyList());
 	}
 
@@ -488,6 +513,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
@@ -495,7 +521,7 @@ public class PostgreSqlQueryGeneratorTest
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
-				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityName#65a8f5cd\" AS this");
+				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityName#fc2928f6\" AS this");
 		assertEquals(parameters, Collections.emptyList());
 	}
 
@@ -507,6 +533,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity").getMock();
 		when(refEntityType.getFullyQualifiedName()).thenReturn("refEntityId");
+		when(refEntityType.getIdValue()).thenReturn("refEntityId");
 		when(refEntityType.getName()).thenReturn("refEntity");
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityType.getAttribute("refIdAttr")).thenReturn(refIdAttr);
@@ -528,6 +555,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
@@ -535,7 +563,7 @@ public class PostgreSqlQueryGeneratorTest
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
-				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntity#07f902bf\" WHERE this.\"idAttr\" = \"refEntity#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entity#65a8f5cd\" AS this");
+				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntity#07f902bf\" WHERE this.\"idAttr\" = \"refEntity#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entity#fc2928f6\" AS this");
 		assertEquals(parameters, Collections.emptyList());
 	}
 
@@ -574,6 +602,7 @@ public class PostgreSqlQueryGeneratorTest
 				.getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getPackage()).thenReturn(package_);
 		when(entityType.getIdAttribute()).thenReturn(masterIdAttr);
 		when(entityType.getAttribute("masterId")).thenReturn(masterIdAttr);
@@ -587,7 +616,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true);
 		assertEquals(sqlSelect,
-				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityName#65a8f5cd_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\", (SELECT array_agg(DISTINCT ARRAY[\"mref2\".\"order\"::TEXT,\"mref2\".\"mref2\"::TEXT]) FROM \"entityName#65a8f5cd_mref2\" AS \"mref2\" WHERE this.\"masterId\" = \"mref2\".\"masterId\") AS \"mref2\" FROM \"entityName#65a8f5cd\" AS this");
+				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityName#fc2928f6_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\", (SELECT array_agg(DISTINCT ARRAY[\"mref2\".\"order\"::TEXT,\"mref2\".\"mref2\"::TEXT]) FROM \"entityName#fc2928f6_mref2\" AS \"mref2\" WHERE this.\"masterId\" = \"mref2\".\"masterId\") AS \"mref2\" FROM \"entityName#fc2928f6\" AS this");
 	}
 
 	@Test
@@ -620,6 +649,7 @@ public class PostgreSqlQueryGeneratorTest
 				.getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entityName");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getPackage()).thenReturn(package_);
 		when(entityType.getIdAttribute()).thenReturn(masterIdAttr);
 		when(entityType.getAttribute("masterId")).thenReturn(masterIdAttr);
@@ -637,7 +667,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true);
 		assertEquals(sqlSelect,
-				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityName#65a8f5cd_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\" FROM \"entityName#65a8f5cd\" AS this ORDER BY \"mref1\" ASC");
+				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityName#fc2928f6_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\" FROM \"entityName#fc2928f6\" AS this ORDER BY \"mref1\" ASC");
 	}
 
 	@DataProvider(name = "getSqlAddColumnProvider")
@@ -650,6 +680,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(refIdAttrStr.getDataType()).thenReturn(STRING);
 		EntityType refEntityTypeString = mock(EntityType.class);
 		when(refEntityTypeString.getFullyQualifiedName()).thenReturn("refEntityStrId");
+		when(refEntityTypeString.getIdValue()).thenReturn("refEntityStrId");
 		when(refEntityTypeString.toString()).thenReturn("refEntityStr");
 		when(refEntityTypeString.getFullyQualifiedName()).thenReturn("refEntityStr");
 		when(refEntityTypeString.getName()).thenReturn("refEntityStr");
@@ -661,7 +692,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(refIdAttrInt.getName()).thenReturn("refIdAttrInt");
 		when(refIdAttrInt.getDataType()).thenReturn(INT);
 		EntityType refEntityTypeInt = mock(EntityType.class);
-		when(refEntityTypeInt.getFullyQualifiedName()).thenReturn("refEntityIntId");
+		when(refEntityTypeInt.getIdValue()).thenReturn("refEntityIntId");
 		when(refEntityTypeInt.toString()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getFullyQualifiedName()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getName()).thenReturn("refEntityInt");
@@ -669,7 +700,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		return Arrays.asList(new Object[] { BOOL, true, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" boolean" },
 				new Object[] { CATEGORICAL, true, refEntityTypeInt,
-						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" integer,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
+						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" integer,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#15855f86\"(\"refIdAttrInt\")" },
 				new Object[] { DATE, true, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" date" },
 				new Object[] { DATE_TIME, true, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" timestamp" },
 				new Object[] { DECIMAL, true, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" double precision" },
@@ -678,7 +709,7 @@ public class PostgreSqlQueryGeneratorTest
 				new Object[] { ENUM, true, null,
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entity#65a8f5cd_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
 				new Object[] { FILE, true, refEntityTypeString,
-						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#7fc12697\"(\"refIdAttrStr\")" },
 				new Object[] { HTML, true, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" text" },
 				new Object[] { HYPERLINK, true, null,
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255)" },
@@ -689,10 +720,10 @@ public class PostgreSqlQueryGeneratorTest
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255)" },
 				new Object[] { TEXT, true, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" text" },
 				new Object[] { XREF, true, refEntityTypeString,
-						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#7fc12697\"(\"refIdAttrStr\")" },
 				new Object[] { BOOL, false, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" boolean NOT NULL" },
 				new Object[] { CATEGORICAL, false, refEntityTypeInt,
-						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" integer NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
+						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" integer NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#15855f86\"(\"refIdAttrInt\")" },
 				new Object[] { DATE, false, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" date NOT NULL" },
 				new Object[] { DATE_TIME, false, null,
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" timestamp NOT NULL" },
@@ -703,7 +734,7 @@ public class PostgreSqlQueryGeneratorTest
 				new Object[] { ENUM, false, null,
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
 				new Object[] { FILE, false, refEntityTypeString,
-						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#7fc12697\"(\"refIdAttrStr\")" },
 				new Object[] { HTML, false, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" text NOT NULL" },
 				new Object[] { HYPERLINK, false, null,
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL" },
@@ -714,19 +745,23 @@ public class PostgreSqlQueryGeneratorTest
 						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL" },
 				new Object[] { TEXT, false, null, "ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" text NOT NULL" },
 				new Object[] { XREF, false, refEntityTypeString,
-						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" })
+						"ALTER TABLE \"entity#65a8f5cd\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity#65a8f5cd_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#7fc12697\"(\"refIdAttrStr\")" })
 				.iterator();
 	}
 
 	@Test(dataProvider = "getSqlAddColumnProvider")
 	public void getSqlAddColumn(AttributeType attrType, boolean nillable, EntityType refEntityType, String sql)
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getIdentifier()).thenReturn("idAttrId");
+
+		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
-		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(idAttr.getIdentifier()).thenReturn("idAttrId");
+		when(entityType.getIdValue()).thenReturn("entityName");
+
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
+
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		when(attr.getDataType()).thenReturn(attrType);
@@ -734,6 +769,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getRefEntity()).thenReturn(refEntityType);
 		when(attr.getEnumOptions())
 				.thenReturn(attrType == ENUM ? newArrayList("enum0, enum1") : Collections.emptyList());
+
 		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr), sql);
 	}
 
@@ -759,6 +795,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityName");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumn(entityType, attr),
@@ -771,6 +808,7 @@ public class PostgreSqlQueryGeneratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getFullyQualifiedName()).thenReturn("entityName");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entityName");
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getIdentifier()).thenReturn("attrId");
 		Attribute idxAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
@@ -865,6 +903,7 @@ public class PostgreSqlQueryGeneratorTest
 	{
 		EntityType result = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityName).getMock();
 		when(result.getName()).thenReturn(entityName);
+		when(result.getIdValue()).thenReturn(entityName);
 		when(result.getIdAttribute()).thenReturn(idAttribute);
 		when(result.getAttribute(idAttributeName)).thenReturn(idAttribute);
 		return result;
