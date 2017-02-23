@@ -1,7 +1,7 @@
 import _ from "underscore";
 import $ from "jquery";
 import {htmlEscape} from "../utils/HtmlUtils";
-import {createRsqlQuery, createRsqlAggregateQuery} from "./rsql"
+import {createRsqlQuery, createRsqlAggregateQuery, encodeRsqlValue} from "./rsql";
 
 const apiBaseUri = '/api/v2/';
 
@@ -43,11 +43,11 @@ export default class RestClientV2 {
 
             if (options.q) {
                 if (options.q.length > 0) {
-                    items.push('q=' + createRsqlQuery(options.q));
+                    items.push('q=' + encodeRsqlValue(createRsqlQuery(options.q)));
                 }
             }
             if (options.aggs) {
-                items.push('aggs=' + createRsqlAggregateQuery(options.aggs));
+                items.push('aggs=' + encodeRsqlValue(createRsqlAggregateQuery(options.aggs)));
             }
             if (options.attrs) {
                 items.push('attrs=' + createAttrsValue(options.attrs));
