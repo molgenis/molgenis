@@ -34,7 +34,7 @@
                         <#if entitiesMeta?has_content>
                             <#list entitiesMeta?keys as fullyQualifiedName>
                                 <option value="${fullyQualifiedName?html}"<#if selectedEntityName?? && (fullyQualifiedName == selectedEntityName)>
-                                        selected</#if>>${entitiesMeta[fullyQualifiedName].name?html}</option>
+                                        selected</#if>>${entitiesMeta[fullyQualifiedName].label?html}</option>
                             </#list>
                         </#if>
                         </select>
