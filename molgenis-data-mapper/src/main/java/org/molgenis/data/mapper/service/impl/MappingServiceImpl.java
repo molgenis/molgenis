@@ -11,7 +11,6 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
