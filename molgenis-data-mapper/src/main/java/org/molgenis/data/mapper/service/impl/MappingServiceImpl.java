@@ -187,7 +187,8 @@ public class MappingServiceImpl implements MappingService
 
 		Repository<Entity> targetRepo;
 		if (!dataService.hasRepository(entityName))
-		{	targetMetaData.setPackage(defaultPackage);
+		{
+			targetMetaData.setPackage(defaultPackage);
 			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
 			permissionSystemService.giveUserEntityPermissions(getContext(), singletonList(targetRepo.getName()));

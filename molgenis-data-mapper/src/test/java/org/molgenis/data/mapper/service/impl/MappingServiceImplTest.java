@@ -14,6 +14,7 @@ import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -83,6 +84,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private PackageFactory packageFactory;
+
+	@Autowired
+	private DefaultPackage defaultPackage;
 
 	@Mock
 	private Repository<Entity> hopRepo;
@@ -289,6 +293,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		@SuppressWarnings("unchecked")
 		Repository<Entity> addEntityRepo = mock(Repository.class);
 		when(addEntityRepo.getName()).thenReturn(entityName);
+
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setName(TARGET_HOP_ENTITY)
 				.setPackage(package_);
 		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
@@ -301,7 +306,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(entityName);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals("base_"+entityName);
 			}
 		}))).thenReturn(addEntityRepo);
 
@@ -324,7 +329,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		String generatedEntityName = mappingService
 				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName, true);
-		assertEquals(generatedEntityName, entityName);
+		assertEquals(generatedEntityName, "base_"+entityName);
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
@@ -587,5 +592,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		{
 			return new AttributeFactory(mock(EntityPopulator.class));
 		}
+
+		@Bean
+		DefaultPackage defaultPackage(){ return new DefaultPackage(new PackageMetadata()); }
 	}
 }

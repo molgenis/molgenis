@@ -9,6 +9,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -204,9 +205,12 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public OntologyTagService ontologyTagService()
+		OntologyTagService ontologyTagService()
 		{
 			return mock(OntologyTagService.class);
 		}
+
+		@Bean
+		DefaultPackage defaultPackage(){ return mock(DefaultPackage.class); }
 	}
 }
