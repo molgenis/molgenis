@@ -51,8 +51,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	protected List<Entity> getBatch(Query<Entity> q)
 	{
 		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, documentType, SearchType.QUERY_AND_FETCH, q, null, null, null,
-						entityType);
+				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_AND_FETCH, entityType, q, null, null, null);
 		return elasticsearchFacade.searchForIds(searchRequestBuilderConsumer, q.toString(), documentType, indexName)
 				.map(idString -> convert(idString, entityType.getIdAttribute()))
 				.map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject)).collect(toList());
