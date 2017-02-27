@@ -70,8 +70,10 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	{
 		EntityType vcfMetaData = tabixVcfRepository.getEntityType();
 
-		vcfMetaData.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
-		repoMetaData.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		vcfMetaData.setId("dummyId");
+		vcfMetaData.getOwnAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		repoMetaData.setId("dummyId");
+		repoMetaData.getOwnAllAttributes().forEach(attr -> attr.setIdentifier(null));
 		assertTrue(EntityUtils.equals(vcfMetaData, repoMetaData));
 	}
 
