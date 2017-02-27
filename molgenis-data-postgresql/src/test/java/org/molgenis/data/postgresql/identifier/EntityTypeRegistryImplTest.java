@@ -41,8 +41,9 @@ public class EntityTypeRegistryImplTest
 		when(entityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getFullyQualifiedName()).thenReturn(entityTypeName);
 		when(entityType.getName()).thenReturn("entityTypeSimpleName");
+		when(entityType.getIdValue()).thenReturn("entityTypeId");
 		entityTypeRegistryImpl.registerEntityType(entityType);
-		String tableName = "entityTypeSimpleName#2b9f9eaf";
+		String tableName = "entityTypeSimpleName#c34894ba";
 		assertEquals(entityTypeRegistryImpl.getEntityTypeDescription(tableName),
 				EntityTypeDescription.create(entityTypeName, ImmutableMap.of()));
 	}
@@ -55,8 +56,9 @@ public class EntityTypeRegistryImplTest
 		when(entityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getFullyQualifiedName()).thenReturn(entityTypeName);
 		when(entityType.getName()).thenReturn("entityTypeSimpleName");
+		when(entityType.getIdValue()).thenReturn("entityTypeId");
 		entityTypeRegistryImpl.registerEntityType(entityType);
-		String tableName = "entityTypeSimpleName#2b9f9eaf_mrefattr";
+		String tableName = "entityTypeSimpleName#c34894ba_mrefattr";
 		assertEquals(entityTypeRegistryImpl.getEntityTypeDescription(tableName),
 				EntityTypeDescription.create(entityTypeName, ImmutableMap.of()));
 	}

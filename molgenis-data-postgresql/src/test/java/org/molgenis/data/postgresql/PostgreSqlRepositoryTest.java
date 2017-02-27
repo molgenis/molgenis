@@ -94,6 +94,7 @@ public class PostgreSqlRepositoryTest
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entity");
 		when(entityType.getName()).thenReturn("entity");
 		when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
@@ -123,6 +124,7 @@ public class PostgreSqlRepositoryTest
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getFullyQualifiedName()).thenReturn("entity");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entity");
 		when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
 		Entity entity0 = mock(Entity.class);
@@ -156,6 +158,7 @@ public class PostgreSqlRepositoryTest
 		EntityType refEntityMeta = mock(EntityType.class);
 		String refEntityName = "RefEntity";
 		when(refEntityMeta.getFullyQualifiedName()).thenReturn("refEntityId");
+		when(refEntityMeta.getIdValue()).thenReturn("refEntityId");
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute(refIdAttrName)).thenReturn(refIdAttr);
@@ -178,6 +181,7 @@ public class PostgreSqlRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		String entityName = "Entity";
 		when(entityType.getFullyQualifiedName()).thenReturn("entityId");
+		when(entityType.getIdValue()).thenReturn("entityId");
 		when(entityType.getName()).thenReturn(entityName);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAttribute(idAttrName)).thenReturn(idAttr);
