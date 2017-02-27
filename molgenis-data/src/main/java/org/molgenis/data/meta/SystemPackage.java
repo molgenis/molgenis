@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 public abstract class SystemPackage extends Package
 {
-	private IdGenerator idGenerator;
+	private String packageName;
 
 	protected SystemPackage(String packageName, PackageMetadata packageMetadata)
 	{
@@ -20,15 +20,16 @@ public abstract class SystemPackage extends Package
 
 	public void bootstrap()
 	{
-		setId(idGenerator.generateId());
 		init();
+		setId(MetaUtils.getFullyQualyfiedName(packageName, getParent()));
 	}
 
 	protected abstract void init();
 
-	@Autowired
-	public void setIdGenerator(IdGenerator idGenerator)
+	public Package setName(String name)
 	{
-		this.idGenerator = requireNonNull(idGenerator);
+		this.packageName = name;
+		super.setName(name);
+		return this;
 	}
 }
