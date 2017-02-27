@@ -1,0 +1,45 @@
+# Table of contents
+
+- [Release Notes](https://github.com/molgenis/molgenis/releases)
+- Tools
+  - [MOLGENIS Data](tools/data.md)
+  - [MOLGENIS Compute](tools/compute.md)
+  - [CoNVaDING](tools/CoNVaDING.md)
+- Documentation
+  - MOLGENIS
+    - [Getting Started](documentation/data-start.md)
+    - [Upload](documentation/guide-upload.md)
+    - [Explore](documentation/guide-explore.md)
+    - [Admin](documentation/guide-admin.md)
+    - [Customize](documentation/guide-customize.md)
+    - [Scripts](documentation/guide-scripts.md)
+    - [SORTA](documentation/guide-SORTA.md)
+  - Script Tools
+    - [REST](documentation/guide-rest.md)
+    - [FAIR](documentation/guide-fair.md)
+    - [Download tool](documentation/guide-emx-download.md)
+    - [R](documentation/guide-R.md)
+    - [Python](documentation/guide-python.md)
+    - [Biobank Directory](documentation/biobank-directory.md)
+  - Reference
+    - [EMX format](documentation/ref-emx.md)
+    - [REST api V1](documentation/ref-rest.md)
+    - [REST api V2](documentation/ref-rest2.md)
+    - [R api](documentation/ref-R.md)
+    - [Install](documentation/install.md)
+- Develop
+  - [Start](develop/start.md)
+  - [IntelliJ](develop/intellij.md)
+  - [Security](develop/security.md)
+  - [Architecture](develop/architecture.md)
+  - [Technologies](develop/technologies.md)
+  - [UX Frontend](develop/frontend.md)
+  - [Data Backend](develop/backend.md)
+  - [Annotators](develop/annotators.md)
+  - [Services](develop/service.md)
+  - [Migrations](develop/migrations.md)
+  - [Jobs](develop/jobs.md)
+- Support
+  - [Organisation](support/organisation.md)
+  - [The Team](support/team.md)
+  - [Third party software](support/third.md)
