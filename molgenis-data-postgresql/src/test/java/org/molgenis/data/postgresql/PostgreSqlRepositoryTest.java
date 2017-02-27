@@ -94,6 +94,7 @@ public class PostgreSqlRepositoryTest
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entity");
 		when(entityType.getName()).thenReturn("entity");
 		when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
@@ -123,6 +124,7 @@ public class PostgreSqlRepositoryTest
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getFullyQualifiedName()).thenReturn("entity");
 		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getIdValue()).thenReturn("entity");
 		when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
 		Entity entity0 = mock(Entity.class);
