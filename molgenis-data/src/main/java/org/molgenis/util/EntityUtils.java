@@ -222,7 +222,7 @@ public class EntityUtils
 	{
 		if (entityType == null && otherEntityType != null) return false;
 		if (entityType != null && otherEntityType == null) return false;
-		if (!entityType.getFullyQualifiedName().equals(otherEntityType.getFullyQualifiedName())) return false;
+		if (!entityType.getId().equals(otherEntityType.getId())) return false;
 		if (!entityType.getName().equals(otherEntityType.getName())) return false;
 		if (!Objects.equals(entityType.getLabel(), otherEntityType.getLabel())) return false;
 		if (!Objects.equals(entityType.getDescription(), otherEntityType.getDescription())) return false;
@@ -241,12 +241,10 @@ public class EntityUtils
 		Package otherPackage = otherEntityType.getPackage();
 		if (package_ == null && otherPackage != null) return false;
 		if (package_ != null && otherPackage == null) return false;
-
-		//FIXME
-		//if (!package_.getIdValue().equals(otherPackage.getIdValue()))
-		//{
-		//	return false;
-		//}
+		if (package_ != null && !package_.getIdValue().equals(otherPackage.getIdValue()))
+		{
+			return false;
+		}
 
 		// compare id attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
 		Attribute ownIdAttribute = entityType.getOwnIdAttribute();
@@ -286,7 +284,7 @@ public class EntityUtils
 				.equals(otherExtendsEntityType.getFullyQualifiedName())) return false;
 
 		// compare attributes
-		if (!equals(entityType.getOwnAttributes(), otherEntityType.getOwnAttributes())) return false;
+		if (!equals(entityType.getOwnAllAttributes(), otherEntityType.getOwnAllAttributes())) return false;
 
 		// compare tag identifiers
 		List<Tag> tags = newArrayList(entityType.getTags());

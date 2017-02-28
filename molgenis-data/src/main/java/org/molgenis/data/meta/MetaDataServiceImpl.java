@@ -762,6 +762,18 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
+		public String getId()
+		{
+			return entityType.getId();
+		}
+
+		@Override
+		public EntityType setId(String id)
+		{
+			return entityType.setId(id);
+		}
+
+		@Override
 		public String getName()
 		{
 			return entityType.getName();
