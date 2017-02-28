@@ -306,7 +306,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals("base_"+entityName);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(defaultPackage.PACKAGE_DEFAULT+"_"+entityName);
 			}
 		}))).thenReturn(addEntityRepo);
 
@@ -329,7 +329,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		String generatedEntityName = mappingService
 				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName, true);
-		assertEquals(generatedEntityName, "base_"+entityName);
+		assertEquals(generatedEntityName, defaultPackage.PACKAGE_DEFAULT+"_"+entityName);
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
