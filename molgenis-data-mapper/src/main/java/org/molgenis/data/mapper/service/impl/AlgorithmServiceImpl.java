@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.Double.parseDouble;
-import static java.lang.Long.parseLong;
 import static java.lang.Math.round;
 import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
@@ -40,6 +39,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.data.DataConverter.toBoolean;
+import static org.molgenis.data.meta.AttributeType.*;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -108,7 +108,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Object derivedValue;
 			try
 			{
-				Object result = derivedValue = jsMagmaScriptEvaluator.eval(algorithm, entity);
+				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
 				derivedValue = convert(result, targetAttribute);
 			}
 			catch (RuntimeException e)
@@ -180,17 +180,16 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				Collection<Object> valueIds = (Collection<Object>) value;
 
 				convertedValue = valueIds.stream().map(valueId -> entityManager
-						.getReference(attr.getRefEntity(), convert(valueId, attr.getRefEntity().getIdAttribute())))
-						.collect(Collectors.toList());
+						.getReference(attr.getRefEntity(), convert(valueId, attr.getRefEntity().getIdAttribute()))).collect(Collectors.toList());
 				break;
 			case DATE:
-				convertedValue = value != null ? new Date(Double.valueOf(value.toString()).longValue()) : null;
+				convertedValue = convertToDate(value);
 				break;
 			case DATE_TIME:
-				convertedValue = value != null ? new Timestamp(Double.valueOf(value.toString()).longValue()) : null;
+				convertedValue = convertToDateTime(value);
 				break;
 			case DECIMAL:
-				convertedValue = value != null ? parseDouble(value.toString()) : null;
+				convertedValue = convertToDouble(value);
 				break;
 			case EMAIL:
 			case ENUM:
@@ -202,10 +201,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				convertedValue = value != null ? value.toString() : null;
 				break;
 			case INT:
-				convertedValue = value != null ? toIntExact(round(parseDouble(value.toString()))) : null;
+				convertedValue = convertToInteger(value);
 				break;
 			case LONG:
-				convertedValue = value != null ? round(parseDouble(value.toString())) : null;
+				convertedValue = convertToLong(value);
 				break;
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
@@ -213,6 +212,87 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 
+		return convertedValue;
+	}
+
+	private Date convertToDate(Object value)
+	{
+		try
+		{
+			return value != null ? new Date(Double.valueOf(value.toString()).longValue()) : null;
+		}
+		catch (NumberFormatException e)
+		{
+			LOG.debug("", e);
+			throw new AlgorithmException(
+					format("'%s' can't be converted to type '%s'", value.toString(), DATE.toString()));
+		}
+	}
+
+	private Timestamp convertToDateTime(Object value)
+	{
+		try
+		{
+			return value != null ? new Timestamp(Double.valueOf(value.toString()).longValue()) : null;
+		}
+		catch (NumberFormatException e)
+		{
+			LOG.debug("", e);
+			throw new AlgorithmException(
+					format("'%s' can't be converted to type '%s'", value.toString(), DATE_TIME.toString()));
+		}
+	}
+
+	private Double convertToDouble(Object value)
+	{
+		try
+		{
+			return value != null ? parseDouble(value.toString()) : null;
+		}
+		catch (NumberFormatException e)
+		{
+			LOG.debug("", e);
+			throw new AlgorithmException(
+					format("'%s' can't be converted to type '%s'", value.toString(), DECIMAL.toString()));
+		}
+	}
+
+	private Integer convertToInteger(Object value)
+	{
+		Integer convertedValue;
+		try
+		{
+			convertedValue = value != null ? toIntExact(round(parseDouble(value.toString()))) : null;
+		}
+		catch (NumberFormatException e)
+		{
+			LOG.debug("", e);
+			throw new AlgorithmException(
+					format("'%s' can't be converted to type '%s'", value.toString(), INT.toString()));
+		}
+		catch (ArithmeticException e)
+		{
+			LOG.debug("", e);
+			throw new AlgorithmException(
+					format("'%s' is larger than the maximum allowed value for type '%s'", value.toString(),
+							INT.toString()));
+		}
+		return convertedValue;
+	}
+
+	private Long convertToLong(Object value)
+	{
+		Long convertedValue;
+		try
+		{
+			convertedValue = value != null ? round(parseDouble(value.toString())) : null;
+		}
+		catch (NumberFormatException e)
+		{
+			LOG.debug("", e);
+			throw new AlgorithmException(
+					format("'%s' can't be converted to type '%s'", value.toString(), LONG.toString()));
+		}
 		return convertedValue;
 	}
 }
