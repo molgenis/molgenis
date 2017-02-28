@@ -163,6 +163,10 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
+			model.addAttribute("genomicDataSettings", genomicDataSettings);
+			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
+
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
 		}
