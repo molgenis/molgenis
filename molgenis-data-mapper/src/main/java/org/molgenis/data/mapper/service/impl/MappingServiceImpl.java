@@ -185,19 +185,20 @@ public class MappingServiceImpl implements MappingService
 		}
 
 		Repository<Entity> targetRepo;
-		if (!dataService.hasRepository(entityName) && !dataService.hasRepository("base_"+entityName))
+		if (!dataService.hasRepository(entityName) && !dataService.hasRepository(defaultPackage.PACKAGE_DEFAULT+"_"+entityName))
 		{
 			targetMetaData.setPackage(defaultPackage);
 			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
 			permissionSystemService.giveUserEntityPermissions(getContext(), singletonList(targetRepo.getName()));
-		}else
+		}
+		else
 		{
 			targetMetaData.setPackage(null);
 			//if the entity is in the base package, this should be added to the name
-			if(dataService.hasRepository("base_"+entityName))
+			if(dataService.hasRepository(defaultPackage.PACKAGE_DEFAULT+"_"+entityName))
 			{
-				entityName = "base_" + entityName;
+				entityName = defaultPackage.PACKAGE_DEFAULT+"_"+entityName;
 				targetMetaData.setName(entityName);
 				targetMetaData.setLabel(entityName);
 			}
