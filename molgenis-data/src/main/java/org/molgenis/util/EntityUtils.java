@@ -371,7 +371,13 @@ public class EntityUtils
 
 		if (checkIdentifier) if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
 		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
-		if (!Objects.equals(attr.getEntity().getId(), otherAttr.getEntity().getId())) return false;
+
+		EntityType entity = attr.getEntity();
+		EntityType otherEntity = otherAttr.getEntity();
+		if (entity == null && otherEntity != null) return false;
+		if (entity != null && otherEntity == null) return false;
+		if (entity != null && !entity.getId().equals(otherEntity.getId())) return false;
+
 		if (!Objects.equals(attr.getSequenceNumber(), otherAttr.getSequenceNumber())) return false;
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
