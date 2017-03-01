@@ -2,6 +2,7 @@ package org.molgenis.dataexplorer.controller;
 
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
@@ -112,27 +113,61 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
+			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
+		StringBuilder message = new StringBuilder("");
+
 		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
 				.filter(entityType -> !entityType.isAbstract())
 				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
-		if (selectedEntityName != null)
+		if (selectedEntityId != null)
 		{
-			entityExists = dataService.hasRepository(selectedEntityName);
-			hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
+			if (selectedEntityName != null)
+			{
+				message.append("Cannot initialize the dataexplorer with both an entityName and entityId url parameter");
+			}
+			else
+			{
+				EntityType entityType = dataService.getMeta().getEntityTypeById(selectedEntityId);
+				if (entityType == null)
+				{
+					message.append("Entity does not exist or you do not have permission on this entity");
+				}
+				else
+				{
+					selectedEntityName = entityType.getFullyQualifiedName();
+				}
+			}
+			if (selectedEntityName != null)
+			{
+				checkExistsAndPermission(selectedEntityName, message, entityExists, hasEntityPermission);
+			}
 		}
+		if (StringUtils.isNotEmpty(model.toString()) {
+		model.addAttribute("warningMessage", message.toString());
+	}
+		model.addAttribute("selectedEntityName", selectedEntityName);
+		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
+
+		return "view-dataexplorer";
+	}
+
+	private void checkExistsAndPermission(@RequestParam(value = "entity", required = false) String selectedEntityName,
+			StringBuilder message, boolean entityExists, boolean hasEntityPermission)
+	{
+		entityExists = dataService.hasRepository(selectedEntityName);
+		hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
 			if (selectedEntityName != null)
 			{
-				StringBuilder message = new StringBuilder(
+				message.append(
 						"Entity does not exist or you do not have permission on this entity");
 				if (!SecurityUtils.currentUserIsAuthenticated())
 				{
@@ -142,13 +177,8 @@ public class DataExplorerController extends MolgenisPluginController
 				{
 					message.append(", please specify the fully qualified entity name");
 				}
-				model.addAttribute("warningMessage", message.toString());
 			}
 		}
-		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
-
-		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
