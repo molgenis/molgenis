@@ -4,6 +4,11 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.IdentifierLookupService;
+import org.molgenis.data.meta.IdentifierLookupServiceImpl;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -63,10 +68,15 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		{
 			return mock(GrantedAuthoritiesMapper.class);
 		}
+
+		@Bean
+		public IdentifierLookupService identifierLookupService(){
+			return new IdentifierLookupServiceImpl(dataService());
+		}
 	}
 
 	@Autowired
-	private PermissionManagerServiceImpl pluginPermissionManagerService;
+	private PermissionManagerService pluginPermissionManagerService;
 
 	@Autowired
 	private DataService dataService;
@@ -162,14 +172,21 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 		plugin1 = when(mock(MolgenisPlugin.class).getId()).thenReturn("1").getMock();
 		when(plugin1.getName()).thenReturn("plugin1");
+		when(plugin1.getId()).thenReturn("plugin1");
 		plugin2 = when(mock(MolgenisPlugin.class).getId()).thenReturn("2").getMock();
 		when(plugin2.getName()).thenReturn("plugin2");
+		when(plugin1.getId()).thenReturn("plugin2");
 		plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
-		when(plugin3.getName()).thenReturn("plugin3n");
+		when(plugin3.getName()).thenReturn("plugin3");
+		when(plugin1.getId()).thenReturn("plugin3");
 		when(molgenisPluginRegistry.iterator())
 				.thenReturn(Arrays.<MolgenisPlugin>asList(plugin1, plugin2, plugin3).iterator());
 
-		when(dataService.getEntityNames()).thenReturn(Stream.empty());
+		when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(Stream.empty());
+		when(dataService
+				.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), anyObject(),
+						eq(new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+								.field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class))).thenReturn(Stream.empty());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)

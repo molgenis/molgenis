@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.script.*;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 
@@ -20,6 +24,7 @@ public class NashornScriptEngine
 	private static final Logger LOG = LoggerFactory.getLogger(NashornScriptEngine.class);
 
 	private static final List<String> RESOURCE_NAMES;
+	private static Pattern PATTERN_NATIVE_DATE = Pattern.compile("\\[Date (.*?)\\]");
 
 	static
 	{
@@ -97,6 +102,7 @@ public class NashornScriptEngine
 		LOG.debug("Initialized Nashorn script engine");
 	}
 
+
 	private static Object convertNashornValue(Object nashornValue)
 	{
 		if (nashornValue == null)
@@ -114,7 +120,21 @@ public class NashornScriptEngine
 			}
 			else
 			{
-				throw new RuntimeException("Unable to convert [ScriptObjectMirror]");
+				// context: https://github.com/molgenis/molgenis/issues/5824
+				// returning new Date() in JavaScript results in a ScriptObjectMirror without values that wraps a
+				// NativeDate. The underlying NativeDate cannot be accessed/unwrapped so we use the toString() and
+				// parse it to a Java Date.
+				Matcher matcher = PATTERN_NATIVE_DATE.matcher(scriptObjectMirror.toString());
+				if (matcher.matches())
+				{
+					String dateString = matcher.group(1);
+					Calendar calendar = DatatypeConverter.parseDateTime(dateString);
+					convertedValue = calendar.getTimeInMillis();
+				}
+				else
+				{
+					throw new RuntimeException("Unable to convert [ScriptObjectMirror]");
+				}
 			}
 		}
 		else

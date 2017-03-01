@@ -53,15 +53,15 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
-		return decoratedRepositoryCollection.getEntityNames();
+		return decoratedRepositoryCollection.getEntityIds();
 	}
 
 	@Override
-	public Repository<Entity> getRepository(String name)
+	public Repository<Entity> getRepository(String id)
 	{
-		Repository<Entity> repository = decoratedRepositoryCollection.getRepository(name);
+		Repository<Entity> repository = decoratedRepositoryCollection.getRepository(id);
 		return repository != null ? repositoryDecoratorFactory.createDecoratedRepository(repository) : null;
 	}
 
@@ -73,9 +73,9 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public boolean hasRepository(String name)
+	public boolean hasRepository(String id)
 	{
-		return decoratedRepositoryCollection.hasRepository(name);
+		return decoratedRepositoryCollection.hasRepository(id);
 	}
 
 	@Override

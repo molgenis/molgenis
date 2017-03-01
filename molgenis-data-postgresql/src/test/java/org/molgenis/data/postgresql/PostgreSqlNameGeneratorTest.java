@@ -28,6 +28,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		assertEquals(PostgreSqlNameGenerator.getTableName(entityType), expectedTableName);
 	}
@@ -49,6 +50,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		assertEquals(PostgreSqlNameGenerator.getTableName(entityType, quoteIdentifiers), expectedTableName);
 	}
@@ -74,6 +76,7 @@ public class PostgreSqlNameGeneratorTest
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(attr.getName()).thenReturn(attrName);
 		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr), expectedJunctionTableName);
 	}
@@ -107,6 +110,7 @@ public class PostgreSqlNameGeneratorTest
 		when(attr.getName()).thenReturn(attrName);
 		Attribute idxAttr = mock(Attribute.class);
 		when(idxAttr.getIdentifier()).thenReturn("9876543210-0123456789-9876543210");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(idxAttr.getName()).thenReturn(indexAttrName);
 		assertEquals(PostgreSqlNameGenerator.getJunctionTableIndexName(entityType, attr, idxAttr),
 				expectedJunctionTableName);
@@ -200,6 +204,7 @@ public class PostgreSqlNameGeneratorTest
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(attr.getName()).thenReturn(attrName);
 		assertEquals(PostgreSqlNameGenerator.getPrimaryKeyName(entityType, attr), expectedPrimaryKeyName);
 	}
@@ -222,6 +227,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
@@ -247,6 +253,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
@@ -272,6 +279,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
@@ -292,6 +300,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		assertEquals(PostgreSqlNameGenerator.getFunctionValidateUpdateName(entityType),
 				expectedFunctionValidateUpdateName);
@@ -310,6 +319,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
+		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(entityType.getName()).thenReturn(entitySimpleName);
 		assertEquals(PostgreSqlNameGenerator.getUpdateTriggerName(entityType), expectedUpdateTriggerName);
 	}

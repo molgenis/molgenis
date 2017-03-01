@@ -83,7 +83,8 @@ public class XmlMolgenisUiPluginTest
 	@Test
 	public void getParentMenu()
 	{
-		assertEquals(new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, molgenisPermissionService).getParentMenu(),
+		assertEquals(
+				new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, molgenisPermissionService).getParentMenu(),
 				molgenisUiMenu);
 	}
 

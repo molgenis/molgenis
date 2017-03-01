@@ -232,6 +232,12 @@ public class CmdLineDataService implements DataService
 	}
 
 	@Override
+	public Stream<Object> getEntityIds()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
 		throw new UnsupportedOperationException();

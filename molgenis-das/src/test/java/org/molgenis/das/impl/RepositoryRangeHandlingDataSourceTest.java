@@ -68,9 +68,11 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		EntityType metaData = entityTypeFactory.create().setFullyQualifiedName("dataset");
+		EntityType metaData = entityTypeFactory.create().setName("dataset");
 		when(dataService.getEntityType("dataset")).thenReturn(metaData);
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, metaData)).thenReturn("POS");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, metaData)).thenReturn("STOP");
 
 		DasType type = new DasType("0", "", "", "type");
 		DasMethod method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
@@ -94,9 +96,13 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 				null);
 
 		Query<Entity> q = new QueryImpl<>().eq("CHROM", "1");
+		q.and().nest();
+		q.le("POS", 100000);
+		q.and().ge("STOP", 1);
+		q.unnest();
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
-		EntityType emd = entityTypeFactory.create().setFullyQualifiedName("DAS");
+		EntityType emd = entityTypeFactory.create().setName("DAS");
 		emd.addAttribute(attrMetaFactory.create().setName("STOP").setDataType(INT));
 		emd.addAttribute(attrMetaFactory.create().setName("linkout"));
 		emd.addAttribute(attrMetaFactory.create().setName("NAME"), ROLE_LABEL);

@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.support.StaticEntity;
 
 import static com.google.common.collect.Iterables.concat;
@@ -8,8 +9,7 @@ import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
-import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
+import static org.molgenis.data.meta.model.PackageMetadata.*;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
@@ -44,7 +44,7 @@ public class Package extends StaticEntity
 	public Package(String packageId, EntityType entityType)
 	{
 		super(entityType);
-		setName(packageId);
+		setId(packageId);
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class Package extends StaticEntity
 	public static Package newInstance(Package package_)
 	{
 		Package packageCopy = new Package(package_.getEntityType());
-		packageCopy.setFullyQualifiedName(package_.getFullyQualifiedName());
+		packageCopy.setId(package_.getId());
 		packageCopy.setName(package_.getName());
 		packageCopy.setLabel(package_.getLabel());
 		packageCopy.setDescription(package_.getDescription());
@@ -67,6 +67,17 @@ public class Package extends StaticEntity
 		return packageCopy;
 	}
 
+	public String getId()
+	{
+		return getString(ID);
+	}
+
+	public Package setId(String id)
+	{
+		set(ID, id);
+		return this;
+	}
+
 	/**
 	 * Gets the name of the package without the trailing parent packages
 	 *
@@ -74,13 +85,12 @@ public class Package extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(PackageMetadata.SIMPLE_NAME);
+		return getString(PackageMetadata.NAME);
 	}
 
-	public Package setName(String simpleName)
+	public Package setName(String name)
 	{
-		set(PackageMetadata.SIMPLE_NAME, simpleName);
-		updateFullName();
+		set(PackageMetadata.NAME, name);
 		return this;
 	}
 
@@ -97,7 +107,6 @@ public class Package extends StaticEntity
 	public Package setParent(Package parentPackage)
 	{
 		set(PackageMetadata.PARENT, parentPackage);
-		updateFullName();
 		return this;
 	}
 
@@ -118,13 +127,7 @@ public class Package extends StaticEntity
 	 */
 	public String getFullyQualifiedName()
 	{
-		return getString(PackageMetadata.FULL_NAME);
-	}
-
-	public Package setFullyQualifiedName(String fullName)
-	{
-		set(PackageMetadata.FULL_NAME, fullName);
-		return this;
+		return MetaUtils.getFullyQualyfiedName(getName(), getParent());
 	}
 
 	/**
@@ -226,25 +229,6 @@ public class Package extends StaticEntity
 			package_ = package_.getParent();
 		}
 		return package_;
-	}
-
-	private void updateFullName()
-	{
-		String simpleName = getName();
-		if (simpleName != null)
-		{
-			String fullName;
-			Package parentPackage = getParent();
-			if (parentPackage != null)
-			{
-				fullName = parentPackage.getFullyQualifiedName() + PACKAGE_SEPARATOR + simpleName;
-			}
-			else
-			{
-				fullName = simpleName;
-			}
-			set(PackageMetadata.FULL_NAME, fullName);
-		}
 	}
 
 	@Override

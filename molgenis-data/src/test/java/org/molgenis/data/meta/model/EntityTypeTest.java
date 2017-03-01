@@ -12,7 +12,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
@@ -48,8 +49,6 @@ public class EntityTypeTest
 	@Test
 	public void addSequenceNumberNull()
 	{
-		EntityType entityType = mock(EntityType.class);
-
 		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
@@ -60,15 +59,13 @@ public class EntityTypeTest
 		when(attr3.getSequenceNumber()).thenReturn(2);
 		when(attribute.getSequenceNumber()).thenReturn(null);
 
-		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		EntityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
 		verify(attribute).setSequenceNumber(3);
 	}
 
 	@Test
 	public void addSequenceNumberNullAndOtherNull()
 	{
-		EntityType entityType = mock(EntityType.class);
-
 		Attribute attr1 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Attribute attr2 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		Attribute attr3 = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
@@ -79,34 +76,8 @@ public class EntityTypeTest
 		when(attr3.getSequenceNumber()).thenReturn(null);
 		when(attribute.getSequenceNumber()).thenReturn(null);
 
-		entityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
+		EntityType.addSequenceNumber(attribute, Lists.newArrayList(attr1, attr2, attr3));
 		verify(attribute).setSequenceNumber(0);
-	}
-
-	@Test
-	public void setNameNoSimpleNameNoLabel()
-	{
-		EntityType entityType = new EntityType(createEntityTypeMeta());
-		String name = "name";
-		entityType.setFullyQualifiedName(name);
-		assertEquals(entityType.getFullyQualifiedName(), name);
-		assertEquals(entityType.getName(), name);
-		assertEquals(entityType.getLabel(), name);
-	}
-
-	@Test
-	public void setNameExistingSimpleNameExistingLabel()
-	{
-		EntityType entityType = new EntityType(createEntityTypeMeta());
-		String label = "label";
-		String simpleName = "simpleName";
-		String name = "name";
-		entityType.setLabel(label);
-		entityType.setName(simpleName);
-		entityType.setFullyQualifiedName(name);
-		assertEquals(entityType.getFullyQualifiedName(), name);
-		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getLabel(), label);
 	}
 
 	@Test
@@ -116,9 +87,7 @@ public class EntityTypeTest
 		String simpleName = "simpleName";
 		entityType.setName(simpleName);
 		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
-		assertEquals(entityType.getFullyQualifiedName(), simpleName);
-		assertEquals(entityType.getString(FULL_NAME), simpleName);
+		assertEquals(entityType.getString(NAME), simpleName);
 		assertEquals(entityType.getLabel(), simpleName);
 		assertEquals(entityType.getString(LABEL), simpleName);
 	}
@@ -129,13 +98,10 @@ public class EntityTypeTest
 		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String label = "label";
 		String simpleName = "simpleName";
-		entityType.setFullyQualifiedName("name");
 		entityType.setLabel(label);
 		entityType.setName(simpleName);
 		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
-		assertEquals(entityType.getFullyQualifiedName(), simpleName);
-		assertEquals(entityType.getString(FULL_NAME), simpleName);
+		assertEquals(entityType.getString(NAME), simpleName);
 		assertEquals(entityType.getLabel(), label);
 		assertEquals(entityType.getString(LABEL), label);
 	}
@@ -239,7 +205,7 @@ public class EntityTypeTest
 	public void addAttributeWithDuplicateName()
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
-		entityType.setFullyQualifiedName("myEntity");
+		entityType.setName("myEntity");
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
 		entityType.addAttribute(attr0);
@@ -253,8 +219,7 @@ public class EntityTypeTest
 		Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
 		Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.FULL_NAME)).thenReturn(strAttr);
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.SIMPLE_NAME)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.NAME)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.PACKAGE)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(LABEL)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.DESCRIPTION)).thenReturn(strAttr);

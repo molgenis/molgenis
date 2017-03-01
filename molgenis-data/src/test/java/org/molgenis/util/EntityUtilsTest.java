@@ -4,11 +4,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +24,81 @@ import static org.testng.Assert.*;
 
 public class EntityUtilsTest
 {
+	@DataProvider(name = "testEqualsEntityTypeProvider")
+	public static Iterator<Object[]> testEqualsEntityTypeProvider()
+	{
+		EntityType entityType = createEqualsEntityType();
+
+		List<Object[]> dataList = new ArrayList<>();
+		dataList.add(new Object[] { entityType, entityType, true });
+
+		EntityType otherIdEntityType = createEqualsEntityType();
+		when(otherIdEntityType.getId()).thenReturn("otherId");
+		dataList.add(new Object[] { entityType, otherIdEntityType, false });
+
+		EntityType otherNameEntityType = createEqualsEntityType();
+		when(otherNameEntityType.getName()).thenReturn("otherName");
+		dataList.add(new Object[] { entityType, otherNameEntityType, false });
+
+		EntityType otherLabelEntityType = createEqualsEntityType();
+		when(otherLabelEntityType.getName()).thenReturn("otherLabel");
+		dataList.add(new Object[] { entityType, otherLabelEntityType, false });
+
+		EntityType otherAbstractEntityType = createEqualsEntityType();
+		when(otherAbstractEntityType.isAbstract()).thenReturn(false);
+		dataList.add(new Object[] { entityType, otherAbstractEntityType, false });
+
+		EntityType otherBackendEntityType = createEqualsEntityType();
+		when(otherBackendEntityType.getBackend()).thenReturn("otherBackend");
+		dataList.add(new Object[] { entityType, otherBackendEntityType, false });
+
+		EntityType otherPackageEntityType = createEqualsEntityType();
+		when(otherPackageEntityType.getPackage()).thenReturn(mock(Package.class));
+		dataList.add(new Object[] { entityType, otherPackageEntityType, false });
+
+		EntityType otherDescriptionEntityType = createEqualsEntityType();
+		when(otherDescriptionEntityType.getDescription()).thenReturn("otherDescription");
+		dataList.add(new Object[] { entityType, otherDescriptionEntityType, false });
+
+		EntityType otherAttributesEntityType = createEqualsEntityType();
+		when(otherAttributesEntityType.getOwnAllAttributes()).thenReturn(singletonList(mock(Attribute.class)));
+		dataList.add(new Object[] { entityType, otherAttributesEntityType, false });
+
+		EntityType otherTagsEntityType = createEqualsEntityType();
+		when(otherTagsEntityType.getTags()).thenReturn(singletonList(mock(Tag.class)));
+		dataList.add(new Object[] { entityType, otherTagsEntityType, false });
+
+		EntityType otherExtendsEntityType = createEqualsEntityType();
+		when(otherExtendsEntityType.getExtends()).thenReturn(mock(EntityType.class));
+		dataList.add(new Object[] { entityType, otherExtendsEntityType, false });
+
+		return dataList.iterator();
+	}
+
+	private static EntityType createEqualsEntityType()
+	{
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.toString()).thenReturn("entity");
+		when(entityType.getId()).thenReturn("id");
+		when(entityType.getName()).thenReturn("name");
+		when(entityType.getLabel()).thenReturn("label");
+		when(entityType.isAbstract()).thenReturn(true);
+		when(entityType.getBackend()).thenReturn("backend");
+		when(entityType.getPackage()).thenReturn(null);
+		when(entityType.getDescription()).thenReturn(null);
+		when(entityType.getOwnAllAttributes()).thenReturn(emptyList());
+		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
+		when(entityType.getTags()).thenReturn(emptyList());
+		when(entityType.getExtends()).thenReturn(null);
+		return entityType;
+	}
+
+	@Test(dataProvider = "testEqualsEntityTypeProvider")
+	public void testEqualsEntityType(EntityType entityType, EntityType otherEntityType, boolean equals) throws Exception
+	{
+		assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
+	}
+
 	@Test
 	public void isEmptyNoAttributes()
 	{

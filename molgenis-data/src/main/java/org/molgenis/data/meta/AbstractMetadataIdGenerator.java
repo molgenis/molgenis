@@ -12,8 +12,8 @@ public abstract class AbstractMetadataIdGenerator implements MetadataIdGenerator
 	 * @param id identifier of variable length
 	 * @return hashcode
 	 */
-	protected String generateHashcode(String id)
+	protected String generateHashcode(Object id)
 	{
-		return Hashing.crc32().hashString(id, UTF_8).toString();
+		return Hashing.crc32().hashString(id.toString(), UTF_8).toString();
 	}
 }

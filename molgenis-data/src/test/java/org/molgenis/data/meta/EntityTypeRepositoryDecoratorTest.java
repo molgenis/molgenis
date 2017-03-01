@@ -74,6 +74,8 @@ public class EntityTypeRepositoryDecoratorTest
 	private EntityType entityType3;
 	@Mock
 	private EntityType entityType4;
+	@Mock
+	private IdentifierLookupService identifierLookupService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -85,7 +87,7 @@ public class EntityTypeRepositoryDecoratorTest
 		when(entityType3.getFullyQualifiedName()).thenReturn(entityName3);
 		when(entityType4.getFullyQualifiedName()).thenReturn(entityName4);
 		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, systemEntityTypeRegistry,
-				permissionService);
+				permissionService, identifierLookupService);
 	}
 
 	@Test

@@ -55,7 +55,7 @@ public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getRepositories()
 	{
-		List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityNames());
+		List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityIds());
 		assertNotNull(repositories);
 		assertEquals(repositories.size(), 3);
 	}

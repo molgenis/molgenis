@@ -7,6 +7,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.populate.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,14 @@ public class RepositoryCopier
 
 	private final MetaDataService metaDataService;
 	private final AttributeFactory attrFactory;
+	private final IdGenerator idGenerator;
 
 	@Autowired
-	public RepositoryCopier(MetaDataService metaDataService, AttributeFactory attrFactory)
+	public RepositoryCopier(MetaDataService metaDataService, AttributeFactory attrFactory, IdGenerator idGenerator)
 	{
 		this.metaDataService = requireNonNull(metaDataService);
 		this.attrFactory = requireNonNull(attrFactory);
+		this.idGenerator = idGenerator;
 	}
 
 	@Transactional
@@ -49,6 +52,7 @@ public class RepositoryCopier
 		emd.setName(simpleName);
 		emd.setPackage(pack);
 		emd.setLabel(label);
+		emd.setId(idGenerator.generateId());
 		// create repository for copied entity meta data
 		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
 

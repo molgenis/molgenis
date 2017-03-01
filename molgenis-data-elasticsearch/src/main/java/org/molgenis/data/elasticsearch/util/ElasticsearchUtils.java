@@ -143,7 +143,7 @@ public class ElasticsearchUtils
 			LOG.trace("Counting Elasticsearch [{}] docs", type);
 		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityType);
+		generator.buildSearchRequest(searchRequestBuilder, SearchType.COUNT, entityType, q, null, null, null);
 		SearchResponse searchResponse = searchRequestBuilder.get();
 		if (searchResponse.getFailedShards() > 0)
 		{
@@ -244,13 +244,12 @@ public class ElasticsearchUtils
 		LOG.debug("Flushed Elasticsearch index [{}]", indexName);
 	}
 
-	public SearchResponse search(SearchType searchType, SearchRequest request, EntityType entityType,
-			String documentType, String indexName)
+	public SearchResponse search(SearchType searchType, SearchRequest request, String indexName)
 	{
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
-		generator
-				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getAggregateField1(),
-						request.getAggregateField2(), request.getAggregateFieldDistinct(), entityType);
+		generator.buildSearchRequest(builder, searchType, request.getEntityType(), request.getQuery(),
+				request.getAggregateAttribute1(), request.getAggregateAttribute2(),
+				request.getAggregateAttributeDistinct());
 		LOG.trace("*** REQUEST\n{}", builder);
 		SearchResponse response = builder.get();
 		LOG.trace("*** RESPONSE\n{}", response);

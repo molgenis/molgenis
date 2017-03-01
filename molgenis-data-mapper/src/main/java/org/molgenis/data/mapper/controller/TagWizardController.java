@@ -81,8 +81,8 @@ public class TagWizardController extends MolgenisPluginController
 	@RequestMapping
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
-		List<String> entityNames = dataService.findAll(ENTITY_TYPE_META_DATA)
-				.map(e -> e.getString(EntityTypeMetadata.FULL_NAME)).collect(toList());
+		List<String> entityNames = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
+				.map(entityType -> entityType.getFullyQualifiedName()).collect(toList());
 
 		if (StringUtils.isEmpty(target))
 		{

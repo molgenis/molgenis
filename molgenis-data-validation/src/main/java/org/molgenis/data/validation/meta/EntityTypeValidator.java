@@ -24,7 +24,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.NameValidator.validateName;
+import static org.molgenis.data.meta.NameValidator.validateEntityOrPackageName;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -270,7 +270,7 @@ public class EntityTypeValidator
 		{
 			try
 			{
-				validateName(entityType.getName());
+				validateEntityOrPackageName(entityType.getName());
 			}
 			catch (MolgenisDataException e)
 			{

@@ -6,10 +6,10 @@
     $(function () {
         var onValueChange = function (event) {
             // check if user has read or write permission on entity
-            api.getAsync('/api/v1/' + event.value.fullName + '/meta', {'expand': ['attributes']}).done(function (entity) {
+            api.getAsync('/api/v1/' + event.value.id + '/meta', {'expand': ['attributes']}).done(function (entity) {
                 React.render(molgenis.ui.Form({
                     entity: entity,
-                    entityInstance: event.value.simpleName,
+                    entityInstance: event.value.name,
                     mode: entity.writable ? 'edit' : 'view',
                     modal: false,
                     enableOptionalFilter: false,
@@ -23,7 +23,11 @@
             query: {
                 operator: 'NESTED',
                 nestedRules: [
-                    {field: 'package', operator: 'EQUALS', value: 'sys' + molgenis.packageSeparator + 'set'},
+                    {
+                        field: 'extends',
+                        operator: 'EQUALS',
+                        value: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + 'settings'
+                    },
                     {operator: 'AND'},
                     {operator: 'NOT'},
                     {field: 'isAbstract', operator: 'EQUALS', value: 'true'}
@@ -40,8 +44,8 @@
         // initialize with application settings
         onValueChange({
             value: {
-                fullName: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + 'app',
-                simpleName: 'app'
+                id: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + 'app',
+                name: 'app'
             }
         });
     });

@@ -271,7 +271,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		String entityTypeId = "entityTypeId";
 		String entityTypeName = "entityTypeName";
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeName(entityTypeName)
+				.setEntityTypeId(entityTypeName).setEntityTypeName(entityTypeName)
 				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));

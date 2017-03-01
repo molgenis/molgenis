@@ -32,8 +32,8 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.mapper.meta.MappingTargetMetaData.*;
@@ -89,12 +89,13 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		MockitoAnnotations.initMocks(this);
 
 		// POJOs
-		EntityType sourceEntityType = entityTypeFactory.create("source");
-		targetEntityType = entityTypeFactory.create("target");
+		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
+		targetEntityType = entityTypeFactory.create("target").setName("target");
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
 		targetEntityType.addAttribute(targetAttribute);
-		entityMappings = asList(new EntityMapping("entityMappingID", sourceEntityType, targetEntityType, emptyList()));
-		mappingTargets = asList(new MappingTarget("mappingTargetID", targetEntityType, entityMappings));
+		entityMappings = singletonList(
+				new EntityMapping("entityMappingID", sourceEntityType, targetEntityType, emptyList()));
+		mappingTargets = singletonList(new MappingTarget("mappingTargetID", targetEntityType, entityMappings));
 
 		// Entities
 		Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
@@ -106,10 +107,10 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		mappingTargetEntity.set(IDENTIFIER, "mappingTargetID");
 		mappingTargetEntity.set(TARGET, "target");
 
-		entityMappingEntities = asList(entityMappingEntity);
+		entityMappingEntities = singletonList(entityMappingEntity);
 		mappingTargetEntity.set(ENTITY_MAPPINGS, entityMappingEntities);
 
-		mappingTargetEntities = asList(mappingTargetEntity);
+		mappingTargetEntities = singletonList(mappingTargetEntity);
 	}
 
 	@Test

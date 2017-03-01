@@ -100,9 +100,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		hop = entityTypeFactory.create("HOP");
+		hop = entityTypeFactory.create("HOP").setName("HOP");
 		hop.addAttribute(attrMetaFactory.create().setName("age").setDataType(INT));
-		lifeLines = entityTypeFactory.create("LifeLines");
+		lifeLines = entityTypeFactory.create("LifeLines").setName("LifeLines");
 		hop.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);

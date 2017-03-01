@@ -124,7 +124,7 @@ public class VcfToEntity
 		EntityType result = null;
 		if (formatMetaData.iterator().hasNext())
 		{
-			result = entityTypeFactory.create().setName(entityName + "_Sample");
+			result = entityTypeFactory.create().setName(entityName + "Sample");
 
 			Attribute idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
 			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true)
@@ -141,7 +141,7 @@ public class VcfToEntity
 				{
 					name = name + "_";
 				}
-				Attribute attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?]", "_"))
+				Attribute attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?_]", ""))
 						.setDataType(vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true)
 						.setLabel(meta.getId());
 

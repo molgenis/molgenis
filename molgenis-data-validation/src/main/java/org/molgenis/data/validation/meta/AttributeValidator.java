@@ -240,7 +240,7 @@ public class AttributeValidator
 		{
 			try
 			{
-				NameValidator.validateName(attr.getName());
+				NameValidator.validateAttributeName(attr.getName());
 			}
 			catch (MolgenisDataException e)
 			{

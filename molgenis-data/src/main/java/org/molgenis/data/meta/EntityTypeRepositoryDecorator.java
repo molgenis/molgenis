@@ -54,14 +54,17 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final MolgenisPermissionService permissionService;
+	private final IdentifierLookupService identifierLookupService;
 
 	public EntityTypeRepositoryDecorator(Repository<EntityType> decoratedRepo, DataService dataService,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService)
+			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
+			IdentifierLookupService identifierLookupService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
+		this.identifierLookupService = identifierLookupService;
 	}
 
 	@Override
@@ -301,7 +304,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void addEntityType(EntityType entityType)
 	{
-		validatePermission(entityType.getFullyQualifiedName(), Permission.WRITEMETA);
+		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		// add row to entities table
 		decoratedRepo.add(entityType);
@@ -361,7 +364,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void validateUpdateAllowed(EntityType entityType)
 	{
 		String entityName = entityType.getFullyQualifiedName();
-		validatePermission(entityName, Permission.WRITEMETA);
+		String entityId = identifierLookupService.getEntityTypeId(entityName);
+		validatePermission(entityId, entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
 		//FIXME: should only be possible to update system entities during bootstrap!
@@ -394,7 +398,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void validateDeleteAllowed(EntityType entityType)
 	{
 		String entityName = entityType.getFullyQualifiedName();
-		validatePermission(entityName, Permission.WRITEMETA);
+		validatePermission(entityName, entityType.getFullyQualifiedName(), Permission.WRITEMETA);
 
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityName);
 		if (isSystem)
@@ -467,8 +471,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
-		return EntityTypeStream
-				.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), permission));
+		return EntityTypeStream.filter(entityType -> permissionService
+				.hasPermissionOnEntity(entityType.getFullyQualifiedName(), permission));
 	}
 
 	private static class FilteredConsumer
@@ -484,9 +488,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 		public void filter(List<EntityType> entityTypes)
 		{
-			List<EntityType> filteredEntityTypes = entityTypes.stream()
-					.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ))
-					.collect(toList());
+			List<EntityType> filteredEntityTypes = entityTypes.stream().filter(entityType -> permissionService
+					.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ)).collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}
 	}
