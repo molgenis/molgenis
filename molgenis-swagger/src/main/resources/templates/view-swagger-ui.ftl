@@ -6,7 +6,7 @@
     <title>Swagger UI</title>
     <link rel="icon" type="image/png" href="/webjars/swagger-ui/images/favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="/webjars/swagger-ui/images/favicon-16x16.png" sizes="16x16" />
-    <link href='/webjars/swagger-ui/2.2.10-1/css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
+    <link href='/webjars/swagger-ui/css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
     <link href='/webjars/swagger-ui/css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
     <link href='/webjars/swagger-ui/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
     <link href='/webjars/swagger-ui/css/reset.css' media='print' rel='stylesheet' type='text/css'/>
