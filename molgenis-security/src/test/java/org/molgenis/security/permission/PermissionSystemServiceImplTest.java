@@ -34,9 +34,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
 
-@ContextConfiguration(classes = { PermissionSystemServiceTest.Config.class })
+@ContextConfiguration(classes = { PermissionSystemServiceImplTest.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class PermissionSystemServiceTest extends AbstractTestNGSpringContextTests
+public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Captor
 	private ArgumentCaptor<UserAuthority> userAuthorityStreamCaptor;
@@ -58,13 +58,13 @@ public class PermissionSystemServiceTest extends AbstractTestNGSpringContextTest
 	{
 		initMocks(this);
 		config.resetMocks();
-		permissionSystemService = new PermissionSystemService(dataService, userAuthorityFactory);
+		permissionSystemService = new PermissionSystemServiceImpl(dataService, userAuthorityFactory);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testPermissionSystemService()
 	{
-		new PermissionSystemService(null, null);
+		new PermissionSystemServiceImpl(null, null);
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class PermissionSystemServiceTest extends AbstractTestNGSpringContextTest
 		@Bean
 		public PermissionSystemService permissionSystemService()
 		{
-			return new PermissionSystemService(dataService(), userAuthorityFactory());
+			return new PermissionSystemServiceImpl(dataService(), userAuthorityFactory());
 		}
 
 		void resetMocks()
