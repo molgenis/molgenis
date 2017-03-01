@@ -6,6 +6,7 @@ import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -16,13 +17,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Component
 public class PermissionSystemService
@@ -37,6 +42,15 @@ public class PermissionSystemService
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 	}
 
+	public void giveUserEntityPermissions(Stream<EntityType> entityTypeStream)
+	{
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		List<String> entityTypeIds = entityTypeStream.map(EntityType::getId).collect(toList());
+		runAsSystem(() ->
+		{
+			giveUserEntityPermissions(securityContext, entityTypeIds);
+		});
+	}
 	@RunAsSystem
 	public void giveUserEntityPermissions(SecurityContext securityContext, List<String> entities)
 	{
