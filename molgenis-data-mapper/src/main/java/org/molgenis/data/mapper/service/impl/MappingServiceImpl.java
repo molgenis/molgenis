@@ -184,7 +184,7 @@ public class MappingServiceImpl implements MappingService
 		{
 			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
-			permissionSystemService.giveUserEntityPermissions(targetMetaData);
+			permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
 		}
 		else
 		{

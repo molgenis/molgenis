@@ -331,7 +331,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityName).getMock();
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
-		verify(permissionSystemService).giveUserEntityPermissions(entityTypeCaptor.capture());
+		verify(permissionSystemService).giveUserWriteMetaPermissions(entityTypeCaptor.capture());
 		assertEquals(entityTypeCaptor.getValue().getName(), entityName);
 	}
 

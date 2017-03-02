@@ -49,13 +49,13 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	}
 
 	@Override
-	public void giveUserEntityPermissions(EntityType entityType)
+	public void giveUserWriteMetaPermissions(EntityType entityType)
 	{
-		giveUserEntityPermissions(singleton(entityType));
+		giveUserWriteMetaPermissions(singleton(entityType));
 	}
 
 	@Override
-	public void giveUserEntityPermissions(Collection<EntityType> entityTypes)
+	public void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes)
 	{
 		// superusers and system user have all permissions by default
 		if (SecurityUtils.currentUserIsSuOrSystem())

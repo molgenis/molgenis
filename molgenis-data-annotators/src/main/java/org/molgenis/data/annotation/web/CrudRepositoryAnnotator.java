@@ -77,7 +77,7 @@ public class CrudRepositoryAnnotator
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
-					permissionSystemService.giveUserEntityPermissions(targetMetaData);
+					permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
 					runAsSystem(() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);

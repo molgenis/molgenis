@@ -389,7 +389,7 @@ class RestControllerV2
 
 		// Retrieve new repo
 		Repository<Entity> repository = dataService.getRepository(newFullName);
-		permissionSystemService.giveUserEntityPermissions(repository.getEntityType());
+		permissionSystemService.giveUserWriteMetaPermissions(repository.getEntityType());
 
 		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
 		response.setStatus(HttpServletResponse.SC_CREATED);

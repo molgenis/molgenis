@@ -141,7 +141,7 @@ public class VcfImporterServiceTest
 		assertEquals(entityImportReport, expectedEntityImportReport);
 
 		verify(metaDataService, times(1)).createRepository(argThat(eqName(entityType0)));
-		verify(permissionSystemService, times(1)).giveUserEntityPermissions(entityType0);
+		verify(permissionSystemService, times(1)).giveUserWriteMetaPermissions(entityType0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -247,8 +247,8 @@ public class VcfImporterServiceTest
 
 		verify(metaDataService).createRepository(argThat(eqName(sampleEntityType0)));
 		verify(metaDataService).createRepository(argThat(eqName(entityType0)));
-		verify(permissionSystemService).giveUserEntityPermissions(entityType0);
-		verify(permissionSystemService).giveUserEntityPermissions(sampleEntityType0);
+		verify(permissionSystemService).giveUserWriteMetaPermissions(entityType0);
+		verify(permissionSystemService).giveUserWriteMetaPermissions(sampleEntityType0);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)

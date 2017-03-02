@@ -99,7 +99,7 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 				invocation -> asList(new SimpleGrantedAuthority("newAuthority0"),
 						new SimpleGrantedAuthority("newAuthority1")));
 
-		permissionSystemService.giveUserEntityPermissions(asList(entityType0, entityType1));
+		permissionSystemService.giveUserWriteMetaPermissions(asList(entityType0, entityType1));
 
 		String prefix = "ROLE_ENTITY";
 		verify(dataService).add(eq(USER_AUTHORITY), userAuthorityStreamCaptor.capture());
@@ -132,7 +132,7 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 	private void giveUserEntityPermissionsUserSystemOrAdmin()
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
-		permissionSystemService.giveUserEntityPermissions(Collections.singleton(entityType));
+		permissionSystemService.giveUserWriteMetaPermissions(Collections.singleton(entityType));
 		verifyZeroInteractions(dataService);
 	}
 
