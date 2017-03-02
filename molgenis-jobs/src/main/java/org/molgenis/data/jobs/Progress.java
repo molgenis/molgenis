@@ -1,5 +1,7 @@
 package org.molgenis.data.jobs;
 
+import org.molgenis.data.jobs.model.JobExecution;
+
 public interface Progress
 {
 	void start();
@@ -19,4 +21,6 @@ public interface Progress
 	Long timeRunning();
 
 	void setResultUrl(String string);
+
+	JobExecution getJobExecution();
 }
