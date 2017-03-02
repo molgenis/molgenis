@@ -398,9 +398,15 @@ public class MetaDataServiceImpl implements MetaDataService
 		else
 		{
 			String entityTypeId = identifierLookupService.getEntityTypeId(fullyQualifiedEntityName);
-			return entityTypeId != null ? dataService
-					.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(), EntityType.class) : null;
+			return getEntityTypeById(entityTypeId);
 		}
+	}
+
+	@Override
+	public EntityType getEntityTypeById(String entityTypeId)
+	{
+		return entityTypeId != null ? dataService
+				.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(), EntityType.class) : null;
 	}
 
 	@Transactional

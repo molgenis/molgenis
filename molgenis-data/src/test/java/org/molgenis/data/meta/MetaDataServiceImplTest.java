@@ -447,6 +447,17 @@ public class MetaDataServiceImplTest
 	}
 
 	@Test
+	public void getEntityTypeById()
+	{
+		String entityId = "entityId";
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq("entityId"), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
+
+		assertEquals(metaDataServiceImpl.getEntityTypeById(entityId), entityType);
+	}
+
+	@Test
 	public void getEntityTypeUnknownEntity()
 	{
 		String entityName = "entity";

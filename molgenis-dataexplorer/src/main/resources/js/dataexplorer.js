@@ -689,6 +689,9 @@ $.when($,
             function init() {
                 // set entity in dropdown
                 if (!state.entity) {
+                    state.entity = $("#dataset-select").find("option:selected").val()
+                }
+                if (!state.entity) {
                     state.entity = $('#dataset-select').find('option:not(:empty)').first().val();
                 }
                 $('#dataset-select').select2('val', state.entity);
