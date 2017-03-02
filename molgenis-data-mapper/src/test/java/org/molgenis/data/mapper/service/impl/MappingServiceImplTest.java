@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -330,8 +329,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
 		verify(geneRepo).forEachBatched(consumerCaptor.capture(), any(Integer.class));
 
-		verify(permissionSystemService)
-				.giveUserEntityPermissions(SecurityContextHolder.getContext(), singletonList(entityName));
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityName).getMock();
+		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
+		verify(permissionSystemService).giveUserEntityPermissions(entityTypeCaptor.capture());
+		assertEquals(entityTypeCaptor.getValue().getName(), entityName);
 	}
 
 	/**

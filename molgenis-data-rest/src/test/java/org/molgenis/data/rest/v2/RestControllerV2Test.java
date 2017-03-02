@@ -36,7 +36,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -475,7 +474,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String responseBody =
 				"{\n  \"location\": \"/api/v2/entity?q=id=in=(\\\"p1\\\",\\\"p2\\\")\",\n  \"resources\": [\n    {\n      \"href\": \"/api/v2/entity/p1\"\n    },\n"
 						+ "    {\n      \"href\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
-		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
+		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
@@ -626,8 +626,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
 		when(repoCopier.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
 
-		doNothing().when(permissionSystemService)
-				.giveUserEntityPermissions(any(SecurityContext.class), Collections.singletonList(any(String.class)));
+		doNothing().when(permissionSystemService).giveUserEntityPermissions(any(EntityType.class));
 		return pack;
 	}
 

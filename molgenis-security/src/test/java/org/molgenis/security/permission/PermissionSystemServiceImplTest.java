@@ -7,14 +7,15 @@ import org.mockito.Mock;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
@@ -24,10 +25,14 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -39,16 +44,22 @@ import static org.testng.Assert.assertEquals;
 public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Captor
-	private ArgumentCaptor<UserAuthority> userAuthorityStreamCaptor;
+	private ArgumentCaptor<Stream<UserAuthority>> userAuthorityStreamCaptor;
 
 	@Autowired
 	private Config config;
 
 	@Autowired
-	private DataService dataService;
+	private UserService userService;
 
 	@Autowired
 	private UserAuthorityFactory userAuthorityFactory;
+
+	@Autowired
+	private RoleHierarchy roleHierarchy;
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -58,13 +69,14 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 	{
 		initMocks(this);
 		config.resetMocks();
-		permissionSystemService = new PermissionSystemServiceImpl(dataService, userAuthorityFactory);
+		permissionSystemService = new PermissionSystemServiceImpl(userService, userAuthorityFactory, roleHierarchy,
+				dataService);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testPermissionSystemService()
 	{
-		new PermissionSystemServiceImpl(null, null);
+		new PermissionSystemServiceImpl(null, null, null, null);
 	}
 
 	@Test
@@ -77,16 +89,21 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(id1).getMock();
 
 		User user = mock(User.class);
-		when(dataService
-				.findOne(UserMetaData.USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, "user"), User.class))
-				.thenReturn(user);
+		when(userService.getUser("user")).thenReturn(user);
 		when(userAuthorityFactory.create()).thenAnswer(invocation -> mock(UserAuthority.class));
 
-		permissionSystemService.giveUserEntityPermissions(Stream.of(entityType0, entityType1));
+		Collection<? extends GrantedAuthority> authorities = asList(
+				new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + id0),
+				new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + id1));
+		when(roleHierarchy.getReachableGrantedAuthorities(authorities)).thenAnswer(
+				invocation -> asList(new SimpleGrantedAuthority("newAuthority0"),
+						new SimpleGrantedAuthority("newAuthority1")));
+
+		permissionSystemService.giveUserEntityPermissions(asList(entityType0, entityType1));
 
 		String prefix = "ROLE_ENTITY";
-		verify(dataService, times(2)).add(eq(USER_AUTHORITY), userAuthorityStreamCaptor.capture());
-		List<UserAuthority> userAuthorities = userAuthorityStreamCaptor.getAllValues();
+		verify(dataService).add(eq(USER_AUTHORITY), userAuthorityStreamCaptor.capture());
+		List<UserAuthority> userAuthorities = userAuthorityStreamCaptor.getValue().collect(toList());
 		assertEquals(userAuthorities.size(), 2);
 		verify(userAuthorities.get(0)).setUser(user);
 		verify(userAuthorities.get(0)).setRole(prefix + "_WRITEMETA_" + id0);
@@ -95,11 +112,7 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 
 		Set<String> newAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority).collect(toSet());
-
-		assertEquals(newAuthorities,
-				Sets.newHashSet("existingAuthority", prefix + "_COUNT_" + id0, prefix + "_READ_" + id0,
-						prefix + "_WRITE_" + id0, prefix + "_WRITEMETA_" + id0, prefix + "_COUNT_" + id1,
-						prefix + "_READ_" + id1, prefix + "_WRITE_" + id1, prefix + "_WRITEMETA_" + id1));
+		assertEquals(newAuthorities, Sets.newHashSet("existingAuthority", "newAuthority0", "newAuthority1"));
 	}
 
 	@Test
@@ -109,9 +122,8 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 		giveUserEntityPermissionsUserSystemOrAdmin();
 	}
 
-	// This test tests buggy behavior because a superuser has authority ROLE_SU instead of ROLE_ADMIN
 	@Test
-	@WithMockUser(username = "user", authorities = { "ROLE_ADMIN" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	public void giveUserEntityPermissionsUserAdmin()
 	{
 		giveUserEntityPermissionsUserSystemOrAdmin();
@@ -120,7 +132,7 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 	private void giveUserEntityPermissionsUserSystemOrAdmin()
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
-		permissionSystemService.giveUserEntityPermissions(Stream.of(entityType));
+		permissionSystemService.giveUserEntityPermissions(Collections.singleton(entityType));
 		verifyZeroInteractions(dataService);
 	}
 
@@ -128,10 +140,16 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 	public static class Config
 	{
 		@Mock
-		private DataService dataService;
+		private UserService userService;
 
 		@Mock
 		private UserAuthorityFactory userAuthorityFactory;
+
+		@Mock
+		private RoleHierarchy roleHierarchy;
+
+		@Mock
+		private DataService dataService;
 
 		public Config()
 		{
@@ -139,9 +157,9 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 		}
 
 		@Bean
-		public DataService dataService()
+		public UserService userService()
 		{
-			return dataService;
+			return userService;
 		}
 
 		@Bean
@@ -151,14 +169,27 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 		}
 
 		@Bean
+		public RoleHierarchy roleHierarchy()
+		{
+			return roleHierarchy;
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return dataService;
+		}
+
+		@Bean
 		public PermissionSystemService permissionSystemService()
 		{
-			return new PermissionSystemServiceImpl(dataService(), userAuthorityFactory());
+			return new PermissionSystemServiceImpl(userService(), userAuthorityFactory(), roleHierarchy(),
+					dataService());
 		}
 
 		void resetMocks()
 		{
-			reset(dataService, userAuthorityFactory);
+			reset(userService, userAuthorityFactory, roleHierarchy, dataService);
 		}
 	}
 }

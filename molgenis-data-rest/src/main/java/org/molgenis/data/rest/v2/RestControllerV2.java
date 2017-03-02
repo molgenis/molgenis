@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -390,8 +389,7 @@ class RestControllerV2
 
 		// Retrieve new repo
 		Repository<Entity> repository = dataService.getRepository(newFullName);
-		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-				Collections.singletonList(repository.getName()));
+		permissionSystemService.giveUserEntityPermissions(repository.getEntityType());
 
 		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
 		response.setStatus(HttpServletResponse.SC_CREATED);
