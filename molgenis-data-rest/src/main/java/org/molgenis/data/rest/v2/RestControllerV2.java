@@ -17,7 +17,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -46,6 +46,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -355,6 +356,7 @@ class RestControllerV2
 	 * @return String name of the new entity
 	 * @throws Exception
 	 */
+	@Transactional
 	@RequestMapping(value = "copy/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String copyEntity(@PathVariable("entityName") String entityName,
@@ -384,11 +386,10 @@ class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
+		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
 				repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
-		Repository<Entity> repository = dataService.getRepository(newFullName);
 		permissionSystemService.giveUserEntityPermissions(repository.getEntityType());
 
 		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
@@ -397,10 +398,11 @@ class RestControllerV2
 		return repository.getName();
 	}
 
-	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName, Package pack,
+	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
+			Package pack,
 			String label)
 	{
-		RunAsSystemProxy.runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
+		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
 
 	/**
