@@ -148,7 +148,8 @@ public class DataExplorerController extends MolgenisPluginController
 				checkExistsAndPermission(selectedEntityName, message, entityExists, hasEntityPermission);
 			}
 		}
-		if (StringUtils.isNotEmpty(model.toString()) {
+		if (StringUtils.isNotEmpty(model.toString()))
+		{
 		model.addAttribute("warningMessage", message.toString());
 	}
 		model.addAttribute("selectedEntityName", selectedEntityName);
