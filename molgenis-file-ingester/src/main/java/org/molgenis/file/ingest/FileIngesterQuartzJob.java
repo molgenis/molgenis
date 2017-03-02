@@ -77,9 +77,6 @@ public class FileIngesterQuartzJob implements Job
 			LOG.error("UTF-8 not supported by URLEncoder", ex);
 		}
 		FileIngestJob job = fileIngestJobFactory.createJob(jobExecution);
-		FileMeta fileMeta = job.call();
-		dataService.add(FILE_META, fileMeta);
-		jobExecution.setFile(fileMeta);
-		dataService.update(FILE_INGEST_JOB_EXECUTION, jobExecution);
+		job.call();
 	}
 }
