@@ -371,6 +371,14 @@ public class EntityUtils
 
 		if (checkIdentifier) if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
 		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
+
+		EntityType entity = attr.getEntity();
+		EntityType otherEntity = otherAttr.getEntity();
+		if (entity == null && otherEntity != null) return false;
+		if (entity != null && otherEntity == null) return false;
+		if (entity != null && !entity.getId().equals(otherEntity.getId())) return false;
+
+		if (!Objects.equals(attr.getSequenceNumber(), otherAttr.getSequenceNumber())) return false;
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
 		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
@@ -378,8 +386,8 @@ public class EntityUtils
 		if (!Objects.equals(attr.isLabelAttribute(), otherAttr.isLabelAttribute())) return false;
 		if (!Objects.equals(attr.getLookupAttributeIndex(), otherAttr.getLookupAttributeIndex())) return false;
 
-		// recursively compare attribute parts
-		if (!EntityUtils.equals(attr.getChildren(), otherAttr.getChildren())) return false;
+		// recursively compare attribute parent
+		if (!EntityUtils.equals(attr.getParent(), otherAttr.getParent())) return false;
 
 		// compare entity identifier
 		EntityType refEntity = attr.getRefEntity();
@@ -388,7 +396,8 @@ public class EntityUtils
 		if (refEntity != null && otherRefEntity == null) return false;
 		if (refEntity != null && otherRefEntity != null && !refEntity.getFullyQualifiedName().equals(otherRefEntity.getFullyQualifiedName()))
 			return false;
-
+		if (!EntityUtils.equals(attr.getMappedBy(), otherAttr.getMappedBy())) return false;
+		if (!Objects.equals(attr.getOrderBy(), otherAttr.getOrderBy())) return false;
 		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression())) return false;
 		if (!Objects.equals(attr.isNillable(), otherAttr.isNillable())) return false;
 		if (!Objects.equals(attr.isAuto(), otherAttr.isAuto())) return false;
