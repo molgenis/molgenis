@@ -46,11 +46,11 @@ public class AggregateQueryGenerator
 		}
 		if (!aggAttr1.isAggregatable())
 		{
-			//			throw new IllegalArgumentException("Attribute is not isAggregatable [ " + aggAttr1.getName() + "]");
+			throw new IllegalArgumentException("Attribute is not isAggregatable [ " + aggAttr1.getName() + "]");
 		}
 		if (aggAttr2 != null && !aggAttr2.isAggregatable())
 		{
-			//			throw new IllegalArgumentException("Attribute is not isAggregatable [ " + aggAttr2.getName() + "]");
+			throw new IllegalArgumentException("Attribute is not isAggregatable [ " + aggAttr2.getName() + "]");
 		}
 		if (aggAttrDistinct != null && aggAttrDistinct.isNillable())
 		{
