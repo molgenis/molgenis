@@ -95,7 +95,6 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		FileIngestJobExecution jobExecution = captor.getValue();
 		assertEquals(jobExecution.getFailureEmail(), new String[] { "x@y.z" });
 		assertEquals(jobExecution.getFileIngest(), fileIngest);
-		verify(dataService).add("sys_FileMeta", fileMeta);
 	}
 
 	@Configuration
