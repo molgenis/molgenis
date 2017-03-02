@@ -125,24 +125,18 @@ public class DataExplorerController extends MolgenisPluginController
 				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
-		if (selectedEntityId != null)
+		if (selectedEntityId != null && selectedEntityName == null)
 		{
-			if (selectedEntityName != null)
+			EntityType entityType = dataService.getMeta().getEntityTypeById(selectedEntityId);
+			if (entityType == null)
 			{
-				message.append("Cannot initialize the dataexplorer with both an entityName and entityId url parameter");
+				message.append("Entity does not exist or you do not have permission on this entity");
 			}
 			else
 			{
-				EntityType entityType = dataService.getMeta().getEntityTypeById(selectedEntityId);
-				if (entityType == null)
-				{
-					message.append("Entity does not exist or you do not have permission on this entity");
-				}
-				else
-				{
-					selectedEntityName = entityType.getFullyQualifiedName();
-				}
+				selectedEntityName = entityType.getFullyQualifiedName();
 			}
+
 			if (selectedEntityName != null)
 			{
 				checkExistsAndPermission(selectedEntityName, message, entityExists, hasEntityPermission);
@@ -168,8 +162,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (selectedEntityName != null)
 			{
-				message.append(
-						"Entity does not exist or you do not have permission on this entity");
+				message.append("Entity does not exist or you do not have permission on this entity");
 				if (!SecurityUtils.currentUserIsAuthenticated())
 				{
 					message.append(", log in to view more entities");
