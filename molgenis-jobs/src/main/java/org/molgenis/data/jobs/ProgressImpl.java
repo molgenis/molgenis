@@ -150,12 +150,4 @@ public class ProgressImpl implements Progress
 		return jobExecution;
 	}
 
-	@Override
-	public void setJobExecution(JobExecution jobExecution)
-	{
-		JobExecutionContext.unset();
-		JobExecutionContext.set(jobExecution);
-		update();
-	}
-
 }

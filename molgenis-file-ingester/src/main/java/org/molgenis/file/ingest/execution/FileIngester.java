@@ -81,8 +81,7 @@ public class FileIngester
 		fileIngestJobExecution.setFile(fileMeta);
 
 		dataService.add(FILE_META, fileMeta);
-		dataService.update(FILE_INGEST_JOB_EXECUTION, fileIngestJobExecution);
-		progress.setJobExecution(fileIngestJobExecution);
+
 		return fileMeta;
 	}
 
