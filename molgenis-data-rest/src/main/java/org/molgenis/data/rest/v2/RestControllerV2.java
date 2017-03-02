@@ -384,11 +384,10 @@ class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
+		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
 				repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
-		Repository<Entity> repository = dataService.getRepository(newFullName);
 		permissionSystemService.giveUserWriteMetaPermissions(repository.getEntityType());
 
 		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
@@ -397,10 +396,12 @@ class RestControllerV2
 		return repository.getName();
 	}
 
-	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName, Package pack,
+	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
+			Package pack,
 			String label)
 	{
-		RunAsSystemProxy.runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
+		return RunAsSystemProxy
+				.runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
 
 	/**
