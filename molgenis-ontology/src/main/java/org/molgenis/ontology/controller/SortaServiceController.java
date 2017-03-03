@@ -547,7 +547,7 @@ public class SortaServiceController extends MolgenisPluginController
 		});
 
 		EntityType resultEntityType = entityTypeFactory.create(resultEntityName);
-		permissionSystemService.giveUserEntityPermissions(asList(inputData.getEntityType(), resultEntityType));
+		permissionSystemService.giveUserWriteMetaPermissions(asList(inputData.getEntityType(), resultEntityType));
 
 		return sortaJobExecution;
 	}

@@ -9,7 +9,7 @@ import java.util.Collection;
  */
 public interface PermissionSystemService
 {
-	void giveUserEntityPermissions(EntityType entityType);
+	void giveUserWriteMetaPermissions(EntityType entityType);
 
-	void giveUserEntityPermissions(Collection<EntityType> entityTypes);
+	void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes);
 }

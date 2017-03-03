@@ -129,7 +129,7 @@ public class ImportWriter
 
 	private void createEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
 	{
-		permissionSystemService.giveUserEntityPermissions(entityTypes);
+		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
 	}
 
 	private GroupedEntityTypes groupEntityTypes(ImmutableCollection<EntityType> entities)

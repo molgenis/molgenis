@@ -392,7 +392,7 @@ class RestControllerV2
 				repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
-		permissionSystemService.giveUserEntityPermissions(repository.getEntityType());
+		permissionSystemService.giveUserWriteMetaPermissions(repository.getEntityType());
 
 		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
 		response.setStatus(HttpServletResponse.SC_CREATED);

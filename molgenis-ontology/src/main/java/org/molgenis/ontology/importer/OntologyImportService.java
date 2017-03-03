@@ -69,7 +69,7 @@ public class OntologyImportService implements ImportService
 
 					crudRepository.add(stream(repo.spliterator(), false));
 
-					permissionSystemService.giveUserEntityPermissions(addedEntities);
+					permissionSystemService.giveUserWriteMetaPermissions(addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getFullyQualifiedName())
 							.collect(Collectors.toList());
 					int count = 1;

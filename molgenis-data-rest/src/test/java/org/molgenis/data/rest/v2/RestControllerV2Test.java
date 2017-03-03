@@ -626,7 +626,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
 		when(repoCopier.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
 
-		doNothing().when(permissionSystemService).giveUserEntityPermissions(any(EntityType.class));
+		doNothing().when(permissionSystemService).giveUserWriteMetaPermissions(any(EntityType.class));
 		return pack;
 	}
 
