@@ -606,6 +606,66 @@ public class EntityUtilsTest
 		return testCases.iterator();
 	}
 
+	@Test(dataProvider = "testEqualsAttributeNoIdentifierCheckProvider")
+	public void testEqualsAttributeNoIdentifierCheck(Attribute attr, Attribute otherAttr, boolean shouldEqual)
+	{
+		assertEquals(EntityUtils.equals(attr, otherAttr, false), shouldEqual);
+	}
+
+	@DataProvider(name = "testEqualsAttributeNoIdentifierCheckProvider")
+	public Iterator<Object[]> testEqualsAttributeNoIdentifierCheckProvider()
+	{
+		List<Object[]> testCases = newArrayList();
+
+		{
+			// identifiers differ
+			Attribute attr = getMockAttr();
+			when(attr.getIdentifier()).thenReturn("attrId");
+			Attribute otherAttr = getMockAttr();
+			when(otherAttr.getIdentifier()).thenReturn("otherAttrId");
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{   // parent attribute identifiers differ
+			Attribute attr = getMockAttr();
+			Attribute parentAttr = getMockAttr();
+			when(parentAttr.getIdentifier()).thenReturn("parentAttrId");
+			when(attr.getParent()).thenReturn(parentAttr);
+
+			Attribute otherAttr = getMockAttr();
+			Attribute otherParentAttr = getMockAttr();
+			when(otherParentAttr.getIdentifier()).thenReturn("otherParentAttrId");
+			when(otherAttr.getParent()).thenReturn(otherParentAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{   // entity identifier differs
+			Attribute attr = getMockAttr();
+			EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
+			when(attr.getEntity()).thenReturn(entityType);
+
+			Attribute otherAttr = getMockAttr();
+			EntityType otherEntityType = when(mock(EntityType.class).getId()).thenReturn("otherEntityTypeId").getMock();
+			when(otherAttr.getEntity()).thenReturn(otherEntityType);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{
+			// identifiers and label differ
+			Attribute attr = getMockAttr();
+			when(attr.getIdentifier()).thenReturn("attrId");
+			when(attr.getLabel()).thenReturn("label");
+			Attribute otherAttr = getMockAttr();
+			when(otherAttr.getIdentifier()).thenReturn("otherAttrId");
+			when(otherAttr.getLabel()).thenReturn("otherLabel");
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		return testCases.iterator();
+	}
+
 	private Attribute getMockAttr(String toString)
 	{
 		Attribute attr = getMockAttr();
