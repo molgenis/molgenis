@@ -37,12 +37,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
@@ -311,7 +311,7 @@ class RestControllerV2
 		try
 		{
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
-					.collect(Collectors.toList());
+					.collect(toList());
 			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
 			final List<String> ids = new ArrayList<String>();
 
@@ -427,10 +427,11 @@ class RestControllerV2
 
 		try
 		{
-			final Stream<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e));
+			List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
+					.collect(toList());
 
 			// update all entities
-			this.dataService.update(entityName, entities);
+			this.dataService.update(entityName, entities.stream());
 			entities.forEach(entity -> restService
 					.updateMappedByEntities(entity, dataService.findOneById(entityName, entity.getIdValue())));
 			response.setStatus(HttpServletResponse.SC_OK);
@@ -475,7 +476,7 @@ class RestControllerV2
 			}
 
 			final List<Entity> entities = request.getEntities().stream().filter(e -> e.size() == 2)
-					.map(e -> this.restService.toEntity(meta, e)).collect(Collectors.toList());
+					.map(e -> this.restService.toEntity(meta, e)).collect(toList());
 			if (entities.size() != request.getEntities().size())
 			{
 				throw createMolgenisDataExceptionIdentifierAndValue();
