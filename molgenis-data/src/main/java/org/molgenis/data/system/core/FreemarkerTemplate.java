@@ -39,6 +39,12 @@ public class FreemarkerTemplate extends StaticEntity
 		return getString(NAME);
 	}
 
+	public String getNameWithoutExtension()
+	{
+		String name = getName();
+		return name.endsWith(".ftl") ? name.substring(0, name.length() - 4) : name;
+	}
+
 	public void setName(String name)
 	{
 		set(NAME, name);
