@@ -403,6 +403,21 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 	}
 
+	@Override
+	public EntityType getEntityTypeById(String entityTypeId)
+	{
+		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
+		if (systemEntity != null)
+		{
+			return systemEntity;
+		}
+		else
+		{
+			return entityTypeId != null ? dataService
+					.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(), EntityType.class) : null;
+		}
+	}
+
 	@Transactional
 	@Override
 	public void addPackage(Package package_)

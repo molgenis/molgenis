@@ -424,8 +424,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		{
 			dataService.add(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), authorsAndBooks.getAuthors().stream());
 			dataService.add(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), authorsAndBooks.getBooks().stream());
-			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData().getFullyQualifiedName(), indexService, LOG);
-			waitForIndexToBeStable(authorsAndBooks.getBookMetaData().getFullyQualifiedName(), indexService, LOG);
+			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData(), indexService, LOG);
+			waitForIndexToBeStable(authorsAndBooks.getBookMetaData(), indexService, LOG);
 		});
 		return authorsAndBooks;
 	}
@@ -436,7 +436,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		runAsSystem(() ->
 		{
 			dataService.add(persons.get(0).getEntityType().getFullyQualifiedName(), persons.stream());
-			waitForIndexToBeStable(persons.get(0).getEntityType().getFullyQualifiedName(), indexService, LOG);
+			waitForIndexToBeStable(persons.get(0).getEntityType(), indexService, LOG);
 		});
 		return persons;
 	}

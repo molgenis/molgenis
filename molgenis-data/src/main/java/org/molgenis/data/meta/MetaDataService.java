@@ -277,4 +277,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return Stream containing all concrete children
 	 */
 	Stream<EntityType> getConcreteChildren(EntityType entityType);
+
+	EntityType getEntityTypeById(String entityId);
 }
