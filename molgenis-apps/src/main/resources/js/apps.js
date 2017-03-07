@@ -10,7 +10,7 @@ $(function () {
         }), $('#create-app-form')[0]).setState({showModal: true});
     });
 
-    $('#edit-app-btn').on('click', function () {
+    $('.edit-app-btn').on('click', function () {
         var appName = $(this).data('appname')
         React.render(molgenis.ui.Form({
             entity: 'sys_App',
