@@ -9,7 +9,6 @@ import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -21,8 +20,8 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
+import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
@@ -81,9 +80,9 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
-		org.molgenis.security.permission.PermissionSystemService.class,
+		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		MolgenisPermissionServiceImpl.class })
+		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final String INTEGRATION_TEST_DATABASE_NAME;

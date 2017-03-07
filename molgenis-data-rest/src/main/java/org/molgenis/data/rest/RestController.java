@@ -499,6 +499,7 @@ public class RestController
 	 * @param response
 	 * @throws UnknownEntityException
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	public void createFromFormPost(@PathVariable("entityName") String entityName, HttpServletRequest request,
 			HttpServletResponse response)
@@ -525,6 +526,7 @@ public class RestController
 	 * @param response
 	 * @throws UnknownEntityException
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=multipart/form-data")
 	public void createFromFormPostMultiPart(@PathVariable("entityName") String entityName,
 			MultipartHttpServletRequest request, HttpServletResponse response)
@@ -554,6 +556,7 @@ public class RestController
 		createInternal(entityName, paramMap, response);
 	}
 
+	@Transactional
 	@RequestMapping(value = "/{entityName}", method = POST)
 	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
 			HttpServletResponse response)
@@ -575,6 +578,7 @@ public class RestController
 	 * @param untypedId
 	 * @param entityMap
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
 	@ResponseStatus(OK)
 	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId,
@@ -592,6 +596,7 @@ public class RestController
 	 * @param untypedId
 	 * @param entityMap
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
 	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId,
@@ -660,6 +665,7 @@ public class RestController
 	 * @param request
 	 * @throws UnknownEntityException
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPostMultiPart(@PathVariable("entityName") String entityName,
@@ -699,6 +705,7 @@ public class RestController
 	 * @param request
 	 * @throws UnknownEntityException
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId,
@@ -721,6 +728,7 @@ public class RestController
 	 * @param entityName
 	 * @param untypedId
 	 */
+	@Transactional
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
@@ -1003,7 +1011,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@Transactional
 	private void updateInternal(String entityName, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityName);
@@ -1025,7 +1032,6 @@ public class RestController
 		restService.updateMappedByEntities(entity, existing);
 	}
 
-	@Transactional
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
 	{
 		EntityType entityType = dataService.getEntityType(entityName);

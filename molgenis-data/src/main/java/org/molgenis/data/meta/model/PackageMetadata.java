@@ -48,7 +48,7 @@ public class PackageMetadata extends SystemEntityType
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		Attribute parentAttr = addAttribute(PARENT).setReadOnly(true).setDataType(XREF).setRefEntity(this)
+		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this)
 				.setLabel("Parent");
 		addAttribute(CHILDREN).setReadOnly(true).setDataType(ONE_TO_MANY).setMappedBy(parentAttr)
 				.setOrderBy(new Sort(LABEL)).setRefEntity(this).setLabel("Children");
