@@ -623,7 +623,7 @@ class RestControllerV2
 		{
 			Long count = dataService.count(entityName, q);
 			Iterable<Entity> it;
-			if (count > 0)
+			if (count > 0 && q.getPageSize() > 0)
 			{
 				it = () -> dataService.findAll(entityName, q).iterator();
 			}

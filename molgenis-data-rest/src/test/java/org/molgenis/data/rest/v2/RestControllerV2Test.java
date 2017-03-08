@@ -56,6 +56,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -463,6 +464,41 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourceCollectionResponse));
 	}
+
+	@Test
+	public void retrieveEntityCollectionWithZeroNumSize() throws Exception
+	{
+		// have count return a non null value irrespective of query
+		Long countResult = 2L;
+		when(dataService.count(anyString(), anyObject())).thenReturn(countResult);
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION)
+				.param("num", "0"))
+				.andExpect(
+						status().isOk()
+				)
+				.andExpect(
+						jsonPath("$.items").isEmpty()
+				)
+				.andExpect(
+						jsonPath("$.total").value(countResult)
+				);
+	}
+
+	@Test
+	public void retrieveEntityCollectionWitNonZeroNumSize() throws Exception
+	{
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
+				.andExpect(
+						status().isOk()
+				)
+				.andExpect(
+						jsonPath("$.items").isNotEmpty()
+				)
+				.andExpect(
+						jsonPath("$.total").value(2L)
+				);
+	}
+
 
 	@SuppressWarnings("unchecked")
 	@Test
