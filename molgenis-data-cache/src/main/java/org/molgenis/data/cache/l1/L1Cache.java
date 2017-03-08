@@ -81,7 +81,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
-			LOG.trace("Removing all entities from L1 cache that belong to {}", entityType);
+			LOG.trace("Removing all entities from L1 cache that belong to {}", entityType.getFullyQualifiedName());
 			entityCache.evictAll(entityType);
 		}
 	}
