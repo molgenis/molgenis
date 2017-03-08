@@ -69,6 +69,15 @@ public interface DataService extends Iterable<Repository<Entity>>
 	EntityType getEntityType(String entityName);
 
 	/**
+	 * Returns the type for the given entity
+	 *
+	 * @param entityId entity id
+	 * @return entity type
+	 * @throws UnknownEntityException
+	 */
+	EntityType getEntityTypeById(String entityId);
+
+	/**
 	 * Returns the number of entities of the given type.
 	 *
 	 * @param entityName entity name

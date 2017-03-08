@@ -57,7 +57,7 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public Stream<Entity> findAll(Query<Entity> query)
 	{
-		if (transactionInformation.isRepositoryCompletelyClean(getName()))
+		if (transactionInformation.isRepositoryCompletelyClean(getEntityType()))
 		{
 			// FIXME page size for metadata is always 0, and batching is done by the postgres repository
 			// FIXME Only superusers are able to use the L3 cache for metadata
@@ -84,7 +84,7 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public Entity findOne(Query<Entity> query)
 	{
-		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable)
+		if (transactionInformation.isRepositoryCompletelyClean(getEntityType()) && cacheable)
 		{
 			// pageSize is irrelevant for findOne, would be a waste to cache them in different entries
 			// sort may affect which of the results is the first result, so cannot ignore that.

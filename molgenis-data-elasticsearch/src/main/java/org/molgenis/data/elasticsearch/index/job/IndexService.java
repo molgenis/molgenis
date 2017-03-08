@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch.index.job;
 
+import org.molgenis.data.meta.model.EntityType;
+
 /**
  * Schedules {@link IndexJob}s.
  */
@@ -15,7 +17,7 @@ public interface IndexService
 
 	void waitForAllIndicesStable() throws InterruptedException;
 
-	void waitForIndexToBeStableIncludingReferences(String entityName) throws InterruptedException;
+	void waitForIndexToBeStableIncludingReferences(EntityType entityType) throws InterruptedException;
 
 	void cleanupJobExecutions();
 }

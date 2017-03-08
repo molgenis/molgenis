@@ -1,6 +1,7 @@
 package org.molgenis.data.transaction;
 
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Set;
 
@@ -24,18 +25,18 @@ public interface TransactionInformation
 	 * Even if this method returns false, {@link #isEntityDirty(EntityKey)}
 	 * can still return true for one or more entities
 	 *
-	 * @param entityName fully qualified name of the repository
+	 * @param entityType of the repository
 	 * @return indication if the entire repository has been dirtied
 	 */
-	boolean isEntireRepositoryDirty(String entityName);
+	boolean isEntireRepositoryDirty(EntityType entityType);
 
 	/**
 	 * Finds out if a repository is completely clean in the current transaction
 	 *
-	 * @param entityName
+	 * @param entityType of the repository
 	 * @return indication if the entire repository is clean
 	 */
-	boolean isRepositoryCompletelyClean(String entityName);
+	boolean isRepositoryCompletelyClean(EntityType entityType);
 
 	/**
 	 * Get all IDs of specific entity instances that have been dirtied by this transaction.

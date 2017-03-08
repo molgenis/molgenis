@@ -45,6 +45,13 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public EntityType getEntityTypeById(String entityId)
+	{
+		return metaDataService.getEntityTypeById(entityId);
+	}
+
+
+	@Override
 	public Stream<Object> getEntityIds()
 	{
 		return metaDataService.getEntityTypes().map(EntityType::getId);

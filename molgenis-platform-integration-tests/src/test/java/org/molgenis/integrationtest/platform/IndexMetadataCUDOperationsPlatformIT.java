@@ -58,7 +58,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		{
 			dataService.getMeta().deleteEntityType(entityTypeDynamic.getFullyQualifiedName());
 		});
-		PlatformIT.waitForIndexToBeStable(EntityTypeMetadata.ENTITY_TYPE_META_DATA, indexService, LOG);
+		PlatformIT.waitForIndexToBeStable(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), indexService, LOG);
 		waitForWorkToBeFinished(indexService, LOG);
 
 		// 3. verify that mapping is removed

@@ -175,7 +175,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 		actualEntity = l1Cache.get(repository, entityID2, entityType).get();
 		assertTrue(EntityUtils.equals(actualEntity, entity2));
 
-		l1Cache.evictAll(entityType.getFullyQualifiedName());
+		l1Cache.evictAll(entityType);
 
 		Optional<Entity> result = l1Cache.get(repository, entityID1, entityType);
 		assertEquals(result, null);
@@ -206,7 +206,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 
 		// Evict entity, return null
 		l1Cache.put(repository, entity1);
-		l1Cache.evictAll(repository);
+		l1Cache.evictAll(entityType);
 		Optional<Entity> actualEntity = l1Cache.get(repository, entityID1, entityType);
 		assertEquals(actualEntity, null);
 
