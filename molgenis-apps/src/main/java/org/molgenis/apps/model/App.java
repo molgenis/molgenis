@@ -26,64 +26,74 @@ public class App extends StaticEntity
 		setName(name);
 	}
 
+	public String getId()
+	{
+		return getString(ID);
+	}
+
+	public void setId(String id)
+	{
+		set(ID, id);
+	}
+
 	public String getName()
 	{
-		return getString(APP_NAME);
+		return getString(NAME);
 	}
 
 	public void setName(String name)
 	{
-		set(APP_NAME, name);
+		set(NAME, name);
 	}
 
 	public String getDescription()
 	{
-		return getString(APP_DESCRIPTION);
+		return getString(DESCRIPTION);
 	}
 
 	public void setDescription(String description)
 	{
-		set(APP_DESCRIPTION, description);
+		set(DESCRIPTION, description);
 	}
 
 	public FileMeta getSourceFiles()
 	{
-		return getEntity(RESOURCE_FILES, FileMeta.class);
+		return getEntity(RESOURCE_ZIP, FileMeta.class);
 	}
 
 	public void setSourceFiles(String sourcesDirectory)
 	{
-		set(RESOURCE_FILES, sourcesDirectory);
+		set(RESOURCE_ZIP, sourcesDirectory);
 	}
 
 	public boolean isActive()
 	{
-		return getBoolean(ACTIVE);
+		return getBoolean(IS_ACTIVE);
 	}
 
 	public void setActive(boolean isActive)
 	{
-		set(ACTIVE, isActive);
+		set(IS_ACTIVE, isActive);
 	}
 
 	public String getIconHref()
 	{
-		return getString(APP_ICON_URL);
+		return getString(ICON_HREF);
 	}
 
 	public void setIconHref(String iconHref)
 	{
-		set(APP_ICON_URL, iconHref);
+		set(ICON_HREF, iconHref);
 	}
 
 	public FreemarkerTemplate getHtmlTemplate()
 	{
-		return getEntity(APP_INDEX_HTML, FreemarkerTemplate.class);
+		return getEntity(LANDING_PAGE_HTML_TEMPLATE, FreemarkerTemplate.class);
 	}
 
 	public void setHtmlTemplate(FreemarkerTemplate htmlTemplate)
 	{
-		set(APP_INDEX_HTML, htmlTemplate);
+		set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
 	}
 }
 

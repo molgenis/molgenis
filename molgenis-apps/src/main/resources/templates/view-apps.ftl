@@ -23,7 +23,7 @@
             <div class="well">
                 <div class="<#if app.active>active<#else>inactive</#if>">
                     <#if app.active>
-                    <a target="_blank" href="/menu/main/apps/${app.name}">
+                    <a target="_blank" href="/menu/main/apps/${app.id}">
                     </#if>
                     <img src="${app.iconHref!"/img/logo_molgenis.gif"}" alt="App icon" class="app-logo">
                     <#if app.active>
@@ -35,11 +35,11 @@
                     <p>${app.description!}</p>
                 </div>
                 <@hasPermission entityName='${appEntityTypeFullyQualifiedName}' permission="WRITE">
-                    <button class="btn btn-warning edit-app-btn" data-appname="${app.name}">Edit app details</button>
+                    <button class="btn btn-default edit-app-btn" data-app-id="${app.id}">Edit</button>
             <#if !app.active>
-                <button class="btn btn-success activate-app-btn" data-appname="${app.name}">Activate app</button>
+                <button class="btn btn-success activate-app-btn" data-app-id="${app.id}">Activate</button>
             <#else>
-                <button class="btn btn-default deactivate-app-btn" data-appname="${app.name}">Deactivate app</button>
+                <button class="btn btn-warning deactivate-app-btn" data-app-id="${app.id}">Deactivate</button>
             </#if>
                 </@hasPermission>
             </div>
@@ -47,7 +47,5 @@
     </div>
 </#list>
 </div>
-<div id="create-app-form"></div>
-<div id="edit-app-form"></div>
-
+<div id="form-modal-container"></div>
 <@footer/>

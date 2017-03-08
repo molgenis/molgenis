@@ -8,6 +8,8 @@ import java.net.URI;
 @AutoValue
 public abstract class AppInfoDto
 {
+	public abstract String getId();
+
 	public abstract String getName();
 
 	@Nullable
@@ -26,6 +28,8 @@ public abstract class AppInfoDto
 	@AutoValue.Builder
 	public abstract static class Builder
 	{
+		public abstract Builder setId(String newId);
+
 		public abstract Builder setName(String newName);
 
 		public abstract Builder setDescription(String newDescription);

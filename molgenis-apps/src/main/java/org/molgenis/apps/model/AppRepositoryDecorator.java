@@ -59,7 +59,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	@Override
 	public void update(App app)
 	{
-		updateApp(app, findOneById(app.getName()));
+		updateApp(app, findOneById(app.getId()));
 		super.update(app);
 	}
 
@@ -68,7 +68,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	{
 		super.update(appStream.filter(app ->
 		{
-			updateApp(app, findOneById(app.getName()));
+			updateApp(app, findOneById(app.getId()));
 			return true;
 		}));
 	}
@@ -206,7 +206,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 				//noinspection StringConcatenationMissingWhitespace
 				zipFile.extractAll(
 						fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar + app
-								.getName() + separatorChar);
+								.getId() + separatorChar);
 			}
 			catch (ZipException e)
 			{
@@ -221,7 +221,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 		try
 		{
 			//noinspection StringConcatenationMissingWhitespace
-			fileStore.deleteDirectory(FILE_STORE_PLUGIN_APPS_PATH + separatorChar + app.getName());
+			fileStore.deleteDirectory(FILE_STORE_PLUGIN_APPS_PATH + separatorChar + app.getId());
 		}
 		catch (IOException e)
 		{

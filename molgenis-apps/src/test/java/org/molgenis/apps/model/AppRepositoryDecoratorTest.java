@@ -61,7 +61,7 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testAddInactiveNoResourceZip()
 	{
-		App app = getMockApp(false);
+		App app = getMockApp("id",false);
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 	}
@@ -69,7 +69,7 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testAddActiveNoResourceZip()
 	{
-		App app = getMockApp(true);
+		App app = getMockApp("id",true);
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 	}
@@ -77,7 +77,7 @@ public class AppRepositoryDecoratorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'app-invalid.zip' is not a valid zip file.")
 	public void testAddInvalidResourceZip()
 	{
-		App app = getMockApp(false, "app-invalid.zip");
+		App app = getMockApp("id", false, "app-invalid.zip");
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 	}
@@ -85,7 +85,7 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testAddInactiveValidResourceZip()
 	{
-		App app = getMockApp(false, "app-valid.zip");
+		App app = getMockApp("id", false, "app-valid.zip");
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 		//noinspection ResultOfMethodCallIgnored
@@ -95,7 +95,7 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testAddActiveValidResourceZip()
 	{
-		App app = getMockApp(true, "app-valid.zip");
+		App app = getMockApp("id", true, "app-valid.zip");
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 		//noinspection ResultOfMethodCallIgnored
@@ -105,11 +105,11 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testAddStream()
 	{
-		App app0 = getMockApp(true, "app-valid.zip");
-		App app1 = getMockApp(false, "app-valid.zip");
-		App app2 = getMockApp(true, "app-valid.zip");
-		App app3 = getMockApp(true);
-		App app4 = getMockApp(false);
+		App app0 = getMockApp("id0", true, "app-valid.zip");
+		App app1 = getMockApp("id1", false, "app-valid.zip");
+		App app2 = getMockApp("id2", true, "app-valid.zip");
+		App app3 = getMockApp("id3", true);
+		App app4 = getMockApp("id4", false);
 		appRepositoryDecorator.add(Stream.of(app0, app1, app2, app3, app4));
 
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -123,9 +123,9 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testUpdateActivatedResourceToActivatedValidResource() throws IOException
 	{
-		App existingApp = getMockApp(true, "app-valid.zip");
-		App app = getMockApp(true, "app-valid-update.zip");
-		when(appRepository.findOneById(APP_NAME)).thenReturn(existingApp);
+		App existingApp = getMockApp("id", true, "app-valid.zip");
+		App app = getMockApp("id", true, "app-valid-update.zip");
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
 		verify(appRepository).update(app);
 		verify(fileStore).deleteDirectory(anyString());
@@ -136,9 +136,9 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testUpdateDeactivatedResourceToDeactivatedValidResource()
 	{
-		App existingApp = getMockApp(false, "app-valid.zip");
-		App app = getMockApp(false, "app-valid.zip");
-		when(appRepository.findOneById(APP_NAME)).thenReturn(existingApp);
+		App existingApp = getMockApp("id", false, "app-valid.zip");
+		App app = getMockApp("id", false, "app-valid.zip");
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
 		verify(appRepository).update(app);
 		//noinspection ResultOfMethodCallIgnored
@@ -148,27 +148,27 @@ public class AppRepositoryDecoratorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'app-invalid.zip' is not a valid zip file.")
 	public void testUpdateDeactivatedResourceToDeactivatedInvalidResource()
 	{
-		App existingApp = getMockApp(false, "app-valid.zip");
-		App app = getMockApp(false, "app-invalid.zip");
-		when(appRepository.findOneById(APP_NAME)).thenReturn(existingApp);
+		App existingApp = getMockApp("id", false, "app-valid.zip");
+		App app = getMockApp("id", false, "app-invalid.zip");
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'app-invalid.zip' is not a valid zip file.")
 	public void testUpdateNoResourceToDeactivatedInvalidResource()
 	{
-		App existingApp = getMockApp(false);
-		App app = getMockApp(false, "app-invalid.zip");
-		when(appRepository.findOneById(APP_NAME)).thenReturn(existingApp);
+		App existingApp = getMockApp("id", false);
+		App app = getMockApp("id", false, "app-invalid.zip");
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
 	}
 
 	@Test
 	public void testUpdateStream() throws IOException
 	{
-		App existingApp = getMockApp(true, "app-valid.zip");
-		App app = getMockApp(true, "app-valid-update.zip");
-		when(appRepository.findOneById(APP_NAME)).thenReturn(existingApp);
+		App existingApp = getMockApp("id", true, "app-valid.zip");
+		App app = getMockApp("id", true, "app-valid-update.zip");
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(Stream.of(app));
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(appRepository).update(captor.capture());
@@ -181,7 +181,7 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testDeleteActive() throws IOException
 	{
-		App app = getMockApp(true, "app-valid.zip");
+		App app = getMockApp("id", true, "app-valid.zip");
 		appRepositoryDecorator.delete(app);
 		verify(fileStore).deleteDirectory(anyString());
 	}
@@ -189,7 +189,7 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testDeleteInactive() throws IOException
 	{
-		App app = getMockApp(false, "app-valid.zip");
+		App app = getMockApp("id", false, "app-valid.zip");
 		appRepositoryDecorator.delete(app);
 		verify(fileStore, never()).deleteDirectory(anyString());
 	}
@@ -197,9 +197,9 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testDeleteStream() throws IOException
 	{
-		App app0 = getMockApp(true, "app-valid.zip");
-		App app1 = getMockApp(false, "app-valid.zip");
-		App app2 = getMockApp(true, "app-valid-update.zip");
+		App app0 = getMockApp("id0", true, "app-valid.zip");
+		App app1 = getMockApp("id1", false, "app-valid.zip");
+		App app2 = getMockApp("id2", true, "app-valid-update.zip");
 		appRepositoryDecorator.delete(Stream.of(app0, app1, app2));
 
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -212,20 +212,21 @@ public class AppRepositoryDecoratorTest
 	@Test
 	public void testDeleteById() throws IOException
 	{
-		App app = getMockApp(true, "app-valid.zip");
-		when(appRepository.findOneById(APP_NAME)).thenReturn(app);
-		appRepositoryDecorator.deleteById(APP_NAME);
+		App app = getMockApp("id", true, "app-valid.zip");
+		when(appRepository.findOneById("id")).thenReturn(app);
+		appRepositoryDecorator.deleteById("id");
 		verify(fileStore).deleteDirectory(anyString());
 	}
 
-	private App getMockApp(boolean isActive)
+	private App getMockApp(String id, boolean isActive)
 	{
-		return getMockApp(isActive, null);
+		return getMockApp(id, isActive, null);
 	}
 
-	private App getMockApp(boolean isActive, String resourceFilename)
+	private App getMockApp(String id, boolean isActive, String resourceFilename)
 	{
 		App app = mock(App.class);
+		when(app.getId()).thenReturn(id);
 		when(app.getName()).thenReturn(APP_NAME);
 		when(app.isActive()).thenReturn(isActive);
 		if (resourceFilename != null)

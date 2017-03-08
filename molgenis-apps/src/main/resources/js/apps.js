@@ -1,39 +1,43 @@
-$(function () {
-    $('#create-app-btn').on('click', function () {
-        React.render(molgenis.ui.Form({
-            entity: 'sys_App',
-            modal: true,
-            mode: 'create',
-            onSubmitSuccess: function () {
-                location.reload();
-            }
-        }), $('#create-app-form')[0]).setState({showModal: true});
-    });
+(function ($, molgenis) {
+    'use strict';
 
-    $('.edit-app-btn').on('click', function () {
-        var appName = $(this).data('appname')
-        React.render(molgenis.ui.Form({
-            entity: 'sys_App',
-            entityInstance: appName,
-            modal: true,
-            mode: 'edit',
-            onSubmitSuccess: function () {
-                location.reload();
-            }
-        }), $('#create-app-form')[0]).setState({showModal: true});
-    });
+    $(function () {
+        $('#create-app-btn').on('click', function () {
+            React.render(molgenis.ui.Form({
+                entity: 'sys_App',
+                modal: true,
+                mode: 'create',
+                onSubmitSuccess: function () {
+                    window.location = molgenis.contextUrl;
+                }
+            }), $('#form-modal-container')[0]).setState({showModal: true});
+        });
 
-    $('.activate-app-btn').on('click', function () {
-        var appName = $(this).data('appname')
-        $.post(molgenis.contextUrl + "/" + appName + "/activate").then(function () {
-            location.reload()
-        })
-    });
+        $('.edit-app-btn').on('click', function () {
+            var appId = $(this).data('app-id')
+            React.render(molgenis.ui.Form({
+                entity: 'sys_App',
+                entityInstance: appId,
+                modal: true,
+                mode: 'edit',
+                onSubmitSuccess: function () {
+                    window.location = molgenis.contextUrl;
+                }
+            }), $('#form-modal-container')[0]).setState({showModal: true});
+        });
 
-    $('.deactivate-app-btn').on('click', function () {
-        var appName = $(this).data('appname')
-        $.post(molgenis.contextUrl + "/" + appName + "/deactivate").then(function () {
-            location.reload()
-        })
-    });
-})
+        $('.activate-app-btn').on('click', function () {
+            var appId = $(this).data('app-id')
+            $.post(molgenis.contextUrl + '/' + appId + '/activate').then(function () {
+                window.location = molgenis.contextUrl;
+            })
+        });
+
+        $('.deactivate-app-btn').on('click', function () {
+            var appId = $(this).data('app-id')
+            $.post(molgenis.contextUrl + '/' + appId + '/deactivate').then(function () {
+                window.location = molgenis.contextUrl;
+            })
+        });
+    })
+}($, window.top.molgenis = window.top.molgenis || {}));

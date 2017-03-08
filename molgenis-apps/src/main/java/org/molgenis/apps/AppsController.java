@@ -1,7 +1,9 @@
 package org.molgenis.apps;
 
 import org.molgenis.apps.model.App;
+import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -66,7 +68,9 @@ public class AppsController extends MolgenisPluginController
 
 	private Stream<App> getApps()
 	{
-		Stream<App> apps = dataService.findAll(APP, App.class);
+		Query<App> query = dataService.query(APP, App.class);
+		query.sort().on(AppMetaData.NAME);
+		Stream<App> apps = query.findAll();
 		if (!permissionService.hasPermissionOnEntity(APP, Permission.WRITE))
 		{
 			apps = apps.filter(App::isActive);
@@ -74,58 +78,60 @@ public class AppsController extends MolgenisPluginController
 		return apps;
 	}
 
-	@RequestMapping(value = "/{appName}", method = GET)
-	public String viewApp(@PathVariable String appName, Model model, HttpServletResponse response)
+	@RequestMapping(value = "/{appId}", method = GET)
+	public String viewApp(@PathVariable("appId") String appId, Model model, HttpServletResponse response)
 	{
-		App app = dataService.findOneById(APP, appName, App.class);
+		App app = dataService.findOneById(APP, appId, App.class);
 		if (app == null)
 		{
-			model.addAttribute("errorMessage", format("Unknown app '%s'", appName));
+			model.addAttribute("errorMessage", format("Unknown app '%s'", appId));
 			response.setStatus(SC_BAD_REQUEST);
 			return "forward:" + URI;
 		}
 		if (!app.isActive())
 		{
-			model.addAttribute("errorMessage", format("App '%s' is deactivated", appName));
+			model.addAttribute("errorMessage", format("App '%s' is deactivated", app.getName()));
 			response.setStatus(SC_BAD_REQUEST);
 			return "forward:" + URI;
 		}
+
+		model.addAttribute("app", toAppInfoDto(app));
 
 		FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
 		return htmlTemplate.getNameWithoutExtension();
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{appName}/activate", method = POST)
+	@RequestMapping(value = "/{appId}/activate", method = POST)
 	@ResponseStatus(OK)
-	public void activateApp(@PathVariable String appName)
+	public void activateApp(@PathVariable("appId") String appId)
 	{
-		App app = dataService.findOneById(APP, appName, App.class);
+		App app = dataService.findOneById(APP, appId, App.class);
 		if (app == null)
 		{
-			throw new AppsException(format("Unknown app '%s'", appName));
+			throw new AppsException(format("Unknown app '%s'", appId));
 		}
 		if (app.isActive())
 		{
-			throw new AppsException(format("App '%s' already activated", appName));
+			throw new AppsException(format("App '%s' already activated", app.getName()));
 		}
 
 		app.setActive(true);
 		dataService.update(APP, app);
 	}
 
-	@RequestMapping(value = "/{appName}/deactivate", method = POST)
+	@RequestMapping(value = "/{appId}/deactivate", method = POST)
 	@ResponseStatus(OK)
-	public void deactivateApp(@PathVariable String appName, Model model)
+	public void deactivateApp(@PathVariable("appId") String appId, Model model)
 	{
-		App app = dataService.findOneById(APP, appName, App.class);
+		App app = dataService.findOneById(APP, appId, App.class);
 		if (app == null)
 		{
-			throw new AppsException(format("Unknown app '%s'", appName));
+			throw new AppsException(format("Unknown app '%s'", appId));
 		}
 		if (!app.isActive())
 		{
-			throw new AppsException(format("App '%s' already deactivated", appName));
+			throw new AppsException(format("App '%s' already deactivated", app.getName()));
 		}
 
 		app.setActive(false);
@@ -153,7 +159,7 @@ public class AppsController extends MolgenisPluginController
 			iconHref = null;
 		}
 
-		return AppInfoDto.builder().setName(app.getName()).setDescription(app.getDescription())
+		return AppInfoDto.builder().setId(app.getId()).setName(app.getName()).setDescription(app.getDescription())
 				.setActive(app.isActive()).setIconHref(iconHref).build();
 	}
 
