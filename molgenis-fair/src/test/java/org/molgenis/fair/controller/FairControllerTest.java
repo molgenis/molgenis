@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -51,11 +51,6 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getMetadataTest() throws Exception
 	{
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getScheme()).thenReturn("http");
-		when(request.getServerName()).thenReturn("molgenis01.gcc.rug.nl");
-		when(request.getLocalPort()).thenReturn(8080);
-
 		Entity answer = mock(Entity.class);
 		when(dataService.findOne(eq("fdp_Metadata"), anyObject())).thenReturn(answer);
 
@@ -69,10 +64,20 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 	{
 		reset(dataService);
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getScheme()).thenReturn("http");
-		when(request.getServerName()).thenReturn("molgenis01.gcc.rug.nl");
-		when(request.getLocalPort()).thenReturn(8080);
+		Entity answer = mock(Entity.class);
+
+		when(dataService.findOneById("fdp_Catalog", "catalogID")).thenReturn(answer);
+
+		this.mockMvc.perform(get(URI.create("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID?blah=value"))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk());
+
+		Mockito.verify(entityModelWriter).createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID", answer);
+	}
+
+	@Test
+	public void getCatalogTestForwarded() throws Exception
+	{
+		reset(dataService);
 
 		Entity answer = mock(Entity.class);
 
@@ -87,11 +92,6 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getDatasetTest() throws Exception
 	{
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getScheme()).thenReturn("http");
-		when(request.getServerName()).thenReturn("molgenis01.gcc.rug.nl");
-		when(request.getLocalPort()).thenReturn(8080);
-
 		Entity answer = mock(Entity.class);
 
 		when(dataService.findOneById("fdp_Dataset", "datasetID")).thenReturn(answer);
@@ -104,19 +104,15 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getDistributionTest() throws Exception
 	{
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getScheme()).thenReturn("http");
-		when(request.getServerName()).thenReturn("molgenis01.gcc.rug.nl");
-		when(request.getLocalPort()).thenReturn(8080);
-
 		Entity answer = mock(Entity.class);
 
 		when(dataService.findOneById("fdp_Distribution", "distributionID")).thenReturn(answer);
 		this.mockMvc.perform(get("/fdp/catalogID/datasetID/distributionID").header("X-Forwarded-Host", "website.com")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk());
+				.header("X-Forwarded-Proto", "https").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk());
 
 		Mockito.verify(entityModelWriter)
-				.createRdfModel("http://website.com/fdp/catalogID/datasetID/distributionID", answer);
+				.createRdfModel("https://website.com/fdp/catalogID/datasetID/distributionID", answer);
 	}
 
 }

@@ -83,16 +83,8 @@ public class ElasticsearchService implements SearchService
 
 	private SearchResult search(SearchRequest request)
 	{
-		// TODO : A quick fix now! Need to find a better way to get
-		// EntityType in ElasticSearchService, because ElasticSearchService should not be
-		// aware of DataService. E.g. Put EntityType in the SearchRequest object
-		EntityType entityType = (request.getDocumentType() != null && dataService != null && dataService
-				.hasRepository(request.getDocumentType())) ? dataService
-				.getEntityType(request.getDocumentType()) : null;
-		String documentType = request.getDocumentType() == null ? null : request.getDocumentType();
-		SearchResponse response = elasticsearchFacade
-				.search(SearchType.QUERY_AND_FETCH, request, entityType, documentType, indexName);
-		return responseParser.parseSearchResponse(request, response, entityType, dataService);
+		SearchResponse response = elasticsearchFacade.search(SearchType.QUERY_AND_FETCH, request, indexName);
+		return responseParser.parseSearchResponse(request, response, dataService);
 	}
 
 	@Override
@@ -156,21 +148,21 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void index(Entity entity, EntityType entityType, IndexingMode indexingMode)
 	{
-		LOG.debug("Indexing single {}.{} entity ...", entityType.getName(), entity.getIdValue());
+		LOG.debug("Indexing single {}.{} entity ...", entityType.getFullyQualifiedName(), entity.getIdValue());
 		index(Stream.of(entity), entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Iterable<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode)
 	{
-		LOG.debug("Indexing multiple {} entities...", entityType.getName());
+		LOG.debug("Indexing multiple {} entities...", entityType.getFullyQualifiedName());
 		return index(stream(entities.spliterator(), false), entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Stream<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode)
 	{
-		LOG.debug("Indexing multiple {} entities...", entityType.getName());
+		LOG.debug("Indexing multiple {} entities...", entityType.getFullyQualifiedName());
 		return index(entities, entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
@@ -228,7 +220,7 @@ public class ElasticsearchService implements SearchService
 			// Get actual entities from the dataservice, skipping the ones that no longer exist and
 			// fetching all of their attributes in one go
 			referringEntitiesStream = dataService
-					.findAll(refEntityType.getName(), referringEntitiesStream.map(Entity::getIdValue),
+					.findAll(refEntityType.getFullyQualifiedName(), referringEntitiesStream.map(Entity::getIdValue),
 							createFetchForReindexing(refEntityType));
 
 			references = concat(references, referringEntitiesStream
@@ -266,7 +258,7 @@ public class ElasticsearchService implements SearchService
 			}
 			q.eq(attribute.getName(), referredEntity);
 		}
-		LOG.debug("q: [{}], referringEntityType: [{}]", q.toString(), referringEntityType.getName());
+		LOG.debug("q: [{}], referringEntityType: [{}]", q.toString(), referringEntityType.getFullyQualifiedName());
 		if (hasMapping(referringEntityType))
 		{
 			return searchInternalWithScanScroll(q, referringEntityType);
@@ -365,11 +357,11 @@ public class ElasticsearchService implements SearchService
 
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
 		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, documentType, SearchType.QUERY_AND_FETCH, query, null, null,
-						null, entityType);
+				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_AND_FETCH, entityType, query, null, null,
+						null);
 
+		String documentType = documentIdGenerator.generateId(entityType);
 		return elasticsearchFacade
 				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), documentType, indexName)
 				.map(idString -> convert(idString, entityType.getIdAttribute()))
@@ -383,8 +375,7 @@ public class ElasticsearchService implements SearchService
 		Attribute xAttr = aggregateQuery.getAttributeX();
 		Attribute yAttr = aggregateQuery.getAttributeY();
 		Attribute distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(documentIdGenerator.generateId(entityType), q, xAttr, yAttr,
-				distinctAttr);
+		SearchRequest searchRequest = SearchRequest.create(entityType, q, xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
 	}

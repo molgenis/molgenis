@@ -174,7 +174,7 @@ public class MappingServiceImpl implements MappingService
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetaData.setPackage(null);
-		targetMetaData.setSimpleName(entityName);
+		targetMetaData.setId(idGenerator.generateId());
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
 		if (addSourceAttribute)
@@ -210,15 +210,15 @@ public class MappingServiceImpl implements MappingService
 
 		try
 		{
-			LOG.info("Applying mappings to repository [" + targetMetaData.getName() + "]");
+			LOG.info("Applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
 			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
 				LOG.info("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			}
-			LOG.info("Done applying mappings to repository [" + targetMetaData.getName() + "]");
-			return targetMetaData.getName();
+			LOG.info("Done applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
+			return targetMetaData.getFullyQualifiedName();
 		}
 		catch (RuntimeException ex)
 		{
@@ -267,8 +267,8 @@ public class MappingServiceImpl implements MappingService
 
 			if (isReferenceType(mappingTargetAttribute))
 			{
-				String mappingTargetRefEntityName = mappingTargetAttribute.getRefEntity().getName();
-				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getName();
+				String mappingTargetRefEntityName = mappingTargetAttribute.getRefEntity().getFullyQualifiedName();
+				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getFullyQualifiedName();
 				if (!mappingTargetRefEntityName.equals(targetRepositoryRefEntityName))
 				{
 					throw new MolgenisDataException(
@@ -345,20 +345,5 @@ public class MappingServiceImpl implements MappingService
 		String targetAttributeName = attributeMapping.getTargetAttribute().getName();
 		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType);
 		target.set(targetAttributeName, typedValue);
-	}
-
-	@Override
-	public String generateId(AttributeType dataType, Long count)
-	{
-		Object id;
-		if (dataType == INT || dataType == LONG || dataType == DECIMAL)
-		{
-			id = count + 1;
-		}
-		else
-		{
-			id = idGenerator.generateId();
-		}
-		return id.toString();
 	}
 }

@@ -51,8 +51,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getRequiredAttributes()
 	{
-		Iterator<Attribute> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes()
-				.iterator();
+		Iterator<Attribute> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes().iterator();
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getChromAttribute());
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getPosAttribute());
 	}

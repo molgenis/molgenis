@@ -58,7 +58,7 @@ public class VcfImporterService implements ImportService
 		List<EntityType> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
 
-		Iterator<String> it = source.getEntityNames().iterator();
+		Iterator<String> it = source.getEntityIds().iterator();
 		if (it.hasNext())
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
@@ -82,7 +82,7 @@ public class VcfImporterService implements ImportService
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
-		Iterator<String> it = source.getEntityNames().iterator();
+		Iterator<String> it = source.getEntityIds().iterator();
 		if (it.hasNext())
 		{
 			String entityName = it.next();
@@ -104,7 +104,7 @@ public class VcfImporterService implements ImportService
 			Attribute sampleAttribute = emd.getAttribute(VcfAttributes.SAMPLES);
 			if (sampleAttribute != null)
 			{
-				String sampleEntityName = sampleAttribute.getRefEntity().getName();
+				String sampleEntityName = sampleAttribute.getRefEntity().getFullyQualifiedName();
 				boolean sampleEntityExists = runAsSystem(() -> dataService.hasRepository(sampleEntityName));
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
@@ -157,7 +157,7 @@ public class VcfImporterService implements ImportService
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
 			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(samplesEntityType.getName()));
+					Collections.singletonList(samplesEntityType.getFullyQualifiedName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 		else
@@ -171,7 +171,7 @@ public class VcfImporterService implements ImportService
 		try (Repository<Entity> outRepository = runAsSystem(() -> dataService.getMeta().createRepository(entityType)))
 		{
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(entityType.getName()));
+					Collections.singletonList(entityType.getFullyQualifiedName()));
 
 			addedEntities.add(entityType);
 

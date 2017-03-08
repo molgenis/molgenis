@@ -19,7 +19,6 @@ import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -49,7 +48,7 @@ public class FileTypeEditing extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[FILE\\] to \\[STRING\\] not allowed, allowed types are \\[\\]")
 	public void testNoConversionsAllowed()
 	{
-		EntityType entityType = entityTypeFactory.create("1");
+		EntityType entityType = entityTypeFactory.create("FileEntity");
 		entityType.setName("FileEntity");
 		entityType.setBackend("PostgreSQL");
 

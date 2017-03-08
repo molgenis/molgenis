@@ -67,13 +67,14 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		when(contextMock.getMergedJobDataMap()).thenReturn(jobDataMap);
 
 		EntityType targetEntity = entityTypeFactory.create();
-		targetEntity.setName("org_molgenis_test_TypeTest");
+		targetEntity.setName("TypeTest");
 
 		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.setFailureEmail("x@y.z");
 		fileIngest.setTargetEntity(targetEntity);
 		when(dataService.findOneById(FileIngestMetaData.FILE_INGEST, "abcde", FileIngest.class)).thenReturn(fileIngest);
 
+		@SuppressWarnings("unchecked")
 		Query<User> queryMock = Mockito.mock(Query.class);
 		User admin = userFactory.create();
 		admin.setUsername("admin");

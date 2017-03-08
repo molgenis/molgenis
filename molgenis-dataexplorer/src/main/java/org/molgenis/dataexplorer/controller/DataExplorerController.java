@@ -42,7 +42,7 @@ import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
@@ -75,6 +75,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private GenomicDataSettings genomicDataSettings;
+
+	@Autowired
+	private DirectoryController directoryController;
 
 	@Autowired
 	private DataService dataService;
@@ -114,8 +117,10 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		List<EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
-				.filter(entityType -> !entityType.isAbstract()).collect(toList());
+		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract())
+				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
+
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -154,9 +159,14 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
+			model.addAttribute("genomicDataSettings", genomicDataSettings);
+			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
+
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
 		}
@@ -279,11 +289,12 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeEntities = new HashMap<>();
 		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ);
+			boolean canWrite = molgenisPermissionService
+					.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
 			if (canRead || canWrite)
 			{
-				genomeEntities.put(entityType.getName(), entityType.getLabel());
+				genomeEntities.put(entityType.getFullyQualifiedName(), entityType.getLabel());
 			}
 		});
 		return genomeEntities;
@@ -452,4 +463,5 @@ public class DataExplorerController extends MolgenisPluginController
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
+
 }

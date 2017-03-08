@@ -63,10 +63,10 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				.setDataType(CATEGORICAL);
 		targetAttribute.setRefEntity(targetRefEntityType);
 
-		Mockito.when(dataService.findAll(targetRefEntityType.getName()))
+		Mockito.when(dataService.findAll(targetRefEntityType.getFullyQualifiedName()))
 				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
-		targetEntityType = entityTypeFactory.create("target");
+		targetEntityType = entityTypeFactory.create("target").setName("target");
 		targetEntityType.addAttribute(targetAttribute);
 
 		EntityType sourceRefEntityType = createCategoricalRefEntityType("LifeLines_POTATO_REF");
@@ -84,11 +84,11 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttribute.setRefEntity(sourceRefEntityType);
 
-		Mockito.when(dataService.findAll(sourceRefEntityType.getName())).thenReturn(
+		Mockito.when(dataService.findAll(sourceRefEntityType.getFullyQualifiedName())).thenReturn(
 				Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
 						sourceEntity7, sourceEntity8));
 
-		sourceEntityType = entityTypeFactory.create("source");
+		sourceEntityType = entityTypeFactory.create("source").setName("source");
 		sourceEntityType.addAttributes(Lists.newArrayList(sourceAttribute));
 	}
 
@@ -117,7 +117,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Entity targetEntity2 = new DynamicEntity(targetRefEntityType,
 				of("code", 1, "label", "Ever had high blood pressure "));
 		Entity targetEntity3 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "Missing"));
-		Mockito.when(dataService.findAll(targetRefEntityType.getName()))
+		Mockito.when(dataService.findAll(targetRefEntityType.getFullyQualifiedName()))
 				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3));
 		targetAttribute = attrMetaFactory.create().setName("History of Hypertension").setDataType(CATEGORICAL);
 		targetAttribute.setRefEntity(targetRefEntityType);
@@ -126,7 +126,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Entity sourceEntity1 = new DynamicEntity(targetRefEntityType, of("code", 1, "label", "yes"));
 		Entity sourceEntity2 = new DynamicEntity(targetRefEntityType, of("code", 2, "label", "no"));
 		Entity sourceEntity3 = new DynamicEntity(targetRefEntityType, of("code", 3, "label", "I do not know"));
-		Mockito.when(dataService.findAll(sourceRefEntityType.getName()))
+		Mockito.when(dataService.findAll(sourceRefEntityType.getFullyQualifiedName()))
 				.thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3));
 
 		sourceAttribute = attrMetaFactory.create().setName("High_blood_pressure").setDataType(CATEGORICAL);
@@ -142,7 +142,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 
 	private EntityType createCategoricalRefEntityType(String entityName)
 	{
-		EntityType targetRefEntityType = entityTypeFactory.create(entityName);
+		EntityType targetRefEntityType = entityTypeFactory.create(entityName).setName(entityName);
 		Attribute targetCodeAttribute = attrMetaFactory.create().setName("code").setDataType(INT);
 		Attribute targetLabelAttribute = attrMetaFactory.create().setName("label");
 		targetRefEntityType.addAttribute(targetCodeAttribute, ROLE_ID);

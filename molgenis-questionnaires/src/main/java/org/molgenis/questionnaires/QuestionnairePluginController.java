@@ -5,7 +5,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -62,11 +61,12 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private List<Questionnaire> getQuestionnaires()
 	{
-		List<Questionnaire> questionnaires;
-		List<Entity> questionnaireMeta = runAsSystem(() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
-		questionnaires = questionnaireMeta.stream()
-				.map(entityType -> entityType.getString(EntityTypeMetadata.FULL_NAME))
+		List<Questionnaire> questionnaires;
+		List<EntityType> questionnaireMeta = runAsSystem(
+				() -> findQuestionnairesMetaData(dataService).collect(toList()));
+
+		questionnaires = questionnaireMeta.stream().map(EntityType::getFullyQualifiedName)
 				.filter(name -> currentUserIsSu() || currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name))
 				.map(name ->
 				{
@@ -135,7 +135,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 			entity = entityManager.create(entityType, POPULATE);
 			entity.set(OWNER_USERNAME, getCurrentUsername());
 			entity.set(ATTR_STATUS, status.toString());
-			dataService.add(entityType.getName(), entity);
+			dataService.add(entityType.getFullyQualifiedName(), entity);
 		}
 		return entity;
 	}
@@ -143,7 +143,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType entityType)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return new Questionnaire(entityType.getName(),
+		return new Questionnaire(entityType.getFullyQualifiedName(),
 				entityType.getLabel(languageService.getCurrentUserLanguageCode()), status,
 				entityType.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}

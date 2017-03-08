@@ -68,7 +68,7 @@ public class CatalogueController extends MolgenisPluginController
 			if (!emds.isEmpty())
 			{
 				// Select first entity
-				selectedEntityNameValue = emds.get(0).getName();
+				selectedEntityNameValue = emds.get(0).getFullyQualifiedName();
 			}
 		}
 

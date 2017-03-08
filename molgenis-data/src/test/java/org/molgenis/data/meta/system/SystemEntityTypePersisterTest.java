@@ -1,26 +1,22 @@
 package org.molgenis.data.meta.system;
 
-import com.google.common.collect.Maps;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -39,12 +35,13 @@ public class SystemEntityTypePersisterTest
 	private DataService dataService;
 
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private SystemPackageRegistry systemPackageRegistry;
 	private SystemEntityTypePersister systemEntityTypePersister;
 	private AttributeMetadata attrMetaMeta;
 	private MetaDataService metaDataService;
 
 	@Captor
-	ArgumentCaptor<Stream<Object>> objectIdCaptor;
+	private ArgumentCaptor<Stream<Object>> objectIdCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -57,34 +54,35 @@ public class SystemEntityTypePersisterTest
 		dataService = mock(DataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
+		systemPackageRegistry = mock(SystemPackageRegistry.class);
 		EntityTypeDependencyResolver entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
-				entityTypeDependencyResolver);
+				entityTypeDependencyResolver, systemPackageRegistry);
 	}
 
 	@Test
 	public void removeNonExistingSystemEntities() throws Exception
 	{
 		Package systemPackage = mock(Package.class);
-		when(systemPackage.getName()).thenReturn(PACKAGE_SYSTEM);
+		when(systemPackage.getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM);
 
-		EntityType refRemovedMeta = when(mock(EntityType.class).getName()).thenReturn("refRemoved").getMock();
+		EntityType refRemovedMeta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refRemoved").getMock();
 		when(refRemovedMeta.getPackage()).thenReturn(systemPackage);
 		when(refRemovedMeta.toString()).thenReturn("refRemoved");
 		when(refRemovedMeta.getAtomicAttributes()).thenReturn(emptyList());
 
-		EntityType removedMeta = when(mock(EntityType.class).getName()).thenReturn("removed").getMock();
+		EntityType removedMeta = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("removed").getMock();
 		when(removedMeta.getPackage()).thenReturn(systemPackage);
 		when(removedMeta.toString()).thenReturn("removed");
 		Attribute refAttr = when(mock(Attribute.class).getRefEntity()).thenReturn(refRemovedMeta).getMock();
 		when(removedMeta.getAtomicAttributes()).thenReturn(singletonList(refAttr));
 
-		EntityType refEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		EntityType refEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("refEntity").getMock();
 		when(refEntityType.getPackage()).thenReturn(systemPackage);
 		when(refEntityType.toString()).thenReturn("refEntity");
 		when(refEntityType.getAtomicAttributes()).thenReturn(emptyList());
 
-		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
 		when(entityType.getPackage()).thenReturn(systemPackage);
 		when(entityType.toString()).thenReturn("entity");
 		when(entityType.getAtomicAttributes()).thenReturn(emptyList());
@@ -96,7 +94,7 @@ public class SystemEntityTypePersisterTest
 
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
 				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
-		systemEntityTypePersister.removeNonExistingSystemEntities();
+		systemEntityTypePersister.removeNonExistingSystemEntityTypes();
 		verify(metaDataService).deleteEntityType(newArrayList(refRemovedMeta, removedMeta));
 	}
 
@@ -106,30 +104,27 @@ public class SystemEntityTypePersisterTest
 		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenAnswer(invocation -> Stream.empty());
 
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
-				.thenReturn(Stream.empty());
-		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
+				.thenAnswer(invocation -> Stream.empty());
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(invocation -> Stream.empty());
 
-		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
-		ApplicationContext applicationContext = mock(ApplicationContext.class);
+		String packageId0 = "packageId0";
 		String packageName0 = "packageName0";
-		Package package0 = when(mock(Package.class).getIdValue()).thenReturn(packageName0).getMock();
+		SystemPackage package0 = when(mock(SystemPackage.class).getFullyQualifiedName()).thenReturn(packageName0).getMock();
+		when(package0.getId()).thenReturn(packageId0);
+		String packageId1 = "packageId1";
 		String packageName1 = "packageName1";
-		Package package1 = when(mock(Package.class).getIdValue()).thenReturn(packageName1).getMock();
-		Map<String, Package> packageMap = Maps.newHashMap();
-		packageMap.put(packageName0, package0);
-		packageMap.put(packageName1, package1);
-		when(applicationContext.getBeansOfType(Package.class)).thenReturn(packageMap);
-		when(event.getApplicationContext()).thenReturn(applicationContext);
-		when(dataService.findOneById(PACKAGE, packageName0, Package.class)).thenReturn(package0);
-		when(dataService.findOneById(PACKAGE, packageName1, Package.class)).thenReturn(null);
-		systemEntityTypePersister.persist(event);
+		SystemPackage package1 = when(mock(SystemPackage.class).getFullyQualifiedName()).thenReturn(packageName1).getMock();
+		when(package1.getId()).thenReturn(packageId1);
+		when(systemPackageRegistry.getSystemPackages()).thenReturn(Stream.of(package0, package1));
+		when(dataService.findAll(PACKAGE, Package.class)).thenAnswer(invocation -> Stream.of(package0));
+		systemEntityTypePersister.persist();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).add(eq(PACKAGE), captor.capture());
-		assertEquals(captor.getValue().collect(toList()), newArrayList(package1));
+		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(metaDataService).upsertPackages(captor.capture());
+		assertEquals(captor.getValue().collect(toList()), newArrayList(package0, package1));
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/5168
@@ -140,26 +135,27 @@ public class SystemEntityTypePersisterTest
 		Attribute attr = mock(Attribute.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY_TYPE)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(Stream.empty());
-		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
-				.thenReturn(Stream.empty());
-		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(new EmptyStreamAnswer());
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenAnswer(invocation -> Stream.empty());
 
-		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
-		ApplicationContext applicationContext = mock(ApplicationContext.class);
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
+				.thenAnswer(invocation -> Stream.empty());
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(invocation -> Stream.empty());
+
+		String packageId0 = "packageId0";
 		String packageName0 = "packageName0";
-		Package package0 = when(mock(Package.class).getIdValue()).thenReturn(packageName0).getMock();
+		SystemPackage package0 = when(mock(SystemPackage.class).getFullyQualifiedName()).thenReturn(packageName0).getMock();
+		when(package0.getId()).thenReturn(packageId0);
+		String packageId1 = "packageId1";
 		String packageName1 = "packageName1";
-		Package package1 = when(mock(Package.class).getIdValue()).thenReturn(packageName1).getMock();
-		Map<String, Package> packageMap = Maps.newHashMap();
-		packageMap.put(packageName0, package0);
-		packageMap.put(packageName1, package1);
-		when(applicationContext.getBeansOfType(Package.class)).thenReturn(packageMap);
-		when(event.getApplicationContext()).thenReturn(applicationContext);
-		when(dataService.findOneById(PACKAGE, packageName0, Package.class)).thenReturn(package0);
-		when(dataService.findOneById(PACKAGE, packageName1, Package.class)).thenReturn(package1);
-		systemEntityTypePersister.persist(event);
-		verify(dataService, times(0)).add(eq(PACKAGE), any(Stream.class));
+		SystemPackage package1 = when(mock(SystemPackage.class).getFullyQualifiedName()).thenReturn(packageName1).getMock();
+		when(package1.getId()).thenReturn(packageId1);
+		when(systemPackageRegistry.getSystemPackages()).thenReturn(Stream.of(package0, package1));
+		when(dataService.findAll(PACKAGE, Package.class)).thenAnswer(invocation -> Stream.of(package0, package1));
+		systemEntityTypePersister.persist();
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(metaDataService).upsertPackages(captor.capture());
+		assertEquals(captor.getValue().collect(toList()), newArrayList(package0, package1));
 	}
 
 	private static class EmptyStreamAnswer implements Answer<Stream<EntityType>>

@@ -88,7 +88,7 @@ public class TextAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 				{ "https://www.google.com", HYPERLINK, MolgenisValidationException.class,
 						"Attribute data type update from [TEXT] to [HYPERLINK] not allowed, allowed types are [BOOL, COMPOUND, DATE, DATE_TIME, DECIMAL, ENUM, HTML, INT, LONG, SCRIPT, STRING]" },
 				{ "enumOption100", ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAIN_ENTITY'." },
+						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
 				{ "Not a date", DATE, MolgenisValidationException.class,
 						"Value [Not a date] of this entity attribute is not of type [DATE]." },
 				{ "Not a date time", DATE_TIME, MolgenisValidationException.class,

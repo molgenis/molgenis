@@ -46,13 +46,7 @@ public class SystemEntityTypeRegistry
 
 	void addSystemEntityType(SystemEntityType systemEntityType)
 	{
-		String systemEntityTypeName = systemEntityType.getName();
-		if (systemEntityTypeName == null)
-		{
-			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setName()?",
-					systemEntityType.getClass().getSimpleName()));
-		}
-
+		String systemEntityTypeName = systemEntityType.getFullyQualifiedName();
 		LOG.trace("Registering system entity [{}] ...", systemEntityTypeName);
 		systemEntityTypeMap.put(systemEntityTypeName, systemEntityType);
 	}

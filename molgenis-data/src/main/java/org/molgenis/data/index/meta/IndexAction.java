@@ -68,6 +68,17 @@ public class IndexAction extends StaticEntity
 		return this;
 	}
 
+	public String getEntityTypeId()
+	{
+		return getString(ENTITY_TYPE_ID);
+	}
+
+	public IndexAction setEntityTypeId(String entityTypeId)
+	{
+		set(ENTITY_TYPE_ID, entityTypeId);
+		return this;
+	}
+
 	public String getEntityFullName()
 	{
 		return getString(ENTITY_FULL_NAME);

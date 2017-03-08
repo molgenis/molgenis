@@ -5,11 +5,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.slf4j.Logger;
@@ -40,8 +38,8 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	private static final List<AttributeType> referencingTypes = newArrayList(MREF, XREF, CATEGORICAL, CATEGORICAL_MREF,
 			FILE);
 	private static final List<String> enumOptions = newArrayList("1", "2b", "abc");
-	private static final String MAIN_ENTITY = "MAIN_ENTITY";
-	private static final String REFERENCE_ENTITY = "REFERENCE_ENTITY";
+	private static final String MAIN_ENTITY = "MAINENTITY";
+	private static final String REFERENCE_ENTITY = "REFERENCEENTITY";
 	private static final String MAIN_ENTITY_ID_VALUE = "1";
 
 	@Autowired
@@ -62,6 +60,9 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	@Autowired
 	MetaDataService metaDataService;
 
+	@Autowired
+	IdentifierLookupService identifierLookupService;
+
 	private EntityType entityType;
 	private String mainId = "id";
 	private String mainAttribute = "mainAttribute";
@@ -70,28 +71,41 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	private String refId = "id";
 	private String refLabel = "label";
 
-	List<GrantedAuthority> setAuthorities()
+	List<GrantedAuthority> setAuthorities(IdentifierLookupService identifierLookupService)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + ENTITY_TYPE_META_DATA));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ENTITY_TYPE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(ENTITY_TYPE_META_DATA)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(ENTITY_TYPE_META_DATA)));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + ATTRIBUTE_META_DATA));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + ATTRIBUTE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(ATTRIBUTE_META_DATA)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(ATTRIBUTE_META_DATA)));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + PACKAGE));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PACKAGE));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(PackageMetadata.PACKAGE)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(PackageMetadata.PACKAGE)));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + "sys_sec_UserAuthority"));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId("sys_sec_UserAuthority")));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + MAIN_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + MAIN_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + MAIN_ENTITY));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITEMETA_" + identifierLookupService.getEntityTypeId(MAIN_ENTITY)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(MAIN_ENTITY)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(MAIN_ENTITY)));
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + REFERENCE_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + REFERENCE_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + REFERENCE_ENTITY));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITEMETA_" + identifierLookupService.getEntityTypeId(REFERENCE_ENTITY)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(REFERENCE_ENTITY)));
+		authorities.add(new SimpleGrantedAuthority(
+				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(REFERENCE_ENTITY)));
 
 		return authorities;
 	}
@@ -104,9 +118,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	 */
 	void setup(AttributeType type, AttributeType refIdType)
 	{
-		List<GrantedAuthority> authorities = setAuthorities();
-		getContext().setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
-
 		entityType = entityTypeFactory.create("1");
 		entityType.setName(MAIN_ENTITY);
 		entityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
@@ -135,8 +146,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 		entityType.addAttributes(newArrayList(mainIdAttribute, mainAttributeAttribute));
 		referenceEntityType.addAttributes(newArrayList(refIdAttribute, refLabelAttribute));
 
-		metaDataService.upsertEntityTypes(newArrayList(entityType, referenceEntityType));
-
 		Entity refEntity_1 = entityManager.create(referenceEntityType, NO_POPULATE);
 		Entity refEntity_2 = entityManager.create(referenceEntityType, NO_POPULATE);
 		Entity refEntity_3 = entityManager.create(referenceEntityType, NO_POPULATE);
@@ -163,7 +172,13 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 		refEntity_2.set(refLabel, "email label");
 		refEntity_3.set(refLabel, "hyperlink label");
 
-		dataService.add(REFERENCE_ENTITY, Stream.of(refEntity_1, refEntity_2, refEntity_3));
+		runAsSystem(() ->
+		{
+			metaDataService.upsertEntityTypes(newArrayList(entityType, referenceEntityType));
+			dataService.add(REFERENCE_ENTITY, Stream.of(refEntity_1, refEntity_2, refEntity_3));
+		});
+		List<GrantedAuthority> authorities = setAuthorities(identifierLookupService);
+		getContext().setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
 	}
 
 	void testTypeConversion(Object valueToConvert, AttributeType typeToConvertTo) throws MolgenisValidationException

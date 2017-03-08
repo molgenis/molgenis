@@ -8,14 +8,14 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.*;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -56,11 +56,9 @@ import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -111,7 +109,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private FileRepositoryCollection repositoryCollection;
 	private ImportService importService;
 	private Date date;
+	private EntityType entityType;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp() throws ParseException
 	{
@@ -122,6 +122,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		ValidationResultWizardPage validationResultWizardPage = mock(ValidationResultWizardPage.class);
 		ImportResultsWizardPage importResultsWizardPage = mock(ImportResultsWizardPage.class);
 		PackageWizardPage packageWizardPage = mock(PackageWizardPage.class);
+		IdentifierLookupService identifierLookupService = mock(IdentifierLookupService.class);
 		importServiceFactory = mock(ImportServiceFactory.class);
 		fileStore = mock(FileStore.class);
 		fileRepositoryCollectionFactory = mock(FileRepositoryCollectionFactory.class);
@@ -130,11 +131,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		dataService = mock(DataService.class);
 		repositoryCollection = mock(FileRepositoryCollection.class);
 		importService = mock(ImportService.class);
+		entityType = mock(EntityType.class);
 
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
 				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
 				userAccountService, importServiceFactory, fileStore, fileRepositoryCollectionFactory, importRunService,
-				executorService, groupAuthorityFactory);
+				executorService, groupAuthorityFactory, identifierLookupService);
 
 		List<GroupAuthority> authorities = Lists.newArrayList();
 
@@ -185,6 +187,19 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 				return Stream.of(authority1, authority2, authority3, authority4);
 			}
 		});
+
+		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
+				eq(new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+						.field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
+				.thenAnswer(new Answer<Stream<EntityType>>()
+				{
+					@Override
+					public Stream<EntityType> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.of(entityType, entityType);
+					}
+				});
+
 		when(dataService
 				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
 						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
@@ -195,7 +210,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 				return Stream.of(authority1, authority2, authority3, authority4);
 			}
 		});
-		when(dataService.getEntityNames()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
+		when(dataService.getEntityIds()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		Authentication authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -216,6 +231,15 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		date = format.parse("01-01-2016");
 
 		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(group1));
+
+		when(identifierLookupService.getEntityTypeId("entity1")).thenReturn("entity1");
+		when(identifierLookupService.getEntityTypeId("entity2")).thenReturn("entity2");
+		when(identifierLookupService.getEntityTypeId("entity3")).thenReturn("entity3");
+		when(identifierLookupService.getEntityTypeId("entity4")).thenReturn("entity4");
+		when(identifierLookupService.getEntityTypeId("entity5")).thenReturn("entity5");
+
+		when(entityType.getId()).thenReturn("entityTypeId");
+		when(entityType.getFullyQualifiedName()).thenReturn("entityTypeName");
 
 		reset(executorService);
 	}

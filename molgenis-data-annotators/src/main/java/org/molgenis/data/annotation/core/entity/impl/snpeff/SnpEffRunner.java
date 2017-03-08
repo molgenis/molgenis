@@ -46,11 +46,9 @@ public class SnpEffRunner
 	private String snpEffPath;
 
 	private static final String CHARSET = "UTF-8";
-	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
+	public static final String ENTITY_NAME_SUFFIX = "EFFECTS";
 
 	public static final String NAME = "snpEff";
-	public static final String LOF = "LOF";
-	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
 
 	private EffectsMetaData effectsMetaData = new EffectsMetaData();
@@ -319,7 +317,7 @@ public class SnpEffRunner
 	public EntityType getTargetEntityType(EntityType sourceEntityType)
 	{
 		EntityType entityType = entityTypeFactory.create()
-				.setSimpleName(sourceEntityType.getSimpleName() + ENTITY_NAME_SUFFIX)
+				.setName(sourceEntityType.getName() + ENTITY_NAME_SUFFIX)
 				.setPackage(sourceEntityType.getPackage());
 		entityType.setBackend(sourceEntityType.getBackend());
 		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false)

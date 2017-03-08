@@ -14,6 +14,7 @@ import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -27,6 +28,7 @@ public abstract class SystemEntityType extends EntityType
 
 	private final String entityName;
 	private final String systemPackageName;
+	private final String id;
 
 	/**
 	 * Construct entity meta data for an entity with the given name stored in the system package.
@@ -38,16 +40,23 @@ public abstract class SystemEntityType extends EntityType
 		this(entityName, PACKAGE_SYSTEM);
 	}
 
+	public SystemEntityType(String entityName, String packageName)
+	{
+		this(entityName, packageName, packageName + "_" +entityName);//FIXME
+	}
+
 	/**
 	 * Construct entity meta data for an entity with the given name stored in a system package with the given package name.
 	 *
 	 * @param entityName        entity name
 	 * @param systemPackageName system package name
 	 */
-	public SystemEntityType(String entityName, String systemPackageName)
+	public SystemEntityType(String entityName, String systemPackageName, String entityId)
 	{
 		this.entityName = requireNonNull(entityName);
 		this.systemPackageName = requireNonNull(systemPackageName);
+		this.id = requireNonNull(entityId);
+
 		if (!systemPackageName.startsWith(PACKAGE_SYSTEM))
 		{
 			throw new IllegalArgumentException(
@@ -56,11 +65,33 @@ public abstract class SystemEntityType extends EntityType
 		}
 	}
 
+	@Override
+	public Object get(String attributeName)
+	{
+		if(attributeName.equals(ID))
+			return id;
+		return super.get(attributeName);
+	}
+
+	@Override
+	public Object getIdValue()
+	{
+		return id;
+	}
+
+	@Override
+	public String getString(String attributeName)
+	{
+		if(attributeName.equals(ID))
+			return id;
+		return super.getString(attributeName);
+	}
+
 	public void bootstrap(EntityTypeMetadata entityTypeMetadata)
 	{
 		super.init(new BootstrapEntity(entityTypeMetadata));
-		setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
-		setSimpleName(entityName);
+		setId(id);
+		setName(entityName);
 		setDefaultValues();
 		init();
 	}
@@ -71,13 +102,19 @@ public abstract class SystemEntityType extends EntityType
 	protected abstract void init();
 
 	@Override
-	public String getName()
+	public String getFullyQualifiedName()
 	{
 		return systemPackageName + PACKAGE_SEPARATOR + entityName;
 	}
 
 	@Override
-	public String getSimpleName()
+	public String getId()
+	{
+		return this.id;
+	}
+
+	@Override
+	public String getName()
 	{
 		return entityName;
 	}

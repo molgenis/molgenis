@@ -70,7 +70,7 @@ public class RestServiceTest
 		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(INT);
 		EntityType refEntityType = mock(EntityType.class);
-		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getFullyQualifiedName()).thenReturn(refEntityName);
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(attrType);
@@ -90,7 +90,7 @@ public class RestServiceTest
 		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 		EntityType refEntityType = mock(EntityType.class);
-		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getFullyQualifiedName()).thenReturn(refEntityName);
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(attrType);
@@ -109,7 +109,7 @@ public class RestServiceTest
 		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 		EntityType refEntityMeta = mock(EntityType.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
+		when(refEntityMeta.getFullyQualifiedName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(XREF);
@@ -139,7 +139,7 @@ public class RestServiceTest
 	public void updateMappedByEntitiesEntity() {
 		String refEntityName = "refEntityName";
 		EntityType refEntityMeta = mock(EntityType.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
+		when(refEntityMeta.getFullyQualifiedName()).thenReturn(refEntityName);
 
 		String mappedByAttrName = "mappedByAttr";
 		Attribute mappedByAttr = mock(Attribute.class);
@@ -163,7 +163,7 @@ public class RestServiceTest
 		when(entity.getEntityType()).thenReturn(entityMeta);
 		restService.updateMappedByEntities(entity);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(refEntityName), captor.capture());
 		List<Entity> refEntities = captor.getValue().collect(toList());
@@ -177,7 +177,7 @@ public class RestServiceTest
 	public void updateMappedByEntitiesEntityEntity() {
 		String refEntityName = "refEntityName";
 		EntityType refEntityMeta = mock(EntityType.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
+		when(refEntityMeta.getFullyQualifiedName()).thenReturn(refEntityName);
 
 		String mappedByAttrName = "mappedByAttr";
 		Attribute mappedByAttr = mock(Attribute.class);
@@ -207,7 +207,7 @@ public class RestServiceTest
 
 		restService.updateMappedByEntities(entity, existingEntity);
 
-		//noinspection unchecked
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(refEntityName), captor.capture());
 		List<Entity> refEntities = captor.getValue().collect(toList());

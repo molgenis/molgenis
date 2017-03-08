@@ -41,7 +41,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Stream<String> getEntityNames()
 	{
-		return metaDataService.getEntityTypes().map(EntityType::getName);
+		return metaDataService.getEntityTypes().map(EntityType::getFullyQualifiedName);
+	}
+
+	@Override
+	public Stream<Object> getEntityIds()
+	{
+		return metaDataService.getEntityTypes().map(EntityType::getId);
 	}
 
 	@Override

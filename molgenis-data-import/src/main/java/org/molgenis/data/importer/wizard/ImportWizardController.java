@@ -1,9 +1,13 @@
 package org.molgenis.data.importer.wizard;
 
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.NameValidator;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
@@ -68,6 +72,7 @@ public class ImportWizardController extends AbstractWizardController
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 	private final UserAccountService userAccountService;
 	private final GroupAuthorityFactory groupAuthorityFactory;
+	private final IdentifierLookupService identifierLookupService;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -84,7 +89,7 @@ public class ImportWizardController extends AbstractWizardController
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			GroupAuthorityFactory groupAuthorityFactory)
+			GroupAuthorityFactory groupAuthorityFactory, IdentifierLookupService identifierLookupService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -109,6 +114,7 @@ public class ImportWizardController extends AbstractWizardController
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 		this.dataService = dataService;
 		this.asyncImportJobs = Executors.newSingleThreadExecutor();
+		this.identifierLookupService = identifierLookupService;
 	}
 
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
@@ -117,7 +123,8 @@ public class ImportWizardController extends AbstractWizardController
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			ExecutorService executorService, GroupAuthorityFactory groupAuthorityFactory)
+			ExecutorService executorService, GroupAuthorityFactory groupAuthorityFactory,
+			IdentifierLookupService identifierLookupService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -140,6 +147,7 @@ public class ImportWizardController extends AbstractWizardController
 		this.dataService = dataService;
 		this.asyncImportJobs = executorService;
 		this.groupAuthorityFactory = groupAuthorityFactory;
+		this.identifierLookupService = identifierLookupService;
 	}
 
 	@Override
@@ -172,12 +180,17 @@ public class ImportWizardController extends AbstractWizardController
 			throw new RuntimeException("Current user does not belong to the requested group.");
 		}
 		String entitiesString = webRequest.getParameter("entityIds");
-		List<String> entities = Arrays.asList(entitiesString.split(","));
+		List<String> entityNames = Arrays.asList(entitiesString.split(","));
+		Stream<Object> entityIds = entityNames.stream()
+				.map(entityName -> identifierLookupService.getEntityTypeId(entityName));
+		List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityIds,
+				new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+						.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
 
 		Group group = dataService.findOneById(GROUP, groupId, Group.class);
 		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 		List<Authority> groupPermissions = getGroupPermissions(group);
-		Permissions permissions = createPermissions(groupPermissions, entities);
+		Permissions permissions = createPermissions(groupPermissions, entityTypes);
 		permissions.setGroupId(groupId);
 		return permissions;
 
@@ -187,29 +200,34 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		dataService.getEntityNames().forEach(entityClassId ->
+
+		dataService.getEntityIds().forEach(entityClassId ->
 		{
-			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
+			GroupAuthority authority = getGroupAuthority(groupId, entityClassId.toString());
 
 			boolean newGroupAuthority;
-			if(authority == null) {
+			if (authority == null)
+			{
 				newGroupAuthority = true;
 				authority = groupAuthorityFactory.create();
-			} else {
+			}
+			else
+			{
 				newGroupAuthority = false;
 			}
 
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value != null && (SecurityUtils
-					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
-					|| userAccountService.getCurrentUser().isSuperuser()))
+			if (value != null && (
+					SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
+							|| userAccountService.getCurrentUser().isSuperuser()))
 			{
 				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
 						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
-					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
+					authority
+							.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
 					if (newGroupAuthority)
 					{
 						authority.setId(UUID.randomUUID().toString());
@@ -243,21 +261,21 @@ public class ImportWizardController extends AbstractWizardController
 
 	private List<Authority> getGroupPermissions(Group group)
 	{
-		return dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group),
-				GroupAuthority.class).collect(Collectors.toList());
+		return dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group),
+						GroupAuthority.class).collect(Collectors.toList());
 	}
 
-	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)
+	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<EntityType> entityTypes)
 	{
 		Permissions permissions = new Permissions();
 
-		if (entityIds != null)
+		if (entityTypes != null)
 		{
-			Map<String, String> entityClassMap = new TreeMap<String, String>();
-			for (String entityClassId : entityIds)
+			Map<String, String> entityClassMap = new TreeMap<>();
+			for (EntityType entityType : entityTypes)
 			{
-				entityClassMap.put(entityClassId, entityClassId);
+				entityClassMap.put(entityType.getId(), entityType.getFullyQualifiedName());
 			}
 			permissions.setEntityIds(entityClassMap);
 		}
@@ -307,15 +325,15 @@ public class ImportWizardController extends AbstractWizardController
 	/**
 	 * Returns a group authority based on group and entity class identifier.
 	 *
-	 * @param groupId group identifier
+	 * @param groupId       group identifier
 	 * @param entityClassId entity class identifier
 	 * @return existing group authority or <code>null</code> if no matching group authority exists.
 	 */
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
-		Stream<GroupAuthority> stream = dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
-				GroupAuthority.class);
+		Stream<GroupAuthority> stream = dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
+						GroupAuthority.class);
 		GroupAuthority existingGroupAuthority = null;
 		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
 		{
@@ -401,7 +419,8 @@ public class ImportWizardController extends AbstractWizardController
 
 	private ResponseEntity<String> createCreatedResponseEntity(ImportRun importRun) throws URISyntaxException
 	{
-		String href = Href.concatEntityHref("/api/v2", importRun.getEntityType().getName(), importRun.getIdValue());
+		String href = Href
+				.concatEntityHref("/api/v2", importRun.getEntityType().getFullyQualifiedName(), importRun.getIdValue());
 		return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
 	}
 
@@ -477,7 +496,7 @@ public class ImportWizardController extends AbstractWizardController
 
 		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{
-			NameValidator.validateName(file.getName().replace("." + extension, ""));
+			NameValidator.validateEntityOrPackageName(file.getName().replace("." + extension, ""));
 			if (!DatabaseAction.ADD.equals(databaseAction))
 			{
 				throw new IllegalArgumentException(

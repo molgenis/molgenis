@@ -17,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -42,7 +42,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * Test the Importer test cases
  */
-@TransactionConfiguration(defaultRollback = false)
+@Rollback(value = false)
 @ContextConfiguration(classes = { PlatformITConfig.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class ImportServiceIT extends AbstractTestNGSpringContextTests
@@ -76,11 +76,11 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest")));
 
 		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"),
-				ImmutableMap.<String, Integer>builder().put("TestCategorical_1", 50).put("TestMref_1", 50)
-						.put("TestXref_2", 50).put("TestXref_1", 50)
-						.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity_2", 50).build(),
-				ImmutableSet.of("TestCategorical_1", "TestMref_1", "TestXref_2", "TestXref_1", "TestEntity_0",
-						"advanced_TestEntity_1", "advanced_p_TestEntity_2")));
+				ImmutableMap.<String, Integer>builder().put("TestCategorical1", 50).put("TestMref1", 50)
+						.put("TestXref2", 50).put("TestXref1", 50)
+						.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity2", 50).build(),
+				ImmutableSet.of("TestCategorical1", "TestMref1", "TestXref2", "TestXref1", "TestEntity0",
+						"advanced_TestEntity1", "advanced_p_TestEntity2")));
 
 		data.add(createAddData("it_emx_lookup_attribute.xlsx", asList("it", "emx", "lookupattribute"),
 				ImmutableMap.<String, Integer>builder().put("Ref1", 2).put("Ref2", 2).put("Ref3", 2).put("Ref4", 2)

@@ -88,15 +88,14 @@ public class EntityTestHarness
 
 	public EntityType createDynamicRefEntityType()
 	{
-		return entityTypeFactory.create().setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
+		return entityTypeFactory.create().setName("TypeTestRefDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_REF_STRING, STRING).setNillable(false), ROLE_LABEL);
 	}
 
-	public EntityType createDynamicTestEntityType()
+	public EntityType createDynamicTestEntityType(EntityType refEntityType)
 	{
-		EntityType refEntityType = createDynamicRefEntityType();
-		EntityType entityType = entityTypeFactory.create().setSimpleName("TypeTestDynamic")
+		EntityType entityType = entityTypeFactory.create().setName("TypeTestDynamic")
 				.setBackend("PostgreSQL");
 		entityType
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
@@ -185,5 +184,12 @@ public class EntityTestHarness
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public void addSelfReference(EntityType selfXrefEntityType)
+	{
+		Attribute selfRef = createAttribute(ATTR_XREF, XREF);
+		selfRef.setRefEntity(selfXrefEntityType);
+		selfXrefEntityType.addAttribute(selfRef);
 	}
 }

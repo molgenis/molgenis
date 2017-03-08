@@ -1,13 +1,22 @@
-import $ from "jquery";
+import {encode} from 'mdurl'
+
+export function containsRsqlReservedCharacter(value) {
+    return /["'();,=!~<> ]/.test(value);
+}
+
+/**
+ * Escapes an rsql value by putting it between quotes.
+ */
+export function rsqlEscape(value) {
+    const doubleQuotes = (value.match(/["]/g) || []).length
+    const singleQuotes = (value.match(/[']/g) || []).length
+
+    const quoteChar = (doubleQuotes >= singleQuotes) ? "'" : "\""
+    return quoteChar + value.split(quoteChar).join("\\" + quoteChar) + quoteChar
+}
 
 function toRsqlValue(value) {
-    if (_.isString(value) === false || (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
-        || value.indexOf(',') !== -1 || value.indexOf('=') !== -1 || value.indexOf('!') !== -1 || value.indexOf('~') !== -1 || value.indexOf('<') !== -1
-        || value.indexOf('>') !== -1 || value.indexOf(' ') !== -1)) {
-        return '"' + encodeURIComponent(value) + '"';
-    } else {
-        return encodeURIComponent(value);
-    }
+    return containsRsqlReservedCharacter(value) ? rsqlEscape(value) : value;
 }
 
 export function createRsqlQuery(rules) {
@@ -24,36 +33,34 @@ export function createRsqlQuery(rules) {
         switch (rule.operator) {
             case 'SEARCH':
                 let field = rule.field !== undefined ? rule.field : '*';
-                rsql += encodeURIComponent(field) + '=q=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(field) + '=q=' + toRsqlValue(rule.value);
                 break;
             case 'EQUALS':
-                rsql += encodeURIComponent(rule.field) + '==' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '==' + toRsqlValue(rule.value);
                 break;
             case 'IN':
-                rsql += encodeURIComponent(rule.field) + '=in=' + '(' + $.map(rule.value, function (value) {
-                        return toRsqlValue(value);
-                    }).join(',') + ')';
+                rsql += toRsqlValue(rule.field) + '=in=' + '(' + rule.value.map(toRsqlValue).join(',') + ')';
                 break;
             case 'LESS':
-                rsql += encodeURIComponent(rule.field) + '=lt=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '=lt=' + toRsqlValue(rule.value);
                 break;
             case 'LESS_EQUAL':
-                rsql += encodeURIComponent(rule.field) + '=le=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '=le=' + toRsqlValue(rule.value);
                 break;
             case 'GREATER':
-                rsql += encodeURIComponent(rule.field) + '=gt=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '=gt=' + toRsqlValue(rule.value);
                 break;
             case 'GREATER_EQUAL':
-                rsql += encodeURIComponent(rule.field) + '=ge=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '=ge=' + toRsqlValue(rule.value);
                 break;
             case 'RANGE':
-                rsql += encodeURIComponent(rule.field) + '=rng=' + '(' + toRsqlValue(rule.value[0]) + ',' + toRsqlValue(rule.value[1]) + ')';
+                rsql += toRsqlValue(rule.field) + '=rng=' + '(' + toRsqlValue(rule.value[0]) + ',' + toRsqlValue(rule.value[1]) + ')';
                 break;
             case 'LIKE':
-                rsql += encodeURIComponent(rule.field) + '=like=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '=like=' + toRsqlValue(rule.value);
                 break;
             case 'NOT':
-                rsql += encodeURIComponent(rule.field) + '!=' + toRsqlValue(rule.value);
+                rsql += toRsqlValue(rule.field) + '!=' + toRsqlValue(rule.value);
                 break;
             case 'AND':
                 // ignore dangling AND rule
@@ -104,4 +111,11 @@ export function createRsqlAggregateQuery(aggs) {
         rsql += 'distinct==' + toRsqlValue(aggs.distinct);
     }
     return rsql;
+}
+
+/**
+ * URLEncodes an rsql value, leaving as many rsql-relevant characters as possible unencoded
+ */
+export function encodeRsqlValue(str) {
+    return encode(str, encode.componentChars + "=:,;\"'<>", false)
 }

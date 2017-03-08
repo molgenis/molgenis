@@ -23,6 +23,7 @@ import static org.testng.Assert.assertEquals;
 public class RepositorySecurityDecoratorTest
 {
 	private String entityName;
+	private String entityId;
 	private Repository<Entity> decoratedRepository;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 
@@ -31,11 +32,13 @@ public class RepositorySecurityDecoratorTest
 	public void setUp()
 	{
 		entityName = "entity";
+		entityId = "entityID";
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(entityName);
+		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getName()).thenReturn(entityName);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn("entityID");
 		repositorySecurityDecorator = new RepositorySecurityDecorator(decoratedRepository);
 	}
 
@@ -43,7 +46,7 @@ public class RepositorySecurityDecoratorTest
 	public void addStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityName);
+				"ROLE_ENTITY_WRITE_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -56,7 +59,7 @@ public class RepositorySecurityDecoratorTest
 	public void addStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -67,7 +70,7 @@ public class RepositorySecurityDecoratorTest
 		}
 		catch (MolgenisDataAccessException e)
 		{
-			verify(decoratedRepository, times(1)).getName();
+			verify(decoratedRepository, times(1)).getEntityType();
 			verifyNoMoreInteractions(decoratedRepository);
 			throw e;
 		}
@@ -77,7 +80,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -95,7 +98,7 @@ public class RepositorySecurityDecoratorTest
 	public void deleteStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityName);
+				"ROLE_ENTITY_WRITE_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -108,7 +111,7 @@ public class RepositorySecurityDecoratorTest
 	public void deleteStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -119,7 +122,7 @@ public class RepositorySecurityDecoratorTest
 		}
 		catch (MolgenisDataAccessException e)
 		{
-			verify(decoratedRepository, times(1)).getName();
+			verify(decoratedRepository, times(1)).getEntityType();
 			verifyNoMoreInteractions(decoratedRepository);
 			throw e;
 		}
@@ -130,7 +133,7 @@ public class RepositorySecurityDecoratorTest
 	public void updateStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityName);
+				"ROLE_ENTITY_WRITE_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -146,7 +149,7 @@ public class RepositorySecurityDecoratorTest
 	public void updateStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -157,7 +160,7 @@ public class RepositorySecurityDecoratorTest
 		}
 		catch (MolgenisDataAccessException e)
 		{
-			verify(decoratedRepository, times(1)).getName();
+			verify(decoratedRepository, times(1)).getEntityType();
 			verifyNoMoreInteractions(decoratedRepository);
 			throw e;
 		}
@@ -167,7 +170,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllStream()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -201,7 +204,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllStreamFetch()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -251,7 +254,7 @@ public class RepositorySecurityDecoratorTest
 	public void findOnePermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -281,7 +284,7 @@ public class RepositorySecurityDecoratorTest
 	public void findAllAsStreamPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -312,7 +315,7 @@ public class RepositorySecurityDecoratorTest
 	public void streamFetch()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityName);
+				"ROLE_ENTITY_READ_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -343,7 +346,7 @@ public class RepositorySecurityDecoratorTest
 	public void aggregate()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_COUNT_" + entityName);
+				"ROLE_ENTITY_COUNT_" + entityId);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 

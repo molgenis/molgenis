@@ -85,7 +85,7 @@ public class VcfToEntity
 		Attribute idAttribute = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
 		idAttribute.setVisible(false);
 
-		EntityType entityType = entityTypeFactory.create().setSimpleName(entityName);
+		EntityType entityType = entityTypeFactory.create().setName(entityName);
 		entityType.addAttribute(vcfAttributes.getChromAttribute());
 		entityType.addAttribute(vcfAttributes.getAltAttribute());
 		entityType.addAttribute(vcfAttributes.getPosAttribute());
@@ -124,7 +124,7 @@ public class VcfToEntity
 		EntityType result = null;
 		if (formatMetaData.iterator().hasNext())
 		{
-			result = entityTypeFactory.create().setSimpleName(entityName + "_Sample");
+			result = entityTypeFactory.create().setName(entityName + "Sample");
 
 			Attribute idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
 			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true)
@@ -141,7 +141,7 @@ public class VcfToEntity
 				{
 					name = name + "_";
 				}
-				Attribute attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?]", "_"))
+				Attribute attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?_]", ""))
 						.setDataType(vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true)
 						.setLabel(meta.getId());
 

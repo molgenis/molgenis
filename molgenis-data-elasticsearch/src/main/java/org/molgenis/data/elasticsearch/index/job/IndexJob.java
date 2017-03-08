@@ -11,6 +11,7 @@ import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,7 +239,8 @@ class IndexJob extends Job
 	private EntityType getEntityType(IndexAction indexAction)
 	{
 		EntityType entityType = entityTypeFactory.create(indexAction.getEntityFullName());
-		entityType.setSimpleName(indexAction.getEntityTypeName());
+		entityType.setId(indexAction.getEntityTypeId());
+		entityType.setName(indexAction.getEntityTypeName());
 		return entityType;
 	}
 }

@@ -79,7 +79,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 		if (transactionId != null)
 		{
-			LOG.debug("register(entityFullName: [{}], entityId: [{}])", entityType.getName(), entityId);
+			LOG.debug("register(entityFullName: [{}], entityId: [{}])", entityType.getFullyQualifiedName(), entityId);
 			final int actionOrder = indexActionsPerTransaction.get(transactionId).size();
 			if (actionOrder >= LOG_EVERY && actionOrder % LOG_EVERY == 0)
 			{
@@ -89,14 +89,14 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityFullName(entityType.getName()).setEntityTypeName(entityType.getSimpleName())
+					.setEntityFullName(entityType.getFullyQualifiedName()).setEntityTypeId(entityType.getId()).setEntityTypeName(entityType.getName())
 					.setEntityId(entityId).setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
 		{
 			LOG.error("Transaction id is unknown, register of entityFullName [{}] dataType [{}], entityId [{}]",
-					entityType.getName(), entityId);
+					entityType.getFullyQualifiedName(), entityId);
 		}
 	}
 
@@ -172,8 +172,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		// convert referencing entity names to index actions
 		Stream<IndexAction> referencingEntityIndexActions = referencingEntityMap.values().stream()
 				.map(referencingEntity -> indexActionFactory.create()
-						.setEntityTypeName(referencingEntity.getSimpleName())
-						.setEntityFullName(referencingEntity.getName())
+						.setEntityTypeId(referencingEntity.getId()).setEntityTypeName(entityType.getName())
+						.setEntityFullName(referencingEntity.getFullyQualifiedName())
 						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
 
 		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);

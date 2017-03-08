@@ -279,13 +279,13 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		Entity expectedVariant1 = result.next();
 		assertEquals(2, Iterables.size(expectedVariant1.getEntities("EFFECT")));
 		Iterator<Entity> effectsIterator = expectedVariant1.getEntities("EFFECT").iterator();
-		assertEquals(effectsIterator.next().getIdValue(),"effect_ID1");
-		assertEquals(effectsIterator.next().getIdValue(),"effect_ID2");
+		assertEquals(effectsIterator.next().getIdValue(), "effect_ID1");
+		assertEquals(effectsIterator.next().getIdValue(), "effect_ID2");
 		assertTrue(result.hasNext());
 		Entity expectedVariant2 = result.next();
 		assertEquals(1, Iterables.size(expectedVariant2.getEntities("EFFECT")));
 		effectsIterator = expectedVariant2.getEntities("EFFECT").iterator();
-		assertEquals(effectsIterator.next().getIdValue(),"effect_ID3");
+		assertEquals(effectsIterator.next().getIdValue(), "effect_ID3");
 		assertFalse(result.hasNext());
 	}
 

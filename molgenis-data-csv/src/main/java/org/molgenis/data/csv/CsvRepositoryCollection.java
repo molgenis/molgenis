@@ -60,7 +60,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
 		return entityNames;
 	}
@@ -132,7 +132,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	{
 		return new Iterator<Repository<Entity>>()
 		{
-			Iterator<String> it = getEntityNames().iterator();
+			Iterator<String> it = getEntityIds().iterator();
 
 			@Override
 			public boolean hasNext()
@@ -158,7 +158,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getName());
+		return hasRepository(entityType.getFullyQualifiedName());
 	}
 
 	@Autowired

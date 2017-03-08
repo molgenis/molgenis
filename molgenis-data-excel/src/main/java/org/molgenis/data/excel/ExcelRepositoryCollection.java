@@ -72,7 +72,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
 		int count = getNumberOfSheets();
 		List<String> sheetNames = Lists.newArrayListWithCapacity(count);
@@ -149,7 +149,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	{
 		return new Iterator<Repository<Entity>>()
 		{
-			Iterator<String> it = getEntityNames().iterator();
+			Iterator<String> it = getEntityIds().iterator();
 
 			@Override
 			public boolean hasNext()
@@ -170,7 +170,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> entityNames = getEntityNames().iterator();
+		Iterator<String> entityNames = getEntityIds().iterator();
 		while (entityNames.hasNext())
 		{
 			if (entityNames.next().equals(name)) return true;
@@ -181,7 +181,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getName());
+		return hasRepository(entityType.getFullyQualifiedName());
 	}
 
 	@Autowired

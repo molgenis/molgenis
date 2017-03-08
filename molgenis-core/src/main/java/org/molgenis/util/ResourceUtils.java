@@ -11,10 +11,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class ResourceUtils
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceUtils.class);
-	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 
 	private ResourceUtils()
 	{
@@ -35,13 +36,13 @@ public class ResourceUtils
 	public static String getString(String resourceName) throws IOException
 	{
 		URL resourceUrl = Resources.getResource(resourceName);
-		return getString(resourceUrl, CHARSET_UTF8);
+		return getString(resourceUrl, UTF_8);
 	}
 
 	public static String getString(Class<?> contextClass, String resourceName) throws IOException
 	{
 		URL resourceUrl = Resources.getResource(contextClass, resourceName);
-		return getString(resourceUrl, CHARSET_UTF8);
+		return getString(resourceUrl, UTF_8);
 	}
 
 	public static String getString(Class<?> contextClass, String resourceName, Charset charset) throws IOException

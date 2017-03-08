@@ -73,7 +73,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 
 			try
 			{
-				NameValidator.validateName(userGivenName);
+				NameValidator.validateEntityOrPackageName(userGivenName);
 				if (dataService.hasRepository(userGivenName))
 				{
 					result.addError(new ObjectError("wizard", "An entity with this name already exists."));
@@ -127,7 +127,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		Set<String> allPackages = new HashSet<>(validationReport.getPackages());
 		for (Package p : dataService.getMeta().getPackages())
 		{
-			allPackages.add(p.getName());
+			allPackages.add(p.getFullyQualifiedName());
 		}
 
 		List<String> entitiesInDefaultPackage = new ArrayList<>();

@@ -32,13 +32,11 @@ public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 	public EntityType metaDataCanAnnotate = entityTypeFactory.create().setName("test");
 	public EntityType metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
-	public Attribute attributeChrom = attributeFactory.create().setName(CHROM)
-			.setDataType(STRING);
+	public Attribute attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 	public Attribute attributePos = attributeFactory.create().setName(POS).setDataType(LONG);
 	public Attribute attributeRef = attributeFactory.create().setName(REF).setDataType(STRING);
 	public Attribute attributeAlt = attributeFactory.create().setName(ALT).setDataType(STRING);
-	public Attribute attributeCantAnnotateChrom = attributeFactory.create().setName(CHROM)
-			.setDataType(LONG);
+	public Attribute attributeCantAnnotateChrom = attributeFactory.create().setName(CHROM).setDataType(LONG);
 	public ArrayList<Entity> input = new ArrayList<>();
 	public ArrayList<Entity> input1 = new ArrayList<>();
 	public ArrayList<Entity> input2 = new ArrayList<>();

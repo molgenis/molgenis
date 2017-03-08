@@ -71,7 +71,6 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	public void testGetEntityType()
 	{
 		EntityType expectedEntityType = entityTypeFactory.create();
-		expectedEntityType.setSimpleName("EntityNameSmall");
 		expectedEntityType.setName("EntityNameSmall");
 		expectedEntityType.addAttribute(vcfAttrs.getChromAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getAltAttribute());
@@ -96,11 +95,11 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		Attribute infoChar2 = attrMetaFactory.create().setName("CHAR").setDataType(STRING).setDescription("char field")
 				.setAggregatable(true).setParent(infoMetaData);
 
-		expectedEntityType.addAttribute(infoMetaData);
 		expectedEntityType.addAttribute(infoNS);
 		expectedEntityType.addAttribute(infoDF);
 		expectedEntityType.addAttribute(infoDF2);
 		expectedEntityType.addAttribute(infoChar2);
+		expectedEntityType.addAttribute(infoMetaData);
 
 		EntityType actualEntityType = vcfToEntitySmall.getEntityType();
 		String backend = "test";
@@ -111,8 +110,11 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		expectedEntityType.setPackage(package_);
 		actualEntityType.setPackage(package_);
 
-		expectedEntityType.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
-		actualEntityType.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		expectedEntityType.setId("dummyId");
+		expectedEntityType.getOwnAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		actualEntityType.setId("dummyId");
+		actualEntityType.getOwnAllAttributes().forEach(attr -> attr.setIdentifier(null));
+
 		assertTrue(EntityUtils.equals(expectedEntityType, actualEntityType));
 	}
 

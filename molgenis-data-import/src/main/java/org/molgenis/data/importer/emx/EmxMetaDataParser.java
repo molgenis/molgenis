@@ -15,6 +15,7 @@ import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -169,6 +170,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final AttributeValidator attributeValidator;
 	private final TagValidator tagValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final IdentifierLookupService identifierLookupService;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, EntityTypeDependencyResolver entityTypeDependencyResolver)
@@ -184,13 +186,14 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = null;
 		this.tagValidator = null;
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.identifierLookupService = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
 			I18nStringFactory i18nStringFactory, EntityTypeValidator entityTypeValidator,
 			AttributeValidator attributeValidator, TagValidator tagValidator,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
@@ -203,10 +206,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.tagValidator = requireNonNull(tagValidator);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.identifierLookupService = requireNonNull(identifierLookupService);
 	}
 
 	@Override
-	//FIXME The source is parsed twice!!! Once by dermineImportableEntities and once by doImport
+	//FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
 	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackageName)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
@@ -231,7 +235,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (dataService != null)
 			{
 				List<EntityType> metadataList = new ArrayList<>();
-				for (String emxName : source.getEntityNames())
+				for (String emxName : source.getEntityIds())
 				{
 					String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
 					if (repoName == null) repoName = emxName;
@@ -271,10 +275,10 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	private ImmutableMap<String, EntityType> getEntityTypeMap(DataService dataService, RepositoryCollection source)
 	{
-		// FIXME: So if there is no attribute sheet, we assume it is already in the dataservice?
+		// If there is no attribute sheet, we assume the entity is already known in MOLGENIS
 		Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
 		if (attributeSourceRepository != null) return getEntityTypeFromSource(source).getEntityMap();
-		else return getEntityTypeFromDataService(dataService, source.getEntityNames());
+		else return getEntityTypeFromDataService(dataService, source.getEntityIds());
 	}
 
 	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
@@ -437,7 +441,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + rowIndex);
 
 			Package package_ = packageFactory.create();
-			package_.setName(name);
 			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
 			package_.setLabel(packageEntity.getString(EMX_PACKAGE_LABEL));
 
@@ -449,12 +452,12 @@ public class EmxMetaDataParser implements MetaDataParser
 						"Inconsistent package structure. Package: '" + name + "', parent: '" + parentName + '\'');
 
 				String simpleName = name.substring(parentName.length() + 1); // subpackage_package
-				package_.setSimpleName(simpleName);
+				package_.setName(simpleName);
 				package_.setParent(intermediateResults.getPackage(parentName));
 			}
 			else
 			{
-				package_.setSimpleName(name);
+				package_.setName(name);
 			}
 
 			// Set package tags
@@ -684,7 +687,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		for (Entity pack : packageRepo)
 		{
-			String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+			String name = pack.getString(PackageMetadata.NAME);
 			String parentName = pack.getString(PackageMetadata.PARENT);
 
 			if (parentName == null)
@@ -709,7 +712,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				Entity parent = resolvedByName.get(pack.getString(PackageMetadata.PARENT));
 				if (parent != null)
 				{
-					String name = pack.getString(PackageMetadata.SIMPLE_NAME);
+					String name = pack.getString(PackageMetadata.NAME);
 					ready.add(pack);
 					resolvedByName.put(name, pack);
 				}
@@ -1097,7 +1100,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * re-iterate to map the mrefs/xref refEntity (or give error if not found)
-	 * TODO consider also those in existing db
 	 *
 	 * @param attributeRepo       the attributes {@link Repository}
 	 * @param intermediateResults {@link ParsedMetaData} to add the ref entities to
@@ -1203,7 +1205,9 @@ public class EmxMetaDataParser implements MetaDataParser
 		Package package_ = intermediateResults.getPackage(packageName);
 		if (package_ == null && dataService != null)
 		{
-			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageName, Package.class);
+			package_ = dataService
+					.findOneById(PackageMetadata.PACKAGE, identifierLookupService.getPackageId(packageName),
+							Package.class);
 		}
 		return package_;
 	}
@@ -1232,8 +1236,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		existingMetaData.forEach(emd ->
 		{
-			if (!allEntityTypeMap.containsKey(emd.getName())) allEntityTypeMap.put(emd.getName(), emd);
-			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getName()))) && emd instanceof SystemEntityType)
+			if (!allEntityTypeMap.containsKey(emd.getFullyQualifiedName()))
+				allEntityTypeMap.put(emd.getFullyQualifiedName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getFullyQualifiedName())))
+					&& emd instanceof SystemEntityType)
 			{
 				throw new MolgenisDataException(
 						"SystemEntityType in the database conflicts with the metadata for this import");
@@ -1314,7 +1320,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private MyEntitiesValidationReport generateEntityValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
 	{
-		for (String sheet : source.getEntityNames())
+		for (String sheet : source.getEntityIds())
 		{
 			if (EMX_PACKAGES.equals(sheet))
 			{

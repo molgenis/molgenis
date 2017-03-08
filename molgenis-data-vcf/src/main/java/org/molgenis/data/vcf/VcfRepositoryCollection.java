@@ -45,17 +45,17 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		this.file = requireNonNull(file);
 
 		String name = file.getName();
-		if (name.endsWith(EXTENSION_VCF))
+		if (name.toLowerCase().endsWith(EXTENSION_VCF))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF));
 		}
-		else if (name.endsWith(EXTENSION_VCF_GZ))
+		else if (name.toLowerCase().endsWith(EXTENSION_VCF_GZ))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_GZ));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF_GZ));
 		}
-		else if (name.endsWith(EXTENSION_VCF_ZIP))
+		else if (name.toLowerCase().endsWith(EXTENSION_VCF_ZIP))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_ZIP));
+			this.entityName = name.substring(0, name.toLowerCase().lastIndexOf('.' + EXTENSION_VCF_ZIP));
 		}
 		else
 		{
@@ -70,7 +70,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
 		return Collections.singleton(entityName);
 	}
@@ -100,7 +100,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	{
 		return new Iterator<Repository<Entity>>()
 		{
-			Iterator<String> it = getEntityNames().iterator();
+			Iterator<String> it = getEntityIds().iterator();
 
 			@Override
 			public boolean hasNext()
@@ -121,7 +121,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> entityNames = getEntityNames().iterator();
+		Iterator<String> entityNames = getEntityIds().iterator();
 		while (entityNames.hasNext())
 		{
 			if (entityNames.next().equals(name)) return true;
@@ -132,6 +132,6 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getName());
+		return hasRepository(entityType.getFullyQualifiedName());
 	}
 }

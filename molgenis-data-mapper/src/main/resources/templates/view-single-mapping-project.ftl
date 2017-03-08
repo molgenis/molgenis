@@ -128,7 +128,7 @@
                             <#if source.getAttributeMapping(attribute.name)??>
                                 <#assign attributeMapping = source.getAttributeMapping(attribute.name)>
                                 <#list attributeMapping.sourceAttributes as mappedSourceAttribute>
-                                ${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+                                <#if mappedSourceAttribute??>${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if></#if>
                                     <#if attributeMapping.algorithmState??></#if>
                                 </#list>
                             <#elseif !attribute.nillable>
@@ -177,7 +177,7 @@
                         <select name="source" id="source-entity-select" class="form-control" required="required"
                                 placeholder="Select source entity">
                         <#list entityTypes as entityType>
-                            <option value="${entityType.name?html}">${entityType.name?html}</option>
+                            <option value="${entityType.fullyQualifiedName?html}">${entityType.fullyQualifiedName?html}</option>
                         </#list>
                         </select>
                     </div>

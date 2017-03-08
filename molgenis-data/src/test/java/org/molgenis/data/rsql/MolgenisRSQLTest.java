@@ -27,7 +27,7 @@ public class MolgenisRSQLTest
 	{
 		MockitoAnnotations.initMocks(this);
 		molgenisRSQL = new MolgenisRSQL();
-		entityType = when(mock(EntityType.class).getName()).thenReturn("Person").getMock();
+		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Person").getMock();
 		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
 		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
@@ -35,7 +35,7 @@ public class MolgenisRSQLTest
 		when(entityType.getAttribute("name")).thenReturn(nameAttr);
 		when(entityType.getAttribute("age")).thenReturn(ageAttr);
 
-		genderEntityType = when(mock(EntityType.class).getName()).thenReturn("Gender").getMock();
+		genderEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Gender").getMock();
 		Attribute genderIdAttribute = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(genderIdAttribute.getDataType()).thenReturn(INT);
 		when(genderEntityType.getIdAttribute()).thenReturn(genderIdAttribute);

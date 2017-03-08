@@ -32,9 +32,9 @@
                         <select class="form-control" id="dataset-select" data-placeholder="Choose an Entity">
                             <option value=""></option><#-- Required for placeholder to work with select2 -->
                         <#if entitiesMeta?has_content>
-                            <#list entitiesMeta as entityMeta>
-                                <option value="${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)>
-                                        selected</#if>>${entityMeta.simpleName?html}</option>
+                            <#list entitiesMeta?keys as fullyQualifiedName>
+                                <option value="${fullyQualifiedName?html}"<#if selectedEntityName?? && (fullyQualifiedName == selectedEntityName)>
+                                        selected</#if>>${entitiesMeta[fullyQualifiedName].label?html}</option>
                             </#list>
                         </#if>
                         </select>

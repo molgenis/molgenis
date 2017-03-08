@@ -2,7 +2,7 @@ package org.molgenis.questionnaires;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -49,13 +49,13 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 		}
 		if (edit.equalsIgnoreCase("true") && (questionnaireName != null)) model.addAttribute("edit", true);
 
-		List<Entity> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService)
+		List<EntityType> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService)
 				.collect(Collectors.toList());
 		model.addAttribute("questionnaires", questionnaires);
 
 		if ((questionnaireName == null) && !questionnaires.isEmpty())
 		{
-			questionnaireName = questionnaires.get(0).getString(EntityTypeMetadata.FULL_NAME);
+			questionnaireName = questionnaires.get(0).getFullyQualifiedName();
 		}
 
 		model.addAttribute("content", thankYouTextService.getThankYouText(questionnaireName));

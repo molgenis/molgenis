@@ -18,6 +18,8 @@ $.when($,
         self.getIdentifierAttribute = getIdentifierAttribute;
         self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
+        self.getRSQL = getRSQL;
+        self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
         var selectedEntityMetaData = null;
@@ -50,6 +52,20 @@ $.when($,
         };
 
         var state;
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getnToken() {
+            return state.nToken;
+        }
+
+        /**
+         * @memberOf molgenis.dataexplorer
+         */
+        function getRSQL() {
+            return state.filter;
+        }
 
         /**
          * @memberOf molgenis.dataexplorer
@@ -436,12 +452,13 @@ $.when($,
                 }
             }
 
-            // Prevent $.param double encoding RSQL attributes and values. The RestclientV2 also encodes the RSQL
+            // Use special encoding for the rsql
             var filter = state.filter
             delete cleanState.filter
 
             // update browser state
-            if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState) + '&filter=' + filter);
+            if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
+                + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
         }
 
@@ -520,33 +537,25 @@ $.when($,
 
             $(document).on('updateAttributeFilters', function (e, data) {
                 var rules = []
-
                 for (var i = 0; i < Object.keys(data.filters).length; i++) {
                     var key = Object.keys(data.filters)[i]
                     var filter = data.filters[key]
                     var rule = filter.createQueryRule()
 
-                    if (rule.hasOwnProperty('value')) {
-                        if (rule.value !== undefined) {
-                            rules.push(rule)
-                        }
-                    }
+                    if ((rule.hasOwnProperty('value') && rule.value !== undefined) ||
+                        (rule.hasOwnProperty('nestedRules') && rule.nestedRules.length > 0)) {
 
-                    if (rule.hasOwnProperty('nestedRules')) {
-                        if (rule.nestedRules.length > 0) {
-                            rules.push(rule)
+                        if (rules.length > 0) {
+                            // Add an 'AND' operator between filters for every attribute
+                            rules.push({'operator': 'AND'})
                         }
+                        rules.push(rule)
                     }
 
                     if (filter.isEmpty()) {
                         delete attributeFilters[filter.attribute.href];
                     } else {
                         attributeFilters[filter.attribute.href] = filter;
-                    }
-
-                    // Add an 'AND' operator between filters for every attribute
-                    if (i < data.filters.length - 1) {
-                        rules.push({'operator': 'AND'})
                     }
                 }
 
@@ -646,7 +655,7 @@ $.when($,
                     "<li>Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.</li>" +
                     "</ul>" +
                     "<br/>By pushing the ok button you will create an new entity with copied data.</div>",
-                    value: selectedEntityMetaData.label + '_',
+                    value: selectedEntityMetaData.label + 'Copy',
                     callback: function (result) {
                         if (result !== null) {
                             $.ajax({

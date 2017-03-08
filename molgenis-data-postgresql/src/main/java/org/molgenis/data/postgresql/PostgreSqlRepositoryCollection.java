@@ -87,17 +87,17 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityNames()
+	public Iterable<String> getEntityIds()
 	{
 		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL)
-				.fetch(getEntityTypeFetch()).findAll().map(EntityType::getName)::iterator;
+				.fetch(getEntityTypeFetch()).findAll().map(EntityType::getId)::iterator;
 	}
 
 	@Override
-	public Repository<Entity> getRepository(String name)
+	public Repository<Entity> getRepository(String id)
 	{
 		EntityType entityType = dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).and()
-				.eq(FULL_NAME, name).and().eq(IS_ABSTRACT, false).fetch(getEntityTypeFetch()).findOne();
+				.eq(ID, id).and().eq(IS_ABSTRACT, false).fetch(getEntityTypeFetch()).findOne();
 		return getRepository(entityType);
 	}
 
@@ -121,7 +121,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		if (entityType.isAbstract())
 		{
-			throw new UnknownRepositoryException(entityType.getName());
+			throw new UnknownRepositoryException(entityType.getFullyQualifiedName());
 		}
 		dropTables(entityType);
 	}
@@ -133,7 +133,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlDropTable = getSqlDropTable(entityType);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping table for entity [{}]", entityType.getName());
+			LOG.debug("Dropping table for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlDropTable);
@@ -144,7 +144,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlDropFunctionValidateUpdate = getSqlDropFunctionValidateUpdate(entityType);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping trigger function for entity [{}]", entityType.getName());
+			LOG.debug("Dropping trigger function for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlDropFunctionValidateUpdate);
@@ -160,7 +160,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			throw new MolgenisDataException(
 					format("Cannot add attribute [%s] to abstract entity type [%s].", attr.getName(),
-							entityType.getName()));
+							entityType.getFullyQualifiedName()));
 		}
 		if (entityType.getAttribute(attr.getName()) != null)
 		{
@@ -177,7 +177,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			throw new MolgenisDataException(
 					format("Cannot update attribute [%s] for abstract entity type [%s].", attr.getName(),
-							entityType.getName()));
+							entityType.getFullyQualifiedName()));
 		}
 		if (!isPersisted(attr) && !isPersisted(updatedAttr))
 		{
@@ -205,7 +205,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			throw new MolgenisDataException(
 					format("Cannot delete attribute [%s] from abstract entity type [%s].", attr.getName(),
-							entityType.getName()));
+							entityType.getFullyQualifiedName()));
 		}
 		if (entityType.getAttribute(attr.getName()) == null)
 		{
@@ -301,8 +301,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 
 		// ref entity changes
-		if (attr.getRefEntity() != null && updatedAttr.getRefEntity() != null && !attr.getRefEntity().getName()
-				.equals(updatedAttr.getRefEntity().getName()))
+		if (attr.getRefEntity() != null && updatedAttr.getRefEntity() != null && !attr.getRefEntity()
+				.getFullyQualifiedName().equals(updatedAttr.getRefEntity().getFullyQualifiedName()))
 		{
 			updateRefEntity(entityType, attr, updatedAttr);
 		}
@@ -339,8 +339,9 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			throw new MolgenisDataException(
 					format("Updating entity [%s] attribute [%s] referenced entity from [%s] to [%s] not allowed for type [%s]",
-							entityType.getName(), attr.getName(), attr.getRefEntity().getName(),
-							updatedAttr.getRefEntity().getName(), updatedAttr.getDataType().toString()));
+							entityType.getFullyQualifiedName(), attr.getName(),
+							attr.getRefEntity().getFullyQualifiedName(),
+							updatedAttr.getRefEntity().getFullyQualifiedName(), updatedAttr.getDataType().toString()));
 		}
 	}
 
@@ -390,7 +391,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			throw new MolgenisDataException(
 					format("Data type of entity [%s] attribute [%s] cannot be modified, because [%s] is an ID attribute.",
-							entityType.getName(), attr.getName(), attr.getName()));
+							entityType.getFullyQualifiedName(), attr.getName(), attr.getName()));
 		}
 
 		// do nothing on representation changes XREF --> CATEGORICAL
@@ -436,7 +437,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			{
 				throw new MolgenisDataException(
 						format("ID attribute [%s] of entity [%s] must be unique", attr.getName(),
-								entityType.getName()));
+								entityType.getFullyQualifiedName()));
 			}
 
 			dropUniqueKey(entityType, updatedAttr);
@@ -534,8 +535,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			String sqlSetNotNull = getSqlSetNotNull(entityType, updatedAttr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Creating not null constraint for entity [{}] attribute [{}]", entityType.getName(),
-						attr.getName());
+				LOG.debug("Creating not null constraint for entity [{}] attribute [{}]",
+						entityType.getFullyQualifiedName(), attr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", sqlSetNotNull);
@@ -550,14 +551,14 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			{
 				throw new MolgenisDataException(
 						format("ID attribute [%s] of entity [%s] cannot be nullable", attr.getName(),
-								entityType.getName()));
+								entityType.getFullyQualifiedName()));
 			}
 
 			String sqlDropNotNull = getSqlDropNotNull(entityType, updatedAttr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Removing not null constraint for entity [{}] attribute [{}]", entityType.getName(),
-						attr.getName());
+				LOG.debug("Removing not null constraint for entity [{}] attribute [{}]",
+						entityType.getFullyQualifiedName(), attr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", sqlDropNotNull);
@@ -573,7 +574,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createTableSql = getSqlCreateTable(entityType);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating table for entity [{}]", entityType.getName());
+			LOG.debug("Creating table for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createTableSql);
@@ -601,7 +602,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createFunctionSql = getSqlCreateFunctionValidateUpdate(entityType, readonlyTableAttrs);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating update trigger function for entity [{}]", entityType.getName());
+			LOG.debug("Creating update trigger function for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createFunctionSql);
@@ -612,7 +613,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createUpdateTriggerSql = getSqlCreateUpdateTrigger(entityType, readonlyTableAttrs);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating update trigger for entity [{}]", entityType.getName());
+			LOG.debug("Creating update trigger for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createUpdateTriggerSql);
@@ -632,7 +633,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String dropUpdateTriggerSql = getSqlDropUpdateTrigger(entityType);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Deleting update trigger for entity [{}]", entityType.getName());
+			LOG.debug("Deleting update trigger for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", dropUpdateTriggerSql);
@@ -643,7 +644,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String dropFunctionValidateUpdateSql = getSqlDropFunctionValidateUpdate(entityType);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Deleting update trigger function for entity [{}]", entityType.getName());
+			LOG.debug("Deleting update trigger function for entity [{}]", entityType.getFullyQualifiedName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", dropFunctionValidateUpdateSql);
@@ -662,7 +663,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createForeignKeySql = getSqlCreateForeignKey(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createForeignKeySql);
@@ -676,7 +678,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String dropForeignKeySql = getSqlDropForeignKey(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping foreign key for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Dropping foreign key for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", dropForeignKeySql);
@@ -690,7 +693,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createUniqueKeySql = getSqlCreateUniqueKey(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createUniqueKeySql);
@@ -704,7 +708,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String dropUniqueKeySql = getSqlDropUniqueKey(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping unique key for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Dropping unique key for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", dropUniqueKeySql);
@@ -718,7 +723,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlCreateCheckConstraint = getSqlCreateCheckConstraint(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating check constraint for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Creating check constraint for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlCreateCheckConstraint);
@@ -732,7 +738,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlDropCheckConstraint = getSqlDropCheckConstraint(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping check constraint for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Dropping check constraint for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlDropCheckConstraint);
@@ -746,7 +753,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String addColumnSql = getSqlAddColumn(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating column for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Creating column for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", addColumnSql);
@@ -787,7 +795,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String dropColumnSql = getSqlDropColumn(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping column for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Dropping column for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", dropColumnSql);
@@ -801,8 +810,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlSetDataType = getSqlSetDataType(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Changing data type of entity [{}] attribute [{}] to [{}]", entityType.getName(), attr.getName(),
-					attr.getDataType().toString());
+			LOG.debug("Changing data type of entity [{}] attribute [{}] to [{}]", entityType.getFullyQualifiedName(),
+					attr.getName(), attr.getDataType().toString());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlSetDataType);
@@ -816,7 +825,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createJunctionTableSql = getSqlCreateJunctionTable(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityType.getName(), attr.getName());
+			LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
+					attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createJunctionTableSql);
@@ -827,8 +837,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityType, attr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityType.getName(),
-					attr.getName());
+			LOG.debug("Creating junction table index for entity [{}] attribute [{}]",
+					entityType.getFullyQualifiedName(), attr.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createJunctionTableIndexSql);
@@ -842,7 +852,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlDropJunctionTable = getSqlDropJunctionTable(entityType, mrefAttr);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping junction table for entity [{}] attribute [{}]", entityType.getName(),
+			LOG.debug("Dropping junction table for entity [{}] attribute [{}]", entityType.getFullyQualifiedName(),
 					mrefAttr.getName());
 			if (LOG.isTraceEnabled())
 			{

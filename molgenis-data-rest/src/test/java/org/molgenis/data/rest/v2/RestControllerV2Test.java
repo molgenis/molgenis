@@ -4,10 +4,12 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
@@ -44,18 +46,17 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -63,6 +64,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -103,7 +105,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private LanguageService languageService;
-	
+
 	@Autowired
 	private RestControllerV2 restControllerV2;
 
@@ -139,6 +141,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private String attrCompoundAttr0Name;
 	private String attrCompoundAttrCompoundName;
 	private String attrCompoundAttrCompoundAttr0Name;
+	private EntityType entityType;
 
 	@BeforeMethod
 	public void beforeMethod() throws ParseException
@@ -215,7 +218,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String enum2 = "enum2";
 
 		// required
-		EntityType entityType = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
+		entityType = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
 		Attribute attrId = attributeFactory.create().setName(attrIdName);
 		entityType.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		Attribute attrBool = createAttributeMeta(entityType, attrBoolName, BOOL).setNillable(false);
@@ -508,16 +511,43 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String responseBody =
 				"{\n  \"location\": \"/api/v2/entity?q=id=in=(\\\"p1\\\",\\\"p2\\\")\",\n  \"resources\": [\n    {\n      \"href\": \"/api/v2/entity/p1\"\n    },\n"
 						+ "    {\n      \"href\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
-		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
-				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
+		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 	}
 
 	@Test
+	public void testCreateEntitiesAttribute() throws Exception
+	{
+		MetaDataService metadataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metadataService);
+		when(dataService.getEntityType(ATTRIBUTE_META_DATA)).thenReturn(entityType);
+		Attribute attribute0 = mock(Attribute.class);
+		when(attribute0.getIdValue()).thenReturn("p1");
+		when(attribute0.getEntityType()).thenReturn(entityType);
+		Attribute attribute1 = mock(Attribute.class);
+		when(attribute1.getIdValue()).thenReturn("p2");
+		when(attribute1.getEntityType()).thenReturn(entityType);
+		when(entityManager.create(entityType, POPULATE)).thenReturn(attribute0).thenReturn(attribute1);
+
+		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
+		String responseBody = "{\n" + "  \"location\": \"/api/v2/sys_md_Attribute?q=id=in=(\\\"p1\\\",\\\"p2\\\")\",\n"
+				+ "  \"resources\": [\n" + "    {\n" + "      \"href\": \"/api/v2/sys_md_Attribute/p1\"\n" + "    },\n"
+				+ "    {\n" + "      \"href\": \"/api/v2/sys_md_Attribute/p2\"\n" + "    }\n" + "  ]\n" + "}";
+		mockMvc.perform(post(RestControllerV2.BASE_URI + '/' + ATTRIBUTE_META_DATA).content(content)
+				.contentType(APPLICATION_JSON)).andExpect(status().isCreated())
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody));
+
+		verify(metadataService).addAttribute(attribute0);
+		verify(metadataService).addAttribute(attribute1);
+		verifyNoMoreInteractions(metadataService);
+	}
+
+	@Test
 	public void testCopyEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		Package pack = mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -535,6 +565,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -550,6 +581,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -567,6 +599,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -585,6 +618,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
@@ -606,7 +640,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
 	{
 		Package pack = mock(Package.class);
-		when(pack.getName()).thenReturn("org_molgenis_blah");
+		when(pack.getFullyQualifiedName()).thenReturn("org_molgenis_blah");
 
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("org_molgenis_blah_duplicateEntity")).thenReturn(true);
@@ -622,6 +656,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("org_molgenis_blah_newEntity");
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
@@ -843,6 +878,78 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
 				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
+	}
+
+	@DataProvider(name = "testDeleteEntityCollection")
+	public static Iterator<Object[]> testDeleteEntityCollectionProvider() throws ParseException
+	{
+		return Arrays.asList(new Object[] { STRING, asList("0", "1") }, new Object[] { INT, asList(0, 1) },
+				new Object[] { LONG, asList(0L, 1L) }, new Object[] { EMAIL, asList("0", "1") },
+				new Object[] { HYPERLINK, asList("0", "1") }).iterator();
+	}
+
+	@Test(dataProvider = "testDeleteEntityCollection")
+	public void testDeleteEntityCollection(AttributeType idAttrType, List<Object> expectedIds) throws Exception
+	{
+		EntityType entityType = mock(EntityType.class);
+		Attribute idAttr = when(mock(Attribute.class).getDataType()).thenReturn(idAttrType).getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(dataService.getEntityType("MyEntityType")).thenReturn(entityType);
+		this.mockMvc.perform(
+				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"0\",\"1\"]}"))
+				.andExpect(status().isNoContent());
+
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
+		assertEquals(captor.getValue().collect(toList()), expectedIds);
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Exception
+	{
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		when(dataService.getEntityType("MyEntityType")).thenReturn(entityType);
+
+		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
+				+ "      \"message\": \"Cannot delete entities because type [MyEntityType] is abstract.\"\n" + "    }\n"
+				+ "  ]\n" + "}";
+		this.mockMvc.perform(
+				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
+	{
+		when(dataService.getEntityType("MyEntityType"))
+				.thenThrow(new UnknownEntityException("Unknown entity [MyEntityType]"));
+
+		String expectedContent =
+				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Unknown entity [MyEntityType]\"\n"
+						+ "    }\n" + "  ]\n" + "}";
+		this.mockMvc.perform(
+				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionNoEntitiesToDelete() throws Exception
+	{
+		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
+				+ "      \"message\": \"Please provide at least one entity in the entityIds property.\"\n" + "    }\n"
+				+ "  ]\n" + "}";
+		this.mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[]}"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
+	}
+
+	@Test
+	public void testDeleteEntityCollectionExceptionInvalidRequestBody() throws Exception
+	{
+		String expectedContent =
+				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Invalid request body.\"\n" + "    }\n"
+						+ "  ]\n" + "}";
+		this.mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("invalid"))
+				.andExpect(status().isBadRequest()).andExpect(content().string(expectedContent));
 	}
 
 	@Test
@@ -1082,12 +1189,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/categorical_mref\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical_mref\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mref\",\n"
 			+ "        \"label\": \"categorical_mref\",\n" + "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
@@ -1103,14 +1209,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/compound\",\n" + "        \"fieldType\": \"COMPOUND\",\n"
-			+ "        \"name\": \"compound\",\n" + "        \"label\": \"compound\",\n" + "        \"attributes\": [\n"
-			+ "          {\n" + "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/compound\",\n"
+			+ "        \"fieldType\": \"COMPOUND\",\n" + "        \"name\": \"compound\",\n"
+			+ "        \"label\": \"compound\",\n" + "        \"attributes\": [\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
 			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
 			+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
 			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
@@ -1222,24 +1328,23 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/script\",\n" + "        \"fieldType\": \"SCRIPT\",\n"
-			+ "        \"name\": \"script\",\n" + "        \"label\": \"script\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/string\",\n" + "        \"fieldType\": \"STRING\",\n"
-			+ "        \"name\": \"string\",\n" + "        \"label\": \"string\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/text\",\n" + "        \"fieldType\": \"TEXT\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/script\",\n"
+			+ "        \"fieldType\": \"SCRIPT\",\n" + "        \"name\": \"script\",\n"
+			+ "        \"label\": \"script\",\n" + "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/string\",\n"
+			+ "        \"fieldType\": \"STRING\",\n" + "        \"name\": \"string\",\n"
+			+ "        \"label\": \"string\",\n" + "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/text\",\n" + "        \"fieldType\": \"TEXT\",\n"
 			+ "        \"name\": \"text\",\n" + "        \"label\": \"text\",\n" + "        \"attributes\": [],\n"
 			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
 			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
@@ -1260,18 +1365,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/boolOptional\",\n" + "        \"fieldType\": \"BOOL\",\n"
-			+ "        \"name\": \"boolOptional\",\n" + "        \"label\": \"boolOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/categoricalOptional\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/boolOptional\",\n"
+			+ "        \"fieldType\": \"BOOL\",\n" + "        \"name\": \"boolOptional\",\n"
+			+ "        \"label\": \"boolOptional\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categoricalOptional\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categoricalOptional\",\n"
 			+ "        \"label\": \"categoricalOptional\",\n" + "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
@@ -1287,12 +1391,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/categorical_mrefOptional\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical_mrefOptional\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mrefOptional\",\n"
 			+ "        \"label\": \"categorical_mrefOptional\",\n" + "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
@@ -1308,18 +1411,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/dateOptional\",\n" + "        \"fieldType\": \"DATE\",\n"
-			+ "        \"name\": \"dateOptional\",\n" + "        \"label\": \"dateOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/date_timeOptional\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/dateOptional\",\n"
+			+ "        \"fieldType\": \"DATE\",\n" + "        \"name\": \"dateOptional\",\n"
+			+ "        \"label\": \"dateOptional\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/date_timeOptional\",\n"
 			+ "        \"fieldType\": \"DATE_TIME\",\n" + "        \"name\": \"date_timeOptional\",\n"
 			+ "        \"label\": \"date_timeOptional\",\n" + "        \"attributes\": [],\n"
 			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
@@ -1387,33 +1489,33 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/scriptOptional\",\n" + "        \"fieldType\": \"SCRIPT\",\n"
-			+ "        \"name\": \"scriptOptional\",\n" + "        \"label\": \"scriptOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
 			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/stringOptional\",\n"
-			+ "        \"fieldType\": \"STRING\",\n" + "        \"name\": \"stringOptional\",\n"
-			+ "        \"label\": \"stringOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/scriptOptional\",\n"
+			+ "        \"fieldType\": \"SCRIPT\",\n" + "        \"name\": \"scriptOptional\",\n"
+			+ "        \"label\": \"scriptOptional\",\n" + "        \"attributes\": [],\n"
+			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
 			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/textOptional\",\n" + "        \"fieldType\": \"TEXT\",\n"
-			+ "        \"name\": \"textOptional\",\n" + "        \"label\": \"textOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n"
+			+ "        \"href\": \"/api/v2/entity/meta/stringOptional\",\n" + "        \"fieldType\": \"STRING\",\n"
+			+ "        \"name\": \"stringOptional\",\n" + "        \"label\": \"stringOptional\",\n"
+			+ "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n" + "        \"auto\": false,\n"
 			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/xrefOptional\",\n"
-			+ "        \"fieldType\": \"XREF\",\n" + "        \"name\": \"xrefOptional\",\n"
-			+ "        \"label\": \"xrefOptional\",\n" + "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/textOptional\",\n"
+			+ "        \"fieldType\": \"TEXT\",\n" + "        \"name\": \"textOptional\",\n"
+			+ "        \"label\": \"textOptional\",\n" + "        \"attributes\": [],\n"
+			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
+			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
+			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
+			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xrefOptional\",\n" + "        \"fieldType\": \"XREF\",\n"
+			+ "        \"name\": \"xrefOptional\",\n" + "        \"label\": \"xrefOptional\",\n"
+			+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
 			+ "          \"href\": \"/api/v2/refEntity\",\n" + "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n" + "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n" + "            {\n"
@@ -1427,17 +1529,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
 			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
 			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n"
-			+ "        },\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n" + "    \"labelAttribute\": \"id\",\n"
-			+ "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n"
-			+ "    \"isAbstract\": false,\n" + "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n"
-			+ "  },\n"
-			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"id\": \"0\",\n" + "  \"bool\": true,\n"
-			+ "  \"categorical\": {\n" + "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\"\n"
-			+ "  },\n" + "  \"categorical_mref\": [\n" + "    {\n" + "      \"_href\": \"/api/v2/refEntity/ref0\",\n"
+			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [\n"
+			+ "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false,\n"
+			+ "    \"languageCode\": \"en\"\n" + "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n"
+			+ "  \"id\": \"0\",\n" + "  \"bool\": true,\n" + "  \"categorical\": {\n"
+			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\"\n" + "  },\n"
+			+ "  \"categorical_mref\": [\n" + "    {\n" + "      \"_href\": \"/api/v2/refEntity/ref0\",\n"
 			+ "      \"id\": \"ref0\"\n" + "    },\n" + "    {\n" + "      \"_href\": \"/api/v2/refEntity/ref0\",\n"
 			+ "      \"id\": \"ref0\"\n" + "    }\n" + "  ],\n" + "  \"compound_attr0\": \"compoundAttr0Str\",\n"
 			+ "  \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\",\n" + "  \"date\": \"2015-05-22\",\n"
@@ -1465,8 +1566,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "    ],\n" + "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"bool\": true\n" + "}";
+					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true\n" + "}";
 
 	private final String resourcePartialAttributeInCompoundResponse =
 			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
@@ -1490,8 +1590,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"compound_attr0\": \"compoundAttr0Str\"\n" + "}";
+					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"compound_attr0\": \"compoundAttr0Str\"\n" + "}";
 
 	private final String resourcePartialAttributeInCompoundInCompoundResponse =
 			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
@@ -1550,17 +1649,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
 					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"xref\": {\n" + "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"value\": \"val0\"\n"
-					+ "  }\n" + "}";
+					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
+					+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"value\": \"val0\"\n" + "  }\n" + "}";
 
 	private final String resourcePartialSubAttributesResponse =
 			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
@@ -1591,16 +1689,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
 					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"xref\": {\n" + "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n"
+					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
+					+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n"
 					+ "    \"value\": \"val0\"\n" + "  }\n" + "}";
 
 	private final String resourcePartialAttributesResponse =
@@ -1623,8 +1721,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "    ],\n" + "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"bool\": true,\n" + "  \"string\": \"str\"\n" + "}";
+					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true,\n" + "  \"string\": \"str\"\n" + "}";
 
 	private final String resourceCollectionResponse =
 			"{\n" + "  \"href\": \"/api/v2/entity\",\n" + "  \"meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
@@ -1660,8 +1757,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -1682,8 +1779,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -1818,8 +1915,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -1861,8 +1958,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -1889,8 +1986,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -1912,8 +2009,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -1997,8 +2094,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
@@ -2040,19 +2137,18 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
 					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
 					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
+					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
 					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n" + "  \"start\": 0,\n"
-					+ "  \"num\": 100,\n"
-					+ "  \"total\": 2,\n" + "  \"items\": [\n" + "    {\n" + "      \"_href\": \"/api/v2/entity/0\",\n"
-					+ "      \"id\": \"0\",\n" + "      \"bool\": true,\n" + "      \"categorical\": {\n"
-					+ "        \"_href\": \"/api/v2/refEntity/ref0\",\n" + "        \"id\": \"ref0\"\n" + "      },\n"
-					+ "      \"categorical_mref\": [\n" + "        {\n"
+					+ "  \"num\": 100,\n" + "  \"total\": 2,\n" + "  \"items\": [\n" + "    {\n"
+					+ "      \"_href\": \"/api/v2/entity/0\",\n" + "      \"id\": \"0\",\n" + "      \"bool\": true,\n"
+					+ "      \"categorical\": {\n" + "        \"_href\": \"/api/v2/refEntity/ref0\",\n"
+					+ "        \"id\": \"ref0\"\n" + "      },\n" + "      \"categorical_mref\": [\n" + "        {\n"
 					+ "          \"_href\": \"/api/v2/refEntity/ref0\",\n" + "          \"id\": \"ref0\"\n"
 					+ "        },\n" + "        {\n" + "          \"_href\": \"/api/v2/refEntity/ref0\",\n"
 					+ "          \"id\": \"ref0\"\n" + "        }\n" + "      ],\n"
@@ -2109,8 +2205,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "                \"idAttribute\": \"id\",\n" + "                \"lookupAttributes\": [\n"
 					+ "                  \"id\"\n" + "                ],\n" + "                \"isAbstract\": false,\n"
 					+ "                \"writable\": false,\n" + "                \"languageCode\": \"en\"\n"
-					+ "              },\n"
-					+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
+					+ "              },\n" + "              \"auto\": false,\n" + "              \"nillable\": true,\n"
 					+ "              \"readOnly\": false,\n" + "              \"labelAttribute\": false,\n"
 					+ "              \"unique\": false,\n" + "              \"visible\": true,\n"
 					+ "              \"lookupAttribute\": false,\n" + "              \"isAggregatable\": false\n"
@@ -2118,16 +2213,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n"
 					+ "            \"id\"\n" + "          ],\n" + "          \"isAbstract\": false,\n"
 					+ "          \"writable\": false,\n" + "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
+					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
 					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
 					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
 					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
 					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
 					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"xref\": {\n" + "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n"
-					+ "    \"ref\": {\n" + "      \"_href\": \"/api/v2/refRefEntity/refRef0\",\n"
-					+ "      \"value\": \"value\"\n" + "    }\n" + "  }\n" + "}";
+					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
+					+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n" + "    \"ref\": {\n"
+					+ "      \"_href\": \"/api/v2/refRefEntity/refRef0\",\n" + "      \"value\": \"value\"\n"
+					+ "    }\n" + "  }\n" + "}";
 }

@@ -38,8 +38,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
@@ -275,7 +274,7 @@ class PostgreSqlRepository extends AbstractRepository
 		LOG.trace("SQL: {}", allRowsSelect);
 		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
 		template.query(allRowsSelect,
-				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
+				(ResultSetExtractor<Object>) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
 						resultSet));
 		LOG.debug("Streamed entire repository in batches of size {} in {}.", batchSize, stopwatch);
 	}
@@ -483,7 +482,8 @@ class PostgreSqlRepository extends AbstractRepository
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
 							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getName(), entity.getIdValue().toString())));
+									attr.getName(), attr.getEntity().getFullyQualifiedName(),
+									entity.getIdValue().toString())));
 				}
 
 				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
@@ -522,8 +522,9 @@ class PostgreSqlRepository extends AbstractRepository
 					LOG.trace("SQL: {}", updateSql);
 				}
 			}
-			jdbcTemplate
+			int[] counts = jdbcTemplate
 					.batchUpdate(updateSql, new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr));
+			verifyUpdate(entitiesBatch, counts, idAttr);
 
 			// update values in entity junction table
 			if (!junctionTableAttrs.isEmpty())
@@ -542,6 +543,21 @@ class PostgreSqlRepository extends AbstractRepository
 		});
 	}
 
+	private void verifyUpdate(List<? extends Entity> entitiesBatch, int[] counts, Attribute idAttr)
+	{
+		int nrUpdatedEntities = Arrays.stream(counts).sum();
+		if (nrUpdatedEntities < entitiesBatch.size())
+		{
+			Set<Object> existingEntityIds = findAll(entitiesBatch.stream().map(Entity::getIdValue),
+					new Fetch().field(idAttr.getName())).map(Entity::getIdValue).collect(toSet());
+			Object nonExistingEntityId = entitiesBatch.stream().map(Entity::getIdValue)
+					.filter(entityId -> !existingEntityIds.contains(entityId)).findFirst().orElse(null);
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getName(),
+							nonExistingEntityId.toString())));
+		}
+	}
+
 	private void addMrefs(final List<Map<String, Object>> mrefs, final Attribute attr)
 	{
 		// database doesn't validate NOT NULL constraint for attribute values referencing multiple entities,
@@ -549,7 +565,8 @@ class PostgreSqlRepository extends AbstractRepository
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", entityType.getName(), attr.getName())));
+					format("Entity [%s] attribute [%s] value cannot be null", entityType.getFullyQualifiedName(),
+							attr.getName())));
 		}
 
 		final Attribute idAttr = entityType.getIdAttribute();

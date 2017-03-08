@@ -66,7 +66,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityType = entityTypeFactory.create(repository);
+		entityType = entityTypeFactory.create(repository).setName(repository);
 		entityType.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName("ATTRIBUTE_1"));
 
@@ -175,7 +175,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 		actualEntity = l1Cache.get(repository, entityID2, entityType).get();
 		assertTrue(EntityUtils.equals(actualEntity, entity2));
 
-		l1Cache.evictAll(entityType.getName());
+		l1Cache.evictAll(entityType.getFullyQualifiedName());
 
 		Optional<Entity> result = l1Cache.get(repository, entityID1, entityType);
 		assertEquals(result, null);

@@ -367,8 +367,8 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsMergeMultilineMismatchChrom()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
-				true, vcfAttributes);
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)), true,
+				vcfAttributes);
 		try
 		{
 			filter.filterResults(Arrays.asList(resultEntity10, entityMismatchChrom), entity10, false);
@@ -385,8 +385,8 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	public void filterResultsMergeMultilineMismatchPos()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
-				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)),
-				true, vcfAttributes);
+				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)), true,
+				vcfAttributes);
 		try
 		{
 			filter.filterResults(Arrays.asList(entityMismatchPos, resultEntity10), entity10, false);

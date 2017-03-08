@@ -81,7 +81,8 @@ public class IndexBootstrapper
 	private EntityType getEntityType(IndexAction indexAction)
 	{
 		EntityType entityType = entityTypeFactory.create(indexAction.getEntityFullName());
-		entityType.setSimpleName(indexAction.getEntityTypeName());
+		entityType.setId(indexAction.getEntityTypeId());
+		entityType.setName(indexAction.getEntityTypeName());
 		return entityType;
 	}
 }

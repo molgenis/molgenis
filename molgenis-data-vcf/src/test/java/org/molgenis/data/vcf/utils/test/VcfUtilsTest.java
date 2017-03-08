@@ -1,6 +1,5 @@
 package org.molgenis.data.vcf.utils.test;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -22,10 +21,6 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -72,9 +67,9 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		annotatedEntityType = entityTypeFactory.create().setName("test");
-		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
-		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
+		annotatedEntityType =  entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate =  entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate =  entityTypeFactory.create().setName("test");
 
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 		attributePos = attributeFactory.create().setName(POS).setDataType(INT);
@@ -174,7 +169,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		entities.add(entity2);
 		entities.add(entity3);
 
-		expectedEffectsEntityType = entityTypeFactory.create().setName("EFFECTannotations");
+		expectedEffectsEntityType =  entityTypeFactory.create().setName("EFFECTannotations");
 		expectedEffectsEntityType
 				.addAttribute(attributeFactory.create().setName("identifier").setDataType(STRING), ROLE_ID);
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Alt_Allele").setDataType(STRING));
