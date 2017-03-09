@@ -53,6 +53,19 @@ public class NameValidator
 
 	}
 
+	public static void validateEntityName(String name)
+	{
+		checkForKeyword(name);
+		validateName(name);
+		checkForIllegalCharacters(name);
+	}
+
+	public static void validatePackageName(String name)
+	{
+		validateName(name);
+		checkForIllegalCharacters(name);
+	}
+
 	private static void validateName(String name)
 	{
 		if (name.length() > MAX_ATTRIBUTE_LENGTH)
@@ -67,12 +80,8 @@ public class NameValidator
 		}
 	}
 
-	public static void validateEntityOrPackageName(String name)
+	private static void checkForIllegalCharacters(String name)
 	{
-		checkForKeyword(name);
-
-		validateName(name);
-
 		if (!name.matches("[a-zA-Z0-9#]+(-[a-z]{2,3})??$"))
 		{
 			throw new MolgenisDataException("Invalid characters in: [" + name
