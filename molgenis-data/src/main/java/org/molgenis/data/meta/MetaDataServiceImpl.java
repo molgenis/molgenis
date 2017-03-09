@@ -43,8 +43,6 @@ public class MetaDataServiceImpl implements MetaDataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
-	private static final int BATCH_SIZE = 1000;
-
 	private final DataService dataService;
 	private final RepositoryCollectionRegistry repoCollectionRegistry;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
