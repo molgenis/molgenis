@@ -1,10 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,6 +35,14 @@ public class PostgreSqlRepositoryCollectionTest
 		dataService = mock(DataService.class);
 		postgreSqlRepoCollection = new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate,
 				dataService);
+	}
+
+	@Test
+	public void testUpdateRepository() throws Exception
+	{
+		EntityType entityType = mock(EntityType.class);
+		Repository<Entity> repository = postgreSqlRepoCollection.updateRepository(entityType);
+		assertEquals(repository.getEntityType(), entityType);
 	}
 
 	@Test
