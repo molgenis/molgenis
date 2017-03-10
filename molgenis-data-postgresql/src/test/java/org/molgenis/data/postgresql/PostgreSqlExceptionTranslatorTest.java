@@ -194,9 +194,12 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateForeignKeyViolationStillReferenced()
 	{
+
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("myTable");
+		when(serverErrorMessage.getMessage()).thenReturn(
+				"update or delete on table \"myDependentTable\" violates foreign key constraint \"myTable_myAttr_fkey\" on table \"myTable\"");
 		when(serverErrorMessage.getDetail())
 				.thenReturn("Key (myColumn)=(myValue) is still referenced from table \"myTable\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
