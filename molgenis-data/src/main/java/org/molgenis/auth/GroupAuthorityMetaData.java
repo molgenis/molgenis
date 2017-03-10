@@ -43,9 +43,8 @@ public class GroupAuthorityMetaData extends SystemEntityType
 		setPackage(securityPackage);
 
 		setExtends(authorityMetaData);
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true)
-				.setDescription("").setNillable(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true).setNillable(false);
 	}
 
 	@Override

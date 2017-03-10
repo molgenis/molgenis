@@ -61,7 +61,7 @@ public class UserMetaData extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true).setDescription("")
+		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true)
 				.setNillable(false);
 		addAttribute(PASSWORD_).setLabel("Password")
 				.setDescription("This is the hashed password, enter a new plaintext password to update.")
@@ -72,12 +72,12 @@ public class UserMetaData extends SystemEntityType
 				.setDescription("Boolean to indicate if this account can be used to login").setAggregatable(true)
 				.setNillable(false);
 		addAttribute(SUPERUSER).setLabel("Superuser").setDataType(BOOL).setDefaultValue("false").setAggregatable(true)
-				.setDescription("").setNillable(false);
-		addAttribute(FIRSTNAME).setLabel("First name").setNillable(true).setDescription("");
-		addAttribute(MIDDLENAMES).setLabel("Middle names").setNillable(true).setDescription("");
-		addAttribute(LASTNAME, ROLE_LOOKUP).setLabel("Last name").setNillable(true).setDescription("");
+				.setNillable(false);
+		addAttribute(FIRSTNAME).setLabel("First name").setNillable(true);
+		addAttribute(MIDDLENAMES).setLabel("Middle names").setNillable(true);
+		addAttribute(LASTNAME, ROLE_LOOKUP).setLabel("Last name").setNillable(true);
 		addAttribute(TITLE).setLabel("Title").setNillable(true).setDescription("An academic title, e.g. Prof.dr, PhD");
-		addAttribute(AFFILIATION).setLabel("Affiliation").setNillable(true).setDescription("");
+		addAttribute(AFFILIATION).setLabel("Affiliation").setNillable(true);
 		addAttribute(DEPARTMENT)
 				.setDescription("Added from the old definition of MolgenisUser. Department of this contact.")
 				.setNillable(true);
