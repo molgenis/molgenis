@@ -19,9 +19,18 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 @Service
 public class LanguageService
 {
+	public static final String LANGUAGE_CODE_EN = "en";
+	public static final String LANGUAGE_CODE_NL = "nl";
+	public static final String LANGUAGE_CODE_DE = "de";
+	public static final String LANGUAGE_CODE_ES = "es";
+	public static final String LANGUAGE_CODE_IT = "it";
+	public static final String LANGUAGE_CODE_PT = "pt";
+	public static final String LANGUAGE_CODE_FR = "fr";
+	public static final String LANGUAGE_CODE_XX = "xx";
+
 	private final DataService dataService;
 	private final AppSettings appSettings;
-	public static final String DEFAULT_LANGUAGE_CODE = "en";
+	public static final String DEFAULT_LANGUAGE_CODE = LANGUAGE_CODE_EN;
 	public static final String DEFAULT_LANGUAGE_NAME = "English";
 
 	@Autowired
@@ -40,7 +49,8 @@ public class LanguageService
 	 */
 	public static Stream<String> getLanguageCodes()
 	{
-		return Stream.of("en", "nl", "de", "es", "it", "pt", "fr", "xx");
+		return Stream.of(LANGUAGE_CODE_EN, LANGUAGE_CODE_NL, LANGUAGE_CODE_DE, LANGUAGE_CODE_ES, LANGUAGE_CODE_IT,
+				LANGUAGE_CODE_PT, LANGUAGE_CODE_FR, LANGUAGE_CODE_XX);
 	}
 
 	/**

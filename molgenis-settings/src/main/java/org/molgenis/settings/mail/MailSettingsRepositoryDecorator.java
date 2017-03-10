@@ -1,41 +1,41 @@
 package org.molgenis.settings.mail;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.util.mail.MailSenderFactory;
 import org.molgenis.util.mail.MailSettings;
 
 import static java.util.Objects.requireNonNull;
 
-public class MailSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
+public class MailSettingsRepositoryDecorator extends AbstractRepositoryDecorator<MailSettingsImpl>
 {
-	private final Repository<Entity> decoratedRepository;
+	private final Repository<MailSettingsImpl> decoratedRepository;
 	private final MailSenderFactory mailSenderFactory;
 
-	public MailSettingsRepositoryDecorator(Repository<Entity> decoratedRepository, MailSenderFactory mailSenderFactory)
+	public MailSettingsRepositoryDecorator(Repository<MailSettingsImpl> decoratedRepository,
+			MailSenderFactory mailSenderFactory)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.mailSenderFactory = requireNonNull(mailSenderFactory);
 	}
 
 	@Override
-	protected Repository<Entity> delegate()
+	protected Repository<MailSettingsImpl> delegate()
 	{
 		return decoratedRepository;
 	}
 
 	@Override
-	public void add(Entity entity)
+	public void add(MailSettingsImpl entity)
 	{
-		validate(new MailSettingsImpl(entity));
+		validate(entity);
 		delegate().add(entity);
 	}
 
 	@Override
-	public void update(Entity entity)
+	public void update(MailSettingsImpl entity)
 	{
-		validate(new MailSettingsImpl(entity));
+		validate(entity);
 		delegate().update(entity);
 	}
 

@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
+import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.DateToStringConverter;
@@ -86,7 +87,8 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class })
+		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
+		SystemRepositoryDecoratorFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final String INTEGRATION_TEST_DATABASE_NAME;
@@ -111,6 +113,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private EntityFactoryRegistrar entityFactoryRegistrar;
 	@Autowired
 	private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
+	@Autowired
+	private SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -228,6 +232,10 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 
 					LOG.trace("Registering entity factories ...");
 					entityFactoryRegistrar.register(event);
+					LOG.trace("Registered entity factories");
+
+					LOG.trace("Registering entity factories ...");
+					systemRepositoryDecoratorFactoryRegistrar.register(event);
 					LOG.trace("Registered entity factories");
 					LOG.debug("Bootstrapped registries");
 

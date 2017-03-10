@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.StaticEntity;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
  * Base class for application and plugin settings entities. Settings are read/written from/to data source.
  * TODO: Bring this class up to date with 2.0, see http://www.molgenis.org/ticket/4787
  */
-public abstract class DefaultSettingsEntity implements Entity
+public abstract class DefaultSettingsEntity extends StaticEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
