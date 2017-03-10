@@ -21,7 +21,6 @@ public class AppsConfig
 
 	public AppsConfig(FileStore fileStore, RepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
-
 		this.fileStore = requireNonNull(fileStore);
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 	}
