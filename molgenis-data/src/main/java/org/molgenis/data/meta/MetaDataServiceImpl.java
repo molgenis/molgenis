@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -47,17 +48,20 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final IdentifierLookupService identifierLookupService;
+	private final PackagePersister packagePersister;
 
 	@Autowired
 	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService,
+			PackagePersister packagePersister)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.repoCollectionRegistry = requireNonNull(repoCollectionRegistry);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 		this.identifierLookupService = requireNonNull(identifierLookupService);
+		this.packagePersister = requireNonNull(packagePersister);
 	}
 
 	@Override
@@ -414,20 +418,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void upsertPackages(Stream<Package> packages)
 	{
-		// TODO replace with dataService.upsert once available in Repository
-		packages.forEach(package_ ->
-		{
-			String packageId = identifierLookupService.getPackageId(package_.getFullyQualifiedName());
-			if (packageId != null)
-			{
-				package_.setId(packageId);
-				dataService.update(PACKAGE, package_);
-			}
-			else
-			{
-				addPackage(package_);
-			}
-		});
+		packagePersister.upsertPackages(packages);
 	}
 
 	@Override
