@@ -53,6 +53,13 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
+	public Repository<Entity> updateRepository(EntityType entityType)
+	{
+		return repositoryDecoratorFactory
+				.createDecoratedRepository(decoratedRepositoryCollection.updateRepository(entityType));
+	}
+
+	@Override
 	public Iterable<String> getEntityIds()
 	{
 		return decoratedRepositoryCollection.getEntityIds();
