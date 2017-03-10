@@ -144,4 +144,10 @@ public class ProgressImpl implements Progress
 		jobExecution.setResultUrl(string);
 	}
 
+	@Override
+	public JobExecution getJobExecution()
+	{
+		return jobExecution;
+	}
+
 }

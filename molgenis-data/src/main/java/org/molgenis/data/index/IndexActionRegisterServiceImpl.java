@@ -89,7 +89,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityFullName(entityType.getFullyQualifiedName()).setEntityTypeId(entityType.getId()).setEntityTypeName(entityType.getName())
+					.setEntityTypeId(entityType.getId()).setEntityTypeName(entityType.getName())
 					.setEntityId(entityId).setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
@@ -133,17 +133,17 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 		// 2. Filter excluded entities
 		Set<IndexAction> indexActionWithoutExcluded = allIndexAction.stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName())).collect(toSet());
+				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityTypeId())).collect(toSet());
 
 		// 3. Find all entities names of actions where no row is specified
-		Set<String> entityFullNames = indexActionWithoutExcluded.stream()
-				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityFullName)
+		Set<String> entityFullIds = indexActionWithoutExcluded.stream()
+				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityTypeId)
 				.collect(toSet());
 
 		// 4. Filter all row index actions from list
 		return indexActionWithoutExcluded.stream()
-				.filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullNames
-						.contains(indexAction.getEntityFullName())).collect(toSet());
+				.filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullIds
+						.contains(indexAction.getEntityTypeId())).collect(toSet());
 	}
 
 	/**
@@ -158,7 +158,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return Stream.of(indexAction);
 		}
 
-		EntityType entityType = dataService.getEntityType(indexAction.getEntityFullName());
+		EntityType entityType = dataService.getEntityTypeById(indexAction.getEntityTypeId());
 		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
 		{
 			return Stream.of(indexAction);
@@ -173,7 +173,6 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		Stream<IndexAction> referencingEntityIndexActions = referencingEntityMap.values().stream()
 				.map(referencingEntity -> indexActionFactory.create()
 						.setEntityTypeId(referencingEntity.getId()).setEntityTypeName(entityType.getName())
-						.setEntityFullName(referencingEntity.getFullyQualifiedName())
 						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
 
 		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
@@ -184,7 +183,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	{
 		LOG.debug("Forget index actions for transaction {}", transactionId);
 		return indexActionsPerTransaction.removeAll(transactionId).stream()
-				.anyMatch(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()));
+				.anyMatch(indexAction -> !excludedEntities.contains(indexAction.getEntityTypeId()));
 	}
 
 	private Collection<IndexAction> getIndexActionsForCurrentTransaction()
@@ -199,23 +198,23 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean isEntityDirty(EntityKey entityKey)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() != null && indexAction.getEntityFullName()
-						.equals(entityKey.getEntityName()) && indexAction.getEntityId()
+				indexAction -> indexAction.getEntityId() != null && indexAction.getEntityTypeId()
+						.equals(entityKey.getEntityTypeId()) && indexAction.getEntityId()
 						.equals(entityKey.getId().toString()));
 	}
 
 	@Override
-	public boolean isEntireRepositoryDirty(String entityName)
+	public boolean isEntireRepositoryDirty(EntityType entityType)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityFullName().equals(entityName));
+				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityTypeId().equals(entityType.getId()));
 	}
 
 	@Override
-	public boolean isRepositoryCompletelyClean(String entityName)
+	public boolean isRepositoryCompletelyClean(EntityType entityType)
 	{
 		return getIndexActionsForCurrentTransaction().stream()
-				.noneMatch(indexAction -> indexAction.getEntityFullName().equals(entityName));
+				.noneMatch(indexAction -> indexAction.getEntityTypeId().equals(entityType.getId()));
 	}
 
 	@Override
@@ -229,13 +228,13 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public Set<String> getEntirelyDirtyRepositories()
 	{
 		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() == null)
-				.map(IndexAction::getEntityFullName).collect(toSet());
+				.map(IndexAction::getEntityTypeId).collect(toSet());
 	}
 
 	@Override
 	public Set<String> getDirtyRepositories()
 	{
-		return getIndexActionsForCurrentTransaction().stream().map(IndexAction::getEntityFullName).collect(toSet());
+		return getIndexActionsForCurrentTransaction().stream().map(IndexAction::getEntityTypeId).collect(toSet());
 	}
 
 	/**
@@ -246,9 +245,9 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private EntityKey createEntityKey(IndexAction indexAction)
 	{
-		return EntityKey.create(indexAction.getEntityFullName(),
+		return EntityKey.create(indexAction.getEntityTypeId(),
 				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
-						dataService.getEntityType(indexAction.getEntityFullName()).getIdAttribute()) : null);
+						dataService.getEntityTypeById(indexAction.getEntityTypeId()).getIdAttribute()) : null);
 	}
 
 }

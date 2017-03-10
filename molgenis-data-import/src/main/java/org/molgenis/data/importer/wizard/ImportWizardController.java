@@ -1,6 +1,5 @@
 package org.molgenis.data.importer.wizard;
 
-import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
@@ -496,7 +495,7 @@ public class ImportWizardController extends AbstractWizardController
 
 		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{
-			NameValidator.validateEntityOrPackageName(file.getName().replace("." + extension, ""));
+			NameValidator.validateEntityName(file.getName().replace("." + extension, ""));
 			if (!DatabaseAction.ADD.equals(databaseAction))
 			{
 				throw new IllegalArgumentException(

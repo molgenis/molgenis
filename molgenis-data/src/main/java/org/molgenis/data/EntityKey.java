@@ -9,18 +9,18 @@ import org.molgenis.data.meta.model.EntityType;
 @AutoValue
 public abstract class EntityKey
 {
-	public abstract String getEntityName();
+	public abstract String getEntityTypeId();
 
 	public abstract Object getId();
 
-	public static EntityKey create(String entityName, Object id)
+	public static EntityKey create(String entityId, Object id)
 	{
-		return new AutoValue_EntityKey(entityName, id);
+		return new AutoValue_EntityKey(entityId, id);
 	}
 
 	public static EntityKey create(EntityType entityType, Object id)
 	{
-		return create(entityType.getFullyQualifiedName(), id);
+		return create(entityType.getId(), id);
 	}
 
 	public static EntityKey create(Entity entity)

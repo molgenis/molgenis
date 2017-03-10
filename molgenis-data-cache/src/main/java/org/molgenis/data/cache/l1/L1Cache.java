@@ -76,13 +76,13 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	}
 
 	//TODO: Call this also when repository metadata changes!
-	public void evictAll(String entityName)
+	public void evictAll(EntityType entityType)
 	{
 		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
-			LOG.trace("Removing all entities from L1 cache that belong to {}", entityName);
-			entityCache.evictAll(entityName);
+			LOG.trace("Removing all entities from L1 cache that belong to {}", entityType.getFullyQualifiedName());
+			entityCache.evictAll(entityType);
 		}
 	}
 

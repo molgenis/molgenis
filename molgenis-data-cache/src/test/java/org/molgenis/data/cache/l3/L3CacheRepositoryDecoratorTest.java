@@ -119,21 +119,21 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneRepositoryClean()
 	{
-		when(transactionInformation.isRepositoryCompletelyClean(repositoryName)).thenReturn(true);
+		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
 		Query<Entity> queryWithPageSizeOne = new QueryImpl<>(query).pageSize(1);
 		when(l3Cache.get(decoratedRepository, queryWithPageSizeOne)).thenReturn(singletonList(3));
 		when(decoratedRepository.findOneById(3, fetch)).thenReturn(entity3);
 
 		assertEquals(l3CacheRepositoryDecorator.findOne(queryWithPageSizeOne), entity3);
 		verify(decoratedRepository, times(1)).findOneById(3, fetch);
-		verify(decoratedRepository, atLeast(0)).getName();
+		verify(decoratedRepository, atLeast(0)).getEntityType();
 		verifyNoMoreInteractions(decoratedRepository);
 	}
 
 	@Test
 	public void testFindOneRepositoryDirty()
 	{
-		when(transactionInformation.isRepositoryCompletelyClean(repositoryName)).thenReturn(false);
+		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(false);
 		when(decoratedRepository.findOne(query)).thenReturn(entity3);
 
 		assertEquals(l3CacheRepositoryDecorator.findOne(query), entity3);
@@ -143,7 +143,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAllRepositoryClean()
 	{
-		when(transactionInformation.isRepositoryCompletelyClean(repositoryName)).thenReturn(true);
+		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
 
 		List<Object> ids = asList(1, 2);
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
@@ -161,7 +161,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAllVeryLargePageSize()
 	{
-		when(transactionInformation.isRepositoryCompletelyClean(repositoryName)).thenReturn(true);
+		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
 		Query<Entity> largeQuery = new QueryImpl<>(query).setPageSize(10000);
 
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
@@ -177,7 +177,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAllZeroPageSize()
 	{
-		when(transactionInformation.isRepositoryCompletelyClean(repositoryName)).thenReturn(true);
+		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
 		Query<Entity> largeQuery = new QueryImpl<>(query).setPageSize(0);
 
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
@@ -193,7 +193,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAllRepositoryDirty()
 	{
-		when(transactionInformation.isRepositoryCompletelyClean(repositoryName)).thenReturn(false);
+		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(false);
 		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL");
 		query.pageSize(10);
 		query.sort(new Sort());

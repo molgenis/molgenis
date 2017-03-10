@@ -57,8 +57,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		evictBiDiReferencedEntityTypes();
 		if (cacheable)
 		{
-			String entityName = getName();
-			entities = entities.peek(entity -> l1Cache.put(entityName, entity));
+			String entityId = getEntityType().getId();
+			entities = entities.peek(entity -> l1Cache.put(entityId, entity));
 		}
 		return delegate().add(entities);
 	}
@@ -67,7 +67,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	public void add(Entity entity)
 	{
 		evictBiDiReferencedEntities(entity);
-		if (cacheable) l1Cache.put(getName(), entity);
+		if (cacheable) l1Cache.put(getEntityType().getId(), entity);
 		delegate().add(entity);
 	}
 
@@ -76,7 +76,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		if (cacheable)
 		{
-			Optional<Entity> entity = l1Cache.get(getName(), id, getEntityType());
+			Optional<Entity> entity = l1Cache.get(getEntityType().getId(), id, getEntityType());
 			if (entity != null)
 			{
 				return entity.orElse(null);
@@ -107,9 +107,9 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private List<Entity> findAllBatch(List<Object> batch)
 	{
-		String entityName = getName();
+		String entityId = getEntityType().getId();
 		EntityType entityType = getEntityType();
-		List<Object> missingIds = batch.stream().filter(id -> l1Cache.get(entityName, id, entityType) == null)
+		List<Object> missingIds = batch.stream().filter(id -> l1Cache.get(entityId, id, entityType) == null)
 				.collect(toList());
 
 		Map<Object, Entity> missingEntities = delegate().findAll(missingIds.stream())
@@ -117,7 +117,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
 		return Lists.transform(batch, id ->
 		{
-			Optional<Entity> result = l1Cache.get(entityName, id, getEntityType());
+			Optional<Entity> result = l1Cache.get(entityId, id, getEntityType());
 			if (result == null)
 			{
 				return missingEntities.get(id);
@@ -130,7 +130,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	public void update(Entity entity)
 	{
 		evictBiDiReferencedEntityTypes();
-		if (cacheable) l1Cache.put(getName(), entity);
+		if (cacheable) l1Cache.put(getEntityType().getId(), entity);
 		delegate().update(entity);
 	}
 
@@ -142,7 +142,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			entities = entities.filter(entity ->
 			{
-				l1Cache.put(getName(), entity);
+				l1Cache.put(getEntityType().getId(), entity);
 				return true;
 			});
 		}
@@ -169,7 +169,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	public void deleteById(Object id)
 	{
 		evictBiDiReferencedEntityTypes();
-		if (cacheable) l1Cache.putDeletion(EntityKey.create(getName(), id));
+		if (cacheable) l1Cache.putDeletion(EntityKey.create(getEntityType(), id));
 		delegate().deleteById(id);
 	}
 
@@ -179,8 +179,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		evictBiDiReferencedEntityTypes();
 		if (cacheable)
 		{
-			String entityName = getName();
-			ids = ids.peek(id -> l1Cache.putDeletion(EntityKey.create(entityName, id)));
+			EntityType entityType = getEntityType();
+			ids = ids.peek(id -> l1Cache.putDeletion(EntityKey.create(entityType, id)));
 		}
 		delegate().deleteAll(ids);
 	}
@@ -189,7 +189,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	public void deleteAll()
 	{
 		evictBiDiReferencedEntityTypes();
-		if (cacheable) l1Cache.evictAll(getName());
+		if (cacheable) l1Cache.evictAll(getEntityType());
 		delegate().deleteAll();
 	}
 
@@ -198,9 +198,9 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private void evictBiDiReferencedEntityTypes()
 	{
-		getEntityType().getMappedByAttributes().map(Attribute::getRefEntity).map(EntityType::getFullyQualifiedName)
+		getEntityType().getMappedByAttributes().map(Attribute::getRefEntity)
 				.forEach(l1Cache::evictAll);
-		getEntityType().getInversedByAttributes().map(Attribute::getRefEntity).map(EntityType::getFullyQualifiedName)
+		getEntityType().getInversedByAttributes().map(Attribute::getRefEntity)
 				.forEach(l1Cache::evictAll);
 	}
 
