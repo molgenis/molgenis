@@ -44,13 +44,13 @@ public class CombinedEntityCache
 	}
 
 	/**
-	 * Evicts all entries from the cache that belong to a certain entityName.
+	 * Evicts all entries from the cache that belong to a certain entityType.
 	 *
-	 * @param entityName the name of the entity whose entries are to be evicted
+	 * @param entityType the id of the entity whose entries are to be evicted
 	 */
-	public void evictAll(String entityName)
+	public void evictAll(EntityType entityType)
 	{
-		cache.asMap().keySet().stream().filter(e -> e.getEntityName().equals(entityName)).forEach(cache::invalidate);
+		cache.asMap().keySet().stream().filter(e -> e.getEntityTypeId().equals(entityType.getId())).forEach(cache::invalidate);
 	}
 
 	/**
@@ -82,8 +82,8 @@ public class CombinedEntityCache
 	 */
 	public void put(Entity entity)
 	{
-		String entityName = entity.getEntityType().getFullyQualifiedName();
-		cache.put(EntityKey.create(entityName, entity.getIdValue()), Optional.of(entityHydration.dehydrate(entity)));
+		EntityType entityType = entity.getEntityType();
+		cache.put(EntityKey.create(entityType, entity.getIdValue()), Optional.of(entityHydration.dehydrate(entity)));
 	}
 
 	public void evict(Stream<EntityKey> entityKeys)

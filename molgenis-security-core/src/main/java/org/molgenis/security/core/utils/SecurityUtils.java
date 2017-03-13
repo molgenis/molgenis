@@ -80,6 +80,14 @@ public class SecurityUtils
 	}
 
 	/**
+	 * Returns whether the current user is a superuser or the system user.
+	 */
+	public static boolean currentUserIsSuOrSystem()
+	{
+		return currentUserIsSu() || currentUserisSystem();
+	}
+
+	/**
 	 * Returns whether the current user is a super user
 	 *
 	 * @return

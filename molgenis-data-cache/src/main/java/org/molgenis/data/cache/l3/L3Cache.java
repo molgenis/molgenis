@@ -67,12 +67,12 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 
 	private LoadingCache<Query<Entity>, List<Object>> getQueryCache(Repository<Entity> repository)
 	{
-		String name = repository.getName();
-		if (!caches.containsKey(name))
+		String id = repository.getEntityType().getId();
+		if (!caches.containsKey(id))
 		{
-			caches.putIfAbsent(name, createQueryCache(repository));
+			caches.putIfAbsent(id, createQueryCache(repository));
 		}
-		return caches.get(name);
+		return caches.get(id);
 	}
 
 	private LoadingCache<Query<Entity>, List<Object>> createQueryCache(Repository<Entity> repository)

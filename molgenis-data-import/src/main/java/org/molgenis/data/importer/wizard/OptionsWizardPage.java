@@ -73,7 +73,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 
 			try
 			{
-				NameValidator.validateEntityOrPackageName(userGivenName);
+				NameValidator.validateEntityName(userGivenName);
 				if (dataService.hasRepository(userGivenName))
 				{
 					result.addError(new ObjectError("wizard", "An entity with this name already exists."));

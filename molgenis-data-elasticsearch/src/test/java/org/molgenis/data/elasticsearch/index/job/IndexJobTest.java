@@ -85,10 +85,11 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 				.thenReturn(indexActionGroup);
 		when(dataService.getMeta()).thenReturn(mds);
 		testEntityType = harness.createDynamicRefEntityType();
-		when(mds.getEntityType("test")).thenReturn(testEntityType);
+		when(mds.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
 		toIndexEntity = harness.createTestRefEntities(testEntityType, 1).get(0);
-		when(dataService.getEntityType("test")).thenReturn(testEntityType);
-		when(dataService.findOneById("test", "entityId")).thenReturn(toIndexEntity);
+		when(dataService.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
+		when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(toIndexEntity);
+		when(dataService.getEntityTypeById("entityType")).thenReturn(testEntityType);
 	}
 
 	@Test
@@ -131,15 +132,15 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexDeleteSingleEntityTest()
 	{
-		when(dataService.findOneById("test", "entityId")).thenReturn(null);
+		when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(null);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId").setActionOrder(0)
+				.setEntityTypeId("entityType").setEntityId("entityId").setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
-		when(dataService.hasRepository("test")).thenReturn(true);
+		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
 		indexJob.call(progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
@@ -149,7 +150,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		// verify progress messages
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing test.entityId");
+		verify(progress).progress(0, "Indexing TypeTestRefDynamic.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");
@@ -167,7 +168,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexUpdateSingleEntityTest()
 	{
-		Entity actualEntity = dataService.findOneById("test", "entityId");
+		Entity actualEntity = dataService.findOneById("TypeTestRefDynamic", "entityId");
 		EntityType emd = actualEntity.getEntityType();
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(emd.getIdAttribute().getName(), "entityId");
@@ -179,10 +180,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	private void rebuildIndexSingleEntityTest(IndexingMode indexingMode)
 	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId").setActionOrder(0)
+				.setEntityTypeId("entityType").setEntityId("entityId").setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
-		when(dataService.hasRepository("test")).thenReturn(true);
+		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 		indexActionGroup.setCount(1);
 
 		indexJob.call(this.progress);
@@ -192,7 +193,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing test.entityId");
+		verify(progress).progress(0, "Indexing TypeTestRefDynamic.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");
@@ -204,12 +205,12 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	private void rebuildIndexMetaUpdateDataTest()
 	{
-		when(dataService.hasRepository("test")).thenReturn(true);
-		EntityType entityType = dataService.getEntityType("test");
+		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
+		EntityType entityType = dataService.getEntityType("TypeTestRefDynamic");
 		when(searchService.hasMapping(entityType)).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
+				.setEntityTypeId("entityType").setEntityId(null).setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
@@ -219,7 +220,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing test");
+		verify(progress).progress(0, "Indexing TypeTestRefDynamic");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");
@@ -236,10 +237,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	private void rebuildIndexMetaCreateDataTest()
 	{
-		when(dataService.hasRepository("test")).thenReturn(true);
+		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
+				.setEntityTypeId("entityType").setEntityId(null).setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
@@ -249,7 +250,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing test");
+		verify(progress).progress(0, "Indexing TypeTestRefDynamic");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");
@@ -270,14 +271,17 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	{
 		String entityTypeId = "entityTypeId";
 		String entityTypeName = "entityTypeName";
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getFullyQualifiedName()).thenReturn("pack_"+entityTypeId);
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId(entityTypeName).setEntityTypeName(entityTypeName)
-				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityTypeId("entityType").setEntityTypeId(entityTypeId).setEntityTypeName(entityTypeName)
+				.setEntityId(null).setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
-		when(dataService.hasRepository("test")).thenReturn(false);
+		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(false);
+		when(dataService.getEntityTypeById("entityTypeName")).thenReturn(null);
+
 		when(searchService.hasMapping(any(EntityType.class))).thenReturn(true);
 
 		indexJob.call(this.progress);
@@ -286,11 +290,11 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		verify(this.searchService).delete(entityTypeCaptor.capture());
 		EntityType actualEntityType = entityTypeCaptor.getValue();
-		assertEquals(actualEntityType.getFullyQualifiedName(), entityTypeName);
+		assertEquals(actualEntityType.getId(), entityTypeId);
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Dropping test");
+		verify(progress).progress(0, "Dropping entityType with name: entityTypeName and ID: entityTypeId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");
@@ -303,15 +307,15 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void indexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
 		IndexAction indexAction1 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId1").setActionOrder(0)
+				.setEntityTypeId("entityType").setEntityId("entityId1").setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		IndexAction indexAction2 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId2").setActionOrder(1)
+				.setEntityTypeId("entityType").setEntityId("entityId2").setActionOrder(1)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		IndexAction indexAction3 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId3").setActionOrder(2)
+				.setEntityTypeId("entityType").setEntityId("entityId3").setActionOrder(2)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		mockGetAllIndexActions(of(indexAction1, indexAction2, indexAction3));
@@ -320,7 +324,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		MolgenisDataException mde = new MolgenisDataException("Random unrecoverable exception");
 		doThrow(mde).when(searchService).deleteById("entityId2", testEntityType);
 
-		when(dataService.hasRepository("test")).thenReturn(true);
+		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
 		try
 		{

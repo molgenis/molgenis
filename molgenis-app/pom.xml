@@ -62,6 +62,11 @@
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-apps</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-bootstrap</artifactId>
             <version>${project.version}</version>
         </dependency>

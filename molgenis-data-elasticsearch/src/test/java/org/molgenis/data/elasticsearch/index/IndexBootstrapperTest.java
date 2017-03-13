@@ -101,9 +101,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
 		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
 		IndexAction action = mock(IndexAction.class);
-		when(action.getEntityTypeName()).thenReturn("myEntityTypeName");
 		when(action.getEntityTypeId()).thenReturn("myEntityTypeName");
-		when(action.getEntityFullName()).thenReturn("myEntityTypeName");
 		when(action.getEntityId()).thenReturn("myEntityId");
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getFullyQualifiedName()).thenReturn("myEntityTypeName");

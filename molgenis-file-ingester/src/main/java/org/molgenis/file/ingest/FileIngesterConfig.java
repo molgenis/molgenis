@@ -1,10 +1,6 @@
 package org.molgenis.file.ingest;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.platform.decorators.RepositoryDecoratorRegistry;
+import org.molgenis.data.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
