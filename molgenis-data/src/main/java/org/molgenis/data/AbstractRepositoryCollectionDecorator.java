@@ -35,12 +35,6 @@ public abstract class AbstractRepositoryCollectionDecorator extends ForwardingOb
 	}
 
 	@Override
-	public Repository<Entity> updateRepository(EntityType entityType)
-	{
-		return delegate().updateRepository(entityType);
-	}
-
-	@Override
 	public Iterable<String> getEntityIds()
 	{
 		return delegate().getEntityIds();

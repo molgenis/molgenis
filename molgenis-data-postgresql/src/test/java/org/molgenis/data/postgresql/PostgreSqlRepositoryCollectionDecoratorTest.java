@@ -53,14 +53,6 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 	}
 
 	@Test
-	public void testUpdateRepository() throws Exception
-	{
-		repoCollectionDecorator.updateRepository(entityType);
-		verify(repoCollection).updateRepository(entityType);
-		verify(entityTypeRegistry).registerEntityType(entityType);
-	}
-
-	@Test
 	public void testDeleteRepository()
 	{
 		repoCollectionDecorator.deleteRepository(entityType);
