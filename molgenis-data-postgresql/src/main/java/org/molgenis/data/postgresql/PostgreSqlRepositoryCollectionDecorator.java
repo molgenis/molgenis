@@ -68,6 +68,7 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	{
 		EntityType updatedEntityType = entityTypeCopier.copy(entityType);
 		Attribute updatedAttributeCopy = attributeCopier.copy(updatedAttr);
+		updatedEntityType.removeAttribute(attr);
 		updatedEntityType.addAttribute(updatedAttributeCopy);
 
 		entityTypeRegistry.registerEntityType(updatedEntityType);
