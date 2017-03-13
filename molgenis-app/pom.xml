@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-app</artifactId>
     <packaging>war</packaging>
@@ -60,6 +60,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-apps</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-bootstrap</artifactId>

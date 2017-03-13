@@ -2,13 +2,16 @@ package org.molgenis.util;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +25,81 @@ import static org.testng.Assert.*;
 
 public class EntityUtilsTest
 {
+	@DataProvider(name = "testEqualsEntityTypeProvider")
+	public static Iterator<Object[]> testEqualsEntityTypeProvider()
+	{
+		EntityType entityType = createEqualsEntityType();
+
+		List<Object[]> dataList = new ArrayList<>();
+		dataList.add(new Object[] { entityType, entityType, true });
+
+		EntityType otherIdEntityType = createEqualsEntityType();
+		when(otherIdEntityType.getId()).thenReturn("otherId");
+		dataList.add(new Object[] { entityType, otherIdEntityType, false });
+
+		EntityType otherNameEntityType = createEqualsEntityType();
+		when(otherNameEntityType.getName()).thenReturn("otherName");
+		dataList.add(new Object[] { entityType, otherNameEntityType, false });
+
+		EntityType otherLabelEntityType = createEqualsEntityType();
+		when(otherLabelEntityType.getName()).thenReturn("otherLabel");
+		dataList.add(new Object[] { entityType, otherLabelEntityType, false });
+
+		EntityType otherAbstractEntityType = createEqualsEntityType();
+		when(otherAbstractEntityType.isAbstract()).thenReturn(false);
+		dataList.add(new Object[] { entityType, otherAbstractEntityType, false });
+
+		EntityType otherBackendEntityType = createEqualsEntityType();
+		when(otherBackendEntityType.getBackend()).thenReturn("otherBackend");
+		dataList.add(new Object[] { entityType, otherBackendEntityType, false });
+
+		EntityType otherPackageEntityType = createEqualsEntityType();
+		when(otherPackageEntityType.getPackage()).thenReturn(mock(Package.class));
+		dataList.add(new Object[] { entityType, otherPackageEntityType, false });
+
+		EntityType otherDescriptionEntityType = createEqualsEntityType();
+		when(otherDescriptionEntityType.getDescription()).thenReturn("otherDescription");
+		dataList.add(new Object[] { entityType, otherDescriptionEntityType, false });
+
+		EntityType otherAttributesEntityType = createEqualsEntityType();
+		when(otherAttributesEntityType.getOwnAllAttributes()).thenReturn(singletonList(mock(Attribute.class)));
+		dataList.add(new Object[] { entityType, otherAttributesEntityType, false });
+
+		EntityType otherTagsEntityType = createEqualsEntityType();
+		when(otherTagsEntityType.getTags()).thenReturn(singletonList(mock(Tag.class)));
+		dataList.add(new Object[] { entityType, otherTagsEntityType, false });
+
+		EntityType otherExtendsEntityType = createEqualsEntityType();
+		when(otherExtendsEntityType.getExtends()).thenReturn(mock(EntityType.class));
+		dataList.add(new Object[] { entityType, otherExtendsEntityType, false });
+
+		return dataList.iterator();
+	}
+
+	private static EntityType createEqualsEntityType()
+	{
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.toString()).thenReturn("entity");
+		when(entityType.getId()).thenReturn("id");
+		when(entityType.getName()).thenReturn("name");
+		when(entityType.getLabel()).thenReturn("label");
+		when(entityType.isAbstract()).thenReturn(true);
+		when(entityType.getBackend()).thenReturn("backend");
+		when(entityType.getPackage()).thenReturn(null);
+		when(entityType.getDescription()).thenReturn(null);
+		when(entityType.getOwnAllAttributes()).thenReturn(emptyList());
+		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
+		when(entityType.getTags()).thenReturn(emptyList());
+		when(entityType.getExtends()).thenReturn(null);
+		return entityType;
+	}
+
+	@Test(dataProvider = "testEqualsEntityTypeProvider")
+	public void testEqualsEntityType(EntityType entityType, EntityType otherEntityType, boolean equals) throws Exception
+	{
+		assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
+	}
+
 	@Test
 	public void isEmptyNoAttributes()
 	{
@@ -115,14 +193,14 @@ public class EntityUtilsTest
 		assertFalse(EntityUtils.equals(attr, otherAttr, true));
 	}
 
-	@Test(dataProvider = "attributeProvider")
-	public void attributeEquals(Attribute attr, Attribute otherAttr, boolean shouldEqual)
+	@Test(dataProvider = "testEqualsAttributeProvider")
+	public void testEqualsAttribute(Attribute attr, Attribute otherAttr, boolean shouldEqual)
 	{
 		assertEquals(EntityUtils.equals(attr, otherAttr), shouldEqual);
 	}
 
-	@DataProvider(name = "attributeProvider")
-	public Iterator<Object[]> attributeProvider()
+	@DataProvider(name = "testEqualsAttributeProvider")
+	public Iterator<Object[]> testEqualsAttributeProvider()
 	{
 		List<Object[]> testCases = newArrayList();
 
@@ -132,55 +210,6 @@ public class EntityUtilsTest
 
 		{ // both attrs null
 			testCases.add(new Object[] { null, null, true });
-		}
-
-		{ // children equals
-			Attribute attr = getMockAttr("compound");
-			Attribute otherAttr = getMockAttr("compound");
-			Attribute child1 = getMockAttr();
-			Attribute child2 = getMockAttr();
-			Attribute child3 = getMockAttr();
-			Attribute child4 = getMockAttr();
-			when(child1.getIdentifier()).thenReturn("1");
-			when(child2.getIdentifier()).thenReturn("2");
-			when(child3.getIdentifier()).thenReturn("1");
-			when(child4.getIdentifier()).thenReturn("2");
-			when(attr.getChildren()).thenReturn(newArrayList(child1, child2));
-			when(otherAttr.getChildren()).thenReturn(newArrayList(child3, child4));
-
-			testCases.add(new Object[] { attr, otherAttr, true });
-		}
-
-		{ // children different order
-			Attribute attr = getMockAttr("compound");
-			Attribute otherAttr = getMockAttr("compound");
-			Attribute child1 = getMockAttr();
-			Attribute child2 = getMockAttr();
-			Attribute child3 = getMockAttr();
-			Attribute child4 = getMockAttr();
-			when(child1.getIdentifier()).thenReturn("1");
-			when(child2.getIdentifier()).thenReturn("2");
-			when(child3.getIdentifier()).thenReturn("2");
-			when(child4.getIdentifier()).thenReturn("1");
-			when(attr.getChildren()).thenReturn(newArrayList(child1, child2));
-			when(otherAttr.getChildren()).thenReturn(newArrayList(child3, child4));
-
-			testCases.add(new Object[] { attr, otherAttr, false });
-		}
-
-		{ // children missing child
-			Attribute attr = getMockAttr("compound");
-			Attribute otherAttr = getMockAttr("compound");
-			Attribute child1 = getMockAttr();
-			Attribute child2 = getMockAttr();
-			Attribute child3 = getMockAttr();
-			when(child1.getIdentifier()).thenReturn("1");
-			when(child2.getIdentifier()).thenReturn("2");
-			when(child3.getIdentifier()).thenReturn("1");
-			when(attr.getChildren()).thenReturn(newArrayList(child1, child2));
-			when(otherAttr.getChildren()).thenReturn(newArrayList(child3));
-
-			testCases.add(new Object[] { attr, otherAttr, false });
 		}
 
 		{ // refEntity one null
@@ -223,7 +252,7 @@ public class EntityUtilsTest
 			Attribute otherAttr = getMockAttr("2tags");
 			Tag tag = mock(Tag.class);
 			when(attr.getTags()).thenReturn(newArrayList(tag));
-			when(attr.getTags()).thenReturn(newArrayList(tag, tag));
+			when(otherAttr.getTags()).thenReturn(newArrayList(tag, tag));
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -339,7 +368,7 @@ public class EntityUtilsTest
 			Attribute attr = getMockAttr("enumOptionsAB");
 			Attribute otherAttr = getMockAttr("enumOptionsBC");
 			when(attr.getEnumOptions()).thenReturn(newArrayList("A", "B"));
-			when(attr.getEnumOptions()).thenReturn(newArrayList("B", "C"));
+			when(otherAttr.getEnumOptions()).thenReturn(newArrayList("B", "C"));
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -348,7 +377,7 @@ public class EntityUtilsTest
 			Attribute attr = getMockAttr("rangeMin3");
 			Attribute otherAttr = getMockAttr("rangeMin5");
 			when(attr.getRangeMin()).thenReturn(3L);
-			when(attr.getRangeMin()).thenReturn(5L);
+			when(otherAttr.getRangeMin()).thenReturn(5L);
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -357,7 +386,7 @@ public class EntityUtilsTest
 			Attribute attr = getMockAttr("rangeMax3");
 			Attribute otherAttr = getMockAttr("rangeMax5");
 			when(attr.getRangeMax()).thenReturn(3L);
-			when(attr.getRangeMax()).thenReturn(5L);
+			when(otherAttr.getRangeMax()).thenReturn(5L);
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -384,7 +413,7 @@ public class EntityUtilsTest
 			Attribute attr = getMockAttr("visibleExpressionA");
 			Attribute otherAttr = getMockAttr("visibleExpressionB");
 			when(attr.getVisibleExpression()).thenReturn("A");
-			when(attr.getVisibleExpression()).thenReturn("B");
+			when(otherAttr.getVisibleExpression()).thenReturn("B");
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -393,7 +422,7 @@ public class EntityUtilsTest
 			Attribute attr = getMockAttr("validationExpressionA");
 			Attribute otherAttr = getMockAttr("validationExpressionB");
 			when(attr.getValidationExpression()).thenReturn("A");
-			when(attr.getValidationExpression()).thenReturn("B");
+			when(otherAttr.getValidationExpression()).thenReturn("B");
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -402,7 +431,7 @@ public class EntityUtilsTest
 			Attribute attr = getMockAttr("defaultValueA");
 			Attribute otherAttr = getMockAttr("defaultValueB");
 			when(attr.getValidationExpression()).thenReturn("A");
-			when(attr.getValidationExpression()).thenReturn("B");
+			when(otherAttr.getValidationExpression()).thenReturn("B");
 
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
@@ -470,6 +499,170 @@ public class EntityUtilsTest
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
 
+		{ // sequence number equals
+			Attribute attr = getMockAttr("sequenceNumber0");
+			Attribute otherAttr = getMockAttr("sequenceNumber0");
+			when(attr.getSequenceNumber()).thenReturn(0);
+			when(otherAttr.getSequenceNumber()).thenReturn(0);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // sequence number not equals
+			Attribute attr = getMockAttr("sequenceNumber0");
+			Attribute otherAttr = getMockAttr("sequenceNumber1");
+			when(attr.getSequenceNumber()).thenReturn(0);
+			when(otherAttr.getSequenceNumber()).thenReturn(1);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		{ // order by equals
+			Attribute attr = getMockAttr("orderBySort");
+			Attribute otherAttr = getMockAttr("orderBySort");
+			Sort sort = mock(Sort.class);
+			when(attr.getOrderBy()).thenReturn(sort);
+			when(otherAttr.getOrderBy()).thenReturn(sort);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // order by not equals
+			Attribute attr = getMockAttr("orderBySort");
+			Attribute otherAttr = getMockAttr("orderByOtherSort");
+			Sort sort = mock(Sort.class);
+			Sort otherSort = mock(Sort.class);
+			when(attr.getOrderBy()).thenReturn(sort);
+			when(otherAttr.getOrderBy()).thenReturn(otherSort);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		{ // mapped by equals
+			Attribute attr = getMockAttr("mappedByAttribute");
+			Attribute otherAttr = getMockAttr("mappedByAttribute");
+			Attribute mappedByAttr = getMockAttr();
+			when(attr.getMappedBy()).thenReturn(mappedByAttr);
+			when(otherAttr.getMappedBy()).thenReturn(mappedByAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // mapped by not equals
+			Attribute attr = getMockAttr("mappedByAttribute");
+			Attribute otherAttr = getMockAttr("mappedByOtherAttribute");
+			Attribute mappedByAttr = getMockAttr();
+			when(mappedByAttr.getIdentifier()).thenReturn("attrId0");
+			when(attr.getMappedBy()).thenReturn(mappedByAttr);
+			Attribute mappedByOtherAttr = getMockAttr();
+			when(mappedByOtherAttr.getIdentifier()).thenReturn("attrId1");
+			when(otherAttr.getMappedBy()).thenReturn(mappedByOtherAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		{ // parent equals
+			Attribute attr = getMockAttr("parentAttribute");
+			Attribute otherAttr = getMockAttr("parentAttribute");
+			Attribute parentAttr = getMockAttr();
+			when(attr.getParent()).thenReturn(parentAttr);
+			when(otherAttr.getParent()).thenReturn(parentAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // parent not equals
+			Attribute attr = getMockAttr("parentAttribute");
+			Attribute otherAttr = getMockAttr("parentOtherAttribute");
+			Attribute parentAttr = getMockAttr();
+			when(attr.getParent()).thenReturn(parentAttr);
+			Attribute parentOtherAttr = getMockAttr();
+			when(otherAttr.getParent()).thenReturn(parentOtherAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // entity equals
+			Attribute attr = getMockAttr("entityType");
+			Attribute otherAttr = getMockAttr("entityType");
+			EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
+			when(attr.getEntity()).thenReturn(entityType);
+			when(otherAttr.getEntity()).thenReturn(entityType);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{ // entity not equals
+			Attribute attr = getMockAttr("entityType");
+			Attribute otherAttr = getMockAttr("otherEntityType");
+			EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
+			when(attr.getEntity()).thenReturn(entityType);
+			EntityType otherEntityType = when(mock(EntityType.class).getId()).thenReturn("otherEntityTypeId").getMock();
+			when(otherAttr.getEntity()).thenReturn(otherEntityType);
+
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
+		return testCases.iterator();
+	}
+
+	@Test(dataProvider = "testEqualsAttributeNoIdentifierCheckProvider")
+	public void testEqualsAttributeNoIdentifierCheck(Attribute attr, Attribute otherAttr, boolean shouldEqual)
+	{
+		assertEquals(EntityUtils.equals(attr, otherAttr, false), shouldEqual);
+	}
+
+	@DataProvider(name = "testEqualsAttributeNoIdentifierCheckProvider")
+	public Iterator<Object[]> testEqualsAttributeNoIdentifierCheckProvider()
+	{
+		List<Object[]> testCases = newArrayList();
+
+		{
+			// identifiers differ
+			Attribute attr = getMockAttr();
+			when(attr.getIdentifier()).thenReturn("attrId");
+			Attribute otherAttr = getMockAttr();
+			when(otherAttr.getIdentifier()).thenReturn("otherAttrId");
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{   // parent attribute identifiers differ
+			Attribute attr = getMockAttr();
+			Attribute parentAttr = getMockAttr();
+			when(parentAttr.getIdentifier()).thenReturn("parentAttrId");
+			when(attr.getParent()).thenReturn(parentAttr);
+
+			Attribute otherAttr = getMockAttr();
+			Attribute otherParentAttr = getMockAttr();
+			when(otherParentAttr.getIdentifier()).thenReturn("otherParentAttrId");
+			when(otherAttr.getParent()).thenReturn(otherParentAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{   // entity identifier differs
+			Attribute attr = getMockAttr();
+			EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
+			when(attr.getEntity()).thenReturn(entityType);
+
+			Attribute otherAttr = getMockAttr();
+			EntityType otherEntityType = when(mock(EntityType.class).getId()).thenReturn("otherEntityTypeId").getMock();
+			when(otherAttr.getEntity()).thenReturn(otherEntityType);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
+		{
+			// identifiers and label differ
+			Attribute attr = getMockAttr();
+			when(attr.getIdentifier()).thenReturn("attrId");
+			when(attr.getLabel()).thenReturn("label");
+			Attribute otherAttr = getMockAttr();
+			when(otherAttr.getIdentifier()).thenReturn("otherAttrId");
+			when(otherAttr.getLabel()).thenReturn("otherLabel");
+			testCases.add(new Object[] { attr, otherAttr, false });
+		}
+
 		return testCases.iterator();
 	}
 
@@ -482,8 +675,9 @@ public class EntityUtilsTest
 
 	private Attribute getMockAttr()
 	{
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
 		Attribute attr = mock(Attribute.class);
-		when(attr.getChildren()).thenReturn(emptyList());
+		when(attr.getEntity()).thenReturn(entityType);
 		when(attr.getTags()).thenReturn(emptyList());
 		return attr;
 	}

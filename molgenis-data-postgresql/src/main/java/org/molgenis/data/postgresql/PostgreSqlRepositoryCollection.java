@@ -81,6 +81,14 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
+	public Repository<Entity> updateRepository(EntityType entityType)
+	{
+		PostgreSqlRepository repository = createPostgreSqlRepository();
+		repository.setEntityType(entityType);
+		return repository;
+	}
+
+	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
 		return isTableExists(entityType);

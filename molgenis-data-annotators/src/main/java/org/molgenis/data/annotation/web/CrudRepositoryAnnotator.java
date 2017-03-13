@@ -14,11 +14,9 @@ import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
 
 import static java.util.Spliterator.ORDERED;
@@ -79,8 +77,7 @@ public class CrudRepositoryAnnotator
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
-					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-							Collections.singletonList(externalRepository.getName()));
+					permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
 					runAsSystem(() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);

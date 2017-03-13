@@ -9,6 +9,7 @@ import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
@@ -35,7 +36,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,12 +56,14 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -138,6 +140,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private String attrCompoundAttr0Name;
 	private String attrCompoundAttrCompoundName;
 	private String attrCompoundAttrCompoundAttr0Name;
+	private EntityType entityType;
 
 	@BeforeMethod
 	public void beforeMethod() throws ParseException
@@ -214,7 +217,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String enum2 = "enum2";
 
 		// required
-		EntityType entityType = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
+		entityType = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
 		Attribute attrId = attributeFactory.create().setName(attrIdName);
 		entityType.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		Attribute attrBool = createAttributeMeta(entityType, attrBoolName, BOOL).setNillable(false);
@@ -464,6 +467,41 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(content().string(resourceCollectionResponse));
 	}
 
+	@Test
+	public void retrieveEntityCollectionWithZeroNumSize() throws Exception
+	{
+		// have count return a non null value irrespective of query
+		Long countResult = 2L;
+		when(dataService.count(anyString(), anyObject())).thenReturn(countResult);
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION)
+				.param("num", "0"))
+				.andExpect(
+						status().isOk()
+				)
+				.andExpect(
+						jsonPath("$.items").isEmpty()
+				)
+				.andExpect(
+						jsonPath("$.total").value(countResult)
+				);
+	}
+
+	@Test
+	public void retrieveEntityCollectionWitNonZeroNumSize() throws Exception
+	{
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
+				.andExpect(
+						status().isOk()
+				)
+				.andExpect(
+						jsonPath("$.items").isNotEmpty()
+				)
+				.andExpect(
+						jsonPath("$.total").value(2L)
+				);
+	}
+
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCreateEntities() throws Exception
@@ -477,6 +515,33 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
+	}
+
+	@Test
+	public void testCreateEntitiesAttribute() throws Exception
+	{
+		MetaDataService metadataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metadataService);
+		when(dataService.getEntityType(ATTRIBUTE_META_DATA)).thenReturn(entityType);
+		Attribute attribute0 = mock(Attribute.class);
+		when(attribute0.getIdValue()).thenReturn("p1");
+		when(attribute0.getEntityType()).thenReturn(entityType);
+		Attribute attribute1 = mock(Attribute.class);
+		when(attribute1.getIdValue()).thenReturn("p2");
+		when(attribute1.getEntityType()).thenReturn(entityType);
+		when(entityManager.create(entityType, POPULATE)).thenReturn(attribute0).thenReturn(attribute1);
+
+		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
+		String responseBody = "{\n" + "  \"location\": \"/api/v2/sys_md_Attribute?q=id=in=(\\\"p1\\\",\\\"p2\\\")\",\n"
+				+ "  \"resources\": [\n" + "    {\n" + "      \"href\": \"/api/v2/sys_md_Attribute/p1\"\n" + "    },\n"
+				+ "    {\n" + "      \"href\": \"/api/v2/sys_md_Attribute/p2\"\n" + "    }\n" + "  ]\n" + "}";
+		mockMvc.perform(post(RestControllerV2.BASE_URI + '/' + ATTRIBUTE_META_DATA).content(content)
+				.contentType(APPLICATION_JSON)).andExpect(status().isCreated())
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody));
+
+		verify(metadataService).addAttribute(attribute0);
+		verify(metadataService).addAttribute(attribute1);
+		verifyNoMoreInteractions(metadataService);
 	}
 
 	@Test
@@ -597,8 +662,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
 		when(repoCopier.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
 
-		doNothing().when(permissionSystemService)
-				.giveUserEntityPermissions(any(SecurityContext.class), Collections.singletonList(any(String.class)));
+		doNothing().when(permissionSystemService).giveUserWriteMetaPermissions(any(EntityType.class));
 		return pack;
 	}
 

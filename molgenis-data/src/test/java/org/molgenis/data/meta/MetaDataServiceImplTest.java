@@ -8,6 +8,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -38,6 +40,7 @@ public class MetaDataServiceImplTest
 	private RepositoryCollectionRegistry repoCollectionRegistry;
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private IdentifierLookupService identifierLookupService;
+	private PackagePersister packagePersister;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -48,8 +51,9 @@ public class MetaDataServiceImplTest
 		SystemEntityTypeRegistry systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
 		entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		identifierLookupService = mock(IdentifierLookupService.class);
+		packagePersister = mock(PackagePersister.class);
 		metaDataServiceImpl = new MetaDataServiceImpl(dataService, repoCollectionRegistry, systemEntityTypeRegistry,
-				entityTypeDependencyResolver, identifierLookupService);
+				entityTypeDependencyResolver, identifierLookupService, packagePersister);
 	}
 
 	@Test
@@ -415,22 +419,12 @@ public class MetaDataServiceImplTest
 	@Test
 	public void upsertPackages()
 	{
-		String newPackageName = "newPackage";
-		String newPackageId = "new";
-		Package packageNew = when(mock(Package.class).getFullyQualifiedName()).thenReturn(newPackageName).getMock();
-		when(packageNew.getId()).thenReturn(newPackageId);
-		String updatedPackageName = "updatedPackage";
-		String updatedPackageId = "updated";
-		Package packageUpdated = when(mock(Package.class).getFullyQualifiedName()).thenReturn(updatedPackageName)
-				.getMock();
-		when(packageUpdated.getId()).thenReturn(updatedPackageId);
-
-		when(identifierLookupService.getPackageId(packageNew.getFullyQualifiedName())).thenReturn(null);
-		when(identifierLookupService.getPackageId(packageUpdated.getFullyQualifiedName())).thenReturn(updatedPackageId);
-		metaDataServiceImpl.upsertPackages(Stream.of(packageNew, packageUpdated));
-		verify(dataService).add(PACKAGE, packageNew);
-		verify(dataService).update(PACKAGE, packageUpdated);
-		verifyNoMoreInteractions(dataService);
+		Package package0 = mock(Package.class);
+		Package package1 = mock(Package.class);
+		metaDataServiceImpl.upsertPackages(Stream.of(package0, package1));
+		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(packagePersister).upsertPackages(captor.capture());
+		assertEquals(captor.getValue().collect(toList()), asList(package0, package1));
 	}
 
 	@Test
@@ -444,6 +438,17 @@ public class MetaDataServiceImplTest
 				.thenReturn(entityType);
 
 		assertEquals(metaDataServiceImpl.getEntityType(entityName), entityType);
+	}
+
+	@Test
+	public void getEntityTypeById()
+	{
+		String entityId = "entityId";
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq("entityId"), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
+
+		assertEquals(metaDataServiceImpl.getEntityTypeById(entityId), entityType);
 	}
 
 	@Test

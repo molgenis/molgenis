@@ -11,7 +11,6 @@ import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,38 +117,42 @@ class IndexJob extends Job
 	private boolean performAction(Progress progress, int progressCount, IndexAction indexAction)
 	{
 		requireNonNull(indexAction);
-		String fullName = indexAction.getEntityFullName();
+		String entityTypeId = indexAction.getEntityTypeId();
 		updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.STARTED);
-
+		EntityType entityType = dataService.getEntityTypeById(entityTypeId);
 		try
 		{
-			if (dataService.hasRepository(fullName))
+			if (entityType != null)
 			{
 				if (indexAction.getEntityId() != null)
 				{
-					progress.progress(progressCount, format("Indexing {0}.{1}", fullName, indexAction.getEntityId()));
-					rebuildIndexOneEntity(fullName, indexAction.getEntityId());
+					progress.progress(progressCount,
+							format("Indexing {0}.{1}", entityType.getFullyQualifiedName(), indexAction.getEntityId()));
+					rebuildIndexOneEntity(entityTypeId, indexAction.getEntityId());
 				}
 				else
 				{
-					progress.progress(progressCount, format("Indexing {0}", fullName));
-					final Repository<Entity> repository = dataService.getRepository(fullName);
+					progress.progress(progressCount, format("Indexing {0}", entityType.getFullyQualifiedName()));
+					final Repository<Entity> repository = dataService.getRepository(entityType.getFullyQualifiedName());
 					searchService.rebuildIndex(repository);
 				}
 			}
 			else
 			{
-				EntityType entityType = getEntityType(indexAction);
+				entityType = getEntityType(indexAction);
 				if (searchService.hasMapping(entityType))
 				{
-					progress.progress(progressCount, format("Dropping {0}", fullName));
+					progress.progress(progressCount,
+							format("Dropping entityType with name: {0} and ID: {1}", entityType.getName(),
+									entityType.getId()));
 					searchService.delete(entityType);
 				}
 				else
 				{
 					// Index Job is finished, here we concluded that we don't have enough info to continue the index job
 					progress.progress(progressCount,
-							format("Skip index entity {0}.{1}", fullName, indexAction.getEntityId()));
+							format("Skip index entity {0}.{1}", entityType.getFullyQualifiedName(),
+									indexAction.getEntityId()));
 				}
 			}
 			updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
@@ -178,50 +181,57 @@ class IndexJob extends Job
 	/**
 	 * Indexes one single entity instance.
 	 *
-	 * @param entityFullName  the fully qualified name of the entity's repository
+	 * @param entityTypeId the id of the entity's repository
 	 * @param untypedEntityId the identifier of the entity to update
 	 */
-	private void rebuildIndexOneEntity(String entityFullName, String untypedEntityId)
+	private void rebuildIndexOneEntity(String entityTypeId, String untypedEntityId)
 	{
-		LOG.trace("Indexing [{}].[{}]... ", entityFullName, untypedEntityId);
+		LOG.trace("Indexing [{}].[{}]... ", entityTypeId, untypedEntityId);
 
 		// convert entity id string to typed entity id
-		EntityType entityType = dataService.getEntityType(entityFullName);
-		Object entityId =
-				entityType != null ? getTypedValue(untypedEntityId, entityType.getIdAttribute()) : untypedEntityId;
-
-		Entity actualEntity = dataService.findOneById(entityFullName, entityId);
-
-		if (null == actualEntity)
+		EntityType entityType = dataService.getEntityTypeById(entityTypeId);
+		if (null != entityType)
 		{
-			// Delete
-			LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-			searchService.deleteById(entityId.toString(), entityType);
-			return;
-		}
+			Object entityId = getTypedValue(untypedEntityId, entityType.getIdAttribute());
+			String entityFullName = entityType.getFullyQualifiedName();
 
-		boolean indexEntityExists = searchService.hasMapping(entityType);
-		if (!indexEntityExists)
-		{
-			LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityFullName);
-			searchService.createMappings(entityType);
-		}
+			Entity actualEntity = dataService.findOneById(entityFullName, entityId);
 
-		Query<Entity> q = new QueryImpl<>();
-		q.eq(entityType.getIdAttribute().getName(), entityId);
-		Entity indexEntity = searchService.findOne(q, entityType);
+			if (null == actualEntity)
+			{
+				// Delete
+				LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
+				searchService.deleteById(entityId.toString(), entityType);
+				return;
+			}
 
-		if (null != indexEntity)
-		{
-			// update
-			LOG.debug("Index update [{}].[{}].", entityFullName, entityId);
-			searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.UPDATE);
+			boolean indexEntityExists = searchService.hasMapping(entityType);
+			if (!indexEntityExists)
+			{
+				LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityTypeId);
+				searchService.createMappings(entityType);
+			}
+
+			Query<Entity> q = new QueryImpl<>();
+			q.eq(entityType.getIdAttribute().getName(), entityId);
+			Entity indexEntity = searchService.findOne(q, entityType);
+
+			if (null != indexEntity)
+			{
+				// update
+				LOG.debug("Index update [{}].[{}].", entityTypeId, entityId);
+				searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.UPDATE);
+			}
+			else
+			{
+				// Add
+				LOG.debug("Index add [{}].[{}].", entityTypeId, entityId);
+				searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.ADD);
+			}
 		}
 		else
 		{
-			// Add
-			LOG.debug("Index add [{}].[{}].", entityFullName, entityId);
-			searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.ADD);
+			throw new MolgenisDataException("Unknown EntityType for entityTypeId: " + entityTypeId);
 		}
 	}
 
@@ -238,7 +248,7 @@ class IndexJob extends Job
 
 	private EntityType getEntityType(IndexAction indexAction)
 	{
-		EntityType entityType = entityTypeFactory.create(indexAction.getEntityFullName());
+		EntityType entityType = entityTypeFactory.create(indexAction.getEntityId());
 		entityType.setId(indexAction.getEntityTypeId());
 		entityType.setName(indexAction.getEntityTypeName());
 		return entityType;

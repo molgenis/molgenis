@@ -1,10 +1,8 @@
 package org.molgenis.ontology.importer.repository;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
@@ -23,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -371,17 +370,8 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 		public IdGenerator idGenerator()
 		{
 			IdGenerator idGenerator = mock(IdGenerator.class);
-			when(idGenerator.generateId()).thenAnswer(new GenerateIdAnswer());
+			when(idGenerator.generateId()).thenAnswer((invocation) -> UUID.randomUUID().toString());
 			return idGenerator;
-		}
-
-		private static class GenerateIdAnswer implements Answer<String>
-		{
-			@Override
-			public String answer(InvocationOnMock invocation) throws Throwable
-			{
-				return String.valueOf(System.nanoTime());
-			}
 		}
 	}
 }

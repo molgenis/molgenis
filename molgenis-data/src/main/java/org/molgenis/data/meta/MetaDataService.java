@@ -163,6 +163,14 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	EntityType getEntityType(String name);
 
 	/**
+	 * Gets the entity type for a given entity.
+	 *
+	 * @param entityTypeId the id of the entity
+	 * @return EntityType of the entity, or null if the entity does not exist
+	 */
+	EntityType getEntityTypeById(String entityTypeId);
+
+	/**
 	 * Returns a stream of all {@link EntityType entity type}.
 	 *
 	 * @return all entity type

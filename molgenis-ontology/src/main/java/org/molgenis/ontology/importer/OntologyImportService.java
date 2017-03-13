@@ -15,7 +15,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,9 +69,9 @@ public class OntologyImportService implements ImportService
 
 					crudRepository.add(stream(repo.spliterator(), false));
 
+					permissionSystemService.giveUserWriteMetaPermissions(addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getFullyQualifiedName())
 							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 					int count = 1;
 					for (String entityName : entityNames)
 					{

@@ -56,7 +56,7 @@ public class EntityTypeMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true);
 		addAttribute(NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package").setReadOnly(true);
+		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package");
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);

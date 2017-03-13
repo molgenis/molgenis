@@ -6,6 +6,7 @@ import org.molgenis.data.support.StaticEntity;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -229,6 +230,65 @@ public class Package extends StaticEntity
 			package_ = package_.getParent();
 		}
 		return package_;
+	}
+
+	/**
+	 * Based on generated AutoValue class:
+	 * <pre><code>
+	 * {@literal @}AutoValue
+	 * public abstract class Package
+	 * {
+	 *     public abstract String getId();
+	 *     public abstract String getName();
+	 *    {@literal @}Nullable public abstract String getLabel();
+	 *    {@literal @}Nullable public abstract String getDescription();
+	 *    {@literal @}Nullable public abstract Package getParent();
+	 *     public abstract List<Tag> getTags();
+	 * }
+	 * </code></pre>
+	 *
+	 * @param o
+	 * @return
+	 */
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == this)
+		{
+			return true;
+		}
+		if (o instanceof Package)
+		{
+			Package that = (Package) o;
+			return (this.getId().equals(that.getId())) && (this.getName().equals(that.getName())) && ((this.getLabel()
+					== null) ? (that.getLabel() == null) : this.getLabel().equals(that.getLabel())) && ((
+					this.getDescription() == null) ? (that.getDescription() == null) : this.getDescription()
+					.equals(that.getDescription())) && ((this.getParent() == null) ? (that.getParent() == null) : this
+					.getParent().equals(that.getParent())) && (newArrayList(this.getTags())
+					.equals(newArrayList(that.getTags())));
+		}
+		return false;
+	}
+
+	/**
+	 * Based on generated AutoValue class:
+	 * <pre><code>
+	 * {@literal @}AutoValue
+	 * public abstract class Package
+	 * {
+	 *     public abstract String getId();
+	 * }
+	 * </code></pre>
+	 *
+	 * @return
+	 */
+	@Override
+	public int hashCode()
+	{
+		int h = 1;
+		h *= 1000003;
+		h ^= this.getId().hashCode();
+		return h;
 	}
 
 	@Override

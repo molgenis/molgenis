@@ -12,6 +12,7 @@
             <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
         <menu label="Plugins" name="plugins">
+            <plugin id="apps" name="Apps" url="apps"/>
             <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
         	<plugin id="pathways" name="Pathways" url="pathways"/>
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />

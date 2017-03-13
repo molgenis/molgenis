@@ -79,17 +79,6 @@ public class IndexAction extends StaticEntity
 		return this;
 	}
 
-	public String getEntityFullName()
-	{
-		return getString(ENTITY_FULL_NAME);
-	}
-
-	public IndexAction setEntityFullName(String entityFullName)
-	{
-		set(ENTITY_FULL_NAME, entityFullName);
-		return this;
-	}
-
 	public String getEntityId()
 	{
 		return getString(ENTITY_ID);
@@ -129,8 +118,8 @@ public class IndexAction extends StaticEntity
 
 		if (getEntityId() != null ? !getEntityId().equals(that.getEntityId()) : that.getEntityId() != null)
 			return false;
-		return getEntityFullName() != null ? getEntityFullName().equals(that.getEntityFullName()) :
-				that.getEntityFullName() == null;
+		return getEntityTypeId() != null ? getEntityTypeId().equals(that.getEntityTypeId()) :
+				that.getEntityTypeId() == null;
 
 	}
 
@@ -143,7 +132,7 @@ public class IndexAction extends StaticEntity
 	public int hashCode()
 	{
 		int result = getEntityId() != null ? getEntityId().hashCode() : 0;
-		result = 31 * result + (getEntityFullName() != null ? getEntityFullName().hashCode() : 0);
+		result = 31 * result + (getEntityTypeId() != null ? getEntityTypeId().hashCode() : 0);
 		return result;
 	}
 }

@@ -125,6 +125,10 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				asList("it", "emx", "addupdate"),
 				ImmutableMap.<String, Integer>builder().put("TestAddUpdate", 3).build(), Collections.emptySet()));
 
+		data.add(createUpdateData("it_emx_addAttrToAbstract.xlsx", "it_emx_addAttrToAbstract-update.xlsx",
+				asList("it", "emx", "addAttrToAbstract"),
+				ImmutableMap.<String, Integer>builder().put("Child1", 2).put("Child2", 2).build(),
+				Collections.emptySet()));
 		return data.iterator();
 	}
 
