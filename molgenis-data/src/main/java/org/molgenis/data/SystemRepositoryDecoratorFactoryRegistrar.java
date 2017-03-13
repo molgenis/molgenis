@@ -10,12 +10,12 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 @Component
-public class RepositoryDecoratorFactoryRegistrar
+public class SystemRepositoryDecoratorFactoryRegistrar
 {
-	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
+	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 
 	@Autowired
-	public RepositoryDecoratorFactoryRegistrar(RepositoryDecoratorRegistry repositoryDecoratorRegistry)
+	public SystemRepositoryDecoratorFactoryRegistrar(SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 	}
@@ -23,8 +23,8 @@ public class RepositoryDecoratorFactoryRegistrar
 	public void register(ContextRefreshedEvent event)
 	{
 		ApplicationContext ctx = event.getApplicationContext();
-		Map<String, StaticEntityRepositoryDecoratorFactory> repositoryDecoratorFactoryMap = ctx
-				.getBeansOfType(StaticEntityRepositoryDecoratorFactory.class);
+		Map<String, SystemRepositoryDecoratorFactory> repositoryDecoratorFactoryMap = ctx
+				.getBeansOfType(SystemRepositoryDecoratorFactory.class);
 		repositoryDecoratorFactoryMap.values().forEach(
 				(repositoryDecoratorFactory) -> repositoryDecoratorRegistry.addFactory(repositoryDecoratorFactory));
 	}

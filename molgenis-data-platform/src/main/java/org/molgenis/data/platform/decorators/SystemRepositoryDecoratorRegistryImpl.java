@@ -1,18 +1,21 @@
 package org.molgenis.data.platform.decorators;
 
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.SystemRepositoryDecoratorFactory;
+import org.molgenis.data.SystemRepositoryDecoratorRegistry;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class RepositoryDecoratorRegistryImpl implements RepositoryDecoratorRegistry
+public class SystemRepositoryDecoratorRegistryImpl implements SystemRepositoryDecoratorRegistry
 {
-	private final Map<String, StaticEntityRepositoryDecoratorFactory> factories = new HashMap<>();
+	private final Map<String, SystemRepositoryDecoratorFactory> factories = new HashMap<>();
 
 	@Override
-	public synchronized void addFactory(StaticEntityRepositoryDecoratorFactory factory)
+	public synchronized void addFactory(SystemRepositoryDecoratorFactory factory)
 	{
 		String factoryId = factory.getEntityType().getId();
 		factories.put(factoryId, factory);
@@ -22,7 +25,7 @@ public class RepositoryDecoratorRegistryImpl implements RepositoryDecoratorRegis
 	public synchronized Repository<Entity> decorate(Repository<Entity> repository)
 	{
 		String factoryId = repository.getEntityType().getId();
-		EntityTypeRepositoryDecoratorFactory factory = factories.get(factoryId);
+		SystemRepositoryDecoratorFactory factory = factories.get(factoryId);
 		if (factory != null)
 		{
 			return factory.createDecoratedRepository(repository);

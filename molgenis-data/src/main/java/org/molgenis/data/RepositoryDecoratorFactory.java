@@ -3,7 +3,7 @@ package org.molgenis.data;
 /**
  * Repository decorator factory that creates decorated {@link Repository repositories}.
  *
- * @see EntityTypeRepositoryDecoratorFactory
+ * @see SystemRepositoryDecoratorFactory
  */
 public interface RepositoryDecoratorFactory
 {

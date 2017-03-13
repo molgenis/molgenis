@@ -1,7 +1,7 @@
 package org.molgenis.file;
 
+import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
-import org.molgenis.data.StaticEntityRepositoryDecoratorFactory;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class FileMetaRepositoryDecoratorFactory
-		extends StaticEntityRepositoryDecoratorFactory<FileMeta, FileMetaMetaData>
+		extends AbstractSystemRepositoryDecoratorFactory<FileMeta, FileMetaMetaData>
 {
 	private final FileStore fileStore;
 

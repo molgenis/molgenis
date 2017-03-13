@@ -593,9 +593,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
+		public SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry()
 		{
-			return mock(RepositoryDecoratorRegistry.class);
+			return mock(SystemRepositoryDecoratorRegistry.class);
 		}
 
 		@Bean

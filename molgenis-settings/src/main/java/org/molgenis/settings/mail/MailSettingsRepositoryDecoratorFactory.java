@@ -1,7 +1,7 @@
 package org.molgenis.settings.mail;
 
+import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
-import org.molgenis.data.StaticEntityRepositoryDecoratorFactory;
 import org.molgenis.util.mail.MailSenderFactory;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class MailSettingsRepositoryDecoratorFactory
-		extends StaticEntityRepositoryDecoratorFactory<MailSettingsImpl, MailSettingsImpl.Meta>
+		extends AbstractSystemRepositoryDecoratorFactory<MailSettingsImpl, MailSettingsImpl.Meta>
 {
 	private final MailSenderFactory mailSenderFactory;
 

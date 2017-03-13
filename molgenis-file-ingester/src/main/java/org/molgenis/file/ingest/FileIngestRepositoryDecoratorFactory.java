@@ -1,8 +1,8 @@
 package org.molgenis.file.ingest;
 
+import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.StaticEntityRepositoryDecoratorFactory;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class FileIngestRepositoryDecoratorFactory
-		extends StaticEntityRepositoryDecoratorFactory<FileIngest, FileIngestMetaData>
+		extends AbstractSystemRepositoryDecoratorFactory<FileIngest, FileIngestMetaData>
 {
 	private final FileIngesterJobScheduler fileIngesterJobScheduler;
 	private final DataService dataService;

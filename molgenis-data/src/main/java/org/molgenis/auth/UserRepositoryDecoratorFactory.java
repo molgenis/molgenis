@@ -1,15 +1,15 @@
 package org.molgenis.auth;
 
+import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.StaticEntityRepositoryDecoratorFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 
 @Component
-public class UserRepositoryDecoratorFactory extends StaticEntityRepositoryDecoratorFactory<User, UserMetaData>
+public class UserRepositoryDecoratorFactory extends AbstractSystemRepositoryDecoratorFactory<User, UserMetaData>
 {
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final DataService dataService;

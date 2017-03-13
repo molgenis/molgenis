@@ -11,16 +11,17 @@ import static java.util.Objects.requireNonNull;
  * @param <E>
  * @param <M>
  */
-public abstract class StaticEntityRepositoryDecoratorFactory<E extends StaticEntity, M extends SystemEntityType>
-		implements EntityTypeRepositoryDecoratorFactory<E>
+public abstract class AbstractSystemRepositoryDecoratorFactory<E extends StaticEntity, M extends SystemEntityType>
+		implements SystemRepositoryDecoratorFactory<E, M>
 {
 	private final M entityType;
 
-	public StaticEntityRepositoryDecoratorFactory(M entityType)
+	public AbstractSystemRepositoryDecoratorFactory(M entityType)
 	{
 		this.entityType = requireNonNull(entityType);
 	}
 
+	@Override
 	public M getEntityType()
 	{
 		return entityType;

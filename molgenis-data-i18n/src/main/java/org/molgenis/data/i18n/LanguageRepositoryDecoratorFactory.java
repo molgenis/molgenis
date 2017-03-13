@@ -1,7 +1,7 @@
 package org.molgenis.data.i18n;
 
+import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
-import org.molgenis.data.StaticEntityRepositoryDecoratorFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class LanguageRepositoryDecoratorFactory
-		extends StaticEntityRepositoryDecoratorFactory<Language, LanguageMetadata>
+		extends AbstractSystemRepositoryDecoratorFactory<Language, LanguageMetadata>
 {
 	private final LanguageService languageService;
 

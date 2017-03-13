@@ -49,7 +49,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final AppSettings appSettings;
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
-	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
+	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final SearchService searchService;
@@ -72,7 +72,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
 			AppSettings appSettings, DataService dataService, ExpressionValidator expressionValidator,
-			RepositoryDecoratorRegistry repositoryDecoratorRegistry, SystemEntityTypeRegistry systemEntityTypeRegistry,
+			SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry,
+			SystemEntityTypeRegistry systemEntityTypeRegistry,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService, L1Cache l1Cache,
 			L2Cache l2Cache, TransactionInformation transactionInformation,
 			EntityListenersService entityListenersService, MolgenisPermissionService permissionService,
