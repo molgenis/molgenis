@@ -12,6 +12,7 @@
     - [Customize](documentation/guide-customize.md)
     - [Scripts](documentation/guide-scripts.md)
     - [SORTA](documentation/guide-SORTA.md)
+    - [Appstore](documentation/guide-appstore.md)
   - Script Tools
     - [REST](documentation/guide-rest.md)
     - [FAIR](documentation/guide-fair.md)
