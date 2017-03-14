@@ -24,7 +24,7 @@ We are happy to reuse as much as we can from high-quality existing open source s
 * [Higcharts](http://www.highcharts.com/) - for graphs (can be used not-for profit only)
 
 # Backend
-* [MySQL](https://www.mysql.com/) - our work-horse for simple database storage
+* [PostGreSQL](https://www.postgresql.org/) - our work-horse for simple database storage
 * [ElasticSearch](https://www.elastic.co/products/elasticsearch) - for smart indexing and search
 * [OWL api](http://owlapi.sourceforge.net/) - for semantic data imports
 * [Open CSV](http://opencsv.sourceforge.net/) - for reading tab/csv delimited files

@@ -6,27 +6,11 @@ This document explains how to get the code, install the necessary software and c
 
 install java8 JDK (not JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-install eclipse (we used Luna) from https://www.eclipse.org/downloads/
-(or use [IntelliJ](./intellij.html))
+install [IntelliJ](./intellij.html))
 
-MOLGENIS v1.21.5 or lower: [install MySQL](https://www.mysql.com/downloads/) (we used 5.6.23 DMG)
-MOLGENIS v2.0 or higher: [install PostGreSQL](https://www.postgresql.org/download/)
+[install PostGreSQL](https://www.postgresql.org/download/)
 
 install git from http://git-scm.com/download/
-
-# Configure mysql
-
-open terminal and start mysql client (command differs in Windows, Linux, Mac): 
-
-    /usr/local/mysql/bin/mysql -u root
-    
-Note, if not running you can start the MySQL server from the System Preferences
-
-in mysql client create database and permissions via command:
-
-    create database omx;
-    grant all privileges on omx.* to molgenis@localhost identified by 'molgenis';
-    flush privileges;
 
 # Configure postgresql
 If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostGreSQL server running, open up the included pgAdmin application that is supplied with most PostGreSQL installations, and perform the following actions:
@@ -36,27 +20,6 @@ If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installat
 - Add 'can create databases' privilege to user 'molgenis'
 
 Now that your database server and properties file have been configured. 
-
-# Configure Eclipse
-
-start Eclipse
-
-when asked, create fresh workspace folder (not same folder as git!)
-
-go to 'Help' -> 'Eclipse market place'
-
-find and install plugins:
-* 'JBoss Tools', during install only select Freemarker IDE
-* 'TestNG for Eclipse'
-* 'm2e-apt'
-
-Restart (if you didn't do that already)
-
-go to 'Eclipse' -> 'Preferences' 
-* 'installed JREs' and select 'java 8'
-* 'Maven' -> 'Annotation Processing' and select 'Automatically Configure JDT APT'
-
-Restart
 
 # Get the code
 
@@ -88,16 +51,7 @@ Create the file ~/.molgenis/omx/molgenis-server.properties
 
     nano ~/.molgenis/omx/molgenis-server.properties
     
-... and add user and database properties to this file when using MOLGENIS 1.21.5 or lower:
-
-```
-	db_user=molgenis  
-	db_password=molgenis  
-	db_uri=jdbc:mysql://localhost/molgenis  
-	admin.password=admin  
-	user.password=admin  
-```
-... or add user and database properties to this file when using MOLGENIS 2.0 or higher:
+... and add user and database properties to this file:
 
 ```
 	db_user=molgenis  
@@ -112,35 +66,9 @@ should be in your home folder, if the file is not there yet, just create it.
 
 # Start MOLGENIS
 
-In eclipse, if still open, close the 'Welcome' screen.
+In IntelliJ 
 
-Choose 'File' -> 'Import' -> 'Import existing Maven projects'
-
-Browse to your /git/molgenis directory 
-
-Select it, you will then be prompted to install some maven connectors, accept these 
-(else MOLGENIS will not build properly in eclipse)
-
-Right mouse 'molgenis' -> Run as -> Maven build ... 
-	In Goals type: clean install. 
-	Under Goals check Update Snapshots and Resolve Workspace artifacts. 
-	In the JRE tab, add the VM arguments: 
-	```
-	-Xmx2g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost
-	```
-	Click run
-
-Right mouse 'molgenis-app' -> Run as -> Maven build ... 
-	in goals type 'jetty:run' 
-	In the JRE tab, add the VM arguments:
-    ```
-    -Xmx2g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost
-    ```
-	Click run
-
-Open your browser at http://localhost:8080/
-
-You should see the application. Login as 'admin', 'admin' to be able to upload and view data, create users, etc etc.
+TODO...
 
 # Update your code
 
@@ -161,10 +89,6 @@ And push back any merges or commits of your own to your online fork.
 See also the [MOLGENIS Security settings](./security)
 
 # Troubleshooting
-
-## When I build I get maven build error 'env not available'. 
-
-Solution: start Eclipse from commandline.
 
 ## When I try to start an application, the console tells me 'Address already in use'!
 

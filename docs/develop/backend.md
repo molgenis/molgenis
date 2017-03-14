@@ -1,8 +1,8 @@
 **
-MOLGENIS has a data api behind which there is great flexibility in the data backends. Currently we mostly use MySQL and ElasticSearch. This section describes how you can create a new back-end, e.g a NoSQL store or a file reader/writer
+MOLGENIS has a data api behind which there is great flexibility in the data backends. We use PostGreSQL and ElasticSearch. This section describes how you can create a new back-end, e.g a NoSQL store or a file reader/writer
 **
 
-The best way to learn how backends are created are to first studie the core interfaces and then use one of the existing backends as template.
+The best way to learn how backends are created are to first study the core interfaces and then use one of the existing backends as template.
 
 # Core interfaces
 
@@ -18,7 +18,7 @@ MOLGENIS currently has the following 'data' interfaces
 
 MOLGENIS currently has the following backend implementations:
 
-* [MySQL](https://github.com/molgenis/molgenis/tree/master/molgenis-data-mysql/src/main/java/org/molgenis/data/mysql)
+* [PostGreSQL](https://github.com/molgenis/molgenis/tree/master/molgenis-data-postgresql/src/main/java/org/molgenis/data/postgresql)
 * [Elastic Search](https://github.com/molgenis/molgenis/tree/master/molgenis-data-elasticsearch/src/main/java/org/molgenis/data/elasticsearch)
 * [Microsoft Excel](https://github.com/molgenis/molgenis/tree/master/molgenis-data-excel/src/main/java/org/molgenis/data/excel)
 * [Comma Seperated Values](https://github.com/molgenis/molgenis/tree/master/molgenis-data-csv/src/main/java/org/molgenis/data/csv) 

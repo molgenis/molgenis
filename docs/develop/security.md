@@ -20,7 +20,7 @@ running from your IDE tomcat or when running integration tests in maven:
 If your firewall settings are based on the executables you run, instead
 on ports you open/close:
 
-Disallow java, and postgres (molgenis 2.x) / mysql (molgenis 1.x) 
+Disallow java, and postgres
 to open incoming connections in your firewall.
 
 ### macbook
@@ -31,5 +31,4 @@ On macbook, you can do this as follows
   * Firewall -> turn it on, go to Firewall options
     * Java processes, all of them -> Block incoming connections
     * postgres -> Block incoming connections
-    * mysql -> Block incoming connections
     * Automatically allow signed software to receive incoming connections -> uncheck

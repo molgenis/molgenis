@@ -3,7 +3,7 @@ EMX (entity model extensible) is a flexible spreadsheet format to easily upload 
 **
 
 # Minimal example 
-([download](/data/simple_data_example_v20160915.xlsx))
+([download](../data/simple_data_example_v20160915.xlsx))
 
 For example, if you want to upload an Excel with sheet 'patients':
 
@@ -28,7 +28,7 @@ Then you must provide a model of your 'patients' via Excel with sheet named 'att
 You can first upload the 'model' and then the 'data'. Or you can put the both into one file and upload in one go. What you prefer :-) [todo: provide example files for download]
 
 # Advanced example 
-([download](/data/advanced_data_example_v20151104.xlsx))
+([download](../data/advanced_data_example_v20151104.xlsx))
 
 Lets assume we want to upload multiple data sheets, with relations between them:
 
@@ -104,7 +104,7 @@ For all technical names in the EMX format, the following rules apply:
 - No special characters, except for; '_' and '#', only letters, numbers are allowed.
 - No names starting with digits. 
 - Maximum length for names is 30 chars.
-- Keywords used by programming languages (e.g. java, javascript, mysql) are not allowed.
+- Keywords used by programming languages (e.g. java, javascript, postgresql) are not allowed.
 
 These rules only apply to the technical names, labels are not limited by these rules.
 
@@ -255,7 +255,7 @@ free text description of the entity
 description for specified language (can be multiple languages, example: description-nl)
 
 ### backend
-the backend (database) to store the entities in (currently MySQL or ElasticSearch)
+the backend (database) to store the entities in (currently PostGreSQL or ElasticSearch)
 
 ### tags 
 ability to tag the data referring to the tags sections, described below

@@ -10,27 +10,12 @@ Before you start, make sure the following middleware is installed on your system
 * Java 8 JDK (latest version available from Oracle)
 * Maven >= 3.1.0 (The built-in maven version of IntelliJ is too old to compile molgenis.)
 * Apache Tomcat 7 or 8
-For MOlGENIS 1.x:
-* MySQL server.
-* MySQL JDBC driver. Put it in the lib/ext dir of your Tomcat installation.
-For MOLGENIS 2.x:
 * PostGreSQL server. ([How to set up])
 
 ## Molgenis settings
 You'll need a molgenis-server.properties file. In your home dir, create a folder
 `.molgenis`. In it create a folder called `omx`.
 Put a file in there called `molgenis-server.properties` and fill it with this information:
-**MOLGENIS v1.21.5 or lower**
-
-```
-	db_user=molgenis  
-	db_password=molgenis  
-	db_uri=jdbc:mysql://localhost/molgenis  
-	admin.password=admin  
-	user.password=admin  
-```
-
-**MOLGENIS v2.0 or higher**
 
 ```
 	db_user=molgenis  
@@ -98,12 +83,14 @@ A browser reload should display the changes.
 See also the [MOLGENIS Security settings](./security)
 
 ## Webpack watch run configuration
-(TODO: I just noticed that IntelliJ has webpack support so I suspect there's a better way to do this.)
+* Open molgenis-core-ui/target/classes/js.
+* Right-click the dist folder, Mark directory as..., cancel exclusion.
 * Open molgenis-core-ui/package.json
 * Select the scripts / watch key in the json configuration
 * Right-click it and select the NPM `create watch` option from the menu.
 * SaveIn the tool bar, select the npm `watch` configuration and press the play button to start webpack watch.
 
-Somehow, getting your javascript/webpack changes to show in the browser requires tabbing from IntelliJ to the browser
-and back again twice. But then it works!
-Let us know if you find out how to improve this.
+Now, whenever you make changes to one or more JavaScript files, the corresponding js bundle file will get rebuilt by
+the npm watch task. Once it's built, tab out of IntelliJ to trigger a refresh of the exploded war.
+As soon as IntelliJ loses focus, you'll see a task progress bar in the bottom right corner of IntelliJ.
+Wait for that task to finish and then refresh the browser. The changes will be loaded.

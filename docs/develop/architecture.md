@@ -8,7 +8,7 @@ MOLGENIS follows a commonly used three layer architecture:
 
 * Frontend runs in the web browser using HTML + CSS + javascript pages, mostly interactive using AJAX
 * Middleware runs on a web server using Java + Tomcat. 
-* Backend runs runs either embedded in the web server (e.g. elasticsearch) or is a seperate backend service (e.g. mysql)
+* Backend runs runs either embedded in the web server (e.g. elasticsearch) or is a seperate backend service (e.g. postgresql)
 
 The figure below summarizes this architecture.
 

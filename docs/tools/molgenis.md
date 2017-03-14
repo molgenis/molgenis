@@ -1,7 +1,7 @@
 # MOLGENIS/data
 
 **
-Here you will learn, step-by-step, what MOLGENIS/data is, how to install it, and first glance on the options it offers you to manage and explore your data.
+Here you will learn, step-by-step, what MOLGENIS is, how to install it, and first glance on the options it offers you to manage and explore your data.
 **
 
 ## Using our demo server

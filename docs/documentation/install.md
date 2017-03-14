@@ -6,8 +6,7 @@ You can download, install and use MOLGENIS for free under license [LGPLv3](). We
 The three components needed to run MOLGENIS locally or on a server are:
 
 * [apache-tomcat, v7 (latest release)](http://tomcat.apache.org/)
-* MOLGENIS v1.21.5 or lower: [MySQL, v5.1](https://www.mysql.com/downloads/)
-* MOLGENIS v2.0 or higher: [PostGreSQL, v9.6](https://www.postgresql.org/download/)
+* [PostGreSQL, v9.6](https://www.postgresql.org/download/)
 * The WAR for the [latest molgenis-app release](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) from maven central.
 * [Java, v8 (latest release)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
@@ -26,18 +25,6 @@ The **-Dmolgenis.home** property tells tomcat where to find your properties file
 
 Inside the specified molgenis home folder, create a file called *molgenis-server.properties*, and depending on the version of your MOLGENIS, write the following:
 
-**MOLGENIS v1.21.5 or lower**
-
-```
-	db_user=molgenis  
-	db_password=molgenis  
-	db_uri=jdbc:mysql://localhost/molgenis  
-	admin.password=admin  
-	user.password=admin  
-```
-
-**MOLGENIS v2.0 or higher**
-
 ```
 	db_user=molgenis  
 	db_password=molgenis  
@@ -47,24 +34,7 @@ Inside the specified molgenis home folder, create a file called *molgenis-server
 ```
 
 
-Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in either MySQL or PostGreSQL. This effectively means that whatever you call your database, your db_uri should point to it.
-
-
-**Setting up your MySQL**  
-If you are unfamiliar with MySQL, follow one of their [MySQL installation guides](http://dev.mysql.com/doc/refman/5.7/en/windows-installation.html). Once you have a MySQL server running, login as admin user and type the following commands:
-
-```
-	create database molgenis;  
-	grant all privileges on molgenis.* to molgenis@localhost identified by 'molgenis';  
-	flush privileges;  
-```
-
-To allow MOLGENIS to connect to MySQL, you also need to add a MySQL connector to your apache-tomcat lib folder.
-
-```
-cd ${apache-tomcat_folder}/lib/
-wget http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.28/mysql-connector-java-5.1.28.jar
-```
+Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostGreSQL. This effectively means that whatever you call your database, your db_uri should point to it.
 
 **Setting up your PostGreSQL**  
 If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostGreSQL server running, open up the included pgAdmin application that is supplied with most PostGreSQL installations, and perform the following actions:
@@ -87,16 +57,12 @@ The fastest and easiest way to get MOLGENIS running on a machine, is using our c
 
 [Download](https://github.com/molgenis/molgenis-cargo) the entire project from GitHub.
 
-**Setting up your MySQL**  
-If you are unfamiliar with MySQL, follow one of their [MySQL installation guides](http://dev.mysql.com/doc/refman/5.7/en/windows-installation.html). Once you have a MySQL server running, login as admin user and type the following commands:
+*Setting up your PostGreSQL**  
+If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostGreSQL server running, open up the included pgAdmin application that is supplied with most PostGreSQL installations, and perform the following actions:
 
-```sql
-	create database omx;
-	grant all privileges on omx.* to molgenis@localhost identified by 'molgenis';
-	flush privileges;
-```
-
-If your MySQL has been configured correctly, and your molgenis-server.properties set, then you have to navigate to the location of the cargo and start MOLGENIS with the following command:
+- Add a database 'molgenis'
+- Add a user 'molgenis' (password 'molgenis') under Login Roles
+- Add 'can create databases' privilege to user 'molgenis'
 
 ```bash
 mvn clean resources:resources org.codehaus.cargo:cargo-maven2-plugin:run

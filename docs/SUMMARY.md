@@ -2,12 +2,10 @@
 
 - [Release Notes](https://github.com/molgenis/molgenis/releases)
 - Tools
-  - [MOLGENIS Data](tools/data.md)
-  - [MOLGENIS Compute](tools/compute.md)
-  - [CoNVaDING](tools/CoNVaDING.md)
+  - [MOLGENIS Data](tools/molgenis.md)
 - Documentation
   - MOLGENIS
-    - [Getting Started](documentation/data-start.md)
+    - [Getting Started](documentation/molgenis-start.md)
     - [Upload](documentation/guide-upload.md)
     - [Explore](documentation/guide-explore.md)
     - [Admin](documentation/guide-admin.md)
@@ -25,6 +23,7 @@
     - [EMX format](documentation/ref-emx.md)
     - [REST api V1](documentation/ref-rest.md)
     - [REST api V2](documentation/ref-rest2.md)
+    - [Swagger specification](documentation/ref-swagger.md)
     - [R api](documentation/ref-R.md)
     - [Install](documentation/install.md)
 - Develop
@@ -39,7 +38,3 @@
   - [Services](develop/service.md)
   - [Migrations](develop/migrations.md)
   - [Jobs](develop/jobs.md)
-- Support
-  - [Organisation](support/organisation.md)
-  - [The Team](support/team.md)
-  - [Third party software](support/third.md)
