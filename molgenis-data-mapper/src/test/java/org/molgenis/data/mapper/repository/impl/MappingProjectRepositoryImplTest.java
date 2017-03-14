@@ -3,10 +3,8 @@ package org.molgenis.data.mapper.repository.impl;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
+import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
@@ -19,11 +17,10 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.UserService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -203,17 +200,14 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@Import(MapperTestConfig.class)
 	public static class Config
 	{
 		@Autowired
-		private MappingProjectMetaData mappingProjectMeta;
+		private DataService dataService;
 
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
+		@Autowired
+		private MappingProjectMetaData mappingProjectMeta;
 
 		@Bean
 		public MappingTargetRepository mappingTargetRepository()
@@ -236,7 +230,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public MappingProjectRepositoryImpl mappingProjectRepositoryImpl()
 		{
-			return new MappingProjectRepositoryImpl(dataService(), mappingTargetRepository(), molgenisUserService(),
+			return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), molgenisUserService(),
 					idGenerator(), mappingProjectMeta);
 		}
 

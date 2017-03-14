@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
@@ -16,6 +15,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -47,7 +47,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-public class EntityTypeRepositoryDecoratorTest
+public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private final String entityName1 = "EntityType1";
 	private final String entityName2 = "EntityType2";
@@ -80,7 +80,6 @@ public class EntityTypeRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(entityType1.getFullyQualifiedName()).thenReturn(entityName1);
 		when(entityType2.getFullyQualifiedName()).thenReturn(entityName2);

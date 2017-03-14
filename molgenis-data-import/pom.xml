@@ -27,6 +27,13 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>

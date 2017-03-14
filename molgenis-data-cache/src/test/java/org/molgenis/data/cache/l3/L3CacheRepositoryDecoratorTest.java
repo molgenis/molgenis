@@ -11,12 +11,10 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,7 +26,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.meta.AttributeType.INT;
@@ -75,11 +72,9 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Mock
 	private Fetch fetch;
 
-	@BeforeClass
-	public void beforeClass()
+	@BeforeMethod
+	public void beforeMethod()
 	{
-		initMocks(this);
-
 		entityType = entityTypeFactory.create(repositoryName).setName(repositoryName);
 		entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
@@ -101,17 +96,11 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
 		l3CacheRepositoryDecorator = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache,
 				transactionInformation);
-
+		verify(decoratedRepository).getCapabilities();
 		query = new QueryImpl<>().eq(COUNTRY, "GB");
 		query.pageSize(10);
 		query.sort(new Sort().on(COUNTRY));
 		query.setFetch(fetch);
-	}
-
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		reset(l3Cache, transactionInformation, decoratedRepository);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		when(decoratedRepository.getName()).thenReturn(repositoryName);
 	}

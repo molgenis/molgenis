@@ -4,19 +4,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
+import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.UserService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
@@ -97,7 +93,6 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod() throws Exception
 	{
-		initMocks(this);
 		config.resetMocks();
 	}
 
@@ -140,15 +135,10 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		assertTrue(ago < MINUTES.toMillis(5) + SECONDS.toMillis(3));
 	}
 
-	@ComponentScan(basePackages = {
-			"org.molgenis.data.elasticsearch.index.job, org.molgenis.data.jobs.model, org.molgenis.auth" })
 	@Configuration
-	@Import({ IndexConfig.class })
+	@Import({ IndexConfig.class, IndexActionRegisterServiceImpl.class })
 	public static class Config
 	{
-		@Mock
-		private DataService dataService;
-
 		@Mock
 		private IndexJobFactory indexJobFactory;
 
@@ -168,13 +158,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 
 		private void resetMocks()
 		{
-			Mockito.reset(dataService, indexJobFactory, executorService, mailSender);
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return dataService;
+			Mockito.reset(indexJobFactory, executorService, mailSender);
 		}
 
 		@Bean

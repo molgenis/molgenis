@@ -1,7 +1,10 @@
 package org.molgenis.data.index;
 
 import com.google.common.collect.Lists;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
@@ -13,6 +16,7 @@ import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -29,7 +33,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.testng.Assert.*;
 
-public class IndexActionRegisterServiceTest
+public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 {
 	@InjectMocks
 	private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl();
@@ -49,7 +53,6 @@ public class IndexActionRegisterServiceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		TransactionSynchronizationManager.bindResource(MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
 	}
 

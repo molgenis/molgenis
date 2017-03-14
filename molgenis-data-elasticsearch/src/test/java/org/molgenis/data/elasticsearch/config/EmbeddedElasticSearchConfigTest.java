@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.config;
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -43,7 +44,8 @@ public class EmbeddedElasticSearchConfigTest
 		molgenisHomeDir.deleteOnExit();
 
 		System.setProperty("molgenis.home", molgenisHomeDir.getAbsolutePath());
-		context = new AnnotationConfigApplicationContext(DataServiceImpl.class, EmbeddedElasticSearchConfig.class,
+		context = new AnnotationConfigApplicationContext(MetadataTestConfig.class, DataServiceImpl.class,
+				EmbeddedElasticSearchConfig.class,
 				ElasticsearchEntityFactory.class, Config.class);
 	}
 

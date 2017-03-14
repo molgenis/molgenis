@@ -2,9 +2,11 @@ package org.molgenis.data.annotation.core.resources.impl;
 
 import com.google.common.collect.Lists;
 import org.mockito.Mockito;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.config.EffectsTestConfig;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.meta.model.Attribute;
@@ -13,11 +15,11 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -145,7 +147,7 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.annotation.core.effects" })
+	@Import({ VcfTestConfig.class, EffectsTestConfig.class })
 	public static class Config
 	{
 		@Bean
@@ -154,12 +156,6 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 			Resource result = mock(Resource.class);
 			when(result.getName()).thenReturn("resourceName");
 			return result;
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
 		}
 
 		@Bean

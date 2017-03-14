@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
+import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -17,17 +18,14 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -42,7 +40,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -99,12 +96,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private EntityType geneMetaData;
 
 	private Package package_;
-
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -543,16 +534,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.data.index.meta",
-			"org.molgenis.data.populate" })
+	@Import(UserTestConfig.class)
 	static class Config
 	{
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
-
 		@Bean
 		public AlgorithmService algorithmService()
 		{
@@ -581,12 +565,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		public PermissionSystemService permissionSystemService()
 		{
 			return mock(PermissionSystemService.class);
-		}
-
-		@Bean
-		public AttributeFactory attributeFactory()
-		{
-			return new AttributeFactory(mock(EntityPopulator.class));
 		}
 	}
 }

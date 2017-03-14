@@ -3,6 +3,7 @@ package org.molgenis.gavin.controller;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.molgenis.auth.User;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
@@ -11,19 +12,19 @@ import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.gavin.config.GavinTestConfig;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionMetaData;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -189,7 +190,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.gavin.job.meta", "org.molgenis.data.jobs.model" })
+	@Import(GavinTestConfig.class)
 	public static class Config
 	{
 		@Bean

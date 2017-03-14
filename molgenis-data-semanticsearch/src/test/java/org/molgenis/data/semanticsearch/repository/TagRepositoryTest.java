@@ -1,5 +1,6 @@
 package org.molgenis.data.semanticsearch.repository;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
@@ -7,7 +8,6 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

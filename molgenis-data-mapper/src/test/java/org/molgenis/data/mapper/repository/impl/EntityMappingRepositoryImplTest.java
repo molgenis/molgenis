@@ -1,9 +1,11 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import com.google.common.collect.Lists;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -22,12 +24,11 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
@@ -143,7 +144,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@Import(MapperTestConfig.class)
 	public static class Config
 	{
 		@Autowired

@@ -6,7 +6,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
-import org.testng.annotations.BeforeClass;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -17,11 +17,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.util.ResourceUtils.getFile;
 import static org.testng.Assert.assertEquals;
 
-public class AppRepositoryDecoratorTest
+public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private static final String APP_NAME = "appName";
 
@@ -33,16 +32,9 @@ public class AppRepositoryDecoratorTest
 
 	private AppRepositoryDecorator appRepositoryDecorator;
 
-	@BeforeClass
-	public void setUpBeforeClass()
-	{
-		initMocks(this);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(appRepository, fileStore);
 		appRepositoryDecorator = new AppRepositoryDecorator(appRepository, fileStore);
 	}
 

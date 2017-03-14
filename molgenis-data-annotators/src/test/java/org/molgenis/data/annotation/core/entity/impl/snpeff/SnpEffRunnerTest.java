@@ -1,9 +1,10 @@
 package org.molgenis.data.annotation.core.entity.impl.snpeff;
 
 import com.google.common.collect.Iterators;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.config.EffectsTestConfig;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
@@ -11,16 +12,17 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
@@ -70,12 +72,11 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	private final List<Entity> expectedMultiGeneEffectEntities = newArrayList();
 
 	private final ArrayList<Entity> entities = new ArrayList<>();
-	;
+
 	private EntityType metaDataCanAnnotate;
 
 	private EntityType effectsEMD;
 
-	@InjectMocks
 	private SnpEffRunner snpEffRunner;
 
 	@Mock
@@ -85,15 +86,8 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	private Entity snpEffAnnotatorSettings;
 
 	@BeforeClass
-	public void beforeMethod() throws IOException
+	public void setUpBeforeClass()
 	{
-		jarRunner = mock(JarRunnerImpl.class);
-
-		IdGenerator idGenerator = new IdGeneratorImpl();
-
-		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
-				entityTypeFactory, attributeFactory);
-
 		metaDataCanAnnotate = entityTypeFactory.create().setName("test").setName("test");
 		Attribute attributeChrom = vcfAttributes.getChromAttribute();
 		Attribute attributePos = vcfAttributes.getPosAttribute();
@@ -739,6 +733,17 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 				.addAll(newArrayList(expectedMultiGene1, expectedMultiGene2, expectedMultiGene3, expectedMultiGene4));
 	}
 
+	@BeforeMethod
+	public void beforeMethod() throws IOException
+	{
+		jarRunner = mock(JarRunnerImpl.class);
+
+		IdGenerator idGenerator = new IdGeneratorImpl();
+
+		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
+				entityTypeFactory, attributeFactory);
+	}
+
 	@Test
 	public void annotateCountTest()
 	{
@@ -908,7 +913,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.annotation.core.effects" })
+	@Import({ VcfTestConfig.class, EffectsTestConfig.class })
 	public static class Config
 	{
 	}

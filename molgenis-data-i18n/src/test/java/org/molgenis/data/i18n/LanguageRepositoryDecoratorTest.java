@@ -2,8 +2,8 @@ package org.molgenis.data.i18n;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.config.I18nTestConfig;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
@@ -13,10 +13,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -70,7 +69,6 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(dataService.getEntityType(ENTITY_TYPE_META_DATA)).thenReturn(entityTypeMeta);
@@ -217,7 +215,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.i18n.model" })
+	@Import(I18nTestConfig.class)
 	public static class Config
 	{
 

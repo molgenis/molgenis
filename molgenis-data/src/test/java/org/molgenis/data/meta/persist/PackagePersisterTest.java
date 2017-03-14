@@ -5,7 +5,7 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Package;
-import org.testng.annotations.BeforeClass;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -16,29 +16,21 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.model.PackageMetadata.NAME;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.testng.Assert.assertEquals;
 
-public class PackagePersisterTest
+public class PackagePersisterTest extends AbstractMockitoTest
 {
 	@Mock
 	private DataService dataService;
 
 	private PackagePersister packagePersister;
 
-	@BeforeClass
-	public void setUpBeforeClass()
-	{
-		initMocks(this);
-		packagePersister = new PackagePersister(dataService);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(dataService);
+		packagePersister = new PackagePersister(dataService);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)

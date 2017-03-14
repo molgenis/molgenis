@@ -12,14 +12,13 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,7 +26,6 @@ import java.net.URISyntaxException;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.auth.UserMetaData.*;
@@ -36,7 +34,7 @@ import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDO
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 
 @ContextConfiguration
-public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
+public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@Autowired
 	private AccountService accountService;
@@ -56,17 +54,10 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private IdGenerator idGenerator;
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-		when(appSettings.getTitle()).thenReturn("Molgenis title");
-	}
-
 	@BeforeMethod
 	public void setUp()
 	{
-		reset(dataService, idGenerator, mailSender);
+		when(appSettings.getTitle()).thenReturn("Molgenis title");
 		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		Group allUsersGroup = mock(Group.class);

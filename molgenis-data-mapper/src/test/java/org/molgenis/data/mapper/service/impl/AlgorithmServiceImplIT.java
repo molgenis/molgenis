@@ -6,9 +6,11 @@ import com.google.common.collect.Sets;
 import org.mockito.Matchers;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -32,11 +34,10 @@ import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -473,14 +474,11 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@Import(UserTestConfig.class)
 	public static class Config
 	{
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
+		@Autowired
+		private DataService dataService;
 
 		@Bean
 		public SemanticSearchService semanticSearchService()
@@ -546,7 +544,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		@Bean
 		public AlgorithmGeneratorService algorithmGeneratorService()
 		{
-			return new AlgorithmGeneratorServiceImpl(dataService(), unitResolver(), algorithmTemplateService());
+			return new AlgorithmGeneratorServiceImpl(dataService, unitResolver(), algorithmTemplateService());
 		}
 	}
 }

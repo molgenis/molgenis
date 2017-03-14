@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer;
 import com.google.common.collect.ImmutableList;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
@@ -13,6 +12,7 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.controller.AnnotationJob;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-public class AnnotationJobTest
+public class AnnotationJobTest extends AbstractMockitoTest
 {
 	private AnnotationJob annotationJob;
 
@@ -47,7 +47,6 @@ public class AnnotationJobTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		EntityType emd = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("repo").getMock();
 		when(emd.getLabel()).thenReturn("My repo");
 

@@ -1,7 +1,8 @@
 package org.molgenis.data.annotation.core.entity.impl.gavin;
 
-import org.molgenis.data.DataService;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.config.EffectsTestConfig;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
@@ -19,16 +20,16 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.GenericDependencyResolver;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -229,7 +230,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.annotation.core.effects" })
+	@Import({ VcfTestConfig.class, EffectsTestConfig.class })
 	public static class Config
 	{
 		@Bean
@@ -240,12 +241,6 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 					.thenReturn(ResourceUtils.getFile(getClass(), "/gavin/GAVIN_calibrations_r0.1.xlsx").getPath());
 
 			return settings;
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
 		}
 
 		@Bean

@@ -2,7 +2,7 @@ package org.molgenis.data.meta.system;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,14 +31,22 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.testng.Assert.assertEquals;
 
-public class SystemEntityTypePersisterTest
+public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 {
+	@Mock
 	private DataService dataService;
-
+	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	@Mock
+	private EntityTypeDependencyResolver entityTypeDependencyResolver;
+	@Mock
 	private SystemPackageRegistry systemPackageRegistry;
+
 	private SystemEntityTypePersister systemEntityTypePersister;
+
+	@Mock
 	private AttributeMetadata attrMetaMeta;
+	@Mock
 	private MetaDataService metaDataService;
 
 	@Captor
@@ -46,16 +55,9 @@ public class SystemEntityTypePersisterTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
-		attrMetaMeta = mock(AttributeMetadata.class);
-		metaDataService = mock(MetaDataService.class);
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
-		dataService = mock(DataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
-		systemPackageRegistry = mock(SystemPackageRegistry.class);
-		EntityTypeDependencyResolver entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
 				entityTypeDependencyResolver, systemPackageRegistry);
 	}

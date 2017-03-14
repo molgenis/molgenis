@@ -1,21 +1,19 @@
 package org.molgenis.settings.mail;
 
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.mail.MailSenderFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-public class MailSettingsRepositoryDecoratorTest
+public class MailSettingsRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private MailSettingsRepositoryDecorator mailSettingsRepositoryDecorator;
 	@Mock
@@ -25,17 +23,10 @@ public class MailSettingsRepositoryDecoratorTest
 	@Mock
 	private Repository<Entity> decorated;
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-		mailSettingsRepositoryDecorator = new MailSettingsRepositoryDecorator(decorated, mailSenderFactory);
-	}
-
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Mockito.reset(entity, mailSenderFactory, decorated);
+		mailSettingsRepositoryDecorator = new MailSettingsRepositoryDecorator(decorated, mailSenderFactory);
 	}
 
 	@DataProvider(name = "addDontTest")

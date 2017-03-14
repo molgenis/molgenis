@@ -12,12 +12,10 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.LazyEntity;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,7 +28,6 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static junit.framework.Assert.assertNull;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityKey.create;
@@ -40,6 +37,7 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertNull;
 
 @ContextConfiguration(classes = L1CacheRepositoryDecoratorTest.Config.class)
 public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
@@ -64,7 +62,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private AttributeFactory attributeFactory;
 
-	@Mock
+	@Autowired
 	private DataService dataService;
 
 	@Mock
@@ -85,11 +83,9 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Captor
 	private ArgumentCaptor<Stream<EntityKey>> entityKeysCaptor;
 
-	@BeforeClass
-	public void beforeClass()
+	@BeforeMethod
+	public void beforeMethod()
 	{
-		initMocks(this);
-
 		authorMetaData = entityTypeFactory.create(authorEntityName).setName(authorEntityName);
 		bookMetaData = entityTypeFactory.create(bookEntityName).setName(bookEntityName);
 
@@ -119,12 +115,6 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(authorRepository.getEntityType()).thenReturn(authorMetaData);
 
 		l1CacheRepositoryDecorator = new L1CacheRepositoryDecorator(authorRepository, l1Cache);
-	}
-
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		reset(l1Cache);
 	}
 
 	@Test

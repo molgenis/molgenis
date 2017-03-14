@@ -1,18 +1,19 @@
 package org.molgenis.ontology.importer.repository;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.meta.*;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -363,7 +364,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model" })
+	@Import(OntologyTestConfig.class)
 	public static class Config
 	{
 		@Bean

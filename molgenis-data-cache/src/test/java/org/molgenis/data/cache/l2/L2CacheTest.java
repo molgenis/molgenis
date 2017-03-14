@@ -13,8 +13,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
-import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -72,7 +70,6 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		initMocks(this);
 		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
 		emd = entityTestHarness.createDynamicTestEntityType(refEntityType);
 		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 2);
@@ -97,7 +94,6 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		reset(repository, transactionInformation);
 		when(repository.getEntityType()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getFullyQualifiedName());
 
@@ -217,7 +213,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import({ EntityTestHarness.class, EntityHydration.class })
+	@Import({ EntityHydration.class, TestHarnessConfig.class })
 	public static class Config
 	{
 		@Mock
