@@ -1,0 +1,19 @@
+{
+    "User" : {"title":"User","description":"Upload, search and visualize your data"},
+    
+    "login":{"title":"Login", "description":"Registration and sign in"},
+    "upload" : {"title":"Upload", "description":"Batch import of Excel, CSV and other files"},
+    "explorer" : {"title":"Explorer", "description":"View, filter and edit your data"},
+    
+    "admin":{"title":"Admin","description":"How to customize your MOLGENIS","subheading":true},
+    
+    "users":{"title":"Users & Groups","description":"Manage users and groups"},
+    "permissions":{"title":"Permissions", "description":"Give view/edit/create permissions to users and groups"},
+    "menu":{"title":"Menu manager", "description":"Change the menu's, logo and styling"},
+    
+    "showcases":{"title":"Showcases","description":"Ready to use example applications","subheading":true},
+    "biobanking" : {"title":"Biobanking", "description":"Provide access to biobank data and samples"},
+    "research": {"title":"Research", "description":"Share all your consortium data and scripts"},
+    "rd":{"title":"Rare disease","description":"Share information about patients and mutations"},
+    "lorem" : {"title":"Lorem ipsum","description":"This page only exists to enable testing of the layout"}
+}
