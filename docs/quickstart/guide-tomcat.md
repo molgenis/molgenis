@@ -1,9 +1,10 @@
-**
-You can download, install and use MOLGENIS for free under license [LGPLv3](). We here document three approaches: (1) install using apache-tomcat, (2) install using maven cargo or (3) install by compiling the code yourself
-**
+# Deploy MOLGENIS with apache-tomcat
 
-# Using apache-tomcat
 The three components needed to run MOLGENIS locally or on a server are:
+
+**
+You can download, install and use MOLGENIS for free under license [LGPLv3]().
+**
 
 * [apache-tomcat, v7 (latest release)](http://tomcat.apache.org/)
 * [PostGreSQL, v9.6](https://www.postgresql.org/download/)
@@ -33,7 +34,6 @@ Inside the specified molgenis home folder, create a file called *molgenis-server
 	user.password=admin  
 ```
 
-
 Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostGreSQL. This effectively means that whatever you call your database, your db_uri should point to it.
 
 **Setting up your PostGreSQL**  
@@ -49,29 +49,3 @@ If you open up a web browser and navigate to where your apache-tomcat applicatio
 ![](../images//molgenis_home_logged_out.png?raw=true, "molgenis home page")  
 
 Congratulations! You now have your MOLGENIS application up and running. Remember the admin.password you set in the molgenis-server.properties file? Use that password to login as the admin user. The next section will take you through the different modules MOLGENIS has to offer.
-
-# Using maven cargo
-The fastest and easiest way to get MOLGENIS running on a machine, is using our cargo project. This is collection of files that you can use to deploy MOLGENIS for you. There are three steps you need to do before this will work: 
-
-**Download the cargo project**
-
-[Download](https://github.com/molgenis/molgenis-cargo) the entire project from GitHub.
-
-*Setting up your PostGreSQL**  
-If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostGreSQL server running, open up the included pgAdmin application that is supplied with most PostGreSQL installations, and perform the following actions:
-
-- Add a database 'molgenis'
-- Add a user 'molgenis' (password 'molgenis') under Login Roles
-- Add 'can create databases' privilege to user 'molgenis'
-
-```bash
-mvn clean resources:resources org.codehaus.cargo:cargo-maven2-plugin:run
-```
-
-More details are included in the README of the cargo project.
-
-# Compiling the code
-
-You can also compile the code yourself. See the [Development guide](/develop).
-
-

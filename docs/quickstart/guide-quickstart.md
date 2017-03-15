@@ -1,15 +1,11 @@
-# MOLGENIS/data
-
-**
-Here you will learn, step-by-step, what MOLGENIS is, how to install it, and first glance on the options it offers you to manage and explore your data.
-**
+# Quickstart guide
 
 ## Using our demo server
 The first thing you can do is to get some hands-on experience by trying out our [demo server](http://molgenis.org/demo). This server contains several data sets including biobank data and genetic data. If you want to try importing some example files, then the only thing needed from your end is that you create an account. An email will be sent containing your login in credentials.
 But perhaps you want to see how your own data looks like, but not upload it for other people to see, not yet anyway. So let's jump right into that.  
 
 ## Getting your first data in
-So you have a MOLGENIS/data application up and running, and your dataset is sitting nice and cozy on your computer somewhere, now what? We upload the data of course! As mentioned before, MOLGENIS uses an extensible model format allowing you to model your data however you want. This is done via the **EMX** format. Now I know a custom format sounds scary, but if you keep reading for a bit, you will find out it's not scary at all.
+So you have a MOLGENIS application up and running, and your dataset is sitting nice and cozy on your computer somewhere, now what? We upload the data of course! As mentioned before, MOLGENIS uses an extensible model format allowing you to model your data however you want. This is done via the **EMX** format. Now I know a custom format sounds scary, but if you keep reading for a bit, you will find out it's not scary at all.
 
 We wanted researchers to be able to describe their data in a flexible 'meta model'. This sounds really interesting, but what it boils down to, is that you have one separate xlsx sheet that describes your column names, or attributes as we call them. Thats it. Thats all the EMX format is. Keep reading to find a detailed example.
 
@@ -55,20 +51,9 @@ To keep it simple, all you need to do is click the 'select a file' button, selec
 
 Congratulations! You have now deployed MOLGENIS either locally or on a server, and you have made the first steps on getting your data into the MOLGENIS database. Play around a bit with the different data explorer filters to get a feel on how MOLGENIS works.
 
-Of course, simply uploading and showing data is not the only thing you can do with the MOLGENIS software. In the following MOLGENIS step-by-step section, we will take you from being a simple user, and teach you on how to be an expert.
+Of course, simply uploading and showing data is not the only thing you can do with the MOLGENIS software. In the following MOLGENIS step-by-step section, we will take you from being a simple user, and teach you on how to be an expert.    
 
-# What is next?
+## Running your own MOLGENIS
+You can run MOLGENIS on you local machine or on your own linux server.
 
-## Download & install
-
-You can download and install MOLGENIS for free. See [Download & Install guide](../documentation/install)
-
-## Request cloud installation
-
-We host MOLGENIS for our partners. Email m.a.swertz@rug.nl for more information.
-
-## Become a MOLGENIS guru
-
-You can use the [Documentation](../documentation) to become a MOLGENIS guru.
-Or you can see whether you are interested in [MOLGENIS compute](../compute).    
-
+Either you run it in [Maven cargo](./guide-cargo.md), in a local [Tomcat webserver](./guide-tomcat.md), or you [clone the code](./guide-local-compile.md) from GitHub and compile it to start developing

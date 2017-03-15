@@ -1,25 +1,4 @@
-**
-This document explains how to get the code, install the necessary software and compile/run for the first time
-**
-
-# Software needed
-
-install java8 JDK (not JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html
-
-install [IntelliJ](./intellij.html))
-
-[install PostGreSQL](https://www.postgresql.org/download/)
-
-install git from http://git-scm.com/download/
-
-# Configure postgresql
-If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostGreSQL server running, open up the included pgAdmin application that is supplied with most PostGreSQL installations, and perform the following actions:
-
-- Add a database 'molgenis'
-- Add a user 'molgenis' (password 'molgenis') under Login Roles
-- Add 'can create databases' privilege to user 'molgenis'
-
-Now that your database server and properties file have been configured. 
+# Compile MOLGENIS locally
 
 # Get the code
 
@@ -40,6 +19,15 @@ Optionally select stable molgenis version:
     git checkout -b <tag name: see https://github.com/molgenis/molgenis/releases>
 
 More information about forking can be found here: https://help.github.com/articles/fork-a-repo
+
+# Configure postgresql
+If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostGreSQL server running, open up the included pgAdmin application that is supplied with most PostGreSQL installations, and perform the following actions:
+
+- Add a database 'molgenis'
+- Add a user 'molgenis' (password 'molgenis') under Login Roles
+- Add 'can create databases' privilege to user 'molgenis'
+
+Now that your database server and properties file have been configured. 
 
 # Set admin password<a name="server-props"></a>
 
@@ -84,14 +72,3 @@ Perform regular updates so the latest changes are merged with your local clone.
 And push back any merges or commits of your own to your online fork.
 
     git push origin master
-    
-## Security
-See also the [MOLGENIS Security settings](./security)
-
-# Troubleshooting
-
-## When I try to start an application, the console tells me 'Address already in use'!
-
-Run the Maven target 'jetty:stop'. If that does not help, use your operating systems process manager to kill anything running on port 8080. For example:
-
-    kill -9 `lsof -i :8080 -t`
