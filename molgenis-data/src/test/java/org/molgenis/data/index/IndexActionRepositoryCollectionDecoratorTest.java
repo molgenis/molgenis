@@ -34,13 +34,6 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	}
 
 	@Test
-	public void testUpdateRepository()
-	{
-		indexActionRepositoryCollectionDecorator.updateRepository(entityType);
-		verify(decoratedRepositoryCollection).updateRepository(entityType);
-	}
-
-	@Test
 	public void deleteEntityType()
 	{
 		indexActionRepositoryCollectionDecorator.deleteRepository(entityType);
