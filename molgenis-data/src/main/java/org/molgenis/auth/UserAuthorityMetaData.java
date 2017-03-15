@@ -43,9 +43,8 @@ public class UserAuthorityMetaData extends SystemEntityType
 		setPackage(securityPackage);
 
 		setExtends(authorityMetaData);
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true)
-				.setDescription("").setNillable(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true).setNillable(false);
 	}
 
 	@Override

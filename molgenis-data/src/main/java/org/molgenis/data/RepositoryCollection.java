@@ -42,13 +42,6 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	Repository<Entity> createRepository(EntityType entityType);
 
 	/**
-	 * @param entityType updated entity type
-	 * @return the update repository
-	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#WRITABLE}
-	 */
-	Repository<Entity> updateRepository(EntityType entityType);
-
-	/**
 	 * Get ids of all the entities in this source
 	 */
 	Iterable<String> getEntityIds();

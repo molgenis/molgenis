@@ -3,6 +3,7 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.util.AttributeCopier;
 import org.molgenis.data.meta.util.EntityTypeCopier;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.testng.annotations.BeforeMethod;
@@ -18,6 +19,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 	private RepositoryCollection repoCollection;
 	private EntityTypeRegistry entityTypeRegistry;
 	private PostgreSqlRepositoryCollectionDecorator repoCollectionDecorator;
+	private AttributeCopier attributeCopier;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -31,8 +33,9 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 		entityTypeRegistry = mock(EntityTypeRegistry.class);
 		EntityTypeCopier entityTypeCopier = mock(EntityTypeCopier.class);
 		when(entityTypeCopier.copy(entityType)).thenReturn(updatedEntityType);
+		attributeCopier = mock(AttributeCopier.class);
 		repoCollectionDecorator = new PostgreSqlRepositoryCollectionDecorator(repoCollection, entityTypeRegistry,
-				entityTypeCopier);
+				entityTypeCopier, attributeCopier);
 	}
 
 	@Test
@@ -50,14 +53,6 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 	}
 
 	@Test
-	public void testUpdateRepository() throws Exception
-	{
-		repoCollectionDecorator.updateRepository(entityType);
-		verify(repoCollection).updateRepository(entityType);
-		verify(entityTypeRegistry).registerEntityType(entityType);
-	}
-
-	@Test
 	public void testDeleteRepository()
 	{
 		repoCollectionDecorator.deleteRepository(entityType);
@@ -69,8 +64,9 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 	public void testAddAttribute()
 	{
 		Attribute attr = mock(Attribute.class);
-
+		when(attributeCopier.copy(attr)).thenReturn(attr);
 		repoCollectionDecorator.addAttribute(entityType, attr);
+		verify(entityTypeRegistry).registerEntityType(updatedEntityType);
 		verify(repoCollection).addAttribute(entityType, attr);
 	}
 
@@ -82,8 +78,8 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 		Attribute attr = mock(Attribute.class);
 
 		Attribute updatedAttr = mock(Attribute.class);
-
 		repoCollectionDecorator.updateAttribute(entityType, attr, updatedAttr);
+		verify(entityTypeRegistry).registerEntityType(updatedEntityType);
 		verify(repoCollection).updateAttribute(entityType, attr, updatedAttr);
 	}
 
@@ -96,5 +92,6 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 
 		repoCollectionDecorator.deleteAttribute(entityType, attr);
 		verify(repoCollection).deleteAttribute(entityType, attr);
+		verify(entityTypeRegistry).registerEntityType(updatedEntityType);
 	}
 }

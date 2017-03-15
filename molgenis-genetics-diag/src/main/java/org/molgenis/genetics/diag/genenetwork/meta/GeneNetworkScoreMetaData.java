@@ -30,7 +30,7 @@ public class GeneNetworkScoreMetaData extends SystemEntityType
 		setDescription("The gene network score for a combination of a gene and a hpo term");
 
 		addAttribute(ID, ROLE_ID).setUnique(true).setAuto(true).setVisible(false).setDescription("TODO");
-		addAttribute(HPO, ROLE_LABEL, ROLE_LOOKUP).setLabel("HPO ID").setDescription("").setNillable(false)
+		addAttribute(HPO, ROLE_LABEL, ROLE_LOOKUP).setLabel("HPO ID").setNillable(false)
 				.setAggregatable(true);
 		addAttribute(ENSEMBL_ID).setLabel("Gene").setDescription("The Ensembl identifier").setNillable(false)
 				.setAggregatable(true);

@@ -40,10 +40,8 @@ public class GroupMemberMetaData extends SystemEntityType
 		setLabel("Group member");
 		setPackage(securityPackage);
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true)
-				.setDescription("").setNillable(false);
-		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true)
-				.setDescription("").setNillable(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true).setNillable(false);
+		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true).setNillable(false);
 	}
 }

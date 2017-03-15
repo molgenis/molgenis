@@ -30,6 +30,7 @@ public class FreemarkerTemplateMetaData extends SystemEntityType
 	public void init()
 	{
 		setLabel("Freemarker template");
+
 		addAttribute(ID, ROLE_ID).setLabel("Id").setAuto(true).setVisible(false);
 		addAttribute(NAME, ROLE_LABEL).setLabel("Name")
 				.setDescription("Template name (must start with 'view-' and end with '.ftl')").setNillable(false)

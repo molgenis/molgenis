@@ -4,7 +4,9 @@ import org.molgenis.data.AbstractRepositoryCollectionDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.util.AttributeCopier;
 import org.molgenis.data.meta.util.EntityTypeCopier;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 
@@ -18,13 +20,15 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	private final RepositoryCollection repoCollection;
 	private final EntityTypeRegistry entityTypeRegistry;
 	private final EntityTypeCopier entityTypeCopier;
+	private final AttributeCopier attributeCopier;
 
 	PostgreSqlRepositoryCollectionDecorator(RepositoryCollection repoCollection, EntityTypeRegistry entityTypeRegistry,
-			EntityTypeCopier entityTypeCopier)
+			EntityTypeCopier entityTypeCopier, AttributeCopier attributeCopier)
 	{
 		this.repoCollection = requireNonNull(repoCollection);
 		this.entityTypeRegistry = requireNonNull(entityTypeRegistry);
 		this.entityTypeCopier = requireNonNull(entityTypeCopier);
+		this.attributeCopier = requireNonNull(attributeCopier);
 	}
 
 	@Override
@@ -42,17 +46,42 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	}
 
 	@Override
-	public Repository<Entity> updateRepository(EntityType entityType)
-	{
-		Repository<Entity> repo = repoCollection.updateRepository(entityType);
-		entityTypeRegistry.registerEntityType(entityType);
-		return repo;
-	}
-
-	@Override
 	public void deleteRepository(EntityType entityType)
 	{
 		repoCollection.deleteRepository(entityType);
 		entityTypeRegistry.unregisterEntityType(entityType);
+	}
+
+	@Override
+	public void addAttribute(EntityType entityType, Attribute attribute)
+	{
+		EntityType updatedEntityType = entityTypeCopier.copy(entityType);
+		Attribute attributeCopy = attributeCopier.copy(attribute);
+		updatedEntityType.addAttribute(attributeCopy);
+
+		entityTypeRegistry.registerEntityType(updatedEntityType);
+		repoCollection.addAttribute(entityType, attribute);
+	}
+
+	@Override
+	public void updateAttribute(EntityType entityType, Attribute attr, Attribute updatedAttr)
+	{
+		EntityType updatedEntityType = entityTypeCopier.copy(entityType);
+		Attribute updatedAttributeCopy = attributeCopier.copy(updatedAttr);
+		updatedEntityType.removeAttribute(attr);
+		updatedEntityType.addAttribute(updatedAttributeCopy);
+
+		entityTypeRegistry.registerEntityType(updatedEntityType);
+		repoCollection.updateAttribute(entityType, attr, updatedAttr);
+	}
+
+	@Override
+	public void deleteAttribute(EntityType entityType, Attribute attr)
+	{
+		EntityType updatedEntityType = entityTypeCopier.copy(entityType);
+		updatedEntityType.removeAttribute(attr);
+
+		entityTypeRegistry.registerEntityType(updatedEntityType);
+		repoCollection.deleteAttribute(entityType, attr);
 	}
 }
