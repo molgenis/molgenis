@@ -10,9 +10,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
-/**
- * Created by charbonb on 12/07/16.
- */
 public class CmdLineDataService implements DataService
 {
 	@Override
@@ -53,6 +50,12 @@ public class CmdLineDataService implements DataService
 
 	@Override
 	public EntityType getEntityType(String entityName)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public EntityType getEntityTypeById(String entityId)
 	{
 		throw new UnsupportedOperationException();
 	}

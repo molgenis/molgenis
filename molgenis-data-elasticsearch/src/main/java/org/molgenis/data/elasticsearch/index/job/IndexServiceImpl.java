@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.index.job;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.index.meta.IndexActionGroup;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -64,7 +65,7 @@ public class IndexServiceImpl implements IndexService
 			Stream<Entity> indexActions = dataService
 					.findAll(INDEX_ACTION, new QueryImpl<>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup));
 			Map<String, Long> numberOfActionsPerEntity = indexActions
-					.collect(groupingBy(indexAction -> indexAction.getString(ENTITY_FULL_NAME), counting()));
+					.collect(groupingBy(indexAction -> indexAction.getString(ENTITY_TYPE_ID), counting()));
 			indexStatus.addActionCounts(numberOfActionsPerEntity);
 
 			IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
@@ -89,9 +90,9 @@ public class IndexServiceImpl implements IndexService
 
 	@Override
 	@RunAsSystem
-	public void waitForIndexToBeStableIncludingReferences(String entityName) throws InterruptedException
+	public void waitForIndexToBeStableIncludingReferences(EntityType entityType) throws InterruptedException
 	{
-		indexStatus.waitForIndexToBeStableIncludingReferences(dataService.getEntityType(entityName));
+		indexStatus.waitForIndexToBeStableIncludingReferences(entityType);
 	}
 
 	/**

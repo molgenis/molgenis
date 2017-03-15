@@ -44,10 +44,6 @@ public class IndexActionMetaData extends SystemEntityType
 	 * The name of the entity type ID that needs to be indexed
 	 */
 	public static final String ENTITY_TYPE_ID = "entityTypeId";
-	/**
-	 * The fully qualified name of the entity type that needs to be indexed (e.g. myPackage_myEntityType)
-	 */
-	public static final String ENTITY_FULL_NAME = "entityFullName";
 
 	/**
 	 * Entity is filled when only one row of the entity "entityFullName" is indexed
@@ -90,11 +86,8 @@ public class IndexActionMetaData extends SystemEntityType
 		addAttribute(ENTITY_TYPE_NAME)
 				.setDescription("The name of the entity type that needs to be indexed (e.g. myEntityType).")
 				.setNillable(false);
-		addAttribute(ENTITY_FULL_NAME).setDescription(
-				"The fully qualified name of the entity type that needs to be indexed (e.g. myPackage_myEntityType).")
-				.setNillable(false);
 		addAttribute(ENTITY_ID)
-				.setDescription("Filled when only one row of the entity \"" + ENTITY_FULL_NAME + "\" is indexed")
+				.setDescription("The id of the entity that needs to be indexed")
 				.setDataType(TEXT).setNillable(true);
 		addAttribute(INDEX_STATUS).setDescription("The status of index action").setDataType(ENUM)
 				.setEnumOptions(IndexStatus.class).setNillable(false);

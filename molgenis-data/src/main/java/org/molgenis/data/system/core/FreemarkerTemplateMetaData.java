@@ -15,6 +15,8 @@ public class FreemarkerTemplateMetaData extends SystemEntityType
 	private static final String SIMPLE_NAME = "FreemarkerTemplate";
 	public static final String FREEMARKER_TEMPLATE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
+	private static final String REGEX_NAME = "/^view-.*\\.ftl$/";
+
 	public static final String ID = "id";
 	public static final String NAME = "Name";
 	public static final String VALUE = "Value";
@@ -28,9 +30,11 @@ public class FreemarkerTemplateMetaData extends SystemEntityType
 	public void init()
 	{
 		setLabel("Freemarker template");
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(NAME, ROLE_LABEL).setDescription("Name of the entity").setNillable(false).setUnique(true);
-		addAttribute(VALUE).setDataType(SCRIPT).setNillable(false);
+
+		addAttribute(ID, ROLE_ID).setLabel("Id").setAuto(true).setVisible(false);
+		addAttribute(NAME, ROLE_LABEL).setLabel("Name")
+				.setDescription("Template name (must start with 'view-' and end with '.ftl')").setNillable(false)
+				.setUnique(true).setValidationExpression("$('" + NAME + "').matches(" + REGEX_NAME + ").value()");
+		addAttribute(VALUE).setLabel("Value").setDataType(SCRIPT).setNillable(false);
 	}
 }

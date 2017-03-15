@@ -4,7 +4,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label class="control-label" for="name">Entity name *</label>
-                <i>(Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.)</i>
+                <i>(Only letters (a-z, A-Z), digits (0-9) and hashes (#) are allowed.)</i>
                 <input type="text" class="form-control" name="name" required placeholder="Enter entity name"
                        value="${wizard.file.name
                        ?replace("\\.vcf\\.gz|\\.vcf",'','ri') <#-- remove extention -->

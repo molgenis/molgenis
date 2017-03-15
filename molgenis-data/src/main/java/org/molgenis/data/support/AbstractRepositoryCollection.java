@@ -31,6 +31,12 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
+	public Repository<Entity> updateRepository(EntityType entityType)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void deleteRepository(EntityType entityType)
 	{
 		throw new UnsupportedOperationException();

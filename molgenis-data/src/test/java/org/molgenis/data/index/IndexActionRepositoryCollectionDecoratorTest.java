@@ -34,10 +34,17 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	}
 
 	@Test
+	public void testUpdateRepository()
+	{
+		indexActionRepositoryCollectionDecorator.updateRepository(entityType);
+		verify(decoratedRepositoryCollection).updateRepository(entityType);
+	}
+
+	@Test
 	public void deleteEntityType()
 	{
 		indexActionRepositoryCollectionDecorator.deleteRepository(entityType);
-		verify(decoratedRepositoryCollection, times(1)).deleteRepository(entityType);
+		verify(decoratedRepositoryCollection).deleteRepository(entityType);
 		verify(indexActionRegisterService).register(entityType, null);
 	}
 
@@ -47,7 +54,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME).getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.addAttribute(entityType, attribute);
-		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityType, attribute);
+		verify(decoratedRepositoryCollection).addAttribute(entityType, attribute);
 		verify(indexActionRegisterService).register(entityType, null);
 	}
 
@@ -57,7 +64,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(REPOSITORY_NAME).getMock();
 		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.deleteAttribute(entityType, attribute);
-		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityType, attribute);
+		verify(decoratedRepositoryCollection).deleteAttribute(entityType, attribute);
 		verify(indexActionRegisterService).register(entityType, null);
 	}
 
@@ -65,7 +72,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	public void addEntityType()
 	{
 		indexActionRepositoryCollectionDecorator.createRepository(entityType);
-		verify(decoratedRepositoryCollection, times(1)).createRepository(entityType);
+		verify(decoratedRepositoryCollection).createRepository(entityType);
 		verify(indexActionRegisterService).register(entityType, null);
 	}
 }

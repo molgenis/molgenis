@@ -25,19 +25,18 @@ import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.HugeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
@@ -130,8 +129,7 @@ public class ImportWriter
 
 	private void createEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
 	{
-		List<String> entityTypeNames = entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(toList());
-		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityTypeNames);
+		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
 	}
 
 	private GroupedEntityTypes groupEntityTypes(ImmutableCollection<EntityType> entities)

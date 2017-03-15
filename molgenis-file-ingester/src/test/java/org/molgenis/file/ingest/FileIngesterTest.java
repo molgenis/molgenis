@@ -1,5 +1,7 @@
 package org.molgenis.file.ingest;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -11,6 +13,7 @@ import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
+import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
@@ -27,6 +30,7 @@ import java.io.File;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
@@ -48,6 +52,9 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private FileIngestFactory fileIngestFactory;
+
+	@Autowired
+	private DataService dataService;
 
 	private ImportService importServiceMock;
 	private FileRepositoryCollection fileRepositoryCollectionMock;
@@ -83,9 +90,11 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		when(importServiceFactoryMock.getImportService(f, fileRepositoryCollectionMock)).thenReturn(importServiceMock);
 		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT))
 				.thenReturn(report);
+		when(progress.getJobExecution()).thenReturn(new FileIngestJobExecution(mock(Entity.class)));
 
-		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
+		FileMeta fileMeta = fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
 
+		verify(dataService).add("sys_FileMeta", fileMeta);
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)
@@ -106,7 +115,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		public FileIngester fileIngester()
 		{
 			return new FileIngester(fileStoreDownload(), importServiceFactory(), fileRepositoryCollectionFactory(),
-					fileMetaFactory());
+					fileMetaFactory(), dataService());
 		}
 
 		@Bean
@@ -133,6 +142,13 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 			FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
 			when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
 			return fileMetaFactory;
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			DataService dataService = mock(DataService.class);
+			return dataService;
 		}
 	}
 }

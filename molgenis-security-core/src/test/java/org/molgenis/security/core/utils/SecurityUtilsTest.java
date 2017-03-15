@@ -85,6 +85,7 @@ public class SecurityUtilsTest
 	public void currentUserIsSu_false()
 	{
 		assertFalse(SecurityUtils.currentUserIsSu());
+		assertFalse(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -96,6 +97,7 @@ public class SecurityUtilsTest
 		when((Collection<GrantedAuthority>) authentication.getAuthorities())
 				.thenReturn(Arrays.<GrantedAuthority>asList(authoritySu));
 		assertTrue(SecurityUtils.currentUserIsSu());
+		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
 	@Test
@@ -103,6 +105,7 @@ public class SecurityUtilsTest
 	{
 		when(userDetails.getUsername()).thenReturn(USER_SYSTEM);
 		assertTrue(SecurityUtils.currentUserisSystem());
+		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
 	@Test
@@ -110,6 +113,7 @@ public class SecurityUtilsTest
 	{
 		when(userDetails.getUsername()).thenReturn("user");
 		assertFalse(SecurityUtils.currentUserisSystem());
+		assertFalse(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
 	@Test
