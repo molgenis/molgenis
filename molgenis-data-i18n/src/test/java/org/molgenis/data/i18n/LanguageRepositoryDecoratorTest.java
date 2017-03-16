@@ -4,14 +4,12 @@ import org.mockito.Mock;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_EN;
 import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_NL;
 import static org.testng.Assert.assertEquals;
