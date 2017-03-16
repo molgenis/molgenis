@@ -714,5 +714,6 @@
         <module>molgenis-annotators-cmd</module>
         <module>molgenis-util</module>
         <module>molgenis-settings</module>
+        <module>molgenis-swagger</module>
     </modules>
 </project>
