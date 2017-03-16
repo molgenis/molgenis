@@ -10,7 +10,3 @@ MOLGENIS takes away the hassle of storing data, and makes it highly accessible w
 
 # Should I use it?
 If you are a researcher, a (bio)informatician, a biomedical practitioner, or anyone else who has a lot of (scientific) data on their hands, then MOLGENIS is a software package that will help you in setting up an online  database application in no time at all, making your data query-able and allowing you to share your data with collaborators effortlessly. By mastering the MOLGENIS software toolkit you will be able to store, edit, analyse, and share your data faster than ever before. 
-
-### Documentation for previous versions
-
-[MOLGENIS v1.21.x](link TODO)
