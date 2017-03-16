@@ -38,11 +38,11 @@ The layout of this is determined via a freemarker file matching the 'return' abo
 ```
 
 # Reusing components
-Via the myplugin.js you can use MOLGENIS standard UI components (Table, Form, Entity select etc.) that retrieve data via the REST API (see [REST reference](/documentation). See components at [Github](https://github.com/molgenis/molgenis/tree/master//molgenis-core-ui/src/main/resources/js/component)
+Via the myplugin.js you can use MOLGENIS standard UI components (Table, Form, Entity select etc.) that retrieve data via the REST API (see [REST reference](../documentation/guide-rest.md). See components at [Github](https://github.com/molgenis/molgenis/tree/master//molgenis-core-ui/src/main/resources/js/component)
 
 # Adding to your menu
 
-Finally you can use this component within your menu (see [Customization guide](/documentation/guide-customize)) and give it permissions so users can see it (see [Admin guide](/documentation/guide-admin))
+Finally you can use this component within your menu (see [Customization guide](../documentation/guide-customize.md)) and give it permissions so users can see it (see [Admin guide](../documentation/guide-admin.md))
 
 # Advanced topics
 

@@ -139,7 +139,7 @@ And push back any merges or commits of your own to your online fork.
     git push origin master
     
 ## Security
-See also the [MOLGENIS Security settings](./security)
+See also the [MOLGENIS Security settings](./security.md)
 
 # Troubleshooting
 

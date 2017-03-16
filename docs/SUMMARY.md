@@ -22,7 +22,6 @@
         - [EMX format](documentation/ref-emx.md)
         - [REST api V1](documentation/ref-rest.md)
         - [REST api V2](documentation/ref-rest2.md)
-        - [Swagger specification](documentation/ref-swagger.md)
         - [R api](documentation/ref-R.md)
         - [Install](documentation/install.md)
     - Develop

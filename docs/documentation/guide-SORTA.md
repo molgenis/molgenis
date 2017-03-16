@@ -30,4 +30,4 @@ Step 4 - Users can pick the correct matches from the list of concepts sorted bas
 
 ## Ontology model
 
-Standard codes (ontologies) can be imported using the [EMX format](ref-emx) , the model can be browsed and viewed as a UML diagram as well as a flat list in the webbrowser. 
+Standard codes (ontologies) can be imported using the [EMX format](./ref-emx.md) , the model can be browsed and viewed as a UML diagram as well as a flat list in the webbrowser. 

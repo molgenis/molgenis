@@ -108,8 +108,8 @@ In the permissions view you can do this repeatedely for multiple groups:
 
 # What next?
 
-To learn more you could read the [EMX reference](ref-emx).
-Alternatively directly move on to [explore your data](guide-explore)
+To learn more you could read the [EMX reference](./ref-emx.md).
+Alternatively directly move on to [explore your data](./guide-explore.md)
 
 # Import API
 

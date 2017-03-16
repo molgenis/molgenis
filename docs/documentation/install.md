@@ -84,6 +84,6 @@ More details are included in the README of the cargo project.
 
 # Compiling the code
 
-You can also compile the code yourself. See the [Development guide](/develop).
+You can also compile the code yourself. See the [Development guide](./install.md).
 
 

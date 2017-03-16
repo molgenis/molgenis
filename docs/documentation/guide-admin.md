@@ -86,7 +86,7 @@ You can navigate to the permission module under the Admin menu, and then navigat
 Here you can set permissions for different groups and users. These permissions allow users to either Edit, View, Count, or do nothing with the different data sets and modules in MOLGENIS.
 
 **Try it out**  
-Remember that molgenis_user that we created in the user management section? If you go to the users tab and look for molgenis_user, you will find it does not have any permissions yet, except for those inherited from the All users group. Let's change it so that our test_group has the permission to open the Data explorer, and the molgenis_user will be able to see the example_data_table data set, which we created in the [Upload](guide-upload) guide.
+Remember that molgenis_user that we created in the user management section? If you go to the users tab and look for molgenis_user, you will find it does not have any permissions yet, except for those inherited from the All users group. Let's change it so that our test_group has the permission to open the Data explorer, and the molgenis_user will be able to see the example_data_table data set, which we created in the [Upload](./guide-upload.md) guide.
 
 **Setting group permissions**  
 As you open the permission manager, the groups tab is already selected. For the group *test_group* we want to set the permissions in such a way to the members of that group can use the data explorer to look at data sets. To do this, select the test_group from the drop down. Next you will want to lookup data explorer in the Plugin column, and set the permission to *View*. Press the Save button which is below the table to save your change. 

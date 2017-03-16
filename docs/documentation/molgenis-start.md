@@ -61,14 +61,8 @@ Of course, simply uploading and showing data is not the only thing you can do wi
 
 ## Download & install
 
-You can download and install MOLGENIS for free. See [Download & Install guide](/download)
+You can download and install MOLGENIS for free. See [Download & Install guide](./install.md)
 
 ## Request cloud installation
 
 We host MOLGENIS for our partners. Email m.a.swertz@rug.nl for more information.
-
-## Become a MOLGENIS guru
-
-You can use the [Documentation](../documentation) to become a MOLGENIS guru.
-Or you can see whether you are interested in [MOLGENIS compute](../compute).    
-
