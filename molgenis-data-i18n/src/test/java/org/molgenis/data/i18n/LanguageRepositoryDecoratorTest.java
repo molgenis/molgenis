@@ -4,6 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,7 +15,7 @@ import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_EN;
 import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_NL;
 import static org.testng.Assert.assertEquals;
 
-public class LanguageRepositoryDecoratorTest
+public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private static final String MESSAGE_ADD_NOT_ALLOWED = "Adding languages is not allowed";
 	private static final String MESSAGE_DELETE_NOT_ALLOWED = "Deleting languages is not allowed";
