@@ -1,9 +1,5 @@
-**
-This section describes how to use the MOLGENIS appstore to upload your own webapps at runtime
-**
-
 ## The MOLGENIS Appstore
-The MOLGENIS appstore allows you to write your own webbased applications and upload them as a 
+The MOLGENIS appstore allows you to write your own web-based applications and upload them as a 
 MOLGENIS plugin at runtime.
 
 ## The main menu
@@ -41,13 +37,15 @@ When an app is active, click on the icon to go to your previously created HTML l
 ![Landing page](../images/appstore/landing_page.png?raw=true, "landing page")
 
 ## Purpose of the App store
-The appstore allows you to create your own webapplications, and place them inside your local MOLGENIS.
-If you are not satisfied with plugins that MOLGENIS offers you, you can write your JS/HTML to display the data in such a way that it fits your needs.
+The appstore allows you to create your own web-applications, and place them inside any running MOLGENIS which has the appstore plugin.
+If you want to create a custom web application to go with your custom data model, you can write your JS/HTML to display the data in such a way that it fits your needs.
 
 Using REST api calls, you can access data that was previously imported, and use fancy JS magic to create the ultimate data visualisation apps
 
 ## Caution
 Apps are stored in the database. If you do not properly version or backup your own apps, then a server crash or a database drop **WILL** delete your app.
 Be smart, backup your apps.
+
+We use [GitHub](https://github.com) for code management and versioning. We can highly recommend GitHub for any coding project you might start working on.
 
 

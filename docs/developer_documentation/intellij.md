@@ -80,7 +80,7 @@ Whenever you tab from molgenis to the browser, all modified resources will be co
 A browser reload should display the changes.
 
 ## Security
-See also the [MOLGENIS Security settings](./security)
+See also the [MOLGENIS Security settings](./security.md)
 
 ## Webpack watch run configuration
 * Open molgenis-core-ui/target/classes/js.

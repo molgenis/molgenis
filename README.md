@@ -7,7 +7,7 @@ MOLGENIS is a collaborative open source project on a mission to generate great s
 See http://molgenis.github.io for documentation.
 
 ## Installation
-See [Getting Started Guide](docs/develop/start.md).
+See [The Quick start guide](docs/quickstart/guide-quickstart.md).
 
 ## Third-party software
 For some modules in MOLGENIS, third-party software is in use. It is important to know that some of these licenses are different than the MOLGENIS license.
