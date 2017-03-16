@@ -10,6 +10,7 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -48,11 +49,12 @@ public class MappingServiceImpl implements MappingService
 	private final MappingProjectRepository mappingProjectRepository;
 	private final PermissionSystemService permissionSystemService;
 	private final AttributeFactory attrMetaFactory;
+	private final DefaultPackage defaultPackage;
 
 	@Autowired
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -60,6 +62,7 @@ public class MappingServiceImpl implements MappingService
 		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.defaultPackage = requireNonNull(defaultPackage);
 	}
 
 	@Override
@@ -170,7 +173,6 @@ public class MappingServiceImpl implements MappingService
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
-		targetMetaData.setPackage(null);
 		targetMetaData.setId(idGenerator.generateId());
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
@@ -180,14 +182,23 @@ public class MappingServiceImpl implements MappingService
 		}
 
 		Repository<Entity> targetRepo;
-		if (!dataService.hasRepository(entityName))
+		if (!dataService.hasRepository(entityName) && !dataService.hasRepository(defaultPackage.PACKAGE_DEFAULT+"_"+entityName))
 		{
+			targetMetaData.setPackage(defaultPackage);
 			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
 			permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
 		}
 		else
 		{
+			targetMetaData.setPackage(null);
+			//if the entity is in the base package, this should be added to the name
+			if(dataService.hasRepository(defaultPackage.PACKAGE_DEFAULT+"_"+entityName))
+			{
+				entityName = defaultPackage.PACKAGE_DEFAULT+"_"+entityName;
+				targetMetaData.setName(entityName);
+				targetMetaData.setLabel(entityName);
+			}
 			// Get an existing repository
 			targetRepo = dataService.getRepository(entityName);
 
