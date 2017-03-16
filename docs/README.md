@@ -13,4 +13,4 @@ If you are a researcher, a (bio)informatician, a biomedical practitioner, or any
 
 ### Documentation for previous versions
 
-[MOLGENIS v1.21.x](link TODO)
+[MOLGENIS v1.21.x](https://molgenis.gitbooks.io/molgenis/content/v/1.21/)
