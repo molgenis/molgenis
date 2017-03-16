@@ -16,6 +16,7 @@ import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
+import org.molgenis.dataexplorer.service.GenomeBrowserService;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -100,6 +101,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
+
+	@Autowired
+	private GenomeBrowserService genomeBrowserService;
 
 	public DataExplorerController()
 	{
@@ -311,7 +315,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<>();
-		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
+		genomeBrowserService.getGenomeBrowserEntities().forEach(entityType ->
 		{
 			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ);
 			boolean canWrite = molgenisPermissionService
@@ -322,15 +326,6 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		});
 		return genomeEntities;
-	}
-
-	private boolean isGenomeBrowserEntity(EntityType entityType)
-	{
-		Attribute attributeStartPosition = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityType);
-		Attribute attributeChromosome = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityType);
-		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
