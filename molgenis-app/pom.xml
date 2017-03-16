@@ -285,7 +285,7 @@
             <artifactId>molgenis-settings</artifactId>
             <version>${project.version}</version>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-swagger</artifactId>
             <version>${project.version}</version>
