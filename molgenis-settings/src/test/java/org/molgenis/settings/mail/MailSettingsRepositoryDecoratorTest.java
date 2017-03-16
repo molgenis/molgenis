@@ -2,6 +2,7 @@ package org.molgenis.settings.mail;
 
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
+import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.mail.MailSenderFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -11,7 +12,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class MailSettingsRepositoryDecoratorTest
+public class MailSettingsRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private MailSettingsRepositoryDecorator mailSettingsRepositoryDecorator;
 	@Mock
