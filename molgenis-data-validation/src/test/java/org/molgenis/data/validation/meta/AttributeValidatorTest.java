@@ -1,6 +1,5 @@
 package org.molgenis.data.validation.meta;
 
-import junit.framework.Assert;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
@@ -10,6 +9,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

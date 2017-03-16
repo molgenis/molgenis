@@ -3,7 +3,10 @@ package org.molgenis.data.vcf.importer;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
@@ -15,6 +18,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -33,7 +37,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.testng.Assert.*;
 
-public class VcfImporterServiceTest
+public class VcfImporterServiceTest extends AbstractMockitoTest
 {
 	private VcfImporterService vcfImporterService;
 	@Mock
@@ -53,13 +57,11 @@ public class VcfImporterServiceTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		SecurityContextHolder.setContext(securityContext);
 		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
 		when(repositoryCollection.getName()).thenReturn("default");
-
 	}
 
 	@SuppressWarnings("unchecked")

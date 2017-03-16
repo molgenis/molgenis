@@ -5,7 +5,7 @@ import org.mockito.Mock;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.file.model.FileMeta;
-import org.testng.annotations.BeforeClass;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,10 +14,9 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
-public class FileMetaRepositoryDecoratorTest
+public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	@Mock
 	private Repository<FileMeta> fileMetaRepository;
@@ -27,16 +26,9 @@ public class FileMetaRepositoryDecoratorTest
 
 	private FileMetaRepositoryDecorator fileMetaRepositoryDecorator;
 
-	@BeforeClass
-	public void setUpBeforeClass()
-	{
-		initMocks(this);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(fileMetaRepository, fileStore);
 		when(fileStore.delete(anyString())).thenReturn(true);
 		fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(fileMetaRepository, fileStore);
 	}

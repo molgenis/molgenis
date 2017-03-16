@@ -2,17 +2,16 @@ package org.molgenis.data.jobs;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,12 +29,6 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	@Mock
 	private MailSender mailSender;
 	private JobExecution jobExecution;
-
-	@BeforeClass
-	public void beforeClass()
-	{
-		MockitoAnnotations.initMocks(this);
-	}
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -101,7 +94,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.populate", "org.molgenis.data.jobs.model" })
+	@Import(JobTestConfig.class)
 	public static class Config
 	{
 

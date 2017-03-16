@@ -1,6 +1,7 @@
 package org.molgenis.data.rest.v2;
 
 import org.molgenis.auth.SecurityPackage;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
@@ -10,7 +11,6 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.security.owned.OwnedEntityType;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

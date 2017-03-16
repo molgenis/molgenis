@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -18,10 +19,9 @@ import java.util.stream.Stream;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
-public class EntityReferenceResolverDecoratorTest
+public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 {
 	@Mock
 	private Repository<Entity> decoratedRepo;
@@ -40,7 +40,6 @@ public class EntityReferenceResolverDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		initMocks(this);
 		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		entityReferenceResolverDecorator = new EntityReferenceResolverDecorator(decoratedRepo, entityManager);
 	}

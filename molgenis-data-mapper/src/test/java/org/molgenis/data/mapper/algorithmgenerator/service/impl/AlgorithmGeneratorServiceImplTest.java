@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -22,7 +23,6 @@ import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -144,11 +144,8 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	@Configuration
 	public static class Config
 	{
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
+		@Autowired
+		private DataService dataService;
 
 		@Bean
 		public UnitResolver unitResolver()
@@ -165,13 +162,13 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		@Bean
 		public AlgorithmTemplateService algorithmTemplateService()
 		{
-			return new AlgorithmTemplateServiceImpl(dataService());
+			return new AlgorithmTemplateServiceImpl(dataService);
 		}
 
 		@Bean
 		public AlgorithmGeneratorService algorithmGeneratorService()
 		{
-			return new AlgorithmGeneratorServiceImpl(dataService(), unitResolver(), algorithmTemplateService());
+			return new AlgorithmGeneratorServiceImpl(dataService, unitResolver(), algorithmTemplateService());
 		}
 	}
 }

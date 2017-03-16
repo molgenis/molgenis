@@ -14,11 +14,11 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -30,7 +30,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { CommandLineAnnotatorConfig.class })
-public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
+public class AnnotatorChainingIT extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	CommandLineAnnotatorConfig commandLineAnnotatorConfig;

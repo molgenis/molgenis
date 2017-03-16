@@ -11,12 +11,12 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -27,12 +27,11 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { GsonConfig.class })
-public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
+public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@InjectMocks
 	private DataExplorerController controller = new DataExplorerController();
@@ -60,8 +59,6 @@ public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeTest()
 	{
-
-		initMocks(this);
 		when(molgenisPermissionService.hasPermissionOnEntity("yes", Permission.WRITEMETA)).thenReturn(true);
 		when(molgenisPermissionService.hasPermissionOnEntity("no", Permission.WRITEMETA)).thenReturn(false);
 

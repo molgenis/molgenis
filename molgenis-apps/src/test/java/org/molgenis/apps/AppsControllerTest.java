@@ -1,33 +1,28 @@
 package org.molgenis.apps;
 
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.Iterator;
@@ -43,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { GsonConfig.class })
-public class AppsControllerTest extends AbstractTestNGSpringContextTests
+public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@Mock
 	private DataService dataService;
@@ -59,16 +54,9 @@ public class AppsControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-	@BeforeClass
-	public void setUpBeforeClass() throws IOException
-	{
-		MockitoAnnotations.initMocks(this);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		Mockito.reset(dataService, fileStore);
 		AppsController appsController = new AppsController(dataService, fileStore, permissionService);
 		mockMvc = MockMvcBuilders.standaloneSetup(appsController).setMessageConverters(gsonHttpMessageConverter)
 				.build();

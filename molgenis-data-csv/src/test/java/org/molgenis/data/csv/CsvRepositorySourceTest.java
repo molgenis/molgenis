@@ -2,10 +2,10 @@ package org.molgenis.data.csv;
 
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;

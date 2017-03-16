@@ -1,22 +1,18 @@
 package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityReferenceCreator;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -24,7 +20,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
-public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringContextTests
+public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest
 {
 	private Entity entity;
 	private EntityType emd;
@@ -188,31 +184,5 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		expected.set("Position", "1");
 		Entity actual = (Entity) evaluator.evaluate(entity);
 		assertTrue(EntityUtils.equals(actual, expected));
-	}
-
-	@Autowired
-	ApplicationContext applicationContext;
-
-	@BeforeClass
-	public void bootstrap()
-	{
-		// bootstrap meta data
-		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
-		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
-		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
-		applicationContext.getBean(EntityTypeMetadata.class).bootstrap(entityTypeMeta);
-		applicationContext.getBean(PackageMetadata.class).bootstrap(entityTypeMeta);
-		applicationContext.getBean(TagMetadata.class).bootstrap(entityTypeMeta);
-	}
-
-	@Configuration
-	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate" })
-	public static class Config
-	{
-		@Bean
-		public EntityReferenceCreator entityReferenceCreator()
-		{
-			return mock(EntityReferenceCreator.class);
-		}
 	}
 }

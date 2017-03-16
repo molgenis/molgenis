@@ -1,14 +1,17 @@
 package org.molgenis.file.ingest;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.file.ingest.config.FileIngestTestConfig;
 import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.molgenis.file.ingest.meta.FileIngest;
@@ -17,11 +20,10 @@ import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,9 +31,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
@@ -107,15 +107,17 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.file.ingest.meta", "org.molgenis.security.owned", "org.molgenis.file.model",
-			"org.molgenis.data.jobs.model", "org.molgenis.auth" })
+	@Import({ UserTestConfig.class, FileIngestTestConfig.class })
 	public static class Config
 	{
+		@Autowired
+		private DataService dataService;
+
 		@Bean
 		public FileIngester fileIngester()
 		{
 			return new FileIngester(fileStoreDownload(), importServiceFactory(), fileRepositoryCollectionFactory(),
-					fileMetaFactory(), dataService());
+					fileMetaFactory(), dataService);
 		}
 
 		@Bean
@@ -142,13 +144,6 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 			FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
 			when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
 			return fileMetaFactory;
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			DataService dataService = mock(DataService.class);
-			return dataService;
 		}
 	}
 }

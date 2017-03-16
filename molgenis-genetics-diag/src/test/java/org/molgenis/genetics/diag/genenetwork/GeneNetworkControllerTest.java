@@ -1,15 +1,16 @@
 package org.molgenis.genetics.diag.genenetwork;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.genetics.diag.genenetwork.meta.GeneNetworkScoreFactory;
 import org.molgenis.genetics.diag.genenetwork.meta.GeneNetworkScoreMetaData;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -88,7 +89,7 @@ public class GeneNetworkControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.genetics.diag.genenetwork.meta" })
+	@Import({ GeneNetworkScoreMetaData.class, GeneNetworkScoreFactory.class })
 	public static class Config
 	{
 		@Bean

@@ -3,10 +3,8 @@ package org.molgenis.data.elasticsearch.index.job;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
+import org.molgenis.data.config.IndexTestConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.index.meta.*;
@@ -15,12 +13,10 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
-import org.molgenis.test.data.EntityTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
@@ -77,7 +73,6 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		initMocks(this);
 		config.resetMocks();
 		indexJob = new IndexJob(progress, authentication, transactionId, dataService, searchService, entityTypeFactory);
 		indexActionGroup = indexActionGroupFactory.create(transactionId).setCount(0);
@@ -350,7 +345,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.index", "org.molgenis.test.data" })
+	@Import({ IndexTestConfig.class, TestHarnessConfig.class })
 	public static class Config
 	{
 		@Autowired
@@ -364,8 +359,6 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		private SearchService searchService;
 		@Mock
 		private MetaDataService mds;
-		@Mock
-		private DataService dataService;
 
 		public Config()
 		{
@@ -396,15 +389,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 			return mds;
 		}
 
-		@Bean
-		public DataService dataService()
-		{
-			return dataService;
-		}
-
 		void resetMocks()
 		{
-			reset(progress, authentication, searchService, mds, dataService);
+			reset(progress, authentication, searchService, mds);
 		}
 	}
 }

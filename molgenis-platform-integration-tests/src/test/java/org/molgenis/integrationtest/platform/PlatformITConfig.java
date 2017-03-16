@@ -6,6 +6,8 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
+import org.molgenis.data.TestHarnessConfig;
+import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
@@ -73,7 +75,9 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
-@Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
+@Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
+		GsonConfig.class,
+		PostgreSqlConfiguration.class,
 		RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,

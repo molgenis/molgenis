@@ -2,16 +2,12 @@ package org.molgenis.charts.data;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,6 +27,8 @@ import static org.testng.Assert.assertNotNull;
 public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 {
 	private ChartDataServiceImpl chartDataService;
+
+	@Autowired
 	private DataService dataServiceMock;
 
 	@Autowired
@@ -41,7 +39,6 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		dataServiceMock = mock(DataService.class);
 		chartDataService = new ChartDataServiceImpl(dataServiceMock);
 	}
 

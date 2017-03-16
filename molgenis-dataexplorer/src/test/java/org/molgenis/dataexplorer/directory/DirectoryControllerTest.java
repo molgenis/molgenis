@@ -8,24 +8,22 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.controller.DirectoryController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URI;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-public class DirectoryControllerTest
+public class DirectoryControllerTest extends AbstractMockitoTest
 {
 	private DirectoryController controller;
 	@Mock
@@ -40,16 +38,9 @@ public class DirectoryControllerTest
 	@Captor
 	private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-	}
-
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		reset(directorySettings, restTemplate, permissions, entityType);
 		controller = new DirectoryController(directorySettings, restTemplate, permissions);
 	}
 

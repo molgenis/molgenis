@@ -3,22 +3,23 @@ package org.molgenis.gavin.job;
 import com.google.common.collect.ImmutableMultiset;
 import org.mockito.Mock;
 import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -32,9 +33,7 @@ import java.util.Iterator;
 import static java.io.File.separator;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 import static org.molgenis.gavin.job.input.model.LineType.*;
 
@@ -99,7 +98,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		initMocks(this);
+		reset(progress, annotatorRunner);
+
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
@@ -214,7 +214,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.vcf.utils" })
+	@Import(VcfTestConfig.class)
 	public static class Config
 	{
 	}

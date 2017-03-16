@@ -2,6 +2,7 @@ package org.molgenis.annotation.test.cmd.conversion;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -10,9 +11,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
@@ -357,8 +356,7 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import(VcfAttributes.class)
-	@ComponentScan({ "org.molgenis.annotation.cmd.conversion" })
+	@Import({ VcfAttributes.class, EffectStructureConverter.class })
 	public static class Config
 	{
 

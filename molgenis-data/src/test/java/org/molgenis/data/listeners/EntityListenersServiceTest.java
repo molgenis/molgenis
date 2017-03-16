@@ -1,9 +1,9 @@
 package org.molgenis.data.listeners;
 
-import junit.framework.Assert;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

@@ -4,12 +4,14 @@ import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
+import org.molgenis.data.config.GroupAuthorityTestConfig;
+import org.molgenis.data.config.GroupTestConfig;
 import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.IdentifierLookupService;
@@ -26,12 +28,10 @@ import org.molgenis.security.permission.PermissionManagerServiceImpl;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
@@ -56,9 +56,11 @@ import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -115,7 +117,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUp() throws ParseException
 	{
-		MockitoAnnotations.initMocks(this);
 		reset(dataService);
 		UploadWizardPage uploadWizardPage = mock(UploadWizardPage.class);
 		OptionsWizardPage optionsWizardPage = mock(OptionsWizardPage.class);
@@ -578,11 +579,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan(value = { "org.molgenis.data.system", "org.molgenis.auth", "org.molgenis.data.meta.system",
-			"org.molgenis.security.owned",
-			"org.molgenis.data.importer" }, excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.molgenis.data.importer.(.*?)\\..*"))
+	@Import({ ImportTestConfig.class, GroupTestConfig.class, GroupAuthorityTestConfig.class })
 	static class Config
 	{
+		@Autowired
+		private DataService dataService;
+
 		@Bean
 		public UserService userService()
 		{
@@ -592,7 +594,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(),
+			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(),
 					grantedAuthoritiesMapper());
 		}
 
@@ -600,12 +602,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		public MetaDataService metaDataService()
 		{
 			return mock(MetaDataService.class);
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
 		}
 
 		@Bean

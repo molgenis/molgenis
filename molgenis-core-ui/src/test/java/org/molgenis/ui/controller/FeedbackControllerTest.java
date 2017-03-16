@@ -2,20 +2,20 @@ package org.molgenis.ui.controller;
 
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
-import org.molgenis.data.DataService;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.UserService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.controller.FeedbackControllerTest.Config;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -189,8 +189,8 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 				.andExpect(model().attribute("feedbackForm", hasProperty("errorMessage", equalTo("Invalid captcha."))));
 	}
 
-	@ComponentScan({ "org.molgenis.auth" })
 	@Configuration
+	@Import(UserTestConfig.class)
 	public static class Config
 	{
 		@Bean
@@ -227,12 +227,6 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 		public MolgenisPluginRegistry molgenisPluginRegistry()
 		{
 			return mock(MolgenisPluginRegistry.class);
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
 		}
 
 		@Bean

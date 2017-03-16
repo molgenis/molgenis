@@ -1,6 +1,6 @@
 package org.molgenis.util;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;

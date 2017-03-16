@@ -2,6 +2,7 @@ package org.molgenis.data.cache.l1;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.EntityManager;
@@ -11,7 +12,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -64,8 +64,6 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		initMocks(this);
-
 		entityType = entityTypeFactory.create(repository).setName(repository);
 		entityType.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName("ATTRIBUTE_1"));
