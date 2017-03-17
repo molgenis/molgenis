@@ -17,11 +17,6 @@
             </resource>
         </resources>
         <plugins>
-            <!-- minify resources -->
-            <plugin>
-                <groupId>com.samaxes.maven</groupId>
-                <artifactId>minify-maven-plugin</artifactId>
-            </plugin>
             <!-- servlet container -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
