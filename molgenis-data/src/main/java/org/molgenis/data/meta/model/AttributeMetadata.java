@@ -33,6 +33,9 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String IS_LABEL_ATTRIBUTE = "isLabelAttribute";
 	public static final String LOOKUP_ATTRIBUTE_INDEX = "lookupAttributeIndex";
 	public static final String REF_ENTITY_TYPE = "refEntityType";
+	/**
+	 * Deleting an entity also deletes the referenced entity when cascading delete is enabled
+	 */
 	public static final String IS_CASCADE_DELETE = "isCascadeDelete";
 
 	/**

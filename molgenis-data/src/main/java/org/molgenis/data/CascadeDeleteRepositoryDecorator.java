@@ -2,7 +2,6 @@ package org.molgenis.data;
 
 import com.google.common.collect.Iterators;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;
 
@@ -93,23 +92,27 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 
 	private void handleCascadeDeletes(Entity entity, Attribute attribute)
 	{
-		EntityType refEntityType = attribute.getRefEntity();
+		Stream<Entity> refEntityStream;
 		if (isSingleReferenceType(attribute))
 		{
 			Entity refEntity = entity.getEntity(attribute.getName());
-			if (refEntity != null)
-			{
-				dataService.delete(refEntityType.getFullyQualifiedName(), refEntity);
-			}
+			refEntityStream = refEntity != null ? Stream.of(refEntity) : Stream.empty();
 		}
 		else
 		{
 			Iterable<Entity> entities = entity.getEntities(attribute.getName());
-			if (entities.iterator().hasNext())
-			{
-				dataService.delete(refEntityType.getFullyQualifiedName(), asStream(entities));
-			}
+			refEntityStream = asStream(entities);
 		}
+
+		// delete one-by-one and first check if exists because entities might not exist due to earlier deletes
+		String refEntityTypeName = attribute.getRefEntity().getFullyQualifiedName();
+		refEntityStream.forEach(refEntity ->
+		{
+			if (dataService.findOneById(refEntityTypeName, refEntity.getIdValue()) != null)
+			{
+				dataService.delete(refEntityTypeName, refEntity);
+			}
+		});
 	}
 
 	private Stream<Attribute> getCascadeDeleteAttributes()
