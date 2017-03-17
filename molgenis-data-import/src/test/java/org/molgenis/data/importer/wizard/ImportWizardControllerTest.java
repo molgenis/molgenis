@@ -41,7 +41,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -585,18 +584,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	{
 		@Autowired
 		private DataService dataService;
-
-		@Bean
-		public PasswordEncoder passwordEncoder()
-		{
-			return mock(PasswordEncoder.class);
-		}
-
-		@Bean
-		public SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry()
-		{
-			return mock(SystemRepositoryDecoratorRegistry.class);
-		}
 
 		@Bean
 		public UserService userService()

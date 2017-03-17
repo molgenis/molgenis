@@ -108,6 +108,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		FileStore fileStore = fileStore();
 		registry.addResourceHandler("/" + PATH_SEGMENT_APPS + "/**")
 				.addResourceLocations("file:///" + fileStore.getStorageDir() + '/' + FILE_STORE_PLUGIN_APPS_PATH + '/');
+		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/")
+				.setCachePeriod(3600).resourceChain(true);
+		// see https://github.com/spring-projects/spring-boot/issues/4403 for why the resourceChain needs to be explicitly added.
 	}
 
 	@Value("${environment:production}")
