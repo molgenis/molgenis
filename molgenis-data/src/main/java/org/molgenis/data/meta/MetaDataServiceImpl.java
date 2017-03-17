@@ -262,6 +262,13 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
+	public void upsertEntityType(EntityType entityType)
+	{
+		upsertEntityTypes(Collections.singletonList(entityType));
+	}
+
+	@Transactional
+	@Override
 	public void upsertEntityTypes(Collection<EntityType> entityTypes)
 	{
 		if (entityTypes.isEmpty())

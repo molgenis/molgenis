@@ -200,6 +200,13 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void updateEntityType(EntityType entityType);
 
 	/**
+	 * Add or update the given entity type and entity type attributes.
+	 *
+	 * @param entityType entity type to upsert
+	 */
+	void upsertEntityType(EntityType entityType);
+
+	/**
 	 * Add or update a collection of entity type and entity type attributes.
 	 * Resolves the dependencies between them so that the entities and their metadata get added in proper order.
 	 *

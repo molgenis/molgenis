@@ -485,6 +485,22 @@ public class EntityType extends StaticEntity
 	}
 
 	/**
+	 * Entity can extend another entity, adding its properties to their own
+	 *
+	 * @return parent entity
+	 */
+	public Iterable<EntityType> getExtendedBy()
+	{
+		return getEntities(EXTENDED_BY, EntityType.class);
+	}
+
+	public EntityType setExtendedBy(Iterable<EntityType> extendedBy)
+	{
+		set(EXTENDED_BY, extendedBy);
+		return this;
+	}
+
+	/**
 	 * Same as {@link #getAttributes()} but does not return attributes of its parent class.
 	 *
 	 * @return entity attributes without extended entity attributes
