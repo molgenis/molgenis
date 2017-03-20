@@ -1,3 +1,5 @@
+import {toRsqlValue} from "./createRsqlQuery";
+
 /**
  * Transforms map to RSQL
  */
@@ -14,7 +16,7 @@ function getRsqlFromConstraint(constraint) {
 }
 
 function getRsqlFromSimpleConstraint(constraint) {
-    return constraint.selector + constraint.comparison + constraint.arguments
+    return toRsqlValue(constraint.selector) + constraint.comparison + toRsqlValue(constraint.arguments)
 }
 
 function getRsqlFromComplexConstraint(constraint) {
