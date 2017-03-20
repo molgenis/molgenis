@@ -233,7 +233,12 @@
      */
     function getLabelValues(refEntityName, refEntityIdAttribute, refEntityLabelAttribute, values, restApi) {
         var ids = Array.from(values.values()).join(',')
-        var requestUri = '/api/v2/' + refEntityName + '?q=' + refEntityIdAttribute + '=in=(' + ids + ')'
+        var rsqlQuery = molgenis.rsql.encodeRsqlValue(molgenis.rsql.createRsqlQuery([{
+            field: refEntityIdAttribute,
+            operator: 'IN',
+            value: values.values()
+        }]))
+        var requestUri = '/api/v2/' + refEntityName + '?q=' + rsqlQuery
 
         return restApi.getAsync(requestUri).then(function (refEntityItems) {
             var labels = {}
