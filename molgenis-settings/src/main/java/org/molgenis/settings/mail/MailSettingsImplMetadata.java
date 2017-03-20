@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
@@ -52,13 +52,18 @@ public class MailSettingsImplMetadata extends DefaultSettingsEntityType
 	public static final String DEFAULT_ENCODING = "defaultEncoding";
 	public static final String JAVA_MAIL_PROPS = "props";
 	public static final String TEST_CONNECTION = "testConnection";
+
 	private JavaMailPropertyType mailSenderPropertyType;
 
-	@Autowired
-	public MailSettingsImplMetadata(JavaMailPropertyType mailSenderPropertyType)
+	public MailSettingsImplMetadata()
 	{
 		super(MailSettingsImpl.ID);
-		this.mailSenderPropertyType = Objects.requireNonNull(mailSenderPropertyType);
+	}
+
+	@Autowired
+	public void setJavaMailPropertyType(JavaMailPropertyType mailSenderPropertyType)
+	{
+		this.mailSenderPropertyType = requireNonNull(mailSenderPropertyType);
 	}
 
 	@Override
