@@ -33,6 +33,10 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String IS_LABEL_ATTRIBUTE = "isLabelAttribute";
 	public static final String LOOKUP_ATTRIBUTE_INDEX = "lookupAttributeIndex";
 	public static final String REF_ENTITY_TYPE = "refEntityType";
+	/**
+	 * Deleting an entity also deletes the referenced entity when cascading delete is enabled
+	 */
+	public static final String IS_CASCADE_DELETE = "isCascadeDelete";
 
 	/**
 	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
@@ -98,6 +102,9 @@ public class AttributeMetadata extends SystemEntityType
 				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
+		addAttribute(IS_CASCADE_DELETE).setDataType(BOOL).setLabel("Cascade delete")
+				.setDescription("Delete corresponding referenced entities on delete")
+				.setValidationExpression(getCascadeDeleteValidationExpression());
 		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
 				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
@@ -169,6 +176,14 @@ public class AttributeMetadata extends SystemEntityType
 
 		return "$('" + REF_ENTITY_TYPE + "').isNull().and($('" + TYPE + "').matches(" + regex + ").not()).or(" + "$('"
 				+ REF_ENTITY_TYPE + "').isNull().not().and($('" + TYPE + "').matches(" + regex + "))).value()";
+	}
+
+	private static String getCascadeDeleteValidationExpression()
+	{
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+
+		return "$('" + IS_CASCADE_DELETE + "').isNull().or(" + "$('" + REF_ENTITY_TYPE + "').isNull().not()).value()";
 	}
 
 	private static String getAutoValidationExpression()

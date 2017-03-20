@@ -38,7 +38,7 @@ public class MappingTargetMetaData extends SystemEntityType
 		setPackage(mapperPackage);
 
 		addAttribute(IDENTIFIER, ROLE_ID);
-		addAttribute(ENTITY_MAPPINGS).setDataType(MREF).setRefEntity(entityMappingMetaData);
+		addAttribute(ENTITY_MAPPINGS).setDataType(MREF).setRefEntity(entityMappingMetaData).setCascadeDelete(true);
 		addAttribute(TARGET).setNillable(false);
 	}
 }
