@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -61,6 +62,7 @@ public class MailSettingsImplMetadata extends DefaultSettingsEntityType
 	}
 
 	@Autowired
+	@Lazy
 	public void setJavaMailPropertyType(JavaMailPropertyType mailSenderPropertyType)
 	{
 		this.mailSenderPropertyType = requireNonNull(mailSenderPropertyType);
