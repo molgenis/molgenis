@@ -52,7 +52,7 @@ export default new Vuex.Store({
     server: {
       apiUrl: 'https://molgenis09.gcc.rug.nl/api/'
     },
-    token: '2da7e973d49f437e9899ac38607a95e8'
+    token: '91efd34943b54d31be116316d4352ded'
   },
   getters: { rsql },
   mutations: {
@@ -63,7 +63,7 @@ export default new Vuex.Store({
       const sampleCounts = matrix.map(row => row[0])
       const biobanks = xLabels.map(biobank => biobank.abbr)
       const aggs = zip([biobanks, sampleCounts])
-        .reduce((agg, v) => ([...agg, { biobank: v[0], sampleCount: v[1] }]), [])
+        .reduce((agg, v) => ([...agg, v]), [])
       console.log(aggs)
       state.aggs = aggs
     }
