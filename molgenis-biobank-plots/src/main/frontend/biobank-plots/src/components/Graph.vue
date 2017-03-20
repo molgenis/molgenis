@@ -1,6 +1,8 @@
 <template>
   <div>
-    <vue-chart :columns="columns" :rows="aggs" :options="options" chartType="BarChart"></vue-chart>
+    <vue-chart :columns="columns" :rows="aggs" :options="options"
+               chartType="BarChart" :chartEvents="chartEvents"
+               ref="sampleCounts"/>
   </div>
 </template>
 
@@ -13,7 +15,16 @@
 
   export default {
     data: function () {
+      const self = this
       return {
+        chartEvents: {
+          'select': function () {
+            const row = self.$refs.sampleCounts.chart.getSelection()[0].row
+            const biobank = self.aggs[row][0]
+            // TODO: dispatch selection
+            console.log('select', row, biobank)
+          }
+        },
         columns: [{
           'type': 'string',
           'label': 'Biobank'
