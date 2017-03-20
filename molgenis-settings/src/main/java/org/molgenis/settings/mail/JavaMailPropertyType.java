@@ -15,7 +15,7 @@ public class JavaMailPropertyType extends SystemEntityType
 	private static final String SIMPLE_NAME = "JavaMailProperty";
 	public static final String JAVA_MAIL_PROPERTY = MailPackage.PACKAGE_MAIL + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	private MailSettingsImpl.Meta mailSettings;
+	private MailSettingsImplMetadata mailSettings;
 	private final MailPackage mailPackage;
 	private final PropertyType propertyType;
 	public static final String MAIL_SETTINGS_REF = "mailSettings";
@@ -29,7 +29,7 @@ public class JavaMailPropertyType extends SystemEntityType
 	}
 
 	@Autowired
-	public void setMailSettingsMetadata(MailSettingsImpl.Meta mailSettings)
+	public void setMailSettingsMetadata(MailSettingsImplMetadata mailSettings)
 	{
 		this.mailSettings = requireNonNull(mailSettings);
 	}

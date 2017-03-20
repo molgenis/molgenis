@@ -9,11 +9,11 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class MailSettingsRepositoryDecoratorFactory
-		extends AbstractSystemRepositoryDecoratorFactory<MailSettingsImpl, MailSettingsImpl.Meta>
+		extends AbstractSystemRepositoryDecoratorFactory<MailSettingsImpl, MailSettingsImplMetadata>
 {
 	private final MailSenderFactory mailSenderFactory;
 
-	public MailSettingsRepositoryDecoratorFactory(MailSettingsImpl.Meta mailSettingsMeta,
+	public MailSettingsRepositoryDecoratorFactory(MailSettingsImplMetadata mailSettingsMeta,
 			MailSenderFactory mailSenderFactory)
 	{
 		super(mailSettingsMeta);
