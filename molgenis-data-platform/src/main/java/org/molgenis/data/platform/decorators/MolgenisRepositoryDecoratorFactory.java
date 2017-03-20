@@ -82,51 +82,54 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repository;
 
-		// 12. Query the L2 cache before querying the database
+		// 14. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-		// 11. Query the L1 cache before querying the database
+		// 13. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 10. Route specific queries to the index
+		// 12. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
 
-		// 9. Query the L3 cache before querying the index
+		// 11. Query the L3 cache before querying the index
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
-		// 8. Register the cud action needed to index indexed repositories
+		// 10. Register the cud action needed to index indexed repositories
 		decoratedRepository = new IndexActionRepositoryDecorator(decoratedRepository, indexActionRegisterService);
 
-		// 7. Custom decorators
+		// 9. Custom decorators
 		decoratedRepository = repositoryDecoratorRegistry.decorate(decoratedRepository);
 
-		// 6. Owned decorator
+		// 8. Perform cascading deletes
+		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
+
+		// 7. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityType(), OWNED))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
 
-		// 5. Entity reference resolver decorator
+		// 6. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
-		// 4. Entity listener
+		// 5. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository, entityListenersService);
 
-		// 3. validation decorator
+		// 4. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
 				entityAttributesValidator, expressionValidator);
 
-		// 2. aggregate anonymization decorator
+		// 3. aggregate anonymization decorator
 		decoratedRepository = new AggregateAnonymizerRepositoryDecorator<>(decoratedRepository, aggregateAnonymizer,
 				appSettings);
 
-		// 1. security decorator
+		// 2. security decorator
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
 
-		// 0. transaction decorator
+		// 1. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);
 
-		// -1. query validation decorator
+		// 0. query validation decorator
 		decoratedRepository = new QueryValidationRepositoryDecorator<>(decoratedRepository, queryValidator);
 
 		return decoratedRepository;
