@@ -23,6 +23,7 @@ export const mutations = {
     const aggs = zip([biobanks, sampleCounts])
       .reduce((agg, v) => ([...agg, v]), [])
     state.aggs = aggs
+    state.numberOfSamples = sampleCounts.reduce((a, b) => a + b, 0)
   },
   [SET_BIOBANKS] (state, items) {
     state.biobanks = items
