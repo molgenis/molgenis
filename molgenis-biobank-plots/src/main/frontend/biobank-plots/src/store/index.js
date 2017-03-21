@@ -1,5 +1,8 @@
+import Vue from 'vue'
 import Vuex from 'vuex'
 import {get} from '../molgenisApi'
+
+Vue.use(Vuex)
 
 function zip (arrays) {
   return arrays[0].map(function (_, i) {
