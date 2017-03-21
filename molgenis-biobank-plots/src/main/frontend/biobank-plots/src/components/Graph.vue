@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <vue-chart :columns="columns" :rows="aggs" :options="options"
-               chartType="BarChart" :chartEvents="chartEvents"
-               ref="sampleCounts"/>
-  </div>
+  <vue-chart :columns="columns" :rows="aggs" :options="options"
+             chartType="BarChart" :chartEvents="chartEvents"
+             ref="sampleCounts"></vue-chart>
 </template>
 
 <script>
@@ -21,8 +19,7 @@
           'select': function () {
             const row = self.$refs.sampleCounts.chart.getSelection()[0].row
             const biobank = self.aggs[row][0]
-            // TODO: dispatch selection
-            console.log('select', row, biobank)
+            self.$store.commit('setFilter', {name: 'biobank', value: biobank})
           }
         },
         columns: [{

@@ -48,13 +48,14 @@ export default new Vuex.Store({
     female: false,
     smoking: false,
     nonSmoking: false,
+    biobank: null,
     aggs: [],
+    biobanks: [],
     server: {
       apiUrl: 'https://molgenis09.gcc.rug.nl/api/'
     },
-    token: '91efd34943b54d31be116316d4352ded'
+    token: 'c9e0671dd1f243e4a5794bf57152d8b7'
   },
-  getters: { rsql },
   mutations: {
     setFilter: function (state, {name, value}) {
       state[name] = value
@@ -64,11 +65,17 @@ export default new Vuex.Store({
       const biobanks = xLabels.map(biobank => biobank.abbr)
       const aggs = zip([biobanks, sampleCounts])
         .reduce((agg, v) => ([...agg, v]), [])
-      console.log(aggs)
       state.aggs = aggs
+    },
+    setBiobanks: function (state, items) {
+      state.biobanks = items
     }
   },
   actions: {
+    getBiobanks: function ({ commit, state }) {
+      get(state.server, 'v2/WP2_biobanks', state.token)
+        .then(response => { commit('setBiobanks', response.items) })
+    },
     setFilterAsync: function ({commit, state}, {name, value}) {
       commit('setFilter', {name, value})
       get(state.server, `v2/WP2_RP?${rsql(state)}aggs=x==biobank_abbr`, state.token)
