@@ -41,7 +41,6 @@ const datatypeGraph = responses => {
   const matrixValues = aggs => {
     const zipped = zip([aggs.xLabels, aggs.matrix.map(row => row[0])])
     const vals = zipped.reduce((acc, val) => ({...acc, [humanReadable[val[0]]]: val[1]}), {True: 0, False: 0, Unknown: 0})
-    console.log(zipped, vals)
     return [vals.True, vals.False, vals.Unknown]
   }
   return {
@@ -67,7 +66,6 @@ export const actions = {
       .then(response => { commit(SET_BIOBANKS, response.items) })
   },
   [SET_BIOBANK] ({commit, state}, biobank) {
-    console.log('setBiobank')
     commit(SET_ATTRIBUTE_CHARTS, [])
     commit(SET_FILTER, {name: 'biobank', value: biobank})
     const filter = rsql(state)

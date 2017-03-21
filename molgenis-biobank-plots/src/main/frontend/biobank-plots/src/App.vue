@@ -29,12 +29,17 @@ import Filters from './components/Filters'
 import Graph from './components/Graph'
 import AttributeGraphs from './components/AttributeGraphs'
 
+import { SET_FILTER_ASYNC } from './store/actions'
+
 export default {
   name: 'app',
   components: {
     Filters,
     Graph,
     AttributeGraphs
+  },
+  created () {
+    this.$store.dispatch(SET_FILTER_ASYNC, {name: '', value: false})
   }
 }
 </script>
