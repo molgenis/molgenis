@@ -25,7 +25,6 @@ import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.MolgenisDateFormat;
@@ -56,7 +55,6 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;

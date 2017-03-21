@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
@@ -15,6 +14,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -46,7 +46,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-public class AttributeRepositoryDecoratorTest
+public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private AttributeRepositoryDecorator repo;
 	@Mock
@@ -78,7 +78,6 @@ public class AttributeRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		when(attribute.getEntity()).thenReturn(abstractEntityType);
 		when(attribute.getName()).thenReturn("attributeName");
 		when(dataService.getMeta()).thenReturn(metadataService);

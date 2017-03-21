@@ -10,15 +10,15 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.*;
 
-public class AlgorithmServiceImplTest
+public class AlgorithmServiceImplTest extends AbstractMockitoTest
 {
 	@Mock
 	private OntologyTagService ontologyTagService;
@@ -36,7 +36,6 @@ public class AlgorithmServiceImplTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		initMocks(this);
 		algorithmServiceImpl = new AlgorithmServiceImpl(ontologyTagService, semanticSearhService,
 				algorithmGeneratorService, entityManager, jsMagmaScriptEvaluator);
 	}

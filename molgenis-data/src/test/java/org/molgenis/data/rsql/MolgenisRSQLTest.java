@@ -1,13 +1,14 @@
 package org.molgenis.data.rsql;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -16,18 +17,19 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
-public class MolgenisRSQLTest
+public class MolgenisRSQLTest extends AbstractMockitoTest
 {
 	private MolgenisRSQL molgenisRSQL;
+	@Mock
 	private EntityType entityType;
+	@Mock
 	private EntityType genderEntityType;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		molgenisRSQL = new MolgenisRSQL();
-		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Person").getMock();
+		when(entityType.getFullyQualifiedName()).thenReturn("Person").getMock();
 		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
 		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
@@ -35,7 +37,7 @@ public class MolgenisRSQLTest
 		when(entityType.getAttribute("name")).thenReturn(nameAttr);
 		when(entityType.getAttribute("age")).thenReturn(ageAttr);
 
-		genderEntityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Gender").getMock();
+		when(genderEntityType.getFullyQualifiedName()).thenReturn("Gender").getMock();
 		Attribute genderIdAttribute = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(genderIdAttribute.getDataType()).thenReturn(INT);
 		when(genderEntityType.getIdAttribute()).thenReturn(genderIdAttribute);

@@ -2,15 +2,16 @@ package org.molgenis.ui.freemarker;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.system.core.FreemarkerTemplateFactory;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.system.core.FreemarkerTemplateMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
 import static org.testng.Assert.*;
@@ -28,19 +28,16 @@ import static org.testng.Assert.*;
 public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest
 {
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.system.core" })
+	@Import({ FreemarkerTemplateMetaData.class, FreemarkerTemplateFactory.class })
 	static class Config
 	{
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
+		@Autowired
+		private DataService dataService;
 
 		@Bean
 		public RepositoryTemplateLoader repositoryTemplateLoader()
 		{
-			return new RepositoryTemplateLoader(dataService());
+			return new RepositoryTemplateLoader(dataService);
 		}
 	}
 

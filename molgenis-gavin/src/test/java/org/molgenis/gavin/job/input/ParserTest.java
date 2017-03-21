@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Multiset;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.gavin.job.input.model.CaddVariant;
 import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.gavin.job.input.model.Variant;
 import org.molgenis.gavin.job.input.model.VcfVariant;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -20,19 +19,13 @@ import java.util.List;
 import static org.mockito.Mockito.verify;
 import static org.molgenis.gavin.job.input.model.LineType.*;
 
-public class ParserTest
+public class ParserTest extends AbstractMockitoTest
 {
 	private Parser lineParser = new Parser();
 	@Mock
 	private LineSink output;
 	@Mock
 	private LineSink error;
-
-	@BeforeMethod
-	private void beforeMethod()
-	{
-		MockitoAnnotations.initMocks(this);
-	}
 
 	@DataProvider(name = "chrom")
 	public Object[][] createParseChromTestcases()

@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
 import com.google.common.collect.Maps;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
@@ -13,12 +14,12 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.*;
+import org.molgenis.script.config.ScriptTestConfig;
 import org.molgenis.security.core.token.TokenService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -107,9 +108,12 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.script" })
+	@Import(ScriptTestConfig.class)
 	public static class Config
 	{
+		@Autowired
+		private DataService dataService;
+
 		@Bean
 		public FileStore fileStore()
 		{
@@ -125,13 +129,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public AlgorithmTemplateServiceImpl algorithmTemplateServiceImpl()
 		{
-			return new AlgorithmTemplateServiceImpl(dataService());
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
+			return new AlgorithmTemplateServiceImpl(dataService);
 		}
 	}
 }

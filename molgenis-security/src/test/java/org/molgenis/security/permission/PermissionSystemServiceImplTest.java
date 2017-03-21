@@ -4,12 +4,14 @@ import com.google.common.collect.Sets;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.user.UserService;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +23,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,13 +36,12 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PermissionSystemServiceImplTest.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContextTests
+public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@Captor
 	private ArgumentCaptor<Stream<UserAuthority>> userAuthorityStreamCaptor;
@@ -67,7 +67,6 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		initMocks(this);
 		config.resetMocks();
 		permissionSystemService = new PermissionSystemServiceImpl(userService, userAuthorityFactory, roleHierarchy,
 				dataService);
@@ -153,7 +152,7 @@ public class PermissionSystemServiceImplTest extends AbstractTestNGSpringContext
 
 		public Config()
 		{
-			initMocks(this);
+			MockitoAnnotations.initMocks(this);
 		}
 
 		@Bean

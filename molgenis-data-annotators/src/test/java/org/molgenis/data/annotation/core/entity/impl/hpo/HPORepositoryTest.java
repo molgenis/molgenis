@@ -1,8 +1,8 @@
 package org.molgenis.data.annotation.core.entity.impl.hpo;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;

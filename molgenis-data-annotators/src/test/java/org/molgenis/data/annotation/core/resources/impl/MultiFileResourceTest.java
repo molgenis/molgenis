@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import org.elasticsearch.common.collect.Lists;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.core.resources.ResourceConfig;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
-public class MultiFileResourceTest
+public class MultiFileResourceTest extends AbstractMockitoTest
 {
 	private MultiFileResource multiFileResource;
 	@Mock
@@ -43,7 +43,6 @@ public class MultiFileResourceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		configs = ImmutableMap.of("3", chrom3Config, "4", chrom4Config);
 		when(config.getConfigs()).thenReturn(configs);
 		multiFileResource = new MultiFileResource("name", config)

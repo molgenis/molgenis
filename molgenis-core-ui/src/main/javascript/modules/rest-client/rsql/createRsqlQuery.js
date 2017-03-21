@@ -1,4 +1,4 @@
-import {encode} from 'mdurl'
+import {encode} from "mdurl";
 
 export function containsRsqlReservedCharacter(value) {
     return /["'();,=!~<> ]/.test(value);
@@ -15,7 +15,7 @@ export function rsqlEscape(value) {
     return quoteChar + value.split(quoteChar).join("\\" + quoteChar) + quoteChar
 }
 
-function toRsqlValue(value) {
+export function toRsqlValue(value) {
     return containsRsqlReservedCharacter(value) ? rsqlEscape(value) : value;
 }
 

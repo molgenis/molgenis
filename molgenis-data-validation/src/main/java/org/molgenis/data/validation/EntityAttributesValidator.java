@@ -421,7 +421,8 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, Attribute attribute, EntityType entityType,
 			String message)
 	{
-		String dataValue = getDataValuesForType(entity, attribute).toString();
+		Object value = getDataValuesForType(entity, attribute);
+		String dataValue = value != null ? value.toString() : null;
 		String fullMessage = format("Invalid [%s] value [%s] for attribute [%s] of entity [%s] with type [%s].",
 				attribute.getDataType().toString().toLowerCase(), dataValue, attribute.getLabel(),
 				entity.getLabelValue(), entityType.getFullyQualifiedName());

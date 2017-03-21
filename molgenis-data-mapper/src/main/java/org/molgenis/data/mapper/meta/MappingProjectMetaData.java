@@ -46,6 +46,6 @@ public class MappingProjectMetaData extends SystemEntityType
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(OWNER).setDataType(XREF).setRefEntity(userMetaData);
-		addAttribute(MAPPING_TARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData);
+		addAttribute(MAPPING_TARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData).setCascadeDelete(true);
 	}
 }

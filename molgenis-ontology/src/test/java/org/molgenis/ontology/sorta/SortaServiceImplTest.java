@@ -1,5 +1,6 @@
 package org.molgenis.ontology.sorta;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
@@ -7,17 +8,17 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -62,8 +63,8 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private OntologyTermDynamicAnnotationFactory ontologyTermDynamicAnnotationFactory;
 
-	@BeforeClass
-	public void beforeClass()
+	@BeforeMethod
+	public void beforeMethod()
 	{
 		// Mock ontology entity
 		Ontology ontology = ontologyFactory.create();
@@ -335,21 +336,17 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model",
-			"org.molgenis.ontology.sorta.meta", "org.molgenis.data.jobs.model" })
+	@Import({ OntologyTestConfig.class, OntologyTermHitMetaData.class })
 	public static class Config
 	{
+		@Autowired
+		private DataService dataService;
+
 		@Autowired
 		public OntologyTermHitMetaData ontologyTermHitMetaData;
 
 		@Autowired
 		private OntologyTermSynonymFactory ontologyTermSynonymFactory;
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
 
 		@Bean
 		public InformationContentService informationContentService()
@@ -360,7 +357,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public SortaServiceImpl sortaServiceImpl()
 		{
-			return new SortaServiceImpl(dataService(), informationContentService(), ontologyTermHitMetaData,
+			return new SortaServiceImpl(dataService, informationContentService(), ontologyTermHitMetaData,
 					ontologyTermSynonymFactory);
 		}
 	}

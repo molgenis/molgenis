@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.core.entity.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
@@ -9,12 +10,12 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -522,7 +523,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model" })
+	@Import({ VcfTestConfig.class })
 	public static class Config
 	{
 	}

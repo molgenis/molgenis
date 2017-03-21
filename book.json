@@ -1,7 +1,14 @@
 {
   "gitbook": "^3.0.0",
   "root": "./docs",
-  "plugins": ["edit-link", "prism", "-fontsettings", "-highlight", "github"],
+  "plugins": [
+    "edit-link",
+    "prism",
+    "-fontsettings",
+    "-highlight",
+    "github",
+    "versions"
+  ],
   "pluginsConfig": {
     "edit-link": {
       "base": "https://github.com/molgenis/molgenis/tree/master/docs",
@@ -9,6 +16,20 @@
     },
     "github": {
       "url": "https://github.com/molgenis/molgenis/"
+    },
+    "versions": {
+      "gitbookConfigURL": "https://raw.githubusercontent.com/molgenis/molgenis/master/book.json",
+      "options": [
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/master/",
+          "text": "MOLGENIS version currently under development",
+          "selected": true
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/1.21/",
+          "text": "MOLGENIS v1.21.x"
+        }
+      ]
     }
   },
   "links": {

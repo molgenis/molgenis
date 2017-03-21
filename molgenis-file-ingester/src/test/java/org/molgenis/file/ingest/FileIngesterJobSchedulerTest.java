@@ -1,16 +1,18 @@
 package org.molgenis.file.ingest;
 
+import org.molgenis.auth.SecurityPackage;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.file.ingest.config.FileIngestTestConfig;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -22,7 +24,6 @@ import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 @ContextConfiguration(classes = { FileIngesterJobSchedulerTest.Config.class })
 public class FileIngesterJobSchedulerTest extends AbstractMolgenisSpringTest
 {
-	private static DataService dataServiceMock = mock(DataService.class);
 	private static Scheduler schedulerMock = mock(Scheduler.class);
 
 	@Autowired
@@ -40,7 +41,6 @@ public class FileIngesterJobSchedulerTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(dataServiceMock);
 		reset(schedulerMock);
 	}
 
@@ -156,26 +156,22 @@ public class FileIngesterJobSchedulerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.file.ingest.meta", "org.molgenis.security.owned", "org.molgenis.file.model",
-			"org.molgenis.data.jobs.model", "org.molgenis.auth" })
+	@Import({ SecurityPackage.class, FileIngestTestConfig.class })
 	public static class Config
 	{
+		@Autowired
+		private DataService dataService;
+
 		@Bean
 		public FileIngesterJobScheduler fileIngesterJobScheduler()
 		{
-			return new FileIngesterJobScheduler(scheduler(), dataService());
+			return new FileIngesterJobScheduler(scheduler(), dataService);
 		}
 
 		@Bean
 		public Scheduler scheduler()
 		{
 			return schedulerMock;
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return dataServiceMock;
 		}
 	}
 }

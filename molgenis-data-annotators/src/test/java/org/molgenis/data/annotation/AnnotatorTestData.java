@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.Attribute;
@@ -8,7 +9,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;

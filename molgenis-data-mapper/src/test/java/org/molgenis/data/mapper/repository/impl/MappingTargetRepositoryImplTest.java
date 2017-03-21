@@ -2,9 +2,10 @@ package org.molgenis.data.mapper.repository.impl;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
@@ -19,12 +20,11 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserService;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -86,8 +86,6 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
-
 		// POJOs
 		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
 		targetEntityType = entityTypeFactory.create("target").setName("target");
@@ -153,7 +151,7 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
+	@Import(MapperTestConfig.class)
 	public static class Config
 	{
 		@Bean

@@ -15,6 +15,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>3.9</version>

@@ -55,5 +55,11 @@
             <artifactId>jdom</artifactId>
             <version>1.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

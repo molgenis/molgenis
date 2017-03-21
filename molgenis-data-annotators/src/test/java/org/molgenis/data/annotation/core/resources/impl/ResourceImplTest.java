@@ -1,21 +1,22 @@
 package org.molgenis.data.annotation.core.resources.impl;
 
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.config.EffectsTestConfig;
 import org.molgenis.data.annotation.core.resources.ResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -48,7 +49,6 @@ public class ResourceImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		resource = new ResourceImpl("cadd_test", config)
 		{
 			@Override
@@ -82,7 +82,7 @@ public class ResourceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.annotation.core.effects" })
+	@Import({ VcfTestConfig.class, EffectsTestConfig.class })
 	public static class Config
 	{
 	}

@@ -23,7 +23,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
  * Serves Swagger documentation of the REST API.
- * @see  <a href="http://swagger.io/">http://swagger.io/</a>
+ *
+ * @see <a href="http://swagger.io/">http://swagger.io/</a>
  */
 @Controller
 @RequestMapping(URI)

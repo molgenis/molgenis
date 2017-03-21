@@ -1,6 +1,7 @@
 package org.molgenis.data.jobs;
 
 import org.mockito.Mock;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -8,18 +9,15 @@ import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 
@@ -49,12 +47,6 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private Query<Entity> query;
-
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-	}
 
 	@Test
 	public void testBootstrap()
@@ -95,12 +87,6 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	@Configuration
 	public static class Config
 	{
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
-
 		@Bean
 		public SystemEntityTypeRegistry systemEntityTypeRegistry()
 		{

@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.index;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -18,7 +19,6 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +59,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		initMocks(this);
 		config.resetMocks();
 
 		indexBootstrapper = new IndexBootstrapper(metaDataService, searchService, indexActionRegisterService,
@@ -140,9 +139,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	public static class Config
 	{
 		@Mock
-		DataService dataService;
-
-		@Mock
 		SearchService searchService;
 
 		@Mock
@@ -160,12 +156,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		public Config()
 		{
 			initMocks(this);
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return dataService;
 		}
 
 		@Bean
@@ -187,12 +177,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public AttributeMetadata attributeMetadata()
-		{
-			return attributeMetadata;
-		}
-
-		@Bean
 		public EntityTypeFactory entityTypeFactory()
 		{
 			return entityTypeFactory;
@@ -200,7 +184,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		void resetMocks()
 		{
-			reset(dataService, searchService, indexActionRegisterService, metaDataService, attributeMetadata,
+			reset(searchService, indexActionRegisterService, metaDataService, attributeMetadata,
 					entityTypeFactory);
 		}
 	}

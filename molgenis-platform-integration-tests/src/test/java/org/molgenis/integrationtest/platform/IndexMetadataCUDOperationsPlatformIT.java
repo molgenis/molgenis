@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.platform;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
@@ -12,7 +13,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.test.data.EntityTestHarness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

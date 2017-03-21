@@ -1,18 +1,19 @@
 package org.molgenis.data.vcf.format;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -162,7 +163,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.vcf.model" })
+	@Import({ VcfTestConfig.class })
 	public static class Config
 	{
 

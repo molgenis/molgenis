@@ -2,21 +2,17 @@ package org.molgenis.data.cache.utils;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
-import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
@@ -31,14 +27,13 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { EntityHydrationTest.Config.class })
+@ContextConfiguration(classes = { TestHarnessConfig.class })
 public class EntityHydrationTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
@@ -51,15 +46,14 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
+	private List<Entity> refEntities;
 
 	@BeforeClass
 	public void beforeClass() throws ParseException
 	{
-		initMocks(this);
-
 		// create referenced entities
 		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
-		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 1);
+		refEntities = entityTestHarness.createTestRefEntities(refEntityType, 1);
 
 		entityType = entityTestHarness.createDynamicTestEntityType(refEntityType);
 
@@ -88,14 +82,16 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_XREF, "0");
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
 		dehydratedEntity.put(ATTR_COMPOUND_CHILD_INT, 10);
+	}
 
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
 		// mock entity manager
-		EntityManager entityManager = when(
-				mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
+		EntityManager entityManager = when(mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
 				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityType))).getMock();
 		when(entityManager.getReference(entityTypeArgumentCaptor.capture(), eq("0"))).thenReturn(refEntities.get(0));
-		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0"))))
-				.thenReturn(refEntities);
+		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0")))).thenReturn(refEntities);
 		entityHydration = new EntityHydration(entityManager);
 	}
 
@@ -154,11 +150,5 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		when(entityType.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
 		when(entity.getEntityType()).thenReturn(entityType);
 		assertEquals(entityHydration.dehydrate(entity), singletonMap(attrName, manyToOneEntityIdValue));
-	}
-
-	@Configuration
-	@ComponentScan(basePackages = "org.molgenis.test.data")
-	public static class Config
-	{
 	}
 }
