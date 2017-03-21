@@ -11,7 +11,6 @@
         </div>
       </div>
     </div>
-
     <form>
       <h4>Data types</h4>
       <div class="custom-controls-stacked">
@@ -38,7 +37,7 @@
 
       <hr>
       <h4>Age</h4>
-      From to
+      From <filter-text-input name="ageFrom" min=0 max=150></filter-text-input> to <filter-text-input name="ageFrom" min=0 max="150"></filter-text-input>
 
       <hr>
       <h4>Biobank</h4>
@@ -56,10 +55,11 @@
 
 <script>
   import FilterCheckbox from './FilterCheckbox'
+  import FilterTextInput from './FilterNumberInput'
   import {mapState} from 'vuex'
 
   export default {
-    components: { filterCheckbox: FilterCheckbox },
+    components: { FilterCheckbox, FilterTextInput },
     computed: {
       ...mapState({
         biobankOptions: state => state.biobanks.map(biobank => ({

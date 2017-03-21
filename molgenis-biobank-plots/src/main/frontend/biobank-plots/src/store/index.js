@@ -75,7 +75,7 @@ export default new Vuex.Store({
     server: {
       apiUrl: 'https://molgenis09.gcc.rug.nl/api/'
     },
-    token: 'e4da2ad59e8c4b339c2225bc7911d0d5'
+    token: 'fac3a156d8474a99940507cb206a76d9'
   },
   mutations: {
     resetFilters: function () {
