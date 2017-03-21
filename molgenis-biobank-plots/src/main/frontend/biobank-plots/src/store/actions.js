@@ -52,7 +52,7 @@ const datatypeGraph = responses => {
       {type: 'number', label: 'Unknown'}
     ],
     rows: [
-      ['rnaseq', ...matrixValues(responses[2].aggs)],
+      ['RNAseq', ...matrixValues(responses[2].aggs)],
       ['wbcc', ...matrixValues(responses[3].aggs)],
       ['DNA', ...matrixValues(responses[4].aggs)],
       ['DNAm', ...matrixValues(responses[5].aggs)]
@@ -76,7 +76,7 @@ export const actions = {
       responses => {
         const smokingGraph = {
           title: 'Smoking',
-          rows: [['smoking', ...responses[0].aggs.matrix.map(row => row[0])]],
+          rows: [['Smoking', ...responses[0].aggs.matrix.map(row => row[0])]],
           columns: [
             {type: 'string', label: 'label'},
             ...responses[0].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
@@ -84,7 +84,7 @@ export const actions = {
         }
         const sexGraph = {
           title: 'Sex',
-          rows: [['sex', ...responses[1].aggs.matrix.map(row => row[0])]],
+          rows: [['Sex', ...responses[1].aggs.matrix.map(row => row[0])]],
           columns: [
             {type: 'string', label: 'label'},
             ...responses[1].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
