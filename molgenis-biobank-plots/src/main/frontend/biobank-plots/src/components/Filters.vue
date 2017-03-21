@@ -55,6 +55,11 @@
           value: biobank.abbr
         }))
       }),
+      numberOfSamples: {
+        get () {
+          return this.$store.state.numberOfSamples
+        }
+      },
       selectedBiobank: {
         get () {
           return this.$store.state.biobank
@@ -67,11 +72,6 @@
     created () {
       this.$store.dispatch('getBiobanks')
       this.$store.commit('setFilter', {name: 'DNA', value: false})
-    },
-    data: function () {
-      return {
-        numberOfSamples: 6
-      }
     },
     name: 'filters'
   }
