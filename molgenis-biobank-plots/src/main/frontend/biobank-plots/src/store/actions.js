@@ -95,10 +95,10 @@ export const actions = {
     const {biobank, server} = state
     const filter = rsql(state)
     const q = filter.length
-      ? `q=${filter};biobank_abbr==${biobank}&`
+      ? (biobank ? `q=${filter};biobank_abbr==${biobank}&` : `q=${filter}&`)
       : (biobank ? `q=biobank_abbr==${biobank}&` : '')
     const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
-    const promises = attributes.map(attr => get(server, `/v2/WP2_RP?${q}&aggs=x==${attr}`, state.token))
+    const promises = attributes.map(attr => get(server, `/v2/WP2_RP?${q}aggs=x==${attr}`, state.token))
     Promise.all(promises).then(
       responses => {
         const smokingGraph = {
