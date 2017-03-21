@@ -1,14 +1,23 @@
 <template>
-  <div id="app" class="container-fluid">
-    <div class="row">
-      <div class="col-2">
-        <filters/>
-      </div>
-      <div class="col-6">
-        <graph/>
-      </div>
-      <div class="col-4">
-        <attribute-graphs/>
+  <div id="app">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-8 col-sm-12">
+          <br>
+          <h1>Possible title</h1>
+          <hr>
+          <div class="row">
+            <div class="col-md-4">
+              <filters/>
+            </div>
+            <div class="col-md-8 ">
+              <graph/>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <attribute-graphs/>
+        </div>
       </div>
     </div>
   </div>
