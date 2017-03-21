@@ -1,5 +1,5 @@
 <template>
-  <b-form-checkbox :checked="value" @change="setFilter">{{label}}</b-form-checkbox>
+  <b-form-checkbox v-model="value">{{label}}</b-form-checkbox>
 </template>
 
 <script>
@@ -7,13 +7,13 @@
     name: 'filter-checkbox',
     props: ['name', 'label'],
     computed: {
-      value: function () {
-        return this.$store.state[this.name]
-      }
-    },
-    methods: {
-      setFilter (checked) {
-        this.$store.dispatch('setFilterAsync', {name: this.name, value: checked})
+      value: {
+        get: function () {
+          return this.$store.state[this.name]
+        },
+        set: function (checked) {
+          this.$store.dispatch('setFilterAsync', {name: this.name, value: checked})
+        }
       }
     }
   }
