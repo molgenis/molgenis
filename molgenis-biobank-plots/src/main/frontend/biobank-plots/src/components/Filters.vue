@@ -33,7 +33,6 @@
   import {mapState} from 'vuex'
 
   export default {
-    self: this,
     components: { filterCheckbox: FilterCheckbox },
     computed: {
       ...mapState({
