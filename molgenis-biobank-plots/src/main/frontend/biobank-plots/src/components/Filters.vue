@@ -1,5 +1,5 @@
 <template>
-  <b-card header="Filters" header-tag="h1">
+  <b-card header="Filters" header-tag="h1" show-footer>
   <form>
     <h4>Data types</h4>
     <div class="custom-controls-stacked">
@@ -34,6 +34,11 @@
       <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
     </select>
   </form>
+
+  <small slot="footer" class="text-muted">
+    Number of samples: {{numberOfSamples}}
+  </small>
+
   </b-card>
 </template>
 
@@ -62,6 +67,11 @@
     created () {
       this.$store.dispatch('getBiobanks')
       this.$store.commit('setFilter', {name: 'DNA', value: false})
+    },
+    data: function () {
+      return {
+        numberOfSamples: 6
+      }
     },
     name: 'filters'
   }
