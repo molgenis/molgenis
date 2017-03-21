@@ -66,7 +66,6 @@ export const actions = {
       .then(response => { commit(SET_BIOBANKS, response.items) })
   },
   [SET_BIOBANK] ({commit, state}, biobank) {
-    console.log('setBiobank')
     commit(SET_ATTRIBUTE_CHARTS, [])
     commit(SET_FILTER, {name: 'biobank', value: biobank})
     const filter = rsql(state)
