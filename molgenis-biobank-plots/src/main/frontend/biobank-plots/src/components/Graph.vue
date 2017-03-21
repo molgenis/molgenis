@@ -1,6 +1,9 @@
 <template>
   <div>
     <h4>Number of Samples per Biobank</h4>
+    <small class="text-muted">
+      Number of samples: {{numberOfSamples}}
+    </small>
     <vue-chart :columns="columns" :rows="aggs" :options="options"
                chartType="BarChart" :chartEvents="chartEvents"
                ref="sampleCounts"></vue-chart>
@@ -47,6 +50,11 @@
       }
     },
     computed: {
+      numberOfSamples: {
+        get () {
+          return this.$store.state.numberOfSamples
+        }
+      },
       ...mapState(['aggs'])
     }
   }

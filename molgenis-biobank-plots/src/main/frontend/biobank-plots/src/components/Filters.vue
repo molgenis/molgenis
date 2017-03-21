@@ -1,5 +1,5 @@
 <template>
-  <b-card show-header show-footer>
+  <b-card show-header>
 
     <div slot="header">
       <div class="row">
@@ -46,11 +46,6 @@
         <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
       </select>
     </form>
-
-    <small slot="footer" class="text-muted">
-      Number of samples: {{numberOfSamples}}
-    </small>
-
   </b-card>
 </template>
 
@@ -70,11 +65,6 @@
           value: biobank.abbr
         }))
       }),
-      numberOfSamples: {
-        get () {
-          return this.$store.state.numberOfSamples
-        }
-      },
       selectedBiobank: {
         get () {
           return this.$store.state.biobank
