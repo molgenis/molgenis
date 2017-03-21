@@ -111,7 +111,19 @@ export default new Vuex.Store({
       const filter = rsql(state)
       const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `biobank_abbr==${biobank}&`
       get(state.server, `/v2/WP2_RP?${q}&aggs=x==sex`, state.token)
-        .then()
+        .then(response => {
+          const sexGraph = {
+            rows: [['sex', ...response.aggs.matrix.map(row => row[0])]],
+            columns: [
+            {type: 'string', label: 'label'},
+            {type: 'number', label: 'Female'},
+            {type: 'number', label: 'Male'},
+            {type: 'number', label: 'Unknown'}
+            ]
+          }
+          const attributeGraphs = [sexGraph]
+          commit('setAttributeCharts', attributeGraphs)
+        })
     },
     setFilterAsync: function ({commit, state}, {name, value}) {
       commit('setFilter', {name, value})
