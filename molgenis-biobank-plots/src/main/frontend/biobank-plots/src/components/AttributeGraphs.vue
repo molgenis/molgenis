@@ -6,7 +6,7 @@
         <h4 v-else>Sample makeup: All biobanks</h4>
       </div>
       <div class="row">
-        <div v-for="chart in attributeCharts" class="col-4">
+        <div v-for="chart in attributeCharts" class="col-md-4">
           {{chart.title}}
           <vue-chart :rows="chart.rows" :columns="chart.columns" :options="options"
                      chartType="ColumnChart" :chartEvents="chartEvents"></vue-chart>
@@ -30,7 +30,8 @@
         },
         options: {
           legend: { position: 'top', maxLines: 3 },
-          isStacked: true
+          isStacked: true,
+          width: '100%'
         }
       }
     },
