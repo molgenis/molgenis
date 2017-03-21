@@ -36,7 +36,7 @@
           'label': 'Biobank'
         }, {
           'type': 'number',
-          'label': 'SampleCount'
+          'label': 'Samples'
         }],
         options: {
           hAxis: {
@@ -45,7 +45,8 @@
           vAxis: {
             title: 'Biobank'
           },
-          height: 400
+          height: 325,
+          width: '100%'
         }
       }
     },
