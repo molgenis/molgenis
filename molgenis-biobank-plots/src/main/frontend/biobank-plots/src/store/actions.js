@@ -71,11 +71,11 @@ export const actions = {
   [SET_BIOBANK] ({commit, dispatch}, biobank) {
     commit(SET_FILTER, {name: 'biobank', value: biobank})
     dispatch(REFRESH_ATTRIBUTE_GRAPHS)
-    dispatch(REFRESH_GRAPH)
   },
   [SET_FILTER_ASYNC] ({commit, dispatch}, {name, value}) {
     commit(SET_FILTER, {name, value})
     dispatch(REFRESH_GRAPH)
+    dispatch(REFRESH_ATTRIBUTE_GRAPHS)
   },
   [RESET_FILTERS_ASYNC] ({commit, dispatch}) {
     commit(RESET_FILTERS)
