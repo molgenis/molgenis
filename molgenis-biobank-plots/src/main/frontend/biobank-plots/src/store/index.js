@@ -1,12 +1,5 @@
-import Vue from 'vue'
 import Vuex from 'vuex'
-import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
 import {get} from '../molgenisApi'
-
-Vue.use(Vuex)
-Vue.use(BootstrapVue)
 
 function zip (arrays) {
   return arrays[0].map(function (_, i) {
