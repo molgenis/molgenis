@@ -3,6 +3,8 @@
 </template>
 
 <script>
+  import { SET_FILTER_ASYNC } from '../store/actions'
+
   export default {
     name: 'filter-checkbox',
     props: ['name', 'label'],
@@ -12,7 +14,7 @@
           return this.$store.state[this.name]
         },
         set: function (checked) {
-          this.$store.dispatch('setFilterAsync', {name: this.name, value: checked})
+          this.$store.dispatch(SET_FILTER_ASYNC, {name: this.name, value: checked})
         }
       }
     }

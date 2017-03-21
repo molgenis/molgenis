@@ -12,6 +12,8 @@
   import Vue from 'vue'
   import VueCharts from 'vue-charts'
 
+  import { SET_BIOBANK } from '../store/actions'
+
   Vue.use(VueCharts)
 
   export default {
@@ -23,7 +25,7 @@
           'select': function () {
             const row = self.$refs.sampleCounts.chart.getSelection()[0].row
             const biobank = self.aggs[row][0]
-            self.$store.dispatch('setBiobank', biobank)
+            self.$store.dispatch(SET_BIOBANK, biobank)
           }
         },
         columns: [{
