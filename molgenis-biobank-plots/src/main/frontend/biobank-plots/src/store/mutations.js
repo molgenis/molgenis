@@ -18,6 +18,7 @@ export const mutations = {
     const biobanks = xLabels.map(biobank => biobank.abbr)
     state.aggs = zip([biobanks, sampleCounts])
       .reduce((agg, v) => ([...agg, v]), [])
+    state.numberOfSamples = sampleCounts.reduce((a, b) => a + b, 0)
   },
   [SET_BIOBANKS] (state, items) {
     state.biobanks = items
