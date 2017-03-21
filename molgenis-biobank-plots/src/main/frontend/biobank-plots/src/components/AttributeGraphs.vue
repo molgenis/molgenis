@@ -1,8 +1,10 @@
 <template>
   <div>
+    <template v-for="chart in attributeCharts">
+    <h4>{{chart.title}}</h4>
     <vue-chart :rows="chart.rows" :columns="chart.columns" :options="options"
-               chartType="ColumnChart" :chartEvents="chartEvents"
-               v-for="chart in attributeCharts"></vue-chart>
+               chartType="ColumnChart" :chartEvents="chartEvents"></vue-chart>
+    </template>
   </div>
 </template>
 
