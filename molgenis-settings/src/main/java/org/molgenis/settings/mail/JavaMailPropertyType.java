@@ -3,7 +3,6 @@ package org.molgenis.settings.mail;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.settings.PropertyType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -16,7 +15,7 @@ public class JavaMailPropertyType extends SystemEntityType
 	private static final String SIMPLE_NAME = "JavaMailProperty";
 	public static final String JAVA_MAIL_PROPERTY = MailPackage.PACKAGE_MAIL + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	private MailSettingsImplMetadata mailSettings;
+	private MailSettingsImpl.Meta mailSettings;
 	private final MailPackage mailPackage;
 	private final PropertyType propertyType;
 	public static final String MAIL_SETTINGS_REF = "mailSettings";
@@ -30,8 +29,7 @@ public class JavaMailPropertyType extends SystemEntityType
 	}
 
 	@Autowired
-	@Lazy
-	public void setMailSettingsMetadata(MailSettingsImplMetadata mailSettings)
+	public void setMailSettingsMetadata(MailSettingsImpl.Meta mailSettings)
 	{
 		this.mailSettings = requireNonNull(mailSettings);
 	}
