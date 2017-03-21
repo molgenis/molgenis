@@ -19,7 +19,7 @@
           'select': function () {
             const row = self.$refs.sampleCounts.chart.getSelection()[0].row
             const biobank = self.aggs[row][0]
-            self.$store.commit('setFilter', {name: 'biobank', value: biobank})
+            self.$store.dispatch('setBiobank', biobank)
           }
         },
         columns: [{

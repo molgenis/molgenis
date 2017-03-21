@@ -94,6 +94,9 @@ export default new Vuex.Store({
     },
     setBiobanks: function (state, items) {
       state.biobanks = items
+    },
+    setAttributeCharts: function (state, charts) {
+      state.attributeCharts = charts
     }
   },
   actions: {
@@ -102,8 +105,13 @@ export default new Vuex.Store({
         .then(response => { commit('setBiobanks', response.items) })
     },
     setBiobank: function ({commit, state}, biobank) {
+      console.log('setBiobank')
+      commit('setAttributeCharts', [])
       commit('setFilter', {name: 'biobank', value: biobank})
-      // fire get calls :)
+      const filter = rsql(state)
+      const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `biobank_abbr==${biobank}&`
+      get(state.server, `/v2/WP2_RP?${q}&aggs=x==sex`, state.token)
+        .then()
     },
     setFilterAsync: function ({commit, state}, {name, value}) {
       commit('setFilter', {name, value})

@@ -47,7 +47,7 @@
           return this.$store.state.biobank
         },
         set (biobank) {
-          this.$store.commit('setFilter', {name: 'biobank', value: biobank})
+          this.$store.dispatch('setBiobank', biobank)
         }
       }
     },
