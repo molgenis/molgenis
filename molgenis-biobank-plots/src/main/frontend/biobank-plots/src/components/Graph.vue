@@ -1,7 +1,10 @@
 <template>
-  <vue-chart :columns="columns" :rows="aggs" :options="options"
-             chartType="BarChart" :chartEvents="chartEvents"
-             ref="sampleCounts"></vue-chart>
+  <div>
+    <h4>Number of Samples per Biobank</h4>
+    <vue-chart :columns="columns" :rows="aggs" :options="options"
+               chartType="BarChart" :chartEvents="chartEvents"
+               ref="sampleCounts"></vue-chart>
+  </div>
 </template>
 
 <script>
@@ -31,7 +34,6 @@
           'label': 'SampleCount'
         }],
         options: {
-          title: 'Number of Samples per Biobank',
           hAxis: {
             title: 'Number of Samples'
           },
