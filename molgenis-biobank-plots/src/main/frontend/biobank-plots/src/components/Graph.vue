@@ -5,7 +5,7 @@
 </template>
 
 <script>
-  import {mapGetters, mapState} from 'vuex'
+  import {mapState} from 'vuex'
   import Vue from 'vue'
   import VueCharts from 'vue-charts'
 
@@ -42,8 +42,7 @@
       }
     },
     computed: {
-      ...mapState(['aggs']),
-      ...mapGetters(['rsql'])
+      ...mapState(['aggs'])
     },
     name: 'graph'
   }

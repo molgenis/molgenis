@@ -34,7 +34,7 @@ const rsql = state => {
   if (smokingConstraints.length) {
     constraints.push('(' + smokingConstraints.join(',') + ')')
   }
-  return constraints.length ? `q=${constraints.join(';')}&` : ''
+  return constraints.join(';')
 }
 
 export default new Vuex.Store({
@@ -51,10 +51,35 @@ export default new Vuex.Store({
     biobank: null,
     aggs: [],
     biobanks: [],
+    attributeCharts: [{ // http://molgenis09.gcc.rug.nl/api/v2/WP2_RP?q=DNAm==true;biobank_abbr==NTR&aggs=x==sex
+      title: 'Sex',
+      rows: [
+        ['sex', 194, 127, 456]
+      ],
+      columns: [
+        {type: 'string', label: 'label'},
+        {type: 'number', label: 'female'},
+        {type: 'number', label: 'male'},
+        {type: 'number', label: 'Unknown'}
+      ]
+    }, { // http://molgenis09.gcc.rug.nl/api/v2/WP2_RP?q=DNAm==true;biobank_abbr==NTR&aggs=x==DNA and
+      // http://molgenis09.gcc.rug.nl/api/v2/WP2_RP?q=DNAm==true;biobank_abbr==NTR&aggs=x==rnaseq
+      title: 'DNA',
+      rows: [
+        ['DNA', 13, 764, 0],
+        ['rnaseq', 473, 304, 0]
+      ],
+      columns: [
+        {type: 'string', label: 'label'},
+        {type: 'number', label: 'True'},
+        {type: 'number', label: 'False'},
+        {type: 'number', label: 'Unknown'}
+      ]
+    }],
     server: {
       apiUrl: 'https://molgenis09.gcc.rug.nl/api/'
     },
-    token: 'c9e0671dd1f243e4a5794bf57152d8b7'
+    token: '3121096f23304f378b98d57fbdce8d76'
   },
   mutations: {
     setFilter: function (state, {name, value}) {
@@ -76,9 +101,15 @@ export default new Vuex.Store({
       get(state.server, 'v2/WP2_biobanks', state.token)
         .then(response => { commit('setBiobanks', response.items) })
     },
+    setBiobank: function ({commit, state}, biobank) {
+      commit('setFilter', {name: 'biobank', value: biobank})
+      // fire get calls :)
+    },
     setFilterAsync: function ({commit, state}, {name, value}) {
       commit('setFilter', {name, value})
-      get(state.server, `v2/WP2_RP?${rsql(state)}aggs=x==biobank_abbr`, state.token)
+      const filter = rsql(state)
+      const q = filter.length ? `q=${filter}&` : ''
+      get(state.server, `v2/WP2_RP?${q}aggs=x==biobank_abbr`, state.token)
         .then(response => { commit('setAggs', response.aggs) })
     }
   },

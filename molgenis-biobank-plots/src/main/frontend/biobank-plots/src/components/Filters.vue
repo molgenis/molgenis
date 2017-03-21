@@ -22,7 +22,7 @@
     <h4>Age</h4>
     From to
     <h4>Biobank</h4>
-    <select v-model="selectedBiobank" class="mb-3">
+    <select v-model="selectedBiobank" class="custom-select">
       <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
     </select>
   </form>
