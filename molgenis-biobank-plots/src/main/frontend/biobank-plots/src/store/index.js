@@ -48,7 +48,7 @@ export default new Vuex.Store({
     biobank: null,
     aggs: [],
     biobanks: [],
-    attributeCharts: [{ // http://molgenis09.gcc.rug.nl/api/v2/WP2_RP?q=DNAm==true;biobank_abbr==NTR&aggs=x==sex
+    attributeCharts: [{
       title: 'Sex',
       rows: [
         ['sex', 194, 127, 456]
@@ -59,8 +59,7 @@ export default new Vuex.Store({
         {type: 'number', label: 'male'},
         {type: 'number', label: 'Unknown'}
       ]
-    }, { // http://molgenis09.gcc.rug.nl/api/v2/WP2_RP?q=DNAm==true;biobank_abbr==NTR&aggs=x==DNA and
-      // http://molgenis09.gcc.rug.nl/api/v2/WP2_RP?q=DNAm==true;biobank_abbr==NTR&aggs=x==rnaseq
+    }, {
       title: 'DNA',
       rows: [
         ['DNA', 13, 764, 0],
