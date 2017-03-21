@@ -110,9 +110,9 @@ export default new Vuex.Store({
       commit('setFilter', {name: 'biobank', value: biobank})
       const filter = rsql(state)
       const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `biobank_abbr==${biobank}&`
-      const smoking = get(state.server, `/v2/WP2_RP?${q}&aggs=x==smoking`, state.token)
-      const sex = get(state.server, `/v2/WP2_RP?${q}&aggs=x==sex`, state.token)
-      Promise.all([smoking, sex]).then(
+      const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
+      const promises = attributes.map(attr => get(state.server, `/v2/WP2_RP?${q}&aggs=x==${attr}`, state.token))
+      Promise.all(promises).then(
         responses => {
           const humanReadable = {
             'T': 'True',
@@ -121,8 +121,8 @@ export default new Vuex.Store({
             'male': 'Male',
             'female': 'Female'
           }
-
           const smokingGraph = {
+            title: 'Smoking',
             rows: [['smoking', ...responses[0].aggs.matrix.map(row => row[0])]],
             columns: [
               {type: 'string', label: 'label'},
@@ -130,13 +130,29 @@ export default new Vuex.Store({
             ]
           }
           const sexGraph = {
+            title: 'Sex',
             rows: [['sex', ...responses[1].aggs.matrix.map(row => row[0])]],
             columns: [
               {type: 'string', label: 'label'},
               ...responses[1].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
             ]
           }
-          const attributeGraphs = [sexGraph, smokingGraph]
+          const datatypeGraph = {
+            title: 'Data types',
+            columns: [
+              {type: 'string', label: 'label'},
+              {type: 'number', label: 'True'},
+              {type: 'number', label: 'False'},
+              {type: 'number', label: 'Unknown'}
+            ],
+            rows: [
+              ['rnaseq', ...responses[2].aggs.matrix.map(row => row[0])],
+              ['wbcc', ...responses[3].aggs.matrix.map(row => row[0])],
+              ['DNA', ...responses[4].aggs.matrix.map(row => row[0])],
+              ['DNAm', ...responses[5].aggs.matrix.map(row => row[0])]
+            ]
+          }
+          const attributeGraphs = [datatypeGraph, sexGraph, smokingGraph]
           commit('setAttributeCharts', attributeGraphs)
         }
       )
