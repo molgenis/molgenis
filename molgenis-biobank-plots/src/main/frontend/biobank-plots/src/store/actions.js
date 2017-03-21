@@ -70,7 +70,7 @@ export const actions = {
     commit(SET_ATTRIBUTE_CHARTS, [])
     commit(SET_FILTER, {name: 'biobank', value: biobank})
     const filter = rsql(state)
-    const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `biobank_abbr==${biobank}&`
+    const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `q=biobank_abbr==${biobank}&`
     const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
     const promises = attributes.map(attr => get(state.server, `/v2/WP2_RP?${q}&aggs=x==${attr}`, state.token))
     Promise.all(promises).then(
