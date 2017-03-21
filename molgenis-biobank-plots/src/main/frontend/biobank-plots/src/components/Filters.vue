@@ -35,7 +35,7 @@
       </div>
 
     <div>
-      <b-button @click="resetFilters">Reset filters</b-button>
+      <b-button @click="resetFilters" variant="warning">Reset filters</b-button>
     </div>
     </form>
   </b-card>
