@@ -1,4 +1,5 @@
 import {get} from '../molgenisApi'
+import {zip} from './utils'
 import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS} from './mutations'
 
 export const GET_BIOBANKS = 'GET_BIOBANKS'
@@ -28,6 +29,38 @@ const rsql = state => {
   return constraints.join(';')
 }
 
+const humanReadable = {
+  'T': 'True',
+  'F': 'False',
+  null: 'Unknown',
+  'male': 'Male',
+  'female': 'Female'
+}
+
+const datatypeGraph = responses => {
+  const matrixValues = aggs => {
+    const zipped = zip([aggs.xLabels, aggs.matrix.map(row => row[0])])
+    const vals = zipped.reduce((acc, val) => ({...acc, [humanReadable[val[0]]]: val[1]}), {True: 0, False: 0, Unknown: 0})
+    console.log(zipped, vals)
+    return [vals.True, vals.False, vals.Unknown]
+  }
+  return {
+    title: 'Data types',
+    columns: [
+      {type: 'string', label: 'label'},
+      {type: 'number', label: 'True'},
+      {type: 'number', label: 'False'},
+      {type: 'number', label: 'Unknown'}
+    ],
+    rows: [
+      ['rnaseq', ...matrixValues(responses[2].aggs)],
+      ['wbcc', ...matrixValues(responses[3].aggs)],
+      ['DNA', ...matrixValues(responses[4].aggs)],
+      ['DNAm', ...matrixValues(responses[5].aggs)]
+    ]
+  }
+}
+
 export const actions = {
   [GET_BIOBANKS] ({ commit, state }) {
     get(state.server, 'v2/WP2_biobanks', state.token)
@@ -43,13 +76,6 @@ export const actions = {
     const promises = attributes.map(attr => get(state.server, `/v2/WP2_RP?${q}&aggs=x==${attr}`, state.token))
     Promise.all(promises).then(
       responses => {
-        const humanReadable = {
-          'T': 'True',
-          'F': 'False',
-          null: 'Unknown',
-          'male': 'Male',
-          'female': 'Female'
-        }
         const smokingGraph = {
           title: 'Smoking',
           rows: [['smoking', ...responses[0].aggs.matrix.map(row => row[0])]],
@@ -66,22 +92,7 @@ export const actions = {
             ...responses[1].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
           ]
         }
-        const datatypeGraph = {
-          title: 'Data types',
-          columns: [
-            {type: 'string', label: 'label'},
-            {type: 'number', label: 'True'},
-            {type: 'number', label: 'False'},
-            {type: 'number', label: 'Unknown'}
-          ],
-          rows: [
-            ['rnaseq', ...responses[2].aggs.matrix.map(row => row[0])],
-            ['wbcc', ...responses[3].aggs.matrix.map(row => row[0])],
-            ['DNA', ...responses[4].aggs.matrix.map(row => row[0])],
-            ['DNAm', ...responses[5].aggs.matrix.map(row => row[0])]
-          ]
-        }
-        const attributeGraphs = [datatypeGraph, sexGraph, smokingGraph]
+        const attributeGraphs = [datatypeGraph(responses), sexGraph, smokingGraph]
         commit(SET_ATTRIBUTE_CHARTS, attributeGraphs)
       }
     )
