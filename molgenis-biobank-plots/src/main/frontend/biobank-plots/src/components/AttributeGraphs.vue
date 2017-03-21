@@ -10,6 +10,7 @@
   import {mapState} from 'vuex'
 
   export default {
+    name: 'attribute-graphs',
     data: function () {
       return {
         chartEvents: {
@@ -28,7 +29,6 @@
     },
     computed: {
       ...mapState(['attributeCharts'])
-    },
-    name: 'attribute-graphs'
+    }
   }
 </script>

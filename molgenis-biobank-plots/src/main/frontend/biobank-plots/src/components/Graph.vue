@@ -12,6 +12,7 @@
   Vue.use(VueCharts)
 
   export default {
+    name: 'graph',
     data: function () {
       const self = this
       return {
@@ -43,7 +44,6 @@
     },
     computed: {
       ...mapState(['aggs'])
-    },
-    name: 'graph'
+    }
   }
 </script>

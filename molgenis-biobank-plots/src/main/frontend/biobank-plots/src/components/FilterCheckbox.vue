@@ -4,8 +4,8 @@
 
 <script>
   export default {
-    props: ['name', 'label'],
     name: 'filter-checkbox',
+    props: ['name', 'label'],
     computed: {
       value: function () {
         return this.$store.state[this.name]
