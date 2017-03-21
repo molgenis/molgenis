@@ -1,13 +1,13 @@
 <template>
-  <div>
-    <h4>Number of Samples per Biobank</h4>
-    <small class="text-muted">
-      Number of samples: {{numberOfSamples}}
-    </small>
+  <b-card show-header>
+    <div slot="header">
+      <h4>Number of Samples per Biobank</h4>
+      <h6 class="card-subtitle mb-2 text-muted">Total number of samples: {{numberOfSamples}}</h6>
+    </div>
     <vue-chart :columns="columns" :rows="aggs" :options="options"
                chartType="BarChart" :chartEvents="chartEvents"
                ref="sampleCounts"></vue-chart>
-  </div>
+  </b-card>
 </template>
 
 <script>
@@ -45,7 +45,7 @@
           vAxis: {
             title: 'Biobank'
           },
-          height: 500
+          height: 400
         }
       }
     },

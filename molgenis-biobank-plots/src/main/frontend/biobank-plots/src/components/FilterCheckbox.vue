@@ -1,5 +1,5 @@
 <template>
-  <b-form-checkbox v-model="value">{{label}}</b-form-checkbox>
+  <b-form-checkbox v-model="value" class="form-control-sm">{{label}}</b-form-checkbox>
 </template>
 
 <script>

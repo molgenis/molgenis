@@ -12,9 +12,9 @@
       </div>
     </div>
 
-    <form>
-      <h4>Data types</h4>
-      <div class="custom-controls-stacked">
+    <form class="form-horizontal">
+      <div class="form-group custom-controls-stacked">
+        <legend class="col-form-legend">Data type</legend>
         <filter-checkbox name="rnaseq" label="Transcriptome (RNAseq)"></filter-checkbox>
         <filter-checkbox name="DNAm" label="Methylome (Illumina 450K)"></filter-checkbox>
         <filter-checkbox name="DNA" label="DNA"></filter-checkbox>
@@ -22,29 +22,25 @@
         <filter-checkbox name="metabolomics" label="Metabolome (Brainshake)"></filter-checkbox>
       </div>
 
-      <hr>
-      <h4>Gender</h4>
-      <div class="custom-controls-stacked">
+      <div class="form-group">
+        <legend class="col-form-legend">Gender</legend>
         <filter-checkbox name="male" label="Male"></filter-checkbox>
         <filter-checkbox name="female" label="Female"></filter-checkbox>
       </div>
 
-      <hr>
-      <h4>Smoking</h4>
-      <div class="custom-controls-stacked">
+      <div class="form-group">
+        <legend class="col-form-legend">Smoking</legend>
         <filter-checkbox name="smoking" label="Yes"></filter-checkbox>
         <filter-checkbox name="nonSmoking" label="No"></filter-checkbox>
       </div>
 
-      <hr>
-      <h4>Age</h4>
-      From to
+      <div class="form-group">
+        <label>Biobank</label>
+        <select v-model="selectedBiobank" class="custom-select form-control">
+          <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
+        </select>
+      </div>
 
-      <hr>
-      <h4>Biobank</h4>
-      <select v-model="selectedBiobank" class="custom-select">
-        <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
-      </select>
     </form>
   </b-card>
 </template>
