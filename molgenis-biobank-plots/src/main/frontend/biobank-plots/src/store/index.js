@@ -35,6 +35,7 @@ const rsql = state => {
 
 export default new Vuex.Store({
   state: {
+    numberOfSamples: 0,
     rnaseq: false,
     DNAm: false,
     DNA: false,

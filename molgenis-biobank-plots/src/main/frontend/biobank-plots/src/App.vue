@@ -16,6 +16,7 @@
           </div>
         </div>
         <div class="col-md-4 col-sm-12">
+          <br>
           <attribute-graphs/>
         </div>
       </div>
