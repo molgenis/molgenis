@@ -53,11 +53,11 @@
   import FilterCheckbox from './FilterCheckbox'
   import {mapState} from 'vuex'
 
-  import { SET_FILTER, RESET_FILTERS } from '../store/mutations'
-  import { GET_BIOBANKS, SET_BIOBANK } from '../store/actions'
+  import { GET_BIOBANKS, RESET_FILTERS_ASYNC, SET_BIOBANK } from '../store/actions'
 
   export default {
-    components: { filterCheckbox: FilterCheckbox },
+    name: 'filters',
+    components: { FilterCheckbox },
     computed: {
       ...mapState({
         biobankOptions: state => state.biobanks.map(biobank => ({
@@ -76,13 +76,12 @@
     },
     created () {
       this.$store.dispatch(GET_BIOBANKS)
-      this.$store.commit(SET_FILTER, {name: 'DNA', value: false})
+      this.$store.dispatch(RESET_FILTERS_ASYNC)
     },
     methods: {
       resetFilters: function () {
-        this.$store.commit(RESET_FILTERS)
+        this.$store.dispatch(RESET_FILTERS_ASYNC)
       }
-    },
-    name: 'filters'
+    }
   }
 </script>

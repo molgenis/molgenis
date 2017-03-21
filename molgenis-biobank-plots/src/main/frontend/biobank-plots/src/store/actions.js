@@ -1,10 +1,13 @@
 import {get} from '../molgenisApi'
 import {zip} from './utils'
-import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS} from './mutations'
+import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS, RESET_FILTERS} from './mutations'
 
 export const GET_BIOBANKS = 'GET_BIOBANKS'
 export const SET_BIOBANK = 'SET_BIOBANK'
 export const SET_FILTER_ASYNC = 'SET_FILTER_ASYNC'
+export const RESET_FILTERS_ASYNC = 'RESET_FILTERS_ASYNC'
+export const REFRESH_GRAPH = 'REFRESH_GRAPH'
+export const REFRESH_ATTRIBUTE_GRAPHS = 'REFRESH_ATTRIBUTE_GRAPHS'
 
 const rsql = state => {
   const constraints = ['rnaseq', 'DNAm', 'DNA', 'wbcc']
@@ -65,13 +68,35 @@ export const actions = {
     get(state.server, 'v2/WP2_biobanks', state.token)
       .then(response => { commit(SET_BIOBANKS, response.items) })
   },
-  [SET_BIOBANK] ({commit, state}, biobank) {
-    commit(SET_ATTRIBUTE_CHARTS, [])
+  [SET_BIOBANK] ({commit, dispatch}, biobank) {
     commit(SET_FILTER, {name: 'biobank', value: biobank})
+    dispatch(REFRESH_ATTRIBUTE_GRAPHS)
+    dispatch(REFRESH_GRAPH)
+  },
+  [SET_FILTER_ASYNC] ({commit, dispatch}, {name, value}) {
+    commit(SET_FILTER, {name, value})
+    dispatch(REFRESH_GRAPH)
+  },
+  [RESET_FILTERS_ASYNC] ({commit, dispatch}) {
+    commit(RESET_FILTERS)
+    dispatch(REFRESH_GRAPH)
+    dispatch(REFRESH_ATTRIBUTE_GRAPHS)
+  },
+  [REFRESH_GRAPH] ({commit, state}) {
+    console.log(REFRESH_GRAPH)
+    const filter = rsql(state)
+    const q = filter.length ? `q=${filter}&` : ''
+    get(state.server, `v2/WP2_RP?${q}aggs=x==biobank_abbr`, state.token)
+      .then(response => { commit(SET_AGGS, response.aggs) })
+  },
+  [REFRESH_ATTRIBUTE_GRAPHS] ({commit, state}) {
+    console.log(REFRESH_ATTRIBUTE_GRAPHS)
+    commit(SET_ATTRIBUTE_CHARTS, [])
+    const {biobank, server} = state
     const filter = rsql(state)
     const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `q=biobank_abbr==${biobank}&`
     const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
-    const promises = attributes.map(attr => get(state.server, `/v2/WP2_RP?${q}&aggs=x==${attr}`, state.token))
+    const promises = attributes.map(attr => get(server, `/v2/WP2_RP?${q}&aggs=x==${attr}`, state.token))
     Promise.all(promises).then(
       responses => {
         const smokingGraph = {
@@ -83,8 +108,8 @@ export const actions = {
           ]
         }
         const sexGraph = {
-          title: 'Sex',
-          rows: [['Sex', ...responses[1].aggs.matrix.map(row => row[0])]],
+          title: 'Gender',
+          rows: [['Gender', ...responses[1].aggs.matrix.map(row => row[0])]],
           columns: [
             {type: 'string', label: 'label'},
             ...responses[1].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
@@ -94,12 +119,5 @@ export const actions = {
         commit(SET_ATTRIBUTE_CHARTS, attributeGraphs)
       }
     )
-  },
-  [SET_FILTER_ASYNC] ({commit, state}, {name, value}) {
-    commit(SET_FILTER, {name, value})
-    const filter = rsql(state)
-    const q = filter.length ? `q=${filter}&` : ''
-    get(state.server, `v2/WP2_RP?${q}aggs=x==biobank_abbr`, state.token)
-      .then(response => { commit(SET_AGGS, response.aggs) })
   }
 }
