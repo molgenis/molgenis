@@ -3,11 +3,11 @@
     <h1>Filter</h1>
     <h4>Data types</h4>
     <div class="custom-controls-stacked">
-      <filter-checkbox name="rnaseq" label="RNASeq"></filter-checkbox>
-      <filter-checkbox name="DNAm" label="DNAm"></filter-checkbox>
+      <filter-checkbox name="rnaseq" label="Transcriptome (RNAseq)"></filter-checkbox>
+      <filter-checkbox name="DNAm" label="Methylome (Illumina 450K)"></filter-checkbox>
       <filter-checkbox name="DNA" label="DNA"></filter-checkbox>
       <filter-checkbox name="wbcc" label="White bloodcell count"></filter-checkbox>
-      <filter-checkbox name="metabolomics" label="Metabolomics"></filter-checkbox>
+      <filter-checkbox name="metabolomics" label="Metabolome (Brainshake)"></filter-checkbox>
     </div>
     <h4>Gender</h4>
     <div class="custom-controls-stacked">
