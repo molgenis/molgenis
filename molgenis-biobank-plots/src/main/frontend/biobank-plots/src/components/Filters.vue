@@ -2,14 +2,7 @@
   <b-card show-header>
 
     <div slot="header">
-      <div class="row">
-        <div class="col-4">
-          <h3>Filters</h3>
-        </div>
-        <div class="col-8 text-right">
-          <b-button size="sm" @click="resetFilters">Reset filters</b-button>
-        </div>
-      </div>
+      <h4>Filters</h4>
     </div>
 
     <form class="form-horizontal">
@@ -41,6 +34,9 @@
         </select>
       </div>
 
+    <div>
+      <b-button @click="resetFilters">Reset filters</b-button>
+    </div>
     </form>
   </b-card>
 </template>
