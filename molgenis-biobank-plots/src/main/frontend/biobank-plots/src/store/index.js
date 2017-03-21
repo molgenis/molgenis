@@ -79,7 +79,7 @@ export default new Vuex.Store({
     server: {
       apiUrl: 'https://molgenis09.gcc.rug.nl/api/'
     },
-    token: '3121096f23304f378b98d57fbdce8d76'
+    token: 'e4da2ad59e8c4b339c2225bc7911d0d5'
   },
   mutations: {
     setFilter: function (state, {name, value}) {
@@ -110,20 +110,36 @@ export default new Vuex.Store({
       commit('setFilter', {name: 'biobank', value: biobank})
       const filter = rsql(state)
       const q = filter.length ? `q=${filter};biobank_abbr==${biobank}&` : `biobank_abbr==${biobank}&`
-      get(state.server, `/v2/WP2_RP?${q}&aggs=x==sex`, state.token)
-        .then(response => {
-          const sexGraph = {
-            rows: [['sex', ...response.aggs.matrix.map(row => row[0])]],
+      const smoking = get(state.server, `/v2/WP2_RP?${q}&aggs=x==smoking`, state.token)
+      const sex = get(state.server, `/v2/WP2_RP?${q}&aggs=x==sex`, state.token)
+      Promise.all([smoking, sex]).then(
+        responses => {
+          const humanReadable = {
+            'T': 'True',
+            'F': 'False',
+            null: 'Unknown',
+            'male': 'Male',
+            'female': 'Female'
+          }
+
+          const smokingGraph = {
+            rows: [['smoking', ...responses[0].aggs.matrix.map(row => row[0])]],
             columns: [
-            {type: 'string', label: 'label'},
-            {type: 'number', label: 'Female'},
-            {type: 'number', label: 'Male'},
-            {type: 'number', label: 'Unknown'}
+              {type: 'string', label: 'label'},
+              ...responses[0].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
             ]
           }
-          const attributeGraphs = [sexGraph]
+          const sexGraph = {
+            rows: [['sex', ...responses[1].aggs.matrix.map(row => row[0])]],
+            columns: [
+              {type: 'string', label: 'label'},
+              ...responses[1].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
+            ]
+          }
+          const attributeGraphs = [sexGraph, smokingGraph]
           commit('setAttributeCharts', attributeGraphs)
-        })
+        }
+      )
     },
     setFilterAsync: function ({commit, state}, {name, value}) {
       commit('setFilter', {name, value})
