@@ -5,7 +5,7 @@
         <h4 v-if="biobank">Sample makeup: {{biobank}}</h4>
         <h4 v-else>Sample makeup: All biobanks</h4>
       </div>
-      <div class="row">
+      <div class="row text-center">
         <div v-for="chart in attributeCharts" class="col-md-4">
           {{chart.title}}
           <vue-chart :rows="chart.rows" :columns="chart.columns" :options="options"
