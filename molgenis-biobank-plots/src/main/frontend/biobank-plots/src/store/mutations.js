@@ -8,7 +8,16 @@ export const SET_ATTRIBUTE_CHARTS = 'SET_ATTRIBUTE_CHARTS'
 
 export const mutations = {
   [RESET_FILTERS] (state) {
-    // TODO reset filters
+    state.rnaseq = false
+    state.DNAm = false
+    state.DNA = false
+    state.wbcc = false
+    state.metabolomics = false
+    state.male = false
+    state.female = false
+    state.smoking = false
+    state.nonSmoking = false
+    state.biobank = null
   },
   [SET_FILTER] (state, {name, value}) {
     state[name] = value
