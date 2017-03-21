@@ -80,7 +80,7 @@ export default new Vuex.Store({
   },
   mutations: {
     resetFilters: function () {
-      //TODO reset filters
+      // TODO reset filters
     },
     setFilter: function (state, {name, value}) {
       state[name] = value

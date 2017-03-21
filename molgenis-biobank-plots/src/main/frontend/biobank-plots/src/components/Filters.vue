@@ -85,8 +85,8 @@
       this.$store.dispatch('getBiobanks')
       this.$store.commit('setFilter', {name: 'DNA', value: false})
     },
-    methods () {
-      resetFilters: function() {
+    methods: {
+      resetFilters: function () {
         this.$store.commit('resetFilters')
       }
     },
