@@ -293,6 +293,17 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	public Boolean getCascadeDelete()
+	{
+		return getBoolean(IS_CASCADE_DELETE);
+	}
+
+	public Attribute setCascadeDelete(Boolean isCascadeDelete)
+	{
+		set(IS_CASCADE_DELETE, isCascadeDelete);
+		return this;
+	}
+
 	/**
 	 * When getDataType=compound, get compound attribute parts
 	 *
@@ -713,7 +724,7 @@ public class Attribute extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "Attribute{" + "name=" + getName() + " id="+ getIdValue()+'}';
+		return "Attribute{" + "name=" + getName() + " id=" + getIdValue() + '}';
 	}
 
 	/**
