@@ -78,6 +78,9 @@ export default new Vuex.Store({
     token: 'e4da2ad59e8c4b339c2225bc7911d0d5'
   },
   mutations: {
+    resetFilters: function () {
+      // TODO reset filters
+    },
     setFilter: function (state, {name, value}) {
       state[name] = value
     },
