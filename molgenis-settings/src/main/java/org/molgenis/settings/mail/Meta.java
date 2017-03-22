@@ -5,7 +5,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,14 +57,9 @@ public class Meta extends DefaultSettingsEntityType
 
 	private JavaMailPropertyType mailSenderPropertyType;
 
-	public Meta()
+	public Meta(JavaMailPropertyType mailSenderPropertyType)
 	{
 		super(MailSettingsImpl.ID);
-	}
-
-	@Autowired
-	public void setJavaMailPropertyType(JavaMailPropertyType mailSenderPropertyType)
-	{
 		this.mailSenderPropertyType = requireNonNull(mailSenderPropertyType);
 	}
 
