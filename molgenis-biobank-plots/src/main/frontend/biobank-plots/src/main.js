@@ -7,19 +7,12 @@ import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-import {addResizeHandler} from './utils'
-
 Vue.use(BootstrapVue)
 
 /* eslint-disable no-new */
-const vue = new Vue({
+new Vue({
   el: '#app',
   store,
   template: '<App/>',
   components: { App }
 })
-
-addResizeHandler(() => {
-  console.log('resizeHandler')
-  vue.$children.map(child => child.$emit('resize'))
-}, 30)
