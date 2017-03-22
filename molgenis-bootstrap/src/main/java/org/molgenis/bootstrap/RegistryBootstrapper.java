@@ -2,6 +2,7 @@ package org.molgenis.bootstrap;
 
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
+import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
@@ -28,19 +29,22 @@ public class RegistryBootstrapper
 	private final SystemEntityTypeRegistrar systemEntityTypeRegistrar;
 	private final SystemPackageRegistrar systemPackageRegistrar;
 	private final EntityFactoryRegistrar entityFactoryRegistrar;
+	private final SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
 	private final ImportServiceRegistrar importServiceRegistrar;
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 
 	@Autowired
 	public RegistryBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
 			SystemEntityTypeRegistrar systemEntityTypeRegistrar, SystemPackageRegistrar systemPackageRegistrar,
-			EntityFactoryRegistrar entityFactoryRegistrar, ImportServiceRegistrar importServiceRegistrar,
-			ScriptRunnerRegistrar scriptRunnerRegistrar)
+			EntityFactoryRegistrar entityFactoryRegistrar,
+			SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar,
+			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar)
 	{
 		this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
 		this.systemEntityTypeRegistrar = requireNonNull(systemEntityTypeRegistrar);
 		this.systemPackageRegistrar = requireNonNull(systemPackageRegistrar);
 		this.entityFactoryRegistrar = requireNonNull(entityFactoryRegistrar);
+		this.systemRepositoryDecoratorFactoryRegistrar = requireNonNull(systemRepositoryDecoratorFactoryRegistrar);
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
 	}
@@ -61,6 +65,10 @@ public class RegistryBootstrapper
 
 		LOG.trace("Registering entity factories ...");
 		entityFactoryRegistrar.register(event);
+		LOG.trace("Registered entity factories");
+
+		LOG.trace("Registering repository decorator factories ...");
+		systemRepositoryDecoratorFactoryRegistrar.register(event);
 		LOG.trace("Registered entity factories");
 
 		LOG.trace("Registering importers ...");

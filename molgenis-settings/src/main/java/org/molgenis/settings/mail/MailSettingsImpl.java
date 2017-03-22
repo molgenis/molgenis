@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
@@ -48,6 +49,8 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		super(ID);
 	}
 
+	// workaround for dependency error running platform integration tests on build server
+	@DependsOn(value = "org.molgenis.settings.mail.JavaMailPropertyType")
 	@Component
 	public static class Meta extends DefaultSettingsEntityType
 	{

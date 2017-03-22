@@ -4,6 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetadata;
@@ -16,7 +17,6 @@ import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.staticentity.TestEntityStatic;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -276,7 +276,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("labelEn"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("descriptionEn"));
 
-		Entity car = new DynamicEntity(i18nStringMetaData);
+		I18nString car = new I18nString(i18nStringMetaData);
 		car.set(I18nStringMetaData.MSGID, "car");
 		car.set("en", "car");
 		car.set("nl", "auto");

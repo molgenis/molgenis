@@ -1,6 +1,7 @@
 package org.molgenis.file.ingest;
 
 import org.molgenis.data.*;
+import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
@@ -8,13 +9,13 @@ import java.util.stream.Stream;
 
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 
-public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
+public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<FileIngest>
 {
-	private final Repository<Entity> decorated;
+	private final Repository<FileIngest> decorated;
 	private final FileIngesterJobScheduler scheduler;
 	private final DataService dataService;
 
-	public FileIngestRepositoryDecorator(Repository<Entity> decorated, FileIngesterJobScheduler scheduler,
+	public FileIngestRepositoryDecorator(Repository<FileIngest> decorated, FileIngesterJobScheduler scheduler,
 			DataService dataService)
 	{
 		this.decorated = decorated;
@@ -23,20 +24,20 @@ public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	@Override
-	protected Repository<Entity> delegate()
+	protected Repository<FileIngest> delegate()
 	{
 		return decorated;
 	}
 
 	@Override
-	public void update(Entity entity)
+	public void update(FileIngest entity)
 	{
 		decorated.update(entity);
 		scheduler.schedule(entity);
 	}
 
 	@Override
-	public void update(Stream<Entity> entities)
+	public void update(Stream<FileIngest> entities)
 	{
 		decorated.update(entities.filter(e ->
 		{
@@ -46,7 +47,7 @@ public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	@Override
-	public void delete(Entity entity)
+	public void delete(FileIngest entity)
 	{
 		String entityId = entity.getString(FileIngestMetaData.ID);
 		scheduler.unschedule(entityId);
@@ -55,7 +56,7 @@ public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	@Override
-	public void delete(Stream<Entity> entities)
+	public void delete(Stream<FileIngest> entities)
 	{
 		decorated.delete(entities.filter(e ->
 		{
@@ -106,14 +107,14 @@ public class FileIngestRepositoryDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	@Override
-	public void add(Entity entity)
+	public void add(FileIngest entity)
 	{
 		decorated.add(entity);
 		scheduler.schedule(entity);
 	}
 
 	@Override
-	public Integer add(Stream<Entity> entities)
+	public Integer add(Stream<FileIngest> entities)
 	{
 		return decorated.add(entities.filter(e ->
 		{

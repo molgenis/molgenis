@@ -6,20 +6,23 @@ import org.molgenis.annotation.cmd.data.CmdLineDataService;
 import org.molgenis.annotation.cmd.data.CmdLineSettingsEntity;
 import org.molgenis.annotation.cmd.utils.VcfValidator;
 import org.molgenis.data.*;
+import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.*;
+import org.molgenis.data.system.model.RootSystemPackage;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -33,8 +36,10 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 @Configuration
 @CommandLineOnlyConfiguration
-@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.vcf.model",
-		"org.molgenis.data.annotation.core.effects" })
+@Import({ RootSystemPackage.class, EntityPopulator.class, AutoValuePopulator.class, DefaultValuePopulator.class,
+		IdGeneratorImpl.class, EntityFactoryRegistry.class, EntityTypeMetadata.class, EntityTypeFactory.class,
+		AttributeMetadata.class, AttributeFactory.class, PackageMetadata.class, PackageFactory.class, TagMetadata.class,
+		TagFactory.class, MetaPackage.class, VcfAttributes.class, EffectsMetaData.class })
 public class CommandLineAnnotatorConfig
 {
 	@Autowired
