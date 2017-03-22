@@ -29,9 +29,7 @@
 
       <div class="form-group">
         <label>Biobank</label>
-        <select v-model="selectedBiobank" class="custom-select form-control">
-          <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
-        </select>
+        <b-form-select v-model="selectedBiobank" :options="biobankOptions"></b-form-select>
       </div>
 
     <div>
