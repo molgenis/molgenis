@@ -42,7 +42,8 @@
         }],
         options: {
           hAxis: {
-            title: 'Number of Samples'
+            title: 'Number of Samples',
+            maxValue: 2500
           },
           vAxis: {
             title: 'Biobank'
