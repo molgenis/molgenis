@@ -30,14 +30,14 @@
       <div class="form-group">
         <legend class="col-form-legend">Age</legend>
         <!--From <filter-number-input name="ageFrom" min=0 max=150></filter-number-input> to <filter-number-input name="ageFrom" min=0 max="150"></filter-number-input>-->
-        <filter-checkbox name="<20" label="<20"></filter-checkbox><br/>
-        <filter-checkbox name="20-30" label="20-30"></filter-checkbox><br/>
-        <filter-checkbox name="30-40" label="30-40"></filter-checkbox><br/>
-        <filter-checkbox name="20-30" label="40-50"></filter-checkbox><br/>
-        <filter-checkbox name="30-40" label="50-60"></filter-checkbox><br/>
-        <filter-checkbox name="20-30" label="60-70"></filter-checkbox><br/>
-        <filter-checkbox name="30-40" label="70-80"></filter-checkbox><br/>
-        <filter-checkbox name="<20" label=">80"></filter-checkbox>
+        <filter-checkbox name="belowTwenty" label="<20"></filter-checkbox><br/>
+        <filter-checkbox name="twentyThirty" label="20-30"></filter-checkbox><br/>
+        <filter-checkbox name="thirtyFourty" label="30-40"></filter-checkbox><br/>
+        <filter-checkbox name="fourtyFifty" label="40-50"></filter-checkbox><br/>
+        <filter-checkbox name="fiftySixty" label="50-60"></filter-checkbox><br/>
+        <filter-checkbox name="sixtySeventy" label="60-70"></filter-checkbox><br/>
+        <filter-checkbox name="seventyEighty" label="70-80"></filter-checkbox><br/>
+        <filter-checkbox name="aboveEigthy" label=">80"></filter-checkbox>
       </div>
 
       <hr>

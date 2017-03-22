@@ -29,7 +29,38 @@ const rsql = state => {
   if (smokingConstraints.length) {
     constraints.push('(' + smokingConstraints.join(',') + ')')
   }
-
+  const ageConstraints = []
+  if (!state.belowTwenty || !state.twentyThirty || !state.thirtyFourty ||
+    !state.fourtyFifty || !state.fiftySixty || !state.sixtySeventy ||
+    !state.seventyEighty || !state.aboveEigthy) {
+    if (state.belowTwenty) {
+      ageConstraints.push('ageGroup=="<20"')
+    }
+    if (state.twentyThirty) {
+      ageConstraints.push('ageGroup=="20-30"')
+    }
+    if (state.thirtyFourty) {
+      ageConstraints.push('ageGroup=="30-40"')
+    }
+    if (state.fourtyFifty) {
+      ageConstraints.push('ageGroup=="40-50"')
+    }
+    if (state.fiftySixty) {
+      ageConstraints.push('ageGroup=="50-60"')
+    }
+    if (state.sixtySeventy) {
+      ageConstraints.push('ageGroup=="60-70"')
+    }
+    if (state.seventyEighty) {
+      ageConstraints.push('ageGroup=="70-80"')
+    }
+    if (state.aboveEigthy) {
+      ageConstraints.push('ageGroup==">80"')
+    }
+    if (ageConstraints.length) {
+      constraints.push('(' + ageConstraints.join(',') + ')')
+    }
+  }
   return constraints.join(';')
 }
 
