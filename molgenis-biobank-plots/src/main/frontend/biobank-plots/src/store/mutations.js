@@ -6,7 +6,7 @@ export const SET_AGGS = 'SET_AGGS'
 export const SET_BIOBANKS = 'SET_BIOBANKS'
 export const SET_ATTRIBUTE_CHARTS = 'SET_ATTRIBUTE_CHARTS'
 
-export const mutations = {
+export default {
   [RESET_FILTERS] (state) {
     state.rnaseq = false
     state.DNAm = false

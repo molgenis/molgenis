@@ -5,24 +5,7 @@ const jsonContentHeaders = {
   'Content-Type': 'application/json'
 }
 
-export function submitForm (url, method, formData, token) {
-  const settings = {
-    method: method,
-    body: formData
-  }
-  if (token) {
-    // for cross-origin requests, use a molgenis token
-    settings.headers = { ...settings.headers, 'x-molgenis-token': token }
-    settings.mode = 'cors'
-  } else {
-    // for same origin requests, use the JSESSIONID cookie
-    settings.credentials = 'same-origin'
-  }
-  return fetch(url, settings)
-}
-
-function callApi (server, uri, method, token) {
-  const url = server.apiUrl + uri
+function callApi (url, method, token) {
   const settings = {
     method: method,
     headers: jsonContentHeaders
@@ -47,8 +30,8 @@ function callApi (server, uri, method, token) {
     })
 }
 
-export function get (server, uri, token) {
-  return callApi(server, uri, 'get', token)
+export function get (url, token) {
+  return callApi(url, 'get', token)
 }
 
 export function login (server, username, password) {

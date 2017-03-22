@@ -1,4 +1,4 @@
-export const state = {
+export default {
   numberOfSamples: 0,
   rnaseq: false,
   DNAm: false,
@@ -13,8 +13,6 @@ export const state = {
   aggs: [],
   biobanks: [],
   attributeCharts: [],
-  server: {
-    apiUrl: 'https://molgenis09.gcc.rug.nl/api/'
-  },
+  apiUrl: 'https://molgenis09.gcc.rug.nl/api/',
   token: 'test'
 }
