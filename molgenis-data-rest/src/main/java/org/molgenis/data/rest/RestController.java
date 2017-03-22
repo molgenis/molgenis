@@ -1060,8 +1060,12 @@ public class RestController
 	private AttributeResponse getAttributePostInternal(String entityName, String attributeName,
 			Set<String> attributeSet, Map<String, Set<String>> attributeExpandSet)
 	{
+		Attribute attribute = null;
 		EntityType meta = dataService.getEntityType(entityName);
-		Attribute attribute = meta.getAttribute(attributeName);
+		if (meta != null)
+		{
+			attribute = meta.getAttribute(attributeName);
+		}
 		if (attribute != null)
 		{
 			return new AttributeResponse(entityName, meta, attribute, attributeSet, attributeExpandSet,
@@ -1094,7 +1098,8 @@ public class RestController
 		}
 
 		String attrHref = Href
-				.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(), refAttributeName);
+				.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
+						refAttributeName);
 		switch (attr.getDataType())
 		{
 			case COMPOUND:
@@ -1194,7 +1199,8 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue()));
+		entityMap.put("href",
+				Href.concatEntityHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue()));
 
 		for (Attribute attr : meta.getAtomicAttributes())
 		{
@@ -1209,21 +1215,21 @@ public class RestController
 				if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					entityMap.put(attrName, new AttributeResponse(meta.getFullyQualifiedName(), meta, attr, subAttributesSet, null,
-							molgenisPermissionService, dataService, languageService));
+					entityMap.put(attrName,
+							new AttributeResponse(meta.getFullyQualifiedName(), meta, attr, subAttributesSet, null,
+									molgenisPermissionService, dataService, languageService));
 				}
 				else
 				{
 					entityMap.put(attrName, Collections.singletonMap("href",
-							Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
-									attrName)));
+							Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(),
+									entity.getIdValue(), attrName)));
 				}
 			}
 			else if (attrType == DATE)
 			{
 				Date date = entity.getDate(attrName);
-				entityMap.put(attrName,
-						date != null ? MolgenisDateFormat.getDateFormat().format(date) : null);
+				entityMap.put(attrName, date != null ? MolgenisDateFormat.getDateFormat().format(date) : null);
 			}
 			else if (attrType == DATE_TIME)
 			{
@@ -1265,8 +1271,9 @@ public class RestController
 						(long) refEntityMaps.size(), mrefEntities);
 
 				EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
-						Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
-								attrName), null, molgenisPermissionService, dataService, languageService);
+						Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(),
+								entity.getIdValue(), attrName), null, molgenisPermissionService, dataService,
+						languageService);
 
 				entityMap.put(attrName, ecr);
 			}
@@ -1276,8 +1283,8 @@ public class RestController
 			{
 				// Add href to ref field
 				Map<String, String> ref = new LinkedHashMap<String, String>();
-				ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(), entity.getIdValue(),
-						attrName));
+				ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getFullyQualifiedName(),
+						entity.getIdValue(), attrName));
 				entityMap.put(attrName, ref);
 			}
 		}
