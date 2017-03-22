@@ -17,15 +17,15 @@ public class MailSenderImplTest extends AbstractMockitoTest
 	private MailSenderImpl mailSender;
 
 	@Mock
-	MailSettings mailSettings;
+	private MailSettings mailSettings;
 	@Mock
-	MailSenderFactory mailSenderFactory;
+	private MailSenderFactory mailSenderFactory;
 	@Mock
-	MailSender actualMailSender;
+	private MailSender actualMailSender;
 	@Mock
-	SimpleMailMessage simpleMailMessage;
+	private SimpleMailMessage simpleMailMessage;
 	@Mock
-	SimpleMailMessage secondSimpleMailMessage;
+	private SimpleMailMessage secondSimpleMailMessage;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException

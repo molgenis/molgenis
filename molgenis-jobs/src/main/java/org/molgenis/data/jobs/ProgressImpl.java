@@ -7,7 +7,6 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -77,18 +76,6 @@ public class ProgressImpl implements Progress
 		JobExecutionContext.unset();
 	}
 
-	private void sendEmail(String[] to, String subject, String text) throws MailException
-	{
-		if (to.length > 0)
-		{
-			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(to);
-			mailMessage.setSubject(subject);
-			mailMessage.setText(text);
-			mailSender.send(mailMessage);
-		}
-	}
-
 	@Override
 	public void failed(Exception ex)
 	{
@@ -99,6 +86,26 @@ public class ProgressImpl implements Progress
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
 		JobExecutionContext.unset();
+	}
+
+	private void sendEmail(String[] to, String subject, String text)
+	{
+		if (to.length > 0)
+		{
+			try
+			{
+				SimpleMailMessage mailMessage = new SimpleMailMessage();
+				mailMessage.setTo(to);
+				mailMessage.setSubject(subject);
+				mailMessage.setText(text);
+				mailSender.send(mailMessage);
+			}
+			catch (RuntimeException e)
+			{
+				jobExecution.setProgressMessage(
+						String.format("%s (Mail not sent: %s)", jobExecution.getProgressMessage(), e.getMessage()));
+			}
+		}
 	}
 
 	@Override
