@@ -19,10 +19,12 @@ var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody
 
 var api = new RestClientV2();
 
-var mutationAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/cdnanotation');
-var proteinAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/aanotation');
-var exonAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/exon', {expand: ['refEntity']});
-var consequenceAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/consequence', {expand: ['refEntity']});
+if(molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/') !== null) {
+    var mutationAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/cdnanotation');
+    var proteinAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/aanotation');
+    var exonAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/exon', {expand: ['refEntity']});
+    var consequenceAttr = molgenis.RestClient.prototype.get('/api/v1/col7a1_Mutations/meta/consequence', {expand: ['refEntity']});
+}
 /**
  * @memberOf component.mixin
  */
