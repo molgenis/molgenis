@@ -2,7 +2,6 @@ package org.molgenis.data.jobs;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
@@ -38,7 +37,6 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		MockitoAnnotations.initMocks(this);
 		jobExecution = new JobExecution(jobExecutionMeta)
 		{
 		};
