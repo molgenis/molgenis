@@ -31,12 +31,41 @@ const constraints = (state, includingBiobank) => {
     smokingConstraints = [{operator: 'OR', operands: smokingConstraints}]
   }
 
+  let ageConstraints = []
+  if (state.belowTwenty) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '<20'})
+  }
+  if (state.twentyThirty) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '20-30'})
+  }
+  if (state.thirtyFourty) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '30-40'})
+  }
+  if (state.fourtyFifty) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '40-50'})
+  }
+  if (state.fiftySixty) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '50-60'})
+  }
+  if (state.sixtySeventy) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '60-70'})
+  }
+  if (state.seventyEighty) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '70-80'})
+  }
+  if (state.aboveEigthy) {
+    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '>80'})
+  }
+  if (ageConstraints.length > 1) {
+    ageConstraints = [{operator: 'OR', operands: ageConstraints}]
+  }
+
   const biobankConstraint = []
   if (state.biobank && includingBiobank) {
     biobankConstraint.push({selector: 'biobank_abbr', comparison: '==', arguments: state.biobank})
   }
 
-  return [...booleanConstraints, ...sexConstraints, ...smokingConstraints, ...biobankConstraint]
+  return [...booleanConstraints, ...sexConstraints, ...smokingConstraints, ...ageConstraints, ...biobankConstraint]
 }
 
 const rsqlTree = (state, includingBiobank) => {

@@ -28,10 +28,25 @@
       </div>
 
       <div class="form-group">
+        <legend class="col-form-legend">Age</legend>
+        <!--From <filter-number-input name="ageFrom" min=0 max=150></filter-number-input> to <filter-number-input name="ageFrom" min=0 max="150"></filter-number-input>-->
+        <filter-checkbox name="belowTwenty" label="<20"></filter-checkbox><br/>
+        <filter-checkbox name="twentyThirty" label="20-30"></filter-checkbox><br/>
+        <filter-checkbox name="thirtyFourty" label="30-40"></filter-checkbox><br/>
+        <filter-checkbox name="fourtyFifty" label="40-50"></filter-checkbox><br/>
+        <filter-checkbox name="fiftySixty" label="50-60"></filter-checkbox><br/>
+        <filter-checkbox name="sixtySeventy" label="60-70"></filter-checkbox><br/>
+        <filter-checkbox name="seventyEighty" label="70-80"></filter-checkbox><br/>
+        <filter-checkbox name="aboveEigthy" label=">80"></filter-checkbox>
+      </div>
+
+      <hr>
+      <div class="form-group">
         <label>Biobank</label>
         <b-form-select v-model="selectedBiobank" :options="biobankOptions"></b-form-select>
       </div>
 
+      <hr>
     <div>
       <button class="btn btn-info" @click.prevent="resetFilters">Reset filters</button>
     </div>
@@ -41,13 +56,14 @@
 
 <script>
   import FilterCheckbox from './FilterCheckbox'
+  import FilterNumberInput from './FilterNumberInput'
   import {mapState} from 'vuex'
 
   import { GET_BIOBANKS, RESET_FILTERS_ASYNC, SET_BIOBANK } from '../store/actions'
 
   export default {
     name: 'filters',
-    components: { FilterCheckbox },
+    components: { FilterCheckbox, FilterNumberInput },
     computed: {
       ...mapState({
         biobankOptions: state => state.biobanks.map(biobank => ({

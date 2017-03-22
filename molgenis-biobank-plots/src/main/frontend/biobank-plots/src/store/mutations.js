@@ -18,6 +18,14 @@ export default {
     state.smoking = false
     state.nonSmoking = false
     state.biobank = null
+    state.belowTwenty = true
+    state.twentyThirty = true
+    state.thirtyFourty = true
+    state.fourtyFifty = true
+    state.fiftySixty = true
+    state.sixtySeventy = true
+    state.seventyEighty = true
+    state.aboveEigthy = true
   },
   [SET_FILTER] (state, {name, value}) {
     state[name] = value
