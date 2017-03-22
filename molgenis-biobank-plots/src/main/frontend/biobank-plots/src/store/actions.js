@@ -1,5 +1,5 @@
 import {get} from '../molgenisApi'
-import {zip} from './utils'
+import {zip} from '../utils'
 import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS, RESET_FILTERS} from './mutations'
 
 export const GET_BIOBANKS = 'GET_BIOBANKS'
@@ -98,7 +98,7 @@ export const actions = {
       ? (biobank ? `q=${filter};biobank_abbr==${biobank}&` : `q=${filter}&`)
       : (biobank ? `q=biobank_abbr==${biobank}&` : '')
     const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
-    const promises = attributes.map(attr => get(server, `/v2/WP2_RP?${q}aggs=x==${attr}`, state.token))
+    const promises = attributes.map(attr => get(server, `v2/WP2_RP?${q}aggs=x==${attr}`, state.token))
     Promise.all(promises).then(
       responses => {
         const smokingGraph = {
