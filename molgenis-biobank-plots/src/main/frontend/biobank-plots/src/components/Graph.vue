@@ -1,12 +1,14 @@
 <template>
-  <b-card show-header>
+  <b-card show-header variant="primary" v-if="aggs.length">
     <div slot="header">
       <h4>Number of Samples per Biobank</h4>
-      <h6 class="card-subtitle mb-2 text-muted">Total number of samples: {{numberOfSamples}}</h6>
+      <h6 class="card-subtitle mb-2">Total number of samples: {{numberOfSamples}}</h6>
     </div>
-    <vue-chart :columns="columns" :rows="aggs" :options="options"
-               chartType="BarChart" :chartEvents="chartEvents"
-               ref="sampleCounts"></vue-chart>
+    <div class="card">
+      <vue-chart :columns="columns" :rows="aggs" :options="options"
+                 chartType="BarChart" :chartEvents="chartEvents"
+                 ref="sampleCounts"></vue-chart>
+    </div>
   </b-card>
 </template>
 

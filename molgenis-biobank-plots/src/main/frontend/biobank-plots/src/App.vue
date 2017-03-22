@@ -7,6 +7,7 @@
         </div>
         <div class="col-md-9">
           <graph/>
+          <br/>
           <attribute-graphs/>
         </div>
       </div>

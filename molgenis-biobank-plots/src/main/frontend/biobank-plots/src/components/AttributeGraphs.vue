@@ -1,16 +1,16 @@
 <template>
   <div v-if="attributeCharts.length">
-    <b-card show-header>
+    <b-card show-header variant="primary">
       <div slot="header">
         <h4 v-if="biobank">Sample makeup: {{biobank}}</h4>
         <h4 v-else>Sample makeup: All biobanks</h4>
       </div>
-      <div class="row text-center">
-        <div v-for="chart in attributeCharts" class="col-md-4">
-          {{chart.title}}
+      <div class="card-deck">
+        <b-card v-for="chart in attributeCharts">
+          <h6 class="chart-header">{{chart.title}}</h6>
           <vue-chart :rows="chart.rows" :columns="chart.columns" :options="options"
                      chartType="ColumnChart" :chartEvents="chartEvents"></vue-chart>
-        </div>
+        </b-card>
       </div>
     </b-card>
   </div>
@@ -40,3 +40,9 @@
     }
   }
 </script>
+<style scoped>
+  .chart-header{
+    color: #292b2c;
+    text-align: center;
+  }
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <b-card show-header>
+  <b-card show-header class="card-outline-primary">
 
     <div slot="header">
       <h4>Filters</h4>
@@ -35,7 +35,7 @@
       </div>
 
     <div>
-      <b-button @click="resetFilters" variant="warning">Reset filters</b-button>
+      <b-button @click="resetFilters" variant="info" class="text-right">Reset filters</b-button>
     </div>
     </form>
   </b-card>
