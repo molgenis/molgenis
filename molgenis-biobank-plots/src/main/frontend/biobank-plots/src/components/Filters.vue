@@ -27,15 +27,26 @@
         <filter-checkbox name="nonSmoking" label="No"></filter-checkbox>
       </div>
 
-      <hr>
-      <h4>Age</h4>
-      From <filter-text-input name="ageFrom" min=0 max=150></filter-text-input> to <filter-text-input name="ageFrom" min=0 max="150"></filter-text-input>
+      <div class="form-group">
+        <legend class="col-form-legend">Age</legend>
+        <!--From <filter-number-input name="ageFrom" min=0 max=150></filter-number-input> to <filter-number-input name="ageFrom" min=0 max="150"></filter-number-input>-->
+        <filter-checkbox name="<20" label="<20"></filter-checkbox><br/>
+        <filter-checkbox name="20-30" label="20-30"></filter-checkbox><br/>
+        <filter-checkbox name="30-40" label="30-40"></filter-checkbox><br/>
+        <filter-checkbox name="20-30" label="40-50"></filter-checkbox><br/>
+        <filter-checkbox name="30-40" label="50-60"></filter-checkbox><br/>
+        <filter-checkbox name="20-30" label="60-70"></filter-checkbox><br/>
+        <filter-checkbox name="30-40" label="70-80"></filter-checkbox><br/>
+        <filter-checkbox name="<20" label=">80"></filter-checkbox>
+      </div>
 
+      <hr>
       <div class="form-group">
         <label>Biobank</label>
         <b-form-select v-model="selectedBiobank" :options="biobankOptions"></b-form-select>
       </div>
 
+      <hr>
     <div>
       <b-button @click="resetFilters" variant="info" class="text-right">Reset filters</b-button>
     </div>
@@ -45,14 +56,14 @@
 
 <script>
   import FilterCheckbox from './FilterCheckbox'
-  import FilterTextInput from './FilterNumberInput'
+  import FilterNumberInput from './FilterNumberInput'
   import {mapState} from 'vuex'
 
   import { GET_BIOBANKS, RESET_FILTERS_ASYNC, SET_BIOBANK } from '../store/actions'
 
   export default {
     name: 'filters',
-    components: { FilterCheckbox },
+    components: { FilterCheckbox, FilterNumberInput },
     computed: {
       ...mapState({
         biobankOptions: state => state.biobanks.map(biobank => ({

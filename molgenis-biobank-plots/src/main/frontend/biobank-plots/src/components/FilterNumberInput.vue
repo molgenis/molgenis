@@ -4,7 +4,7 @@
 
 <script>
   export default {
-    name: 'filter-text-input',
+    name: 'filter-number-input',
     props: ['name', 'min', 'max'],
     computed: {
       value: {

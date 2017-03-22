@@ -29,6 +29,7 @@ const rsql = state => {
   if (smokingConstraints.length) {
     constraints.push('(' + smokingConstraints.join(',') + ')')
   }
+
   return constraints.join(';')
 }
 
@@ -98,6 +99,7 @@ export const actions = {
       ? (biobank ? `q=${filter};biobank_abbr==${biobank}&` : `q=${filter}&`)
       : (biobank ? `q=biobank_abbr==${biobank}&` : '')
     const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
+    // const promises = [...attributes.map(attr => get(server, `/v2/WP2_RP?${q}aggs=x==${attr}`, state.token)),agePromise]
     const promises = attributes.map(attr => get(server, `/v2/WP2_RP?${q}aggs=x==${attr}`, state.token))
     Promise.all(promises).then(
       responses => {
