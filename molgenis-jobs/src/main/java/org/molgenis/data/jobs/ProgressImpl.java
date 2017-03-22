@@ -7,7 +7,6 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -89,7 +88,7 @@ public class ProgressImpl implements Progress
 		JobExecutionContext.unset();
 	}
 
-	private void sendEmail(String[] to, String subject, String text) throws MailException
+	private void sendEmail(String[] to, String subject, String text)
 	{
 		if (to.length > 0)
 		{
@@ -101,7 +100,7 @@ public class ProgressImpl implements Progress
 				mailMessage.setText(text);
 				mailSender.send(mailMessage);
 			}
-			catch (MailException e)
+			catch (RuntimeException e)
 			{
 				jobExecution.setProgressMessage(
 						String.format("%s (Mail not sent: %s)", jobExecution.getProgressMessage(), e.getMessage()));

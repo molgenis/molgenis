@@ -2,7 +2,6 @@ package org.molgenis.util.mail;
 
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.testng.annotations.BeforeMethod;
@@ -10,7 +9,8 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class MailSenderImplTest extends AbstractMockitoTest
 {
@@ -47,12 +47,5 @@ public class MailSenderImplTest extends AbstractMockitoTest
 		when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
 		mailSender.send(simpleMailMessage, secondSimpleMailMessage);
 		verify(actualMailSender).send(simpleMailMessage, secondSimpleMailMessage);
-	}
-
-	@Test(expectedExceptions = MailException.class)
-	public void failAtMailSenderConstruction()
-	{
-		doThrow(new IllegalStateException("fail!")).when(mailSenderFactory).createMailSender(mailSettings);
-		mailSender.send(simpleMailMessage);
 	}
 }

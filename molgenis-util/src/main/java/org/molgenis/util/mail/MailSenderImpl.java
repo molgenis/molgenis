@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
@@ -46,15 +45,6 @@ public class MailSenderImpl implements MailSender
 
 	private MailSender createMailSender()
 	{
-		MailSender mailSender;
-		try
-		{
-			mailSender = mailSenderFactory.createMailSender(mailSettings);
-		}
-		catch (IllegalStateException e)
-		{
-			throw new MailPreparationException(e.getMessage());
-		}
-		return mailSender;
+		return mailSenderFactory.createMailSender(mailSettings);
 	}
 }
