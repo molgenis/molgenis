@@ -16,6 +16,7 @@
   import {mapState} from 'vuex'
   import Vue from 'vue'
   import VueCharts from 'vue-charts'
+  import {resizeEventBus} from '../utils'
 
   import { SET_BIOBANK } from '../store/actions'
 
@@ -60,6 +61,10 @@
         }
       },
       ...mapState(['aggs'])
+    },
+    created () {
+      const self = this
+      resizeEventBus.$on('resize', () => self.$refs.sampleCounts.drawChart())
     }
   }
 </script>
