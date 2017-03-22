@@ -1,5 +1,4 @@
 import { transformToRSQL } from '../rsql/transformer'
-import { getHumanReadable } from '../rsql'
 
 const mapChart = (chart) => ({
   columns: [{label: 'label', type: 'string'}, ...chart.columns],
@@ -57,15 +56,9 @@ export const attributeGraphRsql = (state) => {
   return rsql ? transformToRSQL(rsql) : null
 }
 
-export const readableFilters = (state) => {
-  const rsql = rsqlTree(state, true)
-  return rsql ? getHumanReadable(rsql) : null
-}
-
 export default {
   rsqlTree,
   biobankGraphRsql,
   attributeGraphRsql,
-  readableFilters,
   attributeCharts
 }
