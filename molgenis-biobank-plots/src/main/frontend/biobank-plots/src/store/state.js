@@ -12,7 +12,7 @@ export default {
   biobank: null,
   aggs: [],
   biobanks: [],
-  attributeCharts: [],
+  charts: [],
   apiUrl: 'https://molgenis09.gcc.rug.nl/api/',
   token: 'test'
 }

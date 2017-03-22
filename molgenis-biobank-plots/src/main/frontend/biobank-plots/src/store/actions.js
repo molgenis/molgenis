@@ -11,35 +11,10 @@ export const RESET_FILTERS_ASYNC = 'RESET_FILTERS_ASYNC'
 export const REFRESH_GRAPH = 'REFRESH_GRAPH'
 export const REFRESH_ATTRIBUTE_GRAPHS = 'REFRESH_ATTRIBUTE_GRAPHS'
 
-const humanReadable = {
-  'T': 'True',
-  'F': 'False',
-  null: 'Unknown',
-  'male': 'Male',
-  'female': 'Female'
-}
-
-const datatypeGraph = responses => {
-  const matrixValues = aggs => {
-    const zipped = zip([aggs.xLabels, aggs.matrix.map(row => row[0])])
-    const vals = zipped.reduce((acc, val) => ({...acc, [humanReadable[val[0]]]: val[1]}), {True: 0, False: 0, Unknown: 0})
-    return [vals.True, vals.False, vals.Unknown]
-  }
-  return {
-    title: 'Data types',
-    columns: [
-      {type: 'string', label: 'label'},
-      {type: 'number', label: 'True'},
-      {type: 'number', label: 'False'},
-      {type: 'number', label: 'Unknown'}
-    ],
-    rows: [
-      ['RNAseq', ...matrixValues(responses[2].aggs)],
-      ['wbcc', ...matrixValues(responses[3].aggs)],
-      ['DNA', ...matrixValues(responses[4].aggs)],
-      ['DNAm', ...matrixValues(responses[5].aggs)]
-    ]
-  }
+const matrixValues = aggs => {
+  const zipped = zip([aggs.xLabels, aggs.matrix.map(row => row[0])])
+  const values = zipped.reduce((acc, val) => ({...acc, [val[0]]: val[1]}), {})
+  return { values }
 }
 
 export default {
@@ -86,23 +61,42 @@ export default {
     })
     Promise.all(promises).then(
       responses => {
-        const smokingGraph = {
-          title: 'Smoking',
-          rows: [['Smoking', ...responses[0].aggs.matrix.map(row => row[0])]],
-          columns: [
-            {type: 'string', label: 'label'},
-            ...responses[0].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
-          ]
-        }
-        const sexGraph = {
-          title: 'Gender',
-          rows: [['Gender', ...responses[1].aggs.matrix.map(row => row[0])]],
-          columns: [
-            {type: 'string', label: 'label'},
-            ...responses[1].aggs.xLabels.map(l => ({type: 'number', label: humanReadable[l]}))
-          ]
-        }
-        const attributeGraphs = [datatypeGraph(responses), sexGraph, smokingGraph]
+        const attributeGraphs = [
+          {
+            title: 'Data types',
+            columns: [
+            {type: 'number', label: 'Available', key: 'T'},
+            {type: 'number', label: 'Unavailable', key: 'F'},
+            {type: 'number', label: 'Unknown', key: 'null'}
+            ],
+            rows: [
+            {label: 'RNAseq', ...matrixValues(responses[2].aggs)},
+            {label: 'wbcc', ...matrixValues(responses[3].aggs)},
+            {label: 'DNA', ...matrixValues(responses[4].aggs)},
+            {label: 'DNAm', ...matrixValues(responses[5].aggs)}
+            ]
+          }, {
+            title: 'Smoking',
+            columns: [
+              {type: 'number', label: 'Smoking', key: 'T'},
+              {type: 'number', label: 'Non-Smoking', key: 'F'},
+              {type: 'number', label: 'Unknown', key: 'null'}
+            ],
+            rows: [
+              {label: 'Smoking', ...matrixValues(responses[0].aggs)}
+            ]
+          }, {
+            title: 'Gender',
+            columns: [
+              {type: 'number', label: 'Male', key: 'male'},
+              {type: 'number', label: 'Female', key: 'female'},
+              {type: 'number', label: 'Unknown', key: 'null'}
+            ],
+            rows: [
+              {label: 'Gender', ...matrixValues(responses[1].aggs)}
+            ]
+          }
+        ]
         commit(SET_ATTRIBUTE_CHARTS, attributeGraphs)
       }
     )

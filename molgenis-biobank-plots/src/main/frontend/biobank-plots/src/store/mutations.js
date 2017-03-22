@@ -32,6 +32,6 @@ export default {
     state.biobanks = items
   },
   [SET_ATTRIBUTE_CHARTS] (state, charts) {
-    state.attributeCharts = charts
+    state.charts = charts
   }
 }

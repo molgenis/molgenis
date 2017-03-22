@@ -1,6 +1,14 @@
 import { transformToRSQL } from '../rsql/transformer'
 import { getHumanReadable } from '../rsql'
 
+const mapChart = (chart) => ({
+  columns: [{label: 'label', type: 'string'}, ...chart.columns],
+  rows: chart.rows.map(row => [row.label, ...chart.columns.map(column => row.values[column.key] || 0)]),
+  title: chart.title
+})
+
+const attributeCharts = (state) => state.charts.map(mapChart)
+
 const constraints = (state, includingBiobank) => {
   const booleanConstraints = ['rnaseq', 'DNAm', 'DNA', 'wbcc']
     .filter(attr => state[attr])
@@ -58,5 +66,6 @@ export default {
   rsqlTree,
   biobankGraphRsql,
   attributeGraphRsql,
-  readableFilters
+  readableFilters,
+  attributeCharts
 }
