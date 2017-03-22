@@ -21,14 +21,17 @@ public class GenomeBrowserService
 
 	private GenomicDataSettings genomicDataSettings;
 
-	public GenomeBrowserService(DataService dataService, GenomicDataSettings genomicDataSettings)
+
+	public GenomeBrowserService(
+			DataService dataService,
+			GenomicDataSettings genomicDataSettings
+	)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.genomicDataSettings = requireNonNull(genomicDataSettings);
 	}
 
 	//TODO Improve performance by rewriting to query that returns all genomic entities instead of retrieving all entities and determining which one is genomic
-
 	/**
 	 * Fetch all non abstract genomeBrowser entities
 	 * these are defined as being non abstract and having a ATTRS_POS and ATTRS_CHROM attribute.
@@ -37,7 +40,8 @@ public class GenomeBrowserService
 	 */
 	public Stream<EntityType> getGenomeBrowserEntities()
 	{
-		return dataService.getMeta().getEntityTypes().filter(entityType -> !entityType.isAbstract())
+		return dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract())
 				.filter(this::isGenomeBrowserEntity);
 	}
 
