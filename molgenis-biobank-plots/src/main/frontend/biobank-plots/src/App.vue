@@ -1,22 +1,13 @@
 <template>
   <div id="app">
-    <div class="container-fluid">
+    <div class="container">
       <div class="row">
-        <div class="col-md-8 col-sm-12">
-          <br>
-          <h1>Possible title</h1>
-          <hr>
-          <div class="row">
-            <div class="col-md-4">
-              <filters/>
-            </div>
-            <div class="col-md-8 ">
-              <graph/>
-            </div>
-          </div>
+        <div class="col-md-3">
+          <filters/>
         </div>
-        <div class="col-md-4 col-sm-12">
-          <br>
+        <div class="col-md-9">
+          <graph/>
+          <br/>
           <attribute-graphs/>
         </div>
       </div>

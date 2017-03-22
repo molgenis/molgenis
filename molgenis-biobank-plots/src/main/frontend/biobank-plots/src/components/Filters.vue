@@ -1,19 +1,13 @@
 <template>
-  <b-card show-header show-footer>
+  <b-card show-header class="card-outline-primary">
 
     <div slot="header">
-      <div class="row">
-        <div class="col-4">
-          <h3>Filters</h3>
-        </div>
-        <div class="col-8 text-right">
-          <b-button size="sm" @click="resetFilters">Reset filters</b-button>
-        </div>
-      </div>
+      <h4>Filters</h4>
     </div>
-    <form>
-      <h4>Data types</h4>
-      <div class="custom-controls-stacked">
+
+    <form class="form-horizontal">
+      <div class="form-group custom-controls-stacked">
+        <legend class="col-form-legend">Data type</legend>
         <filter-checkbox name="rnaseq" label="Transcriptome (RNAseq)"></filter-checkbox>
         <filter-checkbox name="DNAm" label="Methylome (Illumina 450K)"></filter-checkbox>
         <filter-checkbox name="DNA" label="DNA"></filter-checkbox>
@@ -21,16 +15,14 @@
         <filter-checkbox name="metabolomics" label="Metabolome (Brainshake)"></filter-checkbox>
       </div>
 
-      <hr>
-      <h4>Gender</h4>
-      <div class="custom-controls-stacked">
+      <div class="form-group">
+        <legend class="col-form-legend">Gender</legend>
         <filter-checkbox name="male" label="Male"></filter-checkbox>
         <filter-checkbox name="female" label="Female"></filter-checkbox>
       </div>
 
-      <hr>
-      <h4>Smoking</h4>
-      <div class="custom-controls-stacked">
+      <div class="form-group">
+        <legend class="col-form-legend">Smoking</legend>
         <filter-checkbox name="smoking" label="Yes"></filter-checkbox>
         <filter-checkbox name="nonSmoking" label="No"></filter-checkbox>
       </div>
@@ -39,17 +31,15 @@
       <h4>Age</h4>
       From <filter-text-input name="ageFrom" min=0 max=150></filter-text-input> to <filter-text-input name="ageFrom" min=0 max="150"></filter-text-input>
 
-      <hr>
-      <h4>Biobank</h4>
-      <select v-model="selectedBiobank" class="custom-select">
-        <option v-for="biobank in biobankOptions" :value='biobank.value'>{{biobank.text}}</option>
-      </select>
+      <div class="form-group">
+        <label>Biobank</label>
+        <b-form-select v-model="selectedBiobank" :options="biobankOptions"></b-form-select>
+      </div>
+
+    <div>
+      <b-button @click="resetFilters" variant="info" class="text-right">Reset filters</b-button>
+    </div>
     </form>
-
-    <small slot="footer" class="text-muted">
-      Number of samples: {{numberOfSamples}}
-    </small>
-
   </b-card>
 </template>
 
@@ -58,8 +48,11 @@
   import FilterTextInput from './FilterNumberInput'
   import {mapState} from 'vuex'
 
+  import { GET_BIOBANKS, RESET_FILTERS_ASYNC, SET_BIOBANK } from '../store/actions'
+
   export default {
-    components: { FilterCheckbox, FilterTextInput },
+    name: 'filters',
+    components: { FilterCheckbox },
     computed: {
       ...mapState({
         biobankOptions: state => state.biobanks.map(biobank => ({
@@ -67,29 +60,23 @@
           value: biobank.abbr
         }))
       }),
-      numberOfSamples: {
-        get () {
-          return this.$store.state.numberOfSamples
-        }
-      },
       selectedBiobank: {
         get () {
           return this.$store.state.biobank
         },
         set (biobank) {
-          this.$store.dispatch('setBiobank', biobank)
+          this.$store.dispatch(SET_BIOBANK, biobank)
         }
       }
     },
     created () {
-      this.$store.dispatch('getBiobanks')
-      this.$store.commit('setFilter', {name: 'DNA', value: false})
+      this.$store.dispatch(GET_BIOBANKS)
+      this.$store.dispatch(RESET_FILTERS_ASYNC)
     },
     methods: {
       resetFilters: function () {
-        this.$store.commit('resetFilters')
+        this.$store.dispatch(RESET_FILTERS_ASYNC)
       }
-    },
-    name: 'filters'
+    }
   }
 </script>

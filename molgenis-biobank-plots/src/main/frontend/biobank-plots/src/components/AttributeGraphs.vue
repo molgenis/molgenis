@@ -1,10 +1,18 @@
 <template>
-  <div>
-    <template v-for="chart in attributeCharts">
-    <h4>{{chart.title}}</h4>
-    <vue-chart :rows="chart.rows" :columns="chart.columns" :options="options"
-               chartType="ColumnChart" :chartEvents="chartEvents"></vue-chart>
-    </template>
+  <div v-if="attributeCharts.length">
+    <b-card show-header variant="primary">
+      <div slot="header">
+        <h4 v-if="biobank">Sample makeup: {{biobank}}</h4>
+        <h4 v-else>Sample makeup: All biobanks</h4>
+      </div>
+      <div class="card-deck">
+        <b-card v-for="chart in attributeCharts">
+          <h6 class="chart-header">{{chart.title}}</h6>
+          <vue-chart :rows="chart.rows" :columns="chart.columns" :options="options"
+                     chartType="ColumnChart" :chartEvents="chartEvents"></vue-chart>
+        </b-card>
+      </div>
+    </b-card>
   </div>
 </template>
 
@@ -21,16 +29,20 @@
           }
         },
         options: {
-          width: 600,
-          height: 400,
           legend: { position: 'top', maxLines: 3 },
-          bar: { groupWidth: '25%' },
-          isStacked: true
+          isStacked: true,
+          width: '100%'
         }
       }
     },
     computed: {
-      ...mapState(['attributeCharts'])
+      ...mapState(['attributeCharts', 'biobank'])
     }
   }
 </script>
+<style scoped>
+  .chart-header{
+    color: #292b2c;
+    text-align: center;
+  }
+</style>
