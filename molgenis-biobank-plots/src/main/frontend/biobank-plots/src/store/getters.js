@@ -8,7 +8,10 @@ const mapChart = (chart) => (chart && {
 
 const attributeCharts = (state) => ({
   gender: mapChart(state.charts.gender),
-  smoking: mapChart(state.charts.smoking)
+  smoking: mapChart(state.charts.smoking),
+  data_types: mapChart(state.charts.data_types),
+  age: mapChart(state.charts.age)
+
 })
 
 const constraints = (state, includingBiobank) => {

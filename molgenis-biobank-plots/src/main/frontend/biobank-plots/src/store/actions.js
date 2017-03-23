@@ -82,11 +82,11 @@ export default {
             columns: [
               {type: 'number', label: '<20', key: '<20'},
               {type: 'number', label: '20-30', key: '20-30'},
-              {type: 'number', label: '20-30', key: '30-40'},
-              {type: 'number', label: '20-30', key: '40-50'},
-              {type: 'number', label: '20-30', key: '50-60'},
-              {type: 'number', label: '20-30', key: '60-70'},
-              {type: 'number', label: '20-30', key: '70-80'},
+              {type: 'number', label: '30-40', key: '30-40'},
+              {type: 'number', label: '40-50', key: '40-50'},
+              {type: 'number', label: '50-60', key: '50-60'},
+              {type: 'number', label: '60-70', key: '60-70'},
+              {type: 'number', label: '70-80', key: '70-80'},
               {type: 'number', label: '>80', key: '>80'},
               {type: 'number', label: 'Unknown', key: 'null'}
             ],
