@@ -17,8 +17,17 @@ If you've filled in a username and password, the settings will be validated when
 with the mail server. If you do not want the settings to be tested at all, you can set `testConnection` to false.
 
 ### JavaMail properties
+By default, the following low-level JavaMail properties, needed to interact with the Gmail SMTP server, are set:
+```
+mail.smtp.starttls.enable=true
+mail.smtp.quitwait=false
+mail.smtp.auth=true
+```
+You may override these properties or add additional properties and override these defaults by adding entities to the 
+```JavaMailProperty``` repository in the Data Explorer. Each key may be provided at most once.
+For a list of valid keys, check https://javamail.java.net/nonav/docs/api/
 
-TODO replace with SimpleMailMessage documentation
+> E.g. Add an entity with key ```mail.debug``` and value ```true``` if you'd like to debug the mail dialog with the server.
 
 # User management
 User management is crucial for keeping an overview of people visiting your online database, but it is also important for security reasons. MOLGENIS has an extensive user management system, allowing people to register themselves, or be registered by an administrator. MOLGENIS uses groups and users to efficiently control permissions. Groups and users can both have individual permissions on certain data sets for example. But users can also be part of a group, automatically inheriting the permissions set for that group. You can find the User manager module under the Admin menu:
