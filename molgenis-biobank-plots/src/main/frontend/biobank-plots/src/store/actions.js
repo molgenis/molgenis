@@ -1,5 +1,5 @@
 import {get} from '../molgenisApi'
-import {URL} from 'isomorphic-url'
+import 'url-polyfill'
 import {zip} from '../utils'
 import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS, RESET_FILTERS} from './mutations'
 import {biobankGraphRsql, attributeGraphRsql} from './getters'
