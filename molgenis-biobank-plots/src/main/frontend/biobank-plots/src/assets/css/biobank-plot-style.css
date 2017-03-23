@@ -1,0 +1,28 @@
+body{
+  background-color: #E1E6EC;
+}
+.card{
+  background-color: white;
+}
+h4{
+  color: #184B8A;
+}
+.card-subtitle{
+  color: #555;
+}
+legend{
+  color: #184B8A;
+}
+.btn-info{
+  background-color: #184B8A;
+  color: rgba(255, 255, 255, .7);
+  border: none;
+}
+.card-outline-primary{
+  box-shadow: 5px 5px 7px #d7dae0;
+  border: none;
+}
+.card-primary{
+  box-shadow: 5px 5px 7px #d7dae0;
+  border: none;
+}
