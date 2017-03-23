@@ -232,11 +232,10 @@
      * Fetches labels for identifiers from the V2 RestClient
      */
     function getLabelValues(refEntityName, refEntityIdAttribute, refEntityLabelAttribute, values, restApi) {
-        var ids = Array.from(values.values()).join(',')
         var rsqlQuery = molgenis.rsql.encodeRsqlValue(molgenis.rsql.createRsqlQuery([{
             field: refEntityIdAttribute,
             operator: 'IN',
-            value: values.values()
+            value: Array.from(values.values())
         }]))
         var requestUri = '/api/v2/' + refEntityName + '?q=' + rsqlQuery
 
