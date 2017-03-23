@@ -1,8 +1,8 @@
 package org.molgenis.file.ingest;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.file.ingest.meta.FileIngest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -11,7 +11,7 @@ import static org.testng.Assert.assertEquals;
 
 public class FileIngestRepositoryDecoratorTest
 {
-	private Repository<Entity> decoratedRepo;
+	private Repository<FileIngest> decoratedRepo;
 	private FileIngestRepositoryDecorator fileIngestRepositoryDecorator;
 
 	@SuppressWarnings("unchecked")

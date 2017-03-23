@@ -1,16 +1,17 @@
 package org.molgenis.data;
 
 /**
- * Temporary class that allows repository decoration (e.g. security, indexing) without a module using implementations of
- * this class requiring dependencies on other modules.
+ * Repository decorator factory that creates decorated {@link Repository repositories}.
+ *
+ * @see SystemRepositoryDecoratorFactory
  */
 public interface RepositoryDecoratorFactory
 {
 	/**
 	 * Creates a decorated repository based on the given {@link Repository}
 	 *
-	 * @param repository
-	 * @return
+	 * @param repository undecorated repository
+	 * @return decorated repository
 	 */
 	Repository<Entity> createDecoratedRepository(Repository<Entity> repository);
 }
