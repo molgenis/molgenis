@@ -8,11 +8,12 @@
     <form class="form-horizontal">
       <div class="form-group custom-controls-stacked">
         <legend class="col-form-legend">Data type</legend>
-        <filter-checkbox name="rnaseq" label="Transcriptome (RNAseq)"></filter-checkbox>
-        <filter-checkbox name="DNAm" label="Methylome (Illumina 450K)"></filter-checkbox>
-        <filter-checkbox name="DNA" label="DNA"></filter-checkbox>
-        <filter-checkbox name="wbcc" label="White bloodcell count"></filter-checkbox>
-        <filter-checkbox name="metabolomics" label="Metabolome (Brainshake)"></filter-checkbox>
+        <filter-checkbox name="transcriptome" label="Transcriptome (RNAseq)"></filter-checkbox>
+        <filter-checkbox name="methylome" label="Methylome (Illumina 450K)"></filter-checkbox>
+        <filter-checkbox name="genotypes" label="Genotypes (Imputed)"></filter-checkbox>
+        <filter-checkbox name="wbcc" label="Whole bloodcell count"></filter-checkbox>
+        <filter-checkbox name="metabolome" label="Metabolome (Brainshake)"></filter-checkbox>
+        <filter-checkbox name="wgs" label="Whole Genome Sequencing (Illumina HiSeq)"></filter-checkbox>
       </div>
 
       <div class="form-group">

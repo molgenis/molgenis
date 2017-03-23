@@ -44,12 +44,12 @@
         options: {
           hAxis: {
             title: 'Number of Samples',
-            maxValue: 2500
+            maxValue: 5500
           },
           vAxis: {
             title: 'Biobank'
           },
-          height: 325,
+          height: 600,
           width: '100%'
         }
       }

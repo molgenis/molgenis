@@ -8,11 +8,12 @@ export const SET_ATTRIBUTE_CHARTS = 'SET_ATTRIBUTE_CHARTS'
 
 export default {
   [RESET_FILTERS] (state) {
-    state.rnaseq = false
-    state.DNAm = false
-    state.DNA = false
+    state.transcriptome = false
+    state.methylome = false
+    state.genotypes = false
     state.wbcc = false
-    state.metabolomics = false
+    state.metabolome = false
+    state.wgs = false
     state.male = false
     state.female = false
     state.smoking = false

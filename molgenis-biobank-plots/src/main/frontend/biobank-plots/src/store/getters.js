@@ -9,7 +9,7 @@ const mapChart = (chart) => ({
 const attributeCharts = (state) => state.charts.map(mapChart)
 
 const constraints = (state, includingBiobank) => {
-  const booleanConstraints = ['rnaseq', 'DNAm', 'DNA', 'wbcc']
+  const booleanConstraints = ['smoking', 'sex', 'transcriptome', 'wbcc', 'genotypes', 'metabolome', 'methylome', 'wgs']
     .filter(attr => state[attr])
     .map(attr => ({selector: attr, comparison: '==', arguments: 'true'}))
 
@@ -32,37 +32,41 @@ const constraints = (state, includingBiobank) => {
   }
 
   let ageConstraints = []
-  if (state.belowTwenty) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '<20'})
-  }
-  if (state.twentyThirty) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '20-30'})
-  }
-  if (state.thirtyFourty) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '30-40'})
-  }
-  if (state.fourtyFifty) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '40-50'})
-  }
-  if (state.fiftySixty) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '50-60'})
-  }
-  if (state.sixtySeventy) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '60-70'})
-  }
-  if (state.seventyEighty) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '70-80'})
-  }
-  if (state.aboveEigthy) {
-    ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '>80'})
-  }
-  if (ageConstraints.length > 1) {
-    ageConstraints = [{operator: 'OR', operands: ageConstraints}]
+  if (!state.belowTwenty || !state.twentyThirty || !state.thirtyFourty ||
+    !state.fourtyFifty || !state.fiftySixty || !state.sixtySeventy ||
+    !state.seventyEighty || !state.aboveEigthy) {
+    if (state.belowTwenty) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '<20'})
+    }
+    if (state.twentyThirty) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '20-30'})
+    }
+    if (state.thirtyFourty) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '30-40'})
+    }
+    if (state.fourtyFifty) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '40-50'})
+    }
+    if (state.fiftySixty) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '50-60'})
+    }
+    if (state.sixtySeventy) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '60-70'})
+    }
+    if (state.seventyEighty) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '70-80'})
+    }
+    if (state.aboveEigthy) {
+      ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '>80'})
+    }
+    if (ageConstraints.length > 1) {
+      ageConstraints = [{operator: 'OR', operands: ageConstraints}]
+    }
   }
 
   const biobankConstraint = []
   if (state.biobank && includingBiobank) {
-    biobankConstraint.push({selector: 'biobank_abbr', comparison: '==', arguments: state.biobank})
+    biobankConstraint.push({selector: 'biobank', comparison: '==', arguments: state.biobank})
   }
 
   return [...booleanConstraints, ...sexConstraints, ...smokingConstraints, ...ageConstraints, ...biobankConstraint]

@@ -19,7 +19,7 @@ const matrixValues = aggs => {
 
 export default {
   [GET_BIOBANKS] ({ commit, state }) {
-    get(state.apiUrl + 'v2/WP2_biobanks', state.token)
+    get(state.apiUrl + 'v2/leiden_biobanks', state.token)
       .then(response => { commit(SET_BIOBANKS, response.items) })
   },
   [SET_BIOBANK] ({commit, dispatch}, biobank) {
@@ -38,23 +38,23 @@ export default {
   },
   [REFRESH_GRAPH] ({commit, state}) {
     const {token, apiUrl} = state
-    const url = new URL(apiUrl + 'v2/WP2_RP')
+    const url = new URL(apiUrl + 'v2/leiden_RP')
     const q = biobankGraphRsql(state)
     if (q) {
       url.searchParams.append('q', q)
     }
-    url.searchParams.append('aggs', 'x==biobank_abbr')
+    url.searchParams.append('aggs', 'x==biobank')
     get(url, token).then(response => { commit(SET_AGGS, response.aggs) })
   },
   [REFRESH_ATTRIBUTE_GRAPHS] ({commit, state}) {
     commit(SET_ATTRIBUTE_CHARTS, [])
     const {token, apiUrl} = state
-    const url = new URL(apiUrl + 'v2/WP2_RP')
+    const url = new URL(apiUrl + 'v2/leiden_RP')
     const q = attributeGraphRsql(state)
     if (q) {
       url.searchParams.append('q', q)
     }
-    const attributes = ['smoking', 'sex', 'rnaseq', 'wbcc', 'DNA', 'DNAm']
+    const attributes = ['smoking', 'sex', 'transcriptome', 'wbcc', 'genotypes', 'metabolome', 'methylome', 'wgs']
     const promises = attributes.map(attr => {
       url.searchParams.set('aggs', `x==${attr}`)
       return get(url, token)
@@ -66,14 +66,15 @@ export default {
             title: 'Data types',
             columns: [
             {type: 'number', label: 'Available', key: 'T'},
-            {type: 'number', label: 'Unavailable', key: 'F'},
-            {type: 'number', label: 'Unknown', key: 'null'}
+            {type: 'number', label: 'Unavailable', key: 'F'}
             ],
             rows: [
-            {label: 'RNAseq', ...matrixValues(responses[2].aggs)},
+            {label: 'transcriptome', ...matrixValues(responses[2].aggs)},
             {label: 'wbcc', ...matrixValues(responses[3].aggs)},
-            {label: 'DNA', ...matrixValues(responses[4].aggs)},
-            {label: 'DNAm', ...matrixValues(responses[5].aggs)}
+            {label: 'genotypes', ...matrixValues(responses[4].aggs)},
+            {label: 'metabolome', ...matrixValues(responses[5].aggs)},
+              {label: 'methylome', ...matrixValues(responses[6].aggs)},
+              {label: 'wgs', ...matrixValues(responses[6].aggs)}
             ]
           }, {
             title: 'Smoking',
