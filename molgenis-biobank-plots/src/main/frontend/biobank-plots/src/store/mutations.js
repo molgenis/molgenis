@@ -1,4 +1,4 @@
-import {zip} from './utils'
+import {zip} from '../utils'
 
 export const RESET_FILTERS = 'RESET_FILTERS'
 export const SET_FILTER = 'SET_FILTER'
