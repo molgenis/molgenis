@@ -117,7 +117,6 @@ export default {
             ]
           }
         }
-        console.log(responses)
         commit(SET_ATTRIBUTE_CHARTS, attributeGraphs)
       }
     )

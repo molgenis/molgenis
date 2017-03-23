@@ -13,10 +13,9 @@
 </template>
 
 <script>
-  import {mapState} from 'vuex'
   import Vue from 'vue'
   import VueCharts from 'vue-charts'
-  import {resizeEventBus} from '../utils'
+  import {resizeEventBus, chartColors} from '../utils'
 
   import { SET_BIOBANK } from '../store/actions'
 
@@ -35,11 +34,14 @@
           }
         },
         columns: [{
-          'type': 'string',
-          'label': 'Biobank'
+          type: 'string',
+          label: 'Biobank'
         }, {
-          'type': 'number',
-          'label': 'Samples'
+          type: 'number',
+          label: 'Samples'
+        }, {
+          type: 'string',
+          role: 'style'
         }],
         options: {
           hAxis: {
@@ -49,7 +51,7 @@
           vAxis: {
             title: 'Biobank'
           },
-          height: 600,
+          height: 700,
           width: '100%'
         }
       }
@@ -60,7 +62,10 @@
           return this.$store.state.numberOfSamples
         }
       },
-      ...mapState(['aggs'])
+      aggs () {
+        return this.$store.state.aggs && this.$store.state.aggs.map(row => [...row, row[0] === this.$store.state.biobank
+            ? chartColors[1] : chartColors[0]])
+      }
     },
     created () {
       const self = this
