@@ -276,7 +276,7 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 			writer.close();
 		}
 		assertEquals(strWriter.toString(),
-				"1	565286	rs1578391	C	T	.	flt	idAttr=0;	GT:DP:EC	1/1:5:5");
+				"1	565286	rs1578391	C	T	.	flt	idAttr=0	GT:DP:EC	1/1:5:5");
 	}
 
 	@Test
