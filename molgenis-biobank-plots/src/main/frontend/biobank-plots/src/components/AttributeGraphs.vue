@@ -24,7 +24,7 @@
             </div>
           </div>
           <div class="col-md-6">
-            <attribute-graph :data="attributeCharts.age" height="507"></attribute-graph>
+            <pie-graph :data="attributeCharts.age" height="507"></pie-graph>
           </div>
         </div>
       </b-card>
@@ -35,10 +35,11 @@
 <script>
   import {mapState, mapGetters} from 'vuex'
   import AttributeGraph from './AttributeGraph'
+  import PieGraph from './PieGraph'
 
   export default {
     name: 'attribute-graphs',
-    components: {AttributeGraph},
+    components: {AttributeGraph, PieGraph},
     computed: {
       ...mapGetters(['attributeCharts']),
       ...mapState(['biobank'])
