@@ -1,7 +1,7 @@
 <template>
   <b-card>
       <h6 class="chart-header">{{data.title}} </h6>
-      <vue-chart ref="chart" :rows="data.rows" :columns="data.columns"
+      <vue-chart ref="chart" :rows="rows" :columns="columns"
         chartType="PieChart" :chartEvents="chartEvents">
       </vue-chart>
   </b-card>
@@ -14,17 +14,18 @@
     name: 'pie-graph',
     props: ['data'],
     data: function () {
-      var labels = ['<20', '20-30', '30-40', '40-50', '50-60', '60-70', '70-80', 'undefined']
-      this.data.rows[0].shift()
-      this.data.rows = zip([labels, this.data.rows[0].map(row => row)])
-      this.data.columns = ['string', 'number']
-      console.log(this.data.rows)
       return {
+        columns: ['string', 'number'],
         chartEvents: {
           'select': function () {
             console.log('Select (but what?)!')
           }
         }
+      }
+    },
+    computed: {
+      rows () {
+        return zip([this.data.columns.map((column) => column.label), this.data.rows[0]]).slice(1)
       }
     },
     created () {
