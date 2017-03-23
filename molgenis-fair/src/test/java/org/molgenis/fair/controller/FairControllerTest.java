@@ -3,6 +3,7 @@ package org.molgenis.fair.controller;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,8 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 		controller = new FairController(dataService, entityModelWriter);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
-				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter).build();
+				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter, new RdfConverter())
+				.build();
 	}
 
 	@Test
@@ -72,6 +74,17 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk());
 
 		Mockito.verify(entityModelWriter).createRdfModel("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID", answer);
+	}
+
+	@Test
+	public void getCatalogTestUnknownCatalog() throws Exception
+	{
+		reset(dataService);
+
+		Entity answer = mock(Entity.class);
+
+		this.mockMvc.perform(get(URI.create("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID?blah=value"))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
 	}
 
 	@Test
