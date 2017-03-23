@@ -6,7 +6,7 @@ export const SET_AGGS = 'SET_AGGS'
 export const SET_BIOBANKS = 'SET_BIOBANKS'
 export const SET_ATTRIBUTE_CHARTS = 'SET_ATTRIBUTE_CHARTS'
 
-export const mutations = {
+export default {
   [RESET_FILTERS] (state) {
     state.rnaseq = false
     state.DNAm = false
@@ -18,6 +18,14 @@ export const mutations = {
     state.smoking = false
     state.nonSmoking = false
     state.biobank = null
+    state.belowTwenty = true
+    state.twentyThirty = true
+    state.thirtyFourty = true
+    state.fourtyFifty = true
+    state.fiftySixty = true
+    state.sixtySeventy = true
+    state.seventyEighty = true
+    state.aboveEigthy = true
   },
   [SET_FILTER] (state, {name, value}) {
     state[name] = value
@@ -32,6 +40,6 @@ export const mutations = {
     state.biobanks = items
   },
   [SET_ATTRIBUTE_CHARTS] (state, charts) {
-    state.attributeCharts = charts
+    state.charts = charts
   }
 }

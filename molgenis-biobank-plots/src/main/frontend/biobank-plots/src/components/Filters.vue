@@ -48,7 +48,7 @@
 
       <hr>
     <div>
-      <b-button @click="resetFilters" variant="info" class="text-right">Reset filters</b-button>
+      <button class="btn btn-info" @click.prevent="resetFilters">Reset filters</button>
     </div>
     </form>
   </b-card>

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import {mapState} from 'vuex'
+  import {mapState, mapGetters} from 'vuex'
   import {resizeEventBus} from '../utils'
 
   export default {
@@ -39,7 +39,8 @@
       }
     },
     computed: {
-      ...mapState(['attributeCharts', 'biobank'])
+      ...mapGetters(['attributeCharts']),
+      ...mapState(['biobank'])
     },
     created () {
       const self = this
