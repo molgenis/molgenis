@@ -58,6 +58,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	private static String ENTITY_UNTYPED_ID = "p1";
 	private static String HREF_ENTITY = BASE_URI + '/' + ENTITY_NAME;
 	private static String HREF_ENTITY_META = HREF_ENTITY + "/meta";
+	private static String HREF_UNKNOWN_ENTITY_META = BASE_URI + "/unknown/meta";
 	private static String HREF_ENTITY_ID = HREF_ENTITY + "/p1";
 
 	private static final String CSV_HEADER = "\"name\",\"id\",\"enum\",\"int\"\n";
@@ -355,6 +356,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
+	}
+
+	@Test
+	public void retrieveAttributeUnknownEntity() throws Exception
+	{
+		mockMvc.perform(get(HREF_UNKNOWN_ENTITY_META + "/attribute")).andExpect(status().isNotFound());
 	}
 
 	@Test
