@@ -6,7 +6,10 @@ const mapChart = (chart) => ({
   title: chart.title
 })
 
-const attributeCharts = (state) => state.charts.map(mapChart)
+const attributeCharts = (state) => ({
+  gender: mapChart(state.charts.gender),
+  smoking: mapChart(state.charts.smoking)
+})
 
 const constraints = (state, includingBiobank) => {
   const booleanConstraints = ['smoking', 'sex', 'transcriptome', 'wbcc', 'genotypes', 'metabolome', 'methylome', 'wgs']

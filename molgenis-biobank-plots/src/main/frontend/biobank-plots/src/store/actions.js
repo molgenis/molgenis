@@ -54,29 +54,47 @@ export default {
     if (q) {
       url.searchParams.append('q', q)
     }
-    const attributes = ['smoking', 'sex', 'transcriptome', 'wbcc', 'genotypes', 'metabolome', 'methylome', 'wgs']
+    const attributes = ['smoking', 'sex', 'transcriptome', 'wbcc', 'genotypes', 'metabolome', 'methylome', 'wgs', 'ageGroup']
     const promises = attributes.map(attr => {
       url.searchParams.set('aggs', `x==${attr}`)
       return get(url, token)
     })
     Promise.all(promises).then(
       responses => {
-        const attributeGraphs = [
-          {
+        const attributeGraphs = {
+          'data_types': {
             title: 'Data types',
             columns: [
-            {type: 'number', label: 'Available', key: 'T'},
-            {type: 'number', label: 'Unavailable', key: 'F'}
+              {type: 'number', label: 'Available', key: 'T'},
+              {type: 'number', label: 'Unavailable', key: 'F'}
             ],
             rows: [
-            {label: 'transcriptome', ...matrixValues(responses[2].aggs)},
-            {label: 'wbcc', ...matrixValues(responses[3].aggs)},
-            {label: 'genotypes', ...matrixValues(responses[4].aggs)},
-            {label: 'metabolome', ...matrixValues(responses[5].aggs)},
+              {label: 'transcriptome', ...matrixValues(responses[2].aggs)},
+              {label: 'wbcc', ...matrixValues(responses[3].aggs)},
+              {label: 'genotypes', ...matrixValues(responses[4].aggs)},
+              {label: 'metabolome', ...matrixValues(responses[5].aggs)},
               {label: 'methylome', ...matrixValues(responses[6].aggs)},
-              {label: 'wgs', ...matrixValues(responses[6].aggs)}
+              {label: 'wgs', ...matrixValues(responses[7].aggs)}
             ]
-          }, {
+          },
+          'age': {
+            title: 'Age',
+            columns: [
+              {type: 'number', label: '<20', key: '<20'},
+              {type: 'number', label: '20-30', key: '20-30'},
+              {type: 'number', label: '20-30', key: '30-40'},
+              {type: 'number', label: '20-30', key: '40-50'},
+              {type: 'number', label: '20-30', key: '50-60'},
+              {type: 'number', label: '20-30', key: '60-70'},
+              {type: 'number', label: '20-30', key: '70-80'},
+              {type: 'number', label: '>80', key: '>80'},
+              {type: 'number', label: 'Unknown', key: 'null'}
+            ],
+            rows: [
+              {label: 'Age', ...matrixValues(responses[8].aggs)}
+            ]
+          },
+          'smoking': {
             title: 'Smoking',
             columns: [
               {type: 'number', label: 'Smoking', key: 'T'},
@@ -86,7 +104,8 @@ export default {
             rows: [
               {label: 'Smoking', ...matrixValues(responses[0].aggs)}
             ]
-          }, {
+          },
+          'gender': {
             title: 'Gender',
             columns: [
               {type: 'number', label: 'Male', key: 'male'},
@@ -97,7 +116,8 @@ export default {
               {label: 'Gender', ...matrixValues(responses[1].aggs)}
             ]
           }
-        ]
+        }
+        console.log(responses)
         commit(SET_ATTRIBUTE_CHARTS, attributeGraphs)
       }
     )

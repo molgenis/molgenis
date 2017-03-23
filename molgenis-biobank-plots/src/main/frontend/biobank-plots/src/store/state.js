@@ -21,7 +21,10 @@ export default {
   biobank: null,
   aggs: [],
   biobanks: [],
-  charts: [],
+  charts: {
+    gender: null,
+    smoking: null
+  },
   apiUrl: 'https://molgenis09.gcc.rug.nl/api/',
   token: 'test'
 }
