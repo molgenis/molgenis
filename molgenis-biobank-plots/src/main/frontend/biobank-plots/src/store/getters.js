@@ -1,6 +1,6 @@
 import { transformToRSQL } from '../rsql/transformer'
 
-const mapChart = (chart) => ({
+const mapChart = (chart) => (chart && {
   columns: [{label: 'label', type: 'string'}, ...chart.columns],
   rows: chart.rows.map(row => [row.label, ...chart.columns.map(column => row.values[column.key] || 0)]),
   title: chart.title

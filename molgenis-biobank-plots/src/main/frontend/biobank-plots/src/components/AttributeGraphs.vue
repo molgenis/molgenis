@@ -9,7 +9,7 @@
           <div class="col-12">
 
             <b-card>
-              <h6 class="chart-header">{{attributeCharts.gender.title}}</h6>
+              <h6 class="chart-header">{{attributeCharts.gender.title}} </h6>
               <vue-chart ref="chart" :rows="attributeCharts.gender.rows" :columns="attributeCharts.gender.columns"
                 :options="options"
                 chartType="ColumnChart" :chartEvents="chartEvents"></vue-chart>
