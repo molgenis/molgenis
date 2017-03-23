@@ -1,11 +1,5 @@
 import Vue from 'vue'
 
-export function zip (arrays) {
-  return arrays[0].map(function (_, i) {
-    return arrays.map(function (array) { return array[i] })
-  })
-}
-
 /**
  * Event bus that emits resize events.
  * Listen with $on('resize', handler)
@@ -46,3 +40,15 @@ export const chartColors = [
   '#329262',
   '#5574A6',
   '#3B3EAC']
+
+export const chartColorsGradient = [
+  '#ADC9FF',
+  '#97B9FC',
+  '#81AAFA',
+  '#6C9AF7',
+  '#568BF5',
+  '#407CF2',
+  '#2B6CF0',
+  '#155DED',
+  '#004EEB'
+]

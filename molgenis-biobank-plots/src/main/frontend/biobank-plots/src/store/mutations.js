@@ -1,4 +1,4 @@
-import {zip} from '../utils'
+import {zip} from 'ramda'
 
 export const RESET_FILTERS = 'RESET_FILTERS'
 export const SET_FILTER = 'SET_FILTER'
@@ -34,7 +34,7 @@ export default {
   [SET_AGGS] (state, {matrix, xLabels}) {
     const sampleCounts = matrix.map(row => row[0])
     const biobanks = xLabels.map(biobank => biobank.abbr)
-    state.aggs = zip([biobanks, sampleCounts])
+    state.aggs = zip(biobanks, sampleCounts)
     state.numberOfSamples = sampleCounts.reduce((a, b) => a + b, 0)
   },
   [SET_BIOBANKS] (state, items) {
