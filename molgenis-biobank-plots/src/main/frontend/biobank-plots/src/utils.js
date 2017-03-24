@@ -33,5 +33,5 @@ export const chartColorsGradient = [
   '#407CF2',
   '#2B6CF0',
   '#155DED',
-  '#cccccc'
+  '#8a8c8e'
 ]
