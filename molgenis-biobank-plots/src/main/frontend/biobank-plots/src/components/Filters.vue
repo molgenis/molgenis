@@ -67,10 +67,10 @@
     components: { FilterCheckbox, FilterNumberInput },
     computed: {
       ...mapState({
-        biobankOptions: state => state.biobanks.map(biobank => ({
+        biobankOptions: (state) => [{text: 'All', value: null}, ...state.biobanks.map(biobank => ({
           text: biobank.abbr,
           value: biobank.abbr
-        }))
+        }))]
       }),
       selectedBiobank: {
         get () {
