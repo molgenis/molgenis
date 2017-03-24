@@ -13,7 +13,7 @@ const resizeThrottler = () => {
     resizeTimeout = setTimeout(function () {
       resizeTimeout = null
       resizeEventBus.$emit('resize')
-    }, 200)
+    }, 500)
   }
 }
 
