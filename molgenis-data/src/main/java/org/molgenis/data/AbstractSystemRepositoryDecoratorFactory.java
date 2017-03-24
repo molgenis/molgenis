@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.support.StaticEntity;
 
 import static java.util.Objects.requireNonNull;
 
@@ -11,7 +10,7 @@ import static java.util.Objects.requireNonNull;
  * @param <E>
  * @param <M>
  */
-public abstract class AbstractSystemRepositoryDecoratorFactory<E extends StaticEntity, M extends SystemEntityType>
+public abstract class AbstractSystemRepositoryDecoratorFactory<E extends Entity, M extends SystemEntityType>
 		implements SystemRepositoryDecoratorFactory<E, M>
 {
 	private final M entityType;

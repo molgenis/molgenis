@@ -1,14 +1,13 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.support.StaticEntity;
 
 /**
  * Repository decorator factory that creates decorated {@link Repository repositories} for specific {@link SystemEntityType system entity types}.
  *
  * @see RepositoryDecoratorFactory
  */
-public interface SystemRepositoryDecoratorFactory<E extends StaticEntity, M extends SystemEntityType>
+public interface SystemRepositoryDecoratorFactory<E extends Entity, M extends SystemEntityType>
 {
 	/**
 	 * Returns system entity type for which repository decorators can be created.

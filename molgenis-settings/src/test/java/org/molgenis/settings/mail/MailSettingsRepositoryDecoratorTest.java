@@ -1,31 +1,41 @@
 package org.molgenis.settings.mail;
 
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.mail.MailSenderFactory;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
-public class MailSettingsRepositoryDecoratorTest extends AbstractMockitoTest
+public class MailSettingsRepositoryDecoratorTest
 {
 	private MailSettingsRepositoryDecorator mailSettingsRepositoryDecorator;
 	@Mock
-	private MailSettingsImpl mailSettings;
+	private Entity entity;
 	@Mock
 	private MailSenderFactory mailSenderFactory;
 	@Mock
-	private Repository<MailSettingsImpl> decorated;
+	private Repository<Entity> decorated;
+
+	@BeforeClass
+	public void beforeClass()
+	{
+		initMocks(this);
+		mailSettingsRepositoryDecorator = new MailSettingsRepositoryDecorator(decorated, mailSenderFactory);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		mailSettingsRepositoryDecorator = new MailSettingsRepositoryDecorator(decorated, mailSenderFactory);
+		Mockito.reset(entity, mailSenderFactory, decorated);
 	}
 
 	@DataProvider(name = "addDontTest")
@@ -38,41 +48,40 @@ public class MailSettingsRepositoryDecoratorTest extends AbstractMockitoTest
 	@Test(dataProvider = "addDontTest")
 	public void testAddDontTestConnection(boolean testConnection, String username, String password)
 	{
-		when(mailSettings.isTestConnection()).thenReturn(testConnection);
-		when(mailSettings.getUsername()).thenReturn(username);
-		when(mailSettings.getPassword()).thenReturn(password);
-
-		mailSettingsRepositoryDecorator.add(mailSettings);
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(testConnection);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn(username);
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn(password);
+		mailSettingsRepositoryDecorator.add(entity);
 		verify(mailSenderFactory, never()).validateConnection(any(MailSettingsImpl.class));
-		verify(decorated).add(mailSettings);
+		verify(decorated).add(entity);
 		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
 	public void testAddValidSettings()
 	{
-		when(mailSettings.isTestConnection()).thenReturn(true);
-		when(mailSettings.getUsername()).thenReturn("Username");
-		when(mailSettings.getPassword()).thenReturn("password");
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(true);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn("Username");
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn("password");
 
-		mailSettingsRepositoryDecorator.add(mailSettings);
+		mailSettingsRepositoryDecorator.add(entity);
 		verify(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
-		verify(decorated).add(mailSettings);
+		verify(decorated).add(entity);
 		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
 	public void testAddInvalidSettings()
 	{
-		when(mailSettings.isTestConnection()).thenReturn(true);
-		when(mailSettings.getUsername()).thenReturn("Username");
-		when(mailSettings.getPassword()).thenReturn("password");
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(true);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn("Username");
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn("password");
 
 		doThrow(IllegalStateException.class).when(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
 
 		try
 		{
-			mailSettingsRepositoryDecorator.add(mailSettings);
+			mailSettingsRepositoryDecorator.add(entity);
 			Assert.fail("Should've thrown exception.");
 		}
 		catch (IllegalStateException expected)
@@ -84,40 +93,40 @@ public class MailSettingsRepositoryDecoratorTest extends AbstractMockitoTest
 	@Test(dataProvider = "addDontTest")
 	public void testUpdateDontTestConnection(boolean testConnection, String username, String password)
 	{
-		when(mailSettings.isTestConnection()).thenReturn(testConnection);
-		when(mailSettings.getUsername()).thenReturn(username);
-		when(mailSettings.getPassword()).thenReturn(password);
-		mailSettingsRepositoryDecorator.update(mailSettings);
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(testConnection);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn(username);
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn(password);
+		mailSettingsRepositoryDecorator.update(entity);
 		verify(mailSenderFactory, never()).validateConnection(any(MailSettingsImpl.class));
-		verify(decorated).update(mailSettings);
+		verify(decorated).update(entity);
 		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
 	public void testUpdateValidSettings()
 	{
-		when(mailSettings.isTestConnection()).thenReturn(true);
-		when(mailSettings.getUsername()).thenReturn("Username");
-		when(mailSettings.getPassword()).thenReturn("password");
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(true);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn("Username");
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn("password");
 
-		mailSettingsRepositoryDecorator.update(mailSettings);
+		mailSettingsRepositoryDecorator.update(entity);
 		verify(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
-		verify(decorated).update(mailSettings);
+		verify(decorated).update(entity);
 		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
 	public void testUpdateInvalidSettings()
 	{
-		when(mailSettings.isTestConnection()).thenReturn(true);
-		when(mailSettings.getUsername()).thenReturn("Username");
-		when(mailSettings.getPassword()).thenReturn("password");
+		when(entity.getBoolean(MailSettingsImpl.Meta.TEST_CONNECTION)).thenReturn(true);
+		when(entity.getString(MailSettingsImpl.Meta.USERNAME)).thenReturn("Username");
+		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn("password");
 
 		doThrow(IllegalStateException.class).when(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
 
 		try
 		{
-			mailSettingsRepositoryDecorator.update(mailSettings);
+			mailSettingsRepositoryDecorator.update(entity);
 			Assert.fail("Should've thrown exception.");
 		}
 		catch (IllegalStateException expected)
@@ -125,4 +134,5 @@ public class MailSettingsRepositoryDecoratorTest extends AbstractMockitoTest
 			verifyZeroInteractions(decorated);
 		}
 	}
+
 }
