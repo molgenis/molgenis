@@ -52,7 +52,8 @@
             title: 'Biobank'
           },
           height: 700,
-          width: '100%'
+          width: '100%',
+          legend: 'none'
         }
       }
     },
