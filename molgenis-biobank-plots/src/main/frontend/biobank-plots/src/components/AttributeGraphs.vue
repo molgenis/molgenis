@@ -20,7 +20,7 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <pie-graph :data="attributeCharts.age" height="400" :colors="chartColors"></pie-graph>
+            <pie-graph :data="attributeCharts.age" height="400" :colors="chartColorsGradient"></pie-graph>
           </div>
         </div>
       </b-card>
