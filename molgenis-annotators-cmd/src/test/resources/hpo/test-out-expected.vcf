@@ -3,4 +3,4 @@
 ##INFO=<ID=HPOIDS,Number=.,Type=String,Description="HPO identifiers">
 ##INFO=<ID=HPOTERMS,Number=.,Type=String,Description="HPO terms">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-1	249239510	test	C	G	.	.	Gene_Name=HSD3B2;HPOIDS=HP:0000037/HP:0008221/HP:0000047;HPOTERMS=Male pseudohermaphroditism/Adrenal hyperplasia/Hypospadias;
+1	249239510	test	C	G	.	.	Gene_Name=HSD3B2;HPOIDS=HP:0000037/HP:0008221/HP:0000047;HPOTERMS=Male pseudohermaphroditism/Adrenal hyperplasia/Hypospadias

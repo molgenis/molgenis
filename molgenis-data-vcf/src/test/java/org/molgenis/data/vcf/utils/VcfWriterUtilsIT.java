@@ -37,8 +37,8 @@ import static org.molgenis.data.vcf.utils.VcfWriterUtils.writeToVcf;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { VcfWriterUtilsIntegrationTest.Config.class })
-public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
+@ContextConfiguration(classes = { VcfWriterUtilsIT.Config.class })
+public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 {
 	@Autowired
 	EntityTypeFactory entityTypeFactory;
@@ -49,7 +49,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	private static final Logger LOG = LoggerFactory.getLogger(VcfWriterUtilsIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfWriterUtilsIT.class);
 	public static final String ID = "ID";
 	public static final String PUTATIVE_IMPACT = "Putative_impact";
 	public static final String TYPE = "TYPE";
@@ -122,9 +122,9 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING));
 		INFO_ATTR = attributeFactory.create().setName(INFO).setDataType(COMPOUND);
-		AC_ATTR = attributeFactory.create().setName(VcfWriterUtilsIntegrationTest.AC).setDataType(STRING).setParent(INFO_ATTR);
-		AN_ATTR = attributeFactory.create().setName(VcfWriterUtilsIntegrationTest.AN).setDataType(STRING).setParent(INFO_ATTR);
-		GTC_ATTR = attributeFactory.create().setName(VcfWriterUtilsIntegrationTest.GTC).setDataType(STRING).setParent(INFO_ATTR);
+		AC_ATTR = attributeFactory.create().setName(VcfWriterUtilsIT.AC).setDataType(STRING).setParent(INFO_ATTR);
+		AN_ATTR = attributeFactory.create().setName(VcfWriterUtilsIT.AN).setDataType(STRING).setParent(INFO_ATTR);
+		GTC_ATTR = attributeFactory.create().setName(VcfWriterUtilsIT.GTC).setDataType(STRING).setParent(INFO_ATTR);
 		metaDataCanAnnotate.addAttribute(INFO_ATTR);
 		metaDataCanAnnotate.addAttribute(AC_ATTR);
 		metaDataCanAnnotate.addAttribute(AN_ATTR);
@@ -155,9 +155,9 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		entity1.set(ALT, "A");
 		entity1.set(QUAL, ".");
 		entity1.set(FILTER, "PASS");
-		entity1.set(VcfWriterUtilsIntegrationTest.AC, "21");
-		entity1.set(VcfWriterUtilsIntegrationTest.AN, "22");
-		entity1.set(VcfWriterUtilsIntegrationTest.GTC, "0,1,10");
+		entity1.set(VcfWriterUtilsIT.AC, "21");
+		entity1.set(VcfWriterUtilsIT.AN, "22");
+		entity1.set(VcfWriterUtilsIT.GTC, "0,1,10");
 
 		entity2.set(CHROM, "1");
 		entity2.set(POS, 10050001);
@@ -276,7 +276,7 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 			writer.close();
 		}
 		assertEquals(strWriter.toString(),
-				"1	565286	rs1578391	C	T	.	flt	idAttr=0;	GT:DP:EC	1/1:5:5");
+				"1	565286	rs1578391	C	T	.	flt	idAttr=0	GT:DP:EC	1/1:5:5");
 	}
 
 	@Test
