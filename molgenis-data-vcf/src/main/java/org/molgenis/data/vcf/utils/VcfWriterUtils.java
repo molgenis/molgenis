@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.utils;
 
 import com.google.common.collect.Lists;
+import net.sf.samtools.util.BlockCompressedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -10,9 +11,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -20,6 +19,7 @@ import java.util.stream.StreamSupport;
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
@@ -68,7 +68,7 @@ public class VcfWriterUtils
 	{
 		System.out.println("Detecting VCF column header...");
 
-		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
+		Scanner inputVcfFileScanner = createVcfFileScanner(inputVcfFile);
 		String line = inputVcfFileScanner.nextLine();
 
 		Map<String, String> infoHeaderLinesMap = new LinkedHashMap<>();
@@ -90,6 +90,16 @@ public class VcfWriterUtils
 		}
 
 		inputVcfFileScanner.close();
+	}
+
+	private static Scanner createVcfFileScanner(File vcfFile) throws IOException
+	{
+		InputStream inputStream = new FileInputStream(vcfFile);
+		if (vcfFile.getName().endsWith(".gz"))
+		{
+			inputStream = new BlockCompressedInputStream(inputStream);
+		}
+		return new Scanner(inputStream, UTF_8.name());
 	}
 
 	/**
@@ -115,8 +125,8 @@ public class VcfWriterUtils
 	 * @param writer
 	 * @throws IOException,Exception
 	 */
-	public static void writeToVcf(Entity vcfEntity, List<Attribute> addedAttributes,
-			List<String> attributesToInclude, BufferedWriter writer) throws MolgenisDataException, IOException
+	public static void writeToVcf(Entity vcfEntity, List<Attribute> addedAttributes, List<String> attributesToInclude,
+			BufferedWriter writer) throws MolgenisDataException, IOException
 	{
 		addStandardFieldsToVcf(vcfEntity, writer);
 		writeInfoData(vcfEntity, writer, addedAttributes, attributesToInclude);
@@ -189,8 +199,7 @@ public class VcfWriterUtils
 	}
 
 	private static void writeAddedInfoHeaders(BufferedWriter outputVCFWriter, List<String> attributesToInclude,
-			Map<String, Attribute> annotatorAttributes, Map<String, String> infoHeaderLinesMap)
-			throws IOException
+			Map<String, Attribute> annotatorAttributes, Map<String, String> infoHeaderLinesMap) throws IOException
 	{
 		for (Attribute annotatorInfoAttr : annotatorAttributes.values())
 		{
@@ -205,8 +214,8 @@ public class VcfWriterUtils
 		}
 	}
 
-	private static String createInfoStringFromAttribute(Attribute infoAttribute,
-			List<String> attributesToInclude, String currentInfoField)
+	private static String createInfoStringFromAttribute(Attribute infoAttribute, List<String> attributesToInclude,
+			String currentInfoField)
 	{
 		String attributeName = infoAttribute.getName();
 		StringBuilder sb = new StringBuilder();
@@ -261,8 +270,7 @@ public class VcfWriterUtils
 		sb.append("'");
 	}
 
-	private static String refAttributesToString(Iterable<Attribute> atomicAttributes,
-			List<String> attributesToInclude)
+	private static String refAttributesToString(Iterable<Attribute> atomicAttributes, List<String> attributesToInclude)
 	{
 		Iterable<Attribute> attributes = StreamSupport.stream(atomicAttributes.spliterator(), false)
 				.filter(attribute -> (attribute.isVisible() && isOutputAttribute(attribute,
@@ -300,8 +308,8 @@ public class VcfWriterUtils
 		}
 	}
 
-	private static void writeInfoData(Entity vcfEntity, BufferedWriter writer,
-			List<Attribute> annotatorAttributes, List<String> attributesToInclude) throws IOException
+	private static void writeInfoData(Entity vcfEntity, BufferedWriter writer, List<Attribute> annotatorAttributes,
+			List<String> attributesToInclude) throws IOException
 	{
 		boolean hasInfoFields = false;
 
@@ -387,8 +395,7 @@ public class VcfWriterUtils
 	 * Create a INFO field annotation and add values
 	 */
 	private static void parseRefFieldsToInfoField(Iterable<Entity> refEntities, Attribute attribute,
-			StringBuilder refEntityInfoFields, List<Attribute> annotatorAttributes,
-			List<String> attributesToInclude)
+			StringBuilder refEntityInfoFields, List<Attribute> annotatorAttributes, List<String> attributesToInclude)
 	{
 		boolean secondValuePresent = false;
 		for (Entity refEntity : refEntities)
@@ -416,8 +423,7 @@ public class VcfWriterUtils
 	 * Add the values of each EFFECT entity to the info field
 	 */
 	private static void addEntityValuesToRefEntityInfoField(StringBuilder refEntityInfoFields, Entity refEntity,
-			Iterable<Attribute> refAttributes, List<Attribute> annotatorAttributes,
-			List<String> attributesToInclude)
+			Iterable<Attribute> refAttributes, List<Attribute> annotatorAttributes, List<String> attributesToInclude)
 	{
 		boolean previousValuePresent = false;
 		for (Attribute refAttribute : refAttributes)

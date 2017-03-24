@@ -1,5 +1,7 @@
 package org.molgenis.annotation.cmd.utils;
 
+import net.sf.samtools.util.BlockCompressedOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -17,6 +19,7 @@ import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,8 +55,7 @@ public class CmdLineAnnotatorUtils
 			List<String> attributesToInclude, boolean update) throws IOException, MolgenisInvalidFormatException
 	{
 
-		try (BufferedWriter outputVCFWriter = new BufferedWriter(
-				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
+		try (BufferedWriter outputVCFWriter = createBufferedWriter(outputVCFFile);
 				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
 						entityTypeFactory, attributeFactory))
 		{
@@ -74,6 +76,32 @@ public class CmdLineAnnotatorUtils
 			writeAnnotationResultToVcfFile(attributesToInclude, outputVCFWriter, outputMetaData, annotatedRecords);
 		}
 		return outputVCFFile.getAbsolutePath();
+	}
+
+	public static void main(String[] args) throws IOException
+	{
+		String str = FileUtils.readFileToString(new File(
+						"C:\\Users\\Dennis\\Dev\\molgenis\\molgenis-annotators-cmd\\src\\test\\resources\\gonl\\test-out-expected.vcf"),
+				StandardCharsets.UTF_8);
+		try (BlockCompressedOutputStream blockCompressedOutputStream = new BlockCompressedOutputStream(
+				"C:\\Users\\Dennis\\Dev\\molgenis\\molgenis-annotators-cmd\\src\\test\\resources\\gonl\\test-out-expected.vcf.gz"))
+		{
+			blockCompressedOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
+	private static BufferedWriter createBufferedWriter(File outputVCFFile) throws IOException
+	{
+		OutputStream outputStream;
+		if (outputVCFFile.getName().endsWith(".gz"))
+		{
+			outputStream = new BlockCompressedOutputStream(outputVCFFile);
+		}
+		else
+		{
+			outputStream = new FileOutputStream(outputVCFFile);
+		}
+		return new BufferedWriter(new OutputStreamWriter(outputStream, UTF_8));
 	}
 
 	private static Iterator<Entity> annotateRepo(RepositoryAnnotator annotator,
@@ -149,8 +177,7 @@ public class CmdLineAnnotatorUtils
 		List<Attribute> outputMetaData = newArrayList();
 		if (annotator instanceof EffectCreatingAnnotator || annotator instanceof EffectBasedAnnotator)
 		{
-			EntityType effectRefEntity = entityTypeFactory.create()
-					.setName(annotator.getSimpleName() + "_EFFECTS");
+			EntityType effectRefEntity = entityTypeFactory.create().setName(annotator.getSimpleName() + "_EFFECTS");
 			for (Attribute outputAttribute : annotator.getOutputAttributes())
 			{
 				effectRefEntity.addAttribute(outputAttribute);
