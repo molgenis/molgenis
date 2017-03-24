@@ -38,9 +38,9 @@ const constraints = (state, includingBiobank) => {
   }
 
   let ageConstraints = []
-  if (!state.belowTwenty || !state.twentyThirty || !state.thirtyFourty ||
-    !state.fourtyFifty || !state.fiftySixty || !state.sixtySeventy ||
-    !state.seventyEighty || !state.aboveEigthy) {
+  if (state.belowTwenty || state.twentyThirty || state.thirtyFourty ||
+    state.fourtyFifty || state.fiftySixty || state.sixtySeventy ||
+    state.seventyEighty || state.aboveEigthy) {
     if (state.belowTwenty) {
       ageConstraints.push({selector: 'ageGroup', comparison: '==', arguments: '<20'})
     }
