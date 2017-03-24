@@ -27,6 +27,7 @@
           width: '100%',
           height: this.height,
           sliceVisibilityThreshold: 0.001,
+          pieResidueSliceLabel: 'Other (all groups < 0.1%)',
           colors: this.colors
         }
       }
