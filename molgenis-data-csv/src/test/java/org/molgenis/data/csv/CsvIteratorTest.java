@@ -3,6 +3,7 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -18,6 +19,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.testng.Assert.assertEquals;
 
@@ -40,7 +43,7 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testIterator() throws IOException
+	public void testIteratorFromCsvFile() throws IOException
 	{
 		InputStream in = getClass().getResourceAsStream("/testdata.csv");
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
@@ -56,4 +59,31 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		assertEquals(entity.get("col2"), "val2");
 	}
 
+	@Test
+	public void testIteratorFromZipFile() throws IOException
+	{
+		File zipFile = getZipWithCsvFile("testdata.csv");
+
+		CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
+		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
+		assertEquals(Iterators.size(it), 5);
+	}
+
+	private File getZipWithCsvFile(String filePath) throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+
+		File zipFile = new File(FileUtils.getTempDirectory() + "test.zip");
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+		ZipEntry e = new ZipEntry(filePath);
+		out.putNextEntry(e);
+
+		IOUtils.copy(in, out);
+
+		out.closeEntry();
+
+		in.close();
+		out.close();
+		return zipFile;
+	}
 }
