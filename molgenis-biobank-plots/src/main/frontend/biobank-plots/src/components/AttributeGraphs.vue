@@ -12,19 +12,15 @@
         </div>
         <div class="row">
           <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12">
-                <attribute-graph :data="attributeCharts.smoking" height="220" :colors="chartColors"></attribute-graph>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <attribute-graph :data="attributeCharts.gender" height="220" :colors="chartColors"></attribute-graph>
-              </div>
-            </div>
+            <attribute-graph :data="attributeCharts.smoking" height="220" :colors="chartColors"></attribute-graph>
           </div>
           <div class="col-md-6">
-            <attribute-graph :data="attributeCharts.age" height="507" :colors="chartColorsGradient"></attribute-graph>
+            <attribute-graph :data="attributeCharts.gender" height="220" :colors="chartColors"></attribute-graph>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <pie-graph :data="attributeCharts.age" height="400" :colors="chartColors"></pie-graph>
           </div>
         </div>
       </b-card>
@@ -35,11 +31,12 @@
 <script>
   import {mapState, mapGetters} from 'vuex'
   import AttributeGraph from './AttributeGraph'
+  import PieGraph from './PieGraph'
   import { chartColors, chartColorsGradient } from '../utils'
 
   export default {
     name: 'attribute-graphs',
-    components: {AttributeGraph},
+    components: {AttributeGraph, PieGraph},
     data: () => ({
       chartColors,
       chartColorsGradient
