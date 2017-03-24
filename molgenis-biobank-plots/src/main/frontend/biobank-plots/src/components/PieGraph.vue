@@ -1,0 +1,51 @@
+<template>
+  <b-card>
+      <h6 class="chart-header">{{data.title}} </h6>
+      <vue-chart ref="chart" :rows="rows" :columns="columns" :options="options"
+        chartType="PieChart" :chartEvents="chartEvents">
+      </vue-chart>
+  </b-card>
+</template>
+
+<script>
+  import {resizeEventBus} from '../utils'
+  import {zip} from 'ramda'
+
+  export default {
+    name: 'pie-graph',
+    props: ['data', 'height', 'colors'],
+    data: function () {
+      return {
+        columns: ['string', 'number'],
+        chartEvents: {
+          'select': function () {
+            console.log('Select (but what?)!')
+          }
+        },
+        options: {
+          legend: 'left',
+          width: '100%',
+          height: this.height,
+          sliceVisibilityThreshold: 0.001,
+          pieResidueSliceLabel: 'Other (all groups < 0.1%)',
+          colors: this.colors
+        }
+      }
+    },
+    computed: {
+      rows () {
+        return zip(this.data.columns.map((column) => column.label), this.data.rows[0]).slice(1)
+      }
+    },
+    created () {
+      const self = this
+      resizeEventBus.$on('resize', () => self.$refs.chart.drawChart())
+    }
+  }
+</script>
+<style scoped>
+  .chart-header{
+    color: #292b2c;
+    text-align: center;
+  }
+</style>
