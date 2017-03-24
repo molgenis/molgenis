@@ -69,6 +69,16 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		assertEquals(Iterators.size(it), 5);
 	}
 
+	@Test
+	public void testIteratorFromZipFileWithFolder() throws IOException
+	{
+		File zipFile = getZipWithCsvFile("folder/testdata.csv");
+
+		CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
+		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
+		assertEquals(Iterators.size(it), 5);
+	}
+
 	private File getZipWithCsvFile(String filePath) throws IOException
 	{
 		InputStream in = getClass().getResourceAsStream("/testdata.csv");
