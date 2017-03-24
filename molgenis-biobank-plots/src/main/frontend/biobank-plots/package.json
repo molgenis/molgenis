@@ -15,7 +15,6 @@
   "dependencies": {
     "bootstrap-vue": "^0.10.1",
     "isomorphic-fetch": "^2.2.1",
-    "isomorphic-url": "^1.0.0-alpha12",
     "mdurl": "^1.0.1",
     "ramda": "^0.23.0",
     "url-polyfill": "^1.0.0",
