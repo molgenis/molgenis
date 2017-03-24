@@ -34,6 +34,10 @@ let state = {
 if (process.env.NODE_ENV === 'development') {
   state = {
     ...state,
+    entities: {
+      biobanks: 'leiden_biobanks',
+      samples: 'leiden_RP'
+    },
     apiUrl: 'https://molgenis09.gcc.rug.nl/api',
     token: 'test'
   }
