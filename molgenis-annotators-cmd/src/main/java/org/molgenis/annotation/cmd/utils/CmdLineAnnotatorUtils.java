@@ -1,7 +1,6 @@
 package org.molgenis.annotation.cmd.utils;
 
 import net.sf.samtools.util.BlockCompressedOutputStream;
-import org.apache.commons.io.FileUtils;
 import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -19,7 +18,6 @@ import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,18 +74,6 @@ public class CmdLineAnnotatorUtils
 			writeAnnotationResultToVcfFile(attributesToInclude, outputVCFWriter, outputMetaData, annotatedRecords);
 		}
 		return outputVCFFile.getAbsolutePath();
-	}
-
-	public static void main(String[] args) throws IOException
-	{
-		String str = FileUtils.readFileToString(new File(
-						"C:\\Users\\Dennis\\Dev\\molgenis\\molgenis-annotators-cmd\\src\\test\\resources\\gonl\\test-out-expected.vcf"),
-				StandardCharsets.UTF_8);
-		try (BlockCompressedOutputStream blockCompressedOutputStream = new BlockCompressedOutputStream(
-				"C:\\Users\\Dennis\\Dev\\molgenis\\molgenis-annotators-cmd\\src\\test\\resources\\gonl\\test-out-expected.vcf.gz"))
-		{
-			blockCompressedOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
-		}
 	}
 
 	private static BufferedWriter createBufferedWriter(File outputVCFFile) throws IOException
