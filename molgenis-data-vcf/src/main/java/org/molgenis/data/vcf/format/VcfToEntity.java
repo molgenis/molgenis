@@ -32,6 +32,7 @@ import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -136,8 +137,7 @@ public class VcfToEntity
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				String name = meta.getId();
-				if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS
-						.contains(name.toUpperCase()))
+				if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS.contains(name.toUpperCase()))
 				{
 					name = name + "_";
 				}
@@ -363,8 +363,11 @@ public class VcfToEntity
 				}
 				else if (vcfInfoVal instanceof List<?>)
 				{
+					List<?> vcfInfoValTokens = (List<?>) vcfInfoVal;
 					// TODO Use list data type once available (see http://www.molgenis.org/ticket/2681)
-					val = StringUtils.join((List<?>) vcfInfoVal, ',');
+					val = vcfInfoValTokens.stream()
+							.map(vcfInfoValToken -> vcfInfoValToken != null ? vcfInfoValToken.toString() : ".")
+							.collect(joining(","));
 				}
 				else if (vcfInfoVal instanceof Float)
 				{
@@ -459,8 +462,7 @@ public class VcfToEntity
 			}
 
 			String name = info.getId();
-			if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS
-					.contains(name.toUpperCase()))
+			if (NameValidator.KEYWORDS.contains(name) || NameValidator.KEYWORDS.contains(name.toUpperCase()))
 			{
 				name = name + '_';
 			}
