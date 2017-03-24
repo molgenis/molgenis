@@ -20,8 +20,8 @@ const resizeThrottler = () => {
 window.addEventListener('resize', resizeThrottler, false)
 
 export const chartColors = [
-  '#3366CC',
-  '#DC3912',
+  '#586AAA',
+  '#ED660A',
   '#cccccc']
 
 export const chartColorsGradient = [

@@ -13,7 +13,7 @@
 
   export default {
     name: 'pie-graph',
-    props: ['data', 'height'],
+    props: ['data', 'height', 'colors'],
     data: function () {
       return {
         columns: ['string', 'number'],
@@ -26,7 +26,8 @@
           legend: 'left',
           width: '100%',
           height: this.height,
-          sliceVisibilityThreshold: 0.001
+          sliceVisibilityThreshold: 0.001,
+          colors: this.colors
         }
       }
     },
