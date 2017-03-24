@@ -1,10 +1,14 @@
 <template>
   <b-card show-header class="card-outline-primary">
 
-    <div slot="header">
-      <h4>Filters</h4>
+    <div slot="header" class="row">
+      <div class="col-md-6">
+        <h4>Filters</h4>
+      </div>
+      <div class="col-md-6">
+        <button class="btn btn-info btn-sm float-md-right" @click.prevent="resetFilters">Reset</button>
+      </div>
     </div>
-
     <form class="form-horizontal">
       <div class="form-group custom-controls-stacked">
         <legend class="col-form-legend">Data type</legend>
@@ -18,14 +22,26 @@
 
       <div class="form-group">
         <legend class="col-form-legend">Gender</legend>
-        <filter-checkbox name="male" label="Male"></filter-checkbox>
-        <filter-checkbox name="female" label="Female"></filter-checkbox>
+        <div class="row">
+          <div class="col-md-6">
+            <filter-checkbox name="male" label="Male"></filter-checkbox>
+          </div>
+          <div class="col-md-6">
+            <filter-checkbox name="female" label="Female"></filter-checkbox>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
         <legend class="col-form-legend">Smoking</legend>
-        <filter-checkbox name="smoking" label="Yes"></filter-checkbox>
-        <filter-checkbox name="nonSmoking" label="No"></filter-checkbox>
+        <div class="row">
+          <div class="col-md-6">
+            <filter-checkbox name="smoking" label="Yes"></filter-checkbox>
+          </div>
+          <div class="col-md-6">
+            <filter-checkbox name="nonSmoking" label="No"></filter-checkbox>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -46,11 +62,6 @@
         <label>Biobank</label>
         <b-form-select v-model="selectedBiobank" :options="biobankOptions"></b-form-select>
       </div>
-
-      <hr>
-    <div>
-      <button class="btn btn-info" @click.prevent="resetFilters">Reset filters</button>
-    </div>
     </form>
   </b-card>
 </template>
@@ -67,10 +78,10 @@
     components: { FilterCheckbox, FilterNumberInput },
     computed: {
       ...mapState({
-        biobankOptions: state => state.biobanks.map(biobank => ({
+        biobankOptions: (state) => [{text: 'All', value: null}, ...state.biobanks.map(biobank => ({
           text: biobank.abbr,
           value: biobank.abbr
-        }))
+        }))]
       }),
       selectedBiobank: {
         get () {
