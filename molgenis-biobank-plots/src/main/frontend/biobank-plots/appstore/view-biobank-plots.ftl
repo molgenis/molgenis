@@ -8,8 +8,16 @@
 <body>
 <div id="header"><img src="/apps/${app.id}/img/bbmri.png" width="100%"/></div>
 <div id=app></div>
-<script type=text/javascript src=/apps/${app.id}/js/manifest.cd25c84197fd6088f7fa.js></script>
-<script type=text/javascript src=/apps/${app.id}/js/vendor.57bb7093f00130e62942.js></script>
-<script type=text/javascript src=/apps/${app.id}/js/app.041d4d500c0dd6f1d882.js></script>
+<script>
+  window.__INITIAL_STATE__ = {
+    entities: {
+      biobanks: 'leiden_biobanks',
+      samples: 'leiden_RP'
+    }
+  }
+</script>
+<script type=text/javascript src=/apps/${app.id}/js/manifest.7f01adc0a3657ff4c28d.js></script>
+<script type=text/javascript src=/apps/${app.id}/js/vendor.b75c441d3983f256513e.js></script>
+<script type=text/javascript src=/apps/${app.id}/js/app.c922cfc6f8afe368eb52.js></script>
 </body>
 </html>

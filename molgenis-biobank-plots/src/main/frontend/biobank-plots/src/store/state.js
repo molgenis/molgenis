@@ -28,15 +28,23 @@ let state = {
     data_types: null,
     age: null
   },
-  apiUrl: window.location.origin + '/api/'
+  apiUrl: window.location.origin + '/api'
 }
 
 if (process.env.NODE_ENV === 'development') {
   state = {
     ...state,
-    apiUrl: 'https://molgenis09.gcc.rug.nl/api/',
+    apiUrl: 'https://molgenis09.gcc.rug.nl/api',
     token: 'test'
   }
+} else if (process.env.NODE_ENV === 'production') {
+  console.log('Production')
+  state = {
+    ...state,
+    ...(window.__INITIAL_STATE__ || {})
+  }
 }
+
+console.log('state:', state)
 
 export default state

@@ -19,7 +19,8 @@ const matrixValues = aggs => {
 
 export default {
   [GET_BIOBANKS] ({ commit, state }) {
-    get(state.apiUrl + 'v2/leiden_biobanks', state.token)
+    const {token, apiUrl, entities: {biobanks}} = state
+    get(`${apiUrl}/v2/${biobanks}`, token)
       .then(response => { commit(SET_BIOBANKS, response.items) })
   },
   [SET_BIOBANK] ({commit, dispatch}, biobank) {
@@ -37,8 +38,8 @@ export default {
     dispatch(REFRESH_ATTRIBUTE_GRAPHS)
   },
   [REFRESH_GRAPH] ({commit, state}) {
-    const {token, apiUrl} = state
-    const url = new URL(apiUrl + 'v2/leiden_RP')
+    const {token, apiUrl, entities: {samples}} = state
+    const url = new URL(`${apiUrl}/v2/${samples}`)
     const q = biobankGraphRsql(state)
     if (q) {
       url.searchParams.append('q', q)
@@ -48,8 +49,8 @@ export default {
   },
   [REFRESH_ATTRIBUTE_GRAPHS] ({commit, state}) {
     commit(SET_ATTRIBUTE_CHARTS, [])
-    const {token, apiUrl} = state
-    const url = new URL(apiUrl + 'v2/leiden_RP')
+    const {token, apiUrl, entities: {samples}} = state
+    const url = new URL(`${apiUrl}/v2/${samples}`)
     const q = attributeGraphRsql(state)
     if (q) {
       url.searchParams.append('q', q)
