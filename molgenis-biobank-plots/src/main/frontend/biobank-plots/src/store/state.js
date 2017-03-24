@@ -1,4 +1,5 @@
-export default {
+
+let state = {
   numberOfSamples: 0,
   transcriptome: false,
   methylome: false,
@@ -27,6 +28,15 @@ export default {
     data_types: null,
     age: null
   },
-  apiUrl: 'https://molgenis09.gcc.rug.nl/api/',
-  token: 'test'
+  apiUrl: window.location.origin + '/api/'
 }
+
+if (process.env.NODE_ENV === 'development') {
+  state = {
+    ...state,
+    apiUrl: 'https://molgenis09.gcc.rug.nl/api/',
+    token: 'test'
+  }
+}
+
+export default state
