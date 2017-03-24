@@ -1,21 +1,25 @@
 package org.molgenis.fair.controller;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
@@ -25,6 +29,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping(BASE_URI)
 public class FairController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(FairController.class);
+
 	static final String BASE_URI = "/fdp";
 
 	private final DataService dataService;
@@ -59,6 +65,10 @@ public class FairController
 	{
 		String subjectIRI = getBaseUri().pathSegment(catalogID).toUriString();
 		Entity subjectEntity = dataService.findOneById("fdp_Catalog", catalogID);
+		if (subjectEntity == null)
+		{
+			throw new UnknownEntityException(format("Catalog with id [%s] does not exist", catalogID));
+		}
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
@@ -83,4 +93,13 @@ public class FairController
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
+	@ExceptionHandler(UnknownEntityException.class)
+	@ResponseBody
+	@ResponseStatus(BAD_REQUEST)
+	public Model handleUnknownEntityException(UnknownEntityException e)
+	{
+		LOG.warn(e.getMessage(), e);
+		Model emptyModel = new LinkedHashModel();
+		return emptyModel;
+	}
 }
