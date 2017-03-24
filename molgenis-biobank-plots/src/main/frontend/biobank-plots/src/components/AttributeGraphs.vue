@@ -12,19 +12,15 @@
         </div>
         <div class="row">
           <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12">
-                <attribute-graph :data="attributeCharts.smoking" height="220"></attribute-graph>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <attribute-graph :data="attributeCharts.gender" height="220"></attribute-graph>
-              </div>
-            </div>
+            <attribute-graph :data="attributeCharts.smoking" height="220"></attribute-graph>
           </div>
           <div class="col-md-6">
-            <pie-graph :data="attributeCharts.age" height="507"></pie-graph>
+            <attribute-graph :data="attributeCharts.gender" height="220"></attribute-graph>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <pie-graph :data="attributeCharts.age" height="400"></pie-graph>
           </div>
         </div>
       </b-card>

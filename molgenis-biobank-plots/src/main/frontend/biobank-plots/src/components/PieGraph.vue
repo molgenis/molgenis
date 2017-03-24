@@ -1,7 +1,7 @@
 <template>
   <b-card>
       <h6 class="chart-header">{{data.title}} </h6>
-      <vue-chart ref="chart" :rows="rows" :columns="columns"
+      <vue-chart ref="chart" :rows="rows" :columns="columns" :options="options"
         chartType="PieChart" :chartEvents="chartEvents">
       </vue-chart>
   </b-card>
@@ -12,7 +12,7 @@
 
   export default {
     name: 'pie-graph',
-    props: ['data'],
+    props: ['data', 'height'],
     data: function () {
       return {
         columns: ['string', 'number'],
@@ -20,6 +20,12 @@
           'select': function () {
             console.log('Select (but what?)!')
           }
+        },
+        options: {
+          legend: 'left',
+          width: '100%',
+          height: this.height,
+          sliceVisibilityThreshold: 0.001
         }
       }
     },
