@@ -11,7 +11,6 @@ const attributeCharts = (state) => ({
   smoking: mapChart(state.charts.smoking),
   data_types: mapChart(state.charts.data_types),
   age: mapChart(state.charts.age)
-
 })
 
 const constraints = (state, includingBiobank) => {

@@ -1,11 +1,5 @@
 import Vue from 'vue'
 
-export function zip (arrays) {
-  return arrays[0].map(function (_, i) {
-    return arrays.map(function (array) { return array[i] })
-  })
-}
-
 /**
  * Event bus that emits resize events.
  * Listen with $on('resize', handler)
@@ -19,8 +13,25 @@ const resizeThrottler = () => {
     resizeTimeout = setTimeout(function () {
       resizeTimeout = null
       resizeEventBus.$emit('resize')
-    }, 30)
+    }, 200)
   }
 }
 
 window.addEventListener('resize', resizeThrottler, false)
+
+export const chartColors = [
+  '#3366CC',
+  '#DC3912',
+  '#cccccc']
+
+export const chartColorsGradient = [
+  '#ADC9FF',
+  '#97B9FC',
+  '#81AAFA',
+  '#6C9AF7',
+  '#568BF5',
+  '#407CF2',
+  '#2B6CF0',
+  '#155DED',
+  '#cccccc'
+]

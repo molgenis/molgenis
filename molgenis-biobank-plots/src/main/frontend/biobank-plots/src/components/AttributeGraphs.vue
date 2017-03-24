@@ -7,24 +7,24 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <attribute-graph :data="attributeCharts.data_types" height="220"></attribute-graph>
+            <attribute-graph :data="attributeCharts.data_types" height="220" :colors="chartColors"></attribute-graph>
           </div>
         </div>
         <div class="row">
           <div class="col-md-6">
             <div class="row">
               <div class="col-md-12">
-                <attribute-graph :data="attributeCharts.smoking" height="220"></attribute-graph>
+                <attribute-graph :data="attributeCharts.smoking" height="220" :colors="chartColors"></attribute-graph>
               </div>
             </div>
             <div class="row">
               <div class="col-md-12">
-                <attribute-graph :data="attributeCharts.gender" height="220"></attribute-graph>
+                <attribute-graph :data="attributeCharts.gender" height="220" :colors="chartColors"></attribute-graph>
               </div>
             </div>
           </div>
           <div class="col-md-6">
-            <attribute-graph :data="attributeCharts.age" height="507"></attribute-graph>
+            <attribute-graph :data="attributeCharts.age" height="507" :colors="chartColorsGradient"></attribute-graph>
           </div>
         </div>
       </b-card>
@@ -35,10 +35,15 @@
 <script>
   import {mapState, mapGetters} from 'vuex'
   import AttributeGraph from './AttributeGraph'
+  import { chartColors, chartColorsGradient } from '../utils'
 
   export default {
     name: 'attribute-graphs',
     components: {AttributeGraph},
+    data: () => ({
+      chartColors,
+      chartColorsGradient
+    }),
     computed: {
       ...mapGetters(['attributeCharts']),
       ...mapState(['biobank'])

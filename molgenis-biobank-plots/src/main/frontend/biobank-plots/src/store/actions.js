@@ -1,8 +1,8 @@
 import {get} from '../molgenisApi'
-import {URL} from 'isomorphic-url'
-import {zip} from '../utils'
+import 'url-polyfill'
 import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS, RESET_FILTERS} from './mutations'
 import {biobankGraphRsql, attributeGraphRsql} from './getters'
+import {zip} from 'ramda'
 
 export const GET_BIOBANKS = 'GET_BIOBANKS'
 export const SET_BIOBANK = 'SET_BIOBANK'
@@ -12,7 +12,7 @@ export const REFRESH_GRAPH = 'REFRESH_GRAPH'
 export const REFRESH_ATTRIBUTE_GRAPHS = 'REFRESH_ATTRIBUTE_GRAPHS'
 
 const matrixValues = aggs => {
-  const zipped = zip([aggs.xLabels, aggs.matrix.map(row => row[0])])
+  const zipped = zip(aggs.xLabels, aggs.matrix.map(row => row[0]))
   const values = zipped.reduce((acc, val) => ({...acc, [val[0]]: val[1]}), {})
   return { values }
 }
@@ -117,7 +117,6 @@ export default {
             ]
           }
         }
-        console.log(responses)
         commit(SET_ATTRIBUTE_CHARTS, attributeGraphs)
       }
     )

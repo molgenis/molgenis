@@ -17,6 +17,8 @@
     "isomorphic-fetch": "^2.2.1",
     "isomorphic-url": "^1.0.0-alpha12",
     "mdurl": "^1.0.1",
+    "ramda": "^0.23.0",
+    "url-polyfill": "^1.0.0",
     "vue": "^2.1.10",
     "vue-charts": "^0.2.1",
     "vuex": "^2.2.1"

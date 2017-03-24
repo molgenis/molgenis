@@ -2,8 +2,7 @@
   <b-card>
       <h6 class="chart-header">{{data.title}} </h6>
       <vue-chart ref="chart" :rows="data.rows" :columns="data.columns"
-        :options="options"
-        chartType="ColumnChart" :chartEvents="chartEvents">
+        :options="options" chartType="ColumnChart" :chartEvents="chartEvents">
       </vue-chart>
   </b-card>
 </template>
@@ -13,7 +12,7 @@
 
   export default {
     name: 'attribute-graph',
-    props: ['data', 'height'],
+    props: ['data', 'colors', 'height'],
     data: function () {
       return {
         chartEvents: {
@@ -25,7 +24,8 @@
           legend: { position: 'top', maxLines: 10 },
           isStacked: true,
           width: '100%',
-          height: this.height
+          height: this.height,
+          colors: this.colors
         }
       }
     },
