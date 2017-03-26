@@ -32,6 +32,15 @@ webpack(webpackConfig, function (err, stats) {
     chunkModules: false
   }) + '\n\n')
 
+  var FolderZip = require('folder-zip');
+  var zip = new FolderZip();
+  var options = {
+    excludeParentFolder: true
+  };
+  zip.zipFolder('dist/assets', options, function(){
+    zip.writeToFile('dist/app-biobank-plots.zip');
+  });
+
   console.log(chalk.cyan('  Build complete.\n'))
   console.log(chalk.yellow(
     '  Tip: built files are meant to be served over an HTTP server.\n' +

@@ -4,7 +4,7 @@ module.exports = {
   build: {
     env: require('./prod.env'),
     index: path.resolve(__dirname, '../dist/view-biobank-plots.ftl'),
-    assetsRoot: path.resolve(__dirname, '../dist'),
+    assetsRoot: path.resolve(__dirname, '../dist/assets'),
     assetsSubDirectory: '/',
     assetsPublicPath: '/apps/${app.id}',
     productionSourceMap: true,
