@@ -32,3 +32,6 @@ legend{
 #header{
   margin-bottom: 2em;
 }
+#header img{
+  width:100%;
+}
