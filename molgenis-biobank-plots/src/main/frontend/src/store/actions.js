@@ -79,7 +79,7 @@ export default {
             ]
           },
           'age': {
-            title: 'Age',
+            title: 'Age distribution',
             columns: [
               {type: 'number', label: '<20', key: '<20'},
               {type: 'number', label: '20-30', key: '20-30'},
@@ -96,25 +96,25 @@ export default {
             ]
           },
           'smoking': {
-            title: 'Smoking',
+            title: 'Smoking data',
             columns: [
-              {type: 'number', label: 'Smoking', key: 'T'},
-              {type: 'number', label: 'Non-Smoking', key: 'F'},
+              {type: 'number', label: 'Available', key: 'T'},
+              {type: 'number', label: 'Not available', key: 'F'},
               {type: 'number', label: 'Unknown', key: 'null'}
             ],
             rows: [
-              {label: 'Smoking', ...matrixValues(responses[0].aggs)}
+              {label: 'Smoking data', ...matrixValues(responses[0].aggs)}
             ]
           },
           'gender': {
-            title: 'Gender',
+            title: 'Sex',
             columns: [
               {type: 'number', label: 'Male', key: 'male'},
               {type: 'number', label: 'Female', key: 'female'},
               {type: 'number', label: 'Unknown', key: 'null'}
             ],
             rows: [
-              {label: 'Gender', ...matrixValues(responses[1].aggs)}
+              {label: 'Sex', ...matrixValues(responses[1].aggs)}
             ]
           }
         }
