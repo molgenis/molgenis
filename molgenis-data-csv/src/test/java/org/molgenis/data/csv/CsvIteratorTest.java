@@ -9,15 +9,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -45,7 +43,7 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testIteratorFromCsvFile() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		InputStream in = new FileInputStream(ResourceUtils.getFile("testdata.csv"));
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
@@ -62,7 +60,7 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testIteratorFromZipFile() throws IOException
 	{
-		File zipFile = getZipWithCsvFile("testdata.csv");
+		File zipFile = getZipWithCsvFile("testdata.csv", "zipFile");
 
 		CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
 		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
@@ -72,18 +70,18 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testIteratorFromZipFileWithFolder() throws IOException
 	{
-		File zipFile = getZipWithCsvFile("folder/testdata.csv");
+		File zipFile = getZipWithCsvFile("folder/testdata.csv", "zipFileWithFolder");
 
 		CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
 		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
 		assertEquals(Iterators.size(it), 5);
 	}
 
-	private File getZipWithCsvFile(String filePath) throws IOException
+	private File getZipWithCsvFile(String filePath, String zipName) throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		InputStream in = new FileInputStream(ResourceUtils.getFile("testdata.csv"));
 
-		File zipFile = new File(FileUtils.getTempDirectory() + "test.zip");
+		File zipFile = new File(FileUtils.getTempDirectoryPath() + zipName + ".zip");
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
 		ZipEntry e = new ZipEntry(filePath);
 		out.putNextEntry(e);
