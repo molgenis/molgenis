@@ -7,6 +7,9 @@ body{
 h4{
   color: #184B8A;
 }
+.card-subtitle.mb-2{
+  color: #BDC8DD;
+}
 .card-subtitle{
   color: #555;
 }

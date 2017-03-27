@@ -15,13 +15,13 @@
         <filter-checkbox name="transcriptome" label="Transcriptome (RNAseq)"></filter-checkbox>
         <filter-checkbox name="methylome" label="Methylome (Illumina 450K)"></filter-checkbox>
         <filter-checkbox name="genotypes" label="Genotypes (Imputed)"></filter-checkbox>
-        <filter-checkbox name="wbcc" label="Whole bloodcell count"></filter-checkbox>
         <filter-checkbox name="metabolome" label="Metabolome (Brainshake)"></filter-checkbox>
         <filter-checkbox name="wgs" label="Whole Genome Sequencing (Illumina HiSeq)"></filter-checkbox>
+        <filter-checkbox name="wbcc" label="Whole bloodcell count"></filter-checkbox>
       </div>
 
       <div class="form-group">
-        <legend class="col-form-legend">Gender</legend>
+        <legend class="col-form-legend">Sex</legend>
         <div class="row">
           <div class="col-md-6">
             <filter-checkbox name="male" label="Male"></filter-checkbox>
@@ -33,7 +33,7 @@
       </div>
 
       <div class="form-group">
-        <legend class="col-form-legend">Smoking</legend>
+        <legend class="col-form-legend">Smoking data available</legend>
         <div class="row">
           <div class="col-md-6">
             <filter-checkbox name="smoking" label="Yes"></filter-checkbox>
