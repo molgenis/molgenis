@@ -32,9 +32,19 @@ webpack(webpackConfig, function (err, stats) {
     chunkModules: false
   }) + '\n\n')
 
+  var FolderZip = require('folder-zip');
+  var zip = new FolderZip();
+  var options = {
+    excludeParentFolder: true
+  };
+  zip.zipFolder('dist/assets', options, function(){
+    zip.writeToFile('dist/app-biobank-plots.zip');
+  });
+
   console.log(chalk.cyan('  Build complete.\n'))
   console.log(chalk.yellow(
-    '  Tip: built files are meant to be served over an HTTP server.\n' +
-    '  Opening index.html over file:// won\'t work.\n'
+    '  Tip: built files are meant to be added to molgenis app store.\n' +
+    '  Upload the app-biobank-plots.zip to your app.\n' +
+    '  Copy the contents of view-biobank-plots.ftl to the app\'s FreemarkerTemplate.\n'
   ))
 })

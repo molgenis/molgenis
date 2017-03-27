@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div id="header">
+      <img src="./assets/img/bbmri.png">
+    </div>
     <div class="container">
       <div class="row">
         <div class="col-md-3">

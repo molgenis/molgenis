@@ -3,10 +3,10 @@ var path = require('path')
 module.exports = {
   build: {
     env: require('./prod.env'),
-    index: path.resolve(__dirname, '../dist/index.html'),
-    assetsRoot: path.resolve(__dirname, '../dist'),
-    assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    index: path.resolve(__dirname, '../dist/view-biobank-plots.ftl'),
+    assetsRoot: path.resolve(__dirname, '../dist/assets'),
+    assetsSubDirectory: '',
+    assetsPublicPath: '/apps/${app.id}',
     productionSourceMap: true,
     productionGzip: false,
     productionGzipExtensions: ['js', 'css'],
