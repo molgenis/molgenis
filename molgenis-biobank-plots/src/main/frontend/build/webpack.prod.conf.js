@@ -44,7 +44,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       filename: process.env.NODE_ENV === 'testing'
         ? 'index.html'
         : config.build.index,
-      template: 'html-loader!index.html',
+      template: 'html-loader!view-biobank-plots.ftl',
       inject: true,
       minify: {
         removeComments: true,

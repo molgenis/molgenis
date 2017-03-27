@@ -8,9 +8,11 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './assets/css/biobank-plot-style.css'
 
-/* eslint-disable no-undef, camelcase */
-__webpack_public_path__ = window.__webpack_public_path__
-/* eslint-enable */
+if (window.__webpack_public_path__) {
+  /* eslint-disable no-undef, camelcase */
+  __webpack_public_path__ = window.__webpack_public_path__
+  /* eslint-enable */
+}
 
 Vue.use(BootstrapVue)
 
