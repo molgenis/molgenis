@@ -57,10 +57,8 @@ public class RestControllerIT
 		LOG.info("testUSerId: " + testUserId);
 
 
-		List<String> entities = new ArrayList<>();
-		entities.add("sys_FreemarkerTemplate");
-		grantRights(adminToken, testUserId, entities);
-
+		grantRights(adminToken, testUserId, "sys_FreemarkerTemplate");
+		grantRights(adminToken, testUserId, "sys_scr_ScriptType");
 
 		this.testUserToken = login("test", "test");
 	}
@@ -112,21 +110,13 @@ public class RestControllerIT
 	 * Grant user rights in list of entities
 	 * @param adminToken the token to use for signin
 	 * @param userId the ID (not the name) of the user that needs to get the rights
-	 * @param entities a list of entity names
+	 * @param entity a list of entity names
 	 * @return
 	 */
-	private int grantRights(String adminToken, String userId, List<String> entities)
+	private int grantRights(String adminToken, String userId, String entity)
 	{
-
-		List<JSONObject> roles = entities.stream()
-				.map(e -> e.toUpperCase())
-				.map(e -> "ROLE_ENTITY_WRITE_" + e)
-				.map(r -> new JSONObject(ImmutableMap.of("role", r, "User", userId)))
-				.collect(Collectors.toList());
-
-
-		JSONObject body = new JSONObject();
-		body.put("entities", roles);
+		String right =  "ROLE_ENTITY_WRITE_" + entity.toUpperCase();
+		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
 
 		return given().log().all()
 				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
