@@ -1,8 +1,12 @@
-import {get} from '../molgenisApi'
+// @flow
+import {aggregateX, getEntityCollection} from '../molgenisApi'
 import 'url-polyfill'
 import {SET_BIOBANKS, SET_FILTER, SET_AGGS, SET_ATTRIBUTE_CHARTS, RESET_FILTERS} from './mutations'
 import {biobankGraphRsql, attributeGraphRsql} from './getters'
 import {zip} from 'ramda'
+
+// eslint-disable-next-line
+import type {State, Biobank, Charts} from './state'
 
 export const GET_BIOBANKS = 'GET_BIOBANKS'
 export const SET_BIOBANK = 'SET_BIOBANK'
@@ -17,52 +21,53 @@ const matrixValues = aggs => {
   return { values }
 }
 
+type ActionParams = {
+  commit: Function,
+  dispatch: Function,
+  state: State
+}
+
 export default {
-  [GET_BIOBANKS] ({ commit, state }) {
-    const {token, apiUrl, entities: {biobanks}} = state
-    get(`${apiUrl}/v2/${biobanks}`, token)
+  [GET_BIOBANKS] (params: ActionParams) {
+    const {commit, state: {token, apiUrl, entities: {biobanks}}} = params
+    getEntityCollection(apiUrl, biobanks, token)
       .then(response => { commit(SET_BIOBANKS, response.items) })
   },
-  [SET_BIOBANK] ({commit, dispatch}, biobank) {
+  [SET_BIOBANK] (params: ActionParams, biobank: Biobank) {
+    const {commit, dispatch} = params
     commit(SET_FILTER, {name: 'biobank', value: biobank})
     dispatch(REFRESH_ATTRIBUTE_GRAPHS)
   },
-  [SET_FILTER_ASYNC] ({commit, dispatch}, {name, value}) {
-    commit(SET_FILTER, {name, value})
+  [SET_FILTER_ASYNC] (params: ActionParams, filter: {name: string, value: any}) {
+    const {commit, dispatch} = params
+    commit(SET_FILTER, filter)
     dispatch(REFRESH_GRAPH)
     dispatch(REFRESH_ATTRIBUTE_GRAPHS)
   },
-  [RESET_FILTERS_ASYNC] ({commit, dispatch}) {
+  [RESET_FILTERS_ASYNC] (params: ActionParams) {
+    const {commit, dispatch} = params
     commit(RESET_FILTERS)
     dispatch(REFRESH_GRAPH)
     dispatch(REFRESH_ATTRIBUTE_GRAPHS)
   },
-  [REFRESH_GRAPH] ({commit, state}) {
+  [REFRESH_GRAPH] (params: ActionParams) {
+    const {commit, state} = params
     const {token, apiUrl, entities: {samples}} = state
-    const url = new URL(`${apiUrl}/v2/${samples}`)
-    const q = biobankGraphRsql(state)
-    if (q) {
-      url.searchParams.append('q', q)
-    }
-    url.searchParams.append('aggs', 'x==biobank')
-    get(url, token).then(response => { commit(SET_AGGS, response.aggs) })
+    const rsql = biobankGraphRsql(state)
+    console.log('rsql', rsql)
+    aggregateX(apiUrl, samples, 'biobank', rsql, token)
+      .then(response => { commit(SET_AGGS, response.aggs) })
   },
-  [REFRESH_ATTRIBUTE_GRAPHS] ({commit, state}) {
-    commit(SET_ATTRIBUTE_CHARTS, [])
+  [REFRESH_ATTRIBUTE_GRAPHS] (params: ActionParams) {
+    const {commit, state} = params
     const {token, apiUrl, entities: {samples}} = state
-    const url = new URL(`${apiUrl}/v2/${samples}`)
-    const q = attributeGraphRsql(state)
-    if (q) {
-      url.searchParams.append('q', q)
-    }
+    commit(SET_ATTRIBUTE_CHARTS, [])
+    const rsql = attributeGraphRsql(state)
     const attributes = ['smoking', 'sex', 'transcriptome', 'wbcc', 'genotypes', 'metabolome', 'methylome', 'wgs', 'ageGroup']
-    const promises = attributes.map(attr => {
-      url.searchParams.set('aggs', `x==${attr}`)
-      return get(url, token)
-    })
+    const promises = attributes.map(attr => aggregateX(apiUrl, samples, attr, rsql, token))
     Promise.all(promises).then(
       responses => {
-        const attributeGraphs = {
+        const attributeGraphs: Charts = {
           'data_types': {
             title: 'Data types',
             columns: [

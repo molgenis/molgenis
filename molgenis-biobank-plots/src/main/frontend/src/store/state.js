@@ -1,5 +1,57 @@
+// @flow
 
-let state = {
+export type State = {
+  entities: {
+    biobanks: string,
+    samples: string
+  },
+  numberOfSamples: number,
+  transcriptome: boolean,
+  methylome: boolean,
+  genotypes: boolean,
+  wbcc: boolean,
+  metabolome: boolean,
+  wgs: boolean,
+  male: boolean,
+  female: boolean,
+  smoking: boolean,
+  nonSmoking: boolean,
+  belowTwenty: boolean,
+  twentyThirty: boolean,
+  thirtyFourty: boolean,
+  fourtyFifty: boolean,
+  fiftySixty: boolean,
+  sixtySeventy: boolean,
+  seventyEighty: boolean,
+  aboveEigthy: boolean,
+  biobank: ?string,
+  aggs: Array<{}>,
+  biobanks: Array<Biobank>,
+  charts?: Charts,
+  apiUrl: string,
+  token?: string
+}
+
+export type Biobank = {id: string, abbr: string}
+
+export type Charts = {
+  gender: Chart,
+  smoking: Chart,
+  data_types: Chart,
+  age: Chart
+}
+
+export type Chart = {
+  columns: Array<{key:string, label:string, type: string}>,
+  rows: Array<{label: string}>,
+  title: string
+}
+
+let state: State = {
+  entities: {
+    biobanks: 'leiden_biobanks',
+    samples: 'leiden_RP'
+  },
   numberOfSamples: 0,
   transcriptome: false,
   methylome: false,
@@ -22,33 +74,21 @@ let state = {
   biobank: null,
   aggs: [],
   biobanks: [],
-  charts: {
-    gender: null,
-    smoking: null,
-    data_types: null,
-    age: null
-  },
+  charts: undefined,
   apiUrl: window.location.origin + '/api'
 }
 
 if (process.env.NODE_ENV === 'development') {
   state = {
     ...state,
-    entities: {
-      biobanks: 'leiden_biobanks',
-      samples: 'leiden_RP'
-    },
     apiUrl: 'https://molgenis09.gcc.rug.nl/api',
     token: 'test'
   }
 } else if (process.env.NODE_ENV === 'production') {
-  console.log('Production')
   state = {
     ...state,
     ...(window.__INITIAL_STATE__ || {})
   }
 }
-
-console.log('state:', state)
 
 export default state

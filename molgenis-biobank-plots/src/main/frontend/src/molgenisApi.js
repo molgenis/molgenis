@@ -1,12 +1,42 @@
+// @flow
+
+import type {Constraint} from './rsql/Constraint'
 import fetch from 'isomorphic-fetch'
+import { transformToRSQL } from './rsql/transformer'
+export type EntityCollection = {
+  items: Array<any>
+}
+
+type AttributeResponseV2 = any // TODO!
+
+export type EntityAggregatesResponse = {
+  aggs: AggregateResult,
+  xAttr: AttributeResponseV2,
+  yAttr: AttributeResponseV2
+}
+
+export type AggregateResult = {
+  matrix: Array<Array<number>>,
+  xLabels: Array<any>,
+  yLabels: Array<string>,
+  threshold: number
+}
+
+type FetchSettings = {
+  method?: string,
+  headers?: {[header : string]: string},
+  mode?: string,
+  cache?: string,
+  credentials?: string // TODO: complete
+}
 
 const jsonContentHeaders = {
   'Accept': 'application/json',
   'Content-Type': 'application/json'
 }
 
-function callApi (url, method, token) {
-  const settings = {
+function callApi (url: URL, method: string, token: ?string) {
+  const settings: FetchSettings = {
     method: method,
     headers: jsonContentHeaders
   }
@@ -30,23 +60,24 @@ function callApi (url, method, token) {
     })
 }
 
-export function get (url, token) {
+export function getEntityCollection (apiUrl: string,
+                                    entityName: string,
+                                    token: ?string): Promise<EntityCollection> {
+  const url = new URL(`${apiUrl}/v2/${entityName}`)
   return callApi(url, 'get', token)
 }
 
-export function login (server, username, password) {
-  return fetch(server.apiUrl + 'v1/login', {
-    method: 'post',
-    headers: jsonContentHeaders,
-    body: JSON.stringify({ username: username, password: password })
-  }).then(response => response.json())
+export function aggregateX (apiUrl: string,
+                            entityName: string,
+                            xAttr: string,
+                            rsql: ?Constraint,
+                            token: ?string): Promise<EntityAggregatesResponse> {
+  const url = new URL(`${apiUrl}/v2/${entityName}`)
+  if (rsql) {
+    url.searchParams.append('q', transformToRSQL(rsql))
+  }
+  url.searchParams.set('aggs', `x==${xAttr}`)
+  return callApi(url, 'get', token)
 }
 
-export function logout (server, token) {
-  return fetch(server.apiUrl + 'v1/logout', {
-    method: 'get',
-    headers: { ...jsonContentHeaders, 'x-molgenis-token': token }
-  })
-}
-
-export default { login, logout, get, callApi }
+export default { getEntityCollection, aggregateX }
