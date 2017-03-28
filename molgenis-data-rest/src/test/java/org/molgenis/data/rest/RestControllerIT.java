@@ -6,6 +6,7 @@ import net.minidev.json.JSONObject;
 import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -32,8 +33,8 @@ public class RestControllerIT
 
 	private String testUserToken;
 
-	@Test
-	public void init()
+	@BeforeClass
+	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getenv("REST_TEST_HOST");
