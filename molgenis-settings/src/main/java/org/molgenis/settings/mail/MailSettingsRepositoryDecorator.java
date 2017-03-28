@@ -5,7 +5,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.util.mail.MailSenderFactory;
 
-
 import static java.util.Objects.requireNonNull;
 
 public class MailSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
