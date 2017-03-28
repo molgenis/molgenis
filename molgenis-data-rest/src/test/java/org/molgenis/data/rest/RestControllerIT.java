@@ -244,9 +244,9 @@ public class RestControllerIT
 	@Test
 	public void testRetrieveEntityCollection()
 	{
+		String responseBody = "\"name\"\n" + "\"python\"\n" + "\"R\"\n" + "\"JavaScript (Magma)\"\n" + "\"JavaScript\"\n";
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_CSV).when()
-				.get(PATH + "csv/sys_scr_ScriptType").then().log().all().statusCode(200).body(equalTo(
-				"\"name\"\n" + "\"python\"\n" + "\"R\"\n" + "\"JavaScript (Magma)\"\n" + "\"JavaScript\"\n"));
+				.get(PATH + "csv/sys_scr_ScriptType").then().log().all().statusCode(200).body(equalTo(responseBody));
 	}
 
 	private void noPermissionRequest(String requestedEntity)
