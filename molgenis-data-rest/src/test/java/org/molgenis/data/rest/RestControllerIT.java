@@ -7,6 +7,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONObject;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.rest.support.RestUtils;
+import org.molgenis.data.rest.convert.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -26,6 +28,7 @@ import static io.restassured.RestAssured.*;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.equalTo;
+import static org.molgenis.data.rest.convert.RestTestUtils.APPLICATION_JSON;
 
 public class RestControllerIT
 {
@@ -33,7 +36,6 @@ public class RestControllerIT
 
 	private static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 	private static final String TEXT_PLAIN = "text/plain";
-	private static final String APPLICATION_JSON = "application/json";
 	private static final String APPLICATION_FORM_URL_ENCODED = "application/x-www-form-urlencoded; charset=UTF-8";
 	private static final String TEXT_CSV = "text/csv";
 	private static final String PATH = "api/v1/";
@@ -48,11 +50,9 @@ public class RestControllerIT
 	 * Pass down system properties via the mvn commandline argument
 	 * example:
 	 * mvn test -Dtest="RestControllerIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
-	 *
-	 * @throws URISyntaxException
 	 */
 	@BeforeClass
-	public void beforeClass() throws URISyntaxException
+	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
@@ -67,7 +67,7 @@ public class RestControllerIT
 		String adminPassword = Strings.isEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		String adminToken = login(adminUserName, adminPassword);
+		String adminToken = RestTestUtils.login(adminUserName, adminPassword);
 
 		createTestUser(adminToken);
 
@@ -77,7 +77,8 @@ public class RestControllerIT
 		grantRights(adminToken, testUserId, "sys_FreemarkerTemplate");
 		grantRights(adminToken, testUserId, "sys_scr_ScriptType");
 
-		this.testUserToken = login("test", "test");
+		this.testUserToken = RestTestUtils.login("test", "test");
+		this.testUserToken = RestTestUtils.login("test", "test");
 
 		LOG.info("Importing RestControllerV1_TestEMX.xlsx...");
 		uploadEMX(adminToken);
@@ -88,7 +89,7 @@ public class RestControllerIT
 	 * Import TypeTest, TypeTestRef, Location and Person
 	 * using add/update
 	 *
-	 * @param token
+	 * @param token to use for login
 	 */
 	private void uploadEMX(String token)
 	{
@@ -106,27 +107,6 @@ public class RestControllerIT
 		given().log().all().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
 				.header(X_MOLGENIS_TOKEN, token).post("plugin/importwizard/importFile").then().log().all()
 				.statusCode(201);
-	}
-
-	/**
-	 * Login with user name and password and return token on success
-	 *
-	 * @param userName the username to login with
-	 * @param password the password to use for login
-	 * @return the token returned from the login
-	 */
-	private String login(String userName, String password)
-	{
-		JSONObject loginBody = new JSONObject();
-		loginBody.put("username", userName);
-		loginBody.put("password", password);
-
-		String token = given().log().all().contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when()
-				.post(PATH + "login").then().log().all().extract().path("token");
-
-		LOG.info("Login token for user(" + userName + "): " + token);
-
-		return token;
 	}
 
 	private void createTestUser(String adminToken)
@@ -152,7 +132,7 @@ public class RestControllerIT
 	 * @param adminToken the token to use for signin
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
 	 * @param entity     a list of entity names
-	 * @return
+	 * @return int http response code
 	 */
 	private int grantRights(String adminToken, String userId, String entity)
 	{
