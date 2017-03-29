@@ -1,8 +1,10 @@
 package org.molgenis.data.rest;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONObject;
 import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
@@ -11,10 +13,15 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 
 import static com.google.api.client.util.Maps.newHashMap;
 import static com.google.common.collect.ImmutableMap.of;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.*;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static java.util.Collections.singletonList;
@@ -37,19 +44,26 @@ public class RestControllerIT
 
 	private String testUserToken;
 
+	/**
+	 * Pass down system properties via the mvn commandline argument
+	 * example:
+	 * mvn test -Dtest="RestControllerIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
+	 *
+	 * @throws URISyntaxException
+	 */
 	@BeforeClass
-	public void beforeClass()
+	public void beforeClass() throws URISyntaxException
 	{
 		LOG.info("Read environment variables");
-		String envHost = System.getenv("REST_TEST_HOST");
+		String envHost = System.getProperty("REST_TEST_HOST");
 		RestAssured.baseURI = Strings.isEmpty(envHost) ? DEFAULT_HOST : envHost;
 		LOG.info("baseURI: " + baseURI);
 
-		String envAdminName = System.getenv("REST_TEST_ADMIN_NAME");
+		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
 		String adminUserName = Strings.isEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
 		LOG.info("adminUserName: " + adminUserName);
 
-		String envAdminPW = System.getenv("REST_TEST_ADMIN_PW");
+		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
 		String adminPassword = Strings.isEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
@@ -64,6 +78,34 @@ public class RestControllerIT
 		grantRights(adminToken, testUserId, "sys_scr_ScriptType");
 
 		this.testUserToken = login("test", "test");
+
+		LOG.info("Importing RestControllerV1_TestEMX.xlsx...");
+		uploadEMX(adminToken);
+		LOG.info("Importing Done");
+	}
+
+	/**
+	 * Import TypeTest, TypeTestRef, Location and Person
+	 * using add/update
+	 *
+	 * @param token
+	 */
+	private void uploadEMX(String token)
+	{
+		URL resourceUrl = Resources.getResource(RestControllerIT.class, "/RestControllerV1_TestEMX.xlsx");
+		File file = null;
+		try
+		{
+			file = new File(new URI(resourceUrl.toString()).getPath());
+		}
+		catch (URISyntaxException e)
+		{
+			LOG.error(e.getMessage());
+		}
+
+		given().log().all().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
+				.header(X_MOLGENIS_TOKEN, token).post("plugin/importwizard/importFile").then().log().all()
+				.statusCode(201);
 	}
 
 	/**
@@ -190,18 +232,31 @@ public class RestControllerIT
 	@Test
 	public void testGetEntityType()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/meta\",\"hrefCollection\":\"/api/v1/sys_scr_ScriptType\",\"name\":\"sys_scr_ScriptType\",\"label\":\"Script type\",\"attributes\":{\"name\":{\"href\":\"/api/v1/sys_scr_ScriptType/meta/name\"}},\"labelAttribute\":\"name\",\"idAttribute\":\"name\",\"lookupAttributes\":[],\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":true}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType/meta").then().log().all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).when().get(PATH + "sys_scr_ScriptType/meta").then().log().all();
+
+		validateGetEntityType(response);
 	}
 
 	@Test
 	public void testGetEntityTypePost()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/meta\",\"hrefCollection\":\"/api/v1/sys_scr_ScriptType\",\"name\":\"sys_scr_ScriptType\",\"label\":\"Script type\",\"attributes\":{\"name\":{\"href\":\"/api/v1/sys_scr_ScriptType/meta/name\"}},\"labelAttribute\":\"name\",\"idAttribute\":\"name\",\"lookupAttributes\":[],\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":true}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
-				.body(new EntityTypeRequest()).when().post(PATH + "sys_scr_ScriptType/meta?_method=GET").then().log()
-				.all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).body(new EntityTypeRequest()).when()
+				.post(PATH + "sys_scr_ScriptType/meta?_method=GET").then().log().all();
+
+		validateGetEntityType(response);
+	}
+
+	private void validateGetEntityType(ValidatableResponse response)
+	{
+		response.statusCode(200);
+		response.body("href", equalTo("/api/v1/sys_scr_ScriptType/meta"), "hrefCollection",
+				equalTo("/api/v1/sys_scr_ScriptType"), "name", equalTo("sys_scr_ScriptType"), "label",
+				equalTo("Script type"), "attributes.name.href", equalTo("/api/v1/sys_scr_ScriptType/meta/name"),
+				"labelAttribute", equalTo("name"), "idAttribute", equalTo("name"), "lookupAttributes",
+				equalTo(newArrayList()), "isAbstract", equalTo(false), "languageCode", equalTo("en"), "writable",
+				equalTo(true));
 	}
 
 	@Test
@@ -299,7 +354,7 @@ public class RestControllerIT
 
 		// Remove entity
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.delete("api/v2/sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(204);
+				.delete(PATH + "sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(204);
 	}
 
 	@Test(enabled = false)
