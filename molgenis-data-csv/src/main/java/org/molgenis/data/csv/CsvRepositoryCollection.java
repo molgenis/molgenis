@@ -32,7 +32,7 @@ import java.util.zip.ZipFile;
 public class CsvRepositoryCollection extends FileRepositoryCollection
 {
 	public static final String NAME = "CSV";
-	private static final String MAC_ZIP = "__MACOSX";
+	static final String MAC_ZIP = "__MACOSX";
 	private final File file;
 	private EntityTypeFactory entityTypeFactory;
 	private AttributeFactory attrMetaFactory;
@@ -88,10 +88,11 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 			try
 			{
 				zipFile = new ZipFile(file);
+
 				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); )
 				{
 					ZipEntry entry = e.nextElement();
-					if (!entry.getName().contains(MAC_ZIP))
+					if (!entry.getName().contains(MAC_ZIP) && !entry.isDirectory())
 					{
 						String name = getRepositoryName(entry.getName());
 						entityNames.add(name);

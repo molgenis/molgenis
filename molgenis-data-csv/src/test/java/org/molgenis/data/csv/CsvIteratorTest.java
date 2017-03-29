@@ -40,11 +40,9 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testIterator() throws IOException
+	public void testIteratorFromCsvFile() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/testdata.csv");
-		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
+		File csvFile = createTmpFileForResource("testdata.csv");
 
 		CsvIterator it = new CsvIterator(csvFile, "testdata", null, null, entityType);
 		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
@@ -56,4 +54,32 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		assertEquals(entity.get("col2"), "val2");
 	}
 
+	@Test
+	public void testIteratorFromZipFile() throws IOException
+	{
+		File zipFile = createTmpFileForResource("zipFile.zip");
+
+		CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
+		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
+		assertEquals(Iterators.size(it), 5);
+	}
+
+	@Test
+	public void testIteratorFromZipFileWithFolder() throws IOException
+	{
+		File zipFile = createTmpFileForResource("zipFileWithFolder.zip");
+
+		CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
+		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
+		assertEquals(Iterators.size(it), 5);
+	}
+
+
+	private File createTmpFileForResource(String fileName) throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/"+fileName);
+		File csvFile = new File(FileUtils.getTempDirectory(), fileName);
+		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
+		return csvFile;
+	}
 }

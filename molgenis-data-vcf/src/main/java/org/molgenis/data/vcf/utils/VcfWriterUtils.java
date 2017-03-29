@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.utils;
 
 import com.google.common.collect.Lists;
+import net.sf.samtools.util.BlockCompressedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -10,9 +11,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -20,6 +19,7 @@ import java.util.stream.StreamSupport;
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
@@ -69,7 +69,7 @@ public class VcfWriterUtils
 	{
 		System.out.println("Detecting VCF column header...");
 
-		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
+		Scanner inputVcfFileScanner = createVcfFileScanner(inputVcfFile);
 		String line = inputVcfFileScanner.nextLine();
 
 		Map<String, String> infoHeaderLinesMap = new LinkedHashMap<>();
@@ -91,6 +91,16 @@ public class VcfWriterUtils
 		}
 
 		inputVcfFileScanner.close();
+	}
+
+	private static Scanner createVcfFileScanner(File vcfFile) throws IOException
+	{
+		InputStream inputStream = new FileInputStream(vcfFile);
+		if (vcfFile.getName().endsWith(".gz"))
+		{
+			inputStream = new BlockCompressedInputStream(inputStream);
+		}
+		return new Scanner(inputStream, UTF_8.name());
 	}
 
 	/**

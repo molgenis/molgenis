@@ -1,5 +1,6 @@
 package org.molgenis.annotation.cmd.utils;
 
+import net.sf.samtools.util.BlockCompressedOutputStream;
 import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -52,8 +53,7 @@ public class CmdLineAnnotatorUtils
 			List<String> attributesToInclude, boolean update) throws IOException, MolgenisInvalidFormatException
 	{
 
-		try (BufferedWriter outputVCFWriter = new BufferedWriter(
-				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
+		try (BufferedWriter outputVCFWriter = createBufferedWriter(outputVCFFile);
 				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
 						entityTypeFactory, attributeFactory))
 		{
@@ -74,6 +74,20 @@ public class CmdLineAnnotatorUtils
 			writeAnnotationResultToVcfFile(attributesToInclude, outputVCFWriter, outputMetaData, annotatedRecords);
 		}
 		return outputVCFFile.getAbsolutePath();
+	}
+
+	private static BufferedWriter createBufferedWriter(File outputVCFFile) throws IOException
+	{
+		OutputStream outputStream;
+		if (outputVCFFile.getName().endsWith(".gz"))
+		{
+			outputStream = new BlockCompressedOutputStream(outputVCFFile);
+		}
+		else
+		{
+			outputStream = new FileOutputStream(outputVCFFile);
+		}
+		return new BufferedWriter(new OutputStreamWriter(outputStream, UTF_8));
 	}
 
 	private static Iterator<Entity> annotateRepo(RepositoryAnnotator annotator,
@@ -149,8 +163,7 @@ public class CmdLineAnnotatorUtils
 		List<Attribute> outputMetaData = newArrayList();
 		if (annotator instanceof EffectCreatingAnnotator || annotator instanceof EffectBasedAnnotator)
 		{
-			EntityType effectRefEntity = entityTypeFactory.create()
-					.setName(annotator.getSimpleName() + "_EFFECTS");
+			EntityType effectRefEntity = entityTypeFactory.create().setName(annotator.getSimpleName() + "_EFFECTS");
 			for (Attribute outputAttribute : annotator.getOutputAttributes())
 			{
 				effectRefEntity.addAttribute(outputAttribute);

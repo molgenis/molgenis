@@ -1,17 +1,21 @@
 package org.molgenis.annotation.test.cmd.integration;
 
-import org.apache.commons.io.FileUtils;
+import net.sf.samtools.util.BlockCompressedInputStream;
+import org.apache.commons.io.IOUtils;
 import org.molgenis.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -26,6 +30,27 @@ public class CmdLineAnnotatorIT
 	{
 		testAnnotator("gonl", ResourceUtils.getFile(getClass(), "/gonl").getPath(), "test.vcf",
 				"test-out-expected.vcf");
+	}
+
+	@Test
+	public void gonlVcfInBgzipVcfOut() throws Exception
+	{
+		testAnnotator("gonl", ResourceUtils.getFile(getClass(), "/gonl").getPath(), "test.vcf",
+				"test-out-expected.vcf.gz");
+	}
+
+	@Test
+	public void gonlBgzipVcfInVcfOut() throws Exception
+	{
+		testAnnotator("gonl", ResourceUtils.getFile(getClass(), "/gonl").getPath(), "test.vcf.gz",
+				"test-out-expected.vcf");
+	}
+
+	@Test
+	public void gonlBgzipVcfInBgzipVcfOut() throws Exception
+	{
+		testAnnotator("gonl", ResourceUtils.getFile(getClass(), "/gonl").getPath(), "test.vcf.gz",
+				"test-out-expected.vcf.gz");
 	}
 
 	@Test
@@ -79,8 +104,21 @@ public class CmdLineAnnotatorIT
 		}
 	}
 
-	private List<String> readLines(String file) throws IOException
+	private List<String> readLines(String pathname) throws IOException
 	{
-		return FileUtils.readLines(new File(file));
+		File file = new File(pathname);
+		InputStream inputStream = new FileInputStream(file);
+		try
+		{
+			if (pathname.endsWith(".gz"))
+			{
+				inputStream = new BlockCompressedInputStream(inputStream);
+			}
+			return IOUtils.readLines(inputStream, UTF_8);
+		}
+		finally
+		{
+			inputStream.close();
+		}
 	}
 }
