@@ -69,7 +69,7 @@ public class RestControllerIT
 
 		String adminToken = RestTestUtils.login(adminUserName, adminPassword);
 
-		createTestUser(adminToken);
+		RestTestUtils.createUser(adminToken, "test", "test");
 
 		String testUserId = getUserId(adminToken, "test");
 		LOG.info("testUSerId: " + testUserId);
@@ -107,23 +107,6 @@ public class RestControllerIT
 		given().log().all().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
 				.header(X_MOLGENIS_TOKEN, token).post("plugin/importwizard/importFile").then().log().all()
 				.statusCode(201);
-	}
-
-	private void createTestUser(String adminToken)
-	{
-		JSONObject createTestUserBody = new JSONObject();
-		createTestUserBody.put("active", true);
-		createTestUserBody.put("username", "test");
-		createTestUserBody.put("password_", "test");
-		createTestUserBody.put("superuser", false);
-		createTestUserBody.put("changePassword", false);
-		createTestUserBody.put("Email", "test@example.com");
-
-		int code = given().log().all().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.body(createTestUserBody.toJSONString()).when().post(PATH + "sys_sec_User").then().log().all().extract()
-				.statusCode();
-
-		LOG.info("Created test user code: " + Integer.toString(code));
 	}
 
 	/**

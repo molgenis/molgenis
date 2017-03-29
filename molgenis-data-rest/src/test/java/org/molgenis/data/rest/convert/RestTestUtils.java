@@ -27,4 +27,24 @@ public class RestTestUtils
 		return given().log().all().contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when()
 				.post("api/v1/login").then().log().all().extract().path("token");
 	}
+
+	/**
+	 * Create a user with testuserName and testUserPassword as admin using given token
+	 * @param adminToken the token to use for login
+	 * @param testuserName the name of the user to create
+	 * @param testUserPassword the password of the user to create
+	 */
+	public static void createUser(String adminToken, String testuserName, String testUserPassword)
+	{
+		JSONObject createTestUserBody = new JSONObject();
+		createTestUserBody.put("active", true);
+		createTestUserBody.put("username", testuserName);
+		createTestUserBody.put("password_", testUserPassword);
+		createTestUserBody.put("superuser", false);
+		createTestUserBody.put("changePassword", false);
+		createTestUserBody.put("Email", testuserName + "@example.com");
+
+		given().log().all().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
+				.body(createTestUserBody.toJSONString()).when().post("api/v1/sys_sec_User").then().log().all();
+	}
 }
