@@ -10,6 +10,7 @@ import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,6 +32,7 @@ public class RestControllerIT
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerIT.class);
 
+	// Request parameters
 	private static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 	private static final String TEXT_PLAIN = "text/plain";
 	private static final String APPLICATION_JSON = "application/json";
@@ -38,21 +40,36 @@ public class RestControllerIT
 	private static final String TEXT_CSV = "text/csv";
 	private static final String PATH = "api/v1/";
 
-	private static final String DEFAULT_HOST = "https://molgenis62.gcc.rug.nl/";
+	// Admin credentioals
+	private static final String DEFAULT_HOST = "http://localhost:8080";
 	private static final String DEFAULT_ADMIN_NAME = "admin";
 	private static final String DEFAULT_ADMIN_PW = "admin";
+
+	// Permission identifiers
+	private static final String PACKAGE_PERMISSION_ID = "package_permission_ID";
+	private static final String ENTITY_TYPE_PERMISSION_ID = "entityType_permission_ID";
+	private static final String ATTRIBUTE_PERMISSION_ID = "attribute_permission_ID";
+	private static final String FREEMARKER_TEMPLATE_PERMISSION_ID = "freemarkerTemplate_permission_ID";
+	private static final String SCRIPT_TYPE_PERMISSION_ID = "scriptType_permission_ID";
+	private static final String TYPE_TEST_PERMISSION_ID = "typeTest_permission_ID";
+	private static final String TYPE_TEST_REF_PERMISSION_ID = "typeTestRef_permission_ID";
+	private static final String LOCATION_PERMISSION_ID = "location_permission_ID";
+	private static final String PERSONS_PERMISSION_ID = "persons_permission_ID";
+
+	// User credentials
+	private static final String REST_TEST_USER = "rest_test_user";
+	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
 
 	private String testUserToken;
 
 	/**
 	 * Pass down system properties via the mvn commandline argument
+	 * <p>
 	 * example:
 	 * mvn test -Dtest="RestControllerIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
-	 *
-	 * @throws URISyntaxException
 	 */
 	@BeforeClass
-	public void beforeClass() throws URISyntaxException
+	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
@@ -69,19 +86,30 @@ public class RestControllerIT
 
 		String adminToken = login(adminUserName, adminPassword);
 
+		LOG.info("Importing RestControllerV1_TestEMX.xlsx...");
+		// uploadEMX(adminToken);
+		LOG.info("Importing Done");
+
 		createTestUser(adminToken);
 
-		String testUserId = getUserId(adminToken, "test");
-		LOG.info("testUSerId: " + testUserId);
+		String testUserId = getUserId(adminToken, REST_TEST_USER);
+		LOG.info("testUserId: " + testUserId);
 
-		grantRights(adminToken, testUserId, "sys_FreemarkerTemplate");
-		grantRights(adminToken, testUserId, "sys_scr_ScriptType");
+		grantSystemRights(adminToken, FREEMARKER_TEMPLATE_PERMISSION_ID, testUserId, "sys_FreemarkerTemplate");
+		grantSystemRights(adminToken, SCRIPT_TYPE_PERMISSION_ID, testUserId, "sys_scr_ScriptType");
+		grantSystemRights(adminToken, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package");
+		grantSystemRights(adminToken, ENTITY_TYPE_PERMISSION_ID, testUserId, "sys_md_EntityType");
+		grantSystemRights(adminToken, ATTRIBUTE_PERMISSION_ID, testUserId, "sys_md_Attribute");
 
-		this.testUserToken = login("test", "test");
+		grantRights(adminToken, TYPE_TEST_PERMISSION_ID, testUserId, "TypeTest");
+		grantRights(adminToken, TYPE_TEST_REF_PERMISSION_ID, testUserId, "TypeTestRef");
+		grantRights(adminToken, LOCATION_PERMISSION_ID, testUserId, "Location");
+		grantRights(adminToken, PERSONS_PERMISSION_ID, testUserId, "Person");
 
-		LOG.info("Importing RestControllerV1_TestEMX.xlsx...");
-		uploadEMX(adminToken);
-		LOG.info("Importing Done");
+		// Add home plugin
+		// Add Language entity
+
+		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 	/**
@@ -133,11 +161,11 @@ public class RestControllerIT
 	{
 		JSONObject createTestUserBody = new JSONObject();
 		createTestUserBody.put("active", true);
-		createTestUserBody.put("username", "test");
-		createTestUserBody.put("password_", "test");
+		createTestUserBody.put("username", REST_TEST_USER);
+		createTestUserBody.put("password_", REST_TEST_USER_PASSWORD);
 		createTestUserBody.put("superuser", false);
 		createTestUserBody.put("changePassword", false);
-		createTestUserBody.put("Email", "test@example.com");
+		createTestUserBody.put("Email", REST_TEST_USER + "@example.com");
 
 		int code = given().log().all().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
 				.body(createTestUserBody.toJSONString()).when().post(PATH + "sys_sec_User").then().log().all().extract()
@@ -154,10 +182,16 @@ public class RestControllerIT
 	 * @param entity     a list of entity names
 	 * @return
 	 */
-	private int grantRights(String adminToken, String userId, String entity)
+	private int grantRights(String adminToken, String permissionID, String userId, String entity)
 	{
-		String right = "ROLE_ENTITY_WRITE_" + entity.toUpperCase();
-		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
+		return grantSystemRights(adminToken, permissionID, userId,
+				getEntityTypeId(adminToken, "name", entity, "sys_md_EntityType"));
+	}
+
+	private int grantSystemRights(String adminToken, String permissionID, String userId, String entity)
+	{
+		String right = "ROLE_ENTITY_WRITE_" + entity;
+		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
 
 		return given().log().all().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
 				.body(body.toJSONString()).when().post(PATH + "sys_sec_UserAuthority").then().log().all().extract()
@@ -166,17 +200,18 @@ public class RestControllerIT
 
 	private String getUserId(String adminToken, String userName)
 	{
+		return getEntityTypeId(adminToken, "username", userName, "sys_sec_User");
+	}
 
+	private String getEntityTypeId(String adminToken, String attribute, String value, String entityName)
+	{
 		Map<String, Object> query = of("q",
-				singletonList(of("field", "username", "operator", "EQUALS", "value", userName)));
+				singletonList(of("field", attribute, "operator", "EQUALS", "value", value)));
 		JSONObject body = new JSONObject(query);
 
-		String id = given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.queryParam("_method", "GET").body(body.toJSONString()).when().post(PATH + "sys_sec_User").then().log()
-				.all().extract().path("items[0].id");
-
-		return id;
-
+		return given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).queryParam("_method", "GET")
+				.body(body.toJSONString()).when().post(PATH + entityName).then().log().all().extract()
+				.path("items[0].id");
 	}
 
 	@Test
@@ -219,7 +254,8 @@ public class RestControllerIT
 	public void testEntityExists()
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_PLAIN).when()
-				.get(PATH + "sys_scr_ScriptType/exist").then().log().all().statusCode(200).body(equalTo("true"));
+				.get(PATH + "it_emx_datatypes_TypeTestRef/exist").then().log().all().statusCode(200)
+				.body(equalTo("true"));
 	}
 
 	@Test
@@ -233,7 +269,8 @@ public class RestControllerIT
 	public void testGetEntityType()
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON).when().get(PATH + "sys_scr_ScriptType/meta").then().log().all();
+				.contentType(APPLICATION_JSON).when().get(PATH + "it_emx_datatypes_TypeTestRef/meta").then().log()
+				.all();
 
 		validateGetEntityType(response);
 	}
@@ -243,7 +280,7 @@ public class RestControllerIT
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
 				.contentType(APPLICATION_JSON).body(new EntityTypeRequest()).when()
-				.post(PATH + "sys_scr_ScriptType/meta?_method=GET").then().log().all();
+				.post(PATH + "it_emx_datatypes_TypeTestRef/meta?_method=GET").then().log().all();
 
 		validateGetEntityType(response);
 	}
@@ -251,12 +288,14 @@ public class RestControllerIT
 	private void validateGetEntityType(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/sys_scr_ScriptType/meta"), "hrefCollection",
-				equalTo("/api/v1/sys_scr_ScriptType"), "name", equalTo("sys_scr_ScriptType"), "label",
-				equalTo("Script type"), "attributes.name.href", equalTo("/api/v1/sys_scr_ScriptType/meta/name"),
-				"labelAttribute", equalTo("name"), "idAttribute", equalTo("name"), "lookupAttributes",
-				equalTo(newArrayList()), "isAbstract", equalTo(false), "languageCode", equalTo("en"), "writable",
-				equalTo(true));
+		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta"), "hrefCollection",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef"), "name", equalTo("it_emx_datatypes_TypeTestRef"),
+				"label", equalTo("TypeTestRef"), "description", equalTo("MOLGENIS Data types test ref entity"),
+				"attributes.value.href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/value"),
+				"attributes.label.href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/label"), "labelAttribute",
+				equalTo("label"), "idAttribute", equalTo("value"), "lookupAttributes",
+				equalTo(newArrayList("value", "label")), "isAbstract", equalTo(false), "languageCode", equalTo("en"),
+				"writable", equalTo(true));
 	}
 
 	@Test
@@ -329,13 +368,12 @@ public class RestControllerIT
 				.all().statusCode(200).body(equalTo(responseBody));
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testRetrieveEntityCollection()
 	{
-		String responseBody =
-				"\"name\"\n" + "\"python\"\n" + "\"R\"\n" + "\"JavaScript (Magma)\"\n" + "\"JavaScript\"\n";
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_CSV).when()
-				.get(PATH + "csv/sys_scr_ScriptType").then().log().all().statusCode(200).body(equalTo(responseBody));
+				.get(PATH + "csv/sys_scr_ScriptType").then().contentType(TEXT_CSV).log().all().statusCode(200)
+				.body(equalTo(""));
 	}
 
 	@Test
@@ -343,18 +381,14 @@ public class RestControllerIT
 	{
 		// Add new entity from form post
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
-				.formParam("name", "IT_ScriptType").when().post(PATH + "sys_scr_ScriptType").then().log().all()
-				.statusCode(201);
+				.formParam("name", "ref6").formParam("label", "label6").when()
+				.post(PATH + "it_emx_datatypes_TypeTestRef").then().log().all().statusCode(201);
 
 		// Check if entity was added
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/IT_ScriptType\",\"name\":\"IT_ScriptType\"}";
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(200)
-				.body(equalTo(responseBody));
-
-		// Remove entity
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.delete(PATH + "sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(204);
+				.get(PATH + "it_emx_datatypes_TypeTestRef/ref6").then().log().all().statusCode(200)
+				.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref6"), "value", equalTo("ref6"), "label",
+						equalTo("label6"));
 	}
 
 	@Test(enabled = false)
@@ -414,4 +448,16 @@ public class RestControllerIT
 				.get(PATH + requestedEntity).then().log().all().statusCode(200);
 	}
 
+	@AfterClass
+	public void afterClass()
+	{
+		// Clean up TestEMX
+		// Clean up permissions
+		// Clean up Token for user
+		// Clean up user
+
+		// optional Cleanup added entities
+	}
+
 }
+
