@@ -48,11 +48,9 @@ public class RestControllerIT
 	 * Pass down system properties via the mvn commandline argument
 	 * example:
 	 * mvn test -Dtest="RestControllerIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
-	 *
-	 * @throws URISyntaxException
 	 */
 	@BeforeClass
-	public void beforeClass() throws URISyntaxException
+	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
@@ -88,7 +86,7 @@ public class RestControllerIT
 	 * Import TypeTest, TypeTestRef, Location and Person
 	 * using add/update
 	 *
-	 * @param token
+	 * @param token to use for login
 	 */
 	private void uploadEMX(String token)
 	{
@@ -152,7 +150,7 @@ public class RestControllerIT
 	 * @param adminToken the token to use for signin
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
 	 * @param entity     a list of entity names
-	 * @return
+	 * @return int http response code
 	 */
 	private int grantRights(String adminToken, String userId, String entity)
 	{
