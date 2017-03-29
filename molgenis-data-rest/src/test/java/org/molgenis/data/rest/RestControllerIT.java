@@ -90,7 +90,7 @@ public class RestControllerIT
 		uploadEMX(adminToken);
 		LOG.info("Importing Done");
 
-		createUser(adminToken, "test", "test");
+		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
 		String testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
@@ -233,7 +233,6 @@ public class RestControllerIT
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
 				.contentType(APPLICATION_JSON).when().get(PATH + "it_emx_datatypes_TypeTestRef/meta").then().log()
 				.all();
-
 		validateGetEntityType(response);
 	}
 
@@ -243,94 +242,81 @@ public class RestControllerIT
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
 				.contentType(APPLICATION_JSON).body(new EntityTypeRequest()).when()
 				.post(PATH + "it_emx_datatypes_TypeTestRef/meta?_method=GET").then().log().all();
-
 		validateGetEntityType(response);
-	}
-
-	private void validateGetEntityType(ValidatableResponse response)
-	{
-		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta"), "hrefCollection",
-				equalTo("/api/v1/it_emx_datatypes_TypeTestRef"), "name", equalTo("it_emx_datatypes_TypeTestRef"),
-				"label", equalTo("TypeTestRef"), "description", equalTo("MOLGENIS Data types test ref entity"),
-				"attributes.value.href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/value"),
-				"attributes.label.href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/label"), "labelAttribute",
-				equalTo("label"), "idAttribute", equalTo("value"), "lookupAttributes",
-				equalTo(newArrayList("value", "label")), "isAbstract", equalTo(false), "languageCode", equalTo("en"),
-				"writable", equalTo(true));
 	}
 
 	@Test
 	public void testRetrieveEntityAttributeMeta()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":true,\"unique\":true,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType/meta/name").then().log().all().statusCode(200)
-				.body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).when().get(PATH + "sys_scr_ScriptType/meta/name").then().log().all();
+		validateRetrieveEntityAttributeMeta(response);
 	}
 
 	@Test
 	public void testRetrieveEntityAttributeMetaPost()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":true,\"unique\":true,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
-				.body(new EntityTypeRequest()).when().post(PATH + "sys_scr_ScriptType/meta/name?_method=GET").then()
-				.log().all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).body(new EntityTypeRequest()).when()
+				.post(PATH + "sys_scr_ScriptType/meta/name?_method=GET").then().log().all();
+		validateRetrieveEntityAttributeMeta(response);
 	}
 
 	@Test
 	public void testRetrieveEntity()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/R\",\"name\":\"R\"}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType/R").then().log().all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).when().get(PATH + "it_emx_datatypes_TypeTestRef/ref1").then().log()
+				.all();
+		validateRetrieveEntity(response);
 	}
 
 	@Test
 	public void testRetrieveEntityPost()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/R\",\"name\":\"R\"}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
-				.body(new EntityTypeRequest()).when().post(PATH + "sys_scr_ScriptType/R?_method=GET").then().log().all()
-				.statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).body(new EntityTypeRequest()).when()
+				.post(PATH + "it_emx_datatypes_TypeTestRef/ref1?_method=GET").then().log().all();
+		validateRetrieveEntity(response);
 	}
 
 	@Test
 	public void testRetrieveEntityAttribute()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_md_Package/sys/children\",\"start\":0,\"num\":100,\"total\":8,\"items\":[{\"href\":\"/api/v1/sys_md_Package/sys_idx\",\"id\":\"sys_idx\",\"name\":\"idx\",\"label\":\"Index\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_mail\",\"id\":\"sys_mail\",\"name\":\"mail\",\"label\":\"Mail\",\"description\":\"Mail properties\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_map\",\"id\":\"sys_map\",\"name\":\"map\",\"label\":\"Mapper\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_map/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_map/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_map/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_map/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_md\",\"id\":\"sys_md\",\"name\":\"md\",\"label\":\"Meta\",\"description\":\"Package containing all meta data entities\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_md/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_md/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_md/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_md/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_ont\",\"id\":\"sys_ont\",\"name\":\"ont\",\"label\":\"Ontology\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_scr\",\"id\":\"sys_scr\",\"name\":\"scr\",\"label\":\"Script\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_sec\",\"id\":\"sys_sec\",\"name\":\"sec\",\"label\":\"Security\",\"description\":\"Package containing security related entities\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_set\",\"id\":\"sys_set\",\"name\":\"set\",\"label\":\"Settings\",\"description\":\"Application and plugin settings\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_set/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_set/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_set/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_set/tags\"}}]}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_md_Package/sys/children").then().log().all().statusCode(200)
-				.body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).when().get(PATH + "it_emx_datatypes_TypeTest/1/xxref_value").then().log()
+				.all();
+		validateRetrieveEntityAttribute(response);
 	}
 
 	@Test
 	public void testRetrieveEntityAttributePost()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_md_Package/sys/children\",\"start\":0,\"num\":100,\"total\":8,\"items\":[{\"href\":\"/api/v1/sys_md_Package/sys_idx\",\"id\":\"sys_idx\",\"name\":\"idx\",\"label\":\"Index\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_idx/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_mail\",\"id\":\"sys_mail\",\"name\":\"mail\",\"label\":\"Mail\",\"description\":\"Mail properties\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_mail/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_map\",\"id\":\"sys_map\",\"name\":\"map\",\"label\":\"Mapper\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_map/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_map/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_map/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_map/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_md\",\"id\":\"sys_md\",\"name\":\"md\",\"label\":\"Meta\",\"description\":\"Package containing all meta data entities\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_md/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_md/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_md/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_md/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_ont\",\"id\":\"sys_ont\",\"name\":\"ont\",\"label\":\"Ontology\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_ont/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_scr\",\"id\":\"sys_scr\",\"name\":\"scr\",\"label\":\"Script\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_scr/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_sec\",\"id\":\"sys_sec\",\"name\":\"sec\",\"label\":\"Security\",\"description\":\"Package containing security related entities\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_sec/tags\"}},{\"href\":\"/api/v1/sys_md_Package/sys_set\",\"id\":\"sys_set\",\"name\":\"set\",\"label\":\"Settings\",\"description\":\"Application and plugin settings\",\"parent\":{\"href\":\"/api/v1/sys_md_Package/sys_set/parent\"},\"children\":{\"href\":\"/api/v1/sys_md_Package/sys_set/children\"},\"entityTypes\":{\"href\":\"/api/v1/sys_md_Package/sys_set/entityTypes\"},\"tags\":{\"href\":\"/api/v1/sys_md_Package/sys_set/tags\"}}]}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
-				.body(new EntityCollectionRequest()).when().post(PATH + "sys_md_Package/sys/children?_method=GET")
-				.then().log().all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).body(new EntityCollectionRequest()).when()
+				.post(PATH + "it_emx_datatypes_TypeTest/1/xxref_value?_method=GET").then().log().all();
+		validateRetrieveEntityAttribute(response);
 	}
 
 	@Test
 	public void testRetrieveEntityCollectionResponse()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType\",\"meta\":{\"href\":\"/api/v1/sys_scr_ScriptType/meta\",\"hrefCollection\":\"/api/v1/sys_scr_ScriptType\",\"name\":\"sys_scr_ScriptType\",\"label\":\"Script type\",\"attributes\":{\"name\":{\"href\":\"/api/v1/sys_scr_ScriptType/meta/name\"}},\"labelAttribute\":\"name\",\"idAttribute\":\"name\",\"lookupAttributes\":[],\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":true},\"start\":0,\"num\":100,\"total\":4,\"items\":[{\"href\":\"/api/v1/sys_scr_ScriptType/python\",\"name\":\"python\"},{\"href\":\"/api/v1/sys_scr_ScriptType/R\",\"name\":\"R\"},{\"href\":\"/api/v1/sys_scr_ScriptType/JavaScript%20(Magma)\",\"name\":\"JavaScript (Magma)\"},{\"href\":\"/api/v1/sys_scr_ScriptType/JavaScript\",\"name\":\"JavaScript\"}]}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType").then().log().all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).when().get(PATH + "it_emx_datatypes_TypeTestRef").then().log().all();
+		validateRetrieveEntityCollectionResponse(response);
 	}
 
 	@Test
 	public void testRetrieveEntityCollectionResponsePost()
 	{
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType\",\"meta\":{\"href\":\"/api/v1/sys_scr_ScriptType/meta\",\"hrefCollection\":\"/api/v1/sys_scr_ScriptType\",\"name\":\"sys_scr_ScriptType\",\"label\":\"Script type\",\"attributes\":{\"name\":{\"href\":\"/api/v1/sys_scr_ScriptType/meta/name\"}},\"labelAttribute\":\"name\",\"idAttribute\":\"name\",\"lookupAttributes\":[],\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":true},\"start\":0,\"num\":100,\"total\":4,\"items\":[{\"href\":\"/api/v1/sys_scr_ScriptType/python\",\"name\":\"python\"},{\"href\":\"/api/v1/sys_scr_ScriptType/R\",\"name\":\"R\"},{\"href\":\"/api/v1/sys_scr_ScriptType/JavaScript%20(Magma)\",\"name\":\"JavaScript (Magma)\"},{\"href\":\"/api/v1/sys_scr_ScriptType/JavaScript\",\"name\":\"JavaScript\"}]}";
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
-				.body(new EntityCollectionRequest()).when().post(PATH + "sys_scr_ScriptType?_method=GET").then().log()
-				.all().statusCode(200).body(equalTo(responseBody));
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON).body(new EntityCollectionRequest()).when()
+				.post(PATH + "it_emx_datatypes_TypeTestRef?_method=GET").then().log().all();
+		validateRetrieveEntityCollectionResponse(response);
 	}
 
 	@Test(enabled = false)
+	// FIXME valdate output in CSV
 	public void testRetrieveEntityCollection()
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_CSV).when()
@@ -343,7 +329,7 @@ public class RestControllerIT
 	{
 		// Add new entity from form post
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
-				.formParam("name", "ref6").formParam("label", "label6").when()
+				.formParam("value", "ref6").formParam("label", "label6").when()
 				.post(PATH + "it_emx_datatypes_TypeTestRef").then().log().all().statusCode(201);
 
 		// Check if entity was added
@@ -408,6 +394,70 @@ public class RestControllerIT
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, token).contentType(APPLICATION_JSON).when()
 				.get(PATH + requestedEntity).then().log().all().statusCode(200);
+	}
+
+	private void validateGetEntityType(ValidatableResponse response)
+	{
+		response.statusCode(200);
+		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta"), "hrefCollection",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef"), "name", equalTo("it_emx_datatypes_TypeTestRef"),
+				"label", equalTo("TypeTestRef"), "description", equalTo("MOLGENIS Data types test ref entity"),
+				"attributes.value.href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/value"),
+				"attributes.label.href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/label"), "labelAttribute",
+				equalTo("label"), "idAttribute", equalTo("value"), "lookupAttributes",
+				equalTo(newArrayList("value", "label")), "isAbstract", equalTo(false), "languageCode", equalTo("en"),
+				"writable", equalTo(true));
+	}
+
+	private void validateRetrieveEntityAttributeMeta(ValidatableResponse response)
+	{
+		response.statusCode(200);
+		response.body("href", equalTo("/api/v1/sys_scr_ScriptType/meta/name"), "fieldType", equalTo("STRING"), "name",
+				equalTo("name"), "label", equalTo("name"), "attributes", equalTo(newArrayList()), "enumOptions",
+				equalTo(newArrayList()), "maxLength", equalTo(255), "auto", equalTo(false), "nillable", equalTo(false),
+				"readOnly", equalTo(true), "labelAttribute", equalTo(true), "unique", equalTo(true), "visible",
+				equalTo(true), "lookupAttribute", equalTo(false), "isAggregatable", equalTo(false));
+	}
+
+	private void validateRetrieveEntity(ValidatableResponse response)
+	{
+		response.statusCode(200);
+		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref1"), "value", equalTo("ref1"), "label",
+				equalTo("label1"));
+	}
+
+	private void validateRetrieveEntityAttribute(ValidatableResponse response)
+	{
+		response.statusCode(200);
+		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/1/xxref_value"), "value", equalTo("ref1"),
+				"label", equalTo("label1"));
+	}
+
+	private void validateRetrieveEntityCollectionResponse(ValidatableResponse response)
+	{
+		response.statusCode(200);
+		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef"), "meta.href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta"), "meta.hrefCollection",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef"), "meta.name", equalTo("it_emx_datatypes_TypeTestRef"),
+				"meta.label", equalTo("TypeTestRef"), "meta.description",
+				equalTo("MOLGENIS Data types test ref entity"), "meta.attributes.value.href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/value"), "meta.attributes.label.href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/label"), "meta.labelAttribute", equalTo("label"),
+				"meta.idAttribute", equalTo("value"), "meta.lookupAttributes", equalTo(newArrayList("value", "label")),
+				"meta.isAbstract", equalTo(false), "meta.languageCode", equalTo("en"), "meta.writable", equalTo(true),
+				"start", equalTo(0), "num", equalTo(100), "total", equalTo(6), "items[0].href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref6"), "items[0].value", equalTo("ref6"),
+				"items[0].label", equalTo("label6"), "items[1].href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref1"), "items[1].value", equalTo("ref1"),
+				"items[1].label", equalTo("label1"), "items[2].href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref2"), "items[2].value", equalTo("ref2"),
+				"items[2].label", equalTo("label2"), "items[3].href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref3"), "items[3].value", equalTo("ref3"),
+				"items[3].label", equalTo("label3"), "items[4].href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref4"), "items[4].value", equalTo("ref4"),
+				"items[4].label", equalTo("label4"), "items[5].href",
+				equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref5"), "items[5].value", equalTo("ref5"),
+				"items[5].label", equalTo("label5"));
 	}
 
 	@AfterClass
