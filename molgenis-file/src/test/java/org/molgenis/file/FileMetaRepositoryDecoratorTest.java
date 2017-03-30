@@ -4,6 +4,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -29,6 +31,8 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		EntityType entityType = when(mock(EntityType.class).getLabel()).thenReturn("file metadata").getMock();
+		when(fileMetaRepository.getEntityType()).thenReturn(entityType);
 		when(fileStore.delete(anyString())).thenReturn(true);
 		fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(fileMetaRepository, fileStore);
 	}
@@ -75,6 +79,14 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		fileMetaRepositoryDecorator.deleteById("id");
 		verify(fileMetaRepository).deleteById("id");
 		verify(fileStore).delete("id");
+	}
+
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "Unknown \\[file metadata] with id \\[id]")
+	public void testDeleteByIdUnknownId() throws Exception
+	{
+		FileMeta fileMeta = getMockFileMeta("id");
+		when(fileMetaRepository.findOneById("id")).thenReturn(null);
+		fileMetaRepositoryDecorator.deleteById("id");
 	}
 
 	@Test
