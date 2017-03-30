@@ -2,12 +2,14 @@ package org.molgenis.file;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.file.model.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -42,7 +44,7 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
 	@Override
 	public void deleteById(Object id)
 	{
-		deleteFile(findOneById(id));
+		deleteFile(getFileMeta(id));
 		super.deleteById(id);
 	}
 
@@ -68,7 +70,7 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
 	{
 		super.deleteAll(ids.filter(id ->
 		{
-			this.deleteFile(findOneById(id));
+			this.deleteFile(getFileMeta(id));
 			return true;
 		}));
 	}
@@ -80,5 +82,16 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
 		{
 			LOG.warn("Could not delete file '{}' from file store", fileMeta.getId());
 		}
+	}
+
+	private FileMeta getFileMeta(Object id)
+	{
+		FileMeta fileMeta = findOneById(id);
+		if (fileMeta == null)
+		{
+			throw new UnknownEntityException(
+					format("Unknown [%s] with id [%s]", getEntityType().getLabel(), id.toString()));
+		}
+		return fileMeta;
 	}
 }
