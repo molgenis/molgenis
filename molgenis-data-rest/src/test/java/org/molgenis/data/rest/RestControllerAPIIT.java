@@ -7,6 +7,7 @@ import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -43,6 +44,8 @@ public class RestControllerAPIIT
 	private static final String PERSONS_PERMISSION_ID = "persons_permission_ID";
 
 	private String testUserToken;
+	private String adminToken;
+	private String testUserId;
 
 	@BeforeClass
 	public void beforeClass()
@@ -60,7 +63,7 @@ public class RestControllerAPIIT
 		String adminPassword = Strings.isEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		String adminToken = login(adminUserName, adminPassword);
+		adminToken = login(adminUserName, adminPassword);
 
 		LOG.info("Importing RestControllerV1_TestEMX.xlsx...");
 		uploadEMX(adminToken, "/RestControllerV1_TestEMX.xlsx");
@@ -68,7 +71,7 @@ public class RestControllerAPIIT
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
-		String testUserId = getUserId(adminToken, PATH, REST_TEST_USER);
+		testUserId = getUserId(adminToken, PATH, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
 
 		grantSystemRights(adminToken, PATH, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package", RestControllerIT.Permission.WRITE);
@@ -198,7 +201,7 @@ public class RestControllerAPIIT
 		public void testRetrieveEntityCollection()
 		{
 			given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_CSV).when()
-					.get(PATH + "csv/sys_scr_ScriptType").then().contentType(TEXT_CSV).log().all().statusCode(200)
+					.get(PATH + "csv/it_emx_datatypes_TypeTestRef").then().contentType(TEXT_CSV).log().all().statusCode(200)
 					.body(equalTo(""));
 		}
 
@@ -262,6 +265,30 @@ public class RestControllerAPIIT
 					.delete("api/v2/sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(204);
 		}
 
+	@AfterClass
+	public void afterClass()
+	{
+		// Clean up TestEMX
+		removeEntity(adminToken, "it_emx_datatypes_TypeTest");
+		removeEntity(adminToken, "it_emx_datatypes_TypeTestRef");
+		removeEntity(adminToken, "it_emx_datatypes_Location");
+		removeEntity(adminToken, "it_emx_datatypes_Person");
+
+		// Clean up permissions
+		removeRight(adminToken, TYPE_TEST_PERMISSION_ID);
+		removeRight(adminToken, TYPE_TEST_REF_PERMISSION_ID);
+		removeRight(adminToken, LOCATION_PERMISSION_ID);
+		removeRight(adminToken, PERSONS_PERMISSION_ID);
+
+		// Clean up Token for user
+		given().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.when().post(PATH + "logout");
+
+		// Clean up user
+		given().header(X_MOLGENIS_TOKEN, this.adminToken)
+				.when().delete("api/v1/sys_sec_User/" + this.testUserId);
+	}
+
 	private void validateGetEntityType(ValidatableResponse response)
 	{
 		response.statusCode(200);
@@ -278,7 +305,7 @@ public class RestControllerAPIIT
 	private void validateRetrieveEntityAttributeMeta(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/sys_scr_ScriptType/meta/name"), "fieldType", equalTo("STRING"), "name",
+		response.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/meta/name"), "fieldType", equalTo("STRING"), "name",
 				equalTo("name"), "label", equalTo("name"), "attributes", equalTo(newArrayList()), "enumOptions",
 				equalTo(newArrayList()), "maxLength", equalTo(255), "auto", equalTo(false), "nillable", equalTo(false),
 				"readOnly", equalTo(true), "labelAttribute", equalTo(true), "unique", equalTo(true), "visible",

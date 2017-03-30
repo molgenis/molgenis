@@ -17,25 +17,27 @@ import static org.molgenis.data.rest.convert.RestTestUtils.*;
 public class RestControllerIT
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerIT.class);
-	private static final String SYS_SEC_USER_AUTHORITY_ID = "sys_sec_UserAuthority_ID";
+	private String testUserId;
 
-	private static final String SYS_FILE_META_ID = "sys_FileMeta_ID";
 	public enum Permission
 	{
-		READ, WRITE, COUNT, NONE, WRITEMETA
+		READ, WRITE, COUNT, NONE, WRITEMETA;
 	}
-
 	// Request parameters1
 	private static final String PATH = "api/v1/";
+
 	// Permission identifiers
 	private static final String FREEMARKER_TEMPLATE_PERMISSION_ID = "freemarkerTemplate_permission_ID";
-
 	private static final String SCRIPT_TYPE_PERMISSION_ID = "scriptType_permission_ID";
+	private static final String SYS_SEC_USER_AUTHORITY_ID = "sys_sec_UserAuthority_ID";
+	private static final String SYS_FILE_META_ID = "sys_FileMeta_ID";
+
 	// User credentials
 	private static final String REST_TEST_USER = "rest_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
 
 	private String testUserToken;
+	private String adminToken;
 
 	/**
 	 * Pass down system properties via the mvn commandline argument
@@ -59,15 +61,11 @@ public class RestControllerIT
 		String adminPassword = Strings.isEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		String adminToken = login(adminUserName, adminPassword);
-
-		LOG.info("Importing RestControllerV1_TestEMX.xlsx...");
-		uploadEMX(adminToken, "/RestControllerV1_TestEMX.xlsx");
-		LOG.info("Importing Done");
+		adminToken = login(adminUserName, adminPassword);
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
-		String testUserId = getUserId(adminToken, PATH, REST_TEST_USER);
+		testUserId = getUserId(adminToken, PATH, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
 
 		grantSystemRights(adminToken, PATH, FREEMARKER_TEMPLATE_PERMISSION_ID, testUserId, "sys_FreemarkerTemplate", Permission.WRITE);
@@ -127,7 +125,8 @@ public class RestControllerIT
 				.header(X_MOLGENIS_TOKEN, this.testUserToken)
 				.when().delete(PATH + "sys_FileMeta" + "/non-existing-entity_id")
 				.then().log().all()
-				.statusCode(NO_CONTENT);
+				.statusCode(NOT_FOUND)
+				.body("errors.message[0]", equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
 	}
 
 	@Test
@@ -183,6 +182,9 @@ public class RestControllerIT
 				.when().get(PATH + "sys_FreemarkerTemplate")
 				.then().statusCode(UNAUTHORIZED)
 				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_FreemarkerTemplate]"));
+
+		// clean up after test
+		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 
@@ -201,17 +203,22 @@ public class RestControllerIT
 
 	}
 
-
-
 	@AfterClass
 	public void afterClass()
 	{
-		// Clean up TestEMX
 		// Clean up permissions
-		// Clean up Token for user
-		// Clean up user
+		removeRight(adminToken, FREEMARKER_TEMPLATE_PERMISSION_ID);
+		removeRight(adminToken, SCRIPT_TYPE_PERMISSION_ID);
+		removeRight(adminToken, SYS_FILE_META_ID);
+		removeRight(adminToken, SYS_SEC_USER_AUTHORITY_ID);
 
-		// optional Cleanup added entities
+		// Clean up Token for user
+		given().header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.when().post(PATH + "logout");
+
+		// Clean up user
+		given().header(X_MOLGENIS_TOKEN, this.adminToken)
+				.when().delete("api/v1/sys_sec_User/" + this.testUserId);
 	}
 
 }

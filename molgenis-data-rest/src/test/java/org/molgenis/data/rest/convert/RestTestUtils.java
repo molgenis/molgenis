@@ -25,7 +25,7 @@ public class RestTestUtils
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
-	public static final String DEFAULT_HOST = "https://molgenis62.gcc.rug.nl";
+	public static final String DEFAULT_HOST = "https://molgenis01.gcc.rug.nl";
 	public static final String DEFAULT_ADMIN_NAME = "admin";
 	public static final String DEFAULT_ADMIN_PW = "admin";
 
@@ -33,6 +33,7 @@ public class RestTestUtils
 	public static final int BAD_REQUEST = 400;
 	public static final int OKE = 200;
 	public static final int UNAUTHORIZED = 401;
+	public static final int NOT_FOUND = 404;
 
 	/**
 	 * Login with user name and password and return token on success
@@ -173,6 +174,24 @@ public class RestTestUtils
 		given()
 				//.log().all()
 				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.body(body.toJSONString()).when().post(path + "sys_sec_UserAuthority");
+				.body(body.toJSONString()).when()
+				.post(path + "sys_sec_UserAuthority");
+	}
+
+	/**
+	 *
+	 * @param adminToken the token to use to authenticate
+	 * @param permissionId the id of the permission to use
+	 */
+	public static void removeRight(String adminToken, String permissionId)
+	{
+		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
+				.delete("api/v1/sys_sec_UserAuthority/" + permissionId);
+	}
+
+	public static void removeEntity(String adminToken, String entityName)
+	{
+		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
+				.delete("api/v1/" + entityName + "/meta").then().log().all();
 	}
 }
