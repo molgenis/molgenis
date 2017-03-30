@@ -24,9 +24,9 @@ import static org.molgenis.data.rest.convert.RestTestUtils.*;
 /**
  * Tests each endpoint of the V1 Rest Api through http calls
  */
-public class RestControllerAPIIT
+public class RestControllerV1APIIT
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RestControllerAPIIT.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV1APIIT.class);
 	private static final String REST_TEST_USER = "api_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "api_test_user_password";
 	private static final String V1_TEST_FILE = "/RestControllerV1_TestEMX.xlsx";
@@ -403,60 +403,60 @@ public class RestControllerAPIIT
 	@Test
 	public void testDeleteAll()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest1").then()
-				.log().all().statusCode(OKE).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest1").then().log().all()
+				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).delete(PATH + "base_APITest1")
-				.then().log().all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).delete(PATH + "base_APITest1").then().log()
+				.all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest1").then()
-				.log().all().statusCode(OKE).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest1").then().log().all()
+				.statusCode(OKE).
 				body("total", equalTo(0));
 	}
 
 	@Test
 	public void testDeleteAllPost()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest2").then()
-				.log().all().statusCode(OKE).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest2").then().log().all()
+				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.post(PATH + "base_APITest2?_method=DELETE").then().log().all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).post(PATH + "base_APITest2?_method=DELETE")
+				.then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest2").then()
-				.log().all().statusCode(OKE).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest2").then().log().all()
+				.statusCode(OKE).
 				body("total", equalTo(0));
 	}
 
 	@Test
 	public void testDeleteMeta()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest3").then()
-				.log().all().statusCode(OKE).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest3").then().log().all()
+				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.adminToken).delete(PATH + "base_APITest3/meta")
-				.then().log().all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, this.adminToken).delete(PATH + "base_APITest3/meta").then().log()
+				.all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest3").then()
-				.log().all().statusCode(NOT_FOUND).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest3").then().log().all()
+				.statusCode(NOT_FOUND).
 				body("errors[0].message", equalTo("Unknown entity [base_APITest3]"));
 	}
 
 	@Test
 	public void testDeleteMetaPost()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest4").then()
-				.log().all().statusCode(OKE).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest4").then().log().all()
+				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.adminToken)
-				.post(PATH + "base_APITest4/meta?_method=DELETE").then().log().all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, this.adminToken).post(PATH + "base_APITest4/meta?_method=DELETE")
+				.then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest4").then()
-				.log().all().statusCode(NOT_FOUND).
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "base_APITest4").then().log().all()
+				.statusCode(NOT_FOUND).
 				body("errors[0].message", equalTo("Unknown entity [base_APITest4]"));
 	}
 
