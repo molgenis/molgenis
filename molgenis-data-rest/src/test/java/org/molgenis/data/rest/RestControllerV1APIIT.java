@@ -20,6 +20,7 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.RestControllerIT.Permission.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Tests each endpoint of the V1 Rest Api through http calls
@@ -208,13 +209,14 @@ public class RestControllerV1APIIT
 		validateRetrieveEntityCollectionResponse(response);
 	}
 
-	@Test(enabled = false)
-	// FIXME valdate output in CSV
+	@Test
 	public void testRetrieveEntityCollection()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_CSV).when()
-				.get(PATH + "csv/it_emx_datatypes_TypeTestRef").then().contentType(TEXT_CSV).log().all().statusCode(200)
-				.body(equalTo(""));
+		String contents = getFileContents("/testRetrieveEntityCollection_response.csv");
+		String response = given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(TEXT_CSV).when()
+				.get(PATH + "csv/it_emx_datatypes_TypeTestRef").then().contentType("text/csv").log().all()
+				.statusCode(200).extract().asString();
+		assertEquals(contents, response);
 	}
 
 	@Test
