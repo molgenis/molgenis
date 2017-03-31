@@ -83,24 +83,24 @@ public class RestControllerV1APIIT
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
-		testUserId = getUserId(adminToken, PATH, REST_TEST_USER);
+		testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
 
-		grantSystemRights(adminToken, PATH, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, PATH, ENTITY_TYPE_PERMISSION_ID, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, PATH, ATTRIBUTE_PERMISSION_ID, testUserId, "sys_md_Attribute", WRITE);
-		grantSystemRights(adminToken, PATH, FILE_META_PERMISSION_ID, testUserId, "sys_FileMeta", READ);
-		grantSystemRights(adminToken, PATH, OWNED_PERMISSION_ID, testUserId, "sys_sec_Owned", READ);
+		grantSystemRights(adminToken, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package", WRITE);
+		grantSystemRights(adminToken, ENTITY_TYPE_PERMISSION_ID, testUserId, "sys_md_EntityType", WRITE);
+		grantSystemRights(adminToken, ATTRIBUTE_PERMISSION_ID, testUserId, "sys_md_Attribute", WRITE);
+		grantSystemRights(adminToken, FILE_META_PERMISSION_ID, testUserId, "sys_FileMeta", READ);
+		grantSystemRights(adminToken, OWNED_PERMISSION_ID, testUserId, "sys_sec_Owned", READ);
 
-		grantRights(adminToken, PATH, TYPE_TEST_PERMISSION_ID, testUserId, "TypeTest", WRITE);
-		grantRights(adminToken, PATH, TYPE_TEST_REF_PERMISSION_ID, testUserId, "TypeTestRef", WRITE);
-		grantRights(adminToken, PATH, LOCATION_PERMISSION_ID, testUserId, "Location", WRITE);
-		grantRights(adminToken, PATH, PERSONS_PERMISSION_ID, testUserId, "Person", WRITE);
+		grantRights(adminToken, TYPE_TEST_PERMISSION_ID, testUserId, "TypeTest", WRITE);
+		grantRights(adminToken, TYPE_TEST_REF_PERMISSION_ID, testUserId, "TypeTestRef", WRITE);
+		grantRights(adminToken, LOCATION_PERMISSION_ID, testUserId, "Location", WRITE);
+		grantRights(adminToken, PERSONS_PERMISSION_ID, testUserId, "Person", WRITE);
 
-		grantRights(adminToken, PATH, API_TEST_1_PERMISSION_ID, testUserId, "APITest1", WRITEMETA);
-		grantRights(adminToken, PATH, API_TEST_2_PERMISSION_ID, testUserId, "APITest2", WRITEMETA);
-		grantRights(adminToken, PATH, API_TEST_3_PERMISSION_ID, testUserId, "APITest3", WRITEMETA);
-		grantRights(adminToken, PATH, API_TEST_4_PERMISSION_ID, testUserId, "APITest4", WRITEMETA);
+		grantRights(adminToken, API_TEST_1_PERMISSION_ID, testUserId, "APITest1", WRITEMETA);
+		grantRights(adminToken, API_TEST_2_PERMISSION_ID, testUserId, "APITest2", WRITEMETA);
+		grantRights(adminToken, API_TEST_3_PERMISSION_ID, testUserId, "APITest3", WRITEMETA);
+		grantRights(adminToken, API_TEST_4_PERMISSION_ID, testUserId, "APITest4", WRITEMETA);
 
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
