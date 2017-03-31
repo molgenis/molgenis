@@ -12,7 +12,7 @@ import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
 import Modal from "./Modal";
 import Form from "./Form";
 import Dialog from "./Dialog";
-import {isRefAttr, isXrefAttr, isMrefAttr, isCompoundAttr} from "rest-client/AttributeFunctions";
+import {isCompoundAttr, isMrefAttr, isRefAttr, isXrefAttr} from "rest-client/AttributeFunctions";
 import "./css/Table.css";
 
 var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
@@ -165,11 +165,13 @@ var Table = React.createClass({
                             label(null, "Rows per page: " + String.fromCharCode(160)),
                             SelectBox({
                                 options: [
+                                    {value: 10, text: 10},
                                     {value: 20, text: 20},
                                     {value: 30, text: 30},
                                     {value: 50, text: 50},
                                     {value: 100, text: 100}
                                 ],
+                                value: 20,
                                 onChange: this._handleRowsPerPageChange
                             })
                         )
