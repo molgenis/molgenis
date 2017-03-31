@@ -25,7 +25,7 @@ public class RestTestUtils
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
-	public static final String DEFAULT_HOST = "https://molgenis01.gcc.rug.nl";
+	public static final String DEFAULT_HOST = "http://localhost:8080";
 	public static final String DEFAULT_ADMIN_NAME = "admin";
 	public static final String DEFAULT_ADMIN_PW = "admin";
 
@@ -50,9 +50,9 @@ public class RestTestUtils
 		loginBody.put("password", password);
 
 		return given()
-				//.log().all()
+				.log().all()
 				.contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when().post("api/v1/login").then()
-				//.log().all()
+				.log().all()
 				.extract().path("token");
 	}
 
@@ -102,33 +102,31 @@ public class RestTestUtils
 		}
 
 		given().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
-				.header(X_MOLGENIS_TOKEN, adminToken).post("plugin/importwizard/importFile");
+				.header(X_MOLGENIS_TOKEN, adminToken).post("plugin/importwizard/importFile").then().log().all();
 	}
 
 	/**
 	 * Get the used id by querying the user entity
 	 *
 	 * @param adminToken token for signin
-	 * @param path       api path to use ( V1 or V2)
 	 * @param userName   the name of the user to fetch the id for
 	 * @return the id of the user
 	 */
-	public static String getUserId(String adminToken, String path, String userName)
+	public static String getUserId(String adminToken, String userName)
 	{
-		return getEntityTypeId(adminToken, path, "username", userName, "sys_sec_User");
+		return getEntityTypeId(adminToken, "username", userName, "sys_sec_User");
 	}
 
 	/**
 	 * Get the id for a given entity
 	 *
 	 * @param adminToken token for signin
-	 * @param path       api path to use ( V1 or V2)
 	 * @param attribute  the field to filter on
 	 * @param value      the value the filter should match
 	 * @param entityName the entity name
 	 * @return the id of the given entity
 	 */
-	public static String getEntityTypeId(String adminToken, String path, String attribute, String value,
+	public static String getEntityTypeId(String adminToken, String attribute, String value,
 			String entityName)
 	{
 		Map<String, Object> query = of("q",
@@ -136,7 +134,7 @@ public class RestTestUtils
 		JSONObject body = new JSONObject(query);
 
 		return given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).queryParam("_method", "GET")
-				.body(body.toJSONString()).when().post(path + entityName).then()
+				.body(body.toJSONString()).when().post("api/v1/" + entityName).then()
 				//.log().all()
 				.extract().path("items[0].id");
 	}
@@ -145,37 +143,35 @@ public class RestTestUtils
 	 * Grant user rights on non-system entity
 	 *
 	 * @param adminToken the token to use for signin
-	 * @param path       api path to use ( V1 or V2)
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
 	 * @param entity     a list of entity names
 	 */
-	public static void grantRights(String adminToken, String path, String permissionID, String userId, String entity,
+	public static void grantRights(String adminToken, String permissionID, String userId, String entity,
 			RestControllerIT.Permission permission)
 	{
-		String entityTypeId = getEntityTypeId(adminToken, path, "name", entity, "sys_md_EntityType");
-		grantSystemRights(adminToken, path, permissionID, userId, entityTypeId, permission);
+		String entityTypeId = getEntityTypeId(adminToken, "name", entity, "sys_md_EntityType");
+		grantSystemRights(adminToken, permissionID, userId, entityTypeId, permission);
 	}
 
 	/**
 	 * Grant user rights on system entity
 	 *
 	 * @param adminToken   the token to use for signin
-	 * @param path         api path to use ( V1 or V2)
 	 * @param permissionID the id of the permission
 	 * @param userId       the id of the user to give the permissions to
 	 * @param entity       the entity on which the permissions are given
 	 * @param permission   the type of permission to give
 	 */
-	public static void grantSystemRights(String adminToken, String path, String permissionID, String userId,
+	public static void grantSystemRights(String adminToken, String permissionID, String userId,
 			String entity, RestControllerIT.Permission permission)
 	{
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
 
 		given()
-				//.log().all()
+				.log().all()
 				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
-				.post(path + "sys_sec_UserAuthority");
+				.post("api/v1/" + "sys_sec_UserAuthority").then().log();
 	}
 
 	/**

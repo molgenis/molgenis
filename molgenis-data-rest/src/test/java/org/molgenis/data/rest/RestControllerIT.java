@@ -57,16 +57,16 @@ public class RestControllerIT
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
-		testUserId = getUserId(adminToken, PATH, REST_TEST_USER);
+		testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
 
-		grantSystemRights(adminToken, PATH, FREEMARKER_TEMPLATE_PERMISSION_ID, testUserId, "sys_FreemarkerTemplate",
+		grantSystemRights(adminToken, FREEMARKER_TEMPLATE_PERMISSION_ID, testUserId, "sys_FreemarkerTemplate",
 				Permission.WRITE);
-		grantSystemRights(adminToken, PATH, SCRIPT_TYPE_PERMISSION_ID, testUserId, "sys_scr_ScriptType",
+		grantSystemRights(adminToken, SCRIPT_TYPE_PERMISSION_ID, testUserId, "sys_scr_ScriptType",
 				Permission.READ);
-		grantSystemRights(adminToken, PATH, SYS_SEC_USER_AUTHORITY_ID, testUserId, "sys_sec_UserAuthority",
+		grantSystemRights(adminToken, SYS_SEC_USER_AUTHORITY_ID, testUserId, "sys_sec_UserAuthority",
 				Permission.COUNT);
-		grantSystemRights(adminToken, PATH, SYS_FILE_META_ID, testUserId, "sys_FileMeta", Permission.WRITEMETA);
+		grantSystemRights(adminToken, SYS_FILE_META_ID, testUserId, "sys_FileMeta", Permission.WRITEMETA);
 
 		// Add home plugin
 		// Add Language entity
