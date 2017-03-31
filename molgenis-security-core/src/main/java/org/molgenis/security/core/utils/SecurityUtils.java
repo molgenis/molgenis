@@ -168,16 +168,13 @@ public class SecurityUtils
 
 	/**
 	 * Get all possible authorities (roles) for an entity
-	 *
-	 * @param entityName
-	 * @return
 	 */
-	public static List<String> getEntityAuthorities(String entityName)
+	public static List<String> getEntityAuthorities(String entityTypeId)
 	{
 		List<String> authorities = new ArrayList<>();
 		for (Permission permission : Permission.values())
 		{
-			String authority = String.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(), entityName);
+			String authority = String.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(), entityTypeId);
 			authorities.add(authority);
 		}
 

@@ -1,6 +1,5 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
@@ -49,13 +48,7 @@ public class MolgenisPermissionServiceImplTest
 						authority6));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		IdentifierLookupService identifierLookupService = mock(IdentifierLookupService.class);
-		when(identifierLookupService.getEntityTypeId("entity1")).thenReturn("entity1");
-		when(identifierLookupService.getEntityTypeId("entity2")).thenReturn("entity2");
-		when(identifierLookupService.getEntityTypeId("entity3")).thenReturn("entity3");
-		when(identifierLookupService.getEntityTypeId("entity-unknown")).thenReturn("entity-unknown");
-
-		molgenisPermissionService = new MolgenisPermissionServiceImpl(identifierLookupService);
+		molgenisPermissionService = new MolgenisPermissionServiceImpl();
 	}
 
 	@AfterClass

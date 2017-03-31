@@ -66,7 +66,7 @@ public interface TagService<ObjectType, CodeSystemType>
 	/**
 	 * Removes all tags for a given entity
 	 *
-	 * @param entityName the name of the entity for which all tags should be removed
+	 * @param entityTypeId the name of the entity for which all tags should be removed
 	 */
-	void removeAllTagsFromEntity(String entityName);
+	void removeAllTagsFromEntity(String entityTypeId);
 }

@@ -28,7 +28,7 @@ var UploadContainer = React.createClass({
     _onSubmit: function (form) {
         var data = new FormData();
         data.append('file', form.file);
-        data.append('entityName', form.fileName);
+        data.append('entityTypeId', form.fileName);
         data.append('action', form.action);
         data.append('notify', false);
 

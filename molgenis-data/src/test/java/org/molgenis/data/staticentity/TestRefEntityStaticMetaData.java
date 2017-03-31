@@ -30,6 +30,7 @@ public class TestRefEntityStaticMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
+		setLabel("TypeTestRefStatic");
 		setPackage(testPackage);
 		addAttribute(EntityTestHarness.ATTR_REF_ID, ROLE_ID);
 		addAttribute(EntityTestHarness.ATTR_REF_STRING, ROLE_LABEL).setNillable(false);

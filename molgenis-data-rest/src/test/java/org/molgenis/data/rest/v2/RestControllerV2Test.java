@@ -146,12 +146,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		reset(dataService);
 		reset(repoCopier);
 
-		EntityType refRefEntityType = entityTypeFactory.create().setName(REF_REF_ENTITY_NAME)
+		EntityType refRefEntityType = entityTypeFactory.create(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
-		EntityType selfRefEntityType = entityTypeFactory.create().setName(SELF_REF_ENTITY_NAME)
+		EntityType selfRefEntityType = entityTypeFactory.create(SELF_REF_ENTITY_NAME)
 				.setLabel(SELF_REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		selfRefEntityType.addAttribute(
@@ -161,7 +161,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
-		EntityType refEntityType = entityTypeFactory.create().setName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
+		EntityType refEntityType = entityTypeFactory.create(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_ATTR_VALUE_NAME)).addAttribute(
 						attributeFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
@@ -215,7 +215,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String enum2 = "enum2";
 
 		// required
-		entityType = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
+		entityType = entityTypeFactory.create(ENTITY_NAME).setLabel(ENTITY_NAME);
 		Attribute attrId = attributeFactory.create().setName(attrIdName);
 		entityType.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		Attribute attrBool = createAttributeMeta(entityType, attrBoolName, BOOL).setNillable(false);
@@ -638,7 +638,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
 	{
 		Package pack = mock(Package.class);
-		when(pack.getFullyQualifiedName()).thenReturn("org_molgenis_blah");
+		when(pack.getId()).thenReturn("org_molgenis_blah");
 
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("org_molgenis_blah_duplicateEntity")).thenReturn(true);
@@ -1024,27 +1024,28 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				RestControllerV2.createUnknownEntityExceptionNotValidId("4").getMessage());
 	}
 
-	private void testCreateEntitiesExceptions(String entityName, String content, String message) throws Exception
+	private void testCreateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
 	{
 		ResultActions resultActions = mockMvc.perform(
-				post(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
+				post(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void testUpdateEntitiesExceptions(String entityName, String content, String message) throws Exception
+	private void testUpdateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
 	{
 		ResultActions resultActions = mockMvc.perform(
-				put(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
+				put(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void testUpdateEntitiesSpecificAttributeExceptions(String entityName, String attributeName, String content,
+	private void testUpdateEntitiesSpecificAttributeExceptions(String entityTypeId, String attributeName,
+			String content,
 			String message) throws Exception
 	{
 		ResultActions resultActions = mockMvc.perform(
-				put(RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content)
+				put(RestControllerV2.BASE_URI + "/" + entityTypeId + "/" + attributeName).content(content)
 						.contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, message);

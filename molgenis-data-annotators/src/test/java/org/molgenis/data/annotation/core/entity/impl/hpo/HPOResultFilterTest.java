@@ -48,11 +48,11 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 	{
 		HpoResultFilter filter = new HpoResultFilter(entityTypeFactory, attributeFactory, hpoAnnotator);
 
-		EntityType resultEntityType = entityTypeFactory.create().setName("result");
+		EntityType resultEntityType = entityTypeFactory.create("result");
 		resultEntityType.addAttribute(hpoAnnotator.getIdsAttr());
 		resultEntityType.addAttribute(hpoAnnotator.getTermsAttr());
 
-		EntityType entityType = entityTypeFactory.create().setName("HPO");
+		EntityType entityType = entityTypeFactory.create("HPO");
 		entityType.addAttribute(attributeFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
 		entityType.addAttribute(attributeFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
 		entityType.addAttribute(attributeFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);

@@ -72,8 +72,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetEntityType()
 	{
-		EntityType expectedEntityType = entityTypeFactory.create();
-		expectedEntityType.setName("EntityNameSmall");
+		EntityType expectedEntityType = entityTypeFactory.create("EntityNameSmall");
 		expectedEntityType.addAttribute(vcfAttrs.getChromAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getAltAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getPosAttribute());
@@ -112,6 +111,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		actualEntityType.setPackage(package_);
 
 		expectedEntityType.setId("dummyId");
+		expectedEntityType.setLabel("EntityNameSmall");
 		expectedEntityType.getOwnAllAttributes().forEach(attr -> attr.setIdentifier(null));
 		actualEntityType.setId("dummyId");
 		actualEntityType.getOwnAllAttributes().forEach(attr -> attr.setIdentifier(null));

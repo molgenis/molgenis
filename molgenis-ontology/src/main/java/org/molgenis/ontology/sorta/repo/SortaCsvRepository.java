@@ -27,7 +27,7 @@ public class SortaCsvRepository extends AbstractRepository
 {
 	private EntityType entityType = null;
 	private final CsvRepository csvRepository;
-	private final String entityName;
+	private final String entityTypeId;
 	private final String entityLabel;
 	public final static String ALLOWED_IDENTIFIER = "Identifier";
 	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays
@@ -37,16 +37,16 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		this.csvRepository = new CsvRepository(file, entityTypeFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
-		this.entityName = file.getName();
+		this.entityTypeId = file.getName();
 		this.entityLabel = file.getName();
 	}
 
-	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile,
+	public SortaCsvRepository(String entityTypeId, String entityLabel, File uploadedFile,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
 		this.csvRepository = new CsvRepository(uploadedFile, entityTypeFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
-		this.entityName = entityName;
+		this.entityTypeId = entityTypeId;
 		this.entityLabel = entityLabel;
 	}
 
@@ -58,8 +58,7 @@ public class SortaCsvRepository extends AbstractRepository
 					.getBean(AttributeFactory.class); // FIXME do not use application context
 
 			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS, attrMetaFactory);
-			entityType.setId(entityName);
-			entityType.setName(entityName);
+			entityType.setId(entityTypeId);
 			entityType.setLabel(entityLabel);
 			entityType.setBackend("PostgreSQL"); // FIXME do not hardcode backend name
 			entityType.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);

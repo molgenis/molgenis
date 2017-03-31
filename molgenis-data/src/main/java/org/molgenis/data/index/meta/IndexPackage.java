@@ -20,7 +20,7 @@ public class IndexPackage extends SystemPackage
 	@Autowired
 	public IndexPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_INDEX, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

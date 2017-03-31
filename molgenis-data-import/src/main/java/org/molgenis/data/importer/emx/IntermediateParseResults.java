@@ -79,10 +79,10 @@ public final class IntermediateParseResults
 		return getPackages().get(name);
 	}
 
-	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
+	public void addAttributes(String entityTypeId, List<EmxAttribute> emxAttrs)
 	{
-		EntityType entityType = getEntityType(entityName);
-		if (entityType == null) entityType = addEntityType(entityName);
+		EntityType entityType = getEntityType(entityTypeId);
+		if (entityType == null) entityType = addEntityType(entityTypeId);
 
 		int lookupAttributeIndex = 0;
 		for (EmxAttribute emxAttr : emxAttrs)
@@ -126,7 +126,7 @@ public final class IntermediateParseResults
 		Package pack = null;
 		for (Package p : packages.values())
 		{
-			String packageName = p.getFullyQualifiedName();
+			String packageName = p.getId();
 			if (fullyQualifiedName.toLowerCase().startsWith(packageName.toLowerCase()))
 			{
 				simpleName = fullyQualifiedName.substring(packageName.length() + 1);// package_entity
@@ -134,7 +134,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityType emd = entityTypeFactory.create().setName(simpleName).setPackage(pack);
+		EntityType emd = entityTypeFactory.create(fullyQualifiedName).setPackage(pack);
 		entities.put(fullyQualifiedName, emd);
 		return emd;
 	}

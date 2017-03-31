@@ -31,211 +31,199 @@ public class CmdLineDataService implements DataService
 	}
 
 	@Override
-	public boolean hasRepository(String entityName)
+	public boolean hasRepository(String entityTypeId)
 	{
 		return false;
 	}
 
 	@Override
-	public Repository<Entity> getRepository(String entityName)
+	public Repository<Entity> getRepository(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
+	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public EntityType getEntityType(String entityName)
+	public EntityType getEntityType(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public EntityType getEntityTypeById(String entityId)
+	public long count(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public long count(String entityName)
+	public long count(String entityTypeId, Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public long count(String entityName, Query<Entity> q)
+	public Stream<Entity> findAll(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Stream<Entity> findAll(String entityName)
+	public <E extends Entity> Stream<E> findAll(String entityTypeId, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz)
+	public Stream<Entity> findAll(String entityTypeId, Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Stream<Entity> findAll(String entityName, Query<Entity> q)
+	public <E extends Entity> Stream<E> findAll(String entityTypeId, Query<E> q, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz)
+	public Stream<Entity> findAll(String entityTypeId, Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Stream<Entity> findAll(String entityName, Stream<Object> ids)
+	public <E extends Entity> Stream<E> findAll(String entityTypeId, Stream<Object> ids, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
+	public Stream<Entity> findAll(String entityTypeId, Stream<Object> ids, Fetch fetch)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch)
+	public <E extends Entity> Stream<E> findAll(String entityTypeId, Stream<Object> ids, Fetch fetch, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
+	public Entity findOneById(String entityTypeId, Object id)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Entity findOneById(String entityName, Object id)
+	public <E extends Entity> E findOneById(String entityTypeId, Object id, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz)
+	public Entity findOneById(String entityTypeId, Object id, Fetch fetch)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Entity findOneById(String entityName, Object id, Fetch fetch)
+	public <E extends Entity> E findOneById(String entityTypeId, Object id, Fetch fetch, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
+	public Entity findOne(String entityTypeId, Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Entity findOne(String entityName, Query<Entity> q)
+	public <E extends Entity> E findOne(String entityTypeId, Query<E> q, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz)
+	public void add(String entityTypeId, Entity entity)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void add(String entityName, Entity entity)
+	public <E extends Entity> void add(String entityTypeId, Stream<E> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> void add(String entityName, Stream<E> entities)
+	public void update(String entityTypeId, Entity entity)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void update(String entityName, Entity entity)
+	public <E extends Entity> void update(String entityTypeId, Stream<E> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> void update(String entityName, Stream<E> entities)
+	public void delete(String entityTypeId, Entity entity)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void delete(String entityName, Entity entity)
+	public <E extends Entity> void delete(String entityTypeId, Stream<E> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> void delete(String entityName, Stream<E> entities)
+	public void deleteById(String entityTypeId, Object id)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteById(String entityName, Object id)
+	public void deleteAll(String entityTypeId, Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteAll(String entityName, Stream<Object> ids)
+	public void deleteAll(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteAll(String entityName)
+	public Query<Entity> query(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Query<Entity> query(String entityName)
+	public <E extends Entity> Query<E> query(String entityTypeId, Class<E> entityClass)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> Query<E> query(String entityName, Class<E> entityClass)
+	public AggregateResult aggregate(String entityTypeId, AggregateQuery aggregateQuery)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Stream<String> getEntityNames()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Stream<Object> getEntityIds()
+	public Stream<String> getEntityTypeIds()
 	{
 		throw new UnsupportedOperationException();
 	}

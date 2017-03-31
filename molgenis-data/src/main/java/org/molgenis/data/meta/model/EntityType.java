@@ -3,7 +3,6 @@ package org.molgenis.data.meta.model;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
 /**
@@ -107,7 +105,6 @@ public class EntityType extends StaticEntity
 	{
 		EntityType entityTypeCopy = new EntityType(entityType.getEntityType()); // do not deep-copy
 		entityTypeCopy.setId(entityType.getId());
-		entityTypeCopy.setName(entityType.getName());
 		entityTypeCopy.setPackage(entityType.getPackage()); // do not deep-copy
 		entityTypeCopy.setLabel(entityType.getLabel());
 		entityTypeCopy.setDescription(entityType.getDescription());
@@ -167,44 +164,6 @@ public class EntityType extends StaticEntity
 	}
 
 	/**
-	 * Gets the fully qualified entity name.
-	 *
-	 * @return fully qualified entity name
-	 */
-	public String getFullyQualifiedName()
-	{
-		return MetaUtils.getFullyQualyfiedName(getName(),getPackage());
-	}
-
-	/**
-	 * Gets the entity name.
-	 *
-	 * @return entity name
-	 */
-	public String getName()
-	{
-		return getString(NAME);
-	}
-
-	/**
-	 * Sets the entity name.
-	 * In case this entity label is null, assigns the entity name to the label.
-	 *
-	 * @param name entity name.
-	 * @return this entity meta data for chaining
-	 */
-	public EntityType setName(String name)
-	{
-		set(NAME, name);
-
-		if (getLabel() == null)
-		{
-			setLabel(name);
-		}
-		return this;
-	}
-
-	/**
 	 * Human readable entity label
 	 *
 	 * @return entity label
@@ -227,10 +186,6 @@ public class EntityType extends StaticEntity
 
 	public EntityType setLabel(String label)
 	{
-		if (label == null)
-		{
-			label = getName();
-		}
 		set(LABEL, label);
 		return this;
 	}
@@ -592,7 +547,7 @@ public class EntityType extends StaticEntity
 			{
 				throw new MolgenisDataException(
 						format("Entity [%s] already contains attribute with name [%s], duplicate attribute names are not allowed",
-								this.getFullyQualifiedName(), attr.getName()));
+								this.getLabel(), attr.getName()));
 			}
 		});
 
@@ -820,6 +775,6 @@ public class EntityType extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "EntityType{" + "name=" + getFullyQualifiedName() + '}';
+		return "EntityType{" + "name=" + getId() + '}';
 	}
 }

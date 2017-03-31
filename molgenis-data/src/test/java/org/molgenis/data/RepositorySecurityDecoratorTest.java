@@ -22,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 
 public class RepositorySecurityDecoratorTest
 {
-	private String entityName;
+	private String entityTypeId;
 	private String entityId;
 	private Repository<Entity> decoratedRepository;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
@@ -31,12 +31,13 @@ public class RepositorySecurityDecoratorTest
 	@BeforeMethod
 	public void setUp()
 	{
-		entityName = "entity";
+		entityTypeId = "entity";
 		entityId = "entityID";
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
+		when(entityType.getId()).thenReturn(entityTypeId);
+		when(entityType.getLabel()).thenReturn(entityTypeId);
 		decoratedRepository = mock(Repository.class);
-		when(decoratedRepository.getName()).thenReturn(entityName);
+		when(decoratedRepository.getName()).thenReturn(entityTypeId);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		when(entityType.getId()).thenReturn("entityID");
 		repositorySecurityDecorator = new RepositorySecurityDecorator(decoratedRepository);

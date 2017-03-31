@@ -30,7 +30,7 @@ public class InMemoryRepositoryTest
 	public void setUpBeforeMethod()
 	{
 		entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getId()).thenReturn("entity");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);

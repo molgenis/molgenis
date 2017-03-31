@@ -53,21 +53,21 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	/**
 	 * Creates a new report, with an entity added to it.
 	 *
-	 * @param entityName name of the entity
+	 * @param entityTypeId name of the entity
 	 * @param importable true if the entity is importable
 	 * @return this report
 	 */
-	public MyEntitiesValidationReport addEntity(String entityName, boolean importable)
+	public MyEntitiesValidationReport addEntity(String entityTypeId, boolean importable)
 	{
-		sheetsImportable.put(entityName, importable);
+		sheetsImportable.put(entityTypeId, importable);
 		valid = valid && importable;
 		if (importable)
 		{
-			fieldsImportable.put(entityName, new ArrayList<String>());
-			fieldsUnknown.put(entityName, new ArrayList<String>());
-			fieldsRequired.put(entityName, new ArrayList<String>());
-			fieldsAvailable.put(entityName, new ArrayList<String>());
-			importOrder.add(entityName);
+			fieldsImportable.put(entityTypeId, new ArrayList<String>());
+			fieldsUnknown.put(entityTypeId, new ArrayList<String>());
+			fieldsRequired.put(entityTypeId, new ArrayList<String>());
+			fieldsAvailable.put(entityTypeId, new ArrayList<String>());
+			importOrder.add(entityTypeId);
 		}
 		return this;
 	}
@@ -109,21 +109,21 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		{
 			throw new IllegalStateException("Must add entity first");
 		}
-		String entityName = getImportOrder().get(getImportOrder().size() - 1);
+		String entityTypeId = getImportOrder().get(getImportOrder().size() - 1);
 		valid = valid && state.isValid();
 		switch (state)
 		{
 			case IMPORTABLE:
-				addField(fieldsImportable, entityName, attributeName);
+				addField(fieldsImportable, entityTypeId, attributeName);
 				break;
 			case UNKNOWN:
-				addField(fieldsUnknown, entityName, attributeName);
+				addField(fieldsUnknown, entityTypeId, attributeName);
 				break;
 			case AVAILABLE:
-				addField(fieldsAvailable, entityName, attributeName);
+				addField(fieldsAvailable, entityTypeId, attributeName);
 				break;
 			case REQUIRED:
-				addField(fieldsRequired, entityName, attributeName);
+				addField(fieldsRequired, entityTypeId, attributeName);
 				break;
 			default:
 				throw new IllegalArgumentException();
@@ -131,13 +131,13 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		return this;
 	}
 
-	private void addField(Map<String, Collection<String>> sheets, String entityName, String attributeName)
+	private void addField(Map<String, Collection<String>> sheets, String entityTypeId, String attributeName)
 	{
-		if (!sheets.containsKey(entityName))
+		if (!sheets.containsKey(entityTypeId))
 		{
-			sheets.put(entityName, new ArrayList<String>());
+			sheets.put(entityTypeId, new ArrayList<String>());
 		}
-		sheets.get(entityName).add(attributeName);
+		sheets.get(entityTypeId).add(attributeName);
 	}
 
 	/**

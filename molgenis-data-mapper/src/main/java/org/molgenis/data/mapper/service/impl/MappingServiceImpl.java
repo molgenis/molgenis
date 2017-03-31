@@ -160,27 +160,26 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	public String applyMappings(MappingTarget mappingTarget, String entityTypeId)
 	{
-		return applyMappings(mappingTarget, entityName, true);
+		return applyMappings(mappingTarget, entityTypeId, true);
 	}
 
 	@Override
 	@Transactional
-	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
+	public String applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetaData.setPackage(null);
 		targetMetaData.setId(idGenerator.generateId());
-		targetMetaData.setName(entityName);
-		targetMetaData.setLabel(entityName);
+		targetMetaData.setLabel(entityTypeId);
 		if (addSourceAttribute)
 		{
 			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
 		Repository<Entity> targetRepo;
-		if (!dataService.hasRepository(entityName))
+		if (!dataService.hasRepository(entityTypeId))
 		{
 			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
@@ -189,7 +188,7 @@ public class MappingServiceImpl implements MappingService
 		else
 		{
 			// Get an existing repository
-			targetRepo = dataService.getRepository(entityName);
+			targetRepo = dataService.getRepository(entityTypeId);
 
 			// Compare the metadata between the target repository and the mapping target
 			// Returns detailed information in case something is not compatible
@@ -207,15 +206,15 @@ public class MappingServiceImpl implements MappingService
 
 		try
 		{
-			LOG.info("Applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
+			LOG.info("Applying mappings to repository [" + targetMetaData.getId() + "]");
 			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
 				LOG.info("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			}
-			LOG.info("Done applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
-			return targetMetaData.getFullyQualifiedName();
+			LOG.info("Done applying mappings to repository [" + targetMetaData.getId() + "]");
+			return targetMetaData.getId();
 		}
 		catch (RuntimeException ex)
 		{
@@ -264,8 +263,8 @@ public class MappingServiceImpl implements MappingService
 
 			if (isReferenceType(mappingTargetAttribute))
 			{
-				String mappingTargetRefEntityName = mappingTargetAttribute.getRefEntity().getFullyQualifiedName();
-				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getFullyQualifiedName();
+				String mappingTargetRefEntityName = mappingTargetAttribute.getRefEntity().getId();
+				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getId();
 				if (!mappingTargetRefEntityName.equals(targetRepositoryRefEntityName))
 				{
 					throw new MolgenisDataException(

@@ -144,7 +144,7 @@ public class EntityAttributesValidator
 			{
 				return createConstraintViolation(entity, attr, entityType, "Not a valid entity, null is not allowed");
 			}
-			if (!refEntity.getEntityType().getFullyQualifiedName().equals(attr.getRefEntity().getFullyQualifiedName()))
+			if (!refEntity.getEntityType().getId().equals(attr.getRefEntity().getId()))
 			{
 				return createConstraintViolation(entity, attr, entityType, "Not a valid entity type.");
 			}
@@ -168,7 +168,7 @@ public class EntityAttributesValidator
 		{
 			return null;
 		}
-		if (!refEntity.getEntityType().getFullyQualifiedName().equals(attr.getRefEntity().getFullyQualifiedName()))
+		if (!refEntity.getEntityType().getId().equals(attr.getRefEntity().getId()))
 		{
 			return createConstraintViolation(entity, attr, entityType, "Not a valid entity type.");
 		}
@@ -401,7 +401,7 @@ public class EntityAttributesValidator
 	{
 		String message = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
 				attribute.getDataType().toString().toLowerCase(), entity.get(attribute.getName()), attribute.getLabel(),
-				entityType.getFullyQualifiedName());
+				entityType.getId());
 
 		Range range = attribute.getRange();
 		if (range != null)
@@ -425,7 +425,7 @@ public class EntityAttributesValidator
 		String dataValue = value != null ? value.toString() : null;
 		String fullMessage = format("Invalid [%s] value [%s] for attribute [%s] of entity [%s] with type [%s].",
 				attribute.getDataType().toString().toLowerCase(), dataValue, attribute.getLabel(),
-				entity.getLabelValue(), entityType.getFullyQualifiedName());
+				entity.getLabelValue(), entityType.getId());
 		fullMessage += " " + message;
 
 		return new ConstraintViolation(fullMessage, dataValue, entity, attribute, entityType, null);

@@ -79,7 +79,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 		if (transactionId != null)
 		{
-			LOG.debug("register(entityFullName: [{}], entityId: [{}])", entityType.getFullyQualifiedName(), entityId);
+			LOG.debug("register(entityFullName: [{}], entityId: [{}])", entityType.getId(), entityId);
 			final int actionOrder = indexActionsPerTransaction.get(transactionId).size();
 			if (actionOrder >= LOG_EVERY && actionOrder % LOG_EVERY == 0)
 			{
@@ -89,14 +89,14 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityTypeId(entityType.getId()).setEntityTypeName(entityType.getName())
+					.setEntityTypeId(entityType.getId())
 					.setEntityId(entityId).setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
 		{
 			LOG.error("Transaction id is unknown, register of entityFullName [{}] dataType [{}], entityId [{}]",
-					entityType.getFullyQualifiedName(), entityId);
+					entityType.getId(), entityId);
 		}
 	}
 
@@ -158,7 +158,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return Stream.of(indexAction);
 		}
 
-		EntityType entityType = dataService.getEntityTypeById(indexAction.getEntityTypeId());
+		EntityType entityType = dataService.getEntityType(indexAction.getEntityTypeId());
 		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
 		{
 			return Stream.of(indexAction);
@@ -171,8 +171,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 		// convert referencing entity names to index actions
 		Stream<IndexAction> referencingEntityIndexActions = referencingEntityMap.values().stream()
-				.map(referencingEntity -> indexActionFactory.create()
-						.setEntityTypeId(referencingEntity.getId()).setEntityTypeName(entityType.getName())
+				.map(referencingEntity -> indexActionFactory.create().setEntityTypeId(referencingEntity.getId())
 						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
 
 		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
@@ -247,7 +246,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	{
 		return EntityKey.create(indexAction.getEntityTypeId(),
 				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
-						dataService.getEntityTypeById(indexAction.getEntityTypeId()).getIdAttribute()) : null);
+						dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute()) : null);
 	}
 
 }

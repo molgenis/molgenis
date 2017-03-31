@@ -11,7 +11,8 @@ public interface MetaDataParser
 	 * @param defaultPackage , the package where the entities without a package should go
 	 * @return {@link ParsedMetaData}
 	 */
-	ParsedMetaData parse(RepositoryCollection source, String defaultPackage);
+	ParsedMetaData parse(RepositoryCollection source,
+			String defaultPackage); // FIXME use entity type ids instead of entity type fqns
 
 	/**
 	 * Generates a {@link EntitiesValidationReport} by parsing all data from a supplied source

@@ -7,7 +7,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
@@ -126,19 +125,19 @@ public class DataExplorerController extends MolgenisPluginController
 
 		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
 				.filter(entityType -> !entityType.isAbstract())
-				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
+				.collect(toMap(EntityType::getId, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
 		{
-			EntityType entityType = dataService.getMeta().getEntityTypeById(selectedEntityId);
+			EntityType entityType = dataService.getMeta().getEntityType(selectedEntityId);
 			if (entityType == null)
 			{
 				message.append("Entity does not exist or you do not have permission on this entity");
 			}
 			else
 			{
-				selectedEntityName = entityType.getFullyQualifiedName();
+				selectedEntityName = entityType.getId();
 			}
 
 			if (selectedEntityName != null)
@@ -180,39 +179,39 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
-	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
+	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
 		if (moduleId.equals(MOD_DATA))
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityName));
+			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 
-			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
-			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
+			model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
+			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
 		}
 		else if (moduleId.equals(MOD_ANNOTATORS))
 		{
 			// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 			// self-explanatory
-			if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+			if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
 			{
 				throw new MolgenisDataAccessException(
-						"No " + Permission.WRITEMETA + " permission on entity [" + entityName
+						"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
 								+ "], this permission is necessary run the annotators.");
 			}
 			Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
-					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
+					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
 							.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
 			model.addAttribute("annotationRun", annotationRun);
-			model.addAttribute("entityName", entityName);
+			model.addAttribute("entityTypeId", entityTypeId);
 		}
 
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -220,22 +219,22 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/copy", method = GET)
 	@ResponseBody
-	public boolean showCopy(@RequestParam("entity") String entityName)
+	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
-				.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
+		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService
+				.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
 		return showCopy;
 	}
 
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
 	 *
-	 * @param entityName
+	 * @param entityTypeId
 	 * @return
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
-	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
+	public ModulesConfigResponse getModules(@RequestParam("entity") String entityTypeId)
 	{
 		boolean modAggregates = dataExplorerSettings.getModAggregates();
 		boolean modAnnotators = dataExplorerSettings.getModAnnotators();
@@ -245,14 +244,14 @@ public class DataExplorerController extends MolgenisPluginController
 
 		if (modAggregates)
 		{
-			modAggregates = dataService.getCapabilities(entityName).contains(RepositoryCapability.AGGREGATEABLE);
+			modAggregates = dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.AGGREGATEABLE);
 		}
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityName, WRITE)) pluginPermission = WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, READ)) pluginPermission = READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT))
+		if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, WRITE)) pluginPermission = WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ)) pluginPermission = READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
@@ -289,7 +288,7 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					if (modReports)
 					{
-						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityName);
+						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
 						if (modEntitiesReportName != null)
 						{
 							modulesConfig
@@ -317,12 +316,11 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeEntities = new HashMap<>();
 		genomeBrowserService.getGenomeBrowserEntities().forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ);
-			boolean canWrite = molgenisPermissionService
-					.hasPermissionOnEntity(entityType.getFullyQualifiedName(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), WRITE);
 			if (canRead || canWrite)
 			{
-				genomeEntities.put(entityType.getFullyQualifiedName(), entityType.getLabel());
+				genomeEntities.put(entityType.getId(), entityType.getLabel());
 			}
 		});
 		return genomeEntities;
@@ -401,7 +399,7 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
 	 *
-	 * @param entityName
+	 * @param entityTypeId
 	 * @param entityId
 	 * @param model
 	 * @return entity report view
@@ -409,22 +407,22 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @author mdehaan, fkelpin
 	 */
 	@RequestMapping(value = "/details", method = RequestMethod.POST)
-	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
+	public String viewEntityDetails(@RequestParam(value = "entityTypeId") String entityTypeId,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
-		EntityType entityType = dataService.getEntityType(entityName);
+		EntityType entityType = dataService.getEntityType(entityTypeId);
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());
 
-		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(id));
+		model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
 		model.addAttribute("entityType", entityType);
-		model.addAttribute("viewName", getViewName(entityName));
+		model.addAttribute("viewName", getViewName(entityTypeId));
 		return "view-entityreport";
 	}
 
-	private String getViewName(String entityName)
+	private String getViewName(String entityTypeId)
 	{
 		// check if entity report is set for this entity
-		String reportTemplate = dataExplorerSettings.getEntityReport(entityName);
+		String reportTemplate = dataExplorerSettings.getEntityReport(entityTypeId);
 		if (reportTemplate != null)
 		{
 			String specificViewname = "view-entityreport-specific-" + reportTemplate;
@@ -435,7 +433,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 
 		// if there are no RuntimeProperty mappings, execute existing behaviour
-		final String specificViewname = "view-entityreport-specific-" + entityName;
+		final String specificViewname = "view-entityreport-specific-" + entityTypeId;
 		if (viewExists(specificViewname))
 		{
 			return specificViewname;

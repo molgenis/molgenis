@@ -71,7 +71,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 				of("code", 4, "label", "Never + fewer than once a week"));
 		Entity targetEntity5 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityType.getFullyQualifiedName()))
+		Mockito.when(dataService.findAll(targetRefEntityType.getId()))
 				.thenAnswer(new Answer<Stream<Entity>>()
 				{
 					@Override
@@ -99,7 +99,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity6 = new DynamicEntity(targetRefEntityType, of("code", 6, "label", "4-5 days per week"));
 		Entity sourceEntity7 = new DynamicEntity(targetRefEntityType, of("code", 7, "label", "6-7 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType.getFullyQualifiedName()))
+		Mockito.when(dataService.findAll(sourceRefEntityType.getId()))
 				.thenAnswer(new Answer<Stream<Entity>>()
 				{
 					@Override
@@ -128,7 +128,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity15 = new DynamicEntity(targetRefEntityType, of("code", 8, "label", "4-5 per day"));
 		Entity sourceEntity16 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "6+ per day"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType1.getFullyQualifiedName()))
+		Mockito.when(dataService.findAll(sourceRefEntityType1.getId()))
 				.thenAnswer(new Answer<Stream<Entity>>()
 				{
 					@Override
@@ -149,7 +149,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity18 = new DynamicEntity(targetRefEntityType, of("code", 2, "label", "no"));
 		Entity sourceEntity19 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType2.getFullyQualifiedName()))
+		Mockito.when(dataService.findAll(sourceRefEntityType2.getId()))
 				.thenAnswer(new Answer<Stream<Entity>>()
 				{
 					@Override
@@ -163,9 +163,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		sourceEntityType.addAttributes(Lists.newArrayList(sourceAttribute, sourceAttribute1, sourceAttribute2));
 	}
 
-	private EntityType createEntityType(String entityName)
+	private EntityType createEntityType(String entityTypeId)
 	{
-		EntityType sourceRefEntityType = entityTypeFactory.create(entityName).setName(entityName);
+		EntityType sourceRefEntityType = entityTypeFactory.create(entityTypeId);
 
 		Attribute sourceCodeAttribute = attrMetaFactory.create().setName("code").setDataType(INT);
 		Attribute sourceLabelAttribute = attrMetaFactory.create().setName("label");

@@ -9,7 +9,6 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -42,29 +41,6 @@ public class PackageValidator
 
 	private static void validatePackageName(Package package_)
 	{
-		NameValidator.validatePackageName(package_.getName());
-
-		Package parentPackage = package_.getParent();
-
-		if (parentPackage != null)
-		{
-			if (!(parentPackage.getFullyQualifiedName() + '_' + package_.getName())
-					.equals(package_.getFullyQualifiedName()))
-			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Qualified package name [%s] not equal to parent package name [%s] underscore package name [%s]",
-								package_.getFullyQualifiedName(), parentPackage.getFullyQualifiedName(),
-								package_.getName())));
-			}
-		}
-		else
-		{
-			if (!package_.getName().equals(package_.getFullyQualifiedName()))
-			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Qualified package name [%s] not equal to package name [%s]",
-								package_.getFullyQualifiedName(), package_.getName())));
-			}
-		}
+		NameValidator.validatePackageId(package_.getId());
 	}
 }

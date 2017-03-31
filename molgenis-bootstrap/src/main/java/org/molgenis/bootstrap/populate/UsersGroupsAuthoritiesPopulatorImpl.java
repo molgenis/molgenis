@@ -102,13 +102,13 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + UserAccountController.ID);
 
 		// allow all users to read meta data entities
-		List<String> entityNames = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
+		List<String> entityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
 				I18N_STRING, FILE_META, OWNED);
-		Stream<GroupAuthority> entityGroupAuthorities = entityNames.stream().map(entityName ->
+		Stream<GroupAuthority> entityGroupAuthorities = entityTypeIds.stream().map(entityTypeId ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
 			usersGroupAuthority.setGroup(allUsersGroup);
-			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityName);
+			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityTypeId);
 			return usersGroupAuthority;
 		});
 

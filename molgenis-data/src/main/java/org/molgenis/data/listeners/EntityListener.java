@@ -8,9 +8,9 @@ import org.molgenis.data.Entity;
 public interface EntityListener
 {
 	/**
-	 * Returns the entity id
+	 * Returns the entity type id
 	 *
-	 * @return entity entity id
+	 * @return entity type id
 	 */
 	Object getEntityId();
 

@@ -175,11 +175,11 @@ public class LazyEntity implements Entity
 	{
 		if (entity == null)
 		{
-			entity = dataService.findOneById(entityType.getFullyQualifiedName(), id);
+			entity = dataService.findOneById(entityType.getId(), id);
 			if (entity == null)
 			{
 				throw new UnknownEntityException(
-						"entity [" + entityType.getFullyQualifiedName() + "] with " + entityType.getIdAttribute().getName() + " ["
+						"entity [" + entityType.getId() + "] with " + entityType.getIdAttribute().getName() + " ["
 								+ id.toString() + "] does not exist");
 			}
 		}
@@ -195,7 +195,7 @@ public class LazyEntity implements Entity
 		}
 		else
 		{
-			return entityType.getFullyQualifiedName() + '{' + entityType.getIdAttribute().getName() + '=' + id
+			return entityType.getId() + '{' + entityType.getIdAttribute().getName() + '=' + id
 					+ ",<lazy attributes not loaded>}";
 		}
 	}

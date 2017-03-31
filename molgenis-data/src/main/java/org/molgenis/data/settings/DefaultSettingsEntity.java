@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ResourceBundle;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
@@ -25,7 +26,8 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 {
 	private static final long serialVersionUID = 1L;
 
-	private final String entityName;
+	private final String entityId;
+	private final String entityTypeId;
 
 	@Autowired
 	private DataService dataService;
@@ -37,12 +39,13 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 
 	public DefaultSettingsEntity(String entityId)
 	{
-		this.entityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + entityId;
+		this.entityId = requireNonNull(entityId);
+		this.entityTypeId = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + entityId;
 	}
 
 	public EntityType getEntityType()
 	{
-		return RunAsSystemProxy.runAsSystem(() -> dataService.getEntityType(entityName));
+		return RunAsSystemProxy.runAsSystem(() -> dataService.getEntityType(entityTypeId));
 	}
 
 	@Override
@@ -170,7 +173,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	{
 		RunAsSystemProxy.runAsSystem(() ->
 		{
-			entityListenersService.addEntityListener(entityName, new EntityListener()
+			entityListenersService.addEntityListener(entityTypeId, new EntityListener()
 			{
 				@Override
 				public void postUpdate(Entity entity)
@@ -181,7 +184,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 				@Override
 				public Object getEntityId()
 				{
-					return getEntityType().getName();
+					return getEntityType().getId();
 				}
 			});
 		});
@@ -196,7 +199,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	{
 		RunAsSystemProxy.runAsSystem(() ->
 		{
-			entityListenersService.removeEntityListener(entityName, new EntityListener()
+			entityListenersService.removeEntityListener(entityTypeId, new EntityListener()
 			{
 
 				@Override
@@ -208,7 +211,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 				@Override
 				public Object getEntityId()
 				{
-					return getEntityType().getName();
+					return getEntityType().getId();
 				}
 			});
 		});
@@ -232,13 +235,12 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	{
 		if (cachedEntity == null)
 		{
-			String id = getEntityType().getName();
 			cachedEntity = RunAsSystemProxy.runAsSystem(() ->
 			{
-				Entity entity = dataService.findOneById(entityName, id);
+				Entity entity = dataService.findOneById(entityTypeId, entityId);
 
 				// refresh cache on settings update
-				entityListenersService.addEntityListener(entityName, new EntityListener()
+				entityListenersService.addEntityListener(entityTypeId, new EntityListener()
 				{
 					@Override
 					public void postUpdate(Entity entity)
@@ -249,7 +251,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 					@Override
 					public Object getEntityId()
 					{
-						return id;
+						return entityId;
 					}
 				});
 				return entity;
@@ -263,7 +265,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	{
 		RunAsSystemProxy.runAsSystem(() ->
 		{
-			dataService.update(entityName, entity);
+			dataService.update(entityTypeId, entity);
 			ResourceBundle.clearCache();
 
 			// cache refresh is handled via entity listener

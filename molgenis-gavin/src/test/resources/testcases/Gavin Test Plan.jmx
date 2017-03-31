@@ -53,12 +53,12 @@
           </elementProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments">
-              <elementProp name="entityName" elementType="HTTPArgument">
+              <elementProp name="entityTypeId" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">jmeter-cadd-tsv</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                <stringProp name="Argument.name">entityName</stringProp>
+                <stringProp name="Argument.name">entityTypeId</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>

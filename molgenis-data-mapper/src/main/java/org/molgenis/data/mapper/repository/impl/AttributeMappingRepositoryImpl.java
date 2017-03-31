@@ -55,12 +55,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		{
 			attributeMapping.setIdentifier(idGenerator.generateId());
 			result = toAttributeMappingEntity(attributeMapping);
-			dataService.add(attributeMappingMetaData.getFullyQualifiedName(), result);
+			dataService.add(attributeMappingMetaData.getId(), result);
 		}
 		else
 		{
 			result = toAttributeMappingEntity(attributeMapping);
-			dataService.update(attributeMappingMetaData.getFullyQualifiedName(), result);
+			dataService.update(attributeMappingMetaData.getId(), result);
 		}
 		return result;
 	}

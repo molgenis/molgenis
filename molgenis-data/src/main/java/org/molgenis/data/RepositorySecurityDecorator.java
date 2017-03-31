@@ -36,7 +36,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Iterator<Entity> iterator()
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.iterator();
 	}
 
@@ -44,7 +44,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
@@ -52,7 +52,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void close() throws IOException
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.close();
 	}
 
@@ -60,7 +60,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public long count(Query<Entity> q)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.COUNT);
+		validatePermission(entityType, Permission.COUNT);
 		return decoratedRepository.count(q);
 	}
 
@@ -68,7 +68,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.findAll(q);
 	}
 
@@ -76,7 +76,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Entity findOne(Query<Entity> q)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.findOne(q);
 	}
 
@@ -84,7 +84,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Entity findOneById(Object id)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.findOneById(id);
 	}
 
@@ -92,7 +92,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Entity findOneById(Object id, Fetch fetch)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.findOneById(id, fetch);
 	}
 
@@ -100,7 +100,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.findAll(ids);
 	}
 
@@ -108,7 +108,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.READ);
+		validatePermission(entityType, Permission.READ);
 		return decoratedRepository.findAll(ids, fetch);
 	}
 
@@ -116,7 +116,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public long count()
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.COUNT);
+		validatePermission(entityType, Permission.COUNT);
 		return decoratedRepository.count();
 	}
 
@@ -124,7 +124,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void update(Entity entity)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.update(entity);
 	}
 
@@ -132,7 +132,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void update(Stream<Entity> entities)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(),  Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.update(entities);
 	}
 
@@ -140,7 +140,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void delete(Entity entity)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.delete(entity);
 	}
 
@@ -148,7 +148,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void delete(Stream<Entity> entities)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.delete(entities);
 	}
 
@@ -156,7 +156,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void deleteById(Object id)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.deleteById(id);
 	}
 
@@ -164,7 +164,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void deleteAll(Stream<Object> ids)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.deleteAll(ids);
 	}
 
@@ -172,7 +172,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void deleteAll()
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.deleteAll();
 	}
 
@@ -180,7 +180,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void add(Entity entity)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		decoratedRepository.add(entity);
 	}
 
@@ -188,7 +188,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Integer add(Stream<Entity> entities)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		validatePermission(entityType, Permission.WRITE);
 		return decoratedRepository.add(entities);
 	}
 
@@ -196,7 +196,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.COUNT);
+		validatePermission(entityType, Permission.COUNT);
 		return decoratedRepository.aggregate(aggregateQuery);
 	}
 }
