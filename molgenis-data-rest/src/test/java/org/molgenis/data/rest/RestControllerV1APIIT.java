@@ -1,7 +1,7 @@
 package org.molgenis.data.rest;
 
+import com.google.common.io.Resources;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
@@ -11,12 +11,16 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.restassured.RestAssured.*;
-import static io.restassured.config.EncoderConfig.encoderConfig;
+import static io.restassured.RestAssured.baseURI;
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.RestControllerIT.Permission.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
@@ -32,6 +36,7 @@ public class RestControllerV1APIIT
 	private static final String REST_TEST_USER_PASSWORD = "api_test_user_password";
 	private static final String V1_TEST_FILE = "/RestControllerV1_TestEMX.xlsx";
 	private static final String V1_DELETE_TEST_FILE = "/RestControllerV1_DeleteEMX.xlsx";
+	private static final String V1_FILE_ATTRIBUTE_TEST_FILE = "/RestControllerV1_FileEMX.xlsx";
 	private static final String PATH = "api/v1/";
 
 	private static final String TEXT_PLAIN = "text/plain";
@@ -53,6 +58,8 @@ public class RestControllerV1APIIT
 	private static final String API_TEST_2_PERMISSION_ID = "api_test_2_permission_ID";
 	private static final String API_TEST_3_PERMISSION_ID = "api_test_3_permission_ID";
 	private static final String API_TEST_4_PERMISSION_ID = "api_test_4_permission_ID";
+
+	private static final String API_TEST_FILE_PERMISSION_ID = "api_test_file_permission_ID";
 
 	private String testUserToken;
 	private String adminToken;
@@ -79,6 +86,7 @@ public class RestControllerV1APIIT
 		LOG.info("Importing Test data");
 		uploadEMX(adminToken, V1_TEST_FILE);
 		uploadEMX(adminToken, V1_DELETE_TEST_FILE);
+		uploadEMX(adminToken, V1_FILE_ATTRIBUTE_TEST_FILE);
 		LOG.info("Importing Done");
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
@@ -101,6 +109,8 @@ public class RestControllerV1APIIT
 		grantRights(adminToken, API_TEST_2_PERMISSION_ID, testUserId, "APITest2", WRITEMETA);
 		grantRights(adminToken, API_TEST_3_PERMISSION_ID, testUserId, "APITest3", WRITEMETA);
 		grantRights(adminToken, API_TEST_4_PERMISSION_ID, testUserId, "APITest4", WRITEMETA);
+
+		grantRights(adminToken, API_TEST_FILE_PERMISSION_ID, testUserId, "ApiTestFile", WRITEMETA);
 
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
@@ -238,26 +248,23 @@ public class RestControllerV1APIIT
 				.delete(PATH + "it_emx_datatypes_TypeTestRef/ref6").then().log().all().statusCode(NO_CONTENT);
 	}
 
-	@Test(enabled = false)
-	// FIXME 500 error
-	public void testCreateFromFormPostMultiPart()
+	@Test
+	public void testCreateFromFormPostMultiPart() throws URISyntaxException
 	{
-		// Add new entity from multipart form post
-		given().log().all().config(config()
-				.encoderConfig(encoderConfig().encodeContentTypeAs("multipart/form-data", ContentType.JSON)))
-				.header(X_MOLGENIS_TOKEN, this.testUserToken).contentType("multipart/form-data")
-				.formParam("name", "IT_ScriptType").when().post(PATH + "sys_scr_ScriptType").then().log().all()
+		URL resourceUrl = Resources.getResource(RestControllerV1APIIT.class, "/RestControllerV1_FileEMX.xlsx");
+		File file = new File(new URI(resourceUrl.toString()).getPath());
+
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType("multipart/form-data")
+				.multiPart("id", "6").multiPart(file).when().post(PATH + "base_ApiTestFile").then().log().all()
 				.statusCode(201);
 
-		// Check if entity was added
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/IT_ScriptType\",\"name\":\"IT_ScriptType\"}";
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(200)
-				.body(equalTo(responseBody));
+				.get(PATH + "base_ApiTestFile/10").then().log().all().statusCode(200)
+				.body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "fileAttr.href",
+						equalTo("/api/v1/base_ApiTestFile/6/fileAttr"));
 
-		// Remove entity
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.delete("api/v2/sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(204);
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).delete(PATH + "base_ApiTestFile/6").then()
+				.log().all().statusCode(204);
 	}
 
 	@Test(enabled = false)
@@ -538,6 +545,8 @@ public class RestControllerV1APIIT
 		removeEntity(adminToken, "base_APITest1");
 		removeEntity(adminToken, "base_APITest2");
 
+		removeEntity(adminToken, "base_ApiTestFile");
+
 		// Clean up permissions
 		removeRight(adminToken, TYPE_TEST_PERMISSION_ID);
 		removeRight(adminToken, TYPE_TEST_REF_PERMISSION_ID);
@@ -550,6 +559,8 @@ public class RestControllerV1APIIT
 		removeRight(adminToken, API_TEST_2_PERMISSION_ID);
 		removeRight(adminToken, API_TEST_3_PERMISSION_ID);
 		removeRight(adminToken, API_TEST_4_PERMISSION_ID);
+
+		removeRight(adminToken, API_TEST_FILE_PERMISSION_ID);
 
 		// Clean up Token for user
 		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post(PATH + "logout");
