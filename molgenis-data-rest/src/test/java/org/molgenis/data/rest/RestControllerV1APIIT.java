@@ -6,7 +6,6 @@ import io.restassured.response.ValidatableResponse;
 import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -267,27 +266,23 @@ public class RestControllerV1APIIT
 				.log().all().statusCode(204);
 	}
 
-	@Test(enabled = false)
-	// FIXME com.fasterxml.jackson.databind.JsonMappingException: No serializer found for class java.io.ByteArrayOutputStream and no properties discovered to create BeanSerializer (to avoid exception, disable SerializationFeature.FAIL_ON_EMPTY_BEANS) ) (through reference chain: org.springframework.mock.web.MockHttpServletResponse["outputStream"]->org.springframework.mock.web.ResponseServletOutputStream["targetStream"])
+	@Test
 	public void testCreate()
 	{
 		Map<String, Object> entityMap = newHashMap();
-		entityMap.put("name", "IT_ScriptType");
+		entityMap.put("value", "ref6");
+		entityMap.put("label", "label6");
 
-		// Add new entity from multipart form post
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).body(entityMap)
-				.formParam("response", new MockHttpServletResponse()).when().post(PATH + "sys_scr_ScriptType").then()
-				.log().all().statusCode(201);
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).body(entityMap)
+				.when().post(PATH + "it_emx_datatypes_TypeTestRef").then().log().all().statusCode(201);
 
-		// Check if entity was added
-		String responseBody = "{\"href\":\"/api/v1/sys_scr_ScriptType/IT_ScriptType\",\"name\":\"IT_ScriptType\"}";
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(200)
-				.body(equalTo(responseBody));
+				.get(PATH + "it_emx_datatypes_TypeTestRef/ref6").then().log().all().statusCode(200)
+				.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref6"), "value", equalTo("ref6"), "label",
+						equalTo("label6"));
 
-		// Remove entity
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.delete("api/v2/sys_scr_ScriptType/IT_ScriptType").then().log().all().statusCode(204);
+				.delete(PATH + "it_emx_datatypes_TypeTestRef/ref6").then().log().all().statusCode(204);
 	}
 
 	@Test
@@ -356,6 +351,12 @@ public class RestControllerV1APIIT
 	//    public void updateFromFormPostMultiPart(@PathVariable("entityName") String entityName,
 	//                                            @PathVariable("id") String untypedId, MultipartHttpServletRequest request)
 	// TODO
+
+	@Test
+	public void testUpdateFromFormPostMultiPart()
+	{
+
+	}
 
 	@Test
 	public void testUpdateFromFormPost()
