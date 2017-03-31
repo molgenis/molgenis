@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import org.molgenis.data.rest.RestControllerIT;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
@@ -15,6 +14,8 @@ import java.util.Map;
 import static com.google.common.collect.ImmutableMap.of;
 import static io.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.io.FileUtils.readFileToString;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Methods shared by Rest Api tests
@@ -49,10 +50,7 @@ public class RestTestUtils
 		loginBody.put("username", userName);
 		loginBody.put("password", password);
 
-		return given()
-				//.log().all()
-				.contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when().post("api/v1/login").then()
-				//.log().all()
+		return given().contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when().post("api/v1/login").then()
 				.extract().path("token");
 	}
 
@@ -73,12 +71,8 @@ public class RestTestUtils
 		createTestUserBody.put("changePassword", false);
 		createTestUserBody.put("Email", testuserName + "@example.com");
 
-		given()
-				//.log().all()
-				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.body(createTestUserBody.toJSONString()).when().post("api/v1/sys_sec_User").then()
-		//.log().all()
-		;
+		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
+				.body(createTestUserBody.toJSONString()).when().post("api/v1/sys_sec_User").then();
 	}
 
 	/**
@@ -98,11 +92,35 @@ public class RestTestUtils
 		}
 		catch (URISyntaxException e)
 		{
-			LoggerFactory.getLogger(RestTestUtils.class).error(e.getMessage());
+			getLogger(RestTestUtils.class).error(e.getMessage());
 		}
 
 		given().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
 				.header(X_MOLGENIS_TOKEN, adminToken).post("plugin/importwizard/importFile");
+	}
+
+	/**
+	 * Reads the contents of a file and stores it in a String.
+	 * Useful if you want to compare the contents of a file with the response of an API endpoint,
+	 * if that endpoint returns a file (e.g. /api/v1/csv/{entityName}
+	 *
+	 * @param fileName the name of the file
+	 * @return a string containing the files contents
+	 */
+	public static String getFileContents(String fileName)
+	{
+		URL resourceUrl = Resources.getResource(RestTestUtils.class, fileName);
+		File file;
+		try
+		{
+			file = new File(new URI(resourceUrl.toString()).getPath());
+			return readFileToString(file);
+		}
+		catch (Exception e)
+		{
+			getLogger(RestTestUtils.class).error(e.getMessage());
+		}
+		return "";
 	}
 
 	/**
@@ -136,9 +154,7 @@ public class RestTestUtils
 		JSONObject body = new JSONObject(query);
 
 		return given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).queryParam("_method", "GET")
-				.body(body.toJSONString()).when().post(path + entityName).then()
-				//.log().all()
-				.extract().path("items[0].id");
+				.body(body.toJSONString()).when().post(path + entityName).then().extract().path("items[0].id");
 	}
 
 	/**
@@ -172,9 +188,7 @@ public class RestTestUtils
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
 
-		given()
-				//.log().all()
-				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
+		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
 				.post(path + "sys_sec_UserAuthority");
 	}
 
