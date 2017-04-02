@@ -96,35 +96,61 @@ public class RestControllerV2IT
 	@Test
 	public void batchCreate()
 	{
-		JSONObject bodyobject = new JSONObject();
-
+		JSONObject jsonObject = new JSONObject();
 		JSONArray entities = new JSONArray();
 
 		JSONObject entity1 = new JSONObject();
 		entity1.put("value", "ref55");
 		entity1.put("label", "label55");
-
 		entities.add(entity1);
 
 		JSONObject entity2 = new JSONObject();
 		entity2.put("value", "ref57");
 		entity2.put("label", "label57");
-
 		entities.add(entity2);
 
-		bodyobject.put("entities", entities);
+		jsonObject.put("entities", entities);
+
+		given()
+				.log().method().log().uri()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString())
+				.when().post(API_V2 + "it_emx_datatypes_TypeTestRefv2")
+				.then().statusCode(CREATED)
+				.log().all()
+				.body("location", equalTo("/api/v2/it_emx_datatypes_TypeTestRefv2?q=value=in=(\"ref55\",\"ref57\")"));
+	}
+
+	@Test
+	public void batchCreateLocation()
+	{
+		JSONObject jsonObject = new JSONObject();
+		JSONArray entities = new JSONArray();
+
+		JSONObject entity = new JSONObject();
+		entity.put("Chromosome", "42");
+		entity.put("Position", 42);
+		entities.add(entity);
+
+		jsonObject.put("entities", entities);
+
+		String expectedLocation = "/api/v2/it_emx_datatypes_Locationv2?q=Position=in=(\"42\")";
+		String expectedHref = "/api/v2/it_emx_datatypes_Locationv2/42";
 
 		given()
 				.log().all()
 				.header(X_MOLGENIS_TOKEN, this.testUserToken)
 				.contentType(APPLICATION_JSON)
-				.body(bodyobject.toJSONString())
-				.when().post(API_V2 + "it_emx_datatypes_TypeTestRefv2")
+				.body(jsonObject.toJSONString())
+				.when().post(API_V2 + "it_emx_datatypes_Locationv2")
 				.then().statusCode(CREATED)
 				.log().all()
-				.body("location", equalTo("/api/v2/TypeTestRef?q=value=in=(\"ref55\",\"ref57\")"));
+				.body("location", equalTo(expectedLocation),
+						"resources[0].href", equalTo(expectedHref));
 
 	}
+
 
 	@AfterClass
 	public void afterClass()
@@ -136,10 +162,10 @@ public class RestControllerV2IT
 		removeEntity(adminToken, "it_emx_datatypes_Personv2");
 
 		// / Clean up permissions
-//		removeRight(adminToken, TYPE_TEST_PERMISSION_V2_ID);
-//		removeRight(adminToken, TYPE_TEST_REF_PERMISSION_V2_ID);
-//		removeRight(adminToken, LOCATION_PERMISSION_V2_ID);
-//		removeRight(adminToken, PERSONS_PERMISSION_V2_ID);
+		removeRight(adminToken, TYPE_TEST_PERMISSION_V2_ID);
+		removeRight(adminToken, TYPE_TEST_REF_PERMISSION_V2_ID);
+		removeRight(adminToken, LOCATION_PERMISSION_V2_ID);
+		removeRight(adminToken, PERSONS_PERMISSION_V2_ID);
 
 		removeRight(adminToken, PACKAGE_PERMISSION_ID);
 		removeRight(adminToken,  ENTITY_TYPE_PERMISSION_ID);
