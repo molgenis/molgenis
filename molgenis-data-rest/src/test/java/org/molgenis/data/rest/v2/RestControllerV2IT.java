@@ -151,6 +151,91 @@ public class RestControllerV2IT
 
 	}
 
+	@Test(dependsOnMethods = "batchCreate")
+	public void batchCreateTypeTest()
+	{
+
+		JSONObject entities = readJsonFile("/createEntitiesv2.json");
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(entities.toJSONString())
+				.when().post(API_V2 + "it_emx_datatypes_TypeTestv2")
+				.then().statusCode(CREATED)
+				.log().all()
+				.body("location", equalTo("/api/v2/it_emx_datatypes_TypeTestv2?q=id=in=(\"55\",\"57\")"),
+						"resources[0].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/55"),
+						"resources[1].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
+
+	}
+
+	@Test(dependsOnMethods = "batchCreateTypeTest", priority = 3)
+	public void batchUpdate()
+	{
+		JSONObject entities = readJsonFile("/updateEntitiesv2.json");
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(entities.toJSONString())
+				.when().put(API_V2 + "it_emx_datatypes_TypeTestv2")
+				.then().statusCode(OKE)
+				.log().all()
+				;
+	}
+
+	@Test(dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"}, priority = 5)
+	public void batchUpdateOnlyOneAttribute()
+	{
+		JSONObject jsonObject = new JSONObject();
+		JSONArray entities = new JSONArray();
+
+		JSONObject entity = new JSONObject();
+		entity.put("id", 55);
+		entity.put("xdatetime", "2015-01-05T08:30:00+0200");
+		entities.add(entity);
+
+		JSONObject entity2 = new JSONObject();
+		entity2.put("id", 57);
+		entity2.put("xdatetime", "2015-01-07T08:30:00+0200");
+		entities.add(entity2);
+
+		jsonObject.put("entities", entities);
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString())
+				.when().put(API_V2 + "it_emx_datatypes_TypeTestv2/xdatetime")
+				.then().statusCode(OKE)
+				.log().all()
+		;
+	}
+
+	@Test(dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"}, priority = 10)
+	public void batchDelete()
+	{
+		JSONObject jsonObject = new JSONObject();
+		JSONArray entityIds = new JSONArray();
+		entityIds.add("55");
+		entityIds.add("57");
+		jsonObject.put("entityIds", entityIds);
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString())
+				.when().delete(API_V2 + "it_emx_datatypes_TypeTestv2")
+				.then().statusCode(NO_CONTENT)
+				.log().all()
+		;
+	}
+
 
 	@AfterClass
 	public void afterClass()
