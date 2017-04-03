@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import org.molgenis.data.rest.RestControllerIT;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.net.URI;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static io.restassured.RestAssured.given;
+import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -22,11 +24,13 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class RestTestUtils
 {
+	private static final Logger LOG = getLogger(RestTestUtils.class);
+
 	public static final String APPLICATION_JSON = "application/json";
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
-	public static final String DEFAULT_HOST = "http://localhost:8080";
+	public static final String DEFAULT_HOST = "https://molgenis01.gcc.rug.nl";
 	public static final String DEFAULT_ADMIN_NAME = "admin";
 	public static final String DEFAULT_ADMIN_PW = "admin";
 
@@ -50,10 +54,7 @@ public class RestTestUtils
 		loginBody.put("username", userName);
 		loginBody.put("password", password);
 
-		return given()
-				.log().all()
-				.contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when().post("api/v1/login").then()
-				.log().all()
+		return given().contentType(APPLICATION_JSON).body(loginBody.toJSONString()).when().post("api/v1/login").then()
 				.extract().path("token");
 	}
 
@@ -75,7 +76,7 @@ public class RestTestUtils
 		createTestUserBody.put("Email", testuserName + "@example.com");
 
 		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.body(createTestUserBody.toJSONString()).when().post("api/v1/sys_sec_User").then();
+				.body(createTestUserBody.toJSONString()).when().post("api/v1/sys_sec_User");
 	}
 
 	/**
@@ -95,11 +96,33 @@ public class RestTestUtils
 		}
 		catch (URISyntaxException e)
 		{
-			getLogger(RestTestUtils.class).error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 
-		given().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
-				.header(X_MOLGENIS_TOKEN, adminToken).post("plugin/importwizard/importFile").then().log().all();
+		String importJobURL = given().multiPart(file).param("file").param("action", "ADD_UPDATE_EXISTING")
+				.header(X_MOLGENIS_TOKEN, adminToken).post("plugin/importwizard/importFile").then().extract()
+				.asString();
+
+		// Remove the leading '/' character and leading and trailing '"' characters
+		importJobURL = importJobURL.substring(2, importJobURL.length() - 1);
+		LOG.info("############ " + importJobURL);
+
+		String importStatus = "RUNNING";
+		while (importStatus.equals("RUNNING"))
+		{
+			importStatus = given().contentType(APPLICATION_JSON).header(X_MOLGENIS_TOKEN, adminToken).get(importJobURL)
+					.then().extract().path("status").toString();
+			try
+			{
+				sleep(500L);
+			}
+			catch (InterruptedException e)
+			{
+				LOG.error(e.getMessage());
+			}
+			LOG.info("Status: " + importStatus);
+		}
+		LOG.info("Import completed");
 	}
 
 	/**
@@ -147,8 +170,7 @@ public class RestTestUtils
 	 * @param entityName the entity name
 	 * @return the id of the given entity
 	 */
-	public static String getEntityTypeId(String adminToken, String attribute, String value,
-			String entityName)
+	public static String getEntityTypeId(String adminToken, String attribute, String value, String entityName)
 	{
 		Map<String, Object> query = of("q",
 				singletonList(of("field", attribute, "operator", "EQUALS", "value", value)));
@@ -181,13 +203,13 @@ public class RestTestUtils
 	 * @param entity       the entity on which the permissions are given
 	 * @param permission   the type of permission to give
 	 */
-	public static void grantSystemRights(String adminToken, String permissionID, String userId,
-			String entity, RestControllerIT.Permission permission)
+	public static void grantSystemRights(String adminToken, String permissionID, String userId, String entity,
+			RestControllerIT.Permission permission)
 	{
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
 
-		given()
+given()
 				.log().all()
 				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
 				.post("api/v1/" + "sys_sec_UserAuthority").then().log();

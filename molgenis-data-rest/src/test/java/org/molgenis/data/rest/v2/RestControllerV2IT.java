@@ -66,6 +66,10 @@ public class RestControllerV2IT
 
 		adminToken = RestTestUtils.login(adminUserName, adminPassword);
 
+		LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
+		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
+		LOG.info("Importing Done");
+
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
 		testUserId = getUserId(adminToken, REST_TEST_USER);
@@ -73,9 +77,6 @@ public class RestControllerV2IT
 		LOG.info("testUserId: " + testUserId);
 		LOG.info("adminUserId " + adminUserId);
 
-		LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
-		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
-		LOG.info("Importing Done");
 
 		grantSystemRights(adminToken, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package", WRITE);
 		grantSystemRights(adminToken, ENTITY_TYPE_PERMISSION_ID, testUserId, "sys_md_EntityType", WRITE);
@@ -90,7 +91,6 @@ public class RestControllerV2IT
 
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 		LOG.info("Test user token:" + this.testUserToken);
-
 	}
 
 	@Test
