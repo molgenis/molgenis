@@ -3,10 +3,14 @@ package org.molgenis.data.rest.convert;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.molgenis.data.rest.RestControllerIT;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -147,6 +151,29 @@ public class RestTestUtils
 			getLogger(RestTestUtils.class).error(e.getMessage());
 		}
 		return "";
+	}
+
+	/**
+	 * Read json from file and return as Json object
+	 * @param fileName the file to read from the resources folder
+	 * @return The json form the file a JSONObject
+	 */
+	public static JSONObject readJsonFile(String fileName)
+	{
+		JSONObject jsonObject = null;
+		try
+		{
+			jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(new FileReader(
+					Resources.getResource(RestTestUtils.class, fileName).getFile()));
+
+		}
+		catch (ParseException | FileNotFoundException e)
+		{
+			LOG.error("Unable to readJsonFile(" + fileName + ")");
+			LOG.error(e.getMessage());
+		}
+
+		return jsonObject;
 	}
 
 	/**
