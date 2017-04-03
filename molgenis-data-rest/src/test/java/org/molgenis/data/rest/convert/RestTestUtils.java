@@ -46,7 +46,7 @@ public class RestTestUtils
 	public static final int NOT_FOUND = 404;
 
 	/**
-	 * Login with user name and password and return token on success
+	 * Login with user name and password and return token on success.
 	 *
 	 * @param userName the username to login with
 	 * @param password the password to use for login
@@ -63,29 +63,30 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Create a user with testuserName and testUserPassword as admin using given token
+	 * Create a user with userName and password as admin using given token.
 	 *
 	 * @param adminToken       the token to use for login
-	 * @param testuserName     the name of the user to create
-	 * @param testUserPassword the password of the user to create
+	 * @param userName     the name of the user to create
+	 * @param password the password of the user to create
 	 */
-	public static void createUser(String adminToken, String testuserName, String testUserPassword)
+	public static void createUser(String adminToken, String userName, String password)
 	{
 		JSONObject createTestUserBody = new JSONObject();
 		createTestUserBody.put("active", true);
-		createTestUserBody.put("username", testuserName);
-		createTestUserBody.put("password_", testUserPassword);
+		createTestUserBody.put("username", userName);
+		createTestUserBody.put("password_", password);
 		createTestUserBody.put("superuser", false);
 		createTestUserBody.put("changePassword", false);
-		createTestUserBody.put("Email", testuserName + "@example.com");
+		createTestUserBody.put("Email", userName + "@example.com");
 
 		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
 				.body(createTestUserBody.toJSONString()).when().post("api/v1/sys_sec_User");
 	}
 
 	/**
-	 * Import emx file
-	 * using add/update
+	 * Import emx file using add/update.
+	 *
+	 * Importing is done async in the backend, but this methods waits for importing to be done.
 	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
@@ -111,6 +112,7 @@ public class RestTestUtils
 		importJobURL = importJobURL.substring(2, importJobURL.length() - 1);
 		LOG.info("############ " + importJobURL);
 
+		// As importing is done async in the backend we poll the success url to check if importing is done.
 		String importStatus = "RUNNING";
 		while (importStatus.equals("RUNNING"))
 		{
@@ -132,7 +134,7 @@ public class RestTestUtils
 	/**
 	 * Reads the contents of a file and stores it in a String.
 	 * Useful if you want to compare the contents of a file with the response of an API endpoint,
-	 * if that endpoint returns a file (e.g. /api/v1/csv/{entityName}
+	 * if that endpoint returns a file (e.g. /api/v1/csv/{entityName}.
 	 *
 	 * @param fileName the name of the file
 	 * @return a string containing the files contents
@@ -154,7 +156,8 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Read json from file and return as Json object
+	 * Read json from file and return as Json object.
+	 *
 	 * @param fileName the file to read from the resources folder
 	 * @return The json form the file a JSONObject
 	 */
@@ -189,7 +192,7 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Get the id for a given entity
+	 * Get the id for a given entity.
 	 *
 	 * @param adminToken token for signin
 	 * @param attribute  the field to filter on
@@ -208,7 +211,7 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Grant user rights on non-system entity
+	 * Grant user rights on non-system entity.
 	 *
 	 * @param adminToken the token to use for signin
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
@@ -222,7 +225,7 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Grant user rights on system entity
+	 * Grant user rights on system entity.
 	 *
 	 * @param adminToken   the token to use for signin
 	 * @param permissionID the id of the permission
@@ -236,7 +239,7 @@ public class RestTestUtils
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
 
-given()
+		given()
 				.log().all()
 				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
 				.post("api/v1/" + "sys_sec_UserAuthority").then().log();
