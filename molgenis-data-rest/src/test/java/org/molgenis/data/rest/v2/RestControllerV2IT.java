@@ -1,11 +1,8 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.elasticsearch.common.Strings;
 import org.molgenis.data.rest.RestControllerIT;
 import org.molgenis.data.rest.convert.RestTestUtils;
@@ -15,16 +12,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.RestControllerIT.Permission.READ;
 import static org.molgenis.data.rest.RestControllerIT.Permission.WRITE;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.testng.Assert.assertNotNull;
 
 public class RestControllerV2IT
 {
@@ -162,7 +155,7 @@ public class RestControllerV2IT
 	public void batchCreateTypeTest()
 	{
 
-		JSONObject entities = readJsonFile("/entitiesv2.json");
+		JSONObject entities = readJsonFile("/createEntitiesv2.json");
 
 		given()
 				.log().all()
@@ -176,6 +169,71 @@ public class RestControllerV2IT
 						"resources[0].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/55"),
 						"resources[1].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
 
+	}
+
+	@Test(dependsOnMethods = "batchCreateTypeTest", priority = 3)
+	public void batchUpdate()
+	{
+		JSONObject entities = readJsonFile("/updateEntitiesv2.json");
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(entities.toJSONString())
+				.when().put(API_V2 + "it_emx_datatypes_TypeTestv2")
+				.then().statusCode(OKE)
+				.log().all()
+				;
+	}
+
+	@Test(dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"}, priority = 5)
+	public void batchUpdateOnlyOneAttribute()
+	{
+		JSONObject jsonObject = new JSONObject();
+		JSONArray entities = new JSONArray();
+
+		JSONObject entity = new JSONObject();
+		entity.put("id", 55);
+		entity.put("xdatetime", "2015-01-05T08:30:00+0200");
+		entities.add(entity);
+
+		JSONObject entity2 = new JSONObject();
+		entity2.put("id", 57);
+		entity2.put("xdatetime", "2015-01-07T08:30:00+0200");
+		entities.add(entity2);
+
+		jsonObject.put("entities", entities);
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString())
+				.when().put(API_V2 + "it_emx_datatypes_TypeTestv2/xdatetime")
+				.then().statusCode(OKE)
+				.log().all()
+		;
+	}
+
+	@Test(dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"}, priority = 10)
+	public void batchDelete()
+	{
+		JSONObject jsonObject = new JSONObject();
+		JSONArray entityIds = new JSONArray();
+		entityIds.add("55");
+		entityIds.add("57");
+		jsonObject.put("entityIds", entityIds);
+
+		given()
+				.log().all()
+				.header(X_MOLGENIS_TOKEN, this.testUserToken)
+				.contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString())
+				.when().delete(API_V2 + "it_emx_datatypes_TypeTestv2")
+				.then().statusCode(NO_CONTENT)
+				.log().all()
+		;
 	}
 
 
