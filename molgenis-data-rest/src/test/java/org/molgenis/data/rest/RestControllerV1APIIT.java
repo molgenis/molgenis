@@ -96,7 +96,7 @@ public class RestControllerV1APIIT
 		grantSystemRights(adminToken, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package", WRITE);
 		grantSystemRights(adminToken, ENTITY_TYPE_PERMISSION_ID, testUserId, "sys_md_EntityType", WRITE);
 		grantSystemRights(adminToken, ATTRIBUTE_PERMISSION_ID, testUserId, "sys_md_Attribute", WRITE);
-		grantSystemRights(adminToken, FILE_META_PERMISSION_ID, testUserId, "sys_FileMeta", READ);
+		grantSystemRights(adminToken, FILE_META_PERMISSION_ID, testUserId, "sys_FileMeta", WRITE);
 		grantSystemRights(adminToken, OWNED_PERMISSION_ID, testUserId, "sys_sec_Owned", READ);
 
 		grantRights(adminToken, TYPE_TEST_PERMISSION_ID, testUserId, "TypeTest", WRITE);
@@ -255,16 +255,12 @@ public class RestControllerV1APIIT
 
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType("multipart/form-data")
 				.multiPart("id", "6").multiPart(file).when().post(PATH + "base_ApiTestFile").then().log().all()
-				.statusCode(201);
+				.statusCode(CREATED);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
-				.get(PATH + "base_ApiTestFile/6").then().log().all().statusCode(200)
-				.body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6")
-				//, "fileAttr.href",equalTo("/api/v1/base_ApiTestFile/6/fileAttr")
-				);
-
-		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).delete(PATH + "base_ApiTestFile/6").then()
-				.log().all().statusCode(204);
+				.get(PATH + "base_ApiTestFile/6").then().log().all().statusCode(OKE)
+				.body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "file.href",
+						equalTo("/api/v1/base_ApiTestFile/6/file"));
 	}
 
 	@Test
@@ -346,17 +342,20 @@ public class RestControllerV1APIIT
 				.post(PATH + "it_emx_datatypes_TypeTestRef/ref1/label?_method=PUT").then().log().all().statusCode(OKE);
 	}
 
-	//    @Transactional
-	//    @RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=multipart/form-data")
-	//    @ResponseStatus(NO_CONTENT)
-	//    public void updateFromFormPostMultiPart(@PathVariable("entityName") String entityName,
-	//                                            @PathVariable("id") String untypedId, MultipartHttpServletRequest request)
-	// TODO
-
 	@Test
-	public void testUpdateFromFormPostMultiPart()
+	public void testUpdateFromFormPostMultiPart() throws URISyntaxException
 	{
+		URL resourceUrl = Resources.getResource(RestControllerV1APIIT.class, "/RestControllerV1_FileEMX.xlsx");
+		File file = new File(new URI(resourceUrl.toString()).getPath());
 
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType("multipart/form-data")
+				.multiPart("id", "1").multiPart(file).when().post(PATH + "base_ApiTestFile/1?_method=PUT").then().log()
+				.all().statusCode(NO_CONTENT);
+
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
+				.get(PATH + "base_ApiTestFile/1").then().log().all().statusCode(OKE)
+				.body("href", equalTo("/api/v1/base_ApiTestFile/1"), "id", equalTo("1"), "file.href",
+						equalTo("/api/v1/base_ApiTestFile/1/file"));
 	}
 
 	@Test
