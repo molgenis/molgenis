@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.elasticsearch.common.Strings;
@@ -18,6 +17,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -231,18 +231,15 @@ public class RestControllerV1APIIT
 	@Test
 	public void testCreateFromFormPost()
 	{
-		// Add new entity from form post
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
 				.formParam("value", "ref6").formParam("label", "label6").when()
 				.post(PATH + "it_emx_datatypes_TypeTestRef").then().log().all().statusCode(CREATED);
 
-		// Check if entity was added
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).get(PATH + "it_emx_datatypes_TypeTestRef/ref6")
 				.then().log().all().statusCode(OKE)
 				.body("href", equalTo("/api/v1/it_emx_datatypes_TypeTestRef/ref6"), "value", equalTo("ref6"), "label",
 						equalTo("label6"));
 
-		// Delete added entity
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON).when()
 				.delete(PATH + "it_emx_datatypes_TypeTestRef/ref6").then().log().all().statusCode(NO_CONTENT);
 	}
@@ -250,7 +247,7 @@ public class RestControllerV1APIIT
 	@Test
 	public void testCreateFromFormPostMultiPart() throws URISyntaxException
 	{
-		URL resourceUrl = Resources.getResource(RestControllerV1APIIT.class, "/RestControllerV1_FileEMX.xlsx");
+		URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType("multipart/form-data")
@@ -345,7 +342,7 @@ public class RestControllerV1APIIT
 	@Test
 	public void testUpdateFromFormPostMultiPart() throws URISyntaxException
 	{
-		URL resourceUrl = Resources.getResource(RestControllerV1APIIT.class, "/RestControllerV1_FileEMX.xlsx");
+		URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType("multipart/form-data")
