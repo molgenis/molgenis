@@ -30,7 +30,7 @@ public class RestTestUtils
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
-	public static final String DEFAULT_HOST = "https://molgenis01.gcc.rug.nl";
+	public static final String DEFAULT_HOST = "https://molgenis62.gcc.rug.nl";
 	public static final String DEFAULT_ADMIN_NAME = "admin";
 	public static final String DEFAULT_ADMIN_PW = "admin";
 
