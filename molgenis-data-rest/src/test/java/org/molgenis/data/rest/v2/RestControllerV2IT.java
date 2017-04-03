@@ -28,17 +28,6 @@ public class RestControllerV2IT
 	private static final String REST_TEST_USER = "rest_test_v2";
 	private static final String REST_TEST_USER_PASSWORD = REST_TEST_USER;
 
-	private static final String PACKAGE_PERMISSION_ID = "package_permission_ID";
-	private static final String ENTITY_TYPE_PERMISSION_ID = "entityType_permission_ID";
-	private static final String ATTRIBUTE_PERMISSION_ID = "attribute_permission_ID";
-	private static final String FILE_META_PERMISSION_ID = "file_meta_permission_ID";
-	private static final String OWNED_PERMISSION_ID = "owned_permission_ID";
-
-	private static final String TYPE_TEST_PERMISSION_V2_ID = "typeTest_permissionc_v2_ID";
-	private static final String TYPE_TEST_REF_PERMISSION_V2_ID = "typeTestRef_permission_v2_ID";
-	private static final String LOCATION_PERMISSION_V2_ID = "location_permission_v2_ID";
-	private static final String PERSONS_PERMISSION_V2_ID = "persons_permission_v2_ID";
-
 	private String testUserToken;
 	private String adminToken;
 	private String testUserId;
@@ -77,17 +66,16 @@ public class RestControllerV2IT
 		LOG.info("testUserId: " + testUserId);
 		LOG.info("adminUserId " + adminUserId);
 
+		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_FileMeta", READ);
+		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
 
-		grantSystemRights(adminToken, PACKAGE_PERMISSION_ID, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, ENTITY_TYPE_PERMISSION_ID, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, ATTRIBUTE_PERMISSION_ID, testUserId, "sys_md_Attribute", WRITE);
-		grantSystemRights(adminToken, FILE_META_PERMISSION_ID, testUserId, "sys_FileMeta", READ);
-		grantSystemRights(adminToken, OWNED_PERMISSION_ID, testUserId, "sys_sec_Owned", READ);
-
-		grantRights(adminToken, TYPE_TEST_PERMISSION_V2_ID, testUserId, "TypeTestv2", RestControllerIT.Permission.WRITE);
-		grantRights(adminToken, TYPE_TEST_REF_PERMISSION_V2_ID, testUserId, "TypeTestRefv2", RestControllerIT.Permission.WRITE);
-		grantRights(adminToken, LOCATION_PERMISSION_V2_ID, testUserId, "Locationv2", RestControllerIT.Permission.WRITE);
-		grantRights(adminToken, PERSONS_PERMISSION_V2_ID, testUserId, "Personv2", RestControllerIT.Permission.WRITE);
+		grantRights(adminToken, testUserId, "TypeTestv2", RestControllerIT.Permission.WRITE);
+		grantRights(adminToken, testUserId, "TypeTestRefv2", RestControllerIT.Permission.WRITE);
+		grantRights(adminToken, testUserId, "Locationv2", RestControllerIT.Permission.WRITE);
+		grantRights(adminToken, testUserId, "Personv2", RestControllerIT.Permission.WRITE);
 
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 		LOG.info("Test user token:" + this.testUserToken);
@@ -111,14 +99,9 @@ public class RestControllerV2IT
 
 		jsonObject.put("entities", entities);
 
-		given()
-				.log().method().log().uri()
-				.header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON)
-				.body(jsonObject.toJSONString())
-				.when().post(API_V2 + "it_emx_datatypes_TypeTestRefv2")
-				.then().statusCode(CREATED)
-				.log().all()
+		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString()).when().post(API_V2 + "it_emx_datatypes_TypeTestRefv2").then()
+				.statusCode(CREATED).log().all()
 				.body("location", equalTo("/api/v2/it_emx_datatypes_TypeTestRefv2?q=value=in=(\"ref55\",\"ref57\")"));
 	}
 
@@ -138,16 +121,10 @@ public class RestControllerV2IT
 		String expectedLocation = "/api/v2/it_emx_datatypes_Locationv2?q=Position=in=(\"42\")";
 		String expectedHref = "/api/v2/it_emx_datatypes_Locationv2/42";
 
-		given()
-				.log().all()
-				.header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON)
-				.body(jsonObject.toJSONString())
-				.when().post(API_V2 + "it_emx_datatypes_Locationv2")
-				.then().statusCode(CREATED)
-				.log().all()
-				.body("location", equalTo(expectedLocation),
-						"resources[0].href", equalTo(expectedHref));
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString()).when().post(API_V2 + "it_emx_datatypes_Locationv2").then()
+				.statusCode(CREATED).log().all()
+				.body("location", equalTo(expectedLocation), "resources[0].href", equalTo(expectedHref));
 
 	}
 
@@ -157,17 +134,12 @@ public class RestControllerV2IT
 
 		JSONObject entities = readJsonFile("/createEntitiesv2.json");
 
-		given()
-				.log().all()
-				.header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON)
-				.body(entities.toJSONString())
-				.when().post(API_V2 + "it_emx_datatypes_TypeTestv2")
-				.then().statusCode(CREATED)
-				.log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
+				.body(entities.toJSONString()).when().post(API_V2 + "it_emx_datatypes_TypeTestv2").then()
+				.statusCode(CREATED).log().all()
 				.body("location", equalTo("/api/v2/it_emx_datatypes_TypeTestv2?q=id=in=(\"55\",\"57\")"),
-						"resources[0].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/55"),
-						"resources[1].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
+						"resources[0].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/55"), "resources[1].href",
+						equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
 
 	}
 
@@ -176,18 +148,12 @@ public class RestControllerV2IT
 	{
 		JSONObject entities = readJsonFile("/updateEntitiesv2.json");
 
-		given()
-				.log().all()
-				.header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON)
-				.body(entities.toJSONString())
-				.when().put(API_V2 + "it_emx_datatypes_TypeTestv2")
-				.then().statusCode(OKE)
-				.log().all()
-				;
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
+				.body(entities.toJSONString()).when().put(API_V2 + "it_emx_datatypes_TypeTestv2").then().statusCode(OKE)
+				.log().all();
 	}
 
-	@Test(dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"}, priority = 5)
+	@Test(dependsOnMethods = { "batchCreate", "batchCreateTypeTest", "batchUpdate" }, priority = 5)
 	public void batchUpdateOnlyOneAttribute()
 	{
 		JSONObject jsonObject = new JSONObject();
@@ -205,18 +171,12 @@ public class RestControllerV2IT
 
 		jsonObject.put("entities", entities);
 
-		given()
-				.log().all()
-				.header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON)
-				.body(jsonObject.toJSONString())
-				.when().put(API_V2 + "it_emx_datatypes_TypeTestv2/xdatetime")
-				.then().statusCode(OKE)
-				.log().all()
-		;
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString()).when().put(API_V2 + "it_emx_datatypes_TypeTestv2/xdatetime").then()
+				.statusCode(OKE).log().all();
 	}
 
-	@Test(dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"}, priority = 10)
+	@Test(dependsOnMethods = { "batchCreate", "batchCreateTypeTest", "batchUpdate" }, priority = 10)
 	public void batchDelete()
 	{
 		JSONObject jsonObject = new JSONObject();
@@ -225,17 +185,10 @@ public class RestControllerV2IT
 		entityIds.add("57");
 		jsonObject.put("entityIds", entityIds);
 
-		given()
-				.log().all()
-				.header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.contentType(APPLICATION_JSON)
-				.body(jsonObject.toJSONString())
-				.when().delete(API_V2 + "it_emx_datatypes_TypeTestv2")
-				.then().statusCode(NO_CONTENT)
-				.log().all()
-		;
+		given().log().all().header(X_MOLGENIS_TOKEN, this.testUserToken).contentType(APPLICATION_JSON)
+				.body(jsonObject.toJSONString()).when().delete(API_V2 + "it_emx_datatypes_TypeTestv2").then()
+				.statusCode(NO_CONTENT).log().all();
 	}
-
 
 	@AfterClass
 	public void afterClass()
@@ -246,27 +199,13 @@ public class RestControllerV2IT
 		removeEntity(adminToken, "it_emx_datatypes_Locationv2");
 		removeEntity(adminToken, "it_emx_datatypes_Personv2");
 
-		// / Clean up permissions
-		removeRight(adminToken, TYPE_TEST_PERMISSION_V2_ID);
-		removeRight(adminToken, TYPE_TEST_REF_PERMISSION_V2_ID);
-		removeRight(adminToken, LOCATION_PERMISSION_V2_ID);
-		removeRight(adminToken, PERSONS_PERMISSION_V2_ID);
-
-		removeRight(adminToken, PACKAGE_PERMISSION_ID);
-		removeRight(adminToken,  ENTITY_TYPE_PERMISSION_ID);
-		removeRight(adminToken,  ATTRIBUTE_PERMISSION_ID);
-		removeRight(adminToken,  FILE_META_PERMISSION_ID);
-		removeRight(adminToken,  OWNED_PERMISSION_ID);
+		// Clean up permissions
+		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, this.testUserToken)
-				.when().post("api/v1/logout");
+		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post("api/v1/logout");
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken)
-				.when().delete("api/v1/sys_sec_User/" + this.testUserId);
+		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
 	}
-
-
-
 }

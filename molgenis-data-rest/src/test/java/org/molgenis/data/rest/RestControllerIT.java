@@ -17,13 +17,10 @@ import static org.molgenis.data.rest.convert.RestTestUtils.*;
 public class RestControllerIT
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerIT.class);
-	// Request parameters1
+
+	// Request parameters
 	private static final String PATH = "api/v1/";
-	// Permission identifiers
-	private static final String FREEMARKER_TEMPLATE_PERMISSION_ID = "freemarkerTemplate_permission_ID";
-	private static final String SCRIPT_TYPE_PERMISSION_ID = "scriptType_permission_ID";
-	private static final String SYS_SEC_USER_AUTHORITY_ID = "sys_sec_UserAuthority_ID";
-	private static final String SYS_FILE_META_ID = "sys_FileMeta_ID";
+
 	// User credentials
 	private static final String REST_TEST_USER = "rest_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
@@ -60,13 +57,10 @@ public class RestControllerIT
 		testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
 
-		grantSystemRights(adminToken, FREEMARKER_TEMPLATE_PERMISSION_ID, testUserId, "sys_FreemarkerTemplate",
-				Permission.WRITE);
-		grantSystemRights(adminToken, SCRIPT_TYPE_PERMISSION_ID, testUserId, "sys_scr_ScriptType",
-				Permission.READ);
-		grantSystemRights(adminToken, SYS_SEC_USER_AUTHORITY_ID, testUserId, "sys_sec_UserAuthority",
-				Permission.COUNT);
-		grantSystemRights(adminToken, SYS_FILE_META_ID, testUserId, "sys_FileMeta", Permission.WRITEMETA);
+		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", Permission.WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", Permission.READ);
+		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", Permission.COUNT);
+		grantSystemRights(adminToken, testUserId, "sys_FileMeta", Permission.WRITEMETA);
 
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
@@ -180,10 +174,7 @@ public class RestControllerIT
 	public void afterClass()
 	{
 		// Clean up permissions
-		removeRight(adminToken, FREEMARKER_TEMPLATE_PERMISSION_ID);
-		removeRight(adminToken, SCRIPT_TYPE_PERMISSION_ID);
-		removeRight(adminToken, SYS_FILE_META_ID);
-		removeRight(adminToken, SYS_SEC_USER_AUTHORITY_ID);
+		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
 		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post(PATH + "logout");

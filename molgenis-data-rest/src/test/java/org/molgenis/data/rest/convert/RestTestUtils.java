@@ -14,9 +14,12 @@ import java.io.FileReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static com.google.common.collect.Maps.newHashMap;
 import static io.restassured.RestAssured.given;
 import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonList;
@@ -34,7 +37,7 @@ public class RestTestUtils
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
-	public static final String DEFAULT_HOST = "https://molgenis62.gcc.rug.nl";
+	public static final String DEFAULT_HOST = "https://molgenis01.gcc.rug.nl";
 	public static final String DEFAULT_ADMIN_NAME = "admin";
 	public static final String DEFAULT_ADMIN_PW = "admin";
 
@@ -156,11 +159,7 @@ public class RestTestUtils
 	}
 
 	/**
-	 * <<<<<<< HEAD
-	 * Read json from file and return as Json object
-	 * =======
 	 * Read json from file and return as Json object.
-	 * >>>>>>> b007fa695f6eb0331044c66c0508305b959b0e90
 	 *
 	 * @param fileName the file to read from the resources folder
 	 * @return The json form the file a JSONObject
@@ -221,30 +220,29 @@ public class RestTestUtils
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
 	 * @param entity     a list of entity names
 	 */
-	public static void grantRights(String adminToken, String permissionID, String userId, String entity,
+	public static void grantRights(String adminToken, String userId, String entity,
 			RestControllerIT.Permission permission)
 	{
 		String entityTypeId = getEntityTypeId(adminToken, "name", entity, "sys_md_EntityType");
-		grantSystemRights(adminToken, permissionID, userId, entityTypeId, permission);
+		grantSystemRights(adminToken, userId, entityTypeId, permission);
 	}
 
 	/**
 	 * Grant user rights on system entity.
 	 *
-	 * @param adminToken   the token to use for signin
-	 * @param permissionID the id of the permission
-	 * @param userId       the id of the user to give the permissions to
-	 * @param entity       the entity on which the permissions are given
-	 * @param permission   the type of permission to give
+	 * @param adminToken the token to use for signin
+	 * @param userId     the id of the user to give the permissions to
+	 * @param entity     the entity on which the permissions are given
+	 * @param permission the type of permission to give
 	 */
-	public static void grantSystemRights(String adminToken, String permissionID, String userId, String entity,
+	public static void grantSystemRights(String adminToken, String userId, String entity,
 			RestControllerIT.Permission permission)
 	{
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
-		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
+		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
 
-		given().log().all().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.body(body.toJSONString()).when().post("api/v1/" + "sys_sec_UserAuthority").then().log();
+		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
+				.post("api/v1/" + "sys_sec_UserAuthority");
 	}
 
 	/**
@@ -260,6 +258,33 @@ public class RestTestUtils
 	public static void removeEntity(String adminToken, String entityName)
 	{
 		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.delete("api/v1/" + entityName + "/meta").then().log().all();
+				.delete("api/v1/" + entityName + "/meta");
+	}
+
+	/**
+	 * Removes permissions from UserAuthority table for a given user identifier
+	 *
+	 * @param adminToken
+	 * @param testUserId
+	 */
+	public static void removeRightsForUser(String adminToken, String testUserId)
+	{
+		// get identifiers for permissions this user owns
+		Map<String, Object> query = of("q",
+				singletonList(of("field", "User", "operator", "EQUALS", "value", testUserId)));
+		JSONObject body = new JSONObject(query);
+
+		List<Map> permissions = given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
+				.queryParam("_method", "GET").body(body.toJSONString()).when().post("api/v1/" + "sys_sec_UserAuthority")
+				.then().extract().path("items");
+
+		List<String> identifiers = permissions.stream().map(jsonObject -> jsonObject.get("id").toString())
+				.collect(Collectors.toList());
+
+		// use identifiers to batch delete from User Authority table
+		Map<String, List<String>> requestBody = newHashMap();
+		requestBody.put("entityIds", identifiers);
+		given().header(X_MOLGENIS_TOKEN, adminToken).contentType(APPLICATION_JSON).body(requestBody)
+				.delete("api/v2/sys_sec_UserAuthority");
 	}
 }
