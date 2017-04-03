@@ -68,9 +68,6 @@ public class RestControllerIT
 				Permission.COUNT);
 		grantSystemRights(adminToken, SYS_FILE_META_ID, testUserId, "sys_FileMeta", Permission.WRITEMETA);
 
-		// Add home plugin
-		// Add Language entity
-
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
