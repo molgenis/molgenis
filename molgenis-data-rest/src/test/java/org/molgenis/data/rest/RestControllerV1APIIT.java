@@ -445,7 +445,7 @@ public class RestControllerV1APIIT
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.adminToken).delete(PATH + "base_APITest3/meta").then().log()
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).delete(PATH + "base_APITest3/meta").then().log()
 				.all().statusCode(NO_CONTENT);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(PATH + "base_APITest3").then().log().all()
@@ -460,7 +460,7 @@ public class RestControllerV1APIIT
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, this.adminToken).post(PATH + "base_APITest4/meta?_method=DELETE")
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).post(PATH + "base_APITest4/meta?_method=DELETE")
 				.then().log().all().statusCode(NO_CONTENT);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(PATH + "base_APITest4").then().log().all()
@@ -569,6 +569,6 @@ public class RestControllerV1APIIT
 		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post(PATH + "logout");
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
+		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
 	}
 }
