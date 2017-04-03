@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -56,8 +57,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Controller
 @RequestMapping(BASE_URI)
-class
-RestControllerV2
+class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
@@ -140,13 +140,13 @@ RestControllerV2
 	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
 			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
 	{
-		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
-		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
+		requireNonNull(molgenisVersion);
+		requireNonNull(molgenisBuildDate);
 		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ?
 				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())
 						+ " by IntelliJ" : molgenisBuildDate;
 
-		Map<String, String> result = new HashMap<>();
+		Map<String, String> result = newHashMap();
 		result.put("molgenisVersion", molgenisVersion);
 		result.put("buildDate", molgenisBuildDate);
 
@@ -402,8 +402,7 @@ RestControllerV2
 	}
 
 	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
-			Package pack,
-			String label)
+			Package pack, String label)
 	{
 		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
@@ -549,8 +548,7 @@ RestControllerV2
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public
-	@ResponseBody
+	public @ResponseBody
 	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
 	{
 		LOG.debug("Invalid request body.", exception);
@@ -559,8 +557,7 @@ RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public
-	@ResponseBody
+	public @ResponseBody
 	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
