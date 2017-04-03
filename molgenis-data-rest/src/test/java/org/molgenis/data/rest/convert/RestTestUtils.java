@@ -155,6 +155,7 @@ public class RestTestUtils
 
 	/**
 	 * Read json from file and return as Json object
+	 *
 	 * @param fileName the file to read from the resources folder
 	 * @return The json form the file a JSONObject
 	 */
@@ -163,8 +164,8 @@ public class RestTestUtils
 		JSONObject jsonObject = null;
 		try
 		{
-			jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(new FileReader(
-					Resources.getResource(RestTestUtils.class, fileName).getFile()));
+			jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE)
+					.parse(new FileReader(Resources.getResource(RestTestUtils.class, fileName).getFile()));
 
 		}
 		catch (ParseException | FileNotFoundException e)
@@ -236,10 +237,8 @@ public class RestTestUtils
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("id", permissionID, "role", right, "User", userId));
 
-given()
-				.log().all()
-				.header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON).body(body.toJSONString()).when()
-				.post("api/v1/" + "sys_sec_UserAuthority").then().log();
+		given().log().all().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
+				.body(body.toJSONString()).when().post("api/v1/" + "sys_sec_UserAuthority").then().log();
 	}
 
 	/**

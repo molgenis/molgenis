@@ -105,15 +105,14 @@ public class RestControllerV2APIIT
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
-	//	@Autowired
-	//	@RequestMapping(value = "/version", method = GET)
-	//	@ResponseBody
-	//	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
-	//			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
-	//	@Test
+	@Test(enabled = false) // TODO
 	public void testGetVersion()
 	{
-
+		//	@Autowired
+		//	@RequestMapping(value = "/version", method = GET)
+		//	@ResponseBody
+		//	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
+		//			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
 	}
 
 	@Test
@@ -205,15 +204,15 @@ public class RestControllerV2APIIT
 		validateRetrieveEntityAttributeMeta(response);
 	}
 
-	//	@Transactional
-	//	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
-	//	@ResponseBody
-	//	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
-	//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
-
-	@Test
+	@Test(enabled = false) // FIXME
 	public void testCreateEntities()
 	{
+		//		@Transactional
+		//		@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
+		//		@ResponseBody
+		//		public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
+		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+
 		JSONObject jsonObject = new JSONObject();
 		JSONArray entities = new JSONArray();
 
@@ -250,35 +249,43 @@ public class RestControllerV2APIIT
 				.body("href", equalTo("/api/v2/base_CopiedEntity"), "items[0].label", equalTo("Copied!"));
 	}
 
-	@Test
+	@Test(enabled = false) // FIXME
 	public void testUpdateEntities()
 	{
-		Map<String, Object> request = newHashMap();
-		request.put("id", "ref1");
-		request.put("xstring", "This is an updated entity!");
+		//		@RequestMapping(value = "/{entityName}", method = PUT)
+		//		public synchronized void updateEntities(@PathVariable("entityName") String entityName,
+		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+
+		Map<String, List<Object>> request = newHashMap();
+		Map<String, Object> entity = newHashMap();
+		entity.put("id", "ref1");
+		entity.put("xstring", "This is an updated entity!");
+
+		request.put("entities", newArrayList(entity));
 
 		given().log().all().contentType(APPLICATION_JSON).body(request).header(X_MOLGENIS_TOKEN, testUserToken)
 				.put(API_V2 + "it_emx_datatypes_TypeTestRef").then().log().all().statusCode(OKE);
 	}
 
-	//	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
-	//	@ResponseStatus(OK)
-	//	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
-	//			@PathVariable("attributeName") String attributeName,
-	//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
-
-	@Test
+	@Test(enabled = false) // TODO
 	public void testUpdateAttribute()
 	{
-	}
+		//	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
+		//	@ResponseStatus(OK)
+		//	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
+		//			@PathVariable("attributeName") String attributeName,
+		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 
-	//	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
-	//	@ResponseBody
-	//	public Map<String, String> getI18nStrings()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).
+				put(API_V2 + "base_v2APITest1/label").then().log().all().statusCode(OKE);
+	}
 
 	@Test
 	public void testGetI18nStrings()
 	{
+		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "i18n")
+				.then().log().all();
+		validateGetI18nStrings(response);
 	}
 
 	private void validateRetrieveEntityWithoutAttributeFilter(ValidatableResponse response)
@@ -383,6 +390,43 @@ public class RestControllerV2APIIT
 				equalTo(255), "auto", equalTo(false), "nillable", equalTo(false), "readOnly", equalTo(true),
 				"labelAttribute", equalTo(false), "unique", equalTo(true), "visible", equalTo(true), "lookupAttribute",
 				equalTo(true), "isAggregatable", equalTo(false));
+	}
+
+	private void validateGetI18nStrings(ValidatableResponse response)
+	{
+		response.statusCode(OKE);
+		response.body("dataexplorer_wizard_cancel", equalTo("Cancel"), "questionnaires_table_view_questionnaire_button",
+				equalTo("View questionnaire"), "dataexplorer_aggregates_title", equalTo("Aggregates"),
+				"dataexplorer_directory_export_no_filters",
+				equalTo("Please filter the collections before sending a request to the negotiator."),
+				"questionnaire_submit", equalTo("Submit"), "questionnaires_title", equalTo("My questionnaires"),
+				"form_bool_false", equalTo("No"), "form_bool_missing", equalTo("N/A"), "form_mref_control_placeholder",
+				equalTo("Search for Values"), "dataexplorer_directory_export_dialog_message",
+				equalTo("Your current selection of biobanks along with your filtering criteria will be sent to the BBMRI Negotiator. Are you sure?"),
+				"questionnaires_table_status_header", equalTo("Status"), "dataexplorer_directory_export_dialog_yes",
+				equalTo("Yes, Send to Negotiator"), "dataexplorer_wizard_button", equalTo("Wizard"),
+				"dataexplorer_wizard_apply", equalTo("Apply"), "questionnaires_table_status_open", equalTo("Open"),
+				"questionnaire_thank_you_page_back_button", equalTo("Back to My questionnaires"), "form_bool_true",
+				equalTo("Yes"), "form_xref_control_placeholder", equalTo("Search for a Value"),
+				"form_url_control_placeholder", equalTo("URL"), "questionnaires_table_continue_questionnaire_button",
+				equalTo("Continue questionnaire"), "questionnaires_table_questionnaire_header",
+				equalTo("Questionnaire"), "dataexplorer_aggregates_missing", equalTo("N/A"),
+				"questionnaires_description", equalTo("Submitted and open questionnaires"),
+				"questionnaires_table_status_submitted", equalTo("Submitted"), "questionnaire_save_and_continue",
+				equalTo("Save and continue later"), "dataexplorer_directory_export_button",
+				equalTo("Go to sample / data negotiation"), "dataexplorer_data_data_item_filters",
+				equalTo("Data item filters"), "dataexplorer_aggregates_total", equalTo("Total"),
+				"dataexplorer_directory_export_dialog_title", equalTo("Send request to the BBMRI Negotiator?"),
+				"questionnaires_table_status_not_started", equalTo("Not started yet"), "form_email_control_placeholder",
+				equalTo("Email"), "form_computed_control_placeholder", equalTo("This value is computed automatically"),
+				"dataexplorer_aggregates_no_result_message", equalTo("No results found"),
+				"questionnaires_table_start_questionnaire_button", equalTo("Start questionnaire"),
+				"dataexplorer_wizard_title", equalTo("Filter Wizard"), "dataexplorer_aggregates_distinct",
+				equalTo("Distinct"), "form_number_control_placeholder", equalTo("Number"),
+				"dataexplorer_aggregates_group_by", equalTo("Group by"), "dataexplorer_directory_export_dialog_no",
+				equalTo("No, I want to keep filtering"), "questionnaire_back_button",
+				equalTo("Back to my questionnaires"), "form_date_control_placeholder", equalTo("Date"),
+				"questionnaires_no_questionnaires_found_message", equalTo("No questionnaires found"));
 	}
 
 	@AfterClass
