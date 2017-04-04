@@ -40,7 +40,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
-import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -140,13 +139,13 @@ class RestControllerV2
 	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
 			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
 	{
-		requireNonNull(molgenisVersion);
-		requireNonNull(molgenisBuildDate);
+		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
+		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
 		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ?
 				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())
 						+ " by IntelliJ" : molgenisBuildDate;
 
-		Map<String, String> result = newHashMap();
+		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
 		result.put("buildDate", molgenisBuildDate);
 
@@ -402,7 +401,8 @@ class RestControllerV2
 	}
 
 	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
-			Package pack, String label)
+			Package pack,
+			String label)
 	{
 		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
@@ -548,7 +548,8 @@ class RestControllerV2
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
+	public
+	@ResponseBody
 	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
 	{
 		LOG.debug("Invalid request body.", exception);
@@ -557,7 +558,8 @@ class RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
+	public
+	@ResponseBody
 	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
