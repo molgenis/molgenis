@@ -2,9 +2,11 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.NAMESPACE;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -24,6 +27,7 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
  */
 public class MolgenisResourceBundleControl extends ResourceBundle.Control
 {
+	public static final String NAMESPACE_ALL = "__ALL__";
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisResourceBundleControl.class);
 	private final DataService dataService;
 	private final AppSettings appSettings;
@@ -40,14 +44,11 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 	{
 		String languageCode = locale.getLanguage();
 
-		// Only handle i18nstrings bundle
-		if (!baseName.equals(I18N_STRING)) return null;
-
 		// Only handle languages that are present in the languages repository
 		if (runAsSystem(() -> dataService.query(LANGUAGE).eq(LanguageMetadata.CODE, languageCode).count()) == 0)
 			return null;
 
-		return new MolgenisResourceBundle(dataService, languageCode, appSettings);
+		return new MolgenisResourceBundle(dataService, languageCode, appSettings, baseName);
 	}
 
 	protected static class MolgenisResourceBundle extends ListResourceBundle
@@ -56,25 +57,34 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		private final String languageCode;
 		private final AppSettings appSettings;
 		private String appLanguageCode;
+		private final String namespace;
 
-		public MolgenisResourceBundle(DataService dataService, String languageCode, AppSettings appSettings)
+		public MolgenisResourceBundle(DataService dataService, String languageCode, AppSettings appSettings,
+				String namespace)
 		{
 			this.dataService = dataService;
 			this.languageCode = languageCode;
 			this.appSettings = appSettings;
+			this.namespace = namespace;
 		}
 
 		@Override
 		protected Object[][] getContents()
 		{
-			List<Entity> entities = runAsSystem(() -> dataService.findAll(I18N_STRING).collect(Collectors.toList()));
+			List<Entity> entities = runAsSystem(() ->
+			{
+				Query<Entity> query = QueryImpl.query();
+				if (!NAMESPACE_ALL.equals(namespace))
+				{
+					query = query.eq(NAMESPACE, namespace);
+				}
+				return dataService.findAll(I18N_STRING, query).collect(Collectors.toList());
+			});
 
 			appLanguageCode = appSettings.getLanguageCode();
 
-			boolean exists = (appLanguageCode != null) && runAsSystem(() ->
-			{
-				return (dataService.findOneById(LANGUAGE, appLanguageCode) != null);
-			});
+			boolean exists = (appLanguageCode != null) && runAsSystem(
+					() -> (dataService.findOneById(LANGUAGE, appLanguageCode) != null));
 
 			if (!exists) appLanguageCode = null;
 

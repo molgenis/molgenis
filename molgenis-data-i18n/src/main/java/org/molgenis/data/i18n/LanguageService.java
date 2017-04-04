@@ -12,7 +12,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -58,7 +57,17 @@ public class LanguageService
 	 */
 	public ResourceBundle getBundle(String languageCode)
 	{
-		return ResourceBundle.getBundle(I18N_STRING, new Locale(languageCode),
+		return getBundle(languageCode, MolgenisResourceBundleControl.NAMESPACE_ALL);
+	}
+
+	/**
+	 * Gets ResourceBundle for a language and namespace
+	 * @param languageCode The language code
+	 * @param namespace the namespace of the bundle, or null for all keys
+	 * @return ResourceBundle for the specified language and namespace
+	 */
+	public ResourceBundle getBundle(String languageCode, String namespace) {
+		return ResourceBundle.getBundle(namespace, new Locale(languageCode),
 				new MolgenisResourceBundleControl(dataService, appSettings));
 	}
 

@@ -6,6 +6,7 @@ import freemarker.template.TemplateException;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.messages.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
@@ -169,6 +170,24 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisInterceptor molgenisInterceptor()
 	{
 		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
+	}
+
+	@Bean
+	public PropertiesMessageSource formMessageSource()
+	{
+		return new PropertiesMessageSource("form");
+	}
+
+	@Bean
+	public PropertiesMessageSource questionnaireMessageSource()
+	{
+		return new PropertiesMessageSource("questionnaire");
+	}
+
+	@Bean
+	public PropertiesMessageSource dataexplorerMessageSource()
+	{
+		return new PropertiesMessageSource("dataexplorer");
 	}
 
 	@Bean

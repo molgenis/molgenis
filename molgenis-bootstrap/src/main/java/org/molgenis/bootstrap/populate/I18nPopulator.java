@@ -1,31 +1,33 @@
 package org.molgenis.bootstrap.populate;
 
+import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
-import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.messages.PropertiesMessageSource;
+import org.molgenis.data.i18n.model.I18nString;
+import org.molgenis.data.i18n.model.I18nStringFactory;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.DatabaseAction.ADD_IGNORE_EXISTING;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.MSGID;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
- * Imports i18n static strings from molgenis-core-ui/src/main/resources/i18n.xlsx at startup.
+ * Imports l10n strings from registered {@link PropertiesMessageSource}s at startup.
  * <p>
  * Only adds new strings, does not update existing ones, because otherwise the ones you have changed using the
  * dataexplorer will be overwritten again on the next startup.
@@ -37,53 +39,50 @@ public class I18nPopulator
 
 	private final DataService dataService;
 	private final LanguageFactory languageFactory;
-	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-	private final ImportServiceFactory importServiceFactory;
-	private final FileStore fileStore;
+	private final List<PropertiesMessageSource> molgenisMessageSources;
+	private final I18nStringFactory i18nStringFactory;
 
 	@Autowired
 	public I18nPopulator(DataService dataService, LanguageFactory languageFactory,
-			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportServiceFactory importServiceFactory,
-			FileStore fileStore)
+			List<PropertiesMessageSource> molgenisMessageSources, I18nStringFactory i18nStringFactory)
 	{
-		this.dataService = requireNonNull(dataService);
 		this.languageFactory = requireNonNull(languageFactory);
-		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
-		this.importServiceFactory = requireNonNull(importServiceFactory);
-		this.fileStore = requireNonNull(fileStore);
+		this.dataService = requireNonNull(dataService);
+		this.molgenisMessageSources = requireNonNull(molgenisMessageSources);
+		this.i18nStringFactory = requireNonNull(i18nStringFactory);
 	}
 
 	/**
-	 * Populate data store with internationalization strings
+	 * Populates dataService with internationalization strings from property files on the classpath.
 	 */
 	public void populateI18nStrings()
 	{
-		final String i18nFileName = "i18n.xlsx";
-
-		// "i18n is saved as a Application/Library resource.
-		// "It is not possible to use it as a file but should streamed as a resource"
-		InputStream is = I18nPopulator.class.getClassLoader().getResourceAsStream(i18nFileName);
-
-		try
+		for (PropertiesMessageSource messageSource : molgenisMessageSources)
 		{
-			File fileInTempDir = fileStore.store(is, i18nFileName);
-			LOG.trace("Create temp file for {} : {}", i18nFileName, fileInTempDir);
+			String namespace = messageSource.getNamespace();
+			Set<String> messageIds = messageSource.getCodes();
 
-			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(fileInTempDir);
+			Set<String> existing = dataService.findAll(I18N_STRING,
+					QueryImpl.IN(MSGID, messageIds).and().eq(I18nStringMetaData.NAMESPACE, namespace))
+					.map(e -> e.getString(MSGID)).collect(toSet());
 
-			ImportService importService = importServiceFactory.getImportService(fileInTempDir, repoCollection);
-			runAsSystem(() -> importService.doImport(repoCollection, ADD_IGNORE_EXISTING, PACKAGE_DEFAULT));
-
-			if (fileInTempDir.exists())
+			Stream<I18nString> missing = Sets.difference(messageIds, existing).stream().map(msgId ->
 			{
-				LOG.trace("Delete temp file for {} : {}", i18nFileName, fileInTempDir);
-				fileInTempDir.delete();
-			}
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
+				I18nString result = i18nStringFactory.create();
+				result.setMessageId(msgId);
+				result.setNamespace(namespace);
+				LanguageService.getLanguageCodes().forEach((language) ->
+				{
+					String message = messageSource.getMessage(language, msgId);
+					if (message != null)
+					{
+						result.set(language, message);
+					}
+				});
+				return result;
+			});
+
+			dataService.add(I18N_STRING, missing);
 		}
 	}
 
