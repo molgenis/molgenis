@@ -1,4 +1,4 @@
-package org.molgenis.data.i18n.messages;
+package org.molgenis.data.i18n;
 
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.util.ResourceUtils;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 
 /**
- * This {@link org.springframework.context.MessageSource} reads messages from properties files on the classpath.
+ * This {@link org.springframework.context.MessageSource} reads localization messages from properties files on the classpath.
  */
 public class PropertiesMessageSource extends ReloadableResourceBundleMessageSource
 {
@@ -18,24 +18,30 @@ public class PropertiesMessageSource extends ReloadableResourceBundleMessageSour
 
 	public PropertiesMessageSource(String namespace)
 	{
+		namespace = namespace.trim().toLowerCase();
 		setBasename(ResourceUtils.CLASSPATH_URL_PREFIX + "l10n/" + namespace);
 		setAlwaysUseMessageFormat(false);
 		setFallbackToSystemLocale(false);
 		setUseCodeAsDefaultMessage(false);
+		setDefaultEncoding("UTF-8");
+
 		this.namespace = namespace;
 	}
 
+	/**
+	 * Returns the namespace of this {@link PropertiesMessageSource}
+	 */
 	public String getNamespace()
 	{
 		return namespace;
 	}
 
 	/**
-	 * Retrieves all message codes for this PropertiesMessageSource.
+	 * Retrieves all messageIDs for this PropertiesMessageSource.
 	 *
-	 * @return message codes present in any of the properties files for this namespace
+	 * @return messageIDs present in any of the properties files for this namespace
 	 */
-	public Set<String> getCodes()
+	public Set<String> getMessageIDs()
 	{
 		return getLanguageCodes().flatMap(
 				(languageCode) -> getMergedProperties(new Locale(languageCode)).getProperties().keySet().stream())
@@ -45,12 +51,12 @@ public class PropertiesMessageSource extends ReloadableResourceBundleMessageSour
 	/**
 	 * Retrieves a message for a specific language and code.
 	 *
-	 * @param language Language code for which to retrieve the message
-	 * @param code     the code of the message
+	 * @param language  language code for the message
+	 * @param messageID the code of the message
 	 * @return the message, or null if not specified
 	 */
-	public String getMessage(String language, String code)
+	public String getMessage(String language, String messageID)
 	{
-		return resolveCodeWithoutArguments(code, new Locale(language));
+		return resolveCodeWithoutArguments(messageID, new Locale(language));
 	}
 }

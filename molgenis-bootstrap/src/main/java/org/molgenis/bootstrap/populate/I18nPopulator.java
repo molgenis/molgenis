@@ -1,14 +1,10 @@
 package org.molgenis.bootstrap.populate;
 
-import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.messages.PropertiesMessageSource;
-import org.molgenis.data.i18n.model.I18nString;
-import org.molgenis.data.i18n.model.I18nStringFactory;
-import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.LocalizationService;
+import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.MSGID;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 
 /**
@@ -40,16 +30,16 @@ public class I18nPopulator
 	private final DataService dataService;
 	private final LanguageFactory languageFactory;
 	private final List<PropertiesMessageSource> molgenisMessageSources;
-	private final I18nStringFactory i18nStringFactory;
+	private final LocalizationService localizationService;
 
 	@Autowired
 	public I18nPopulator(DataService dataService, LanguageFactory languageFactory,
-			List<PropertiesMessageSource> molgenisMessageSources, I18nStringFactory i18nStringFactory)
+			List<PropertiesMessageSource> molgenisMessageSources, LocalizationService localizationService)
 	{
 		this.languageFactory = requireNonNull(languageFactory);
 		this.dataService = requireNonNull(dataService);
 		this.molgenisMessageSources = requireNonNull(molgenisMessageSources);
-		this.i18nStringFactory = requireNonNull(i18nStringFactory);
+		this.localizationService = requireNonNull(localizationService);
 	}
 
 	/**
@@ -57,33 +47,7 @@ public class I18nPopulator
 	 */
 	public void populateI18nStrings()
 	{
-		for (PropertiesMessageSource messageSource : molgenisMessageSources)
-		{
-			String namespace = messageSource.getNamespace();
-			Set<String> messageIds = messageSource.getCodes();
-
-			Set<String> existing = dataService.findAll(I18N_STRING,
-					QueryImpl.IN(MSGID, messageIds).and().eq(I18nStringMetaData.NAMESPACE, namespace))
-					.map(e -> e.getString(MSGID)).collect(toSet());
-
-			Stream<I18nString> missing = Sets.difference(messageIds, existing).stream().map(msgId ->
-			{
-				I18nString result = i18nStringFactory.create();
-				result.setMessageId(msgId);
-				result.setNamespace(namespace);
-				LanguageService.getLanguageCodes().forEach((language) ->
-				{
-					String message = messageSource.getMessage(language, msgId);
-					if (message != null)
-					{
-						result.set(language, message);
-					}
-				});
-				return result;
-			});
-
-			dataService.add(I18N_STRING, missing);
-		}
+		molgenisMessageSources.forEach(localizationService::updateAllLanguages);
 	}
 
 	/**

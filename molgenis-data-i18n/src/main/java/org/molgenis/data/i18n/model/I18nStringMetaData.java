@@ -32,7 +32,7 @@ public class I18nStringMetaData extends SystemEntityType
 		setDescription("Translated language strings");
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
 		addAttribute(MSGID, ROLE_ID).setNillable(false);
-		addAttribute(NAMESPACE).setNillable(false).setDefaultValue(I18N_STRING);
+		addAttribute(NAMESPACE).setNillable(false);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(TEXT);
 	}
 }

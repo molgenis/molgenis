@@ -52,6 +52,35 @@ paths:
       responses:
         200:
           description: Server version
+  /v2/i18n:
+    get:
+      produces:
+        - application/json
+      tags:
+        - V2
+      summary: Get all localization tokens for the user's current language
+
+  /v2/i18n/{namespace}_{language}.properties:
+    get:
+      produces:
+        - text/plain;charset=UTF-8
+      tags:
+        - V2
+      parameters:
+        - name: namespace
+          in: path
+          type: string
+          description: the localization namespace
+          required: true
+        - name: language
+          in: path
+          type: string
+          description: language code for the items to be retrieved
+          required: true
+      summary: Retrieves a properties file for the localization values in this namespace for this locale
+      responses:
+        200:
+          description: Properties file
   /v2/{entity_name}:
     get:
       tags:
