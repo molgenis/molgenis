@@ -88,6 +88,7 @@ public class RestControllerV1APIIT
 		grantRights(adminToken, testUserId, "TypeTestRefAPIV1", WRITE);
 		grantRights(adminToken, testUserId, "LocationAPIV1", WRITE);
 		grantRights(adminToken, testUserId, "PersonAPIV1", WRITE);
+		grantRights(adminToken, testUserId, "Items", WRITE);
 
 		grantRights(adminToken, testUserId, "APITest1", WRITEMETA);
 		grantRights(adminToken, testUserId, "APITest2", WRITEMETA);
@@ -190,7 +191,7 @@ public class RestControllerV1APIIT
 	public void testRetrieveEntityCollectionResponse()
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.contentType(APPLICATION_JSON).when().get(API_V1 + "V1_API_TypeTestRefAPIV1").then().log().all();
+				.contentType(APPLICATION_JSON).when().get(API_V1 + "V1_API_Items").then().log().all();
 		validateRetrieveEntityCollectionResponse(response);
 	}
 
@@ -199,7 +200,7 @@ public class RestControllerV1APIIT
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
 				.contentType(APPLICATION_JSON).body(new EntityCollectionRequest()).when()
-				.post(API_V1 + "V1_API_TypeTestRefAPIV1?_method=GET").then().log().all();
+				.post(API_V1 + "V1_API_Items?_method=GET").then().log().all();
 		validateRetrieveEntityCollectionResponse(response);
 	}
 
@@ -208,9 +209,9 @@ public class RestControllerV1APIIT
 	{
 		String contents = getFileContents("/testRetrieveEntityCollection_response.csv");
 		String response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(TEXT_CSV).when()
-				.get(API_V1 + "csv/V1_API_TypeTestRefAPIV1").then().contentType("text/csv").log().all()
+				.get(API_V1 + "csv/V1_API_Items").then().contentType("text/csv").log().all()
 				.statusCode(200).extract().asString();
-		assertEquals(contents, response);
+		assertEquals(response, contents);
 	}
 
 	@Test
@@ -493,25 +494,25 @@ public class RestControllerV1APIIT
 	private void validateRetrieveEntityCollectionResponse(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1"), "meta.href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta"), "meta.hrefCollection",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1"), "meta.name", equalTo("V1_API_TypeTestRefAPIV1"),
-				"meta.label", equalTo("TypeTestRefAPIV1"), "meta.description",
-				equalTo("MOLGENIS Data types test ref entity"), "meta.attributes.value.href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "meta.attributes.label.href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/label"), "meta.labelAttribute", equalTo("label"),
+		response.body("href", equalTo("/api/v1/V1_API_Items"), "meta.href",
+				equalTo("/api/v1/V1_API_Items/meta"), "meta.hrefCollection",
+				equalTo("/api/v1/V1_API_Items"), "meta.name", equalTo("V1_API_Items"),
+				"meta.label", equalTo("Items"), "meta.description",
+				equalTo("Items"), "meta.attributes.value.href",
+				equalTo("/api/v1/V1_API_Items/meta/value"), "meta.attributes.label.href",
+				equalTo("/api/v1/V1_API_Items/meta/label"), "meta.labelAttribute", equalTo("label"),
 				"meta.idAttribute", equalTo("value"), "meta.lookupAttributes", equalTo(newArrayList("value", "label")),
 				"meta.isAbstract", equalTo(false), "meta.languageCode", equalTo("en"), "meta.writable", equalTo(true),
 				"start", equalTo(0), "num", equalTo(100), "total", equalTo(5), "items[0].href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref1"), "items[0].value", equalTo("ref1"),
+				equalTo("/api/v1/V1_API_Items/ref1"), "items[0].value", equalTo("ref1"),
 				"items[0].label", equalTo("label1"), "items[1].href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref2"), "items[1].value", equalTo("ref2"),
+				equalTo("/api/v1/V1_API_Items/ref2"), "items[1].value", equalTo("ref2"),
 				"items[1].label", equalTo("label2"), "items[2].href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref3"), "items[2].value", equalTo("ref3"),
+				equalTo("/api/v1/V1_API_Items/ref3"), "items[2].value", equalTo("ref3"),
 				"items[2].label", equalTo("label3"), "items[3].href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref4"), "items[3].value", equalTo("ref4"),
+				equalTo("/api/v1/V1_API_Items/ref4"), "items[3].value", equalTo("ref4"),
 				"items[3].label", equalTo("label4"), "items[4].href",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref5"), "items[4].value", equalTo("ref5"),
+				equalTo("/api/v1/V1_API_Items/ref5"), "items[4].value", equalTo("ref5"),
 				"items[4].label", equalTo("label5"));
 	}
 
@@ -529,6 +530,8 @@ public class RestControllerV1APIIT
 		removeEntity(adminToken, "base_APITest2");
 
 		removeEntity(adminToken, "base_ApiTestFile");
+
+		removeEntity(adminToken, "V1_API_Items");
 
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);
