@@ -425,7 +425,7 @@ public class RestControllerV2APIIT
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post(API_V2 + "logout");
+		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
 
 		// Clean up user
 		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
