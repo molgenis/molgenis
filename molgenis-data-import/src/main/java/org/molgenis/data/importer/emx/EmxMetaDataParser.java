@@ -207,19 +207,19 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	@Override
 	//FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
-	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackageName)
+	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackageId)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
 		{
 			IntermediateParseResults intermediateResults = getEntityTypeFromSource(source);
 			List<EntityType> entities;
-			if (defaultPackageName == null)
+			if (defaultPackageId == null)
 			{
 				entities = intermediateResults.getEntities();
 			}
 			else
 			{
-				entities = putEntitiesInDefaultPackage(intermediateResults, defaultPackageName);
+				entities = putEntitiesInDefaultPackage(intermediateResults, defaultPackageId);
 			}
 
 			return new ParsedMetaData(entityTypeDependencyResolver.resolve(entities), intermediateResults.getPackages(),
@@ -1168,16 +1168,16 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * Put the entities that are not in a package in the selected package
 	 *
 	 * @param intermediateResults
-	 * @param defaultPackageName
+	 * @param defaultPackageId
 	 * @return
 	 */
 	private List<EntityType> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
-			String defaultPackageName)
+			String defaultPackageId)
 	{
-		Package p = getPackage(intermediateResults, defaultPackageName);
+		Package p = getPackage(intermediateResults, defaultPackageId);
 		if (p == null && dataService != null)
 		{
-			throw new IllegalArgumentException(format("Unknown package [%s]", defaultPackageName));
+			throw new IllegalArgumentException(format("Unknown package [%s]", defaultPackageId));
 		}
 
 		List<EntityType> entities = newArrayList();
@@ -1196,15 +1196,15 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * Retrieves a {@link Package} by name from parsed data or existing data.
 	 *
 	 * @param intermediateResults parsed data
-	 * @param packageName         package name
+	 * @param packageId           package name
 	 * @return package or <code>null</code> if no package with the given name exists in parsed or existing data
 	 */
-	private Package getPackage(IntermediateParseResults intermediateResults, String packageName)
+	private Package getPackage(IntermediateParseResults intermediateResults, String packageId)
 	{
-		Package package_ = intermediateResults.getPackage(packageName);
+		Package package_ = intermediateResults.getPackage(packageId);
 		if (package_ == null && dataService != null)
 		{
-			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageName, Package.class);
+			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageId, Package.class);
 		}
 		return package_;
 	}

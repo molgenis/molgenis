@@ -7,12 +7,11 @@ public interface MetaDataParser
 	/**
 	 * Parses the metadata of the entities to import.
 	 *
-	 * @param source         {@link RepositoryCollection} containing the data to parse
-	 * @param defaultPackage , the package where the entities without a package should go
+	 * @param source           {@link RepositoryCollection} containing the data to parse
+	 * @param defaultPackageId , the package where the entities without a package should go
 	 * @return {@link ParsedMetaData}
 	 */
-	ParsedMetaData parse(RepositoryCollection source,
-			String defaultPackage); // FIXME use entity type ids instead of entity type fqns
+	ParsedMetaData parse(RepositoryCollection source, String defaultPackageId);
 
 	/**
 	 * Generates a {@link EntitiesValidationReport} by parsing all data from a supplied source

@@ -175,7 +175,7 @@ public class ImportWizardController extends AbstractWizardController
 		}
 		String entitiesString = webRequest.getParameter("entityIds");
 		List<String> entityTypeIds = Arrays.asList(entitiesString.split(","));
-		Stream<Object> entityIds = entityTypeIds.stream().map(entityTypeId -> (Object) entityTypeId); // FIXME
+		Stream<Object> entityIds = entityTypeIds.stream().map(entityTypeId -> (Object) entityTypeId);
 		List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityIds,
 				new Fetch().field(EntityTypeMetadata.ID)
 						.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
