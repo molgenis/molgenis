@@ -17,8 +17,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.molgenis.data.rest.RestControllerIT.Permission.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITEMETA;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.collections.Maps.newHashMap;
 

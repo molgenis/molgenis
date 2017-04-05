@@ -48,6 +48,12 @@ public class RestTestUtils
 	public static final int UNAUTHORIZED = 401;
 	public static final int NOT_FOUND = 404;
 
+	public enum Permission
+	{
+		READ, WRITE, COUNT, NONE, WRITEMETA;
+	}
+
+
 	/**
 	 * Login with user name and password and return token on success.
 	 *
@@ -221,7 +227,7 @@ public class RestTestUtils
 	 * @param entity     a list of entity names
 	 */
 	public static void grantRights(String adminToken, String userId, String entity,
-			RestControllerIT.Permission permission)
+			Permission permission)
 	{
 		String entityTypeId = getEntityTypeId(adminToken, "name", entity, "sys_md_EntityType");
 		grantSystemRights(adminToken, userId, entityTypeId, permission);
@@ -236,7 +242,7 @@ public class RestTestUtils
 	 * @param permission the type of permission to give
 	 */
 	public static void grantSystemRights(String adminToken, String userId, String entity,
-			RestControllerIT.Permission permission)
+			Permission permission)
 	{
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));

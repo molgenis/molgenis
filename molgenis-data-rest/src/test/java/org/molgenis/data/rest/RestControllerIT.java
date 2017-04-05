@@ -177,15 +177,10 @@ public class RestControllerIT
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post(PATH + "logout");
+		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post("api/v1/logout");
 
 		// Clean up user
 		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
-	}
-
-	public enum Permission
-	{
-		READ, WRITE, COUNT, NONE, WRITEMETA;
 	}
 
 }
