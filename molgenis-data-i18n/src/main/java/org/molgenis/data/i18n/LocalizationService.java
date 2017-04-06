@@ -109,7 +109,7 @@ public class LocalizationService
 	 *
 	 * @param messageSource the {@link PropertiesMessageSource} for the namespace that is added
 	 */
-	public void addLocalizationStrings(PropertiesMessageSource messageSource)
+	public void populateLocalizationStrings(PropertiesMessageSource messageSource)
 	{
 		String namespace = messageSource.getNamespace();
 		Set<String> messageIDs = messageSource.getMessageIDs();

@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 
 /**
- * Imports l10n strings from registered {@link PropertiesMessageSource}s at startup.
+ * Imports l10n strings from registered {@link PropertiesMessageSource} beans at startup.
  * <p>
  * Only adds new strings, does not update existing ones, because otherwise the ones you have changed using the
  * dataexplorer will be overwritten again on the next startup.
@@ -48,9 +48,9 @@ public class I18nPopulator
 	 * N.B. If you want to add a namespace with a localization resourcebundle, you need to
 	 * add a PropertiesMessageSource bean to the spring context for that namespace.
 	 */
-	public void populateI18nStrings()
+	public void populateL10nStrings()
 	{
-		localizationMessageSources.forEach(localizationService::addLocalizationStrings);
+		localizationMessageSources.forEach(localizationService::populateLocalizationStrings);
 	}
 
 	/**

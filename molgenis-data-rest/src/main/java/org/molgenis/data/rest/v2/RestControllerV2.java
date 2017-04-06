@@ -521,11 +521,11 @@ class RestControllerV2
 	}
 
 	/**
-	 * Get all i18n resource strings in the language of the current user
+	 * Get all l10n resource strings in the language of the current user
 	 */
 	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, String> getI18nStrings()
+	public Map<String, String> getL10nStrings()
 	{
 		Map<String, String> translations = new HashMap<>();
 
@@ -539,13 +539,13 @@ class RestControllerV2
 	}
 
 	/**
-	 * Get the i18n resource strings for a specific language and namespace.
+	 * Get the localization resource strings for a specific language and namespace.
 	 * Will *not* provide fallback values if the specified language is not available.
 	 */
 	@RequestMapping(value = "/i18n/{namespace}/{language}", method = GET, produces = APPLICATION_JSON_VALUE
 			+ ";charset=UTF-8")
 	@ResponseBody
-	public Map<String, String> getI18nStrings(@PathVariable String namespace, @PathVariable String language)
+	public Map<String, String> getL10nStrings(@PathVariable String namespace, @PathVariable String language)
 	{
 		return localizationService.getMessages(namespace, language);
 	}
@@ -556,7 +556,7 @@ class RestControllerV2
 	@RequestMapping(value = "/i18n/{namespace}_{language}.properties", method = GET, produces = TEXT_PLAIN_VALUE
 			+ ";charset=UTF-8 ")
 	@ResponseBody
-	public String getI18nProperties(@PathVariable String namespace, @PathVariable String language) throws IOException
+	public String getL10nProperties(@PathVariable String namespace, @PathVariable String language) throws IOException
 	{
 		language = language.toLowerCase();
 		Properties translations = new Properties();

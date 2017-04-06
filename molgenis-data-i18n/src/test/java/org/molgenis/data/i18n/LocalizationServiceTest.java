@@ -104,7 +104,7 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testUpdateAllLanguages() throws Exception
+	public void testPopulateLocalizationStrings() throws Exception
 	{
 		Query<L10nString> query = new QueryImpl<L10nString>()
 				.in(MSGID, asList("EN_PLUS_NL", "EN_ONLY", "NL_ONLY", "BIOBANK_UTF8")).and().eq(NAMESPACE, "test");
@@ -114,7 +114,7 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 		when(newString1.getMessageID()).thenReturn("EN_ONLY");
 		when(newString2.getMessageID()).thenReturn("BIOBANK_UTF8");
 
-		localizationService.addLocalizationStrings(propertiesMessageSource);
+		localizationService.populateLocalizationStrings(propertiesMessageSource);
 
 		verify(newString1).setNamespace("test");
 		verify(newString1).setMessageID("EN_ONLY");
