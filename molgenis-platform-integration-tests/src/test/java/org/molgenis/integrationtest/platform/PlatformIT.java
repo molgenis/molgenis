@@ -4,10 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.model.I18nString;
-import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.data.i18n.model.LanguageMetadata;
+import org.molgenis.data.i18n.model.*;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
@@ -106,6 +103,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private IndexActionRegisterServiceImpl indexActionRegisterService;
 	@Autowired
 	private IdentifierLookupService identifierLookupService;
+	@Autowired
+	private I18nStringFactory i18nStringFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -276,10 +275,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("labelEn"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("descriptionEn"));
 
-		I18nString car = new I18nString(i18nStringMetaData);
-		car.set(I18nStringMetaData.MSGID, "car");
+		I18nString car = i18nStringFactory.create();
+		car.setMessageId("car");
 		car.set("en", "car");
 		car.set("nl", "auto");
+		car.setNamespace("platform-it");
 		dataService.add(I18nStringMetaData.I18N_STRING, car);
 		assertEquals(languageService.getBundle("en").getString("car"), "car");
 		assertEquals(languageService.getBundle("nl").getString("car"), "auto");
