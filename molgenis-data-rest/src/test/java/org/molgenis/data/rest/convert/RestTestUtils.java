@@ -229,7 +229,7 @@ public class RestTestUtils
 	public static void grantRights(String adminToken, String userId, String entity,
 			Permission permission)
 	{
-		String entityTypeId = getEntityTypeId(adminToken, "name", entity, "sys_md_EntityType");
+		String entityTypeId = getEntityTypeId(adminToken, "id", entity, "sys_md_EntityType");
 		grantSystemRights(adminToken, userId, entityTypeId, permission);
 	}
 
@@ -261,10 +261,10 @@ public class RestTestUtils
 				.delete("api/v1/sys_sec_UserAuthority/" + permissionId);
 	}
 
-	public static void removeEntity(String adminToken, String entityName)
+	public static void removeEntity(String adminToken, String entityId)
 	{
 		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.delete("api/v1/" + entityName + "/meta");
+				.delete("api/v1/" + entityId + "/meta");
 	}
 
 	/**
