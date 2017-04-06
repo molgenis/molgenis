@@ -6,7 +6,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.model.I18nString;
+import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ParsedMetaData;
@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -93,7 +93,7 @@ public class ImportWriter
 
 		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(job.parsedMetaData.getEntities());
 		importData(job.report, resolvedEntityTypes, job.source, job.dbAction, job.defaultPackage);
-		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
+		importI18nStrings(job.report, job.parsedMetaData.getL10nStrings(), job.dbAction);
 
 		return job.report;
 	}
@@ -204,14 +204,14 @@ public class ImportWriter
 		}
 	}
 
-	private void importI18nStrings(EntityImportReport report, Map<String, I18nString> i18nStrings,
+	private void importI18nStrings(EntityImportReport report, Map<String, L10nString> i18nStrings,
 			DatabaseAction dbAction)
 	{
 		if (!i18nStrings.isEmpty())
 		{
-			Repository<I18nString> repo = dataService.getRepository(I18N_STRING, I18nString.class);
+			Repository<L10nString> repo = dataService.getRepository(L10N_STRING, L10nString.class);
 			int count = update(repo, i18nStrings.values(), dbAction);
-			report.addEntityCount(I18N_STRING, count);
+			report.addEntityCount(L10N_STRING, count);
 		}
 	}
 
@@ -226,7 +226,7 @@ public class ImportWriter
 			String name = entityType.getFullyQualifiedName();
 
 			// Languages and i18nstrings are already done
-			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(I18N_STRING) && dataService
+			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(L10N_STRING) && dataService
 					.hasRepository(name))
 			{
 				Repository<Entity> repository = dataService.getRepository(name);

@@ -29,25 +29,28 @@ public class I18nPopulator
 
 	private final DataService dataService;
 	private final LanguageFactory languageFactory;
-	private final List<PropertiesMessageSource> molgenisMessageSources;
+	private final List<PropertiesMessageSource> localizationMessageSources;
 	private final LocalizationService localizationService;
 
 	@Autowired
 	public I18nPopulator(DataService dataService, LanguageFactory languageFactory,
-			List<PropertiesMessageSource> molgenisMessageSources, LocalizationService localizationService)
+			List<PropertiesMessageSource> localizationMessageSources, LocalizationService localizationService)
 	{
 		this.languageFactory = requireNonNull(languageFactory);
 		this.dataService = requireNonNull(dataService);
-		this.molgenisMessageSources = requireNonNull(molgenisMessageSources);
+		this.localizationMessageSources = requireNonNull(localizationMessageSources);
 		this.localizationService = requireNonNull(localizationService);
 	}
 
 	/**
-	 * Populates dataService with internationalization strings from property files on the classpath.
+	 * Populates dataService with localization strings from property files on the classpath.
+	 *
+	 * N.B. If you want to add a namespace with a localization resourcebundle, you need to
+	 * add a PropertiesMessageSource bean to the spring context for that namespace.
 	 */
 	public void populateI18nStrings()
 	{
-		molgenisMessageSources.forEach(localizationService::updateAllLanguages);
+		localizationMessageSources.forEach(localizationService::addLocalizationStrings);
 	}
 
 	/**

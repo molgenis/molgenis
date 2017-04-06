@@ -530,7 +530,7 @@ class RestControllerV2
 		Map<String, String> translations = new HashMap<>();
 
 		ResourceBundle bundle = languageService.getBundle();
-		for (String key : localizationService.getKeys(NAMESPACE_ALL))
+		for (String key : localizationService.getMessageIDs(NAMESPACE_ALL))
 		{
 			translations.put(key, bundle.getString(key));
 		}

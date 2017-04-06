@@ -50,7 +50,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -88,7 +88,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private LanguageService languageService;
 	@Autowired
-	private I18nStringMetaData i18nStringMetaData;
+	private L10nStringMetaData l10nStringMetaData;
 	@Autowired
 	private LanguageMetadata languageMetadata;
 	@Autowired
@@ -104,7 +104,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private IdentifierLookupService identifierLookupService;
 	@Autowired
-	private I18nStringFactory i18nStringFactory;
+	private L10nStringFactory l10nStringFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -199,7 +199,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(selfXrefEntityType.getFullyQualifiedName(), true, true, true, identifierLookupService));
 		authorities.addAll(makeAuthorities(languageMetadata.getFullyQualifiedName(), true, true, true, identifierLookupService));
 		authorities.addAll(makeAuthorities(attributeMetadata.getFullyQualifiedName(), true, true, true, identifierLookupService));
-		authorities.addAll(makeAuthorities(i18nStringMetaData.getFullyQualifiedName(), true, false, false, identifierLookupService));
+		authorities.addAll(makeAuthorities(l10nStringMetaData.getFullyQualifiedName(), true, false, false, identifierLookupService));
 		authorities.addAll(makeAuthorities(entityTypeMetadata.getFullyQualifiedName(), true, true, true, identifierLookupService));
 
 		SecurityContextHolder.getContext()
@@ -262,25 +262,25 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				new String[] { "en", "nl", "de", "es", "it", "pt", "fr", "xx" });
 
 		// NL
-		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("nl"));
+		assertNotNull(dataService.getEntityType(L10N_STRING).getAttribute("nl"));
 		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("labelNl"));
 		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("descriptionNl"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("labelNl"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("descriptionNl"));
 
 		// EN
-		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("en"));
+		assertNotNull(dataService.getEntityType(L10N_STRING).getAttribute("en"));
 		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("labelEn"));
 		assertNotNull(dataService.getEntityType(ENTITY_TYPE_META_DATA).getAttribute("descriptionEn"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("labelEn"));
 		assertNotNull(dataService.getEntityType(ATTRIBUTE_META_DATA).getAttribute("descriptionEn"));
 
-		I18nString car = i18nStringFactory.create();
-		car.setMessageId("car");
+		L10nString car = l10nStringFactory.create();
+		car.setMessageID("car");
 		car.set("en", "car");
 		car.set("nl", "auto");
 		car.setNamespace("platform-it");
-		dataService.add(I18nStringMetaData.I18N_STRING, car);
+		dataService.add(L10nStringMetaData.L10N_STRING, car);
 		assertEquals(languageService.getBundle("en").getString("car"), "car");
 		assertEquals(languageService.getBundle("nl").getString("car"), "auto");
 

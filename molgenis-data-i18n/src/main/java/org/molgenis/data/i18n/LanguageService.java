@@ -10,7 +10,6 @@ import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -60,17 +59,24 @@ public class LanguageService
 	}
 
 	/**
-	 * Get ResourceBundle for the current user language
+	 * Creates a localization ResourceBundle for the current user's language.
+	 * <p>
+	 * See {@link LocalizationMessageSource} documentation for lookup implementation details.
+	 * <p>
+	 * The ResourceBundle is a Spring {@link MessageSourceResourceBundle} which means that you cannot query its keys.
+	 * Ask the {@link LocalizationService} instead.
 	 */
-	public ResourceBundle getBundle()
+	public MessageSourceResourceBundle getBundle()
 	{
 		return getBundle(getCurrentUserLanguageCode());
 	}
 
 	/**
-	 * Get ResourceBundle for a language
+	 * Creates a localization ResourceBundle for a specific language.
+	 *
+	 * @return MessageSourceResourceBundle
 	 */
-	public ResourceBundle getBundle(String languageCode)
+	public MessageSourceResourceBundle getBundle(String languageCode)
 	{
 		return new MessageSourceResourceBundle(getMessageSource(NAMESPACE_ALL), new Locale(languageCode));
 	}
