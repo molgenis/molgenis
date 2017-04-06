@@ -4,10 +4,12 @@
 
 MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life science research. 
 
-See http://molgenis.github.io for documentation.
+See http://molgenis.gitbooks.io/molgenis for documentation.
+
+For more about our organisation, see https://molgenis.github.io
 
 ## Installation
-See [The Quick start guide](docs/quickstart/guide-quickstart.md).
+See [The Quick start guide](https://molgenis.gitbooks.io/molgenis/quickstart/guide-quickstart.html).
 
 ## Third-party software
 For some modules in MOLGENIS, third-party software is in use. It is important to know that some of these licenses are different than the MOLGENIS license.
@@ -23,6 +25,3 @@ To turn-off/deactivate this functionality you can change the relevant setting fo
 1. In the menu select Admin -> Settings		
 2. Select the dataexplorer settings		
 3. Set the value for Charts to `No`
-
-# Documentation
-{% include "./docs/SUMMARY.md" %}
