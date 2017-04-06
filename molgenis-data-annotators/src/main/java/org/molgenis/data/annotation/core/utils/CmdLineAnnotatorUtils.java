@@ -1,13 +1,11 @@
-package org.molgenis.annotation.cmd.utils;
+package org.molgenis.data.annotation.core.utils;
 
 import net.sf.samtools.util.BlockCompressedOutputStream;
-import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -163,7 +161,7 @@ public class CmdLineAnnotatorUtils
 		List<Attribute> outputMetaData = newArrayList();
 		if (annotator instanceof EffectCreatingAnnotator || annotator instanceof EffectBasedAnnotator)
 		{
-			EntityType effectRefEntity = entityTypeFactory.create().setName(annotator.getSimpleName() + "_EFFECTS");
+			EntityType effectRefEntity = entityTypeFactory.create(annotator.getSimpleName() + "_EFFECTS");
 			for (Attribute outputAttribute : annotator.getOutputAttributes())
 			{
 				effectRefEntity.addAttribute(outputAttribute);

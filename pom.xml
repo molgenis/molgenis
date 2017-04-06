@@ -693,7 +693,6 @@
         <module>molgenis-test</module>
         <module>molgenis-data-cache</module>
         <module>molgenis-data-platform</module>
-        <module>molgenis-annotators-cmd</module>
         <module>molgenis-util</module>
         <module>molgenis-settings</module>
         <module>molgenis-swagger</module>

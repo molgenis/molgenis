@@ -1,4 +1,4 @@
-package org.molgenis.annotation.cmd.conversion;
+package org.molgenis.data.annotation.core.utils;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
