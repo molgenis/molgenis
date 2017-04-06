@@ -6,7 +6,6 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.I18nStringFactory;
-import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -18,15 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.MSGID;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.NAMESPACE;
@@ -63,7 +61,7 @@ public class LocalizationService
 		Query<I18nString> query = new QueryImpl<I18nString>().eq(MSGID, messageId);
 		if (!NAMESPACE_ALL.equals(namespace))
 		{
-			query = query.eq(NAMESPACE, namespace);
+			query = query.and().eq(NAMESPACE, namespace);
 		}
 		I18nString i18nString = dataService.findOne(I18N_STRING, query, I18nString.class);
 		if (i18nString == null)
@@ -117,9 +115,11 @@ public class LocalizationService
 		String namespace = messageSource.getNamespace();
 		Set<String> messageIDs = messageSource.getMessageIDs();
 
-		Map<String, I18nString> toUpdate = dataService
-				.findAll(I18N_STRING, QueryImpl.IN(MSGID, messageIDs).and().eq(I18nStringMetaData.NAMESPACE, namespace))
-				.map(i18nStringFactory::create).collect(toMap(I18nString::getMessageId, identity()));
+		Stream<I18nString> stream = dataService
+				.findAll(I18N_STRING, new QueryImpl<I18nString>().in(MSGID, messageIDs).and().eq(NAMESPACE, namespace),
+						I18nString.class);
+		Map<String, I18nString> toUpdate = stream.map(i18nStringFactory::create)
+				.collect(toMap(I18nString::getMessageId, identity()));
 
 		Map<String, I18nString> toAdd = Sets.difference(messageIDs, toUpdate.keySet()).stream().map(msgId ->
 		{
@@ -150,8 +150,8 @@ public class LocalizationService
 	public void addMissingMessageIDs(String namespace, Set<String> messageIDs)
 	{
 		Set<String> alreadyPresent = dataService
-				.findAll(I18N_STRING, QueryImpl.IN(MSGID, messageIDs).and().eq(I18nStringMetaData.NAMESPACE, namespace))
-				.map(e -> e.getString(MSGID)).collect(toSet());
+				.findAll(I18N_STRING, new QueryImpl<I18nString>().in(MSGID, messageIDs).and().eq(NAMESPACE, namespace),
+						I18nString.class).map(I18nString::getMessageId).collect(toCollection(TreeSet::new));
 
 		Set<String> toAdd = Sets.difference(messageIDs, alreadyPresent);
 		if (!toAdd.isEmpty())
@@ -161,11 +161,11 @@ public class LocalizationService
 			try
 			{
 				dataService.add(I18N_STRING, entities);
-				LOG.info("Added message IDs to namespace '{}' : {}.", messageIDs);
+				LOG.info("Added message IDs to namespace '{}' : {}.", namespace, messageIDs);
 			}
 			catch (MolgenisDataAccessException ex)
 			{
-				LOG.info("No permission to add message IDs to namespace '{}' : {}.", messageIDs, ex);
+				LOG.info("No permission to add message IDs to namespace '{}' : {}.", namespace, messageIDs, ex);
 			}
 		}
 	}
@@ -173,6 +173,6 @@ public class LocalizationService
 	@RunAsSystem
 	public Set<String> getKeys(String namespace)
 	{
-		return getI18nStrings(namespace).stream().map(I18nString::getMessageId).collect(Collectors.toSet());
+		return getI18nStrings(namespace).stream().map(I18nString::getMessageId).collect(toCollection(TreeSet::new));
 	}
 }
