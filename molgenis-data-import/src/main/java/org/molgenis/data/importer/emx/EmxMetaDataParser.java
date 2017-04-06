@@ -128,6 +128,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	// Column names in the i18nstring sheet
 	private static final String EMX_I18N_STRING_MSGID = "msgid";
 	private static final String EMX_I18N_STRING_DESCRIPTION = "description";
+	private static final String EMX_I18N_STRING_NAMESPACE = "namespace";
+	private static final String DEFAULT_NAMESPACE = "default";
 
 	private static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP = newHashMap();
 
@@ -1304,6 +1306,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		L10nString l10nString = l10nStringFactory.create();
 		l10nString.setMessageID(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
 		l10nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
+		String namespace = emxI18nStringEntity.getString(EMX_I18N_STRING_NAMESPACE);
+		if(namespace == null){
+			namespace = DEFAULT_NAMESPACE;
+		}
+		l10nString.setNamespace(namespace);
 
 		LanguageService.getLanguageCodes().forEach(lang -> l10nString.set(lang, emxI18nStringEntity.getString(lang)));
 		return l10nString;

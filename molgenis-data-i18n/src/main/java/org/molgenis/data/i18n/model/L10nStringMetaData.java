@@ -12,7 +12,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 @Component
 public class L10nStringMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "i18nstrings";
+	private static final String SIMPLE_NAME = "L10nString";
 	public static final String L10N_STRING = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
