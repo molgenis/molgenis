@@ -187,7 +187,7 @@ public class MappingServiceImpl implements MappingService
 		}
 
 		Repository<Entity> targetRepo;
-		if(targetMetaData.getPackage() != null || systemPackageRegistry.containsPackage(targetMetaData.getPackage())){
+		if(targetMetaData.getPackage() == null || systemPackageRegistry.containsPackage(targetMetaData.getPackage())){
 			targetMetaData.setPackage(defaultPackage);
 		}
 		String fullyQualifiedEntityName = targetMetaData.getFullyQualifiedName();
