@@ -6,6 +6,7 @@ import freemarker.template.TemplateException;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
@@ -40,6 +41,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -123,6 +125,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
 		converters.add(new ResourceHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
 		converters.add(rdfConverter);
 	}
 
@@ -169,6 +172,18 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisInterceptor molgenisInterceptor()
 	{
 		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
+	}
+
+	@Bean
+	public PropertiesMessageSource formMessageSource()
+	{
+		return new PropertiesMessageSource("form");
+	}
+
+	@Bean
+	public PropertiesMessageSource dataexplorerMessageSource()
+	{
+		return new PropertiesMessageSource("dataexplorer");
 	}
 
 	@Bean

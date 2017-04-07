@@ -5,14 +5,16 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -28,16 +30,19 @@ public class LanguageService
 	public static final String LANGUAGE_CODE_FR = "fr";
 	public static final String LANGUAGE_CODE_XX = "xx";
 
-	private final DataService dataService;
-	private final AppSettings appSettings;
 	public static final String DEFAULT_LANGUAGE_CODE = LANGUAGE_CODE_EN;
 	public static final String DEFAULT_LANGUAGE_NAME = "English";
 
+	private final DataService dataService;
+	private final AppSettings appSettings;
+	private final LocalizationService localizationService;
+
 	@Autowired
-	public LanguageService(DataService dataService, AppSettings appSettings)
+	public LanguageService(DataService dataService, AppSettings appSettings, LocalizationService localizationService)
 	{
-		this.dataService = dataService;
-		this.appSettings = appSettings;
+		this.dataService = requireNonNull(dataService);
+		this.appSettings = requireNonNull(appSettings);
+		this.localizationService = requireNonNull(localizationService);
 	}
 
 	/**
@@ -54,20 +59,37 @@ public class LanguageService
 	}
 
 	/**
-	 * Get ResourceBundle for a language
+	 * Creates a localization ResourceBundle for the current user's language.
+	 * <p>
+	 * See {@link LocalizationMessageSource} documentation for lookup implementation details.
+	 * <p>
+	 * The ResourceBundle is a Spring {@link MessageSourceResourceBundle} which means that you cannot query its keys.
+	 * Ask the {@link LocalizationService} instead.
 	 */
-	public ResourceBundle getBundle(String languageCode)
+	public MessageSourceResourceBundle getBundle()
 	{
-		return ResourceBundle.getBundle(I18N_STRING, new Locale(languageCode),
-				new MolgenisResourceBundleControl(dataService, appSettings));
+		return getBundle(getCurrentUserLanguageCode());
 	}
 
 	/**
-	 * Get ResourceBundle for the current user language
+	 * Creates a localization ResourceBundle for a specific language.
+	 *
+	 * @return MessageSourceResourceBundle
 	 */
-	public ResourceBundle getBundle()
+	public MessageSourceResourceBundle getBundle(String languageCode)
 	{
-		return getBundle(getCurrentUserLanguageCode());
+		return new MessageSourceResourceBundle(getMessageSource(NAMESPACE_ALL), new Locale(languageCode));
+	}
+
+	/**
+	 * Gets MessageSource for a namespace.
+	 *
+	 * @param namespace the namespace of the bundle, or NAMESPACE_ALL for all namespaces
+	 * @return MessageSource for the specified language and namespace
+	 */
+	private MessageSource getMessageSource(String namespace)
+	{
+		return new LocalizationMessageSource(localizationService, namespace, appSettings);
 	}
 
 	/**

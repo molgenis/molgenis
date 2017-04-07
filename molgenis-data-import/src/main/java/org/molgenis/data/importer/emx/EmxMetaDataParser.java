@@ -5,8 +5,8 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.model.I18nString;
-import org.molgenis.data.i18n.model.I18nStringFactory;
+import org.molgenis.data.i18n.model.L10nString;
+import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.importer.EntitiesValidationReport;
@@ -40,7 +40,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toList;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
-import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -128,6 +128,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	// Column names in the i18nstring sheet
 	private static final String EMX_I18N_STRING_MSGID = "msgid";
 	private static final String EMX_I18N_STRING_DESCRIPTION = "description";
+	private static final String EMX_I18N_STRING_NAMESPACE = "namespace";
+	private static final String DEFAULT_NAMESPACE = "default";
 
 	private static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP = newHashMap();
 
@@ -138,7 +140,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_TAGS, TAG);
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_ATTRIBUTES, ATTRIBUTE_META_DATA);
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_LANGUAGES, LANGUAGE);
-		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_I18NSTRINGS, I18N_STRING);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_I18NSTRINGS, L10N_STRING);
 	}
 
 	private static final List<String> EMX_ENTITIES_ALLOWED_ATTRS = Arrays
@@ -165,7 +167,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final EntityTypeFactory entityTypeFactory;
 	private final TagFactory tagFactory;
 	private final LanguageFactory languageFactory;
-	private final I18nStringFactory i18nStringFactory;
+	private final L10nStringFactory l10nStringFactory;
 	private final EntityTypeValidator entityTypeValidator;
 	private final AttributeValidator attributeValidator;
 	private final TagValidator tagValidator;
@@ -181,7 +183,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.tagFactory = null;
 		this.languageFactory = null;
-		this.i18nStringFactory = null;
+		this.l10nStringFactory = null;
 		this.entityTypeValidator = null;
 		this.attributeValidator = null;
 		this.tagValidator = null;
@@ -191,7 +193,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
-			I18nStringFactory i18nStringFactory, EntityTypeValidator entityTypeValidator,
+			L10nStringFactory l10nStringFactory, EntityTypeValidator entityTypeValidator,
 			AttributeValidator attributeValidator, TagValidator tagValidator,
 			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService)
 	{
@@ -201,7 +203,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.tagFactory = requireNonNull(tagFactory);
 		this.languageFactory = requireNonNull(languageFactory);
-		this.i18nStringFactory = requireNonNull(i18nStringFactory);
+		this.l10nStringFactory = requireNonNull(l10nStringFactory);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.tagValidator = requireNonNull(tagValidator);
@@ -228,7 +230,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			return new ParsedMetaData(entityTypeDependencyResolver.resolve(entities), intermediateResults.getPackages(),
 					intermediateResults.getTags(), intermediateResults.getLanguages(),
-					intermediateResults.getI18nStrings());
+					intermediateResults.getL10nStrings());
 		}
 		else
 		{
@@ -256,7 +258,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 				return new ParsedMetaData(entityTypeDependencyResolver.resolve(metadataList),
 						intermediateResults.getPackages(), intermediateResults.getTags(),
-						intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
+						intermediateResults.getLanguages(), intermediateResults.getL10nStrings());
 			}
 			else
 			{
@@ -1293,20 +1295,25 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		emxI18nStringRepo.forEach(emxI18nStringEntity ->
 		{
-			I18nString i18nString = toI18nString(emxI18nStringEntity);
-			intermediateParseResults.addI18nString(i18nString);
+			L10nString l10nString = toL10nString(emxI18nStringEntity);
+			intermediateParseResults.addL10nString(l10nString);
 		});
 
 	}
 
-	private I18nString toI18nString(Entity emxI18nStringEntity)
+	private L10nString toL10nString(Entity emxI18nStringEntity)
 	{
-		I18nString i18nString = i18nStringFactory.create();
-		i18nString.setMessageId(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
-		i18nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
+		L10nString l10nString = l10nStringFactory.create();
+		l10nString.setMessageID(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
+		l10nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
+		String namespace = emxI18nStringEntity.getString(EMX_I18N_STRING_NAMESPACE);
+		if(namespace == null){
+			namespace = DEFAULT_NAMESPACE;
+		}
+		l10nString.setNamespace(namespace);
 
-		LanguageService.getLanguageCodes().forEach(lang -> i18nString.set(lang, emxI18nStringEntity.getString(lang)));
-		return i18nString;
+		LanguageService.getLanguageCodes().forEach(lang -> l10nString.set(lang, emxI18nStringEntity.getString(lang)));
+		return l10nString;
 	}
 
 	/**
