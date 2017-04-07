@@ -401,11 +401,11 @@ class RestControllerV2
 		return repository.getName();
 	}
 
-	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
+	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String entityTypeId,
 			Package pack,
 			String label)
 	{
-		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
+		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, entityTypeId, pack, label));
 	}
 
 	/**

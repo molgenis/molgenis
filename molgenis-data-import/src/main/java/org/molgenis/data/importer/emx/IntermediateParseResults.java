@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.emx.EmxMetaDataParser.EmxAttribute;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableMap.copyOf;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
@@ -42,15 +44,17 @@ public final class IntermediateParseResults
 	 */
 	private final Map<String, I18nString> i18nStrings;
 	private final EntityTypeFactory entityTypeFactory;
+	private final DefaultPackage defaultPackage;
 
-	public IntermediateParseResults(EntityTypeFactory entityTypeFactory)
+	public IntermediateParseResults(EntityTypeFactory entityTypeFactory, DefaultPackage defaultPackage)
 	{
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
+		this.defaultPackage = requireNonNull(defaultPackage);
 		this.tags = new LinkedHashMap<>();
 		this.entities = new LinkedHashMap<>();
 		this.packages = new LinkedHashMap<>();
 		this.languages = new LinkedHashMap<>();
 		this.i18nStrings = new LinkedHashMap<>();
-		this.entityTypeFactory = entityTypeFactory;
 	}
 
 	public void addTag(String identifier, Tag tag)
@@ -122,19 +126,30 @@ public final class IntermediateParseResults
 
 	public EntityType addEntityType(String fullyQualifiedName)
 	{
-		String simpleName = fullyQualifiedName;
+		String entityTypeLabel = fullyQualifiedName;
 		Package pack = null;
 		for (Package p : packages.values())
 		{
 			String packageName = p.getId();
 			if (fullyQualifiedName.toLowerCase().startsWith(packageName.toLowerCase()))
 			{
-				simpleName = fullyQualifiedName.substring(packageName.length() + 1);// package_entity
+				entityTypeLabel = fullyQualifiedName.substring(packageName.length() + 1);// package_entity
 				pack = p;
 			}
 		}
 
-		EntityType emd = entityTypeFactory.create(fullyQualifiedName).setPackage(pack);
+		String entityTypeId;
+		if (pack == null)
+		{
+			pack = this.defaultPackage;
+			entityTypeId = DefaultPackage.PACKAGE_DEFAULT + Package.PACKAGE_SEPARATOR + fullyQualifiedName;
+		}
+		else
+		{
+			entityTypeId = fullyQualifiedName;
+		}
+
+		EntityType emd = entityTypeFactory.create(entityTypeId).setLabel(entityTypeLabel).setPackage(pack);
 		entities.put(fullyQualifiedName, emd);
 		return emd;
 	}

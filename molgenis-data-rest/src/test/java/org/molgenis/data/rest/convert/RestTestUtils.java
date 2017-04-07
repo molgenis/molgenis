@@ -5,7 +5,6 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.molgenis.data.rest.RestControllerIT;
 import org.slf4j.Logger;
 
 import java.io.File;
