@@ -14,6 +14,7 @@ import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
@@ -171,6 +172,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final AttributeValidator attributeValidator;
 	private final TagValidator tagValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final DefaultPackage defaultPackage;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, EntityTypeDependencyResolver entityTypeDependencyResolver)
@@ -186,13 +188,14 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = null;
 		this.tagValidator = null;
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.defaultPackage = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
 			L10nStringFactory l10nStringFactory, EntityTypeValidator entityTypeValidator,
 			AttributeValidator attributeValidator, TagValidator tagValidator,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, DefaultPackage defaultPackage)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
@@ -205,6 +208,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.tagValidator = requireNonNull(tagValidator);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.defaultPackage = requireNonNull(defaultPackage);
 	}
 
 	@Override
@@ -403,7 +407,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
+		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory,
+				defaultPackage);
 		if (tagRepository != null)
 		{
 			for (Entity tagEntity : tagRepository)

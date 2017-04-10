@@ -18,9 +18,7 @@ import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITEMETA;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.collections.Maps.newHashMap;
 
@@ -83,10 +81,10 @@ public class RestControllerV2APIIT
 		grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", WRITE);
 		grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", WRITE);
 
-		grantRights(adminToken, testUserId, "v2APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "v2APITest2", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_v2APITest1", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_v2APITest2", WRITEMETA);
 
-		grantRights(adminToken, testUserId, "APICopyTest", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
 
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
@@ -137,10 +135,10 @@ public class RestControllerV2APIIT
 	@Test
 	public void testDeleteEntity()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V2 + "v2APITest1/ref1").then().log()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V2 + "base_v2APITest1/ref1").then().log()
 				.all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "v2APITest1").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "base_v2APITest1").then().log().all()
 				.body("total", equalTo(4), "items[0].value", equalTo("ref2"), "items[1].value", equalTo("ref3"),
 						"items[2].value", equalTo("ref4"), "items[3].value", equalTo("ref5"));
 	}
@@ -151,9 +149,9 @@ public class RestControllerV2APIIT
 		Map<String, List<String>> requestBody = newHashMap();
 		requestBody.put("entityIds", newArrayList("ref1", "ref2", "ref3", "ref4"));
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).body(requestBody)
-				.delete(API_V2 + "v2APITest2").then().log().all().statusCode(NO_CONTENT);
+				.delete(API_V2 + "base_v2APITest2").then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "v2APITest2").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "base_v2APITest2").then().log().all()
 				.body("total", equalTo(1), "items[0].value", equalTo("ref5"));
 	}
 
@@ -225,13 +223,13 @@ public class RestControllerV2APIIT
 	public void testCopyEntity()
 	{
 		Map<String, String> request = newHashMap();
-		request.put("newEntityName", "CopiedEntity");
+		request.put("newEntityName", "base_CopiedEntity");
 
 		given().log().all().contentType(APPLICATION_JSON).body(request).header(X_MOLGENIS_TOKEN, testUserToken)
-				.post(API_V2 + "copy/APICopyTest").then().log().all();
+				.post(API_V2 + "copy/base_APICopyTest").then().log().all();
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "CopiedEntity").then().log().all()
-				.body("href", equalTo("/api/v2/CopiedEntity"), "items[0].label", equalTo("Copied!"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "base_CopiedEntity").then().log().all()
+				.body("href", equalTo("/api/v2/base_CopiedEntity"), "items[0].label", equalTo("Copied!"));
 	}
 
 	@Test(enabled = false) // FIXME
@@ -262,7 +260,7 @@ public class RestControllerV2APIIT
 		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).
-				put(API_V2 + "v2APITest1/label").then().log().all().statusCode(OKE);
+				put(API_V2 + "base_v2APITest1/label").then().log().all().statusCode(OKE);
 	}
 
 	@Test
@@ -417,11 +415,11 @@ public class RestControllerV2APIIT
 		removeEntity(adminToken, "V2_API_LocationAPIV2");
 		removeEntity(adminToken, "V2_API_PersonAPIV2");
 
-		removeEntity(adminToken, "v2APITest1");
-		removeEntity(adminToken, "v2APITest2");
+		removeEntity(adminToken, "base_v2APITest1");
+		removeEntity(adminToken, "base_v2APITest2");
 
-		removeEntity(adminToken, "APICopyTest");
-		removeEntity(adminToken, "CopiedEntity");
+		removeEntity(adminToken, "base_APICopyTest");
+		removeEntity(adminToken, "base_CopiedEntity");
 
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);

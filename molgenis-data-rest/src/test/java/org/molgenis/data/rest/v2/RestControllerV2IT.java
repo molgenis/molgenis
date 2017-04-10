@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
 import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;

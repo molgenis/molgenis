@@ -22,10 +22,9 @@ import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITEMETA;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests each endpoint of the V1 Rest Api through http calls
@@ -90,12 +89,12 @@ public class RestControllerV1APIIT
 		grantRights(adminToken, testUserId, "V1_API_PersonAPIV1", WRITE);
 		grantRights(adminToken, testUserId, "V1_API_Items", WRITE);
 
-		grantRights(adminToken, testUserId, "APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "APITest2", WRITEMETA);
-		grantRights(adminToken, testUserId, "APITest3", WRITEMETA);
-		grantRights(adminToken, testUserId, "APITest4", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APITest1", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APITest2", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APITest3", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APITest4", WRITEMETA);
 
-		grantRights(adminToken, testUserId, "ApiTestFile", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_ApiTestFile", WRITEMETA);
 
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
@@ -104,8 +103,7 @@ public class RestControllerV1APIIT
 	public void testEntityExists()
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(TEXT_PLAIN).when()
-				.get(API_V1 + "V1_API_TypeTestRefAPIV1/exist").then().log().all().statusCode(200)
-				.body(equalTo("true"));
+				.get(API_V1 + "V1_API_TypeTestRefAPIV1/exist").then().log().all().statusCode(200).body(equalTo("true"));
 	}
 
 	@Test
@@ -119,8 +117,7 @@ public class RestControllerV1APIIT
 	public void testGetEntityType()
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.contentType(APPLICATION_JSON).when().get(API_V1 + "V1_API_TypeTestRefAPIV1/meta").then().log()
-				.all();
+				.contentType(APPLICATION_JSON).when().get(API_V1 + "V1_API_TypeTestRefAPIV1/meta").then().log().all();
 		validateGetEntityType(response);
 	}
 
@@ -155,8 +152,7 @@ public class RestControllerV1APIIT
 	public void testRetrieveEntity()
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.contentType(APPLICATION_JSON).when().get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then().log()
-				.all();
+				.contentType(APPLICATION_JSON).when().get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then().log().all();
 		validateRetrieveEntity(response);
 	}
 
@@ -208,9 +204,12 @@ public class RestControllerV1APIIT
 	public void testRetrieveEntityCollection()
 	{
 		String contents = getFileContents("/testRetrieveEntityCollection_response.csv");
+		// workaround on windows due to git replacing \n with \r\n on checkout of file depending on git core.eol and core.autocrlf config values
+		contents = contents.replaceAll("\\r\\n", "\n").replaceAll("\\r", "\n");
+
 		String response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(TEXT_CSV).when()
-				.get(API_V1 + "csv/V1_API_Items").then().contentType("text/csv").log().all()
-				.statusCode(200).extract().asString();
+				.get(API_V1 + "csv/V1_API_Items").then().contentType("text/csv").log().all().statusCode(200).extract()
+				.asString();
 		assertEquals(response, contents);
 	}
 
@@ -218,11 +217,11 @@ public class RestControllerV1APIIT
 	public void testCreateFromFormPost()
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
-				.formParam("value", "ref6").formParam("label", "label6").when()
-				.post(API_V1 + "V1_API_TypeTestRefAPIV1").then().log().all().statusCode(CREATED);
+				.formParam("value", "ref6").formParam("label", "label6").when().post(API_V1 + "V1_API_TypeTestRefAPIV1")
+				.then().log().all().statusCode(CREATED);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
-				.then().log().all().statusCode(OKE)
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then()
+				.log().all().statusCode(OKE)
 				.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref6"), "value", equalTo("ref6"), "label",
 						equalTo("label6"));
 
@@ -233,17 +232,25 @@ public class RestControllerV1APIIT
 	@Test
 	public void testCreateFromFormPostMultiPart() throws URISyntaxException
 	{
-		URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
-		File file = new File(new URI(resourceUrl.toString()).getPath());
+		try
+		{
+			URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
+			File file = new File(new URI(resourceUrl.toString()).getPath());
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType("multipart/form-data")
-				.multiPart("id", "6").multiPart(file).when().post(API_V1 + "ApiTestFile").then().log().all()
-				.statusCode(CREATED);
+			given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType("multipart/form-data")
+					.multiPart("id", "6").multiPart(file).when().post(API_V1 + "base_ApiTestFile").then().log().all()
+					.statusCode(CREATED);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).when()
-				.get(API_V1 + "ApiTestFile/6").then().log().all().statusCode(OKE)
-				.body("href", equalTo("/api/v1/ApiTestFile/6"), "id", equalTo("6"), "file.href",
-						equalTo("/api/v1/ApiTestFile/6/file"));
+			given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).when()
+					.get(API_V1 + "base_ApiTestFile/6").then().log().all().statusCode(OKE)
+					.body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "file.href",
+							equalTo("/api/v1/base_ApiTestFile/6/file"));
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+			assertTrue(false);
+		}
 	}
 
 	@Test
@@ -253,16 +260,16 @@ public class RestControllerV1APIIT
 		entityMap.put("value", "ref6");
 		entityMap.put("label", "label6");
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).body(entityMap)
-				.when().post(API_V1 + "V1_API_TypeTestRefAPIV1").then().log().all().statusCode(201);
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).body(entityMap).when()
+				.post(API_V1 + "V1_API_TypeTestRefAPIV1").then().log().all().statusCode(201);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).when()
 				.get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then().log().all().statusCode(200)
 				.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref6"), "value", equalTo("ref6"), "label",
 						equalTo("label6"));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then().log().all().statusCode(204);
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
+				.then().log().all().statusCode(204);
 	}
 
 	@Test
@@ -274,8 +281,8 @@ public class RestControllerV1APIIT
 		given().log().all().contentType(APPLICATION_JSON).body(parameters).header(X_MOLGENIS_TOKEN, testUserToken)
 				.put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then().log().all().statusCode(OKE);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
-				.then().log().all().statusCode(OKE).body("label", equalTo("label900"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then()
+				.log().all().statusCode(OKE).body("label", equalTo("label900"));
 
 		parameters.put("label", "label1");
 		given().log().all().contentType(APPLICATION_JSON).body(parameters).header(X_MOLGENIS_TOKEN, testUserToken)
@@ -291,8 +298,8 @@ public class RestControllerV1APIIT
 		given().log().all().contentType(APPLICATION_JSON).body(parameters).header(X_MOLGENIS_TOKEN, testUserToken)
 				.post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=PUT").then().log().all().statusCode(OKE);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
-				.then().log().all().statusCode(OKE).body("label", equalTo("label900"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then()
+				.log().all().statusCode(OKE).body("label", equalTo("label900"));
 
 		parameters.put("label", "label1");
 		given().log().all().contentType(APPLICATION_JSON).body(parameters).header(X_MOLGENIS_TOKEN, testUserToken)
@@ -305,8 +312,8 @@ public class RestControllerV1APIIT
 		given().log().all().contentType(APPLICATION_JSON).body("label900").header(X_MOLGENIS_TOKEN, testUserToken)
 				.put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label").then().log().all().statusCode(OKE);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
-				.then().log().all().statusCode(OKE).body("label", equalTo("label900"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then()
+				.log().all().statusCode(OKE).body("label", equalTo("label900"));
 
 		given().log().all().contentType(APPLICATION_JSON).body("label1").header(X_MOLGENIS_TOKEN, testUserToken)
 				.put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label").then().log().all().statusCode(OKE);
@@ -318,8 +325,8 @@ public class RestControllerV1APIIT
 		given().log().all().contentType(APPLICATION_JSON).body("label900").header(X_MOLGENIS_TOKEN, testUserToken)
 				.post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label?_method=PUT").then().log().all().statusCode(OKE);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
-				.then().log().all().statusCode(OKE).body("label", equalTo("label900"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then()
+				.log().all().statusCode(OKE).body("label", equalTo("label900"));
 
 		given().log().all().contentType(APPLICATION_JSON).body("label1").header(X_MOLGENIS_TOKEN, testUserToken)
 				.post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label?_method=PUT").then().log().all().statusCode(OKE);
@@ -332,13 +339,13 @@ public class RestControllerV1APIIT
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType("multipart/form-data")
-				.multiPart("id", "1").multiPart(file).when().post(API_V1 + "ApiTestFile/1?_method=PUT").then().log()
-				.all().statusCode(NO_CONTENT);
+				.multiPart("id", "1").multiPart(file).when().post(API_V1 + "base_ApiTestFile/1?_method=PUT").then()
+				.log().all().statusCode(NO_CONTENT);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).when()
-				.get(API_V1 + "ApiTestFile/1").then().log().all().statusCode(OKE)
-				.body("href", equalTo("/api/v1/ApiTestFile/1"), "id", equalTo("1"), "file.href",
-						equalTo("/api/v1/ApiTestFile/1/file"));
+				.get(API_V1 + "base_ApiTestFile/1").then().log().all().statusCode(OKE)
+				.body("href", equalTo("/api/v1/base_ApiTestFile/1"), "id", equalTo("1"), "file.href",
+						equalTo("/api/v1/base_ApiTestFile/1/file"));
 	}
 
 	@Test
@@ -348,8 +355,8 @@ public class RestControllerV1APIIT
 				.formParam("value", "ref1").formParam("label", "label900").when()
 				.post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=PUT").then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
-				.then().log().all().statusCode(OKE).body("label", equalTo("label900"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1").then()
+				.log().all().statusCode(OKE).body("label", equalTo("label900"));
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
 				.formParam("value", "ref1").formParam("label", "label1").when()
@@ -360,17 +367,17 @@ public class RestControllerV1APIIT
 	public void testDelete()
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
-				.formParam("value", "ref6").formParam("label", "label6").when()
-				.post(API_V1 + "V1_API_TypeTestRefAPIV1").then().log().all().statusCode(CREATED);
+				.formParam("value", "ref6").formParam("label", "label6").when().post(API_V1 + "V1_API_TypeTestRefAPIV1")
+				.then().log().all().statusCode(CREATED);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
-				.then().log().all().statusCode(OKE).body("value", equalTo("ref6"), "label", equalTo("label6"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then()
+				.log().all().statusCode(OKE).body("value", equalTo("ref6"), "label", equalTo("label6"));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then().log().all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
+				.then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
-				.then().log().all().statusCode(NOT_FOUND)
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then()
+				.log().all().statusCode(NOT_FOUND)
 				.body("errors[0].message", equalTo("V1_API_TypeTestRefAPIV1 ref6 not found"));
 	}
 
@@ -378,32 +385,31 @@ public class RestControllerV1APIIT
 	public void testDeletePost()
 	{
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_FORM_URL_ENCODED)
-				.formParam("value", "ref6").formParam("label", "label6").when()
-				.post(API_V1 + "V1_API_TypeTestRefAPIV1").then().log().all().statusCode(CREATED);
+				.formParam("value", "ref6").formParam("label", "label6").when().post(API_V1 + "V1_API_TypeTestRefAPIV1")
+				.then().log().all().statusCode(CREATED);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
-				.then().log().all().statusCode(OKE).body("value", equalTo("ref6"), "label", equalTo("label6"));
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then()
+				.log().all().statusCode(OKE).body("value", equalTo("ref6"), "label", equalTo("label6"));
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.post(API_V1 + "V1_API_TypeTestRefAPIV1/ref6?_method=DELETE").then().log().all()
-				.statusCode(NO_CONTENT);
+				.post(API_V1 + "V1_API_TypeTestRefAPIV1/ref6?_method=DELETE").then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
-				.then().log().all().statusCode(NOT_FOUND)
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then()
+				.log().all().statusCode(NOT_FOUND)
 				.body("errors[0].message", equalTo("V1_API_TypeTestRefAPIV1 ref6 not found"));
 	}
 
 	@Test
 	public void testDeleteAll()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest1").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest1").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V1 + "APITest1").then().log()
-				.all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V1 + "base_APITest1").then().log().all()
+				.statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest1").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest1").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(0));
 	}
@@ -411,14 +417,14 @@ public class RestControllerV1APIIT
 	@Test
 	public void testDeleteAllPost()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest2").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest2").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).post(API_V1 + "APITest2?_method=DELETE")
-				.then().log().all().statusCode(NO_CONTENT);
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).post(API_V1 + "base_APITest2?_method=DELETE").then()
+				.log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest2").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest2").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(0));
 	}
@@ -426,51 +432,50 @@ public class RestControllerV1APIIT
 	@Test
 	public void testDeleteMeta()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest3").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest3").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).delete(API_V1 + "APITest3/meta").then().log()
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).delete(API_V1 + "base_APITest3/meta").then().log()
 				.all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest3").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest3").then().log().all()
 				.statusCode(NOT_FOUND).
-				body("errors[0].message", equalTo("Unknown entity [APITest3]"));
+				body("errors[0].message", equalTo("Unknown entity [base_APITest3]"));
 	}
 
 	@Test
 	public void testDeleteMetaPost()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest4").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest4").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).post(API_V1 + "APITest4/meta?_method=DELETE")
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).post(API_V1 + "base_APITest4/meta?_method=DELETE")
 				.then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest4").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest4").then().log().all()
 				.statusCode(NOT_FOUND).
-				body("errors[0].message", equalTo("Unknown entity [APITest4]"));
+				body("errors[0].message", equalTo("Unknown entity [base_APITest4]"));
 	}
 
 	private void validateGetEntityType(ValidatableResponse response)
 	{
 		response.statusCode(200);
 		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta"), "hrefCollection",
-				equalTo("/api/v1/V1_API_TypeTestRefAPIV1"), "name", equalTo("V1_API_TypeTestRefAPIV1"),
-				"label", equalTo("TypeTestRefAPIV1"), "description", equalTo("MOLGENIS Data types test ref entity"),
-				"attributes.value.href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"),
-				"attributes.label.href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/label"), "labelAttribute",
-				equalTo("label"), "idAttribute", equalTo("value"), "lookupAttributes",
-				equalTo(newArrayList("value", "label")), "isAbstract", equalTo(false), "languageCode", equalTo("en"),
-				"writable", equalTo(true));
+				equalTo("/api/v1/V1_API_TypeTestRefAPIV1"), "name", equalTo("V1_API_TypeTestRefAPIV1"), "label",
+				equalTo("TypeTestRefAPIV1"), "description", equalTo("MOLGENIS Data types test ref entity"),
+				"attributes.value.href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "attributes.label.href",
+				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/label"), "labelAttribute", equalTo("label"),
+				"idAttribute", equalTo("value"), "lookupAttributes", equalTo(newArrayList("value", "label")),
+				"isAbstract", equalTo(false), "languageCode", equalTo("en"), "writable", equalTo(true));
 	}
 
 	private void validateRetrieveEntityAttributeMeta(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "fieldType",
-				equalTo("STRING"), "name", equalTo("value"), "label", equalTo("value label"), "description",
+		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "fieldType", equalTo("STRING"),
+				"name", equalTo("value"), "label", equalTo("value label"), "description",
 				equalTo("TypeTestRef value attribute"), "attributes", equalTo(newArrayList()), "enumOptions",
 				equalTo(newArrayList()), "maxLength", equalTo(255), "auto", equalTo(false), "nillable", equalTo(false),
 				"readOnly", equalTo(true), "labelAttribute", equalTo(false), "unique", equalTo(true), "visible",
@@ -487,33 +492,28 @@ public class RestControllerV1APIIT
 	private void validateRetrieveEntityAttribute(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/V1_API_TypeTestAPIV1/1/xxref_value"), "value", equalTo("ref1"),
-				"label", equalTo("label1"));
+		response.body("href", equalTo("/api/v1/V1_API_TypeTestAPIV1/1/xxref_value"), "value", equalTo("ref1"), "label",
+				equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityCollectionResponse(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", equalTo("/api/v1/V1_API_Items"), "meta.href",
-				equalTo("/api/v1/V1_API_Items/meta"), "meta.hrefCollection",
-				equalTo("/api/v1/V1_API_Items"), "meta.name", equalTo("V1_API_Items"),
-				"meta.label", equalTo("Items"), "meta.description",
-				equalTo("Items"), "meta.attributes.value.href",
+		response.body("href", equalTo("/api/v1/V1_API_Items"), "meta.href", equalTo("/api/v1/V1_API_Items/meta"),
+				"meta.hrefCollection", equalTo("/api/v1/V1_API_Items"), "meta.name", equalTo("V1_API_Items"),
+				"meta.label", equalTo("Items"), "meta.description", equalTo("Items"), "meta.attributes.value.href",
 				equalTo("/api/v1/V1_API_Items/meta/value"), "meta.attributes.label.href",
-				equalTo("/api/v1/V1_API_Items/meta/label"), "meta.labelAttribute", equalTo("label"),
-				"meta.idAttribute", equalTo("value"), "meta.lookupAttributes", equalTo(newArrayList("value", "label")),
-				"meta.isAbstract", equalTo(false), "meta.languageCode", equalTo("en"), "meta.writable", equalTo(true),
-				"start", equalTo(0), "num", equalTo(100), "total", equalTo(5), "items[0].href",
-				equalTo("/api/v1/V1_API_Items/ref1"), "items[0].value", equalTo("ref1"),
-				"items[0].label", equalTo("label1"), "items[1].href",
-				equalTo("/api/v1/V1_API_Items/ref2"), "items[1].value", equalTo("ref2"),
-				"items[1].label", equalTo("label2"), "items[2].href",
-				equalTo("/api/v1/V1_API_Items/ref3"), "items[2].value", equalTo("ref3"),
-				"items[2].label", equalTo("label3"), "items[3].href",
-				equalTo("/api/v1/V1_API_Items/ref4"), "items[3].value", equalTo("ref4"),
-				"items[3].label", equalTo("label4"), "items[4].href",
-				equalTo("/api/v1/V1_API_Items/ref5"), "items[4].value", equalTo("ref5"),
-				"items[4].label", equalTo("label5"));
+				equalTo("/api/v1/V1_API_Items/meta/label"), "meta.labelAttribute", equalTo("label"), "meta.idAttribute",
+				equalTo("value"), "meta.lookupAttributes", equalTo(newArrayList("value", "label")), "meta.isAbstract",
+				equalTo(false), "meta.languageCode", equalTo("en"), "meta.writable", equalTo(true), "start", equalTo(0),
+				"num", equalTo(100), "total", equalTo(5), "items[0].href", equalTo("/api/v1/V1_API_Items/ref1"),
+				"items[0].value", equalTo("ref1"), "items[0].label", equalTo("label1"), "items[1].href",
+				equalTo("/api/v1/V1_API_Items/ref2"), "items[1].value", equalTo("ref2"), "items[1].label",
+				equalTo("label2"), "items[2].href", equalTo("/api/v1/V1_API_Items/ref3"), "items[2].value",
+				equalTo("ref3"), "items[2].label", equalTo("label3"), "items[3].href",
+				equalTo("/api/v1/V1_API_Items/ref4"), "items[3].value", equalTo("ref4"), "items[3].label",
+				equalTo("label4"), "items[4].href", equalTo("/api/v1/V1_API_Items/ref5"), "items[4].value",
+				equalTo("ref5"), "items[4].label", equalTo("label5"));
 	}
 
 	@AfterClass
@@ -526,12 +526,10 @@ public class RestControllerV1APIIT
 		removeEntity(adminToken, "V1_API_PersonAPIV1");
 
 		// Clean up APITest1 and 2 because they only had their rows deleted
-		removeEntity(adminToken, "APITest1");
-		removeEntity(adminToken, "APITest2");
+		removeEntity(adminToken, "base_APITest1");
+		removeEntity(adminToken, "base_APITest2");
 
-		//todo remove APITest3 and APITest4 inside try-catch, in case delete test fails
-
-		removeEntity(adminToken, "ApiTestFile");
+		removeEntity(adminToken, "base_ApiTestFile");
 
 		removeEntity(adminToken, "V1_API_Items");
 
@@ -542,6 +540,7 @@ public class RestControllerV1APIIT
 		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout").then().log().all();
 
 		// Clean up user
-		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId).then().log().all();
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId)
+				.then().log().all();
 	}
 }
