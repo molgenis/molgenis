@@ -260,10 +260,10 @@ public class RestTestUtils
 				.delete("api/v1/sys_sec_UserAuthority/" + permissionId);
 	}
 
-	public static void removeEntity(String adminToken, String entityName)
+	public static void removeEntity(String adminToken, String entityId)
 	{
 		given().header("x-molgenis-token", adminToken).contentType(APPLICATION_JSON)
-				.delete("api/v1/" + entityName + "/meta");
+				.delete("api/v1/" + entityId + "/meta");
 	}
 
 	/**

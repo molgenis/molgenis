@@ -84,11 +84,11 @@ public class RestControllerV1APIIT
 		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
 
-		grantRights(adminToken, testUserId, "TypeTestAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "TypeTestRefAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "LocationAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "PersonAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "Items", WRITE);
+		grantRights(adminToken, testUserId, "V1_API_TypeTestAPIV1", WRITE);
+		grantRights(adminToken, testUserId, "V1_API_TypeTestRefAPIV1", WRITE);
+		grantRights(adminToken, testUserId, "V1_API_LocationAPIV1", WRITE);
+		grantRights(adminToken, testUserId, "V1_API_PersonAPIV1", WRITE);
+		grantRights(adminToken, testUserId, "V1_API_Items", WRITE);
 
 		grantRights(adminToken, testUserId, "APITest1", WRITEMETA);
 		grantRights(adminToken, testUserId, "APITest2", WRITEMETA);
@@ -237,13 +237,13 @@ public class RestControllerV1APIIT
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType("multipart/form-data")
-				.multiPart("id", "6").multiPart(file).when().post(API_V1 + "base_ApiTestFile").then().log().all()
+				.multiPart("id", "6").multiPart(file).when().post(API_V1 + "ApiTestFile").then().log().all()
 				.statusCode(CREATED);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).when()
-				.get(API_V1 + "base_ApiTestFile/6").then().log().all().statusCode(OKE)
-				.body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "file.href",
-						equalTo("/api/v1/base_ApiTestFile/6/file"));
+				.get(API_V1 + "ApiTestFile/6").then().log().all().statusCode(OKE)
+				.body("href", equalTo("/api/v1/ApiTestFile/6"), "id", equalTo("6"), "file.href",
+						equalTo("/api/v1/ApiTestFile/6/file"));
 	}
 
 	@Test
@@ -332,13 +332,13 @@ public class RestControllerV1APIIT
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType("multipart/form-data")
-				.multiPart("id", "1").multiPart(file).when().post(API_V1 + "base_ApiTestFile/1?_method=PUT").then().log()
+				.multiPart("id", "1").multiPart(file).when().post(API_V1 + "ApiTestFile/1?_method=PUT").then().log()
 				.all().statusCode(NO_CONTENT);
 
 		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).contentType(APPLICATION_JSON).when()
-				.get(API_V1 + "base_ApiTestFile/1").then().log().all().statusCode(OKE)
-				.body("href", equalTo("/api/v1/base_ApiTestFile/1"), "id", equalTo("1"), "file.href",
-						equalTo("/api/v1/base_ApiTestFile/1/file"));
+				.get(API_V1 + "ApiTestFile/1").then().log().all().statusCode(OKE)
+				.body("href", equalTo("/api/v1/ApiTestFile/1"), "id", equalTo("1"), "file.href",
+						equalTo("/api/v1/ApiTestFile/1/file"));
 	}
 
 	@Test
@@ -396,14 +396,14 @@ public class RestControllerV1APIIT
 	@Test
 	public void testDeleteAll()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest1").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest1").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V1 + "base_APITest1").then().log()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V1 + "APITest1").then().log()
 				.all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest1").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest1").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(0));
 	}
@@ -411,14 +411,14 @@ public class RestControllerV1APIIT
 	@Test
 	public void testDeleteAllPost()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest2").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest2").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).post(API_V1 + "base_APITest2?_method=DELETE")
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).post(API_V1 + "APITest2?_method=DELETE")
 				.then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest2").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest2").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(0));
 	}
@@ -426,31 +426,31 @@ public class RestControllerV1APIIT
 	@Test
 	public void testDeleteMeta()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest3").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest3").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).delete(API_V1 + "base_APITest3/meta").then().log()
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).delete(API_V1 + "APITest3/meta").then().log()
 				.all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest3").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest3").then().log().all()
 				.statusCode(NOT_FOUND).
-				body("errors[0].message", equalTo("Unknown entity [base_APITest3]"));
+				body("errors[0].message", equalTo("Unknown entity [APITest3]"));
 	}
 
 	@Test
 	public void testDeleteMetaPost()
 	{
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest4").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest4").then().log().all()
 				.statusCode(OKE).
 				body("total", equalTo(40));
 
-		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).post(API_V1 + "base_APITest4/meta?_method=DELETE")
+		given().log().all().header(X_MOLGENIS_TOKEN, adminToken).post(API_V1 + "APITest4/meta?_method=DELETE")
 				.then().log().all().statusCode(NO_CONTENT);
 
-		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "base_APITest4").then().log().all()
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V1 + "APITest4").then().log().all()
 				.statusCode(NOT_FOUND).
-				body("errors[0].message", equalTo("Unknown entity [base_APITest4]"));
+				body("errors[0].message", equalTo("Unknown entity [APITest4]"));
 	}
 
 	private void validateGetEntityType(ValidatableResponse response)
@@ -526,10 +526,12 @@ public class RestControllerV1APIIT
 		removeEntity(adminToken, "V1_API_PersonAPIV1");
 
 		// Clean up APITest1 and 2 because they only had their rows deleted
-		removeEntity(adminToken, "base_APITest1");
-		removeEntity(adminToken, "base_APITest2");
+		removeEntity(adminToken, "APITest1");
+		removeEntity(adminToken, "APITest2");
 
-		removeEntity(adminToken, "base_ApiTestFile");
+		//todo remove APITest3 and APITest4 inside try-catch, in case delete test fails
+
+		removeEntity(adminToken, "ApiTestFile");
 
 		removeEntity(adminToken, "V1_API_Items");
 
