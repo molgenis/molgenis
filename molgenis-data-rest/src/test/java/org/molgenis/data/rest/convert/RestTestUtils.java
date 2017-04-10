@@ -5,7 +5,6 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.molgenis.data.rest.RestControllerIT;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -37,7 +36,7 @@ public class RestTestUtils
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
-	public static final String DEFAULT_HOST = "https://molgenis01.gcc.rug.nl";
+	public static final String DEFAULT_HOST = "http://localhost:8080";
 	public static final String DEFAULT_ADMIN_NAME = "admin";
 	public static final String DEFAULT_ADMIN_PW = "admin";
 
@@ -229,7 +228,7 @@ public class RestTestUtils
 	public static void grantRights(String adminToken, String userId, String entity,
 			Permission permission)
 	{
-		String entityTypeId = getEntityTypeId(adminToken, "name", entity, "sys_md_EntityType");
+		String entityTypeId = getEntityTypeId(adminToken, "id", entity, "sys_md_EntityType");
 		grantSystemRights(adminToken, userId, entityTypeId, permission);
 	}
 
