@@ -27,7 +27,8 @@
     <#if content?has_content>
     <div class="row">
         <div class="col-md-12">
-        ${content?html}
+        <#-- Do *not* HTML escape content else text formatting won't work -->
+            ${content}
         </div>
     </div>
     </#if>
