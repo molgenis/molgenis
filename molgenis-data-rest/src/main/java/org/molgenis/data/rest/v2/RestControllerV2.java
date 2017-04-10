@@ -213,7 +213,7 @@ class RestControllerV2
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
+	@RequestMapping(value = "/{entityName:^(?!i18n).+}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
@@ -322,7 +322,7 @@ class RestControllerV2
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
 					.collect(toList());
 			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
-			final List<String> ids = new ArrayList<String>();
+			final List<String> ids = new ArrayList<>();
 
 			// Add all entities
 			if (ATTRIBUTE_META_DATA.equals(entityName))
@@ -410,8 +410,7 @@ class RestControllerV2
 	}
 
 	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
-			Package pack,
-			String label)
+			Package pack, String label)
 	{
 		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
@@ -491,7 +490,7 @@ class RestControllerV2
 				throw createMolgenisDataExceptionIdentifierAndValue();
 			}
 
-			final List<Entity> updatedEntities = new ArrayList<Entity>();
+			final List<Entity> updatedEntities = new ArrayList<>();
 			int count = 0;
 			for (Entity entity : entities)
 			{
@@ -572,12 +571,19 @@ class RestControllerV2
 	 * User needs permissions on the entity to add the values, otherwise they'll only be logged.
 	 */
 	@RequestMapping(value = "/i18n/{namespace}", method = POST)
-	@ResponseStatus(OK)
+	@ResponseStatus(CREATED)
 	public void registerMissingResourceStrings(@PathVariable String namespace, HttpServletRequest request)
 	{
 		Set<String> messageIDs = request.getParameterMap().entrySet().stream().map(Map.Entry::getKey)
 				.filter(id -> !id.equals(TIME_PARAM_NAME)).collect(toSet());
 		localizationService.addMissingMessageIDs(namespace, messageIDs);
+	}
+
+	@RequestMapping(value = "/i18n/{namespace}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteNamespace(@PathVariable String namespace)
+	{
+		localizationService.deleteNameSpace(namespace);
 	}
 
 	/**
@@ -720,7 +726,7 @@ class RestControllerV2
 			List<Map<String, Object>> entities = new ArrayList<>();
 			for (Entity entity : it)
 			{
-				Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+				Map<String, Object> responseData = new LinkedHashMap<>();
 				createEntityValuesResponse(entity, fetch, responseData);
 				entities.add(responseData);
 			}
@@ -763,7 +769,7 @@ class RestControllerV2
 
 	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData)
 	{
-		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+		Map<String, Object> responseData = new LinkedHashMap<>();
 		if (includeMetaData)
 		{
 			createEntityTypeResponse(entity.getEntityType(), fetch, responseData);
@@ -810,7 +816,6 @@ class RestControllerV2
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
 											languageService.getCurrentUserLanguageCode());
-							;
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -826,11 +831,10 @@ class RestControllerV2
 						List<Map<String, Object>> refEntityResponses;
 						if (refEntities != null)
 						{
-							refEntityResponses = new ArrayList<Map<String, Object>>();
+							refEntityResponses = new ArrayList<>();
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
 											languageService.getCurrentUserLanguageCode());
-							;
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));

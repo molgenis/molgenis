@@ -10,18 +10,22 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITEMETA;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.Assert.assertEquals;
 import static org.testng.collections.Maps.newHashMap;
 
 /**
@@ -77,6 +81,7 @@ public class RestControllerV2APIIT
 
 		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
+		grantSystemRights(adminToken, testUserId, "sys_L10nString", WRITE);
 
 		grantRights(adminToken, testUserId, "TypeTestAPIV2", WRITE);
 		grantRights(adminToken, testUserId, "TypeTestRefAPIV2", WRITE);
@@ -129,8 +134,8 @@ public class RestControllerV2APIIT
 	public void testRetrieveEntityWithAttributeFilterPost()
 	{
 		ValidatableResponse response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.param("attrs", newArrayList("label")).post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET").then().log()
-				.all();
+				.param("attrs", newArrayList("label")).post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET").then()
+				.log().all();
 		validateRetrieveEntityWithAttributeFilter(response);
 	}
 
@@ -273,24 +278,78 @@ public class RestControllerV2APIIT
 		validateGetI18nStrings(response);
 	}
 
+	@Test
+	public void testGetL10nStrings()
+	{
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(API_V2 + "i18n/form/en").then().log().all()
+				.statusCode(OKE)
+				.body("form_number_control_placeholder", equalTo("Number"), "form_bool_true", equalTo("Yes"),
+						"form_xref_control_placeholder", equalTo("Search for a Value"), "form_date_control_placeholder",
+						equalTo("Date"), "form_url_control_placeholder", equalTo("URL"),
+						"form_computed_control_placeholder", equalTo("This value is computed automatically"),
+						"form_email_control_placeholder", equalTo("Email"), "form_bool_false", equalTo("No"),
+						"form_bool_missing", equalTo("N/A"), "form_mref_control_placeholder",
+						equalTo("Search for Values"));
+	}
+
+	@Test
+	public void testGetL10nProperties() throws IOException
+	{
+		String response = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
+				.get(API_V2 + "i18n/form_en.properties").then().log().all().contentType("text/plain;charset=UTF-8")
+				.statusCode(OKE).extract().asString();
+
+		Properties responseProperties = new Properties();
+		responseProperties.load(new StringReader(response));
+
+		InputStream is = getClass().getResourceAsStream("/testGetL10nProperties_response.properties");
+		Properties expectedProperties = new Properties();
+		expectedProperties.load(new InputStreamReader(is, "UTF-8"));
+
+		assertEquals(responseProperties, expectedProperties);
+	}
+
+	@Test
+	public void testRegisterMissingResourceStrings()
+	{
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
+				.contentType("application/x-www-form-urlencoded;charset=UTF-8").formParam("my_test_key", "test")
+				.post(API_V2 + "i18n/apiv2test").then().log().all().statusCode(CREATED);
+
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
+				.get(API_V2 + "sys_L10nString?q=namespace==apiv2test").then().log().all()
+				.body("items[0].msgid", equalTo("my_test_key"), "items[0].namespace", equalTo("apiv2test"));
+	}
+
+	@Test(dependsOnMethods = "testRegisterMissingResourceStrings")
+	public void testDeleteNamespace()
+	{
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).delete(API_V2 + "i18n/apiv2test").then().log().all()
+				.statusCode(NO_CONTENT);
+
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
+				.get(API_V2 + "sys_L10nString?q=namespace==apiv2test").then().log().all().body("total", equalTo(0));
+	}
+
 	private void validateRetrieveEntityWithoutAttributeFilter(ValidatableResponse response)
 	{
 		response.statusCode(OKE);
 		response.body("_meta.href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.hrefCollection",
-				equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name", equalTo("V2_API_TypeTestRefAPIV2"), "_meta.label",
-				equalTo("TypeTestRefAPIV2"), "_meta.description", equalTo("MOLGENIS Data types test ref entity"),
-				"_meta.attributes[0].href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"),
-				"_meta.attributes[0].fieldType", equalTo("STRING"), "_meta.attributes[0].name", equalTo("value"),
-				"_meta.attributes[0].label", equalTo("value label"), "_meta.attributes[0].description",
-				equalTo("TypeTestRef value attribute"), "_meta.attributes[0].attributes", equalTo(newArrayList()),
-				"_meta.attributes[0].maxLength", equalTo(255), "_meta.attributes[0].auto", equalTo(false),
-				"_meta.attributes[0].nillable", equalTo(false), "_meta.attributes[0].readOnly", equalTo(true),
-				"_meta.attributes[0].labelAttribute", equalTo(false), "_meta.attributes[0].unique", equalTo(true),
-				"_meta.attributes[0].visible", equalTo(true), "_meta.attributes[0].lookupAttribute", equalTo(true),
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name", equalTo("V2_API_TypeTestRefAPIV2"),
+				"_meta.label", equalTo("TypeTestRefAPIV2"), "_meta.description",
+				equalTo("MOLGENIS Data types test ref entity"), "_meta.attributes[0].href",
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "_meta.attributes[0].fieldType",
+				equalTo("STRING"), "_meta.attributes[0].name", equalTo("value"), "_meta.attributes[0].label",
+				equalTo("value label"), "_meta.attributes[0].description", equalTo("TypeTestRef value attribute"),
+				"_meta.attributes[0].attributes", equalTo(newArrayList()), "_meta.attributes[0].maxLength",
+				equalTo(255), "_meta.attributes[0].auto", equalTo(false), "_meta.attributes[0].nillable",
+				equalTo(false), "_meta.attributes[0].readOnly", equalTo(true), "_meta.attributes[0].labelAttribute",
+				equalTo(false), "_meta.attributes[0].unique", equalTo(true), "_meta.attributes[0].visible",
+				equalTo(true), "_meta.attributes[0].lookupAttribute", equalTo(true),
 				"_meta.attributes[0].isAggregatable", equalTo(false), "_meta.attributes[1].href",
-				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"), "_meta.attributes[1].fieldType", equalTo("STRING"),
-				"_meta.attributes[1].name", equalTo("label"), "_meta.attributes[1].label", equalTo("label label"),
-				"_meta.attributes[1].description", equalTo("TypeTestRef label attribute"),
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"), "_meta.attributes[1].fieldType",
+				equalTo("STRING"), "_meta.attributes[1].name", equalTo("label"), "_meta.attributes[1].label",
+				equalTo("label label"), "_meta.attributes[1].description", equalTo("TypeTestRef label attribute"),
 				"_meta.attributes[1].attributes", equalTo(newArrayList()), "_meta.attributes[1].maxLength",
 				equalTo(255), "_meta.attributes[1].auto", equalTo(false), "_meta.attributes[1].nillable",
 				equalTo(false), "_meta.attributes[1].readOnly", equalTo(false), "_meta.attributes[1].labelAttribute",
@@ -299,41 +358,43 @@ public class RestControllerV2APIIT
 				"_meta.attributes[1].isAggregatable", equalTo(false), "_meta.labelAttribute", equalTo("label"),
 				"_meta.idAttribute", equalTo("value"), "_meta.lookupAttributes",
 				equalTo(newArrayList("value", "label")), "_meta.isAbstract", equalTo(false), "_meta.writable",
-				equalTo(true), "_meta.languageCode", equalTo("en"), "_href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"),
-				"value", equalTo("ref1"), "label", equalTo("label1"));
+				equalTo(true), "_meta.languageCode", equalTo("en"), "_href",
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "value", equalTo("ref1"), "label", equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityWithAttributeFilter(ValidatableResponse response)
 	{
 		response.statusCode(OKE);
 		response.body("_meta.href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.hrefCollection",
-				equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name", equalTo("V2_API_TypeTestRefAPIV2"), "_meta.label",
-				equalTo("TypeTestRefAPIV2"), "_meta.description", equalTo("MOLGENIS Data types test ref entity"),
-				"_meta.attributes[0].href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"),
-				"_meta.attributes[0].fieldType", equalTo("STRING"), "_meta.attributes[0].name", equalTo("label"),
-				"_meta.attributes[0].label", equalTo("label label"), "_meta.attributes[0].description",
-				equalTo("TypeTestRef label attribute"), "_meta.attributes[0].attributes", equalTo(newArrayList()),
-				"_meta.attributes[0].maxLength", equalTo(255), "_meta.attributes[0].auto", equalTo(false),
-				"_meta.attributes[0].nillable", equalTo(false), "_meta.attributes[0].readOnly", equalTo(false),
-				"_meta.attributes[0].labelAttribute", equalTo(true), "_meta.attributes[0].unique", equalTo(false),
-				"_meta.attributes[0].visible", equalTo(true), "_meta.attributes[0].lookupAttribute", equalTo(true),
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name", equalTo("V2_API_TypeTestRefAPIV2"),
+				"_meta.label", equalTo("TypeTestRefAPIV2"), "_meta.description",
+				equalTo("MOLGENIS Data types test ref entity"), "_meta.attributes[0].href",
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"), "_meta.attributes[0].fieldType",
+				equalTo("STRING"), "_meta.attributes[0].name", equalTo("label"), "_meta.attributes[0].label",
+				equalTo("label label"), "_meta.attributes[0].description", equalTo("TypeTestRef label attribute"),
+				"_meta.attributes[0].attributes", equalTo(newArrayList()), "_meta.attributes[0].maxLength",
+				equalTo(255), "_meta.attributes[0].auto", equalTo(false), "_meta.attributes[0].nillable",
+				equalTo(false), "_meta.attributes[0].readOnly", equalTo(false), "_meta.attributes[0].labelAttribute",
+				equalTo(true), "_meta.attributes[0].unique", equalTo(false), "_meta.attributes[0].visible",
+				equalTo(true), "_meta.attributes[0].lookupAttribute", equalTo(true),
 				"_meta.attributes[0].isAggregatable", equalTo(false), "_meta.labelAttribute", equalTo("label"),
 				"_meta.idAttribute", equalTo("value"), "_meta.lookupAttributes",
 				equalTo(newArrayList("value", "label")), "_meta.isAbstract", equalTo(false), "_meta.writable",
-				equalTo(true), "_meta.languageCode", equalTo("en"), "_href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"),
-				"label", equalTo("label1"));
+				equalTo(true), "_meta.languageCode", equalTo("en"), "_href",
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "label", equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityCollection(ValidatableResponse response)
 	{
 		response.statusCode(OKE);
-		response.body("href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2"),
-				"meta.hrefCollection", equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.name",
-				equalTo("V2_API_TypeTestRefAPIV2"), "meta.label", equalTo("TypeTestRefAPIV2"), "meta.description",
+		response.body("href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.href",
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.hrefCollection",
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.name", equalTo("V2_API_TypeTestRefAPIV2"),
+				"meta.label", equalTo("TypeTestRefAPIV2"), "meta.description",
 				equalTo("MOLGENIS Data types test ref entity"), "meta.attributes[0].href",
-				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "meta.attributes[0].fieldType", equalTo("STRING"),
-				"meta.attributes[0].name", equalTo("value"), "meta.attributes[0].label", equalTo("value label"),
-				"meta.attributes[0].description", equalTo("TypeTestRef value attribute"),
+				equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "meta.attributes[0].fieldType",
+				equalTo("STRING"), "meta.attributes[0].name", equalTo("value"), "meta.attributes[0].label",
+				equalTo("value label"), "meta.attributes[0].description", equalTo("TypeTestRef value attribute"),
 				"meta.attributes[0].attributes", equalTo(newArrayList()), "meta.attributes[0].maxLength", equalTo(255),
 				"meta.attributes[0].auto", equalTo(false), "meta.attributes[0].nillable", equalTo(false),
 				"meta.attributes[0].readOnly", equalTo(true), "meta.attributes[0].labelAttribute", equalTo(false),
@@ -363,8 +424,8 @@ public class RestControllerV2APIIT
 	private void validateRetrieveEntityAttributeMeta(ValidatableResponse response)
 	{
 		response.statusCode(OKE);
-		response.body("href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "fieldType", equalTo("STRING"), "name",
-				equalTo("value"), "label", equalTo("value label"), "description",
+		response.body("href", equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "fieldType", equalTo("STRING"),
+				"name", equalTo("value"), "label", equalTo("value label"), "description",
 				equalTo("TypeTestRef value attribute"), "attributes", equalTo(newArrayList()), "maxLength",
 				equalTo(255), "auto", equalTo(false), "nillable", equalTo(false), "readOnly", equalTo(true),
 				"labelAttribute", equalTo(false), "unique", equalTo(true), "visible", equalTo(true), "lookupAttribute",
