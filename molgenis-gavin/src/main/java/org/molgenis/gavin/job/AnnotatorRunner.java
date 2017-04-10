@@ -1,14 +1,12 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
-import org.molgenis.annotation.cmd.utils.CmdLineAnnotatorUtils;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.core.utils.CmdLineAnnotatorUtils;
+import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +36,8 @@ public class AnnotatorRunner
 	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
 			throws IOException, MolgenisInvalidFormatException
 	{
-		CmdLineAnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, effectStructureConverter, inputFile,
-				outputFile, emptyList(), update);
+		CmdLineAnnotatorUtils
+				.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, effectStructureConverter,
+						inputFile, outputFile, emptyList(), update);
 	}
 }

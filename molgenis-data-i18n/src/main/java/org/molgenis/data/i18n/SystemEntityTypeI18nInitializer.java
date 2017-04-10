@@ -1,6 +1,6 @@
 package org.molgenis.data.i18n;
 
-import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.L10nStringMetaData;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -34,7 +34,7 @@ public class SystemEntityTypeI18nInitializer
 
 		EntityTypeMetadata entityTypeMeta = ctx.getBean(EntityTypeMetadata.class);
 		AttributeMetadata attrMetaMeta = ctx.getBean(AttributeMetadata.class);
-		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
+		L10nStringMetaData l10nStringMeta = ctx.getBean(L10nStringMetaData.class);
 
 		languageCodes.forEach(languageCode ->
 		{
@@ -46,7 +46,7 @@ public class SystemEntityTypeI18nInitializer
 					.setLabel("Label (" + languageCode + ')');
 			attrMetaMeta.addAttribute(getI18nAttributeName(AttributeMetadata.DESCRIPTION, languageCode))
 					.setNillable(true).setLabel("Description (" + languageCode + ')').setDataType(TEXT);
-			i18nStringMeta.addAttribute(languageCode).setNillable(true).setDataType(STRING);
+			l10nStringMeta.addAttribute(languageCode).setNillable(true).setDataType(STRING);
 		});
 	}
 }
