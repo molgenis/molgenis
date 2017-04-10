@@ -26,12 +26,6 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest
 		intermediateParseResults = new IntermediateParseResults(entityTypeFactory, defaultPackage);
 	}
 
-	@Test(expectedExceptions = NullPointerException.class)
-	public void testIntermediateParseResults()
-	{
-		new IntermediateParseResults(null, null);
-	}
-
 	@Test
 	public void testAddEntityType() throws Exception
 	{

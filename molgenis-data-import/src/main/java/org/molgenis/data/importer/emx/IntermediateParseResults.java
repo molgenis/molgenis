@@ -15,7 +15,6 @@ import java.util.Map;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableMap.copyOf;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
@@ -48,8 +47,8 @@ public final class IntermediateParseResults
 
 	public IntermediateParseResults(EntityTypeFactory entityTypeFactory, DefaultPackage defaultPackage)
 	{
-		this.entityTypeFactory = requireNonNull(entityTypeFactory);
-		this.defaultPackage = requireNonNull(defaultPackage);
+		this.entityTypeFactory = entityTypeFactory;
+		this.defaultPackage = defaultPackage;
 		this.tags = new LinkedHashMap<>();
 		this.entities = new LinkedHashMap<>();
 		this.packages = new LinkedHashMap<>();
