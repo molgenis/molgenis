@@ -101,8 +101,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private IndexActionRegisterServiceImpl indexActionRegisterService;
 	@Autowired
-	private IdentifierLookupService identifierLookupService;
-	@Autowired
 	private L10nStringFactory l10nStringFactory;
 
 	/**
