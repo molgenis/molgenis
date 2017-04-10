@@ -191,6 +191,7 @@ public class LocalizationService
 	 *
 	 * @param namespace
 	 */
+	@Transactional
 	@RunAsSystem
 	public void deleteNameSpace(String namespace)
 	{
