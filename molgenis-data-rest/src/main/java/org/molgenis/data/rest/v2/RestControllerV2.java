@@ -213,7 +213,7 @@ class RestControllerV2
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
+	@RequestMapping(value = "/{entityName:^(i18n)}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
@@ -410,8 +410,7 @@ class RestControllerV2
 	}
 
 	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName,
-			Package pack,
-			String label)
+			Package pack, String label)
 	{
 		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
@@ -572,12 +571,19 @@ class RestControllerV2
 	 * User needs permissions on the entity to add the values, otherwise they'll only be logged.
 	 */
 	@RequestMapping(value = "/i18n/{namespace}", method = POST)
-	@ResponseStatus(OK)
+	@ResponseStatus(CREATED)
 	public void registerMissingResourceStrings(@PathVariable String namespace, HttpServletRequest request)
 	{
 		Set<String> messageIDs = request.getParameterMap().entrySet().stream().map(Map.Entry::getKey)
 				.filter(id -> !id.equals(TIME_PARAM_NAME)).collect(toSet());
 		localizationService.addMissingMessageIDs(namespace, messageIDs);
+	}
+
+	@RequestMapping(value = "/i18n/{namespace}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteNamespace(@PathVariable String namespace)
+	{
+		localizationService.deleteNameSpace(namespace);
 	}
 
 	/**
