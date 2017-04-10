@@ -213,7 +213,7 @@ class RestControllerV2
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{entityName:^(i18n)}/{id:.+}", method = DELETE)
+	@RequestMapping(value = "/{entityName:^(?!i18n).+}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
@@ -322,7 +322,7 @@ class RestControllerV2
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
 					.collect(toList());
 			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
-			final List<String> ids = new ArrayList<String>();
+			final List<String> ids = new ArrayList<>();
 
 			// Add all entities
 			if (ATTRIBUTE_META_DATA.equals(entityName))
@@ -490,7 +490,7 @@ class RestControllerV2
 				throw createMolgenisDataExceptionIdentifierAndValue();
 			}
 
-			final List<Entity> updatedEntities = new ArrayList<Entity>();
+			final List<Entity> updatedEntities = new ArrayList<>();
 			int count = 0;
 			for (Entity entity : entities)
 			{
@@ -726,7 +726,7 @@ class RestControllerV2
 			List<Map<String, Object>> entities = new ArrayList<>();
 			for (Entity entity : it)
 			{
-				Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+				Map<String, Object> responseData = new LinkedHashMap<>();
 				createEntityValuesResponse(entity, fetch, responseData);
 				entities.add(responseData);
 			}
@@ -769,7 +769,7 @@ class RestControllerV2
 
 	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData)
 	{
-		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+		Map<String, Object> responseData = new LinkedHashMap<>();
 		if (includeMetaData)
 		{
 			createEntityTypeResponse(entity.getEntityType(), fetch, responseData);
@@ -816,7 +816,6 @@ class RestControllerV2
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
 											languageService.getCurrentUserLanguageCode());
-							;
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -832,11 +831,10 @@ class RestControllerV2
 						List<Map<String, Object>> refEntityResponses;
 						if (refEntities != null)
 						{
-							refEntityResponses = new ArrayList<Map<String, Object>>();
+							refEntityResponses = new ArrayList<>();
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
 											languageService.getCurrentUserLanguageCode());
-							;
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));
