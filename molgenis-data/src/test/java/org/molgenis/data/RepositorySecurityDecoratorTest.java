@@ -357,7 +357,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(aggregateResult, repositorySecurityDecorator.aggregate(aggregateQuery));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity \\[entity\\]")
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[entity\\] with id \\[entityID\\]")
 	public void aggregateNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
