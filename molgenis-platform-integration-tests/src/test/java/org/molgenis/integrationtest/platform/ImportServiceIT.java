@@ -10,10 +10,14 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.vcf.VcfDataConfig;
+import org.molgenis.data.vcf.importer.VcfImporterService;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
@@ -43,7 +47,7 @@ import static org.testng.Assert.assertEquals;
  * Test the Importer test cases
  */
 @Rollback(value = false)
-@ContextConfiguration(classes = { PlatformITConfig.class })
+@ContextConfiguration(classes = { PlatformITConfig.class, ImportServiceIT.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class ImportServiceIT extends AbstractTestNGSpringContextTests
 {
@@ -64,6 +68,46 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
 		importServiceRegistrar.register(contextRefreshedEvent);
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void testDoImportVcfWithoutSamples()
+	{
+		String fileName = "variantsWithoutSamples.vcf";
+		File file = getFile("/vcf/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport, ImmutableMap.of("variantsWithoutSamples", 10),
+				ImmutableSet.of("variantsWithoutSamples"));
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void testDoImportVcfWithSamples()
+	{
+		String fileName = "variantsWithSamples.vcf";
+		File file = getFile("/vcf/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport, ImmutableMap.of("variantsWithSamples", 10, "variantsWithSamplesSample", 10),
+				ImmutableSet.of("variantsWithSamples", "variantsWithSamplesSample"));
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void testDoImportVcfGzWithSamples()
+	{
+		String fileName = "variantsWithSamplesGz.vcf.gz";
+		File file = getFile("/vcf/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport,
+				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
+				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
 	}
 
 	@DataProvider(name = "doImportEmxAddProvider")
@@ -244,5 +288,11 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 			LOG.error("File name: [{}]", resourceName);
 			throw new MolgenisDataAccessException(e);
 		}
+	}
+
+	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class })
+	static class Config
+	{
+
 	}
 }
