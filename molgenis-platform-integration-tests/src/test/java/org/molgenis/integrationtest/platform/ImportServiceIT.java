@@ -13,6 +13,10 @@ import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.ontology.OntologyDataConfig;
+import org.molgenis.ontology.core.config.OntologyTestConfig;
+import org.molgenis.ontology.importer.OntologyImportService;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +72,22 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
 		importServiceRegistrar.register(contextRefreshedEvent);
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void testDoImportOwl()
+	{
+		String fileName = "ontology-small.owl.zip";
+		File file = getFile("/owl/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport, ImmutableMap
+						.of("sys_ont_OntologyTermDynamicAnnotation", 4, "sys_ont_OntologyTermSynonym", 9,
+								"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),
+				ImmutableSet.of("sys_ont_OntologyTermDynamicAnnotation", "sys_ont_OntologyTermSynonym",
+						"sys_ont_OntologyTermNodePath", "sys_ont_Ontology", "sys_ont_OntologyTerm"));
 	}
 
 	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
@@ -290,7 +310,8 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class })
+	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class, OntologyDataConfig.class,
+			OntologyTestConfig.class, OntologyImportService.class, MolgenisPluginRegistryImpl.class })
 	static class Config
 	{
 
