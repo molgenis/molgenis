@@ -50,7 +50,7 @@ public class GavinAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "Gavin";
 	public static final String RESOURCE = "gavin";
-	public static final String RESOURCE_ENTITY_NAME = "gavin";
+	public static final String RESOURCE_ENTITY_NAME = "base_gavin";
 
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";
@@ -96,7 +96,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
+				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME, RESOURCE,
 						new EmxMetaDataParser(packageFactory, attributeFactory, entityTypeFactory,
 								entityTypeDependencyResolver), entityTypeFactory, attributeFactory);
 			}
