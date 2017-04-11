@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -73,6 +74,32 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
 		importServiceRegistrar.register(contextRefreshedEvent);
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void testDoImportEmxCsvZip()
+	{
+		String fileName = "emx-csv.zip";
+		File file = getFile("/csv/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport, ImmutableMap.of("data_hospital", 3, "data_patients", 3),
+				ImmutableSet.of("data_hospital", "data_patients"));
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void testDoImportEmxTsvZip()
+	{
+		String fileName = "emx-tsv.zip";
+		File file = getFile("/tsv/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport, ImmutableMap.of("data_hospital", 3, "data_patients", 3),
+				ImmutableSet.of("data_hospital", "data_patients"));
 	}
 
 	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
@@ -326,7 +353,8 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class, OntologyDataConfig.class,
-			OntologyTestConfig.class, OntologyImportService.class, MolgenisPluginRegistryImpl.class })
+			OntologyTestConfig.class, OntologyImportService.class, MolgenisPluginRegistryImpl.class,
+			CsvDataConfig.class })
 	static class Config
 	{
 
