@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.DatabaseAction.ADD;
@@ -76,6 +77,21 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 
 	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
 	@Test
+	public void testDoImportObo()
+	{
+		String fileName = "ontology-small.obo.zip";
+		File file = getFile("/obo/" + fileName);
+		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		validateImportReport(importReport, ImmutableMap
+						.of("sys_ont_OntologyTermDynamicAnnotation", 0, "sys_ont_OntologyTermSynonym", 5,
+								"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
+				emptySet());
+	}
+
+	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@Test
 	public void testDoImportOwl()
 	{
 		String fileName = "ontology-small.owl.zip";
@@ -86,8 +102,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		validateImportReport(importReport, ImmutableMap
 						.of("sys_ont_OntologyTermDynamicAnnotation", 4, "sys_ont_OntologyTermSynonym", 9,
 								"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),
-				ImmutableSet.of("sys_ont_OntologyTermDynamicAnnotation", "sys_ont_OntologyTermSynonym",
-						"sys_ont_OntologyTermNodePath", "sys_ont_Ontology", "sys_ont_OntologyTerm"));
+				emptySet());
 	}
 
 	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })

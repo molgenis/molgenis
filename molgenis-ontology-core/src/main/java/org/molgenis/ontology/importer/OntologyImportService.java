@@ -57,10 +57,9 @@ public class OntologyImportService implements ImportService
 			{
 				Repository<Entity> targetRepository = dataService.getRepository(entityTypeId);
 				Integer count = targetRepository.add(asStream(sourceRepository));
-				permissionSystemService.giveUserWriteMetaPermissions(targetRepository.getEntityType());
-
-				report.addNewEntity(entityTypeId);
 				report.addEntityCount(entityTypeId, count);
+
+				permissionSystemService.giveUserWriteMetaPermissions(targetRepository.getEntityType());
 			}
 			catch (IOException e)
 			{
