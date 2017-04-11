@@ -76,7 +76,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		importServiceRegistrar.register(contextRefreshedEvent);
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportEmxCsvZip()
 	{
@@ -85,11 +85,11 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("data_hospital", 3, "data_patients", 3),
-				ImmutableSet.of("data_hospital", "data_patients"));
+		validateImportReport(importReport, ImmutableMap.of("csv_hospital", 3, "csv_patients", 3),
+				ImmutableSet.of("csv_hospital", "csv_patients"));
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportEmxTsvZip()
 	{
@@ -98,11 +98,11 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("data_hospital", 3, "data_patients", 3),
-				ImmutableSet.of("data_hospital", "data_patients"));
+		validateImportReport(importReport, ImmutableMap.of("tsv_hospital", 3, "tsv_patients", 3),
+				ImmutableSet.of("tsv_hospital", "tsv_patients"));
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportObo()
 	{
@@ -117,7 +117,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				emptySet());
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportOwl()
 	{
@@ -132,7 +132,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				emptySet());
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportVcfWithoutSamples()
 	{
@@ -145,7 +145,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				ImmutableSet.of("variantsWithoutSamples"));
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportVcfWithSamples()
 	{
@@ -158,7 +158,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 				ImmutableSet.of("variantsWithSamples", "variantsWithSamplesSample"));
 	}
 
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	@Test
 	public void testDoImportVcfGzWithSamples()
 	{
@@ -211,7 +211,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	public void testDoImportAddEmx(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes)
 	{
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
@@ -239,7 +239,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	public void testDoImportAddUpdateEmx(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes)
 	{
@@ -276,7 +276,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
-	@WithMockUser(username = "SYSTEM", authorities = { "ROLE_SYSTEM" })
+	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
 	public void testDoImportUpdateEmx(File file, File updateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes)
 	{
