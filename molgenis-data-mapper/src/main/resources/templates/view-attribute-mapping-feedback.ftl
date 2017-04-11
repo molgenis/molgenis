@@ -32,6 +32,7 @@
                                             = </#if>
                                         </#if>
                                     </#list>
+
                                 </td>
                             </#if>
                         <#elseif sourceAttribute.dataType == "mref">
@@ -58,6 +59,8 @@
                                 <#else>
                                     <td>${value?html}</td>
                                 </#if>
+                            <#else>
+                                <td></td>
                             </#if>
                         </#if>
                     </#list>

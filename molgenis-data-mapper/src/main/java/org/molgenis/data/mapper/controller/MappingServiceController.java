@@ -231,13 +231,15 @@ public class MappingServiceController extends MolgenisPluginController
 		String algorithm = mappingServiceRequest.getAlgorithm();
 		Long offset = mappingServiceRequest.getOffset();
 		Long num = mappingServiceRequest.getNum();
-		Query<Entity> query = new QueryImpl<Entity>().offset(offset.intValue()).pageSize(num.intValue());
+
+		Query<Entity> query = new QueryImpl<>().offset(offset.intValue()).pageSize(num.intValue());
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
 		Iterable<Entity> sourceEntities = () -> dataService.findAll(sourceEntityName, query).iterator();
 
 		long total = dataService.count(sourceEntityName, new QueryImpl<>());
 		long nrSuccess = 0, nrErrors = 0;
-		Map<String, String> errorMessages = new LinkedHashMap<String, String>();
+
+		Map<String, String> errorMessages = new LinkedHashMap<>();
 		for (AlgorithmEvaluation evaluation : algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities))
 		{
 			if (evaluation.hasError())
@@ -445,7 +447,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String source = requestBody.get("source");
 		String targetAttributeName = requestBody.get("targetAttribute");
 		String searchTermsString = requestBody.get("searchTerms");
-		Set<String> searchTerms = new HashSet<String>();
+		Set<String> searchTerms = new HashSet<>();
 
 		if (StringUtils.isNotBlank(searchTermsString))
 		{
