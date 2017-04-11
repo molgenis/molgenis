@@ -25,9 +25,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.*;
 
 /**
  * Reads and writes messages to and from the {@link L10nString} entity.
@@ -186,5 +184,18 @@ public class LocalizationService
 	public Set<String> getMessageIDs(String namespace)
 	{
 		return getL10nStrings(namespace).stream().map(L10nString::getMessageID).collect(toCollection(TreeSet::new));
+	}
+
+	/**
+	 * Deletes all localization strings for a given namespace
+	 *
+	 * @param namespace
+	 */
+	@Transactional
+	@RunAsSystem
+	public void deleteNameSpace(String namespace)
+	{
+		List<L10nString> namespaceEntities = getL10nStrings(namespace);
+		dataService.delete(L10N_STRING, namespaceEntities.stream());
 	}
 }

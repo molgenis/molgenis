@@ -17,19 +17,20 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newTreeSet;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.collections.Lists.newArrayList;
 
 @ContextConfiguration(classes = { LocalizationService.class, LocalizationServiceTest.Config.class })
 public class LocalizationServiceTest extends AbstractMolgenisSpringTest
@@ -57,6 +58,9 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	private ArgumentCaptor<Stream<L10nString>> addCaptor;
+
+	@Captor
+	private ArgumentCaptor<Stream<L10nString>> deleteCaptor;
 
 	@BeforeMethod
 	public void setUp() throws Exception
@@ -157,6 +161,17 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 
 		Set<String> keys = localizationService.getMessageIDs("test");
 		assertEquals(keys, newHashSet("EN_PLUS_NL", "NL_ONLY"));
+	}
+
+	@Test
+	public void testDeleteNamespace()
+	{
+		Query<L10nString> query = new QueryImpl<L10nString>().eq(NAMESPACE, "test");
+		when(dataService.findAll(L10N_STRING, query, L10nString.class)).thenReturn(Stream.of(string1, string2));
+
+		localizationService.deleteNameSpace("test");
+		verify(dataService).delete(eq(L10N_STRING), deleteCaptor.capture());
+		assertEquals(deleteCaptor.getValue().collect(Collectors.toList()), newArrayList(string1, string2));
 	}
 
 	@Configuration
