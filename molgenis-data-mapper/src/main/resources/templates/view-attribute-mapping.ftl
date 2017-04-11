@@ -104,45 +104,43 @@
             <tr>
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
-                <#if attributeMapping.targetAttribute.dataType == "XREF" || attributeMapping.targetAttribute.dataType == "CATEGORICAL" && (categories)?has_content>
-                    <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
-                    <#list categories as category>
-
-                        <#--only show the columns needed to do the mapping -->
+                    <#if attributeMapping.targetAttribute.dataType == "CATEGORICAL" || attributeMapping.targetAttribute.dataType == "CATEGORICAL_MREF" && (categories)?has_content>
+                        <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
                         <#assign idAttr = refEntityType.getIdAttribute()>
-                        <#if (category[idAttr.name])??>
-                            <#assign value = category[idAttr.name] />
-                            <#assign dataType = idAttr.dataType />
-                            <#if dataType == "DATE_TIME">
-                                ${value?datetime}
-                            <#elseif dataType == "DATE">
-                                ${value?date}
-                            <#else>
-                                ${value?string}
-                            </#if>
-                        </#if>
-
                         <#assign labelAttr = refEntityType.getLabelAttribute()>
-                        <#if labelAttr??>
-                            <#if (category[labelAttr.name])??>
-                                =
-                                <#assign value = category[labelAttr.name] />
-                                <#assign dataType = labelAttr.dataType />
+                        <#list categories as category>
+                            <#if (category[idAttr.name])??>
+                                <#assign value = category[idAttr.name] />
+                                <#assign dataType = idAttr.dataType />
                                 <#if dataType == "DATE_TIME">
-                                ${value?datetime}
+                                    ${value?datetime}
                                 <#elseif dataType == "DATE">
-                                ${value?date}
+                                    ${value?date}
                                 <#else>
-                                ${value?string}
+                                    ${value?string}
                                 </#if>
                             </#if>
-                        </#if>
 
-                        </br></br>
-                    </#list>
-                <#else>
-                    N/A
-                </#if>
+                            <#if labelAttr?? && labelAttr.name != idAttr.name>
+                                <#if (category[labelAttr.name])??>
+                                    =
+                                    <#assign value = category[labelAttr.name] />
+                                    <#assign dataType = labelAttr.dataType />
+                                    <#if dataType == "DATE_TIME">
+                                    ${value?datetime}
+                                    <#elseif dataType == "DATE">
+                                    ${value?date}
+                                    <#else>
+                                    ${value?string}
+                                    </#if>
+                                </#if>
+                            </#if>
+
+                            </br>
+                        </#list>
+                    <#else>
+                        N/A
+                    </#if>
                 </td>
             </tr>
         </table>
