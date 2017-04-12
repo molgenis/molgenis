@@ -54,7 +54,7 @@ class EntityTypeResponseV2
 	public EntityTypeResponseV2(EntityType meta, Fetch fetch, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
-		String name = meta.getFullyQualifiedName();
+		String name = meta.getId();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 

@@ -103,7 +103,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Entity entity = findEntity(entityType);
 		if (entity == null)
 		{
-			LOG.warn("No known entity with name " + entityType.getFullyQualifiedName() + ".");
+			LOG.warn("No known entity with name " + entityType.getId() + ".");
 		}
 		else
 		{
@@ -135,7 +135,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Entity entity = findEntity(tag.getSubject());
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getFullyQualifiedName() + "]");
+			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getId() + "]");
 		}
 		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityType, LabeledResource, LabeledResource>>copyOf(
 				getTagsForEntity(tag.getSubject()));
@@ -167,7 +167,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + p.getFullyQualifiedName() + "]");
+			throw new UnknownEntityException("Unknown package [" + p.getId() + "]");
 		}
 
 		List<SemanticTag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();
@@ -186,7 +186,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
-	public void removeAllTagsFromEntity(String entityName)
+	public void removeAllTagsFromEntity(String entityTypeId)
 	{
 		throw new UnsupportedOperationException();
 	}

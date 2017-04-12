@@ -20,7 +20,6 @@ import java.io.File;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 /**
@@ -54,7 +53,7 @@ public class FileIngester
 	 *
 	 * @see FileIngestMetaData
 	 */
-	public FileMeta ingest(String entityName, String url, String loader, String jobExecutionID, Progress progress,
+	public FileMeta ingest(String entityTypeId, String url, String loader, String jobExecutionID, Progress progress,
 			String failureEmail)
 	{
 		if (!"CSV".equals(loader))
@@ -64,16 +63,16 @@ public class FileIngester
 
 		progress.setProgressMax(2);
 		progress.progress(0, "Downloading url '" + url + "'");
-		File file = fileStoreDownload.downloadFile(url, jobExecutionID, entityName + ".csv");
+		File file = fileStoreDownload.downloadFile(url, jobExecutionID, entityTypeId + ".csv");
 		progress.progress(1, "Importing...");
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport report = importService.doImport(repoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
 
 		progress.status("Ingestion of url '" + url + "' done.");
-		Integer count = report.getNrImportedEntitiesMap().get(entityName);
+		Integer count = report.getNrImportedEntitiesMap().get(entityTypeId);
 		count = count != null ? count : 0;
-		progress.progress(2, "Successfully imported " + count + " " + entityName + " entities.");
+		progress.progress(2, "Successfully imported " + count + " " + entityTypeId + " entities.");
 
 		FileMeta fileMeta = createFileMeta(jobExecutionID, file);
 

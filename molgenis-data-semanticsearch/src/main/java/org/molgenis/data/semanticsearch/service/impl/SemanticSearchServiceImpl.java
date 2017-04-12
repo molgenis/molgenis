@@ -234,8 +234,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		if (attribute == null)
 		{
 			throw new MolgenisDataAccessException(
-					"The attribute : " + attributeName + " does not exsit in EntityType : " + sourceEntityType
-							.getFullyQualifiedName());
+					"The attribute : " + attributeName + " does not exsit in EntityType : " + sourceEntityType.getId());
 		}
 		Explanation explanation = elasticSearchExplainService
 				.explain(new QueryImpl<Entity>(finalQueryRules), dataService.getEntityType(ATTRIBUTE_META_DATA),

@@ -30,10 +30,11 @@ public class ResourcesImpl implements Resources
 	private Map<String, Resource> resources = null;
 
 	@Override
-	public boolean hasRepository(String entityName)
+	public boolean hasRepository(String entityTypeId)
 	{
 		getResources();
-		return dataService.hasRepository(entityName) || (resources.containsKey(entityName) && resources.get(entityName)
+		return dataService.hasRepository(entityTypeId) || (resources.containsKey(entityTypeId) && resources
+				.get(entityTypeId)
 				.isAvailable());
 	}
 

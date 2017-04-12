@@ -108,10 +108,10 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 	public void beforeClass() throws IOException
 	{
 		// Can annotate
-		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create("test");
 
 		// Negative test cannot annotate
-		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate = entityTypeFactory.create("test");
 
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();

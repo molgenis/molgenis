@@ -355,7 +355,7 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 			List<String> sourceNames = mappingTarget.getEntityMappings().stream()
-					.map(i -> i.getSourceEntityType().getFullyQualifiedName()).collect(Collectors.toList());
+					.map(i -> i.getSourceEntityType().getId()).collect(Collectors.toList());
 
 			EntityType targetEntityMeta = mappingTarget.getTarget();
 			for (Attribute attribute : targetEntityMeta.getAtomicAttributes())
@@ -544,7 +544,7 @@ public class MappingServiceController extends MolgenisPluginController
 		EntityType refEntityType = attributeMapping.getTargetAttribute().getRefEntity();
 		if (refEntityType != null)
 		{
-			Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getFullyQualifiedName()).iterator();
+			Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getId()).iterator();
 			model.addAttribute("categories", refEntities);
 		}
 
@@ -672,7 +672,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService
-					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getFullyQualifiedName());
+					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getId());
 
 			targetAttributeIdAttribute = dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -682,7 +682,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			targetAttributeEntities = dataService.findAll(dataService.getEntityType(target).getFullyQualifiedName());
+			targetAttributeEntities = dataService.findAll(dataService.getEntityType(target).getId());
 			targetAttributeIdAttribute = dataService.getEntityType(target).getIdAttribute().getName();
 			targetAttributeLabelAttribute = dataService.getEntityType(target).getLabelAttribute().getName();
 		}
@@ -708,7 +708,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService
-					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getFullyQualifiedName());
+					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getId());
 
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -718,7 +718,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			sourceAttributeEntities = dataService.findAll(dataService.getEntityType(source).getFullyQualifiedName());
+			sourceAttributeEntities = dataService.findAll(dataService.getEntityType(source).getId());
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getIdAttribute().getName();
 			sourceAttributeLabelAttribute = dataService.getEntityType(source).getLabelAttribute().getName();
 		}
@@ -855,7 +855,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 */
 	private List<EntityType> getNewSources(MappingTarget target)
 	{
-		return StreamSupport.stream(dataService.getEntityNames().spliterator(), false)
+		return StreamSupport.stream(dataService.getEntityTypeIds().spliterator(), false)
 				.filter((name) -> isValidSource(target, name)).map(dataService::getEntityType)
 				.collect(Collectors.toList());
 	}
@@ -867,13 +867,13 @@ public class MappingServiceController extends MolgenisPluginController
 
 	private List<EntityType> getEntityTypes()
 	{
-		return dataService.getEntityNames().map(dataService::getEntityType).collect(toList());
+		return dataService.getEntityTypeIds().map(dataService::getEntityType).collect(toList());
 	}
 
 	private List<EntityType> getWritableEntityTypes()
 	{
 		return getEntityTypes().stream().filter(emd -> !emd.isAbstract())
-				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName()).contains(RepositoryCapability.WRITABLE))
+				.filter(emd -> dataService.getCapabilities(emd.getId()).contains(RepositoryCapability.WRITABLE))
 				.collect(Collectors.toList());
 	}
 

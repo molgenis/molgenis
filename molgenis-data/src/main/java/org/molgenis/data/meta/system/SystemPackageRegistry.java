@@ -28,7 +28,7 @@ public class SystemPackageRegistry
 
 	void addSystemPackage(SystemPackage systemPackage)
 	{
-		LOG.trace("Registering system package [{}] ...", systemPackage.getFullyQualifiedName());
+		LOG.trace("Registering system package [{}] ...", systemPackage.getId());
 		systemPackages.add(systemPackage);
 	}
 
@@ -36,7 +36,7 @@ public class SystemPackageRegistry
 	{
 		for (SystemPackage systemPackage : systemPackages)
 		{
-			if (systemPackage.getFullyQualifiedName().equals(package_.getFullyQualifiedName())) return true;
+			if (systemPackage.getId().equals(package_.getId())) return true;
 		}
 		return false;
 	}

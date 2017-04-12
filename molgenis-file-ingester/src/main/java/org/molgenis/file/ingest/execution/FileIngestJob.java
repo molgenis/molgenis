@@ -9,19 +9,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class FileIngestJob extends Job<FileMeta>
 {
 	private final FileIngester fileIngester;
-	private final String entityName;
+	private final String entityTypeId;
 	private final String url;
 	private final String loader;
 	private final String jobExecutionID;
 	private final String failureEmail;
 
 	public FileIngestJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			FileIngester fileIngester, String entityName, String url, String loader, String failureEmail,
+			FileIngester fileIngester, String entityTypeId, String url, String loader, String failureEmail,
 			String jobExecutionID)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.fileIngester = fileIngester;
-		this.entityName = entityName;
+		this.entityTypeId = entityTypeId;
 		this.url = url;
 		this.loader = loader;
 		this.failureEmail = failureEmail;
@@ -31,7 +31,7 @@ public class FileIngestJob extends Job<FileMeta>
 	@Override
 	public FileMeta call(Progress progress) throws Exception
 	{
-		return fileIngester.ingest(entityName, url, loader, jobExecutionID, progress, failureEmail);
+		return fileIngester.ingest(entityTypeId, url, loader, jobExecutionID, progress, failureEmail);
 	}
 
 }

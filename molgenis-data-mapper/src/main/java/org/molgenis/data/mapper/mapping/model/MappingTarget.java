@@ -69,12 +69,12 @@ public class MappingTarget
 	 */
 	public EntityMapping addSource(EntityType source)
 	{
-		if (entityMappings.containsKey(source.getFullyQualifiedName()))
+		if (entityMappings.containsKey(source.getId()))
 		{
-			throw new IllegalStateException("Mapping already present for source " + source.getFullyQualifiedName());
+			throw new IllegalStateException("Mapping already present for source " + source.getId());
 		}
 		EntityMapping result = new EntityMapping(source, target);
-		entityMappings.put(source.getFullyQualifiedName(), result);
+		entityMappings.put(source.getId(), result);
 		return result;
 	}
 
@@ -128,7 +128,7 @@ public class MappingTarget
 
 	public String getName()
 	{
-		return target.getFullyQualifiedName();
+		return target.getId();
 	}
 
 	public Collection<EntityMapping> getEntityMappings()

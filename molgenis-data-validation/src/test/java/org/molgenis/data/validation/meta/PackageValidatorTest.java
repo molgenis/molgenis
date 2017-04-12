@@ -23,15 +23,14 @@ public class PackageValidatorTest
 	{
 		systemPackageRegistry = mock(SystemPackageRegistry.class);
 		packageValidator = new PackageValidator(systemPackageRegistry);
-		systemPackage = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM).getMock();
-		testPackage = when(mock(Package.class).getFullyQualifiedName()).thenReturn("test").getMock();
+		systemPackage = when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM).getMock();
+		testPackage = when(mock(Package.class).getId()).thenReturn("test").getMock();
 	}
 
 	@Test
 	public void testValidateNonSystemPackage() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("myPackage").getMock();
-		when(package_.getName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getId()).thenReturn("myPackage").getMock();
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
 		packageValidator.validate(package_);
 	}
@@ -39,8 +38,7 @@ public class PackageValidatorTest
 	@Test
 	public void testValidateSystemPackageInRegistry() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
-		when(package_.getName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(true);
@@ -50,29 +48,17 @@ public class PackageValidatorTest
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Modifying system packages is not allowed")
 	public void testValidateSystemPackageNotInRegistry() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
-		when(package_.getName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
 		packageValidator.validate(package_);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Qualified package name \\[myPackage\\] not equal to parent package name \\[sys\\] underscore package name \\[myPackage\\]")
-	public void testValidateNameInvalid() throws Exception
-	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("myPackage").getMock();
-		when(package_.getName()).thenReturn("myPackage");
-		when(package_.getParent()).thenReturn(systemPackage);
-		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
-		packageValidator.validate(package_);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[my_Package\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\) and hashes \\(#\\) are allowed.")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid name: \\[0package\\] Names must start with a letter.")
 	public void testValidatePackageInvalidName() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("test_my_Package").getMock();
-		when(package_.getName()).thenReturn("my_Package");
+		Package package_ = when(mock(Package.class).getId()).thenReturn("0package").getMock();
 		when(package_.getParent()).thenReturn(testPackage);
 		when(package_.getRootPackage()).thenReturn(testPackage);
 		packageValidator.validate(package_);
@@ -81,27 +67,16 @@ public class PackageValidatorTest
 	@Test
 	public void testValidatePackageValidName() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("test_myPackage").getMock();
-		when(package_.getName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getId()).thenReturn("test_myPackage").getMock();
 		when(package_.getParent()).thenReturn(testPackage);
 		when(package_.getRootPackage()).thenReturn(testPackage);
-		packageValidator.validate(package_);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[my_Package\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\) and hashes \\(#\\) are allowed.")
-	public void testValidatePackageInvalidNameNoParent() throws Exception
-	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("my_Package").getMock();
-		when(package_.getName()).thenReturn("my_Package");
-		when(package_.getParent()).thenReturn(null);
 		packageValidator.validate(package_);
 	}
 
 	@Test
 	public void testValidatePackageValidNameNoParent() throws Exception
 	{
-		Package package_ = when(mock(Package.class).getFullyQualifiedName()).thenReturn("myPackage").getMock();
-		when(package_.getName()).thenReturn("myPackage");
+		Package package_ = when(mock(Package.class).getId()).thenReturn("myPackage").getMock();
 		when(package_.getParent()).thenReturn(null);
 		packageValidator.validate(package_);
 	}

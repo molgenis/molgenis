@@ -13,9 +13,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.NAME;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
+import static org.testng.Assert.*;
 
 public class EntityTypeTest
 {
@@ -81,32 +79,6 @@ public class EntityTypeTest
 	}
 
 	@Test
-	public void setSimpleNameNoNameNoLabel()
-	{
-		EntityType entityType = new EntityType(createEntityTypeMeta());
-		String simpleName = "simpleName";
-		entityType.setName(simpleName);
-		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getString(NAME), simpleName);
-		assertEquals(entityType.getLabel(), simpleName);
-		assertEquals(entityType.getString(LABEL), simpleName);
-	}
-
-	@Test
-	public void setSimpleNameExistingNameExistingLabel()
-	{
-		EntityType entityType = new EntityType(createEntityTypeMeta());
-		String label = "label";
-		String simpleName = "simpleName";
-		entityType.setLabel(label);
-		entityType.setName(simpleName);
-		assertEquals(entityType.getName(), simpleName);
-		assertEquals(entityType.getString(NAME), simpleName);
-		assertEquals(entityType.getLabel(), label);
-		assertEquals(entityType.getString(LABEL), label);
-	}
-
-	@Test
 	public void setLabel()
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
@@ -120,11 +92,9 @@ public class EntityTypeTest
 	public void setLabelNull()
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
-		String simpleName = "simpleName";
-		entityType.setName(simpleName);
-		entityType.setLabel(null);
-		assertEquals(entityType.getLabel(), simpleName);
-		assertEquals(entityType.getString(LABEL), simpleName);
+		String simpleName = "label";
+		assertNull(entityType.getLabel());
+		assertNull(entityType.getString(LABEL));
 	}
 
 	@Test
@@ -133,7 +103,7 @@ public class EntityTypeTest
 		EntityType entityTypeMeta = createEntityTypeMeta();
 
 		Package package_ = mock(Package.class);
-		when(package_.getFullyQualifiedName()).thenReturn("myPackage");
+		when(package_.getId()).thenReturn("myPackage");
 
 		EntityType extendsEntityType = mock(EntityType.class);
 
@@ -153,8 +123,7 @@ public class EntityTypeTest
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getEntityType()).thenReturn(entityTypeMeta);
-		when(entityType.getName()).thenReturn("myEntity");
-		when(entityType.getFullyQualifiedName()).thenReturn("myPackage_myEntity");
+		when(entityType.getId()).thenReturn("myPackage_myEntity");
 		when(entityType.getPackage()).thenReturn(package_);
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.getDescription()).thenReturn("description");
@@ -170,8 +139,7 @@ public class EntityTypeTest
 
 		EntityType entityTypeCopy = EntityType.newInstance(entityType);
 		assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
-		assertEquals(entityTypeCopy.getName(), "myEntity");
-		assertEquals(entityTypeCopy.getFullyQualifiedName(), "myPackage_myEntity");
+		assertEquals(entityTypeCopy.getId(), "myPackage_myEntity");
 		assertSame(entityTypeCopy.getPackage(), package_);
 		assertEquals(entityTypeCopy.getLabel(), "label");
 		assertEquals(entityTypeCopy.getDescription(), "description");
@@ -205,7 +173,7 @@ public class EntityTypeTest
 	public void addAttributeWithDuplicateName()
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
-		entityType.setName("myEntity");
+		entityType.setLabel("myEntity");
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
 		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
 		entityType.addAttribute(attr0);
@@ -219,7 +187,7 @@ public class EntityTypeTest
 		Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
 		Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.NAME)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ID)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.PACKAGE)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(LABEL)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.DESCRIPTION)).thenReturn(strAttr);

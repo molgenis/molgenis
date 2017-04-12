@@ -1,7 +1,6 @@
 package org.molgenis.data.meta.model;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.support.StaticEntity;
 
 import static com.google.common.collect.Iterables.concat;
@@ -58,7 +57,6 @@ public class Package extends StaticEntity
 	{
 		Package packageCopy = new Package(package_.getEntityType());
 		packageCopy.setId(package_.getId());
-		packageCopy.setName(package_.getName());
 		packageCopy.setLabel(package_.getLabel());
 		packageCopy.setDescription(package_.getDescription());
 		Package parent = package_.getParent();
@@ -76,22 +74,6 @@ public class Package extends StaticEntity
 	public Package setId(String id)
 	{
 		set(ID, id);
-		return this;
-	}
-
-	/**
-	 * Gets the name of the package without the trailing parent packages
-	 *
-	 * @return package name
-	 */
-	public String getName()
-	{
-		return getString(PackageMetadata.NAME);
-	}
-
-	public Package setName(String name)
-	{
-		set(PackageMetadata.NAME, name);
 		return this;
 	}
 
@@ -119,16 +101,6 @@ public class Package extends StaticEntity
 	public Iterable<Package> getChildren()
 	{
 		return getEntities(CHILDREN, Package.class);
-	}
-
-	/**
-	 * Gets the fully qualified name of this package
-	 *
-	 * @return fully qualified package name
-	 */
-	public String getFullyQualifiedName()
-	{
-		return MetaUtils.getFullyQualyfiedName(getName(), getParent());
 	}
 
 	/**
@@ -260,12 +232,11 @@ public class Package extends StaticEntity
 		if (o instanceof Package)
 		{
 			Package that = (Package) o;
-			return (this.getId().equals(that.getId())) && (this.getName().equals(that.getName())) && ((this.getLabel()
-					== null) ? (that.getLabel() == null) : this.getLabel().equals(that.getLabel())) && ((
-					this.getDescription() == null) ? (that.getDescription() == null) : this.getDescription()
-					.equals(that.getDescription())) && ((this.getParent() == null) ? (that.getParent() == null) : this
-					.getParent().equals(that.getParent())) && (newArrayList(this.getTags())
-					.equals(newArrayList(that.getTags())));
+			return (this.getId().equals(that.getId())) && ((this.getLabel() == null) ? (that.getLabel() == null) : this
+					.getLabel().equals(that.getLabel())) && ((this.getDescription() == null) ? (that.getDescription()
+					== null) : this.getDescription().equals(that.getDescription())) && ((this.getParent() == null) ? (
+					that.getParent() == null) : this.getParent().equals(that.getParent())) && (newArrayList(
+					this.getTags()).equals(newArrayList(that.getTags())));
 		}
 		return false;
 	}
@@ -294,6 +265,6 @@ public class Package extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "Package{" + "name=" + getFullyQualifiedName() + '}';
+		return "Package{" + "name=" + getId() + '}';
 	}
 }

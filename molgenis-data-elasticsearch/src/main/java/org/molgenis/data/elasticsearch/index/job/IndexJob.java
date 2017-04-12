@@ -119,7 +119,7 @@ class IndexJob extends Job
 		requireNonNull(indexAction);
 		String entityTypeId = indexAction.getEntityTypeId();
 		updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.STARTED);
-		EntityType entityType = dataService.getEntityTypeById(entityTypeId);
+		EntityType entityType = dataService.getEntityType(entityTypeId);
 		try
 		{
 			if (entityType != null)
@@ -127,13 +127,13 @@ class IndexJob extends Job
 				if (indexAction.getEntityId() != null)
 				{
 					progress.progress(progressCount,
-							format("Indexing {0}.{1}", entityType.getFullyQualifiedName(), indexAction.getEntityId()));
+							format("Indexing {0}.{1}", entityType.getId(), indexAction.getEntityId()));
 					rebuildIndexOneEntity(entityTypeId, indexAction.getEntityId());
 				}
 				else
 				{
-					progress.progress(progressCount, format("Indexing {0}", entityType.getFullyQualifiedName()));
-					final Repository<Entity> repository = dataService.getRepository(entityType.getFullyQualifiedName());
+					progress.progress(progressCount, format("Indexing {0}", entityType.getId()));
+					final Repository<Entity> repository = dataService.getRepository(entityType.getId());
 					searchService.rebuildIndex(repository);
 				}
 			}
@@ -142,16 +142,13 @@ class IndexJob extends Job
 				entityType = getEntityType(indexAction);
 				if (searchService.hasMapping(entityType))
 				{
-					progress.progress(progressCount,
-							format("Dropping entityType with name: {0} and ID: {1}", entityType.getName(),
-									entityType.getId()));
+					progress.progress(progressCount, format("Dropping entityType with id: {0}", entityType.getId()));
 					searchService.delete(entityType);
 				}
 				else
 				{
 					// Index Job is finished, here we concluded that we don't have enough info to continue the index job
-					progress.progress(progressCount,
-							format("Skip index entity {0}.{1}", entityType.getFullyQualifiedName(),
+					progress.progress(progressCount, format("Skip index entity {0}.{1}", entityType.getId(),
 									indexAction.getEntityId()));
 				}
 			}
@@ -189,11 +186,11 @@ class IndexJob extends Job
 		LOG.trace("Indexing [{}].[{}]... ", entityTypeId, untypedEntityId);
 
 		// convert entity id string to typed entity id
-		EntityType entityType = dataService.getEntityTypeById(entityTypeId);
+		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (null != entityType)
 		{
 			Object entityId = getTypedValue(untypedEntityId, entityType.getIdAttribute());
-			String entityFullName = entityType.getFullyQualifiedName();
+			String entityFullName = entityType.getId();
 
 			Entity actualEntity = dataService.findOneById(entityFullName, entityId);
 
@@ -248,9 +245,6 @@ class IndexJob extends Job
 
 	private EntityType getEntityType(IndexAction indexAction)
 	{
-		EntityType entityType = entityTypeFactory.create(indexAction.getEntityId());
-		entityType.setId(indexAction.getEntityTypeId());
-		entityType.setName(indexAction.getEntityTypeName());
-		return entityType;
+		return entityTypeFactory.create(indexAction.getEntityTypeId());
 	}
 }

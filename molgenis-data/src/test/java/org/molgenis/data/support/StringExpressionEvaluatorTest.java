@@ -22,7 +22,7 @@ public class StringExpressionEvaluatorTest
 	@BeforeTest
 	public void createEntity()
 	{
-		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Source").getMock();
+		entityType = when(mock(EntityType.class).getId()).thenReturn("Source").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("Identifier").getMock();
 
 		when(idAttr.getDataType()).thenReturn(INT);

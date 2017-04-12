@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 @AutoValue
 public abstract class EntityTypeDescription
 {
-	public abstract String getFullyQualifiedName();
+	public abstract String getId();
 
 	public abstract ImmutableMap<String, AttributeDescription> getAttributeDescriptionMap();
 

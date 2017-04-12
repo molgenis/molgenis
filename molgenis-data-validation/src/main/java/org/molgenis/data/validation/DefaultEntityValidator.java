@@ -80,7 +80,7 @@ public class DefaultEntityValidator implements EntityValidator
 					{
 						String message = String
 								.format("The attribute '%s' of entity '%s' with key '%s' can not be null.",
-										attr.getName(), meta.getFullyQualifiedName(),
+										attr.getName(), meta.getId(),
 										entity.getString(meta.getLabelAttribute().getName()));
 						violations.add(new ConstraintViolation(message, null, entity, attr, meta, rownr));
 					}
@@ -122,9 +122,9 @@ public class DefaultEntityValidator implements EntityValidator
 				// Create 'in' query, should find only find itself or nothing
 				if (!values.isEmpty())
 				{
-					String entityName = meta.getFullyQualifiedName();
+					String entityTypeId = meta.getId();
 
-					long count = dataService.count(entityName, new QueryImpl<Entity>().in(attr.getName(), values));
+					long count = dataService.count(entityTypeId, new QueryImpl<Entity>().in(attr.getName(), values));
 					if (count > 0)
 					{
 						// Go through the list to find the violators
@@ -137,7 +137,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 							Object value = entity.get(attr.getName());
 							Entity existing = dataService
-									.findOne(entityName, new QueryImpl<Entity>().eq(attr.getName(), value));
+									.findOne(entityTypeId, new QueryImpl<Entity>().eq(attr.getName(), value));
 
 							if (existing != null)
 							{
@@ -148,7 +148,7 @@ public class DefaultEntityValidator implements EntityValidator
 								{
 									String message = String
 											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
-													attr.getName(), meta.getFullyQualifiedName(),
+													attr.getName(), meta.getId(),
 													entity.getString(meta.getLabelAttribute().getName()), value);
 									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
 								}

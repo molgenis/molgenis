@@ -37,12 +37,8 @@ public class EntityUtilsTest
 		when(otherIdEntityType.getId()).thenReturn("otherId");
 		dataList.add(new Object[] { entityType, otherIdEntityType, false });
 
-		EntityType otherNameEntityType = createEqualsEntityType();
-		when(otherNameEntityType.getName()).thenReturn("otherName");
-		dataList.add(new Object[] { entityType, otherNameEntityType, false });
-
 		EntityType otherLabelEntityType = createEqualsEntityType();
-		when(otherLabelEntityType.getName()).thenReturn("otherLabel");
+		when(otherLabelEntityType.getLabel()).thenReturn("otherLabel");
 		dataList.add(new Object[] { entityType, otherLabelEntityType, false });
 
 		EntityType otherAbstractEntityType = createEqualsEntityType();
@@ -81,7 +77,6 @@ public class EntityUtilsTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.toString()).thenReturn("entity");
 		when(entityType.getId()).thenReturn("id");
-		when(entityType.getName()).thenReturn("name");
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.isAbstract()).thenReturn(true);
 		when(entityType.getBackend()).thenReturn("backend");
@@ -103,7 +98,7 @@ public class EntityUtilsTest
 	@Test
 	public void isEmptyNoAttributes()
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getAtomicAttributes()).thenReturn(emptyList());
 		assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityType)));
 	}
@@ -111,7 +106,7 @@ public class EntityUtilsTest
 	@Test
 	public void isEmptyAttributeValuesNull()
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
@@ -122,7 +117,7 @@ public class EntityUtilsTest
 	@Test
 	public void isEmptyAttributeValuesNotNull()
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
@@ -133,14 +128,14 @@ public class EntityUtilsTest
 	@Test
 	public void doesExtend()
 	{
-		EntityType grandfather = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("grandfather").getMock();
+		EntityType grandfather = when(mock(EntityType.class).getId()).thenReturn("grandfather").getMock();
 		assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
 
-		EntityType father = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("father").getMock();
+		EntityType father = when(mock(EntityType.class).getId()).thenReturn("father").getMock();
 		when(father.getExtends()).thenReturn(grandfather);
 		assertTrue(EntityUtils.doesExtend(father, "grandfather"));
 
-		EntityType child = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("child").getMock();
+		EntityType child = when(mock(EntityType.class).getId()).thenReturn("child").getMock();
 		when(child.getExtends()).thenReturn(father);
 		assertTrue(EntityUtils.doesExtend(child, "grandfather"));
 	}
@@ -226,8 +221,8 @@ public class EntityUtilsTest
 			Attribute otherAttr = getMockAttr("refEntity1");
 			EntityType refEntity = mock(EntityType.class);
 			EntityType otherRefEntity = mock(EntityType.class);
-			when(refEntity.getFullyQualifiedName()).thenReturn("ref1");
-			when(otherRefEntity.getFullyQualifiedName()).thenReturn("ref1");
+			when(refEntity.getId()).thenReturn("ref1");
+			when(otherRefEntity.getId()).thenReturn("ref1");
 			when(attr.getRefEntity()).thenReturn(refEntity);
 			when(otherAttr.getRefEntity()).thenReturn(otherRefEntity);
 
@@ -239,8 +234,8 @@ public class EntityUtilsTest
 			Attribute otherAttr = getMockAttr("refEntity2");
 			EntityType refEntity = mock(EntityType.class);
 			EntityType otherRefEntity = mock(EntityType.class);
-			when(refEntity.getFullyQualifiedName()).thenReturn("ref1");
-			when(otherRefEntity.getFullyQualifiedName()).thenReturn("ref2");
+			when(refEntity.getId()).thenReturn("ref1");
+			when(otherRefEntity.getId()).thenReturn("ref2");
 			when(attr.getRefEntity()).thenReturn(refEntity);
 			when(otherAttr.getRefEntity()).thenReturn(otherRefEntity);
 

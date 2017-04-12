@@ -110,8 +110,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	{
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
 		List<Attribute> sourceAttributes = Lists.newArrayList();
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
-		EntityType targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();

@@ -112,7 +112,7 @@ public class MolgenisPluginInterceptorTest
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "plugin_id_test";
 
 		HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
-		when(mockHttpServletRequest.getQueryString()).thenReturn("entity=entityName");
+		when(mockHttpServletRequest.getQueryString()).thenReturn("entity=entityTypeId");
 
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
 		when(handlerMethod.getBean()).thenReturn(createMolgenisPluginController(uri));
@@ -123,7 +123,7 @@ public class MolgenisPluginInterceptorTest
 		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), false);
 		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING),
-				"plugin_id_test?entity=entityName");
+				"plugin_id_test?entity=entityTypeId");
 	}
 
 	@Test

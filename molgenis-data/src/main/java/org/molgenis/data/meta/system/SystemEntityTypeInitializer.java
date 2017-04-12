@@ -72,10 +72,10 @@ public class SystemEntityTypeInitializer
 
 	private void checkPackage(SystemEntityType systemEntityType)
 	{
-		if (!systemEntityType.getPackage().getRootPackage().getFullyQualifiedName().equals(rootSystemPackage.getFullyQualifiedName()))
+		if (!systemEntityType.getPackage().getRootPackage().getId().equals(rootSystemPackage.getId()))
 		{
-			throw new RuntimeException(format("System entity [%s] must be in package [%s]", systemEntityType.getFullyQualifiedName(),
-					rootSystemPackage.getFullyQualifiedName()));
+			throw new RuntimeException(format("System entity [%s] must be in package [%s]", systemEntityType.getId(),
+					rootSystemPackage.getId()));
 		}
 	}
 

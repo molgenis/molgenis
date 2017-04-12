@@ -47,7 +47,7 @@ public class AnnotationJobTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		EntityType emd = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("repo").getMock();
+		EntityType emd = when(mock(EntityType.class).getId()).thenReturn("repo").getMock();
 		when(emd.getLabel()).thenReturn("My repo");
 
 		repository = new InMemoryRepository(emd);

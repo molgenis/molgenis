@@ -133,7 +133,7 @@
                         <select name="target-entity" id="target-entity-select" class="form-control" required="required"
                                 placeholder="Select a target entity">
                             <#list entityTypes as entityType>
-                                <option value="${entityType.fullyQualifiedName?html}">${entityType.fullyQualifiedName?html}</option>
+                                <option value="${entityType.id?html}">${entityType.id?html}</option>
                             </#list>
                         </select>
                     </div>

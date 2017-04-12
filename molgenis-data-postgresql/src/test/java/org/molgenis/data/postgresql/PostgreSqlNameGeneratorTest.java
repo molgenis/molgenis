@@ -18,65 +18,59 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getTableNameEntityTypeProvider")
 	public static Iterator<Object[]> getTableNameEntityTypeProvider()
 	{
-		return newArrayList(new Object[] { "entityName", "\"entityName#e7c7af28\"" },
+		return newArrayList(new Object[] { "entityTypeId", "\"entityTypeId#c34894ba\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
-						"\"thisisa_Very_very_very_very_very_very_very_long_s1mpl3#e7c7af28\"" }).iterator();
+						"\"thisisa_Very_very_very_very_very_very_very_long_s1mpl3#d9b1efe8\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getTableNameEntityTypeProvider")
-	public void testGetTableNameEntityType(String entitySimpleName, String expectedTableName)
+	public void testGetTableNameEntityType(String entityTypeId, String expectedTableName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		assertEquals(PostgreSqlNameGenerator.getTableName(entityType), expectedTableName);
 	}
 
 	@DataProvider(name = "getTableNameEntityTypeBooleanProvider")
 	public static Iterator<Object[]> getTableNameEntityTypeBooleanProvider()
 	{
-		return newArrayList(new Object[] { "entityName", true, "\"entityName#e7c7af28\"" },
-				new Object[] { "entityName", false, "entityName#e7c7af28" },
+		return newArrayList(new Object[] { "entityTypeId", true, "\"entityTypeId#c34894ba\"" },
+				new Object[] { "entityTypeId", false, "entityTypeId#c34894ba" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", true,
-						"\"thisisa_Very_very_very_very_very_very_very_long_s1mpl3#e7c7af28\"" },
+						"\"thisisa_Very_very_very_very_very_very_very_long_s1mpl3#d9b1efe8\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", false,
-						"thisisa_Very_very_very_very_very_very_very_long_s1mpl3#e7c7af28" }).iterator();
+						"thisisa_Very_very_very_very_very_very_very_long_s1mpl3#d9b1efe8" }).iterator();
 	}
 
 	@Test(dataProvider = "getTableNameEntityTypeBooleanProvider")
-	public void testGetTableNameEntityTypeBoolean(String entitySimpleName, boolean quoteIdentifiers,
+	public void testGetTableNameEntityTypeBoolean(String entityTypeId, boolean quoteIdentifiers,
 			String expectedTableName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		assertEquals(PostgreSqlNameGenerator.getTableName(entityType, quoteIdentifiers), expectedTableName);
 	}
 
 	@DataProvider(name = "getJunctionTableNameProvider")
 	public static Iterator<Object[]> getJunctionTableNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "\"entity#e7c7af28_attr\"" },
+		return newArrayList(new Object[] { "entity", "attr", "\"entity#6844280e_attr\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr",
-						"\"thisisa_Very_very_very#e7c7af28_attr\"" },
+						"\"thisisa_Very_very_very#d9b1efe8_attr\"" },
 				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"entity#e7c7af28_thisisa_Very_very_very#69363cb7\"" },
+						"\"entity#6844280e_thisisa_Very_very_very#69363cb7\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"thisisa_Very_very_very#e7c7af28_thisisa_Very_very_very#69363cb7\"" }).iterator();
+						"\"thisisa_Very_very_very#d9b1efe8_thisisa_Very_very_very#69363cb7\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getJunctionTableNameProvider")
-	public void testGetJunctionTableName(String entitySimpleName, String attrName, String expectedJunctionTableName)
+	public void testGetJunctionTableName(String entityTypeId, String attrName, String expectedJunctionTableName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(attr.getName()).thenReturn(attrName);
 		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr), expectedJunctionTableName);
 	}
@@ -84,33 +78,31 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getJunctionTableIndexNameProvider")
 	public static Iterator<Object[]> getJunctionTableIndexNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "idxAttr", "\"entity#e7c7af28_attr_idxAttr_idx\"" },
+		return newArrayList(new Object[] { "entity", "attr", "idxAttr", "\"entity#6844280e_attr_idxAttr_idx\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr", "idxAttr",
-						"\"thisisa_Ve#e7c7af28_attr_idxAttr_idx\"" },
+						"\"thisisa_Ve#d9b1efe8_attr_idxAttr_idx\"" },
 				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3", "idxAttr",
-						"\"entity#e7c7af28_thisisa_Ve#69363cb7_idxAttr_idx\"" },
+						"\"entity#6844280e_thisisa_Ve#69363cb7_idxAttr_idx\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3", "idxAttr",
-						"\"thisisa_Ve#e7c7af28_thisisa_Ve#69363cb7_idxAttr_idx\"" },
+						"\"thisisa_Ve#d9b1efe8_thisisa_Ve#69363cb7_idxAttr_idx\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_idxAttr_nam3",
-						"\"thisisa_Ve#e7c7af28_thisisa_Ve#69363cb7_thisisa_Ve#65070eab_idx\"" }).iterator();
+						"\"thisisa_Ve#d9b1efe8_thisisa_Ve#69363cb7_thisisa_Ve#65070eab_idx\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getJunctionTableIndexNameProvider")
-	public void testGetJunctionTableIndexName(String entitySimpleName, String attrName, String indexAttrName,
+	public void testGetJunctionTableIndexName(String entityTypeId, String attrName, String indexAttrName,
 			String expectedJunctionTableName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
 		when(attr.getName()).thenReturn(attrName);
 		Attribute idxAttr = mock(Attribute.class);
 		when(idxAttr.getIdentifier()).thenReturn("9876543210-0123456789-9876543210");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(idxAttr.getName()).thenReturn(indexAttrName);
 		assertEquals(PostgreSqlNameGenerator.getJunctionTableIndexName(entityType, attr, idxAttr),
 				expectedJunctionTableName);
@@ -186,25 +178,23 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getPrimaryKeyNameProvider")
 	public static Iterator<Object[]> getPrimaryKeyNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "\"entity#e7c7af28_attr_pkey\"" },
+		return newArrayList(new Object[] { "entity", "attr", "\"entity#6844280e_attr_pkey\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr",
-						"\"thisisa_Very_very_v#e7c7af28_attr_pkey\"" },
+						"\"thisisa_Very_very_v#d9b1efe8_attr_pkey\"" },
 				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"entity#e7c7af28_thisisa_Very_very_v#69363cb7_pkey\"" },
+						"\"entity#6844280e_thisisa_Very_very_v#69363cb7_pkey\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"thisisa_Very_very_v#e7c7af28_thisisa_Very_very_v#69363cb7_pkey\"" }).iterator();
+						"\"thisisa_Very_very_v#d9b1efe8_thisisa_Very_very_v#69363cb7_pkey\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getPrimaryKeyNameProvider")
-	public void testGetPrimaryKeyName(String entitySimpleName, String attrName, String expectedPrimaryKeyName)
+	public void testGetPrimaryKeyName(String entityTypeId, String attrName, String expectedPrimaryKeyName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
 		when(attr.getName()).thenReturn(attrName);
 		assertEquals(PostgreSqlNameGenerator.getPrimaryKeyName(entityType, attr), expectedPrimaryKeyName);
 	}
@@ -212,23 +202,21 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getForeignKeyNameProvider")
 	public static Iterator<Object[]> getForeignKeyNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "\"entity#e7c7af28_attr_fkey\"" },
+		return newArrayList(new Object[] { "entity", "attr", "\"entity#6844280e_attr_fkey\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr",
-						"\"thisisa_Very_very_v#e7c7af28_attr_fkey\"" },
+						"\"thisisa_Very_very_v#d9b1efe8_attr_fkey\"" },
 				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"entity#e7c7af28_thisisa_Very_very_v#69363cb7_fkey\"" },
+						"\"entity#6844280e_thisisa_Very_very_v#69363cb7_fkey\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"thisisa_Very_very_v#e7c7af28_thisisa_Very_very_v#69363cb7_fkey\"" }).iterator();
+						"\"thisisa_Very_very_v#d9b1efe8_thisisa_Very_very_v#69363cb7_fkey\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getForeignKeyNameProvider")
-	public void testGetForeignKeyName(String entitySimpleName, String attrName, String expectedForeignKeyName)
+	public void testGetForeignKeyName(String entityTypeId, String attrName, String expectedForeignKeyName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
 		when(attr.getName()).thenReturn(attrName);
@@ -238,23 +226,21 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getUniqueKeyNameProvider")
 	public static Iterator<Object[]> getUniqueKeyNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "\"entity#e7c7af28_attr_key\"" },
+		return newArrayList(new Object[] { "entity", "attr", "\"entity#6844280e_attr_key\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr",
-						"\"thisisa_Very_very_ve#e7c7af28_attr_key\"" },
+						"\"thisisa_Very_very_ve#d9b1efe8_attr_key\"" },
 				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"entity#e7c7af28_thisisa_Very_very_ve#69363cb7_key\"" },
+						"\"entity#6844280e_thisisa_Very_very_ve#69363cb7_key\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"thisisa_Very_very_ve#e7c7af28_thisisa_Very_very_ve#69363cb7_key\"" }).iterator();
+						"\"thisisa_Very_very_ve#d9b1efe8_thisisa_Very_very_ve#69363cb7_key\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getUniqueKeyNameProvider")
-	public void testGetUniqueKeyName(String entitySimpleName, String attrName, String expectedUniqueKeyName)
+	public void testGetUniqueKeyName(String entityTypeId, String attrName, String expectedUniqueKeyName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
 		when(attr.getName()).thenReturn(attrName);
@@ -264,23 +250,21 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getCheckConstraintNameProvider")
 	public static Iterator<Object[]> getCheckConstraintNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "\"entity#e7c7af28_attr_chk\"" },
+		return newArrayList(new Object[] { "entity", "attr", "\"entity#6844280e_attr_chk\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr",
-						"\"thisisa_Very_very_ve#e7c7af28_attr_chk\"" },
+						"\"thisisa_Very_very_ve#d9b1efe8_attr_chk\"" },
 				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"entity#e7c7af28_thisisa_Very_very_ve#69363cb7_chk\"" },
+						"\"entity#6844280e_thisisa_Very_very_ve#69363cb7_chk\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
 						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"thisisa_Very_very_ve#e7c7af28_thisisa_Very_very_ve#69363cb7_chk\"" }).iterator();
+						"\"thisisa_Very_very_ve#d9b1efe8_thisisa_Very_very_ve#69363cb7_chk\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getCheckConstraintNameProvider")
-	public void testGetCheckConstraintName(String entitySimpleName, String attrName, String expectedCheckConstraintName)
+	public void testGetCheckConstraintName(String entityTypeId, String attrName, String expectedCheckConstraintName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
 		when(attr.getName()).thenReturn(attrName);
@@ -290,18 +274,16 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getFunctionValidateUpdateNameProvider")
 	public static Iterator<Object[]> getFunctionValidateUpdateNameProvider()
 	{
-		return newArrayList(new Object[] { "entityName", "\"validate_update_entityName#e7c7af28\"" },
+		return newArrayList(new Object[] { "entityTypeId", "\"validate_update_entityTypeId#c34894ba\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
-						"\"validate_update_thisisa_Very_very_very_very_very_very_#e7c7af28\"" }).iterator();
+						"\"validate_update_thisisa_Very_very_very_very_very_very_#d9b1efe8\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getFunctionValidateUpdateNameProvider")
-	public void testGetFunctionValidateUpdateName(String entitySimpleName, String expectedFunctionValidateUpdateName)
+	public void testGetFunctionValidateUpdateName(String entityTypeId, String expectedFunctionValidateUpdateName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		assertEquals(PostgreSqlNameGenerator.getFunctionValidateUpdateName(entityType),
 				expectedFunctionValidateUpdateName);
 	}
@@ -309,18 +291,16 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getUpdateTriggerNameProvider")
 	public static Iterator<Object[]> getUpdateTriggerNameProvider()
 	{
-		return newArrayList(new Object[] { "entityName", "\"update_trigger_entityName#e7c7af28\"" },
+		return newArrayList(new Object[] { "entityTypeId", "\"update_trigger_entityTypeId#c34894ba\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
-						"\"update_trigger_thisisa_Very_very_very_very_very_very_v#e7c7af28\"" }).iterator();
+						"\"update_trigger_thisisa_Very_very_very_very_very_very_v#d9b1efe8\"" }).iterator();
 	}
 
 	@Test(dataProvider = "getUpdateTriggerNameProvider")
-	public void testGetUpdateTriggerName(String entitySimpleName, String expectedUpdateTriggerName)
+	public void testGetUpdateTriggerName(String entityTypeId, String expectedUpdateTriggerName)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getIdValue()).thenReturn("0123456789-0123456789-0123456789");
-		when(entityType.getName()).thenReturn(entitySimpleName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		assertEquals(PostgreSqlNameGenerator.getUpdateTriggerName(entityType), expectedUpdateTriggerName);
 	}
 }

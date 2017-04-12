@@ -35,8 +35,8 @@ public class DataExplorerHyperlinkDirective implements TemplateDirectiveModel
 	public void execute(Environment env, @SuppressWarnings("rawtypes") Map params, TemplateModel[] loopVars,
 			TemplateDirectiveBody body) throws TemplateException, IOException
 	{
-		if (!params.containsKey("entityName")) throw new TemplateModelException("Missing 'entityName' parameter");
-		String dataset = DataConverter.toString(params.get("entityName"));
+		if (!params.containsKey("entityTypeId")) throw new TemplateModelException("Missing 'entityTypeId' parameter");
+		String dataset = DataConverter.toString(params.get("entityTypeId"));
 		MolgenisPlugin dataexplorer = molgenisPluginRegistry.getPlugin(DataExplorerController.ID);
 		Writer w = env.getOut();
 

@@ -36,11 +36,6 @@ public class IndexActionMetaData extends SystemEntityType
 	public static final String ACTION_ORDER = "actionOrder";
 
 	/**
-	 * The name of the entity type that needs to be indexed (e.g. myEntityType).
-	 */
-	public static final String ENTITY_TYPE_NAME = "entityTypeName";
-
-	/**
 	 * The name of the entity type ID that needs to be indexed
 	 */
 	public static final String ENTITY_TYPE_ID = "entityTypeId";
@@ -82,9 +77,6 @@ public class IndexActionMetaData extends SystemEntityType
 				.setNillable(false);
 		addAttribute(ENTITY_TYPE_ID)
 				.setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
-				.setNillable(false);
-		addAttribute(ENTITY_TYPE_NAME)
-				.setDescription("The name of the entity type that needs to be indexed (e.g. myEntityType).")
 				.setNillable(false);
 		addAttribute(ENTITY_ID)
 				.setDescription("The id of the entity that needs to be indexed")

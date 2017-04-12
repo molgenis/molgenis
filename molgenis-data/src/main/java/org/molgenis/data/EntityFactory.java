@@ -9,11 +9,11 @@ package org.molgenis.data;
 public interface EntityFactory<E extends Entity, P>
 {
 	/**
-	 * Returns entity type name
+	 * Returns entity type id
 	 *
-	 * @return entity type name
+	 * @return entity type id
 	 */
-	String getEntityName();
+	String getEntityTypeId();
 
 	/**
 	 * Creates an entity.

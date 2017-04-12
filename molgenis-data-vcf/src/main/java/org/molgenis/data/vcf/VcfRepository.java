@@ -41,23 +41,24 @@ public class VcfRepository extends AbstractRepository
 	public static final String PREFIX = "##";
 
 	private final VcfReaderFactory vcfReaderFactory;
-	private final String entityName;
+	private final String entityTypeId;
 	private final VcfAttributes vcfAttributes;
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attrMetaFactory;
 	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
 
-	public VcfRepository(File file, String entityName, VcfAttributes vcfAttributes, EntityTypeFactory entityTypeFactory,
+	public VcfRepository(File file, String entityTypeId, VcfAttributes vcfAttributes,
+			EntityTypeFactory entityTypeFactory,
 			AttributeFactory attrMetaFactory) throws IOException
 	{
-		this(new VcfReaderFactoryImpl(file), entityName, vcfAttributes, entityTypeFactory, attrMetaFactory);
+		this(new VcfReaderFactoryImpl(file), entityTypeId, vcfAttributes, entityTypeFactory, attrMetaFactory);
 	}
 
-	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName, VcfAttributes vcfAttributes,
+	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityTypeId, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
 		this.vcfReaderFactory = requireNonNull(vcfReaderFactory);
-		this.entityName = requireNonNull(entityName);
+		this.entityTypeId = requireNonNull(entityTypeId);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
@@ -70,7 +71,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			VcfMeta vcfMeta = reader.getVcfMeta();
-			return new VcfToEntity(entityName, vcfMeta, vcfAttributes, entityTypeFactory, attrMetaFactory);
+			return new VcfToEntity(entityTypeId, vcfMeta, vcfAttributes, entityTypeFactory, attrMetaFactory);
 		}
 		catch (Exception e)
 		{
