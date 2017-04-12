@@ -160,6 +160,18 @@ public class InMemoryRepository implements Repository<Entity>
 		entities.forEach(this::update);
 	}
 
+	@Override
+	public void upsert(Entity entity)
+	{
+		entities.put(getId(entity), entity);
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		entities.forEach(this::upsert);
+	}
+
 	private Object getId(Entity entity)
 	{
 		return entity.get(metadata.getIdAttribute().getName());

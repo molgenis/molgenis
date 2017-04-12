@@ -149,6 +149,18 @@ public abstract class AbstractRepository implements Repository<Entity>
 	}
 
 	@Override
+	public void upsert(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		throw new UnsupportedOperationException();

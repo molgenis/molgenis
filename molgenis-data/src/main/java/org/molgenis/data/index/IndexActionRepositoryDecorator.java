@@ -51,6 +51,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	}
 
 	@Override
+	public void upsert(Entity entity)
+	{
+		delegate().upsert(entity);
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
+		registerRefEntityIndexActions();
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
@@ -96,6 +104,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 		indexActionRegisterService.register(getEntityType(), null);
 		registerRefEntityIndexActions();
 		delegate().update(entities);
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		indexActionRegisterService.register(getEntityType(), null);
+		registerRefEntityIndexActions();
+		delegate().upsert(entities);
 	}
 
 	@Override

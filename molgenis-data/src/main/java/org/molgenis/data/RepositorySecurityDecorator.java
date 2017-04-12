@@ -132,8 +132,24 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void update(Stream<Entity> entities)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(),  Permission.WRITE);
+		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
 		decoratedRepository.update(entities);
+	}
+
+	@Override
+	public void upsert(Entity entity)
+	{
+		EntityType entityType = decoratedRepository.getEntityType();
+		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		decoratedRepository.upsert(entity);
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		EntityType entityType = decoratedRepository.getEntityType();
+		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITE);
+		decoratedRepository.upsert(entities);
 	}
 
 	@Override

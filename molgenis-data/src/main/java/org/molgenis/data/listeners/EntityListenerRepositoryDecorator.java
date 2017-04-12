@@ -40,4 +40,18 @@ public class EntityListenerRepositoryDecorator extends AbstractRepositoryDecorat
 		entities = entityListenersService.updateEntities(decoratedRepository.getName(), entities);
 		decoratedRepository.update(entities);
 	}
+
+	@Override
+	public void upsert(Entity entity)
+	{
+		entityListenersService.updateEntity(decoratedRepository.getName(), entity);
+		decoratedRepository.upsert(entity);
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		entities = entityListenersService.updateEntities(decoratedRepository.getName(), entities);
+		decoratedRepository.upsert(entities);
+	}
 }

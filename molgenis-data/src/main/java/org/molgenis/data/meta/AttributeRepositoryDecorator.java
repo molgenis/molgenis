@@ -238,6 +238,20 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	}
 
 	@Override
+	public void upsert(Attribute attr)
+	{
+		// TODO implement
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void upsert(Stream<Attribute> attrs)
+	{
+		// TODO implement
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void delete(Attribute attr)
 	{
 		validateDeleteAllowed(attr);
@@ -371,7 +385,8 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 
 	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, Permission permission)
 	{
-		return attrs.filter(attr -> permissionService.hasPermissionOnEntity(attr.getEntity().getFullyQualifiedName(), permission));
+		return attrs.filter(attr -> permissionService
+				.hasPermissionOnEntity(attr.getEntity().getFullyQualifiedName(), permission));
 	}
 
 	private class FilteredConsumer
