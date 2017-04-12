@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
@@ -467,6 +468,12 @@ public class MappingServiceController extends MolgenisPluginController
 				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityType(), targetAttribute,
 						tagsForAttribute.values(), searchTerms);
 
+		// If no relevant attributes are found, return all source attributes
+		if (relevantAttributes.isEmpty())
+		{
+			return stream(entityMapping.getSourceEntityType().getAllAttributes())
+					.map(attribute -> ExplainedAttribute.create(attribute)).collect(toList());
+		}
 		return newArrayList(relevantAttributes.values());
 	}
 
@@ -671,8 +678,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
 		{
-			targetAttributeEntities = dataService
-					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getFullyQualifiedName());
+			targetAttributeEntities = dataService.findAll(
+					dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
+							.getFullyQualifiedName());
 
 			targetAttributeIdAttribute = dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -707,8 +715,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
 		{
-			sourceAttributeEntities = dataService
-					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getFullyQualifiedName());
+			sourceAttributeEntities = dataService.findAll(
+					dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
+							.getFullyQualifiedName());
 
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -773,9 +782,8 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
-	public
 	@ResponseBody
-	void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
+	public void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
 	{
@@ -802,9 +810,8 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return Map with the results and size of the source
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	public
 	@ResponseBody
-	Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
+	public Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		EntityType targetEntityType = dataService.getEntityType(mappingServiceRequest.getTargetEntityName());
 		Attribute targetAttribute = targetEntityType != null ? targetEntityType
@@ -873,8 +880,8 @@ public class MappingServiceController extends MolgenisPluginController
 	private List<EntityType> getWritableEntityTypes()
 	{
 		return getEntityTypes().stream().filter(emd -> !emd.isAbstract())
-				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName()).contains(RepositoryCapability.WRITABLE))
-				.collect(Collectors.toList());
+				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName())
+						.contains(RepositoryCapability.WRITABLE)).collect(Collectors.toList());
 	}
 
 	private boolean hasWritePermission(MappingProject project)
