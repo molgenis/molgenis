@@ -365,12 +365,6 @@
      * @memberOf molgenis.dataexplorer.data
      */
     $(function () {
-        $('body').on('click', '#copy-entity-row-url-btn', function(){
-            var entityUrl = document.querySelector('#copy-entity-row-url');
-            // entityUrl.select();
-            // document.execCommand('copy');
-        })
-
         $(document).off('.data');
 
         $(document).on('changeModule.data', function (e, mod) {
