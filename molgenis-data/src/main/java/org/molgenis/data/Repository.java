@@ -158,6 +158,20 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	void update(Stream<E> entities);
 
 	/**
+	 * Upserts one entity
+	 *
+	 * @param entity
+	 */
+	void upsert(E entity);
+
+	/**
+	 * Upserts the given entities
+	 *
+	 * @param entities
+	 */
+	void upsert(Stream<E> entities);
+
+	/**
 	 * Delete one entity
 	 *
 	 * @param entity entity to delete

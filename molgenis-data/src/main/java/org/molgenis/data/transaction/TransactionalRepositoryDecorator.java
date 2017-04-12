@@ -133,6 +133,26 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	}
 
 	@Override
+	public void upsert(E entity)
+	{
+		createWriteTransactionTemplate().execute((status) ->
+		{
+			decoratedRepo.upsert(entity);
+			return null;
+		});
+	}
+
+	@Override
+	public void upsert(Stream<E> entities)
+	{
+		createWriteTransactionTemplate().execute((status) ->
+		{
+			decoratedRepo.upsert(entities);
+			return null;
+		});
+	}
+
+	@Override
 	public void delete(E entity)
 	{
 		createWriteTransactionTemplate().execute((status) ->

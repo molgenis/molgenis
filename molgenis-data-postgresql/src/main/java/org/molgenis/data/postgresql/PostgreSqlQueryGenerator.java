@@ -216,8 +216,8 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateUpdateTrigger(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
 	{
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
-				.append(getUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
-				.append(getTableName(entityType)).append(" FOR EACH ROW WHEN (");
+				.append(getUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ").append(getTableName(entityType))
+				.append(" FOR EACH ROW WHEN (");
 		strBuilder.append(readonlyTableAttrs.stream()
 				.map(attr -> "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW." + getColumnName(attr))
 				.collect(joining(" OR ")));
@@ -234,10 +234,10 @@ class PostgreSqlQueryGenerator
 	{
 		Attribute idAttr = entityType.getIdAttribute();
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityType, attr))
-				.append(" (").append(getJunctionTableOrderColumnName()).append(" INT,")
-				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
-				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
-				.append(" NOT NULL").append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
+				.append(" (").append(getJunctionTableOrderColumnName()).append(" INT,").append(getColumnName(idAttr))
+				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
+				.append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute())).append(" NOT NULL")
+				.append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName(entityType)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
 
@@ -271,8 +271,8 @@ class PostgreSqlQueryGenerator
 			default:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 		}
-		sql.append(", UNIQUE (").append(getJunctionTableOrderColumnName()).append(',')
-				.append(getColumnName(idAttr)).append(')');
+		sql.append(", UNIQUE (").append(getJunctionTableOrderColumnName()).append(',').append(getColumnName(idAttr))
+				.append(')');
 
 		sql.append(')');
 
@@ -321,11 +321,41 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
+	static String getSqlUpsert(EntityType entityType)
+	{
+		StringBuilder sql = new StringBuilder("INSERT INTO ").append(getTableName(entityType)).append(" (");
+		StringBuilder params = new StringBuilder();
+		getTableAttributes(entityType).forEach(attr ->
+		{
+			String columnName = getColumnName(attr);
+			sql.append(columnName).append(", ");
+			params.append("?, ");
+		});
+		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
+		{
+			sql.setLength(sql.length() - 2);
+			params.setLength(params.length() - 2);
+		}
+		sql.append(") VALUES (").append(params).append(')');
+
+		Attribute idAttribute = entityType.getIdAttribute();
+		sql.append(" ON CONFLICT (").append(getColumnName(idAttribute)).append(") DO UPDATE SET ");
+		getTableAttributes(entityType).forEach(
+				attr -> sql.append(getColumnName(attr)).append(" = EXCLUDED.").append(getColumnName(attr))
+						.append(", "));
+
+		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
+		{
+			sql.setLength(sql.length() - 2);
+		}
+		return sql.toString();
+	}
+
 	static String getSqlInsertJunction(EntityType entityType, Attribute attr)
 	{
 		String junctionTableName = getJunctionTableName(entityType, attr);
-		return "INSERT INTO " + junctionTableName + " (" + getJunctionTableOrderColumnName() + ','
-				+ getColumnName(entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
+		return "INSERT INTO " + junctionTableName + " (" + getJunctionTableOrderColumnName() + ',' + getColumnName(
+				entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
 	}
 
 	static String getSqlDeleteAll(EntityType entityType)
@@ -405,8 +435,8 @@ class PostgreSqlQueryGenerator
 					Attribute attr = entityType.getAttribute(attrName);
 					if (attr == null)
 					{
-						throw new UnknownAttributeException(
-								format("Unknown attribute [%s] in entity [%s]", attrName, entityType.getFullyQualifiedName()));
+						throw new UnknownAttributeException(format("Unknown attribute [%s] in entity [%s]", attrName,
+								entityType.getFullyQualifiedName()));
 					}
 					if (isPersistedInOtherTable(attr))
 					{

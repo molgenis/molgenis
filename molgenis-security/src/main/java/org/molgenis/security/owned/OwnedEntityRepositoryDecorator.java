@@ -181,21 +181,21 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		if (isOwnedEntityType())
-		{
-			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
-			String currentUsername = SecurityUtils.getCurrentUsername();
-			entities = entities.map(entity ->
-			{
-				if (mustAddRowLevelSecurity || entity.get(OwnedEntityType.OWNER_USERNAME) == null)
-				{
-					entity.set(OwnedEntityType.OWNER_USERNAME, currentUsername);
-				}
-				return entity;
-			});
-		}
+		decoratedRepo.update(setOwner(entities));
+	}
 
-		decoratedRepo.update(entities);
+	@Override
+	public void upsert(Entity entity)
+	{
+		if (isOwnedEntityType() && (mustAddRowLevelSecurity() || entity.get(OwnedEntityType.OWNER_USERNAME) == null))
+			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		decoratedRepo.upsert(entity);
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		decoratedRepo.upsert(setOwner(entities));
 	}
 
 	@Override
@@ -268,11 +268,16 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
+		return decoratedRepo.add(setOwner(entities));
+	}
+
+	private Stream<Entity> setOwner(Stream<Entity> entities)
+	{
 		if (isOwnedEntityType())
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
-			entities = entities.map(entity ->
+			return entities.map(entity ->
 			{
 				if (mustAddRowLevelSecurity || entity.get(OwnedEntityType.OWNER_USERNAME) == null)
 				{
@@ -281,8 +286,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 				return entity;
 			});
 		}
-
-		return decoratedRepo.add(entities);
+		return entities;
 	}
 
 	private boolean mustAddRowLevelSecurity()

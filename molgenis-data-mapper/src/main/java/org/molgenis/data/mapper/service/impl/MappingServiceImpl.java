@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.api.client.util.Maps.newHashMap;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
@@ -313,22 +314,9 @@ public class MappingServiceImpl implements MappingService
 		}
 		else
 		{
-			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
-			sourceRepo.iterator().forEachRemaining(sourceEntity ->
-			{
-				{
-					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-							sourceMapping.getSourceEntityType(), addSourceAttribute);
-					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
-					{
-						targetRepo.add(mappedEntity);
-					}
-					else
-					{
-						targetRepo.update(mappedEntity);
-					}
-				}
-			});
+			dataService.upsert(targetRepo.getName(), stream(sourceRepo.iterator())
+					.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+							sourceMapping.getSourceEntityType(), addSourceAttribute)));
 		}
 
 	}

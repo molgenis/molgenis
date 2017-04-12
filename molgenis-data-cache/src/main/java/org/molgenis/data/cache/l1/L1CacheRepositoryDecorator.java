@@ -135,6 +135,14 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	}
 
 	@Override
+	public void upsert(Entity entity)
+	{
+		evictBiDiReferencedEntityTypes();
+		if (cacheable) l1Cache.put(getEntityType().getId(), entity);
+		delegate().upsert(entity);
+	}
+
+	@Override
 	public void update(Stream<Entity> entities)
 	{
 		evictBiDiReferencedEntityTypes();
@@ -147,6 +155,21 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 			});
 		}
 		delegate().update(entities);
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		evictBiDiReferencedEntityTypes();
+		if (cacheable)
+		{
+			entities = entities.filter(entity ->
+			{
+				l1Cache.put(getEntityType().getId(), entity);
+				return true;
+			});
+		}
+		delegate().upsert(entities);
 	}
 
 	@Override
@@ -198,10 +221,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private void evictBiDiReferencedEntityTypes()
 	{
-		getEntityType().getMappedByAttributes().map(Attribute::getRefEntity)
-				.forEach(l1Cache::evictAll);
-		getEntityType().getInversedByAttributes().map(Attribute::getRefEntity)
-				.forEach(l1Cache::evictAll);
+		getEntityType().getMappedByAttributes().map(Attribute::getRefEntity).forEach(l1Cache::evictAll);
+		getEntityType().getInversedByAttributes().map(Attribute::getRefEntity).forEach(l1Cache::evictAll);
 	}
 
 	/**

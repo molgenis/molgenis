@@ -132,6 +132,12 @@ public abstract class AbstractRepositoryDecorator<E extends Entity> extends Forw
 	}
 
 	@Override
+	public void upsert(E entity)
+	{
+		delegate().upsert(entity);
+	}
+
+	@Override
 	public void delete(E entity)
 	{
 		delegate().delete(entity);
@@ -165,6 +171,12 @@ public abstract class AbstractRepositoryDecorator<E extends Entity> extends Forw
 	public void update(Stream<E> entities)
 	{
 		delegate().update(entities);
+	}
+
+	@Override
+	public void upsert(Stream<E> entities)
+	{
+		delegate().upsert(entities);
 	}
 
 	@Override

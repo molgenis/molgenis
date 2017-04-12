@@ -249,6 +249,20 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	@Override
+	public void upsert(EntityType entity)
+	{
+		// TODO implement
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void upsert(Stream<EntityType> entities)
+	{
+		// TODO implement
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void delete(EntityType entity)
 	{
 		deleteEntityType(entity);

@@ -50,7 +50,6 @@ public class DataServiceImpl implements DataService
 		return metaDataService.getEntityTypeById(entityId);
 	}
 
-
 	@Override
 	public Stream<Object> getEntityIds()
 	{
@@ -127,6 +126,21 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> void update(String entityName, Stream<E> entities)
 	{
 		getRepository(entityName).update((Stream<Entity>) entities);
+	}
+
+	@Override
+	@Transactional
+	public void upsert(String entityName, Entity entity)
+	{
+		getRepository(entityName).upsert(entity);
+	}
+
+	@Override
+	@Transactional
+	@SuppressWarnings("unchecked")
+	public <E extends Entity> void upsert(String entityName, Stream<E> entities)
+	{
+		getRepository(entityName).upsert((Stream<Entity>) entities);
 	}
 
 	@Override
