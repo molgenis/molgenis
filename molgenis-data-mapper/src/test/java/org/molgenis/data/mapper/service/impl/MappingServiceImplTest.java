@@ -15,9 +15,11 @@ import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -276,6 +278,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void testApplyMappingsAdd()
 	{
 		String entityName = "addEntity";
+		String fullyQualifiedEntityName = "package_addEntity";
+
 		@SuppressWarnings("unchecked")
 		Repository<Entity> addEntityRepo = mock(Repository.class);
 		when(addEntityRepo.getName()).thenReturn(entityName);
@@ -291,7 +295,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(entityName);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(fullyQualifiedEntityName);
 			}
 		}))).thenReturn(addEntityRepo);
 
@@ -314,7 +318,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		String generatedEntityName = mappingService
 				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName, true);
-		assertEquals(generatedEntityName, entityName);
+		assertEquals(generatedEntityName, fullyQualifiedEntityName);
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
@@ -333,6 +337,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void testApplyMappingsUpdate()
 	{
 		String entityName = "updateEntity";
+		String fullyQualifiedEntityName = "package_updateEntity";
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> updateEntityRepo = mock(Repository.class);
@@ -341,8 +346,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
 		targetMeta.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
 		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
-		when(dataService.hasRepository(entityName)).thenReturn(true);
-		when(dataService.getRepository(entityName)).thenReturn(updateEntityRepo);
+		when(dataService.hasRepository(fullyQualifiedEntityName)).thenReturn(true);
+		when(dataService.getRepository(fullyQualifiedEntityName)).thenReturn(updateEntityRepo);
 
 		when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -350,7 +355,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(entityName);
+				return obj instanceof EntityType && ((EntityType) obj).getFullyQualifiedName().equals(fullyQualifiedEntityName);
 			}
 		}))).thenReturn(updateEntityRepo);
 
@@ -373,7 +378,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		String generatedEntityName = mappingService
 				.applyMappings(project.getMappingTarget(hopMetaData.getFullyQualifiedName()), entityName);
-		assertEquals(generatedEntityName, entityName);
+		assertEquals(generatedEntityName, fullyQualifiedEntityName);
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
@@ -385,21 +390,25 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Target repository does not contain the following attribute: COUNTRY_1")
 	public void testIncompatibleMetaDataUnknownAttribute()
 	{
-		String targetRepositoryName = "target_repository";
+		String targetRepositoryName = "targetRepository";
+
+		String fullyQualifiedTargetRepositoryName = "package_targetRepository";
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
+		targetRepositoryMetaData.setPackage(package_);
 
-		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
-		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(dataService.hasRepository(fullyQualifiedTargetRepositoryName)).thenReturn(true);
+		when(dataService.getRepository(fullyQualifiedTargetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY_1").setDataType(STRING));
+		mappingTargetMetaData.setPackage(package_);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
@@ -411,21 +420,25 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 					+ "COUNTRY in the target repository is type STRING. Please make sure the types are the same")
 	public void testIncompatibleMetaDataDifferentType()
 	{
-		String targetRepositoryName = "target_repository";
+		String targetRepositoryName = "targetRepository";
+
+		String fullyQualifiedTargetRepositoryName = "package_targetRepository";
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
+		targetRepositoryMetaData.setPackage(package_);
 
-		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
-		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(dataService.hasRepository(fullyQualifiedTargetRepositoryName)).thenReturn(true);
+		when(dataService.getRepository(fullyQualifiedTargetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(INT));
+		mappingTargetMetaData.setPackage(package_);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
@@ -434,36 +447,44 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
 			"In the mapping target, attribute COUNTRY of type XREF has "
-					+ "reference entity mapping_target_ref while in the target repository attribute COUNTRY of type XREF has reference entity target_repository_ref. "
+					+ "reference entity package_mappingTargetRef while in the target repository attribute COUNTRY of type XREF has reference entity package_targetRepositoryRef. "
 					+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository")
 	public void testIncompatibleMetaDataDifferentRefEntity()
 	{
-		String targetRepositoryName = "target_repository";
-		String targetRepositoryRefEntityName = "target_repository_ref";
-		String mappingTargetRefEntityName = "mapping_target_ref";
+		String targetRepositoryName = "targetRepository";
+		String targetRepositoryRefEntityName = "targetRepositoryRef";
+		String mappingTargetRefEntityName = "mappingTargetRef";
+
+		String fullyQualifiedTargetRepositoryName = "package_targetRepository";
+		String fullyQualifiedTargetRepositoryRefEntityName = "package_targetRepositoryRef";
+		String fullyQualifiedMappingTargetRefEntityName = "package_mappingTargetRef";
 
 		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName)
-				.setName(targetRepositoryRefEntityName);
+				.setName(targetRepositoryRefEntityName).setPackage(package_);
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName)
-				.setName(targetRepositoryName);
+				.setName(targetRepositoryName).setPackage(package_);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(
 				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(targetRefEntity));
+		targetRepositoryMetaData.setPackage(package_);
 
-		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
-		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(dataService.hasRepository(fullyQualifiedTargetRepositoryName)).thenReturn(true);
+		when(dataService.getRepository(fullyQualifiedTargetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
 		EntityType mappingTargetRefEntity = entityTypeFactory.create(mappingTargetRefEntityName)
-				.setName(mappingTargetRefEntityName);
+				.setName(mappingTargetRefEntityName).setPackage(package_);
 
-		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target").setName("mapping_target");
+		EntityType mappingTargetMetaData = entityTypeFactory.create("mappingTarget").setName("mappingTarget");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(
 				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(mappingTargetRefEntity));
+		mappingTargetMetaData.setPackage(package_);
+
+		when(metaDataService.createRepository(mappingTargetMetaData)).thenReturn(targetRepository);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
@@ -566,5 +587,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		{
 			return mock(PermissionSystemService.class);
 		}
+
+		@Bean
+		SystemPackageRegistry systemPackageRegistry(){ return new SystemPackageRegistry(); }
+
+		@Bean
+		DefaultPackage defaultPackage(){ return new DefaultPackage(mock(PackageMetadata.class)); }
+
 	}
 }
