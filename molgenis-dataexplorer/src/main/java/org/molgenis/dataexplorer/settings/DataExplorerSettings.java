@@ -47,12 +47,14 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String MOD_CHARTS = "mod_charts";
 		public static final String MOD_DATA = "mod_data";
 		public static final String MOD_REPORTS = "mod_reports";
+		public static final String MOD_STANDALONE_REPORTS = "mod_standalone_reports";
 
 		private static final boolean DEFAULT_MOD_AGGREGATES = true;
 		private static final boolean DEFAULT_MOD_ANNOTATORS = true;
 		private static final boolean DEFAULT_MOD_CHARTS = true;
 		private static final boolean DEFAULT_MOD_DATA = true;
 		private static final boolean DEFAULT_MOD_REPORT = true;
+		private static final boolean DEFAULT_MOD_STANDALONE_REPORT = false;
 
 		public static final String DATA = "data";
 		public static final String DATA_GALAXY_EXPORT = "data_galaxy_export";
@@ -134,6 +136,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			createModDataSettings(modAttr);
 			addAttribute(MOD_REPORTS).setParent(modAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_MOD_REPORT)).setLabel("Reports");
+			addAttribute(MOD_STANDALONE_REPORTS).setParent(modAttr).setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_MOD_STANDALONE_REPORT)).setLabel("Standalone Reports");
 			createModReportSettings(modAttr);
 		}
 
@@ -144,8 +148,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 			addAttribute(DATA_GALAXY_EXPORT).setParent(dataAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_DATA_GALAXY_EXPORT)).setLabel("Galaxy export");
-			addAttribute(DATA_GALAXY_URL).setParent(dataAttr).setDataType(HYPERLINK).setNillable(true).setLabel("Galaxy URL")
-					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
+			addAttribute(DATA_GALAXY_URL).setParent(dataAttr).setDataType(HYPERLINK).setNillable(true)
+					.setLabel("Galaxy URL").setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 			addAttribute(DATA_GALAXY_API_KEY).setParent(dataAttr).setNillable(true).setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 
@@ -157,14 +161,16 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			Attribute genomeBrowserInitAttr = addAttribute(GENOMEBROWSER_INIT).setParent(genomeBrowserAttr)
 					.setDataType(COMPOUND).setLabel("Initialization");
 
-			addAttribute(GENOMEBROWSER_INIT_BROWSER_LINKS).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
-			addAttribute(GENOMEBROWSER_INIT_COORD_SYSTEM).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
-			addAttribute(GENOMEBROWSER_INIT_LOCATION).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION).setLabel("Location");
-			addAttribute(GENOMEBROWSER_INIT_SOURCES).setParent(genomeBrowserInitAttr).setNillable(false).setDataType(TEXT)
-					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_SOURCES).setLabel("Sources");
+			addAttribute(GENOMEBROWSER_INIT_BROWSER_LINKS).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS)
+					.setLabel("Browser links");
+			addAttribute(GENOMEBROWSER_INIT_COORD_SYSTEM).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM)
+					.setLabel("Coordinate system");
+			addAttribute(GENOMEBROWSER_INIT_LOCATION).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION).setLabel("Location");
+			addAttribute(GENOMEBROWSER_INIT_SOURCES).setParent(genomeBrowserInitAttr).setNillable(false)
+					.setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_SOURCES).setLabel("Sources");
 			addAttribute(GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setParent(genomeBrowserInitAttr).setNillable(false)
 					.setDataType(BOOL).setDefaultValue(String.valueOf(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION))
 					.setLabel("Highlight region");
@@ -190,9 +196,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		{
 			Attribute reportsAttr = addAttribute(REPORTS).setParent(modAttr).setDataType(COMPOUND).setLabel("Reports")
 					.setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
-			addAttribute(REPORTS_ENTITIES).setParent(reportsAttr).setNillable(true).setDataType(TEXT).setLabel("Reports")
-					.setDescription(
-							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
+			addAttribute(REPORTS_ENTITIES).setParent(reportsAttr).setNillable(true).setDataType(TEXT)
+					.setLabel("Reports").setDescription(
+					"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 		}
 	}
 
@@ -246,9 +252,20 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		return value != null ? value : false;
 	}
 
+	public boolean getModStandaloneReports()
+	{
+		Boolean value = getBoolean(Meta.MOD_STANDALONE_REPORTS);
+		return value != null ? value : false;
+	}
+
 	public void setModReports(boolean modReports)
 	{
 		set(Meta.MOD_REPORTS, modReports);
+	}
+
+	public void setModStandaloneReports(boolean modStandaloneReports)
+	{
+		set(Meta.MOD_STANDALONE_REPORTS, modStandaloneReports);
 	}
 
 	public Boolean getGalaxyExport()
