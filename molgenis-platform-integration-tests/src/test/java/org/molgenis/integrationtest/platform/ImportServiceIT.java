@@ -3,14 +3,14 @@ package org.molgenis.integrationtest.platform;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.*;
 import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -67,6 +67,9 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private ImportServiceRegistrar importServiceRegistrar;
+
+	@Autowired
+	private DataService dataService;
 
 	@BeforeClass
 	public void beforeClass()
@@ -136,13 +139,44 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testDoImportVcfWithoutSamples()
 	{
-		String fileName = "variantsWithoutSamples.vcf";
+		String entityId = "variantsWithoutSamples";
+		String fileName = entityId + ".vcf";
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("variantsWithoutSamples", 10),
-				ImmutableSet.of("variantsWithoutSamples"));
+		validateImportReport(importReport, ImmutableMap.of(entityId, 10),
+				ImmutableSet.of(entityId));
+
+		// Check first and last imported row
+		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
+
+		Entity firstRow = entities.get(0);
+		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
+		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
+		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
+		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
+		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
+		assertEquals(firstRow.getString("AA"), "G|||");
+		// todo check rest of info string
+		//		"AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+
+		
+		Entity lastRow = entities.get(entities.size() - 1);
+		assertEquals(lastRow.getString("#CHROM"), "X");
+		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
+		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
+		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
+		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
+		assertEquals(lastRow.getString("AA"), "G|||");
+		// todo check rest of info string
+		//		"AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+
+
 	}
 
 	@WithMockUser(username = "user", authorities = { "ROLE_SU" })
