@@ -13,11 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.stream.Collectors.toList;
@@ -84,7 +85,7 @@ public class JsMagmaScriptEvaluator
 
 	private static Object toScriptEngineValue(Entity entity, Attribute attr)
 	{
-		Object value;
+		Object value = null;
 
 		String attrName = attr.getName();
 		AttributeType attrType = attr.getDataType();
@@ -108,14 +109,18 @@ public class JsMagmaScriptEvaluator
 						.collect(toList());
 				break;
 			case DATE:
-				// convert to epoch
-				Date date = entity.getDate(attrName);
-				value = date != null ? date.getTime() : null;
+				LocalDate localDate = entity.getLocalDate(attrName);
+				if (localDate != null)
+				{
+					value = localDate.atStartOfDay().atOffset(UTC).toInstant().toEpochMilli();
+				}
 				break;
 			case DATE_TIME:
-				// convert to epoch
-				Timestamp timestamp = entity.getTimestamp(attrName);
-				value = timestamp != null ? timestamp.getTime() : null;
+				Instant instant = entity.getInstant(attrName);
+				if (instant != null)
+				{
+					value = instant.toEpochMilli();
+				}
 				break;
 			case DECIMAL:
 				value = entity.getDouble(attrName);

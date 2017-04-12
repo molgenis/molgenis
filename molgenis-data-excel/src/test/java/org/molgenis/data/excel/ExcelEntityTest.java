@@ -1,7 +1,6 @@
 package org.molgenis.data.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
@@ -11,10 +10,8 @@ import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneId;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,7 +44,7 @@ public class ExcelEntityTest
 	@Test
 	public void getStringType()
 	{
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_STRING);
+		when(cell.getCellTypeEnum()).thenReturn(CellType.STRING);
 		when(cell.getStringCellValue()).thenReturn("XXX");
 
 		Object val = excelEntity.get("attr1");
@@ -58,7 +55,7 @@ public class ExcelEntityTest
 	@Test
 	public void getBlankType()
 	{
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_BLANK);
+		when(cell.getCellTypeEnum()).thenReturn(CellType.BLANK);
 		Object val = excelEntity.get("attr1");
 		assertNull(val);
 	}
@@ -66,7 +63,7 @@ public class ExcelEntityTest
 	@Test
 	public void getIntegerType()
 	{
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_NUMERIC);
+		when(cell.getCellTypeEnum()).thenReturn(CellType.NUMERIC);
 		when(cell.getNumericCellValue()).thenReturn(1d);
 
 		Object val = excelEntity.get("attr1");
@@ -77,7 +74,7 @@ public class ExcelEntityTest
 	@Test
 	public void getDoubleType()
 	{
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_NUMERIC);
+		when(cell.getCellTypeEnum()).thenReturn(CellType.NUMERIC);
 		when(cell.getNumericCellValue()).thenReturn(1.8d);
 
 		Object val = excelEntity.get("attr1");
@@ -86,9 +83,30 @@ public class ExcelEntityTest
 	}
 
 	@Test
+	public void getNumericDateType()
+	{
+		double dateDouble = 35917.0;
+		TimeZone utcTimeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
+		Date javaDate = DateUtil.getJavaDate(dateDouble, utcTimeZone);
+
+		when(cell.getCellTypeEnum()).thenReturn(CellType.NUMERIC);
+		when(cell.getNumericCellValue()).thenReturn(dateDouble);
+		when(cell.getDateCellValue()).thenReturn(javaDate);
+		CellStyle cellStyle = mock(CellStyle.class);
+		when(cell.getCellStyle()).thenReturn(cellStyle);
+		short dataFormat = 0x0e;
+		when(cellStyle.getDataFormat()).thenReturn(dataFormat);
+
+		Object val = excelEntity.get("attr1");
+
+		assertNotNull(val);
+		assertEquals(val, "1998-05-02t00:00:00z");
+	}
+
+	@Test
 	public void getBooleanType()
 	{
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_BOOLEAN);
+		when(cell.getCellTypeEnum()).thenReturn(CellType.BOOLEAN);
 		when(cell.getBooleanCellValue()).thenReturn(true);
 
 		Object val = excelEntity.get("attr1");
@@ -99,7 +117,7 @@ public class ExcelEntityTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void getErrorType()
 	{
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_ERROR);
+		when(cell.getCellTypeEnum()).thenReturn(CellType.ERROR);
 		excelEntity.get("attr1");
 	}
 

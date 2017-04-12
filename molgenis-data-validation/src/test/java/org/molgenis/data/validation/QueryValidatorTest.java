@@ -13,7 +13,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
@@ -65,12 +70,12 @@ public class QueryValidatorTest
 
 			// DATE
 			Entity dateEntityType = createEntityType(DATE);
-			asList(new Date(), "2016-11-25", null).forEach(
+			asList(LocalDate.now(), "2016-11-25", null).forEach(
 					value -> queries.add(new Object[] { dateEntityType, new QueryImpl<>().eq("attr", value) }));
 
 			// DATE_TIME
 			Entity dateTimeEntityType = createEntityType(DATE_TIME);
-			asList(new Date(), "1985-08-12T11:12:13+0500", null).forEach(
+			asList(Instant.now(), "1985-08-12T11:12:13+0500", null).forEach(
 					value -> queries.add(new Object[] { dateTimeEntityType, new QueryImpl<>().eq("attr", value) }));
 
 			// DECIMAL

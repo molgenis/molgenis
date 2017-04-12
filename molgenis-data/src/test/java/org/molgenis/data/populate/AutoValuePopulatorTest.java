@@ -81,11 +81,11 @@ public class AutoValuePopulatorTest
 		autoValuePopulator.populate(entity);
 
 		assertNotNull(entity.getIdValue());
-		assertNull(entity.getDate(ATTR_DATE_AUTO_DEFAULT));
-		assertNull(entity.getDate(ATTR_DATE_AUTO_FALSE));
-		assertNotNull(entity.getDate(ATTR_DATE_AUTO_TRUE));
-		assertNull(entity.getDate(ATTR_DATETIME_AUTO_DEFAULT));
-		assertNull(entity.getDate(ATTR_DATETIME_AUTO_FALSE));
-		assertNotNull(entity.getDate(ATTR_DATETIME_AUTO_TRUE));
+		assertNull(entity.getLocalDate(ATTR_DATE_AUTO_DEFAULT));
+		assertNull(entity.getLocalDate(ATTR_DATE_AUTO_FALSE));
+		assertNotNull(entity.getLocalDate(ATTR_DATE_AUTO_TRUE));
+		assertNull(entity.getInstant(ATTR_DATETIME_AUTO_DEFAULT));
+		assertNull(entity.getInstant(ATTR_DATETIME_AUTO_FALSE));
+		assertNotNull(entity.getInstant(ATTR_DATETIME_AUTO_TRUE));
 	}
 }

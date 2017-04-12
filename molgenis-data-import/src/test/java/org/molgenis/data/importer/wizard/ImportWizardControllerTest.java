@@ -54,11 +54,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -111,7 +109,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private ExecutorService executorService;
 	private FileRepositoryCollection repositoryCollection;
 	private ImportService importService;
-	private Date date;
+	private Instant startDate;
 	private EntityType entityType;
 
 	@SuppressWarnings("unchecked")
@@ -229,8 +227,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when((Collection<GrantedAuthority>) authentication.getAuthorities())
 				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 
-		DateFormat format = new SimpleDateFormat("MM-DD-yyyy");
-		date = format.parse("01-01-2016");
+		startDate = Instant.parse("2016-01-01T12:34:28.123Z");
 
 		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(group1));
 
@@ -340,7 +337,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -371,7 +368,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -403,7 +400,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -435,7 +432,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -467,7 +464,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -499,7 +496,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -531,7 +528,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");
@@ -563,7 +560,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
 		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(date);
+		importRun.setStartDate(startDate);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setOwner("Harry");

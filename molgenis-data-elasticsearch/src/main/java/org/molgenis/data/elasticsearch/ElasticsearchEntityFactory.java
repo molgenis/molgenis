@@ -15,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
+import static org.molgenis.util.MolgenisDateFormat.getLocalDateFormatter;
 
 /**
  * Creates entities from Elasticsearch document sources and vice versa.
@@ -142,10 +144,10 @@ public class ElasticsearchEntityFactory
 				}
 				break;
 			case DATE:
-				Date date = entity.getDate(attrName);
+				LocalDate date = entity.getLocalDate(attrName);
 				if (date != null)
 				{
-					String dateValue = MolgenisDateFormat.getDateFormat().format(date);
+					String dateValue = getLocalDateFormatter().format(date);
 					generator.writeString(dateValue);
 				}
 				else
@@ -154,10 +156,10 @@ public class ElasticsearchEntityFactory
 				}
 				break;
 			case DATE_TIME:
-				Date dateTime = entity.getDate(attrName);
+				Instant dateTime = entity.getInstant(attrName);
 				if (dateTime != null)
 				{
-					String dateTimeValue = MolgenisDateFormat.getDateTimeFormat().format(dateTime);
+					String dateTimeValue = MolgenisDateFormat.getDateTimeFormatter().format(dateTime);
 					generator.writeString(dateTimeValue);
 				}
 				else

@@ -4,12 +4,16 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 
+import java.time.Instant;
 import java.util.List;
+
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormatter;
 
 class ExcelUtils
 {
@@ -33,7 +37,17 @@ class ExcelUtils
 			case NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell))
 				{
-					value = DataConverter.toString(cell.getDateCellValue());
+					try
+					{
+						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
+						// Excel dates are stored without timezone. Parse them as UTC.
+						Instant instant = cell.getDateCellValue().toInstant();
+						value = getDateTimeFormatter().format(instant);
+					}
+					finally
+					{
+						LocaleUtil.resetUserTimeZone();
+					}
 				}
 				else
 				{

@@ -10,8 +10,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -115,12 +115,6 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
-		public Date getDate(String attributeName)
-		{
-			return attr.getDate(attributeName);
-		}
-
-		@Override
 		public Double getDouble(String attributeName)
 		{
 			return attr.getDouble(attributeName);
@@ -187,15 +181,15 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
-		public Timestamp getTimestamp(String attributeName)
+		public LocalDate getLocalDate(String attributeName)
 		{
-			return attr.getTimestamp(attributeName);
+			return attr.getLocalDate(attributeName);
 		}
 
 		@Override
-		public java.util.Date getUtilDate(String attributeName)
+		public Instant getInstant(String attributeName)
 		{
-			return attr.getUtilDate(attributeName);
+			return attr.getInstant(attributeName);
 		}
 
 		@Override

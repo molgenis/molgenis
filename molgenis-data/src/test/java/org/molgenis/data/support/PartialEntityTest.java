@@ -69,17 +69,9 @@ public class PartialEntityTest
 	}
 
 	@Test
-	public void getDate()
-	{
-		partialEntity.getDate("id");
-		verify(decoratedEntity, times(1)).getDate("id");
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
 	public void getDateNotInFetch()
 	{
-		partialEntity.getDate("label");
+		partialEntity.getLocalDate("label");
 		verify(entityManager, times(1)).getReference(meta, "id");
 	}
 
@@ -206,30 +198,30 @@ public class PartialEntityTest
 	@Test
 	public void getTimestamp()
 	{
-		partialEntity.getTimestamp("id");
-		verify(decoratedEntity, times(1)).getTimestamp("id");
+		partialEntity.getLocalDate("id");
+		verify(decoratedEntity, times(1)).getLocalDate("id");
 		verifyZeroInteractions(entityManager);
 	}
 
 	@Test
 	public void getTimestampNotInFetch()
 	{
-		partialEntity.getTimestamp("label");
+		partialEntity.getLocalDate("label");
 		verify(entityManager, times(1)).getReference(meta, "id");
 	}
 
 	@Test
 	public void getUtilDate()
 	{
-		partialEntity.getUtilDate("id");
-		verify(decoratedEntity, times(1)).getUtilDate("id");
+		partialEntity.getInstant("id");
+		verify(decoratedEntity, times(1)).getInstant("id");
 		verifyZeroInteractions(entityManager);
 	}
 
 	@Test
 	public void getUtilDateNotInFetch()
 	{
-		partialEntity.getUtilDate("label");
+		partialEntity.getInstant("label");
 		verify(entityManager, times(1)).getReference(meta, "id");
 	}
 

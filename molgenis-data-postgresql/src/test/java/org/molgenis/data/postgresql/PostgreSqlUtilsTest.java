@@ -12,8 +12,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.*;
 import java.util.Iterator;
 
 import static java.util.Arrays.asList;
@@ -21,8 +20,6 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlUtilsTest
@@ -71,8 +68,8 @@ public class PostgreSqlUtilsTest
 	private static String categoricalValueId;
 	private static Entity categoricalMrefValue0;
 	private static String categoricalMrefValueId0, categoricalMrefValueId1;
-	private static Date dateValue;
-	private static Date dateTimeValue;
+	private static LocalDate dateValue;
+	private static Instant dateTimeValue;
 	private static Double decimalValue;
 	private static String emailValue;
 	private static String enumValue;
@@ -89,6 +86,7 @@ public class PostgreSqlUtilsTest
 	private static String textValue;
 	private static Entity xrefValue;
 	private static int xrefValueId;
+	private static OffsetDateTime offsetDateTime;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws ParseException
@@ -226,13 +224,14 @@ public class PostgreSqlUtilsTest
 				.thenReturn(asList(categoricalMrefValue0, categoricalMrefValue1));
 		when(entity.getEntities(attrCategoricalMrefNillableName)).thenReturn(emptyList());
 
-		dateValue = getDateFormat().parse("2012-12-21");
-		when(entity.getUtilDate(attrDateName)).thenReturn(dateValue);
-		when(entity.getUtilDate(attrDateNillableName)).thenReturn(null);
+		dateValue = LocalDate.of(2012, Month.DECEMBER, 21);
+		when(entity.getLocalDate(attrDateName)).thenReturn(dateValue);
+		when(entity.getLocalDate(attrDateNillableName)).thenReturn(null);
 
-		dateTimeValue = getDateTimeFormat().parse("1985-08-12T11:12:13+0500");
-		when(entity.getUtilDate(attrDateTimeName)).thenReturn(dateTimeValue);
-		when(entity.getUtilDate(attrDateTimeNillableName)).thenReturn(null);
+		offsetDateTime = OffsetDateTime.parse("1985-08-12T11:12:13+05:00").withOffsetSameInstant(ZoneOffset.UTC);
+		dateTimeValue = offsetDateTime.toInstant();
+		when(entity.getInstant(attrDateTimeName)).thenReturn(dateTimeValue);
+		when(entity.getInstant(attrDateTimeNillableName)).thenReturn(null);
 
 		decimalValue = 1.23;
 		when(entity.getDouble(attrDecimalName)).thenReturn(decimalValue);
@@ -312,9 +311,8 @@ public class PostgreSqlUtilsTest
 		return asList(new Object[] { attrBool, boolValue }, new Object[] { attrBoolNillable, null },
 				new Object[] { attrCategorical, categoricalValueId }, new Object[] { attrCategoricalNillable, null },
 				new Object[] { attrCategoricalMref, asList(categoricalMrefValueId0, categoricalMrefValueId1) },
-				new Object[] { attrCategoricalMrefNillable, emptyList() },
-				new Object[] { attrDate, LocalDate.of(2012, 12, 21) }, new Object[] { attrDateNillable, null },
-				new Object[] { attrDateTime, new java.sql.Timestamp(dateTimeValue.getTime()) },
+				new Object[] { attrCategoricalMrefNillable, emptyList() }, new Object[] { attrDate, dateValue },
+				new Object[] { attrDateNillable, null }, new Object[] { attrDateTime, offsetDateTime },
 				new Object[] { attrDateTimeNillable, null }, new Object[] { attrDecimal, decimalValue },
 				new Object[] { attrDecimalNillable, null }, new Object[] { attrEmail, emailValue },
 				new Object[] { attrEmailNillable, null }, new Object[] { attrEnum, enumValue },
@@ -354,9 +352,8 @@ public class PostgreSqlUtilsTest
 				new Object[] { categoricalMrefValue0, attrCategoricalMref, categoricalMrefValueId0 },
 				new Object[] { categoricalMrefValueId0, attrCategoricalMref, categoricalMrefValueId0 },
 				new Object[] { null, attrCategoricalMrefNillable, null },
-				new Object[] { dateValue, attrDate, new java.sql.Date(dateValue.getTime()) },
-				new Object[] { null, attrDateNillable, null },
-				new Object[] { dateTimeValue, attrDateTime, new java.sql.Timestamp(dateTimeValue.getTime()) },
+				new Object[] { dateValue, attrDate, dateValue }, new Object[] { null, attrDateNillable, null },
+				new Object[] { dateTimeValue, attrDateTime, offsetDateTime },
 				new Object[] { null, attrDateTimeNillable, null },
 				new Object[] { decimalValue, attrDecimal, decimalValue },
 				new Object[] { null, attrDecimalNillable, null }, new Object[] { emailValue, attrEmail, emailValue },

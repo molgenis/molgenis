@@ -2,7 +2,8 @@ package org.molgenis.data;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.convert.StringToInstantConverter;
+import org.molgenis.data.convert.StringToLocalDateConverter;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
@@ -10,8 +11,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,9 +78,9 @@ public class DataConverter
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			case DATE:
-				return toDate(source);
+				return toLocalDate(source);
 			case DATE_TIME:
-				return toUtilDate(source);
+				return toInstant(source);
 			case DECIMAL:
 				return toDouble(source);
 			case INT:
@@ -153,27 +154,18 @@ public class DataConverter
 		return convert(source, Double.class);
 	}
 
-	public static java.sql.Date toDate(Object source)
+	public static LocalDate toLocalDate(Object source)
 	{
 		if (source == null) return null;
-		if (source instanceof java.sql.Date) return (java.sql.Date) source;
-		if (source instanceof java.util.Date) return new java.sql.Date(((java.util.Date) source).getTime());
-		return new java.sql.Date(convert(source, java.util.Date.class).getTime());
+		if (source instanceof LocalDate) return (LocalDate) source;
+		return convert(source, LocalDate.class);
 	}
 
-	public static java.util.Date toUtilDate(Object source)
+	public static Instant toInstant(Object source)
 	{
 		if (source == null) return null;
-		if (source instanceof java.util.Date) return (java.util.Date) source;
-		return convert(source, java.util.Date.class);
-	}
-
-	public static Timestamp toTimestamp(Object source)
-	{
-		if (source == null) return null;
-		else if (source instanceof Timestamp) return (Timestamp) source;
-		else if (source instanceof Date) return new Timestamp(((Date) source).getTime());
-		return new Timestamp(convert(source, java.util.Date.class).getTime());
+		if (source instanceof Instant) return (Instant) source;
+		return convert(source, Instant.class);
 	}
 
 	public static Entity toEntity(Object source)
@@ -275,7 +267,8 @@ public class DataConverter
 				// We are not in a Spring managed environment
 				conversionService = new DefaultConversionService();
 				((DefaultConversionService) conversionService).addConverter(new DateToStringConverter());
-				((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
+				((DefaultConversionService) conversionService).addConverter(new StringToLocalDateConverter());
+				((DefaultConversionService) conversionService).addConverter(new StringToInstantConverter());
 			}
 			else
 			{

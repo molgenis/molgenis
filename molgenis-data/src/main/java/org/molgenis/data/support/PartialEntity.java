@@ -5,8 +5,8 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import static java.util.Objects.requireNonNull;
 
@@ -138,41 +138,28 @@ public class PartialEntity implements Entity
 	}
 
 	@Override
-	public Date getDate(String attributeName)
+	public Instant getInstant(String attributeName)
 	{
 		if (fetch.hasField(attributeName))
 		{
-			return decoratedEntity.getDate(attributeName);
+			return decoratedEntity.getInstant(attributeName);
 		}
 		else
 		{
-			return entityManager.getReference(getEntityType(), getIdValue()).getDate(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getInstant(attributeName);
 		}
 	}
 
 	@Override
-	public java.util.Date getUtilDate(String attributeName)
+	public LocalDate getLocalDate(String attributeName)
 	{
 		if (fetch.hasField(attributeName))
 		{
-			return decoratedEntity.getUtilDate(attributeName);
+			return decoratedEntity.getLocalDate(attributeName);
 		}
 		else
 		{
-			return entityManager.getReference(getEntityType(), getIdValue()).getUtilDate(attributeName);
-		}
-	}
-
-	@Override
-	public Timestamp getTimestamp(String attributeName)
-	{
-		if (fetch.hasField(attributeName))
-		{
-			return decoratedEntity.getTimestamp(attributeName);
-		}
-		else
-		{
-			return entityManager.getReference(getEntityType(), getIdValue()).getTimestamp(attributeName);
+			return entityManager.getReference(getEntityType(), getIdValue()).getLocalDate(attributeName);
 		}
 	}
 

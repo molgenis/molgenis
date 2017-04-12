@@ -10,7 +10,8 @@ import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.convert.StringToInstantConverter;
+import org.molgenis.data.convert.StringToLocalDateConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
@@ -185,7 +186,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		DefaultConversionService defaultConversionService = new DefaultConversionService();
 		defaultConversionService.addConverter(new DateToStringConverter());
-		defaultConversionService.addConverter(new StringToDateConverter());
+		defaultConversionService.addConverter(new StringToLocalDateConverter());
+		defaultConversionService.addConverter(new StringToInstantConverter());
 		return defaultConversionService;
 	}
 

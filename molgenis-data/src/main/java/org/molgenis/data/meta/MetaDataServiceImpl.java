@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -642,12 +643,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public java.sql.Date getDate(String attributeName)
-		{
-			return entityType.getDate(attributeName);
-		}
-
-		@Override
 		public Double getDouble(String attributeName)
 		{
 			return entityType.getDouble(attributeName);
@@ -730,15 +725,15 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public Timestamp getTimestamp(String attributeName)
+		public LocalDate getLocalDate(String attributeName)
 		{
-			return entityType.getTimestamp(attributeName);
+			return entityType.getLocalDate(attributeName);
 		}
 
 		@Override
-		public Date getUtilDate(String attributeName)
+		public Instant getInstant(String attributeName)
 		{
-			return entityType.getUtilDate(attributeName);
+			return entityType.getInstant(attributeName);
 		}
 
 		@Override

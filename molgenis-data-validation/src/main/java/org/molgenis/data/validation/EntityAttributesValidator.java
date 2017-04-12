@@ -250,7 +250,7 @@ public class EntityAttributesValidator
 	{
 		try
 		{
-			entity.getUtilDate(attribute.getName());
+			entity.getInstant(attribute.getName());
 			return null;
 		}
 		catch (Exception e)
@@ -263,7 +263,7 @@ public class EntityAttributesValidator
 	{
 		try
 		{
-			entity.getDate(attribute.getName());
+			entity.getLocalDate(attribute.getName());
 			return null;
 		}
 		catch (Exception e)
@@ -437,8 +437,9 @@ public class EntityAttributesValidator
 		switch (attribute.getDataType())
 		{
 			case DATE:
+				return entity.getLocalDate(attributeName);
 			case DATE_TIME:
-				return entity.getUtilDate(attributeName);
+				return entity.getInstant(attributeName);
 			case BOOL:
 				return entity.getBoolean(attributeName);
 			case DECIMAL:

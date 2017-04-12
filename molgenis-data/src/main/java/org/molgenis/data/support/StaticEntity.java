@@ -3,8 +3,8 @@ package org.molgenis.data.support;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import static java.util.Objects.requireNonNull;
 
@@ -59,12 +59,6 @@ public abstract class StaticEntity implements Entity
 	public Boolean getBoolean(String attributeName)
 	{
 		return entity.getBoolean(attributeName);
-	}
-
-	@Override
-	public Date getDate(String attributeName)
-	{
-		return entity.getDate(attributeName);
 	}
 
 	@Override
@@ -134,15 +128,15 @@ public abstract class StaticEntity implements Entity
 	}
 
 	@Override
-	public Timestamp getTimestamp(String attributeName)
+	public LocalDate getLocalDate(String attributeName)
 	{
-		return entity.getTimestamp(attributeName);
+		return entity.getLocalDate(attributeName);
 	}
 
 	@Override
-	public java.util.Date getUtilDate(String attributeName)
+	public Instant getInstant(String attributeName)
 	{
-		return entity.getUtilDate(attributeName);
+		return entity.getInstant(attributeName);
 	}
 
 	@Override

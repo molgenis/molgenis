@@ -2,11 +2,12 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -26,11 +27,11 @@ public class DataConverterTest
 	}
 
 	@Test
-	public void convertDate() throws ParseException
+	public void convertLocalDate() throws ParseException
 	{
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(DATE);
-		assertEquals(DataConverter.convert("2015-06-04", attr), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
+		assertEquals(DataConverter.convert("2015-06-04", attr), LocalDate.parse("2015-06-04"));
 	}
 
 	@DataProvider(name = "convertObjectAttributeProvider")
@@ -51,9 +52,9 @@ public class DataConverterTest
 	}
 
 	@Test
-	public void toDate() throws ParseException
+	public void toLocalDate() throws ParseException
 	{
-		assertEquals(DataConverter.toDate("2015-06-04"), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
+		assertEquals(DataConverter.toLocalDate("2015-06-04"), LocalDate.parse("2015-06-04"));
 	}
 
 	@Test
@@ -61,8 +62,7 @@ public class DataConverterTest
 	{
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(DATE_TIME);
-		assertEquals(DataConverter.convert("2015-05-22T11:12:13+0500", attr),
-				MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500"));
+		assertEquals(DataConverter.convert("2015-05-22T11:12:13+0500", attr), Instant.parse("2015-05-22T06:12:13Z"));
 	}
 
 	@Test

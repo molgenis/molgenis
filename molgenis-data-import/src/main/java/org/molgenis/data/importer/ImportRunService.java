@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.UserService;
+import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,17 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 
+import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
+import static java.time.format.DateTimeFormatter.ofLocalizedTime;
+import static java.time.format.FormatStyle.FULL;
+import static java.time.format.FormatStyle.MEDIUM;
+import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
+import static org.molgenis.util.MolgenisDateFormat.getDefaultZoneId;
 
 @Component
 public class ImportRunService
@@ -41,7 +49,7 @@ public class ImportRunService
 	public ImportRun addImportRun(String userName, boolean notify)
 	{
 		ImportRun importRun = importRunFactory.create();
-		importRun.setStartDate(new Date());
+		importRun.setStartDate(Instant.now());
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setUsername(userName); // required and visible
@@ -61,7 +69,7 @@ public class ImportRunService
 			if (importRun != null)
 			{
 				importRun.setStatus(ImportStatus.FINISHED.toString());
-				importRun.setEndDate(new Date());
+				importRun.setEndDate(Instant.now());
 				importRun.setMessage(message);
 				importRun.setImportedEntities(importedEntities);
 				dataService.update(IMPORT_RUN, importRun);
@@ -81,7 +89,7 @@ public class ImportRunService
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 			mailMessage.setTo(userService.getUser(importRun.getUsername()).getEmail());
 			mailMessage.setSubject(createMailTitle(importRun));
-			mailMessage.setText(createMailText(importRun));
+			mailMessage.setText(createEnglishMailText(importRun));
 			mailSender.send(mailMessage);
 		}
 		catch (MailException mce)
@@ -91,10 +99,22 @@ public class ImportRunService
 		}
 	}
 
-	private String createMailText(ImportRun importRun)
+	/**
+	 * Creates an English mail message describing a finished {@link ImportRun}.
+	 * Formats the run's start and end times using {@link MolgenisDateFormat#getDefaultZoneId()}.
+	 *
+	 * @param importRun the ImportRun to describe, it should have non-null start and end dates.
+	 * @return String containing the mail message.
+	 */
+	String createEnglishMailText(ImportRun importRun)
 	{
-		return "The import started by you at: " + importRun.getStartDate() + " has finished with status: " + importRun
-				.getStatus() + "\nMessage:\n" + importRun.getMessage();
+		ZonedDateTime start = importRun.getStartDate().atZone(getDefaultZoneId());
+		ZonedDateTime end = importRun.getEndDate().atZone(getDefaultZoneId());
+		String startDateTimeString = ofLocalizedDateTime(FULL).withLocale(ENGLISH).format(start);
+		String endTimeString = ofLocalizedTime(MEDIUM).withLocale(ENGLISH).format(end);
+
+		return String.format("The import started by you on %1s finished on %2s with status: %3s\nMessage:\n%4s",
+				startDateTimeString, endTimeString, importRun.getStatus(), importRun.getMessage());
 	}
 
 	private String createMailTitle(ImportRun importRun)
@@ -111,7 +131,7 @@ public class ImportRunService
 			if (importRun != null)
 			{
 				importRun.setStatus(ImportStatus.FAILED.toString());
-				importRun.setEndDate(new Date());
+				importRun.setEndDate(Instant.now());
 				importRun.setMessage(message);
 				dataService.update(IMPORT_RUN, importRun);
 			}

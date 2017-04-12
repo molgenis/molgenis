@@ -1,16 +1,19 @@
 package org.molgenis.data.postgresql;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
 
-import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static java.lang.String.format;
+import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -48,16 +51,19 @@ class PostgreSqlUtils
 			case MREF:
 			case ONE_TO_MANY:
 				Iterable<Entity> entities = entity.getEntities(attrName);
-				return stream(entities.spliterator(), false).map(mrefEntity -> getPostgreSqlValue(mrefEntity,
-						mrefEntity.getEntityType().getIdAttribute())).collect(toList());
+				return stream(entities.spliterator(), false)
+						.map(mrefEntity -> getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
+						.collect(toList());
 			case DATE:
-				Date date = entity.getUtilDate(attrName);
-				// http://stackoverflow.com/questions/21242110/convert-java-util-date-to-java-time-localdate
-				return date != null ? date.toInstant().atZone(ZoneId.of("UTC")).toLocalDate() : null;
+				return entity.getLocalDate(attrName);
 			case DATE_TIME:
-				Date dateTime = entity.getUtilDate(attrName);
-				return dateTime != null ? new java.sql.Timestamp(
-						(dateTime.getTime() / DateUtils.MILLIS_PER_SECOND) * DateUtils.MILLIS_PER_SECOND) : null;
+				// As a workaround for #5674, we don't store milliseconds
+				Instant instant = entity.getInstant(attrName);
+				if (instant == null)
+				{
+					return null;
+				}
+				return instant.truncatedTo(ChronoUnit.SECONDS).atOffset(UTC);
 			case DECIMAL:
 				return entity.getDouble(attrName);
 			case EMAIL:
@@ -129,23 +135,25 @@ class PostgreSqlUtils
 						return null;
 					}
 				case DATE:
-					if (queryValue != null && !(queryValue instanceof Date))
+					if (queryValue != null && !(queryValue instanceof LocalDate))
 					{
 						throw new MolgenisDataException(
 								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
 										queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
 					}
-					Date date = (Date) queryValue;
-					return date != null ? new java.sql.Date(date.getTime()) : null;
+					return (LocalDate) queryValue;
 				case DATE_TIME:
-					if (queryValue != null && !(queryValue instanceof Date))
+					if (queryValue == null)
+					{
+						return null;
+					}
+					if (!(queryValue instanceof Instant))
 					{
 						throw new MolgenisDataException(
 								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
+										queryValue.getClass().getSimpleName(), Instant.class.getSimpleName()));
 					}
-					Date dateTime = (Date) queryValue;
-					return dateTime != null ? new java.sql.Timestamp(dateTime.getTime()) : null;
+					return ((Instant) queryValue).atOffset(ZoneOffset.UTC);
 				case DECIMAL:
 					if (queryValue != null && !(queryValue instanceof Double))
 					{

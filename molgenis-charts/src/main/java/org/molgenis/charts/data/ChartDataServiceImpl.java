@@ -361,11 +361,11 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else if (AttributeType.DATE_TIME.equals(attributeFieldTypeEnum))
 		{
-			return entity.getUtilDate(attributeName);
+			return entity.getInstant(attributeName);
 		}
 		else if (AttributeType.DATE.equals(attributeFieldTypeEnum))
 		{
-			return entity.getDate(attributeName);
+			return entity.getLocalDate(attributeName);
 		}
 		else
 		{

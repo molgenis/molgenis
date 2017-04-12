@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import static com.google.common.collect.Iterables.contains;
 import static java.util.Arrays.stream;
@@ -27,6 +29,19 @@ public class EntityModelWriter
 
 	private final SimpleValueFactory valueFactory;
 	private final TagService<LabeledResource, LabeledResource> tagService;
+	private static final DatatypeFactory DATATYPE_FACTORY;
+
+	static
+	{
+		try
+		{
+			DATATYPE_FACTORY = DatatypeFactory.newInstance();
+		}
+		catch (DatatypeConfigurationException e)
+		{
+			throw new Error("Could not instantiate javax.xml.datatype.DatatypeFactory", e);
+		}
+	}
 
 	@Autowired
 	public EntityModelWriter(TagService<LabeledResource, LabeledResource> tagService, SimpleValueFactory valueFactory)
@@ -90,8 +105,13 @@ public class EntityModelWriter
 				model.add(subject, predicate, valueFactory.createLiteral(objectEntity.getBoolean(name)));
 				break;
 			case DATE:
+				XMLGregorianCalendar calendar = DATATYPE_FACTORY
+						.newXMLGregorianCalendar(objectEntity.getLocalDate(name).toString());
+				model.add(subject, predicate, valueFactory.createLiteral(calendar));
+				break;
 			case DATE_TIME:
-				model.add(subject, predicate, valueFactory.createLiteral(objectEntity.getUtilDate(name)));
+				calendar = DATATYPE_FACTORY.newXMLGregorianCalendar(objectEntity.getInstant(name).toString());
+				model.add(subject, predicate, valueFactory.createLiteral(calendar));
 				break;
 			case DECIMAL:
 				model.add(subject, predicate, valueFactory.createLiteral(objectEntity.getDouble(name)));
