@@ -469,7 +469,7 @@ public class MappingServiceController extends MolgenisPluginController
 						tagsForAttribute.values(), searchTerms);
 
 		// If no relevant attributes are found, return all source attributes
-		if (relevantAttributes.size() == 0)
+		if (relevantAttributes.isEmpty())
 		{
 			return stream(entityMapping.getSourceEntityType().getAllAttributes())
 					.map(attribute -> ExplainedAttribute.create(attribute)).collect(toList());
