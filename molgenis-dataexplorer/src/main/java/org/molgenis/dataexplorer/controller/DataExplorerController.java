@@ -22,6 +22,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -92,6 +93,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	MenuManagerService menuManager;
+
+	@Autowired
+	MenuReaderService menuReaderService;
 
 	@Autowired
 	private Gson gson;
@@ -397,6 +401,10 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
 	}
+	private String getBaseUrl()
+	{
+		return menuReaderService.getMenu().findMenuItemPath(URI);
+	}
 
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
@@ -411,6 +419,30 @@ public class DataExplorerController extends MolgenisPluginController
 	@RequestMapping(value = "/details", method = RequestMethod.POST)
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
+	{
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(entityId, entityType.getIdAttribute());
+
+		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(id));
+		model.addAttribute("entityType", entityType);
+		model.addAttribute("viewName", getViewName(entityName));
+		model.addAttribute("baseUrl", "uhfgytrfytfytfytr");
+		return "view-entityreport";
+	}
+
+	/**
+	 * Builds a model containing one entity and returns the entityReport ftl view
+	 *
+	 * @param entityName
+	 * @param entityId
+	 * @param model
+	 * @return entity report view
+	 * @throws Exception if an entity name or id is not found
+	 * @author mdehaan, fkelpin
+	 */
+	@RequestMapping(value = "/details/{entityName}/{entityId}", method = RequestMethod.POST)
+	public String viewEntityDetailsById(@PathVariable(value = "entityName") String entityName,
+			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
 	{
 		EntityType entityType = dataService.getEntityType(entityName);
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());
