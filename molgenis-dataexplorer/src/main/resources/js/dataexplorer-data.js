@@ -84,6 +84,7 @@
             $('#entityReportModal').modal("show");
         });
     }
+
     function onRowClick(entity) {
         var chrom = entity[genomebrowserChromosomeAttribute.name];
         var pos = entity[genomebrowserStartAttribute.name];
