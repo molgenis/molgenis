@@ -11,26 +11,26 @@ import org.molgenis.data.processor.CellProcessor;
 
 import java.util.List;
 
-public class ExcelUtils
+class ExcelUtils
 {
-	public static String toValue(Cell cell)
+	static String toValue(Cell cell)
 	{
 		return toValue(cell, null);
 	}
 
 	// Gets a cell value as String and process the value with the given cellProcessors
-	public static String toValue(Cell cell, List<CellProcessor> cellProcessors)
+	static String toValue(Cell cell, List<CellProcessor> cellProcessors)
 	{
 		String value;
-		switch (cell.getCellType())
+		switch (cell.getCellTypeEnum())
 		{
-			case Cell.CELL_TYPE_BLANK:
+			case BLANK:
 				value = null;
 				break;
-			case Cell.CELL_TYPE_STRING:
+			case STRING:
 				value = cell.getStringCellValue();
 				break;
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell))
 				{
 					value = DataConverter.toString(cell.getDateCellValue());
@@ -45,19 +45,19 @@ public class ExcelUtils
 					else value = String.valueOf(x);
 				}
 				break;
-			case Cell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 				value = String.valueOf(cell.getBooleanCellValue());
 				break;
-			case Cell.CELL_TYPE_FORMULA:
+			case FORMULA:
 				// evaluate formula
 				FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
 				CellValue cellValue = evaluator.evaluate(cell);
-				switch (cellValue.getCellType())
+				switch (cellValue.getCellTypeEnum())
 				{
-					case Cell.CELL_TYPE_BOOLEAN:
+					case BOOLEAN:
 						value = String.valueOf(cellValue.getBooleanValue());
 						break;
-					case Cell.CELL_TYPE_NUMERIC:
+					case NUMERIC:
 						if (DateUtil.isCellDateFormatted(cell))
 						{
 							value = DataConverter.toString(DateUtil.getJavaDate(cellValue.getNumberValue(), false));
@@ -73,10 +73,10 @@ public class ExcelUtils
 							else value = String.valueOf(x);
 						}
 						break;
-					case Cell.CELL_TYPE_STRING:
+					case STRING:
 						value = cellValue.getStringValue();
 						break;
-					case Cell.CELL_TYPE_BLANK:
+					case BLANK:
 						value = null;
 						break;
 					default:
