@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -28,7 +27,6 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.Double.parseDouble;
@@ -37,6 +35,8 @@ import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.data.DataConverter.toBoolean;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -101,11 +101,11 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(Attribute targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities)
 	{
-		return Iterables.transform(sourceEntities, entity ->
+		return stream(sourceEntities.spliterator(), false).map(entity ->
 		{
 			AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
-
 			Object derivedValue;
+
 			try
 			{
 				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
@@ -113,11 +113,15 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			}
 			catch (RuntimeException e)
 			{
+				if (e.getMessage() == null)
+				{
+					return algorithmResult.errorMessage(
+							"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+				}
 				return algorithmResult.errorMessage(e.getMessage());
 			}
-
 			return algorithmResult.value(derivedValue);
-		});
+		}).collect(toList());
 	}
 
 	@Override
@@ -180,7 +184,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				Collection<Object> valueIds = (Collection<Object>) value;
 
 				convertedValue = valueIds.stream().map(valueId -> entityManager
-						.getReference(attr.getRefEntity(), convert(valueId, attr.getRefEntity().getIdAttribute()))).collect(Collectors.toList());
+						.getReference(attr.getRefEntity(), convert(valueId, attr.getRefEntity().getIdAttribute())))
+						.collect(toList());
 				break;
 			case DATE:
 				convertedValue = convertToDate(value);
