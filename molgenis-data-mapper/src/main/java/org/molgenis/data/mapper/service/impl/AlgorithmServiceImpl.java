@@ -111,13 +111,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
 				derivedValue = convert(result, targetAttribute);
 			}
-			catch (NullPointerException e)
-			{
-				return algorithmResult.errorMessage(
-						"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
-			}
 			catch (RuntimeException e)
 			{
+				if (e.getMessage() == null)
+				{
+					return algorithmResult.errorMessage(
+							"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+				}
 				return algorithmResult.errorMessage(e.getMessage());
 			}
 			return algorithmResult.value(derivedValue);
