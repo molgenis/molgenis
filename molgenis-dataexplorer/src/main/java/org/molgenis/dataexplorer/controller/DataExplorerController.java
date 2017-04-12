@@ -7,7 +7,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
@@ -22,8 +21,6 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -92,12 +89,6 @@ public class DataExplorerController extends MolgenisPluginController
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Autowired
-	MenuManagerService menuManager;
-
-	@Autowired
-	MenuReaderService menuReaderService;
-
-	@Autowired
 	private Gson gson;
 
 	@Autowired
@@ -120,7 +111,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @param model
 	 * @return the view name
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = GET)
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
 			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model) throws Exception
 	{
@@ -401,10 +392,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
 	}
-	private String getBaseUrl()
-	{
-		return menuReaderService.getMenu().findMenuItemPath(URI);
-	}
 
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
@@ -416,7 +403,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws Exception if an entity name or id is not found
 	 * @author mdehaan, fkelpin
 	 */
-	@RequestMapping(value = "/details", method = RequestMethod.POST)
+	@RequestMapping(value = "/details", method = POST)
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
@@ -425,22 +412,17 @@ public class DataExplorerController extends MolgenisPluginController
 
 		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(id));
 		model.addAttribute("entityType", entityType);
-		model.addAttribute("viewName", getViewName(entityName));
-		model.addAttribute("baseUrl", "uhfgytrfytfytfytr");
+		model.addAttribute("viewName", getEntityReportViewName(entityName));
+
+		// Used to create a URL to a standalone report
+		model.addAttribute("showStandaloneReportUrl", dataExplorerSettings.getModStandaloneReports());
+		model.addAttribute("entityName", entityName);
+		model.addAttribute("entityId", entityId);
+
 		return "view-entityreport";
 	}
 
-	/**
-	 * Builds a model containing one entity and returns the entityReport ftl view
-	 *
-	 * @param entityName
-	 * @param entityId
-	 * @param model
-	 * @return entity report view
-	 * @throws Exception if an entity name or id is not found
-	 * @author mdehaan, fkelpin
-	 */
-	@RequestMapping(value = "/details/{entityName}/{entityId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/details/{entityName}/{entityId}", method = GET)
 	public String viewEntityDetailsById(@PathVariable(value = "entityName") String entityName,
 			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
 	{
@@ -449,11 +431,13 @@ public class DataExplorerController extends MolgenisPluginController
 
 		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(id));
 		model.addAttribute("entityType", entityType);
-		model.addAttribute("viewName", getViewName(entityName));
-		return "view-entityreport";
+		model.addAttribute("entityName", entityName);
+		model.addAttribute("viewName", getStandaloneReportViewName(entityName));
+
+		return "view-standalone-report";
 	}
 
-	private String getViewName(String entityName)
+	private String getEntityReportViewName(String entityName)
 	{
 		// check if entity report is set for this entity
 		String reportTemplate = dataExplorerSettings.getEntityReport(entityName);
@@ -477,6 +461,16 @@ public class DataExplorerController extends MolgenisPluginController
 			return "view-entityreport-generic";
 		}
 		return "view-entityreport-generic-default";
+	}
+
+	private String getStandaloneReportViewName(String entityName)
+	{
+		final String specificStandaloneReportViewName = "view-standalone-report-specific-" + entityName;
+		if (viewExists(specificStandaloneReportViewName))
+		{
+			return specificStandaloneReportViewName;
+		}
+		return "view-standalone-report-default";
 	}
 
 	private boolean viewExists(String viewName)
