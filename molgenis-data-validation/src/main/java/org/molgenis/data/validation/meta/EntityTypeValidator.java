@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -159,24 +160,25 @@ public class EntityTypeValidator
 			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] type [%s] is not allowed", entityType.getFullyQualifiedName(),
-								ownIdAttr.getName(), ownIdAttr.getDataType().toString())));
+						format("Entity [%s] ID attribute [%s] type [%s] is not allowed",
+								entityType.getFullyQualifiedName(), ownIdAttr.getName(),
+								ownIdAttr.getDataType().toString())));
 			}
 
 			// Validate that ID attribute is unique
 			if (!ownIdAttr.isUnique())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a unique attribute", entityType.getFullyQualifiedName(),
-								ownIdAttr.getName())));
+						format("Entity [%s] ID attribute [%s] is not a unique attribute",
+								entityType.getFullyQualifiedName(), ownIdAttr.getName())));
 			}
 
 			// Validate that ID attribute is not nillable
 			if (ownIdAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getFullyQualifiedName(),
-								ownIdAttr.getName())));
+						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute",
+								entityType.getFullyQualifiedName(), ownIdAttr.getName())));
 			}
 		}
 		else
@@ -193,12 +195,21 @@ public class EntityTypeValidator
 	 * Validates the attributes owned by this entity:
 	 * 1) validates that the parent entity doesn't have attributes with the same name
 	 * 2) validates that this entity doesn't have attributes with the same name
+	 * 3) validates that this entity has attributes defined at all
 	 *
 	 * @param entityType entity meta data
 	 * @throws MolgenisValidationException if an attribute is owned by another entity or a parent attribute has the same name
 	 */
 	private static void validateOwnAttributes(EntityType entityType)
 	{
+		// Validate that entity has attributes
+		if (asStream(entityType.getAllAttributes()).collect(toList()).size() == 0)
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Entity [%s] does not contain any attributes. Did you use the correct package+entity name combination in both the entities as well as the attributes sheet?",
+							entityType.getFullyQualifiedName())));
+		}
+
 		// Validate that entity does not contain multiple attributes with the same name
 		Multimap<String, Attribute> attrMultiMap = asStream(entityType.getAllAttributes())
 				.collect(MultimapCollectors.toArrayListMultimap(Attribute::getName, Function.identity()));
@@ -207,8 +218,8 @@ public class EntityTypeValidator
 			if (attrMultiMap.get(attrName).size() > 1)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] contains multiple attributes with name [%s]", entityType.getFullyQualifiedName(),
-								attrName)));
+						format("Entity [%s] contains multiple attributes with name [%s]",
+								entityType.getFullyQualifiedName(), attrName)));
 			}
 		});
 
@@ -282,11 +293,13 @@ public class EntityTypeValidator
 		Package package_ = entityType.getPackage();
 		if (package_ != null)
 		{
-			if (!(package_.getFullyQualifiedName() + Package.PACKAGE_SEPARATOR + entityType.getName()).equals(entityType.getFullyQualifiedName()))
+			if (!(package_.getFullyQualifiedName() + Package.PACKAGE_SEPARATOR + entityType.getName())
+					.equals(entityType.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Qualified entity name [%s] not equal to entity package name [%s] underscore entity name [%s]",
-								entityType.getFullyQualifiedName(), package_.getFullyQualifiedName(), entityType.getName())));
+								entityType.getFullyQualifiedName(), package_.getFullyQualifiedName(),
+								entityType.getName())));
 			}
 		}
 		else
@@ -294,8 +307,8 @@ public class EntityTypeValidator
 			if (!entityType.getName().equals(entityType.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Qualified entity name [%s] not equal to entity name [%s]", entityType.getFullyQualifiedName(),
-								entityType.getName())));
+						format("Qualified entity name [%s] not equal to entity name [%s]",
+								entityType.getFullyQualifiedName(), entityType.getName())));
 			}
 		}
 	}
@@ -314,8 +327,8 @@ public class EntityTypeValidator
 					.hasSystemEntityType(entityType.getFullyQualifiedName()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getFullyQualifiedName(),
-								entityType.getPackage().getFullyQualifiedName())));
+						format("Adding entity [%s] to system package [%s] is not allowed",
+								entityType.getFullyQualifiedName(), entityType.getPackage().getFullyQualifiedName())));
 			}
 		}
 	}
