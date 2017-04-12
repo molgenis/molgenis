@@ -104,31 +104,43 @@
             <tr>
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
-                <#if attributeMapping.targetAttribute.dataType == "XREF" || attributeMapping.targetAttribute.dataType == "CATEGORICAL" && (categories)?has_content>
-                    <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
-                    <#list categories as category>
-                        <#list refEntityType.attributes as attribute>
-                            <#assign attributeName = attribute.name>
-                            <#if (category[attributeName])??>
-                                <#assign value = category[attributeName] />
-                                <#assign dataType = attribute.dataType />
+                    <#if attributeMapping.targetAttribute.dataType == "CATEGORICAL" || attributeMapping.targetAttribute.dataType == "CATEGORICAL_MREF" && (categories)?has_content>
+                        <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
+                        <#assign idAttr = refEntityType.getIdAttribute()>
+                        <#assign labelAttr = refEntityType.getLabelAttribute()>
+                        <#list categories as category>
+                            <#if (category[idAttr.name])??>
+                                <#assign value = category[idAttr.name] />
+                                <#assign dataType = idAttr.dataType />
                                 <#if dataType == "DATE_TIME">
-                                ${value?datetime}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
-                                    =</#if>
+                                    ${value?datetime}
                                 <#elseif dataType == "DATE">
-                                ${value?date}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
-                                    =</#if>
+                                    ${value?date}
                                 <#else>
-                                ${value?string}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
-                                    =</#if>
+                                    ${value?string}
                                 </#if>
                             </#if>
+
+                            <#if labelAttr?? && labelAttr.name != idAttr.name>
+                                <#if (category[labelAttr.name])??>
+                                    =
+                                    <#assign value = category[labelAttr.name] />
+                                    <#assign dataType = labelAttr.dataType />
+                                    <#if dataType == "DATE_TIME">
+                                    ${value?datetime}
+                                    <#elseif dataType == "DATE">
+                                    ${value?date}
+                                    <#else>
+                                    ${value?string}
+                                    </#if>
+                                </#if>
+                            </#if>
+
+                            </br>
                         </#list>
-                        </br>
-                    </#list>
-                <#else>
-                    N/A
-                </#if>
+                    <#else>
+                        N/A
+                    </#if>
                 </td>
             </tr>
         </table>
