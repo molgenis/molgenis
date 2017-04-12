@@ -215,8 +215,7 @@ public class MappingServiceImpl implements MappingService
 				dataService.getMeta().updateEntityType(existingTargetMetaData);
 			}
 		}
-
-
+		
 		try
 		{
 			LOG.info("Applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
