@@ -269,6 +269,23 @@ public interface DataService extends Iterable<Repository<Entity>>
 	<E extends Entity> void update(String entityName, Stream<E> entities);
 
 	/**
+	 * Upsert an entity
+	 *
+	 * @param entityName
+	 * @param entity
+	 */
+	void upsert(String entityName, Entity entity);
+
+	/**
+	 * Upsert entities
+	 *
+	 * @param entityName
+	 * @param entities
+	 * @param <E>
+	 */
+	<E extends Entity> void upsert(String entityName, Stream<E> entities);
+
+	/**
 	 * Deletes an entity
 	 *
 	 * @param entityName entity name (case insensitive)
