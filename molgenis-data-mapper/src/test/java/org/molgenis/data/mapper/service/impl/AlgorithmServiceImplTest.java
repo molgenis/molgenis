@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
+import com.google.common.collect.Lists;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -11,6 +12,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -80,6 +82,23 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 	public void testApplyConvertLongNumberFormatException()
 	{
 		testApplyConvertException("invalidLong", LONG);
+	}
+
+	@Test
+	public void testApplyAlgorithm()
+	{
+		Attribute attribute = mock(Attribute.class);
+		String algorithm = "algorithm";
+		Entity entity = mock(Entity.class);
+
+		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new NullPointerException());
+
+		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl
+				.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity));
+		AlgorithmEvaluation eval = result.iterator().next();
+
+		Assert.assertEquals(eval.getErrorMessage(),
+				"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
 	}
 
 	private void testApplyConvertException(String algorithmResult, AttributeType attributeType)
