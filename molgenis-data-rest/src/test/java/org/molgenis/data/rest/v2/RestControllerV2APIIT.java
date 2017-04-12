@@ -18,9 +18,7 @@ import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITEMETA;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.collections.Maps.newHashMap;
 
@@ -78,15 +76,15 @@ public class RestControllerV2APIIT
 		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
 
-		grantRights(adminToken, testUserId, "TypeTestAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "TypeTestRefAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "LocationAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "PersonAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_TypeTestAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_TypeTestRefAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", WRITE);
 
-		grantRights(adminToken, testUserId, "v2APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "v2APITest2", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_v2APITest1", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_v2APITest2", WRITEMETA);
 
-		grantRights(adminToken, testUserId, "APICopyTest", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
 
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
@@ -225,7 +223,7 @@ public class RestControllerV2APIIT
 	public void testCopyEntity()
 	{
 		Map<String, String> request = newHashMap();
-		request.put("newEntityName", "CopiedEntity");
+		request.put("newEntityName", "base_CopiedEntity");
 
 		given().log().all().contentType(APPLICATION_JSON).body(request).header(X_MOLGENIS_TOKEN, testUserToken)
 				.post(API_V2 + "copy/base_APICopyTest").then().log().all();
