@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Stopwatch.createStarted;
+import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
@@ -190,6 +191,18 @@ class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
+	public void upsert(Entity entity)
+	{
+		upsert(Stream.of(entity));
+	}
+
+	@Override
+	public void upsert(Stream<Entity> entities)
+	{
+		upsertBatching(entities.iterator());
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		this.delete(Stream.of(entity));
@@ -210,7 +223,7 @@ class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch ->
+		partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch ->
 		{
 			String sql = getSqlDelete(entityType);
 			if (LOG.isDebugEnabled())
@@ -429,7 +442,7 @@ class PostgreSqlRepository extends AbstractRepository
 		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).collect(toList());
 		final String insertSql = getSqlInsert(entityType);
 
-		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
+		partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
 		{
 			if (LOG.isDebugEnabled())
 			{
@@ -512,7 +525,7 @@ class PostgreSqlRepository extends AbstractRepository
 		final String updateSql = getSqlUpdate(entityType);
 
 		// update values in entity table
-		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
+		partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
 		{
 			if (LOG.isDebugEnabled())
 			{
@@ -522,24 +535,40 @@ class PostgreSqlRepository extends AbstractRepository
 					LOG.trace("SQL: {}", updateSql);
 				}
 			}
-			int[] counts = jdbcTemplate
-					.batchUpdate(updateSql, new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr));
+			int[] counts = jdbcTemplate.batchUpdate(updateSql,
+					new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr, false));
 			verifyUpdate(entitiesBatch, counts, idAttr);
+			updateJunctionTable(idAttr, junctionTableAttrs, entitiesBatch);
+		});
+	}
 
-			// update values in entity junction table
-			if (!junctionTableAttrs.isEmpty())
+	private void upsertBatching(Iterator<? extends Entity> entities)
+	{
+		final Attribute idAttr = entityType.getIdAttribute();
+		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType)
+				.filter(attr -> !attr.isReadOnly()).collect(toList());
+		final String upsertSql = getSqlUpsert(entityType);
+		System.out.println(">>>>>>>>> upsertSql = \n" + upsertSql);
+
+		// upsert values in entity table
+		partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
+		{
+			if (LOG.isDebugEnabled())
 			{
-				Map<String, List<Map<String, Object>>> mrefs = createMrefMap(idAttr, junctionTableAttrs, entitiesBatch);
-
-				// update mrefs
-				List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
-						.collect(toList());
-				for (Attribute attr : junctionTableAttrs)
+				LOG.debug("Upserting {} [{}] entities", entitiesBatch.size(), getName());
+				if (LOG.isTraceEnabled())
 				{
-					removeMrefs(ids, attr);
-					addMrefs(mrefs.get(attr.getName()), attr);
+					LOG.trace("SQL: {}", upsertSql);
 				}
 			}
+			// FIXME This does not work if reWriteBatchedInserts is set to true
+			// FIXME JDBC issue: https://github.com/pgjdbc/pgjdbc/issues/783
+			jdbcTemplate.batchUpdate(upsertSql,
+					new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr, true));
+
+			// upsert values in entity junction table
+			updateJunctionTable(idAttr, junctionTableAttrs, entitiesBatch);
 		});
 	}
 
@@ -555,6 +584,25 @@ class PostgreSqlRepository extends AbstractRepository
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getName(),
 							nonExistingEntityId.toString())));
+		}
+	}
+
+	private void updateJunctionTable(Attribute idAttr, List<Attribute> junctionTableAttrs,
+			List<? extends Entity> entitiesBatch)
+	{
+		// update values in entity junction table
+		if (!junctionTableAttrs.isEmpty())
+		{
+			Map<String, List<Map<String, Object>>> mrefs = createMrefMap(idAttr, junctionTableAttrs, entitiesBatch);
+
+			// update mrefs
+			List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
+					.collect(toList());
+			for (Attribute attr : junctionTableAttrs)
+			{
+				removeMrefs(ids, attr);
+				addMrefs(mrefs.get(attr.getName()), attr);
+			}
 		}
 	}
 
@@ -635,13 +683,15 @@ class PostgreSqlRepository extends AbstractRepository
 		private final List<? extends Entity> entities;
 		private final List<Attribute> tableAttrs;
 		private final Attribute idAttr;
+		private final boolean isUpsert;
 
 		BatchUpdatePreparedStatementSetter(List<? extends Entity> entities, List<Attribute> tableAttrs,
-				Attribute idAttr)
+				Attribute idAttr, boolean isUpsert)
 		{
 			this.entities = entities;
 			this.tableAttrs = tableAttrs;
 			this.idAttr = idAttr;
+			this.isUpsert = isUpsert;
 		}
 
 		@Override
@@ -655,8 +705,10 @@ class PostgreSqlRepository extends AbstractRepository
 				Object postgreSqlValue = getPostgreSqlValue(entity, attr);
 				preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 			}
-
-			preparedStatement.setObject(fieldIndex, getPostgreSqlValue(entity, idAttr));
+			if (!isUpsert)
+			{
+				preparedStatement.setObject(fieldIndex, getPostgreSqlValue(entity, idAttr));
+			}
 		}
 
 		@Override
