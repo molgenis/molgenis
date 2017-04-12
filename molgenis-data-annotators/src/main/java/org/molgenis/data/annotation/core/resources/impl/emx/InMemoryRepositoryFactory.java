@@ -26,14 +26,16 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 	private final AttributeFactory attributeFactory;
 	private final EntityTypeFactory entityTypeFactory;
 
+	private final String id;
 	private final String name;
 
 	private ExcelRepositoryCollection repositoryCollection = null;
 	private final MetaDataParser parser;
 
-	public InMemoryRepositoryFactory(String name, MetaDataParser parser, EntityTypeFactory entityTypeFactory,
+	public InMemoryRepositoryFactory(String entityId,String name, MetaDataParser parser, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory)
 	{
+		this.id = entityId;
 		this.name = name;
 		this.parser = parser;
 		this.attributeFactory = attributeFactory;
@@ -57,12 +59,12 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 
 		ImmutableMap<String, EntityType> entityMap = parser.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT)
 				.getEntityMap();
-		if (!entityMap.containsKey(name))
+		if (!entityMap.containsKey(id))
 		{
-			throw new RuntimeException("Entity [" + name + "] is not found. Entities found: " + entityMap.keySet());
+			throw new RuntimeException("Entity [" + id + "] is not found. Entities found: " + entityMap.keySet());
 		}
 
-		EntityType metaData = entityMap.get(name);
+		EntityType metaData = entityMap.get(id);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(metaData);
 		inMemoryRepository.add(StreamSupport.stream(Spliterators
 						.spliteratorUnknownSize(repositoryCollection.getRepository(name).iterator(), Spliterator.ORDERED),
