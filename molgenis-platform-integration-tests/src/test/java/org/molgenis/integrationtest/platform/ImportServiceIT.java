@@ -13,7 +13,6 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -79,9 +78,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 
 	@Autowired
 	private UserFactory userFactory;
-
-	@Autowired
-	private DataService dataService;
 
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
@@ -253,9 +249,18 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
 		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
 		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
+		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
 		assertEquals(firstRow.getString("AA"), "G|||");
-		// todo check rest of info string
-		//		"AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(firstRow.getString("AC"), "0");
+		assertEquals(firstRow.getString("AF"), "1.99681E-4");
+		assertEquals(firstRow.getString("AFR_AF"), "0.0");
+		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
+		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(firstRow.getString("EAS_AF"), "0.0");
+		assertEquals(firstRow.getString("EUR_AF"), "0.0");
+		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(firstRow.getString("SAS_AF"), "0.0");
 
 
 		Entity lastRow = entities.get(entities.size() - 1);
@@ -266,9 +271,19 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
 		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
 		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
+		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
 		assertEquals(lastRow.getString("AA"), "G|||");
-		// todo check rest of info string
-		//		"AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(lastRow.getString("AC"), "0");
+		assertEquals(lastRow.getString("AF"), "1.99681E-4");
+		assertEquals(lastRow.getString("AFR_AF"), "0.0");
+		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
+		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(lastRow.getString("EAS_AF"), "0.0");
+		assertEquals(lastRow.getString("EUR_AF"), "0.0");
+		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(lastRow.getString("SAS_AF"), "0.0");
+
 
 
 	}
