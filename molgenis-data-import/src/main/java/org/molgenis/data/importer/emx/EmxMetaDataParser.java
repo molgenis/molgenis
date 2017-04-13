@@ -1307,7 +1307,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		l10nString.setMessageID(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
 		l10nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
 		String namespace = emxI18nStringEntity.getString(EMX_I18N_STRING_NAMESPACE);
-		if(namespace == null){
+		if (namespace == null)
+		{
 			namespace = DEFAULT_NAMESPACE;
 		}
 		l10nString.setNamespace(namespace);

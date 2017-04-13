@@ -213,9 +213,15 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		DefaultPackage defaultPackage(){ return mock(DefaultPackage.class); }
+		DefaultPackage defaultPackage()
+		{
+			return mock(DefaultPackage.class);
+		}
 
 		@Bean
-		SystemPackageRegistry systemPackageRegistry(){ return mock(SystemPackageRegistry.class); }
+		SystemPackageRegistry systemPackageRegistry()
+		{
+			return mock(SystemPackageRegistry.class);
+		}
 	}
 }

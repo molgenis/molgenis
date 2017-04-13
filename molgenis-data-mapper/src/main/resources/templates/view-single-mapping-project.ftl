@@ -208,7 +208,9 @@
                     <div>
                         <label>Enter a name for the integrated dataset.</label>
                         <input name="newEntityName" type="text" value="" required/>
-                        <p></p><small>The mapped entity will be placed in the same package as the target.</small></p>
+                        <p></p>
+                        <small>The mapped entity will be placed in the same package as the target.</small>
+                        </p>
                     </div>
                     <div>
                         <label>Add source attribute</label>

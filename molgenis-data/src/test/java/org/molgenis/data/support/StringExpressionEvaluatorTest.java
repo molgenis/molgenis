@@ -35,7 +35,7 @@ public class StringExpressionEvaluatorTest
 		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("Long").getMock();
 		when(longAttr.getDataType()).thenReturn(LONG);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getFullyQualifiedName()).thenReturn("test");
+		when(entityType.getId()).thenReturn("test");
 		when(entityType.getAttribute("Identifier")).thenReturn(idAttr);
 		when(entityType.getAttribute("Int")).thenReturn(intAttr);
 		when(entityType.getAttribute("String")).thenReturn(stringAttr);

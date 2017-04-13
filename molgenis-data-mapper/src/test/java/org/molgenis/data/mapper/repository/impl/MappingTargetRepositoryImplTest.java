@@ -192,7 +192,10 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		DefaultPackage defaultPackage(){ return mock(DefaultPackage.class); }
+		DefaultPackage defaultPackage()
+		{
+			return mock(DefaultPackage.class);
+		}
 
 	}
 }

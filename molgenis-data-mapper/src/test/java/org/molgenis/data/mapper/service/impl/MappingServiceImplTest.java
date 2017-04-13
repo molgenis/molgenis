@@ -568,10 +568,16 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		SystemPackageRegistry systemPackageRegistry(){ return new SystemPackageRegistry(); }
+		SystemPackageRegistry systemPackageRegistry()
+		{
+			return new SystemPackageRegistry();
+		}
 
 		@Bean
-		DefaultPackage defaultPackage(){ return new DefaultPackage(mock(PackageMetadata.class)); }
+		DefaultPackage defaultPackage()
+		{
+			return new DefaultPackage(mock(PackageMetadata.class));
+		}
 
 	}
 }

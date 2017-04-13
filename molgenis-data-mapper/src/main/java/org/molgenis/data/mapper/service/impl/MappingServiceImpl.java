@@ -14,7 +14,6 @@ import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
@@ -186,7 +185,8 @@ public class MappingServiceImpl implements MappingService
 		}
 
 		Repository<Entity> targetRepo;
-		if(targetMetaData.getPackage() == null || systemPackageRegistry.containsPackage(targetMetaData.getPackage())){
+		if (targetMetaData.getPackage() == null || systemPackageRegistry.containsPackage(targetMetaData.getPackage()))
+		{
 			targetMetaData.setPackage(defaultPackage);
 		}
 		if (!dataService.hasRepository(entityTypeId))
