@@ -1,5 +1,3 @@
-<button class="btn btn-primary" id="back-to-dataexplorer-btn">Go to the dataexplorer</button>
-<hr>
 <h2>Dataset: ${entityType.getLabel()?html}</h2>
 
 <#assign counter = 0 />
