@@ -10,12 +10,8 @@
 <@footer/>
 
 <script>
-    $.when(
-            $.ajax('<@resource_href "/js/dataexplorer-data.js"/>', {'cache': true}).done(function () {
-                var entityName = '${entityName}'
-                $('body').on('click', '#view-full-dataset-btn', function(){
-                  window.open(window.location.origin + molgenis.getContextUrl()+"?entity="+entityName, "_self")
-                })
-            })
-    )
+    var entityName = '${entityName}'
+    $('body').on('click', '#view-full-dataset-btn', function () {
+        window.open(window.location.origin + molgenis.getContextUrl() + '?entity=' + entityName, '_self')
+    })
 </script>

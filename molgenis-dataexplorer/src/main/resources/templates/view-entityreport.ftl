@@ -27,24 +27,20 @@
 
 <#if showStandaloneReportUrl>
 <script>
-    $.when(
-            $.ajax('<@resource_href "/js/dataexplorer-data.js"/>', {'cache': true}).done(function () {
-                var entityId = '${entityId}'
-                var entityName = '${entityName}'
-                var standaloneReportURL = window.location.origin + molgenis.getContextUrl() + '/details/' + entityName + '/' + entityId
+    var entityIdForURL = '${entityId}'
+    var entityNameForURL = '${entityName}'
+    var standaloneReportURL = window.location.origin + molgenis.getContextUrl() + '/details/' + entityNameForURL + '/' + entityIdForURL
 
-                $('#standalone-report-url').val(standaloneReportURL)
-                //Add copy functionality
-                document.getElementById('copy-standalone-report-url-btn').addEventListener('click', function (e) {
-                    e.preventDefault()
-                    var url = document.createElement('input')
-                    url.setAttribute('value', $('#standalone-report-url').val())
-                    document.body.appendChild(url)
-                    url.select()
-                    document.execCommand('copy')
-                    document.body.removeChild(url)
-                })
-            })
-    )
+    $('#standalone-report-url').val(standaloneReportURL)
+    //Add copy functionality
+    document.getElementById('copy-standalone-report-url-btn').addEventListener('click', function (e) {
+        e.preventDefault()
+        var standaloneURL = document.createElement('input')
+        standaloneURL.setAttribute('value', $('#standalone-report-url').val())
+        document.body.appendChild(standaloneURL)
+        standaloneURL.select()
+        document.execCommand('copy')
+        document.body.removeChild(standaloneURL)
+    })
 </script>
 </#if>
