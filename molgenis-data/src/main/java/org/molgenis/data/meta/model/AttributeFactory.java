@@ -26,7 +26,7 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	}
 
 	@Override
-	public String getEntityName()
+	public String getEntityTypeId()
 	{
 		return AttributeMetadata.ATTRIBUTE_META_DATA;
 	}

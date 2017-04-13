@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -99,5 +100,18 @@ public class DataConverterTest
 		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		assertEquals(DataConverter.toIntList(Arrays.asList(entity0, entity1)), Arrays.asList(id0, id1));
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Conversion failure in entity type \\[test\\] attribute \\[id\\]; .*")
+	public void testWrapExceptionOnInvalidConversion()
+	{
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("test");
+		Attribute attr = mock(Attribute.class);
+		when(attr.getDataType()).thenReturn(AttributeType.INT);
+		when(attr.getName()).thenReturn("id");
+		when(attr.getEntity()).thenReturn(entityType);
+
+		DataConverter.convert("test", attr);
 	}
 }

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.molgenis.data.meta.model.PackageMetadata.NAME;
+import static org.molgenis.data.meta.model.PackageMetadata.ID;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 @Component
@@ -46,7 +46,7 @@ public class PackagePersister
 		Map<String, Package> packageMap = getCandidateExistingPackageMap(packages);
 		packages.forEach(pack ->
 		{
-			Package existingPackage = packageMap.get(pack.getFullyQualifiedName());
+			Package existingPackage = packageMap.get(pack.getId());
 			if (existingPackage != null)
 			{
 				pack.setId(existingPackage.getId()); // inject existing package identifier into package
@@ -73,10 +73,10 @@ public class PackagePersister
 
 	private Map<String, Package> getCandidateExistingPackageMap(Collection<Package> packages)
 	{
-		Set<String> packageNames = Sets.newHashSetWithExpectedSize(packages.size());
-		packages.forEach(pack -> packageNames.add(pack.getName()));
+		Set<String> packageIds = Sets.newHashSetWithExpectedSize(packages.size());
+		packages.forEach(pack -> packageIds.add(pack.getId()));
 
-		Query<Package> query = dataService.query(PACKAGE, Package.class).in(NAME, packageNames);
-		return query.findAll().collect(toMap(Package::getFullyQualifiedName, identity()));
+		Query<Package> query = dataService.query(PACKAGE, Package.class).in(ID, packageIds);
+		return query.findAll().collect(toMap(Package::getId, identity()));
 	}
 }

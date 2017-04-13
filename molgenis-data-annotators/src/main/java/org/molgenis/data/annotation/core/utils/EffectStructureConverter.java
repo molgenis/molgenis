@@ -206,7 +206,7 @@ public class EffectStructureConverter
 	private EntityType createEffectsEntityType(ArrayList<Attribute> effectFieldAttributeList, String effectEntityName,
 			List<Attribute> annotatorAttributes)
 	{
-		EntityType effectsEntityType = entityTypeFactory.create().setName(effectEntityName);
+		EntityType effectsEntityType = entityTypeFactory.create(effectEntityName);
 		effectsEntityType.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityType.AttributeRole.ROLE_ID);
 		effectsEntityType.addAttributes(effectFieldAttributeList);

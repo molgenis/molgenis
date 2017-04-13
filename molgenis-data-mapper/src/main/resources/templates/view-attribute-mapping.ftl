@@ -19,8 +19,8 @@
     <div class="col-md-12">
     <#-- Hidden fields containing information needed for ajax requests -->
         <input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
-        <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.fullyQualifiedName?html}"/>
-        <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.fullyQualifiedName?html}"/>
+        <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.id?html}"/>
+        <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.id?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
                value="${attributeMapping.targetAttribute.name?html}"/>
         <input id="targetAttributeType" type="hidden" name="targetAttributeType"
@@ -48,8 +48,8 @@
 </div>
 <div class="row">
     <div class="col-md-12 col-lg-12">
-        <center><h4>Mapping to <i>${entityMapping.targetEntityType.fullyQualifiedName}
-            .${attributeMapping.targetAttribute.name}</i> from <i>${entityMapping.sourceEntityType.fullyQualifiedName}</i>
+        <center><h4>Mapping to <i>${entityMapping.targetEntityType.id}
+            .${attributeMapping.targetAttribute.name}</i> from <i>${entityMapping.sourceEntityType.id}</i>
         </h4></center>
     </div>
 </div>
@@ -104,26 +104,38 @@
             <tr>
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
-                <#if attributeMapping.targetAttribute.dataType == "XREF" || attributeMapping.targetAttribute.dataType == "CATEGORICAL" && (categories)?has_content>
+                <#if attributeMapping.targetAttribute.dataType == "CATEGORICAL" || attributeMapping.targetAttribute.dataType == "CATEGORICAL_MREF" && (categories)?has_content>
                     <#assign refEntityType = attributeMapping.targetAttribute.refEntity>
+                    <#assign idAttr = refEntityType.getIdAttribute()>
+                    <#assign labelAttr = refEntityType.getLabelAttribute()>
                     <#list categories as category>
-                        <#list refEntityType.attributes as attribute>
-                            <#assign attributeName = attribute.name>
-                            <#if (category[attributeName])??>
-                                <#assign value = category[attributeName] />
-                                <#assign dataType = attribute.dataType />
+                        <#if (category[idAttr.name])??>
+                            <#assign value = category[idAttr.name] />
+                            <#assign dataType = idAttr.dataType />
                                 <#if dataType == "DATE_TIME">
-                                ${value?datetime}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
-                                    =</#if>
+                                ${value?datetime}
                                 <#elseif dataType == "DATE">
-                                ${value?date}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
-                                    =</#if>
+                                ${value?date}
                                 <#else>
-                                ${value?string}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
-                                    =</#if>
+                                ${value?string}
                                 </#if>
                             </#if>
-                        </#list>
+
+                        <#if labelAttr?? && labelAttr.name != idAttr.name>
+                            <#if (category[labelAttr.name])??>
+                                =
+                                <#assign value = category[labelAttr.name] />
+                                <#assign dataType = labelAttr.dataType />
+                                <#if dataType == "DATE_TIME">
+                                ${value?datetime}
+                                <#elseif dataType == "DATE">
+                                ${value?date}
+                                <#else>
+                                ${value?string}
+                                </#if>
+                            </#if>
+                        </#if>
+
                         </br>
                     </#list>
                 <#else>
@@ -152,7 +164,7 @@
                         <div class="form-group">
                             <div class="input-group">
                                 <input id="attribute-search-field" type="text" class="form-control"
-                                       placeholder="Search all ${sourceAttributesSize?html} attributes from ${entityMapping.sourceEntityType.fullyQualifiedName?html}">
+                                       placeholder="Search all ${sourceAttributesSize?html} attributes from ${entityMapping.sourceEntityType.id?html}">
                                 <span class="input-group-btn">
 									<button id="attribute-search-field-button" type="button"
                                             class="btn btn-default"><span

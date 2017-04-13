@@ -84,7 +84,7 @@ public class FileIngest extends StaticEntity
 
 	public String getTargetEntityName()
 	{
-		return getEntity(ENTITY_META_DATA, EntityType.class).getFullyQualifiedName();
+		return getEntity(ENTITY_META_DATA, EntityType.class).getId();
 	}
 
 	public void setCronExpression(String cronExpression)

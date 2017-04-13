@@ -71,9 +71,9 @@ public class EntityTypeDependencyResolver
 		else
 		{
 			Map<String, EntityType> entityTypeMap = entityTypes.stream()
-					.collect(toMap(EntityType::getFullyQualifiedName, Function.identity()));
+					.collect(toMap(EntityType::getId, Function.identity()));
 			return resolvedEntityMetas.stream()
-					.filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getFullyQualifiedName()))
+					.filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getId()))
 					.collect(toList());
 		}
 	}
@@ -93,8 +93,7 @@ public class EntityTypeDependencyResolver
 					.flatMap(attr ->
 					{
 						EntityType refEntity = attr.getRefEntity();
-						if (refEntity != null && !attr.isMappedBy() && !refEntity.getFullyQualifiedName()
-								.equals(entityType.getFullyQualifiedName()))
+						if (refEntity != null && !attr.isMappedBy() && !refEntity.getId().equals(entityType.getId()))
 						{
 							return Stream.of(new EntityTypeNode(refEntity));
 						}
@@ -124,7 +123,7 @@ public class EntityTypeDependencyResolver
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("expandEntityTypeDependencies(EntityTypeNode entityTypeNode) --- entity: [{}], skip: [{}]",
-					entityTypeNode.getEntityType().getFullyQualifiedName(), entityTypeNode.isSkip());
+					entityTypeNode.getEntityType().getId(), entityTypeNode.isSkip());
 		}
 
 		if (!entityTypeNode.isSkip())
@@ -135,8 +134,7 @@ public class EntityTypeDependencyResolver
 					.flatMap(attr ->
 					{
 						EntityType refEntity = attr.getRefEntity();
-						if (refEntity != null && !attr.isMappedBy() && !refEntity.getFullyQualifiedName()
-								.equals(entityType.getFullyQualifiedName()))
+						if (refEntity != null && !attr.isMappedBy() && !refEntity.getId().equals(entityType.getId()))
 						{
 							EntityTypeNode nodeRef = new EntityTypeNode(refEntity, entityTypeNode.getStack());
 							Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
@@ -208,19 +206,19 @@ public class EntityTypeDependencyResolver
 			if (o == null || getClass() != o.getClass()) return false;
 
 			EntityTypeNode that = (EntityTypeNode) o;
-			return entityType.getFullyQualifiedName().equals(that.entityType.getFullyQualifiedName());
+			return entityType.getId().equals(that.entityType.getId());
 		}
 
 		@Override
 		public int hashCode()
 		{
-			return entityType.getFullyQualifiedName().hashCode();
+			return entityType.getId().hashCode();
 		}
 
 		@Override
 		public String toString()
 		{
-			return entityType.getFullyQualifiedName();
+			return entityType.getId();
 		}
 
 		private Set<EntityTypeNode> getStack()

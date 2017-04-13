@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
@@ -231,13 +232,15 @@ public class MappingServiceController extends MolgenisPluginController
 		String algorithm = mappingServiceRequest.getAlgorithm();
 		Long offset = mappingServiceRequest.getOffset();
 		Long num = mappingServiceRequest.getNum();
-		Query<Entity> query = new QueryImpl<Entity>().offset(offset.intValue()).pageSize(num.intValue());
+
+		Query<Entity> query = new QueryImpl<>().offset(offset.intValue()).pageSize(num.intValue());
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
 		Iterable<Entity> sourceEntities = () -> dataService.findAll(sourceEntityName, query).iterator();
 
 		long total = dataService.count(sourceEntityName, new QueryImpl<>());
 		long nrSuccess = 0, nrErrors = 0;
-		Map<String, String> errorMessages = new LinkedHashMap<String, String>();
+
+		Map<String, String> errorMessages = new LinkedHashMap<>();
 		for (AlgorithmEvaluation evaluation : algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities))
 		{
 			if (evaluation.hasError())
@@ -355,7 +358,7 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 			List<String> sourceNames = mappingTarget.getEntityMappings().stream()
-					.map(i -> i.getSourceEntityType().getFullyQualifiedName()).collect(Collectors.toList());
+					.map(i -> i.getSourceEntityType().getId()).collect(Collectors.toList());
 
 			EntityType targetEntityMeta = mappingTarget.getTarget();
 			for (Attribute attribute : targetEntityMeta.getAtomicAttributes())
@@ -445,7 +448,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String source = requestBody.get("source");
 		String targetAttributeName = requestBody.get("targetAttribute");
 		String searchTermsString = requestBody.get("searchTerms");
-		Set<String> searchTerms = new HashSet<String>();
+		Set<String> searchTerms = new HashSet<>();
 
 		if (StringUtils.isNotBlank(searchTermsString))
 		{
@@ -467,6 +470,12 @@ public class MappingServiceController extends MolgenisPluginController
 				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityType(), targetAttribute,
 						tagsForAttribute.values(), searchTerms);
 
+		// If no relevant attributes are found, return all source attributes
+		if (relevantAttributes.isEmpty())
+		{
+			return stream(entityMapping.getSourceEntityType().getAllAttributes())
+					.map(attribute -> ExplainedAttribute.create(attribute)).collect(toList());
+		}
 		return newArrayList(relevantAttributes.values());
 	}
 
@@ -544,7 +553,7 @@ public class MappingServiceController extends MolgenisPluginController
 		EntityType refEntityType = attributeMapping.getTargetAttribute().getRefEntity();
 		if (refEntityType != null)
 		{
-			Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getFullyQualifiedName()).iterator();
+			Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getId()).iterator();
 			model.addAttribute("categories", refEntities);
 		}
 
@@ -672,7 +681,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService
-					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getFullyQualifiedName());
+					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getId());
 
 			targetAttributeIdAttribute = dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -682,7 +691,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			targetAttributeEntities = dataService.findAll(dataService.getEntityType(target).getFullyQualifiedName());
+			targetAttributeEntities = dataService.findAll(dataService.getEntityType(target).getId());
 			targetAttributeIdAttribute = dataService.getEntityType(target).getIdAttribute().getName();
 			targetAttributeLabelAttribute = dataService.getEntityType(target).getLabelAttribute().getName();
 		}
@@ -708,7 +717,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService
-					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getFullyQualifiedName());
+					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getId());
 
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity()
 					.getIdAttribute().getName();
@@ -718,7 +727,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			sourceAttributeEntities = dataService.findAll(dataService.getEntityType(source).getFullyQualifiedName());
+			sourceAttributeEntities = dataService.findAll(dataService.getEntityType(source).getId());
 			sourceAttributeIdAttribute = dataService.getEntityType(source).getIdAttribute().getName();
 			sourceAttributeLabelAttribute = dataService.getEntityType(source).getLabelAttribute().getName();
 		}
@@ -773,9 +782,8 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
-	public
 	@ResponseBody
-	void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
+	public void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
 			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
 			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
 	{
@@ -802,9 +810,8 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return Map with the results and size of the source
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	public
 	@ResponseBody
-	Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
+	public Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		EntityType targetEntityType = dataService.getEntityType(mappingServiceRequest.getTargetEntityName());
 		Attribute targetAttribute = targetEntityType != null ? targetEntityType
@@ -855,7 +862,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 */
 	private List<EntityType> getNewSources(MappingTarget target)
 	{
-		return StreamSupport.stream(dataService.getEntityNames().spliterator(), false)
+		return StreamSupport.stream(dataService.getEntityTypeIds().spliterator(), false)
 				.filter((name) -> isValidSource(target, name)).map(dataService::getEntityType)
 				.collect(Collectors.toList());
 	}
@@ -867,13 +874,13 @@ public class MappingServiceController extends MolgenisPluginController
 
 	private List<EntityType> getEntityTypes()
 	{
-		return dataService.getEntityNames().map(dataService::getEntityType).collect(toList());
+		return dataService.getEntityTypeIds().map(dataService::getEntityType).collect(toList());
 	}
 
 	private List<EntityType> getWritableEntityTypes()
 	{
 		return getEntityTypes().stream().filter(emd -> !emd.isAbstract())
-				.filter(emd -> dataService.getCapabilities(emd.getFullyQualifiedName()).contains(RepositoryCapability.WRITABLE))
+				.filter(emd -> dataService.getCapabilities(emd.getId()).contains(RepositoryCapability.WRITABLE))
 				.collect(Collectors.toList());
 	}
 

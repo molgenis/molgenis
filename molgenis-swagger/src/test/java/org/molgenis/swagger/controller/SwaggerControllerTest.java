@@ -82,8 +82,8 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		when(type1.getFullyQualifiedName()).thenReturn("abc_EntityType2ëæ");
-		when(type2.getFullyQualifiedName()).thenReturn("abc_EntityType1ëæ");
+		when(type1.getId()).thenReturn("abc_EntityType2ëæ");
+		when(type2.getId()).thenReturn("abc_EntityType1ëæ");
 		when(metaDataService.getEntityTypes()).thenReturn(Stream.of(type1, type2));
 
 		assertEquals("view-swagger", swaggerController.swagger(model, response));

@@ -31,7 +31,6 @@ import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
@@ -48,39 +47,37 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final RepositoryCollectionRegistry repoCollectionRegistry;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private final IdentifierLookupService identifierLookupService;
 	private final PackagePersister packagePersister;
 
 	@Autowired
 	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService,
+			EntityTypeDependencyResolver entityTypeDependencyResolver,
 			PackagePersister packagePersister)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.repoCollectionRegistry = requireNonNull(repoCollectionRegistry);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.identifierLookupService = requireNonNull(identifierLookupService);
 		this.packagePersister = requireNonNull(packagePersister);
 	}
 
 	@Override
-	public Repository<Entity> getRepository(String entityName)
+	public Repository<Entity> getRepository(String entityTypeId)
 	{
-		EntityType entityType = getEntityType(entityName);
+		EntityType entityType = getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityName));
+			throw new UnknownEntityException(format("Unknown entity [%s]", entityTypeId));
 		}
 		return !entityType.isAbstract() ? getRepository(entityType) : null;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
+	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityName);
+		return (Repository<E>) getRepository(entityTypeId);
 	}
 
 	@Override
@@ -106,17 +103,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public boolean hasRepository(String entityName)
+	public boolean hasRepository(String entityTypeId)
 	{
-		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
+		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
 		if (systemEntityType != null)
 		{
 			return !systemEntityType.isAbstract();
 		}
 		else
 		{
-			return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
-					.eq(EntityTypeMetadata.ID, identifierLookupService.getEntityTypeId(entityName)).and()
+			return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EntityTypeMetadata.ID, entityTypeId)
+					.and()
 					.eq(IS_ABSTRACT, false).findOne() != null;
 		}
 	}
@@ -127,7 +124,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (entityType.isAbstract())
 		{
 			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getFullyQualifiedName()));
+					format("Can't create repository for abstract entity [%s]", entityType.getId()));
 		}
 		addEntityType(entityType);
 		return getRepository(entityType);
@@ -139,7 +136,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (entityType.isAbstract())
 		{
 			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getFullyQualifiedName()));
+					format("Can't create repository for abstract entity [%s]", entityType.getId()));
 		}
 		addEntityType(entityType);
 		return getRepository(entityType, entityClass);
@@ -159,11 +156,11 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void deleteEntityType(String entityName)
+	public void deleteEntityType(String entityTypeId)
 	{
-		dataService.deleteById(ENTITY_TYPE_META_DATA, identifierLookupService.getEntityTypeId(entityName));
+		dataService.deleteById(ENTITY_TYPE_META_DATA, entityTypeId);
 
-		LOG.info("Removed entity [{}]", entityName);
+		LOG.info("Removed entity [{}]", entityTypeId);
 	}
 
 	@Transactional
@@ -188,8 +185,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 2nd pass: delete entities
 		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getId));
 
-		LOG.info("Removed entities [{}]",
-				entityTypes.stream().map(EntityType::getFullyQualifiedName).collect(joining(",")));
+		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
 	}
 
 	@Transactional
@@ -239,7 +235,7 @@ public class MetaDataServiceImpl implements MetaDataService
 				.eq(EntityTypeMetadata.ID, entityType.getId()).fetch(getEntityTypeFetch()).findOne();
 		if (existingEntityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getFullyQualifiedName()));
+			throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getId()));
 		}
 
 		updateEntityType(entityType, existingEntityType);
@@ -275,7 +271,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		Map<String, EntityType> existingEntityTypeMap = getExistingEntityTypeMap(entityTypes);
 		upsertEntityTypesSkipMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
 		addMappedByAttributes(resolvedEntityTypes, existingEntityTypeMap);
-
 	}
 
 	private Map<String, EntityType> getExistingEntityTypeMap(Collection<EntityType> entityTypes)
@@ -283,8 +278,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 		entityTypes.forEach(entityType ->
 		{
-			String fullyQualifiedName = entityType.getFullyQualifiedName();
-			String entityId = identifierLookupService.getEntityTypeId(fullyQualifiedName);
+			String entityId = entityType.getId();
 			if (entityId != null)
 			{
 				EntityType existingEntityType = dataService
@@ -367,7 +361,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(Attribute attr)
 	{
-		EntityType entityType = dataService.getEntityType(attr.getEntity().getFullyQualifiedName());
+		EntityType entityType = dataService.getEntityType(attr.getEntity().getId());
 		entityType.addAttribute(attr);
 
 		// Update repository state
@@ -379,9 +373,9 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addAttributes(String entityName, Stream<Attribute> attrs)
+	public void addAttributes(String entityTypeId, Stream<Attribute> attrs)
 	{
-		EntityType entityType = dataService.getEntityType(entityName);
+		EntityType entityType = dataService.getEntityType(entityTypeId);
 		List<Attribute> attributes = attrs.collect(toList());
 		entityType.addAttributes(attributes);
 
@@ -393,17 +387,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public EntityType getEntityType(String fullyQualifiedEntityName)
+	public EntityType getEntityType(String entityTypeId)
 	{
-		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(fullyQualifiedEntityName);
+		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
 		if (systemEntity != null)
 		{
 			return systemEntity;
 		}
 		else
 		{
-			String entityTypeId = identifierLookupService.getEntityTypeId(fullyQualifiedEntityName);
-			return getEntityTypeById(entityTypeId);
+			return entityTypeId != null ? dataService
+					.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(), EntityType.class) : null;
 		}
 	}
 
@@ -439,8 +433,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Package getPackage(String fullyQualifiedPackageName)
 	{
-		return dataService
-				.findOneById(PACKAGE, identifierLookupService.getPackageId(fullyQualifiedPackageName), Package.class);
+		return dataService.findOneById(PACKAGE, fullyQualifiedPackageName, Package.class);
 	}
 
 	@Override
@@ -541,7 +534,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = Maps.newLinkedHashMap();
-		stream(repositoryCollection.getEntityIds().spliterator(), false).forEach(id -> entitiesImportable
+		stream(repositoryCollection.getEntityTypeIds().spliterator(), false).forEach(id -> entitiesImportable
 				.put(id, this.isEntityTypeCompatible(repositoryCollection.getRepository(id).getEntityType())));
 
 		return entitiesImportable;
@@ -550,10 +543,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean isEntityTypeCompatible(EntityType newEntityType)
 	{
-		String entityName = newEntityType.getFullyQualifiedName();
-		if (dataService.hasRepository(entityName))
+		String newEntityTypeId = newEntityType.getId();
+		if (dataService.hasRepository(newEntityTypeId))
 		{
-			EntityType oldEntityType = dataService.getEntityType(entityName);
+			EntityType oldEntityType = dataService.getEntityType(newEntityTypeId);
 			List<Attribute> oldAtomicAttributes = stream(oldEntityType.getAtomicAttributes().spliterator(), false)
 					.collect(toList());
 
@@ -581,7 +574,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean isMetaEntityType(EntityType entityType)
 	{
-		switch (entityType.getFullyQualifiedName())
+		switch (entityType.getId())
 		{
 			case ENTITY_TYPE_META_DATA:
 			case ATTRIBUTE_META_DATA:
@@ -755,13 +748,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public String getFullyQualifiedName()
-		{
-			return getPackage() == null ? getName() :
-					getPackage().getFullyQualifiedName() + PACKAGE_SEPARATOR + getName();
-		}
-
-		@Override
 		public String getId()
 		{
 			return entityType.getId();
@@ -771,18 +757,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		public EntityType setId(String id)
 		{
 			return entityType.setId(id);
-		}
-
-		@Override
-		public String getName()
-		{
-			return entityType.getName();
-		}
-
-		@Override
-		public EntityType setName(String name)
-		{
-			return entityType.setName(name);
 		}
 
 		@Override

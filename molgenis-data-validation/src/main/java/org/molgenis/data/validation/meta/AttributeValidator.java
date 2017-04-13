@@ -272,7 +272,7 @@ public class AttributeValidator
 			{
 				throw new MolgenisDataException(
 						format("mappedBy attribute [%s] is not part of entity [%s].", mappedByAttr.getName(),
-								attr.getRefEntity().getFullyQualifiedName()));
+								attr.getRefEntity().getId()));
 			}
 		}
 	}
@@ -299,7 +299,7 @@ public class AttributeValidator
 					{
 						throw new MolgenisDataException(
 								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getFullyQualifiedName(), refAttrName, attr.getEntityType().getFullyQualifiedName(),
+										refEntity.getId(), refAttrName, attr.getEntityType().getId(),
 										attr.getName(), orderBy.toSortString()));
 					}
 				}

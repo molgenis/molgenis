@@ -11,9 +11,9 @@ import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 
 /**
  * This {@link org.springframework.context.MessageSource} reads localization messages from properties files on the classpath.
- *
+ * <p>
  * Uses UTF-8 encoding.
- *
+ * <p>
  * N.B. If you want localization messages for a namespace to be picked up by the populator,
  * you need to create a {@link PropertiesMessageSource} bean for that namespace and add it to the context.
  */

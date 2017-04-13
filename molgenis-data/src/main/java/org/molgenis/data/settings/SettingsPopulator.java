@@ -8,7 +8,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.settings.DefaultSettingsEntityType.ATTR_ID;
 
 /**
  * Populates the data service with default setting values for all {@link DefaultSettingsEntityType} beans.
@@ -36,8 +35,7 @@ public class SettingsPopulator
 		if (settingsEntity == null)
 		{
 			Entity defaultSettingsEntity = defaultSettingsEntityType.getDefaultSettings();
-			defaultSettingsEntity.set(ATTR_ID, defaultSettingsEntityType.getName());
-			dataService.add(defaultSettingsEntityType.getFullyQualifiedName(), defaultSettingsEntity);
+			dataService.add(defaultSettingsEntityType.getId(), defaultSettingsEntity);
 		}
 	}
 }

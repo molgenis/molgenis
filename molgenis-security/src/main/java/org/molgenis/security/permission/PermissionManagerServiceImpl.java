@@ -27,8 +27,8 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
@@ -295,13 +295,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			List<Object> entityClassIds = this.getEntityClassIds();
 			List<EntityType> entityTypes = dataService
 					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityClassIds.stream(),
-							new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+							new Fetch().field(EntityTypeMetadata.ID)
 									.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
 			if (entityClassIds != null)
 			{
 				Map<String, String> entityClassMap = new TreeMap<String, String>();
 				for (EntityType entityType : entityTypes)
-					entityClassMap.put(entityType.getId(), entityType.getFullyQualifiedName());
+					entityClassMap.put(entityType.getId(), entityType.getId());
 				permissions.setEntityIds(entityClassMap);
 			}
 		}

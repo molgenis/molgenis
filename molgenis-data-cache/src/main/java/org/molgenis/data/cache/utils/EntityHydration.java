@@ -48,7 +48,7 @@ public class EntityHydration
 	@SuppressWarnings("unchecked")
 	public Entity hydrate(Map<String, Object> dehydratedEntity, EntityType entityType)
 	{
-		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getFullyQualifiedName());
+		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getId());
 
 		Entity hydratedEntity = entityManager.create(entityType, NO_POPULATE);
 

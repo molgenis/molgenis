@@ -100,8 +100,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		AppInfoDto appInfoDto1 = AppInfoDto.builder().setId("id1").setName("name1").setActive(false).build();
 
 		ResultActions resultActions = mockMvc.perform(get(AppsController.URI)).andExpect(status().isOk())
-				.andExpect(view().name("view-apps"))
-				.andExpect(model().attribute("appEntityTypeFullyQualifiedName", APP));
+				.andExpect(view().name("view-apps")).andExpect(model().attribute("appEntityTypeId", APP));
 		verify(sort).on(AppMetaData.NAME);
 		if (hasWriteAppPermission)
 		{

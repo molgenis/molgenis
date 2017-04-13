@@ -11,10 +11,12 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -110,8 +112,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	{
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
 		List<Attribute> sourceAttributes = Lists.newArrayList();
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
-		EntityType targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
@@ -208,6 +210,18 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		public OntologyTagService ontologyTagService()
 		{
 			return mock(OntologyTagService.class);
+		}
+
+		@Bean
+		DefaultPackage defaultPackage()
+		{
+			return mock(DefaultPackage.class);
+		}
+
+		@Bean
+		SystemPackageRegistry systemPackageRegistry()
+		{
+			return mock(SystemPackageRegistry.class);
 		}
 	}
 }

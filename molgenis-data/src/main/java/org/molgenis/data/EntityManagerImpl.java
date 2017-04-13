@@ -130,7 +130,7 @@ public class EntityManagerImpl implements EntityManager
 		if (entities instanceof EntityStream && ((EntityStream) entities).isLazy())
 		{
 			// TODO remove cast after updating DataService/Repository interfaces to return EntityStream
-			return dataService.findAll(entityType.getFullyQualifiedName(), entities.map(Entity::getIdValue), fetch);
+			return dataService.findAll(entityType.getId(), entities.map(Entity::getIdValue), fetch);
 		}
 
 		// no fetch exists that described what to resolve
@@ -164,7 +164,7 @@ public class EntityManagerImpl implements EntityManager
 		// fill maps
 		for (Attribute attr : resolvableAttrs)
 		{
-			String refEntityName = attr.getRefEntity().getFullyQualifiedName();
+			String refEntityName = attr.getRefEntity().getId();
 
 			if (isSingleReferenceType(attr))
 			{

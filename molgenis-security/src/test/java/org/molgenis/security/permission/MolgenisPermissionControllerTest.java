@@ -32,32 +32,32 @@ public class MolgenisPermissionControllerTest
 	@Test
 	public void hasReadPermissionTrue()
 	{
-		String entityName = "entity";
-		when(molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)).thenReturn(true);
-		assertTrue(molgenisPermissionController.hasReadPermission(entityName));
+		String entityTypeId = "entity";
+		when(molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ)).thenReturn(true);
+		assertTrue(molgenisPermissionController.hasReadPermission(entityTypeId));
 	}
 
 	@Test
 	public void hasReadPermissionFalse()
 	{
-		String entityName = "entity";
-		when(molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)).thenReturn(false);
-		assertFalse(molgenisPermissionController.hasReadPermission(entityName));
+		String entityTypeId = "entity";
+		when(molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ)).thenReturn(false);
+		assertFalse(molgenisPermissionController.hasReadPermission(entityTypeId));
 	}
 
 	@Test
 	public void hasWritePermissionTrue()
 	{
-		String entityName = "entity";
-		when(molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)).thenReturn(true);
-		assertTrue(molgenisPermissionController.hasWritePermission(entityName));
+		String entityTypeId = "entity";
+		when(molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITE)).thenReturn(true);
+		assertTrue(molgenisPermissionController.hasWritePermission(entityTypeId));
 	}
 
 	@Test
 	public void hasWritePermissionFalse()
 	{
-		String entityName = "entity";
-		when(molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)).thenReturn(false);
-		assertFalse(molgenisPermissionController.hasWritePermission(entityName));
+		String entityTypeId = "entity";
+		when(molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITE)).thenReturn(false);
+		assertFalse(molgenisPermissionController.hasWritePermission(entityTypeId));
 	}
 }

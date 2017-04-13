@@ -14,7 +14,6 @@ import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -122,7 +121,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		ValidationResultWizardPage validationResultWizardPage = mock(ValidationResultWizardPage.class);
 		ImportResultsWizardPage importResultsWizardPage = mock(ImportResultsWizardPage.class);
 		PackageWizardPage packageWizardPage = mock(PackageWizardPage.class);
-		IdentifierLookupService identifierLookupService = mock(IdentifierLookupService.class);
 		importServiceFactory = mock(ImportServiceFactory.class);
 		fileStore = mock(FileStore.class);
 		fileRepositoryCollectionFactory = mock(FileRepositoryCollectionFactory.class);
@@ -136,7 +134,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
 				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
 				userAccountService, importServiceFactory, fileStore, fileRepositoryCollectionFactory, importRunService,
-				executorService, groupAuthorityFactory, identifierLookupService);
+				executorService, groupAuthorityFactory);
 
 		List<GroupAuthority> authorities = Lists.newArrayList();
 
@@ -189,7 +187,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		});
 
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
-				eq(new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+				eq(new Fetch().field(EntityTypeMetadata.ID)
 						.field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
 				.thenAnswer(new Answer<Stream<EntityType>>()
 				{
@@ -210,7 +208,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 				return Stream.of(authority1, authority2, authority3, authority4);
 			}
 		});
-		when(dataService.getEntityIds()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
+		when(dataService.getEntityTypeIds())
+				.thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		Authentication authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -231,14 +230,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(group1));
 
-		when(identifierLookupService.getEntityTypeId("entity1")).thenReturn("entity1");
-		when(identifierLookupService.getEntityTypeId("entity2")).thenReturn("entity2");
-		when(identifierLookupService.getEntityTypeId("entity3")).thenReturn("entity3");
-		when(identifierLookupService.getEntityTypeId("entity4")).thenReturn("entity4");
-		when(identifierLookupService.getEntityTypeId("entity5")).thenReturn("entity5");
-
 		when(entityType.getId()).thenReturn("entityTypeId");
-		when(entityType.getFullyQualifiedName()).thenReturn("entityTypeName");
+		when(entityType.getId()).thenReturn("entityTypeName");
 
 		reset(executorService);
 	}

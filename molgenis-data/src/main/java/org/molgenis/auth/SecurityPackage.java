@@ -20,7 +20,7 @@ public class SecurityPackage extends SystemPackage
 	@Autowired
 	public SecurityPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_SECURITY, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

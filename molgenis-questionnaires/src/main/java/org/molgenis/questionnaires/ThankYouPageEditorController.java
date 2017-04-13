@@ -55,7 +55,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 
 		if ((questionnaireName == null) && !questionnaires.isEmpty())
 		{
-			questionnaireName = questionnaires.get(0).getFullyQualifiedName();
+			questionnaireName = questionnaires.get(0).getId();
 		}
 
 		model.addAttribute("content", thankYouTextService.getThankYouText(questionnaireName));

@@ -20,7 +20,7 @@ public class MailPackage extends SystemPackage
 	@Autowired
 	public MailPackage(PackageMetadata packageMetadata)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_MAIL, packageMetadata);
 	}
 
 	@Override

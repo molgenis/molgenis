@@ -75,7 +75,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		entityType = entityTypeFactory.create(repositoryName).setName(repositoryName);
+		entityType = entityTypeFactory.create(repositoryName);
 		entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
 

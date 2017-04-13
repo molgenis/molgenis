@@ -105,7 +105,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		}
 
 		// delete one-by-one and first check if exists because entities might not exist due to earlier deletes
-		String refEntityTypeName = attribute.getRefEntity().getFullyQualifiedName();
+		String refEntityTypeName = attribute.getRefEntity().getId();
 		refEntityStream.forEach(refEntity ->
 		{
 			if (dataService.findOneById(refEntityTypeName, refEntity.getIdValue()) != null)

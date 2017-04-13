@@ -26,10 +26,10 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
+	public XYDataChart getXYDataChart(String entityTypeId, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{
-		Repository<Entity> repo = dataService.getRepository(entityName);
+		Repository<Entity> repo = dataService.getRepository(entityTypeId);
 		EntityType entityType = repo.getEntityType();
 
 		final AttributeType attributeXFieldTypeEnum = entityType.getAttribute(attributeNameXaxis).getDataType();
@@ -48,12 +48,12 @@ public class ChartDataServiceImpl implements ChartDataService
 			if (!StringUtils.isNotBlank(split))
 			{
 				xYDataSeries = Arrays.asList(this
-						.getXYDataSerie(repo, entityName, attributeNameXaxis, attributeNameYaxis,
+						.getXYDataSerie(repo, entityTypeId, attributeNameXaxis, attributeNameYaxis,
 								attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
 			}
 			else
 			{
-				xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
+				xYDataSeries = this.getXYDataSeries(repo, entityTypeId, attributeNameXaxis, attributeNameYaxis,
 						attributeXFieldTypeEnum, attributeYFieldTypeEnum, split, queryRules);
 			}
 
@@ -68,7 +68,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityName, String attributeNameXaxis,
+	public XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityTypeId, String attributeNameXaxis,
 			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
@@ -81,7 +81,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 
 		Sort sort = new Sort().on(attributeNameXaxis).on(attributeNameYaxis);
-		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
+		Iterable<? extends Entity> iterable = getIterable(entityTypeId, repo, queryRules, sort);
 		for (Entity entity : iterable)
 		{
 			Object x = getJavaValue(entity, attributeNameXaxis, attributeXFieldTypeEnum);
@@ -93,13 +93,13 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityName, String attributeNameXaxis,
+	public List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityTypeId, String attributeNameXaxis,
 			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules)
 
 	{
 		Sort sort = new Sort().on(attributeNameXaxis).on(attributeNameYaxis);
-		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
+		Iterable<? extends Entity> iterable = getIterable(entityTypeId, repo, queryRules, sort);
 
 		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
 		for (Entity entity : iterable)
@@ -181,7 +181,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 *            (BoxPlotChart) the chart to be initialized
 	 * @param repo
 	 *            (Repository<? extends Entity>) the repository where the data exists
-	 * @param entityName
+	 * @param entityTypeId
 	 *            (String) the name of the entity to be used
 	 * @param attributeName
 	 *            (String) the name of the observable value in the entity
@@ -192,17 +192,17 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @param scaleToCalcOutliers
 	 *            (double) the scale that need to be used calculating the outliers. value 1 means that there wil not be
 	 *            any outliers.
-	 */ public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
+	 */ public BoxPlotChart getBoxPlotChart(String entityTypeId, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
-		Repository<Entity> repo = dataService.getRepository(entityName);
+		Repository<Entity> repo = dataService.getRepository(entityTypeId);
 		EntityType entityType = repo.getEntityType();
 
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
 		boxPlotChart.setyLabel(entityType.getAttribute(attributeName).getLabel());
 
 		Sort sort = new Sort().on(attributeName);
-		Iterable<Entity> iterable = getIterable(entityName, repo, queryRules, sort);
+		Iterable<Entity> iterable = getIterable(entityTypeId, repo, queryRules, sort);
 		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(entityType, iterable, attributeName,
 				split);
 
@@ -300,14 +300,14 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * get a Iterable holding entitys
 	 *
-	 * @param entityName (String) the name of the entity to be used
+	 * @param entityTypeId (String) the name of the entity to be used
 	 * @param repo       (Repository<? extends Entity>) the repository where the data exists
 	 * @param queryRules (List<QueryRule>) the query rules to be used getting the data from the repo
 	 * @param sort       (Sort)
 	 * @return
 	 */
 
-	private Iterable<Entity> getIterable(String entityName, Repository<Entity> repo, List<QueryRule> queryRules,
+	private Iterable<Entity> getIterable(String entityTypeId, Repository<Entity> repo, List<QueryRule> queryRules,
 			Sort sort)
 	{
 
@@ -374,10 +374,10 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
+	public DataMatrix getDataMatrix(String entityTypeId, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules)
 	{
-		Iterable<Entity> iterable = dataService.getRepository(entityName);
+		Iterable<Entity> iterable = dataService.getRepository(entityTypeId);
 
 		if (queryRules != null && !queryRules.isEmpty())
 		{

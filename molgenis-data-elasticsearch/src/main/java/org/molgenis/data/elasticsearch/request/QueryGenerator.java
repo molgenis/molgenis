@@ -837,7 +837,7 @@ public class QueryGenerator implements QueryPartGenerator
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(
-						format("Unknown attribute [%s] of entity type [%s]", attrName, entityTypeAtDepth.getFullyQualifiedName()));
+						format("Unknown attribute [%s] of entity type [%s]", attrName, entityTypeAtDepth.getId()));
 			}
 			if (depth > 0)
 			{

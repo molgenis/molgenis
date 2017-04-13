@@ -13,8 +13,7 @@ import java.util.Iterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.*;
 
 public class DynamicEntityTest
 {
@@ -35,7 +34,7 @@ public class DynamicEntityTest
 	public static Iterator<Object[]> setExceptionProvider()
 	{
 		return newArrayList(new Object[] { ONE_TO_MANY, mock(Entity.class) },
-				new Object[] { XREF, mock(Iterable.class) }).iterator();
+				new Object[] { XREF, mock(Iterable.class) }, new Object[] { DECIMAL, Double.NaN }).iterator();
 	}
 
 	@Test(dataProvider = "setExceptionProvider", expectedExceptions = MolgenisDataException.class)

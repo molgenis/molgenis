@@ -48,7 +48,7 @@ public class DataExplorerHyperlinkDirectiveTest
 		when(dataService.hasRepository("thedataset")).thenReturn(true);
 
 		Map<String, String> params = Maps.newHashMap();
-		params.put("entityName", "thedataset");
+		params.put("entityTypeId", "thedataset");
 		params.put("class", "class1 class2");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
@@ -72,7 +72,7 @@ public class DataExplorerHyperlinkDirectiveTest
 		when(dataService.hasRepository("thedataset")).thenReturn(false);
 
 		Map<String, String> params = Maps.newHashMap();
-		params.put("entityName", "thedataset");
+		params.put("entityTypeId", "thedataset");
 		params.put("class", "class1 class2");
 		params.put("alternativeText", "alt");
 

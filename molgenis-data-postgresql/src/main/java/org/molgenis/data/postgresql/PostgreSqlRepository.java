@@ -482,7 +482,7 @@ class PostgreSqlRepository extends AbstractRepository
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
 							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getFullyQualifiedName(),
+									attr.getName(), attr.getEntity().getId(),
 									entity.getIdValue().toString())));
 				}
 
@@ -553,7 +553,7 @@ class PostgreSqlRepository extends AbstractRepository
 			Object nonExistingEntityId = entitiesBatch.stream().map(Entity::getIdValue)
 					.filter(entityId -> !existingEntityIds.contains(entityId)).findFirst().orElse(null);
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getName(),
+					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getId(),
 							nonExistingEntityId.toString())));
 		}
 	}
@@ -565,7 +565,7 @@ class PostgreSqlRepository extends AbstractRepository
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", entityType.getFullyQualifiedName(),
+					format("Entity [%s] attribute [%s] value cannot be null", entityType.getId(),
 							attr.getName())));
 		}
 

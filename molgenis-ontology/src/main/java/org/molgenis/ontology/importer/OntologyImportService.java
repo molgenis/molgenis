@@ -56,26 +56,26 @@ public class OntologyImportService implements ImportService
 		EntityImportReport report = new EntityImportReport();
 		try
 		{
-			Iterator<String> it = source.getEntityIds().iterator();
+			Iterator<String> it = source.getEntityTypeIds().iterator();
 			while (it.hasNext())
 			{
-				String entityNameToImport = it.next();
-				Repository<Entity> repo = source.getRepository(entityNameToImport);
+				String entityTypeIdToImport = it.next();
+				Repository<Entity> repo = source.getRepository(entityTypeIdToImport);
 				try
 				{
 					report = new EntityImportReport();
 
-					Repository<Entity> crudRepository = dataService.getRepository(entityNameToImport);
+					Repository<Entity> crudRepository = dataService.getRepository(entityTypeIdToImport);
 
 					crudRepository.add(stream(repo.spliterator(), false));
 
 					permissionSystemService.giveUserWriteMetaPermissions(addedEntities);
-					List<String> entityNames = addedEntities.stream().map(emd -> emd.getFullyQualifiedName())
+					List<String> entityTypeIds = addedEntities.stream().map(emd -> emd.getId())
 							.collect(Collectors.toList());
 					int count = 1;
-					for (String entityName : entityNames)
+					for (String entityTypeId : entityTypeIds)
 					{
-						report.addEntityCount(entityName, count++);
+						report.addEntityCount(entityTypeId, count++);
 					}
 				}
 				finally
@@ -89,9 +89,9 @@ public class OntologyImportService implements ImportService
 			// Remove created repositories
 			for (EntityType emd : addedEntities)
 			{
-				if (dataService.hasRepository(emd.getFullyQualifiedName()))
+				if (dataService.hasRepository(emd.getId()))
 				{
-					dataService.deleteAll(emd.getFullyQualifiedName());
+					dataService.deleteAll(emd.getId());
 				}
 
 				if (searchService.hasMapping(emd))
@@ -130,11 +130,11 @@ public class OntologyImportService implements ImportService
 
 		if (ontologyExists) throw new MolgenisDataException("The ontology you are trying to import already exists");
 
-		Iterator<String> it = source.getEntityIds().iterator();
+		Iterator<String> it = source.getEntityTypeIds().iterator();
 		while (it.hasNext())
 		{
-			String entityName = it.next();
-			report.getSheetsImportable().put(entityName, !ontologyExists);
+			String entityTypeId = it.next();
+			report.getSheetsImportable().put(entityTypeId, !ontologyExists);
 		}
 		return report;
 	}

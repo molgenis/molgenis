@@ -31,7 +31,6 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -155,9 +154,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -204,9 +203,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -253,9 +252,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -278,9 +277,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -328,9 +327,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -387,10 +386,10 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(attribute3.getEntity()).thenReturn(entityType3);
 		when(attribute4.getEntity()).thenReturn(entityType4);
 
-		when(entityType1.getFullyQualifiedName()).thenReturn("EntityType1");
-		when(entityType2.getFullyQualifiedName()).thenReturn("EntityType2");
-		when(entityType3.getFullyQualifiedName()).thenReturn("EntityType3");
-		when(entityType4.getFullyQualifiedName()).thenReturn("EntityType4");
+		when(entityType1.getId()).thenReturn("EntityType1");
+		when(entityType2.getId()).thenReturn("EntityType2");
+		when(entityType3.getId()).thenReturn("EntityType3");
+		when(entityType4.getId()).thenReturn("EntityType4");
 
 		repo.forEachBatched(attributes::addAll, 2);
 
@@ -435,7 +434,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -450,7 +449,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -487,7 +486,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -502,7 +501,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attrCompoundattr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -520,7 +519,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -557,7 +556,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -573,7 +572,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -612,9 +611,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);
@@ -657,9 +656,9 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		setUserAuthentication();
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType0Name).getMock();
+		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn(entityType1Name).getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String attr0Name = "entity0attr0";
 		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn(attr0Name).getMock();
 		when(attr0.getEntity()).thenReturn(entityType0);

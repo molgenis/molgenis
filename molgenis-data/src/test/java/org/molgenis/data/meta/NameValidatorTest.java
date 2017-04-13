@@ -3,16 +3,8 @@ package org.molgenis.data.meta;
 import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-
 public class NameValidatorTest
 {
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testValidateNameTooLong()
-	{
-		NameValidator.validateEntityName("ThisNameIsTooLongToUseAsAnAttributeName");
-	}
-
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateNameInvalidCharacters()
 	{
@@ -60,12 +52,6 @@ public class NameValidatorTest
 	public void testI18nNumber()
 	{
 		NameValidator.validateEntityName("test-n2");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testUnderscore()
-	{
-		NameValidator.validateEntityName("test_test");
 	}
 
 	@Test

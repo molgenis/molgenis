@@ -127,7 +127,7 @@ Defines the data type (default: string)
 | text         | When having a string with a length of more than 255 characters, this data type is recommended.| A string with characters with a maximum length of 65535		  |
 | int          | Integers. Natural numbers like 1, 2, 3, -1, -2, -3. rangeMin and rangeMax can be defined.     | Non decimal numbers in range[-2^31 , 2^31 -1]                    |
 | long         | Non-decimal number of type long                                                               | Non decimal numbers in range[-2^63 , 2^63 -1]                    |
-| decimal      | Decimal numbers/floats.                                                                       | Decimal numbers in range[-2^31 , 2^31 -1]                        |
+| decimal      | Decimal numbers/floats.                                                                       | Decimal numbers with [double-precision](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) ('NaN' not allowed)                        |
 | bool         | A boolean value: true/false                                                                   | TRUE/FALSE                                                       |
 | date         | A date without a time-zone in the ISO-8601 calendar system                                    | yyyy-mm-dd                                                       |
 | datetime     | An instant in time. Time zone information may be used to specify the instant but is not stored. | yyyy-mm-ddThh:mm:ss+timezone e.g. 1985-08-12T11:12:13+0500       |

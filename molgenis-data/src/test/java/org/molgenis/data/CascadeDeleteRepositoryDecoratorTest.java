@@ -53,7 +53,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 		initMocks(this);
 		cascadeDeleteRepositoryDecorator = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
 
-		when(refEntityType.getFullyQualifiedName()).thenReturn(REF_ENTITY_TYPE_NAME);
+		when(refEntityType.getId()).thenReturn(REF_ENTITY_TYPE_NAME);
 		when(refEntityType.getAtomicAttributes()).thenReturn(emptyList());
 
 		when(refEntity.getIdValue()).thenReturn(REF_ENTITY_ID);

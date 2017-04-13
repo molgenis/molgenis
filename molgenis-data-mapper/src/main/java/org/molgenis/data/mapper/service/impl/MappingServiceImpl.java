@@ -10,9 +10,11 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -48,11 +50,14 @@ public class MappingServiceImpl implements MappingService
 	private final MappingProjectRepository mappingProjectRepository;
 	private final PermissionSystemService permissionSystemService;
 	private final AttributeFactory attrMetaFactory;
+	private final SystemPackageRegistry systemPackageRegistry;
+	private final DefaultPackage defaultPackage;
 
 	@Autowired
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory, SystemPackageRegistry systemPackageRegistry,
+			DefaultPackage defaultPackage)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -60,6 +65,8 @@ public class MappingServiceImpl implements MappingService
 		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.systemPackageRegistry = systemPackageRegistry;
+		this.defaultPackage = defaultPackage;
 	}
 
 	@Override
@@ -160,27 +167,29 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	public String applyMappings(MappingTarget mappingTarget, String entityTypeId)
 	{
-		return applyMappings(mappingTarget, entityName, true);
+		return applyMappings(mappingTarget, entityTypeId, true);
 	}
 
 	@Override
 	@Transactional
-	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
+	public String applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
-		targetMetaData.setPackage(null);
 		targetMetaData.setId(idGenerator.generateId());
-		targetMetaData.setName(entityName);
-		targetMetaData.setLabel(entityName);
+		targetMetaData.setLabel(entityTypeId);
 		if (addSourceAttribute)
 		{
 			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
 		Repository<Entity> targetRepo;
-		if (!dataService.hasRepository(entityName))
+		if (targetMetaData.getPackage() == null || systemPackageRegistry.containsPackage(targetMetaData.getPackage()))
+		{
+			targetMetaData.setPackage(defaultPackage);
+		}
+		if (!dataService.hasRepository(entityTypeId))
 		{
 			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
@@ -189,7 +198,7 @@ public class MappingServiceImpl implements MappingService
 		else
 		{
 			// Get an existing repository
-			targetRepo = dataService.getRepository(entityName);
+			targetRepo = dataService.getRepository(entityTypeId);
 
 			// Compare the metadata between the target repository and the mapping target
 			// Returns detailed information in case something is not compatible
@@ -207,15 +216,15 @@ public class MappingServiceImpl implements MappingService
 
 		try
 		{
-			LOG.info("Applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
+			LOG.info("Applying mappings to repository [" + targetMetaData.getId() + "]");
 			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
 				LOG.info("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			}
-			LOG.info("Done applying mappings to repository [" + targetMetaData.getFullyQualifiedName() + "]");
-			return targetMetaData.getFullyQualifiedName();
+			LOG.info("Done applying mappings to repository [" + targetMetaData.getId() + "]");
+			return targetMetaData.getId();
 		}
 		catch (RuntimeException ex)
 		{
@@ -264,8 +273,8 @@ public class MappingServiceImpl implements MappingService
 
 			if (isReferenceType(mappingTargetAttribute))
 			{
-				String mappingTargetRefEntityName = mappingTargetAttribute.getRefEntity().getFullyQualifiedName();
-				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getFullyQualifiedName();
+				String mappingTargetRefEntityName = mappingTargetAttribute.getRefEntity().getId();
+				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getId();
 				if (!mappingTargetRefEntityName.equals(targetRepositoryRefEntityName))
 				{
 					throw new MolgenisDataException(

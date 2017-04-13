@@ -14,20 +14,20 @@ import java.util.List;
  */
 public interface ChartDataService
 {
-	XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis, String split,
+	XYDataChart getXYDataChart(String entityTypeId, String attributeNameXaxis, String attributeNameYaxis, String split,
 			List<QueryRule> queryRules);
 
-	DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
+	DataMatrix getDataMatrix(String entityTypeId, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules);
 
-	List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityName, String attributeNameXaxis,
+	List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityTypeId, String attributeNameXaxis,
 			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules);
 
-	XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityName, String attributeNameXaxis,
+	XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityTypeId, String attributeNameXaxis,
 			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			List<QueryRule> queryRules);
 
-	BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split,
+	BoxPlotChart getBoxPlotChart(String entityTypeId, String attributeName, List<QueryRule> queryRules, String split,
 			double scaleToCalcOutliers);
 }

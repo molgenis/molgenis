@@ -17,7 +17,7 @@ public class StringExpressionEvaluator implements ExpressionEvaluator
 	 * @param attribute  attribute meta data
 	 * @param entityType entity meta data
 	 */
-	public StringExpressionEvaluator(Attribute attribute, EntityType entityType)
+	StringExpressionEvaluator(Attribute attribute, EntityType entityType)
 	{
 		targetAttribute = attribute;
 		String expression = attribute.getExpression();

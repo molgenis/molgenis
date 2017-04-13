@@ -63,9 +63,9 @@ public class SystemEntityTypeTest
 	private class TestNestedCompoundEMD extends SystemEntityType
 	{
 
-		TestNestedCompoundEMD(String entityName)
+		TestNestedCompoundEMD(String entityTypeId)
 		{
-			super(entityName);
+			super(entityTypeId);
 			setIdGenerator(mock(IdGenerator.class));
 		}
 
@@ -86,9 +86,9 @@ public class SystemEntityTypeTest
 	private class TestCompoundEMD extends SystemEntityType
 	{
 
-		TestCompoundEMD(String entityName)
+		TestCompoundEMD(String entityTypeId)
 		{
-			super(entityName);
+			super(entityTypeId);
 			setIdGenerator(mock(IdGenerator.class));
 		}
 

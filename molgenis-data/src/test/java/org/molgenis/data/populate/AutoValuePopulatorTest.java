@@ -31,7 +31,7 @@ public class AutoValuePopulatorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn(ATTR_ID).getMock();
 		when(attrId.getDataType()).thenReturn(STRING);
 		when(attrId.isAuto()).thenReturn(true);

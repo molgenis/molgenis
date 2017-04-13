@@ -528,8 +528,8 @@ public class RestService
 			{
 				throw new MolgenisDataException(
 						format("Updating [%s] with id [%s] not allowed: [%s] is already referred to by another [%s]",
-								attr.getRefEntity().getFullyQualifiedName(), refEntity.getIdValue().toString(), refAttr.getName(),
-								entity.getEntityType().getFullyQualifiedName()));
+								attr.getRefEntity().getId(), refEntity.getIdValue().toString(), refAttr.getName(),
+								entity.getEntityType().getId()));
 			}
 
 			refEntity.set(refAttr.getName(), entity);
@@ -555,7 +555,7 @@ public class RestService
 
 		if (!updatedRefEntities.isEmpty())
 		{
-			dataService.update(attr.getRefEntity().getFullyQualifiedName(), updatedRefEntities.stream());
+			dataService.update(attr.getRefEntity().getId(), updatedRefEntities.stream());
 		}
 	}
 }

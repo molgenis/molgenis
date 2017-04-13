@@ -306,7 +306,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityIds()
+	public Iterable<String> getEntityTypeIds()
 	{
 		return repositories.keySet();
 	}
@@ -337,10 +337,10 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> entityNames = getEntityIds().iterator();
-		while (entityNames.hasNext())
+		Iterator<String> it = getEntityTypeIds().iterator();
+		while (it.hasNext())
 		{
-			if (entityNames.next().equals(name)) return true;
+			if (it.next().equals(name)) return true;
 		}
 		return false;
 	}
@@ -348,6 +348,6 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getFullyQualifiedName());
+		return hasRepository(entityType.getId());
 	}
 }

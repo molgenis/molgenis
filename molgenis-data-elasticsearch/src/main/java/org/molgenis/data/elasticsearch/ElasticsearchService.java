@@ -148,21 +148,21 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void index(Entity entity, EntityType entityType, IndexingMode indexingMode)
 	{
-		LOG.debug("Indexing single {}.{} entity ...", entityType.getFullyQualifiedName(), entity.getIdValue());
+		LOG.debug("Indexing single {}.{} entity ...", entityType.getId(), entity.getIdValue());
 		index(Stream.of(entity), entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Iterable<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode)
 	{
-		LOG.debug("Indexing multiple {} entities...", entityType.getFullyQualifiedName());
+		LOG.debug("Indexing multiple {} entities...", entityType.getId());
 		return index(stream(entities.spliterator(), false), entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Stream<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode)
 	{
-		LOG.debug("Indexing multiple {} entities...", entityType.getFullyQualifiedName());
+		LOG.debug("Indexing multiple {} entities...", entityType.getId());
 		return index(entities, entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
@@ -220,7 +220,7 @@ public class ElasticsearchService implements SearchService
 			// Get actual entities from the dataservice, skipping the ones that no longer exist and
 			// fetching all of their attributes in one go
 			referringEntitiesStream = dataService
-					.findAll(refEntityType.getFullyQualifiedName(), referringEntitiesStream.map(Entity::getIdValue),
+					.findAll(refEntityType.getId(), referringEntitiesStream.map(Entity::getIdValue),
 							createFetchForReindexing(refEntityType));
 
 			references = concat(references, referringEntitiesStream
@@ -258,7 +258,7 @@ public class ElasticsearchService implements SearchService
 			}
 			q.eq(attribute.getName(), referredEntity);
 		}
-		LOG.debug("q: [{}], referringEntityType: [{}]", q.toString(), referringEntityType.getFullyQualifiedName());
+		LOG.debug("q: [{}], referringEntityType: [{}]", q.toString(), referringEntityType.getId());
 		if (hasMapping(referringEntityType))
 		{
 			return searchInternalWithScanScroll(q, referringEntityType);
