@@ -22,6 +22,7 @@ import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
@@ -88,7 +89,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
-		SystemRepositoryDecoratorFactoryRegistrar.class })
+		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final String INTEGRATION_TEST_DATABASE_NAME;
