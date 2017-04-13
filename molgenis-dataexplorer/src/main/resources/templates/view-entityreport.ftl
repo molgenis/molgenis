@@ -38,7 +38,6 @@
                 var standaloneReportURL = window.location.origin + molgenis.getContextUrl() + '/details/' + entityName + '/' + entityId
 
                 $('#standalone-report-url').val(standaloneReportURL)
-
                 //Add copy functionality
                 document.getElementById('copy-standalone-report-url-btn').addEventListener('click', function (e) {
                     e.preventDefault()
