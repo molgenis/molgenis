@@ -6,8 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.*;
 import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -81,9 +80,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	private UserFactory userFactory;
 
 	@Autowired
-	private DataService dataService;
-
-	@Autowired
 	private ImportServiceFactory importServiceFactory;
 
 	@Autowired
@@ -91,6 +87,9 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 
 	@Autowired
 	private ImportServiceRegistrar importServiceRegistrar;
+
+	@Autowired
+	private DataService dataService;
 
 	@BeforeClass
 	public void beforeClass()
@@ -230,13 +229,63 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportVcfWithoutSamplesAsNonSuperuser()
 	{
-		String fileName = "variantsWithoutSamples.vcf";
+		String entityId = "variantsWithoutSamples";
+		String fileName = entityId + ".vcf";
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("variantsWithoutSamples", 10),
-				ImmutableSet.of("variantsWithoutSamples"));
+		validateImportReport(importReport, ImmutableMap.of(entityId, 10),
+				ImmutableSet.of(entityId));
+
+		// Check first and last imported row
+		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
+
+		Entity firstRow = entities.get(0);
+		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
+		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
+		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
+		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
+		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
+		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(firstRow.getString("AA"), "G|||");
+		assertEquals(firstRow.getString("AC"), "0");
+		assertEquals(firstRow.getString("AF"), "1.99681E-4");
+		assertEquals(firstRow.getString("AFR_AF"), "0.0");
+		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
+		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(firstRow.getString("EAS_AF"), "0.0");
+		assertEquals(firstRow.getString("EUR_AF"), "0.0");
+		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(firstRow.getString("SAS_AF"), "0.0");
+
+
+		Entity lastRow = entities.get(entities.size() - 1);
+		assertEquals(lastRow.getString("#CHROM"), "X");
+		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
+		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
+		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
+		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
+		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(lastRow.getString("AA"), "G|||");
+		assertEquals(lastRow.getString("AC"), "0");
+		assertEquals(lastRow.getString("AF"), "1.99681E-4");
+		assertEquals(lastRow.getString("AFR_AF"), "0.0");
+		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
+		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(lastRow.getString("EAS_AF"), "0.0");
+		assertEquals(lastRow.getString("EUR_AF"), "0.0");
+		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(lastRow.getString("SAS_AF"), "0.0");
+
+
+
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
