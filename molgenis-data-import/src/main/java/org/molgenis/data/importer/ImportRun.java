@@ -138,8 +138,7 @@ public class ImportRun extends StaticEntity
 
 	public boolean getNotify()
 	{
-		Boolean notify = getBoolean(NOTIFY);
-		return notify != null ? notify : null;
+		return getBoolean(NOTIFY) != null && getBoolean(NOTIFY);
 	}
 
 	public void setNotify(boolean notify)
