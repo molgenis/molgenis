@@ -106,13 +106,13 @@ public class GavinController extends AbstractStaticContentController
 	 * Starts a job to annotate a VCF file
 	 *
 	 * @param inputFile  the uploaded input file
-	 * @param entityName the name of the file
+	 * @param entityTypeId the name of the file
 	 * @return the ID of the created {@link GavinJobExecution}
 	 * @throws IOException if interaction with the file store fails
 	 */
 	@RequestMapping(value = "/annotate-file", method = POST)
 	public ResponseEntity<String> annotateFile(@RequestParam(value = "file") MultipartFile inputFile,
-			@RequestParam String entityName) throws IOException
+			@RequestParam String entityTypeId) throws IOException
 	{
 		String extension = TSV;
 		if (inputFile.getOriginalFilename().endsWith(GZ))
@@ -122,7 +122,7 @@ public class GavinController extends AbstractStaticContentController
 
 		final GavinJobExecution gavinJobExecution = gavinJobExecutionFactory
 				.create(idGenerator.generateId(SECURE_RANDOM));
-		gavinJobExecution.setFilename(entityName);
+		gavinJobExecution.setFilename(entityTypeId);
 		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		gavinJobExecution.setInputFileExtension(extension);
 		final GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);

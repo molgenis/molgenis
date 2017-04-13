@@ -310,13 +310,13 @@ public class IndexActionRepositoryDecoratorTest
 	private void initEntityMetaBidi()
 	{
 		mappedByEntity = mock(EntityType.class);
-		when(mappedByEntity.getFullyQualifiedName()).thenReturn("mappedByEntity");
+		when(mappedByEntity.getId()).thenReturn("mappedByEntity");
 		Attribute mappedByAttr = mock(Attribute.class);
 		when(mappedByAttr.getName()).thenReturn("mappedByAttr");
 		when(mappedByAttr.getRefEntity()).thenReturn(mappedByEntity);
 
 		inversedByEntity = mock(EntityType.class);
-		when(inversedByEntity.getFullyQualifiedName()).thenReturn("inversedByEntity");
+		when(inversedByEntity.getId()).thenReturn("inversedByEntity");
 		Attribute inversedByAttr = mock(Attribute.class);
 		when(inversedByAttr.getName()).thenReturn("inversedByAttr");
 		when(inversedByAttr.getRefEntity()).thenReturn(inversedByEntity);

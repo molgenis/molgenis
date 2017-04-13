@@ -50,7 +50,7 @@
                             <option val=""></option>
                         <#if entitiesMeta?has_content>
                             <#list entitiesMeta as entityMeta>
-                                <option value="${entityMeta.fullyQualifiedName}"><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.fullyQualifiedName}</#if></option>
+                                <option value="${entityMeta.id}"><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.id}</#if></option>
                             </#list>
                         </#if>
                         </select>

@@ -42,12 +42,12 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	Repository<Entity> createRepository(EntityType entityType);
 
 	/**
-	 * Get ids of all the entities in this source
+	 * Get ids of all the entity types in this source
 	 */
-	Iterable<String> getEntityIds();
+	Iterable<String> getEntityTypeIds();
 
 	/**
-	 * Get a repository by entity id
+	 * Get a repository by entity type id
 	 *
 	 * @throws UnknownEntityException if no repository exists for the given entity name
 	 */

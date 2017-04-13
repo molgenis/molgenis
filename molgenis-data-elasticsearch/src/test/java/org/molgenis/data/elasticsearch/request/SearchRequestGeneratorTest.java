@@ -40,7 +40,7 @@ public class SearchRequestGeneratorTest
 	{
 		when(entityType.getBackend()).thenReturn("notElasticsearch");
 
-		String entityName = "test";
+		String entityTypeId = "test";
 		SearchType searchType = SearchType.COUNT;
 
 		searchRequestGenerator.buildSearchRequest(searchRequestBuilderMock, searchType, entityType,
@@ -48,7 +48,7 @@ public class SearchRequestGeneratorTest
 				null);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
-		verify(searchRequestBuilderMock).setTypes(entityName);
+		verify(searchRequestBuilderMock).setTypes(entityTypeId);
 		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder>anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}
@@ -57,7 +57,7 @@ public class SearchRequestGeneratorTest
 	public void testBuildSearchRequestNoFetch()
 	{
 		when(entityType.getBackend()).thenReturn("notElasticsearch");
-		String entityName = "test";
+		String entityTypeId = "test";
 		SearchType searchType = SearchType.COUNT;
 
 		searchRequestGenerator
@@ -65,7 +65,7 @@ public class SearchRequestGeneratorTest
 						null, null, null);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
-		verify(searchRequestBuilderMock).setTypes(entityName);
+		verify(searchRequestBuilderMock).setTypes(entityTypeId);
 		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder>anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}

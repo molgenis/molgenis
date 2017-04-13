@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 
 /**
@@ -29,9 +28,9 @@ public class SystemEntityTypeRegistry
 		systemEntityTypeMap = Maps.newHashMap();
 	}
 
-	public SystemEntityType getSystemEntityType(String entityName)
+	public SystemEntityType getSystemEntityType(String entityTypeId)
 	{
-		return systemEntityTypeMap.get(entityName);
+		return systemEntityTypeMap.get(entityTypeId);
 	}
 
 	public Stream<SystemEntityType> getSystemEntityTypes()
@@ -39,14 +38,14 @@ public class SystemEntityTypeRegistry
 		return systemEntityTypeMap.values().stream();
 	}
 
-	public boolean hasSystemEntityType(String entityName)
+	public boolean hasSystemEntityType(String entityTypeId)
 	{
-		return systemEntityTypeMap.containsKey(entityName);
+		return systemEntityTypeMap.containsKey(entityTypeId);
 	}
 
 	void addSystemEntityType(SystemEntityType systemEntityType)
 	{
-		String systemEntityTypeName = systemEntityType.getFullyQualifiedName();
+		String systemEntityTypeName = systemEntityType.getId();
 		LOG.trace("Registering system entity [{}] ...", systemEntityTypeName);
 		systemEntityTypeMap.put(systemEntityTypeName, systemEntityType);
 	}

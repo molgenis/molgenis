@@ -69,8 +69,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		jobDataMap.put(FileIngesterQuartzJob.ENTITY_KEY, "abcde");
 		when(contextMock.getMergedJobDataMap()).thenReturn(jobDataMap);
 
-		EntityType targetEntity = entityTypeFactory.create();
-		targetEntity.setName("TypeTest");
+		EntityType targetEntity = entityTypeFactory.create("TypeTest");
 
 		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.setFailureEmail("x@y.z");

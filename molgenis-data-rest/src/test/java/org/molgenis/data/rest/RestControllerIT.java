@@ -71,20 +71,20 @@ public class RestControllerIT
 		ValidatableResponse response;
 
 		response = getWithoutToken("sys_FreemarkerTemplate");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_FreemarkerTemplate]"));
+		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
 
 		response = getWithoutToken("sys_scr_ScriptType");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_scr_ScriptType]"));
+		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [COUNT] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
 
 		response = getWithoutToken("sys_sec_UserAuthority");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_sec_UserAuthority]"));
+		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [COUNT] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 
 		response = getWithoutToken("sys_sec_GroupAuthority");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_sec_GroupAuthority]"));
+		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
 	}
 
 	@Test
@@ -98,16 +98,16 @@ public class RestControllerIT
 	public void getWithoutReadPermissionIsNotAllowed()
 	{
 		ValidatableResponse response = getWithToken("sys_sec_UserAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [READ] permission on entity [sys_sec_UserAuthority]"));
+		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 	}
 
 	@Test
 	public void getWithoutCountPermissionIsNotAllowed()
 	{
 		ValidatableResponse response = getWithToken("sys_sec_GroupAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_sec_GroupAuthority]"));
+		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
 	}
 
 	@Test
@@ -122,16 +122,16 @@ public class RestControllerIT
 	public void deleteWithoutWritePermissionFails()
 	{
 		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_scr_ScriptType/R").then().statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [WRITE] permission on entity [sys_scr_ScriptType]"));
+				.delete(PATH + "sys_scr_ScriptType/R").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
 
 		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_sec_UserAuthority").then().statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [WRITE] permission on entity [sys_sec_UserAuthority]"));
+				.delete(PATH + "sys_sec_UserAuthority").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 
 		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_sec_GroupAuthority").then().statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [WRITE] permission on entity [sys_sec_GroupAuthority]"));
+				.delete(PATH + "sys_sec_GroupAuthority").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [WRITE] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
 	}
 
 	@Test
@@ -148,11 +148,12 @@ public class RestControllerIT
 				.then().statusCode(OKE).log().all();
 
 		given().log().uri().log().method().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.get(PATH + "sys_FreemarkerTemplate").then().statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_FreemarkerTemplate]"));
+				.get(PATH + "sys_FreemarkerTemplate").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
+				equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
 
 		given().log().uri().log().method().when().get(PATH + "sys_FreemarkerTemplate").then().statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", equalTo("No [COUNT] permission on entity [sys_FreemarkerTemplate]"));
+				.body("errors.message[0]",
+						equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
 
 		// clean up after test
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);

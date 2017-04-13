@@ -36,30 +36,26 @@ public class EntityTypeRegistryImplTest
 	@Test
 	public void testGetEntityTypeDescription() throws Exception
 	{
-		String entityTypeName = "entityTypeName";
+		String entityTypeId = "entityTypeId";
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getAllAttributes()).thenReturn(emptyList());
-		when(entityType.getFullyQualifiedName()).thenReturn(entityTypeName);
-		when(entityType.getName()).thenReturn("entityTypeSimpleName");
-		when(entityType.getIdValue()).thenReturn("entityTypeId");
+		when(entityType.getId()).thenReturn(entityTypeId);
 		entityTypeRegistryImpl.registerEntityType(entityType);
-		String tableName = "entityTypeSimpleName#c34894ba";
+		String tableName = "entityTypeId#c34894ba";
 		assertEquals(entityTypeRegistryImpl.getEntityTypeDescription(tableName),
-				EntityTypeDescription.create(entityTypeName, ImmutableMap.of()));
+				EntityTypeDescription.create(entityTypeId, ImmutableMap.of()));
 	}
 
 	@Test
 	public void testGetEntityTypeDescriptionJunctionTable() throws Exception
 	{
-		String entityTypeName = "entityTypeName";
+		String entityTypeId = "entityTypeId";
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getAllAttributes()).thenReturn(emptyList());
-		when(entityType.getFullyQualifiedName()).thenReturn(entityTypeName);
-		when(entityType.getName()).thenReturn("entityTypeSimpleName");
-		when(entityType.getIdValue()).thenReturn("entityTypeId");
+		when(entityType.getId()).thenReturn(entityTypeId);
 		entityTypeRegistryImpl.registerEntityType(entityType);
-		String tableName = "entityTypeSimpleName#c34894ba_mrefattr";
+		String tableName = "entityTypeId#c34894ba_mrefattr";
 		assertEquals(entityTypeRegistryImpl.getEntityTypeDescription(tableName),
-				EntityTypeDescription.create(entityTypeName, ImmutableMap.of()));
+				EntityTypeDescription.create(entityTypeId, ImmutableMap.of()));
 	}
 }

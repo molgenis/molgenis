@@ -7,7 +7,6 @@ import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
@@ -50,19 +49,17 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
 	private final TagMetadata tagMetadata;
-	private final IdentifierLookupService identifierLookupService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagServiceImpl.class);
 
 	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
-			IdGenerator idGenerator, TagMetadata tagMetadata, IdentifierLookupService identifierLookupService)
+			IdGenerator idGenerator, TagMetadata tagMetadata)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tagRepository = requireNonNull(tagRepository);
 		this.ontologyService = requireNonNull(ontologyService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.tagMetadata = requireNonNull(tagMetadata);
-		this.identifierLookupService = requireNonNull(identifierLookupService);
 	}
 
 	@Override
@@ -80,7 +77,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void removeAttributeTag(EntityType entityType, SemanticTag<Attribute, OntologyTerm, Ontology> removeTag)
 	{
 		Attribute attribute = removeTag.getSubject();
-		Entity attributeEntity = findAttributeEntity(entityType.getFullyQualifiedName(), attribute.getName());
+		Entity attributeEntity = findAttributeEntity(entityType.getId(), attribute.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
@@ -99,10 +96,10 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityType entityType, Attribute attribute)
 	{
 		Multimap<Relation, OntologyTerm> tags = create();
-		Entity entity = findAttributeEntity(entityType.getFullyQualifiedName(), attribute.getName());
+		Entity entity = findAttributeEntity(entityType.getId(), attribute.getName());
 		if (entity == null)
 		{
-			LOG.warn("Cannot find attribute {}.{}", entityType.getFullyQualifiedName(), attribute.getName());
+			LOG.warn("Cannot find attribute {}.{}", entityType.getId(), attribute.getName());
 			return tags;
 		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
@@ -120,7 +117,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + package_.getFullyQualifiedName() + "]");
+			throw new UnknownEntityException("Unknown package [" + package_.getId() + "]");
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
@@ -135,7 +132,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@Override
 	public void addAttributeTag(EntityType entityType, SemanticTag<Attribute, OntologyTerm, Ontology> tag)
 	{
-		Entity entity = findAttributeEntity(entityType.getFullyQualifiedName(), tag.getSubject().getName());
+		Entity entity = findAttributeEntity(entityType.getId(), tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
@@ -187,17 +184,17 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
-	public void removeAllTagsFromEntity(String entityName)
+	public void removeAllTagsFromEntity(String entityTypeId)
 	{
-		EntityType entityTypedata = dataService.getEntityType(entityName);
+		EntityType entityTypedata = dataService.getEntityType(entityTypeId);
 		Iterable<Attribute> attributes = entityTypedata.getAtomicAttributes();
 
 		for (Attribute attribute : attributes)
 		{
-			Entity attributeEntity = findAttributeEntity(entityName, attribute.getName());
+			Entity attributeEntity = findAttributeEntity(entityTypeId, attribute.getName());
 			attributeEntity.set(AttributeMetadata.TAGS, emptyList());
 			dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
-			updateEntityTypeEntityWithNewAttributeEntity(entityName, attribute.getName(), attributeEntity);
+			updateEntityTypeEntityWithNewAttributeEntity(entityTypeId, attribute.getName(), attributeEntity);
 		}
 	}
 
@@ -244,8 +241,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	 */
 	private void updateEntityTypeEntityWithNewAttributeEntity(String entity, String attribute, Entity attributeEntity)
 	{
-		EntityType entityEntity = dataService
-				.findOneById(ENTITY_TYPE_META_DATA, identifierLookupService.getEntityTypeId(entity), EntityType.class);
+		EntityType entityEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entity, EntityType.class);
 		Iterable<Attribute> attributes = entityEntity.getOwnAllAttributes();
 		entityEntity.set(ATTRIBUTES, StreamSupport.stream(attributes.spliterator(), false)
 				.map(att -> att.getName().equals(attribute) ? attributeEntity : att).collect(Collectors.toList()));
@@ -259,18 +255,16 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@RunAsSystem
-	private Entity findAttributeEntity(String entityName, String attributeName)
+	private Entity findAttributeEntity(String entityTypeId, String attributeName)
 	{
-		EntityType entityTypeEntity = dataService
-				.findOneById(ENTITY_TYPE_META_DATA, identifierLookupService.getEntityTypeId(entityName),
-						EntityType.class);
+		EntityType entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
 
 		Optional<Attribute> result = stream(entityTypeEntity.getAttributes().spliterator(), false)
 				.filter(att -> attributeName.equals(att.getName())).findFirst();
 
 		if (!result.isPresent() && entityTypeEntity.getExtends() != null)
 		{
-			return findAttributeEntity(entityTypeEntity.getExtends().getFullyQualifiedName(), attributeName);
+			return findAttributeEntity(entityTypeEntity.getExtends().getId(), attributeName);
 		}
 
 		return result.isPresent() ? result.get() : null;

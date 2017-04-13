@@ -67,7 +67,7 @@ public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator imple
 	@Override
 	public String canAnnotate(EntityType repoMetaData)
 	{
-		if (dataService.hasRepository(repoMetaData.getFullyQualifiedName() + SnpEffRunner.ENTITY_NAME_SUFFIX))
+		if (dataService.hasRepository(repoMetaData.getId() + SnpEffRunner.ENTITY_NAME_SUFFIX))
 		{
 			return "already annotated with SnpEff";
 		}

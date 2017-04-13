@@ -205,7 +205,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		Map<String, Object> entityTypeCountMap = entityCountMap.entrySet().stream().collect(
 				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
-				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
+				.map(entityTypeId -> packageName + PACKAGE_SEPARATOR + entityTypeId).collect(toSet());
 		return new Object[] { file, entityTypeCountMap, entityTypeFullyQualifiedNames };
 	}
 
@@ -218,7 +218,7 @@ public class ImportServiceIT extends AbstractTestNGSpringContextTests
 		Map<String, Object> entityTypeCountMap = entityCountMap.entrySet().stream().collect(
 				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
-				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
+				.map(entityTypeId -> packageName + PACKAGE_SEPARATOR + entityTypeId).collect(toSet());
 		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames };
 	}
 

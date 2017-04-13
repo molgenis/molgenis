@@ -19,15 +19,15 @@ public class EntityImportReport implements Serializable
 		nrImportedEntitiesMap = new HashMap<String, Integer>();
 	}
 
-	public void addEntityCount(String entityName, int count)
+	public void addEntityCount(String entityTypeId, int count)
 	{
-		Integer entityCount = nrImportedEntitiesMap.get(entityName);
+		Integer entityCount = nrImportedEntitiesMap.get(entityTypeId);
 		if (entityCount == null)
 		{
 			entityCount = 0;
-			nrImportedEntitiesMap.put(entityName, entityCount);
+			nrImportedEntitiesMap.put(entityTypeId, entityCount);
 		}
-		nrImportedEntitiesMap.put(entityName, entityCount + count);
+		nrImportedEntitiesMap.put(entityTypeId, entityCount + count);
 	}
 
 	public Map<String, Integer> getNrImportedEntitiesMap()
@@ -35,9 +35,9 @@ public class EntityImportReport implements Serializable
 		return nrImportedEntitiesMap;
 	}
 
-	public void addNewEntity(String entityName)
+	public void addNewEntity(String entityTypeId)
 	{
-		newEntities.add(entityName);
+		newEntities.add(entityTypeId);
 	}
 
 	public List<String> getNewEntities()

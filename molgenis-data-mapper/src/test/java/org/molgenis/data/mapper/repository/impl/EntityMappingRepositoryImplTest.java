@@ -112,8 +112,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	{
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
 		List<Attribute> sourceAttributes = Lists.newArrayList();
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
-		EntityType targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
@@ -213,9 +213,15 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		DefaultPackage defaultPackage(){ return mock(DefaultPackage.class); }
+		DefaultPackage defaultPackage()
+		{
+			return mock(DefaultPackage.class);
+		}
 
 		@Bean
-		SystemPackageRegistry systemPackageRegistry(){ return mock(SystemPackageRegistry.class); }
+		SystemPackageRegistry systemPackageRegistry()
+		{
+			return mock(SystemPackageRegistry.class);
+		}
 	}
 }

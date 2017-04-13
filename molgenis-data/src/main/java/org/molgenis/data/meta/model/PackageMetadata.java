@@ -21,7 +21,6 @@ public class PackageMetadata extends SystemEntityType
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
 	public static final String ID = "id";
-	public static final String NAME = "name";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String PARENT = "parent";
@@ -44,9 +43,8 @@ public class PackageMetadata extends SystemEntityType
 		setLabel("Package");
 		setDescription("Grouping of related entities");
 
-		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(LABEL).setLabel("Label");
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
+		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this)
 				.setLabel("Parent");

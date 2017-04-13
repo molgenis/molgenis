@@ -37,7 +37,7 @@ public class JobExecutionUpdaterImpl implements JobExecutionUpdater
 	{
 		try
 		{
-			dataService.update(jobExecution.getEntityType().getFullyQualifiedName(), jobExecution);
+			dataService.update(jobExecution.getEntityType().getId(), jobExecution);
 		}
 		catch (Exception ex)
 		{

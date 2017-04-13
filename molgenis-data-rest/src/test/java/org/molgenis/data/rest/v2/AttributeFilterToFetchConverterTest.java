@@ -79,18 +79,18 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityType = entityTypeFactory.create().setName("SelfRefEntity");
+		selfRefEntityType = entityTypeFactory.create("SelfRefEntity");
 		Attribute selfRefIdAttr = attributeFactory.create().setName("id");
 		selfRefEntityType.addAttribute(selfRefIdAttr, ROLE_ID)
 				.addAttribute(attributeFactory.create().setName("label"), ROLE_LABEL).addAttribute(
 				attributeFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityType));
 
 		labelAttr = attributeFactory.create().setName(REF_LABEL_ATTR_NAME);
-		xrefEntityType = entityTypeFactory.create().setName("xrefEntity")
+		xrefEntityType = entityTypeFactory.create("xrefEntity")
 				.addAttribute(attributeFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(labelAttr, ROLE_LABEL).addAttribute(attributeFactory.create().setName(REF_ATTR_NAME));
 
-		entityType = entityTypeFactory.create().setName("entity")
+		entityType = entityTypeFactory.create("entity")
 				.addAttribute(attributeFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(attributeFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 

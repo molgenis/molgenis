@@ -73,7 +73,7 @@ public class CrudRepositoryAnnotator
 			if (annotator instanceof EffectCreatingAnnotator)
 			{
 				targetMetaData = ((EffectCreatingAnnotator) annotator).getTargetEntityType(entityType);
-				if (!dataService.hasRepository(targetMetaData.getFullyQualifiedName()))
+				if (!dataService.hasRepository(targetMetaData.getId()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
@@ -116,15 +116,15 @@ public class CrudRepositoryAnnotator
 			{
 				runAsSystem(() ->
 				{
-					dataService.deleteAll(targetMetaData.getFullyQualifiedName());
-					dataService.getMeta().deleteEntityType(targetMetaData.getFullyQualifiedName());
+					dataService.deleteAll(targetMetaData.getId());
+					dataService.getMeta().deleteEntityType(targetMetaData.getId());
 				});
 			}
 		}
 		catch (Exception ex)
 		{
 			// log the problem but throw the original exception
-			LOG.error("Failed to remove result entity: %s", targetMetaData.getFullyQualifiedName());
+			LOG.error("Failed to remove result entity: %s", targetMetaData.getId());
 		}
 	}
 
@@ -136,22 +136,23 @@ public class CrudRepositoryAnnotator
 	{
 		Iterator<Entity> it = annotator.annotate(repository);
 
-		String entityName;
+		String entityTypeId;
 		if (annotator instanceof EffectCreatingAnnotator)
 		{
-			entityName = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType()).getFullyQualifiedName();
+			entityTypeId = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType())
+					.getId();
 		}
 		else
 		{
-			entityName = repository.getName();
+			entityTypeId = repository.getName();
 		}
 		switch (action)
 		{
 			case UPDATE:
-				dataService.update(entityName, stream(spliteratorUnknownSize(it, ORDERED), false));
+				dataService.update(entityTypeId, stream(spliteratorUnknownSize(it, ORDERED), false));
 				break;
 			case ADD:
-				dataService.add(entityName, stream(spliteratorUnknownSize(it, ORDERED), false));
+				dataService.add(entityTypeId, stream(spliteratorUnknownSize(it, ORDERED), false));
 				break;
 			default:
 				throw new UnsupportedOperationException();

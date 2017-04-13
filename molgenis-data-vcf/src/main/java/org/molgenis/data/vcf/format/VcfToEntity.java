@@ -64,10 +64,10 @@ public class VcfToEntity
 	 */
 	private final Map<String, String> infoFieldKeyToAttrNameMap;
 
-	public VcfToEntity(String entityName, VcfMeta vcfMeta, VcfAttributes vcfAttributes,
+	public VcfToEntity(String entityTypeId, VcfMeta vcfMeta, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
-		requireNonNull(entityName);
+		requireNonNull(entityTypeId);
 		this.vcfMeta = requireNonNull(vcfMeta);
 		requireNonNull(vcfMeta.getFormatMeta());
 		this.vcfAttributes = requireNonNull(vcfAttributes);
@@ -75,18 +75,19 @@ public class VcfToEntity
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 
 		this.vcfInfoFlagFieldKeys = determineVcfInfoFlagFields(vcfMeta);
-		this.infoFieldKeyToAttrNameMap = createInfoFieldKeyToAttrNameMap(vcfMeta, entityName);
+		this.infoFieldKeyToAttrNameMap = createInfoFieldKeyToAttrNameMap(vcfMeta, entityTypeId);
 
-		this.sampleEntityType = createSampleEntityType(entityName, vcfMeta.getFormatMeta());
-		this.entityType = createEntityType(entityName, vcfMeta);
+		this.sampleEntityType = createSampleEntityType(entityTypeId, vcfMeta.getFormatMeta());
+		this.entityType = createEntityType(entityTypeId, vcfMeta);
 	}
 
-	private EntityType createEntityType(String entityName, VcfMeta vcfMeta)
+	private EntityType createEntityType(String entityTypeId, VcfMeta vcfMeta)
 	{
 		Attribute idAttribute = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
 		idAttribute.setVisible(false);
 
-		EntityType entityType = entityTypeFactory.create().setName(entityName);
+		EntityType entityType = entityTypeFactory.create(entityTypeId);
+		entityType.setLabel(entityTypeId);
 		entityType.addAttribute(vcfAttributes.getChromAttribute());
 		entityType.addAttribute(vcfAttributes.getAltAttribute());
 		entityType.addAttribute(vcfAttributes.getPosAttribute());
@@ -120,13 +121,14 @@ public class VcfToEntity
 		return entityType;
 	}
 
-	private EntityType createSampleEntityType(String entityName, Iterable<VcfMetaFormat> formatMetaData)
+	private EntityType createSampleEntityType(String entityTypeId, Iterable<VcfMetaFormat> formatMetaData)
 	{
 		EntityType result = null;
 		if (formatMetaData.iterator().hasNext())
 		{
-			result = entityTypeFactory.create().setName(entityName + "Sample");
-
+			String sampleEntityTypeId = entityTypeId + "Sample";
+			result = entityTypeFactory.create(sampleEntityTypeId);
+			result.setLabel(sampleEntityTypeId);
 			Attribute idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
 			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true)
 					.setNillable(false);
@@ -434,10 +436,10 @@ public class VcfToEntity
 	 * Returns a mapping of VCF info field keys to MOLGENIS attribute names
 	 *
 	 * @param vcfMeta    VCF metadata
-	 * @param entityName entity name (that could be used to create a MOLGENIS attribute name)
+	 * @param entityTypeId entity name (that could be used to create a MOLGENIS attribute name)
 	 * @return map of VCF info field keys to MOLGENIS attribute names
 	 */
-	private static Map<String, String> createInfoFieldKeyToAttrNameMap(VcfMeta vcfMeta, String entityName)
+	private static Map<String, String> createInfoFieldKeyToAttrNameMap(VcfMeta vcfMeta, String entityTypeId)
 	{
 		Map<String, String> infoFieldIdToAttrNameMap = newHashMapWithExpectedSize(size(vcfMeta.getInfoMeta()));
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
@@ -455,7 +457,7 @@ public class VcfToEntity
 				case FILTER:
 				case QUAL:
 				case ID:
-					postFix = '_' + entityName;
+					postFix = '_' + entityTypeId;
 					break;
 				default:
 					break;

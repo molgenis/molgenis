@@ -20,7 +20,7 @@ public class ScriptPackage extends SystemPackage
 	@Autowired
 	public ScriptPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_SCRIPT, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

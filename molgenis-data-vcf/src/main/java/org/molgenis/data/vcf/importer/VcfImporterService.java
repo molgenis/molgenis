@@ -57,7 +57,7 @@ public class VcfImporterService implements ImportService
 		List<EntityType> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
 
-		Iterator<String> it = source.getEntityIds().iterator();
+		Iterator<String> it = source.getEntityTypeIds().iterator();
 		if (it.hasNext())
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
@@ -81,15 +81,15 @@ public class VcfImporterService implements ImportService
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
-		Iterator<String> it = source.getEntityIds().iterator();
+		Iterator<String> it = source.getEntityTypeIds().iterator();
 		if (it.hasNext())
 		{
-			String entityName = it.next();
-			EntityType emd = source.getRepository(entityName).getEntityType();
+			String entityTypeId = it.next();
+			EntityType emd = source.getRepository(entityTypeId).getEntityType();
 
 			// Vcf entity
-			boolean entityExists = runAsSystem(() -> dataService.hasRepository(entityName));
-			report.getSheetsImportable().put(entityName, !entityExists);
+			boolean entityExists = runAsSystem(() -> dataService.hasRepository(entityTypeId));
+			report.getSheetsImportable().put(entityTypeId, !entityExists);
 
 			// Available Attributes
 			List<String> availableAttributeNames = Lists.newArrayList();
@@ -97,13 +97,13 @@ public class VcfImporterService implements ImportService
 			{
 				availableAttributeNames.add(attr.getName());
 			}
-			report.getFieldsImportable().put(entityName, availableAttributeNames);
+			report.getFieldsImportable().put(entityTypeId, availableAttributeNames);
 
 			// Sample entity
 			Attribute sampleAttribute = emd.getAttribute(VcfAttributes.SAMPLES);
 			if (sampleAttribute != null)
 			{
-				String sampleEntityName = sampleAttribute.getRefEntity().getFullyQualifiedName();
+				String sampleEntityName = sampleAttribute.getRefEntity().getId();
 				boolean sampleEntityExists = runAsSystem(() -> dataService.hasRepository(sampleEntityName));
 				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
 
@@ -139,11 +139,11 @@ public class VcfImporterService implements ImportService
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository<Entity> sampleRepository;
-		String entityName = inRepository.getName();
+		String entityTypeId = inRepository.getName();
 
-		if (runAsSystem(() -> dataService.hasRepository(entityName)))
+		if (runAsSystem(() -> dataService.hasRepository(entityTypeId)))
 		{
-			throw new MolgenisDataException("Can't overwrite existing " + entityName);
+			throw new MolgenisDataException("Can't overwrite existing " + entityTypeId);
 		}
 
 		EntityType entityType = inRepository.getEntityType();
@@ -218,11 +218,11 @@ public class VcfImporterService implements ImportService
 			})));
 			if (vcfEntityCount.get() > 0)
 			{
-				report.addEntityCount(entityName, vcfEntityCount.get());
+				report.addEntityCount(entityTypeId, vcfEntityCount.get());
 			}
 		}
 
-		report.addNewEntity(entityName);
+		report.addNewEntity(entityTypeId);
 
 		return report;
 	}

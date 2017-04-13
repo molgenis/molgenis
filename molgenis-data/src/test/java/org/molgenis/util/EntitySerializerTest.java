@@ -32,7 +32,7 @@ public class EntitySerializerTest
 	public void testSerialize() throws Exception
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getId()).thenReturn("entity");
 
 		Attribute oneToManyAttr = mock(Attribute.class);
 		String oneToManyAttrName = "oneToManyAttr";
@@ -45,7 +45,7 @@ public class EntitySerializerTest
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
 
 		EntityType refEntityType = mock(EntityType.class);
-		when(refEntityType.getFullyQualifiedName()).thenReturn("refEntity");
+		when(refEntityType.getId()).thenReturn("refEntity");
 
 		String oneToManyEntity0IdValue = "oneToManyEntity0";
 		String oneToManyEntity0LabelValue = "oneToManyEntityLabel0";
@@ -86,7 +86,7 @@ public class EntitySerializerTest
 		when(context.serialize(manyToOneEntityIdValue)).thenReturn(new JsonPrimitive(manyToOneEntityIdValue));
 		when(context.serialize(manyToOneEntityLabelValue)).thenReturn(new JsonPrimitive(manyToOneEntityLabelValue));
 
-		String expectedJson = "{\"__entityName\":\"entity\",\"oneToManyAttr\":[{\"__entityName\":\"refEntity\",\"__idValue\":\"oneToManyEntity0\",\"__labelValue\":\"oneToManyEntityLabel0\"},{\"__entityName\":\"refEntity\",\"__idValue\":\"oneToManyEntity1\",\"__labelValue\":\"oneToManyEntityLabel1\"}],\"xrefAttr\":{\"__entityName\":\"refEntity\",\"__idValue\":\"xrefEntity0\",\"__labelValue\":\"xrefEntityLabel0\"}}";
+		String expectedJson = "{\"__entityTypeId\":\"entity\",\"oneToManyAttr\":[{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"oneToManyEntity0\",\"__labelValue\":\"oneToManyEntityLabel0\"},{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"oneToManyEntity1\",\"__labelValue\":\"oneToManyEntityLabel1\"}],\"xrefAttr\":{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"xrefEntity0\",\"__labelValue\":\"xrefEntityLabel0\"}}";
 		assertEquals(entitySerializer.serialize(entity, type, context).toString(), expectedJson);
 	}
 }

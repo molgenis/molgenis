@@ -9,7 +9,6 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.TokenFactory;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
@@ -85,9 +84,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 	@Autowired
 	private GroupMemberFactory groupMemberFactory;
-
-	@Autowired
-	private IdentifierLookupService identifierLookupService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception

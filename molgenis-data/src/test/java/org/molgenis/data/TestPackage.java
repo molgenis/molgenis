@@ -20,7 +20,7 @@ public class TestPackage extends SystemPackage
 	@Autowired
 	public TestPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_TEST_ENTITY, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

@@ -15,8 +15,6 @@ public interface ElasticsearchIndexManagerService
 
 	/**
 	 * Rebuilds the index for the given entity type
-	 *
-	 * @param entityName
 	 */
-	void rebuildIndex(String entityName);
+	void rebuildIndex(String entityTypeId);
 }

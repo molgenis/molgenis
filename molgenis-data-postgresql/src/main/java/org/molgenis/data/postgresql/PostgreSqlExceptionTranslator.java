@@ -462,7 +462,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		{
 			throw new RuntimeException(format("Unknown entity for table name [%s]", tableName));
 		}
-		return entityTypeDescription.getFullyQualifiedName();
+		return entityTypeDescription.getId();
 	}
 
 	/**
