@@ -202,20 +202,17 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportOboAsNonSuperuser()
 	{
-		String fileName = "ontology-small.obo.zip";
-		File file = getFile("/obo/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap
-						.of("sys_ont_OntologyTermDynamicAnnotation", 0, "sys_ont_OntologyTermSynonym", 5,
-								"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
-				emptySet());
+		testDoImportObo();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
 	public void testDoImportOboAsSuperuser()
+	{
+		testDoImportObo();
+	}
+
+	private void testDoImportObo()
 	{
 		String fileName = "ontology-small.obo.zip";
 		File file = getFile("/obo/" + fileName);
@@ -235,20 +232,17 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportOwlAsNonSuperuser()
 	{
-		String fileName = "ontology-small.owl.zip";
-		File file = getFile("/owl/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap
-						.of("sys_ont_OntologyTermDynamicAnnotation", 4, "sys_ont_OntologyTermSynonym", 9,
-								"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),
-				emptySet());
+		testDoImportOwl();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
 	public void testDoImportOwlAsSuperuser()
+	{
+		testDoImportOwl();
+	}
+
+	private void testDoImportOwl()
 	{
 		String fileName = "ontology-small.owl.zip";
 		File file = getFile("/owl/" + fileName);
@@ -337,18 +331,17 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportVcfWithSamplesAsNonSuperuser()
 	{
-		String fileName = "variantsWithSamples.vcf";
-		File file = getFile("/vcf/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("variantsWithSamples", 10, "variantsWithSamplesSample", 10),
-				ImmutableSet.of("variantsWithSamples", "variantsWithSamplesSample"));
+		testDoImportVcfWithSamples();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
 	public void testDoImportVcfWithSamplesAsSuperuser()
+	{
+		testDoImportVcfWithSamples();
+	}
+
+	private void testDoImportVcfWithSamples()
 	{
 		String fileName = "variantsWithSamples.vcf";
 		File file = getFile("/vcf/" + fileName);
@@ -363,19 +356,17 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportVcfGzWithSamplesAsNonSuperuser()
 	{
-		String fileName = "variantsWithSamplesGz.vcf.gz";
-		File file = getFile("/vcf/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport,
-				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
-				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
+		testDoImportVcfGzWithSamples();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
 	public void testDoImportVcfGzWithSamplesAsSuperuser()
+	{
+		testDoImportVcfGzWithSamples();
+	}
+
+	private void testDoImportVcfGzWithSamples()
 	{
 		String fileName = "variantsWithSamplesGz.vcf.gz";
 		File file = getFile("/vcf/" + fileName);
