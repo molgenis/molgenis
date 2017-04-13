@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
@@ -256,6 +257,17 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportVcfWithoutSamplesAsNonSuperuser()
 	{
+		testDoImportVcfWithoutSamples();
+	}
+
+	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
+	@Test
+	public void testDoImportVcfWithoutSamplesAsSuperuser()
+	{
+		testDoImportVcfWithoutSamples();
+	}
+
+	private void testDoImportVcfWithoutSamples() {
 		String entityId = "variantsWithoutSamples";
 		String fileName = entityId + ".vcf";
 		File file = getFile("/vcf/" + fileName);
@@ -308,20 +320,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(lastRow.getString("EUR_AF"), "0.0");
 		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
 		assertEquals(lastRow.getString("SAS_AF"), "0.0");
-
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportVcfWithoutSamplesAsSuperuser()
-	{
-		String fileName = "variantsWithoutSamples.vcf";
-		File file = getFile("/vcf/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("variantsWithoutSamples", 10),
-				ImmutableSet.of("variantsWithoutSamples"));
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -340,13 +338,74 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 
 	private void testDoImportVcfWithSamples()
 	{
-		String fileName = "variantsWithSamples.vcf";
+		String entityId = "variantsWithSamples";
+		String fileName = entityId + ".vcf";
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("variantsWithSamples", 10, "variantsWithSamplesSample", 10),
-				ImmutableSet.of("variantsWithSamples", "variantsWithSamplesSample"));
+		validateImportReport(importReport, ImmutableMap.of(entityId, 10, entityId + "Sample", 10),
+				ImmutableSet.of(entityId, entityId + "Sample"));
+
+		// Check first and last imported row
+		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
+
+		Entity firstRow = entities.get(0);
+		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
+		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
+		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
+		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
+		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
+		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(firstRow.getString("AA"), "G|||");
+		assertEquals(firstRow.getString("AC"), "0");
+		assertEquals(firstRow.getString("AF"), "1.99681E-4");
+		assertEquals(firstRow.getString("AFR_AF"), "0.0");
+		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
+		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(firstRow.getString("EAS_AF"), "0.0");
+		assertEquals(firstRow.getString("EUR_AF"), "0.0");
+		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(firstRow.getString("SAS_AF"), "0.0");
+
+		// Verify Samples
+		ImmutableList<Entity> samples = ImmutableList.copyOf(firstRow.getEntities(VcfAttributes.SAMPLES).iterator());
+		assertEquals(samples.size(), 1);
+		Entity firstRowSample = samples.get(0);
+		assertEquals(firstRowSample.getIdValue(), firstRow.getIdValue() + "0");
+		assertEquals(firstRowSample.getString(VcfAttributes.FORMAT_GT), "0|1");
+
+
+		Entity lastRow = entities.get(entities.size() - 1);
+		assertEquals(lastRow.getString("#CHROM"), "X");
+		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
+		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
+		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
+		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
+		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(lastRow.getString("AA"), "G|||");
+		assertEquals(lastRow.getString("AC"), "0");
+		assertEquals(lastRow.getString("AF"), "1.99681E-4");
+		assertEquals(lastRow.getString("AFR_AF"), "0.0");
+		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
+		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(lastRow.getString("EAS_AF"), "0.0");
+		assertEquals(lastRow.getString("EUR_AF"), "0.0");
+		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(lastRow.getString("SAS_AF"), "0.0");
+
+		// Verify Samples
+		samples = ImmutableList.copyOf(lastRow.getEntities(VcfAttributes.SAMPLES).iterator());
+		assertEquals(samples.size(), 1);
+		Entity lastRowSample = samples.get(0);
+		assertEquals(lastRowSample.getIdValue(), lastRow.getIdValue() + "0");
+		assertEquals(lastRowSample.getString(VcfAttributes.FORMAT_GT), "1|1");
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -365,7 +424,8 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 
 	private void testDoImportVcfGzWithSamples()
 	{
-		String fileName = "variantsWithSamplesGz.vcf.gz";
+		String entityId = "variantsWithSamplesGz";
+		String fileName = entityId + ".vcf.gz";
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
@@ -373,6 +433,66 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		validateImportReport(importReport,
 				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
 				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
+
+		// Check first and last imported row
+		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
+
+		Entity firstRow = entities.get(0);
+		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
+		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
+		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
+		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
+		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
+		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(firstRow.getString("AA"), "G|||");
+		assertEquals(firstRow.getString("AC"), "0");
+		assertEquals(firstRow.getString("AF"), "1.99681E-4");
+		assertEquals(firstRow.getString("AFR_AF"), "0.0");
+		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
+		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(firstRow.getString("EAS_AF"), "0.0");
+		assertEquals(firstRow.getString("EUR_AF"), "0.0");
+		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(firstRow.getString("SAS_AF"), "0.0");
+
+		// Verify Samples
+		ImmutableList<Entity> samples = ImmutableList.copyOf(firstRow.getEntities(VcfAttributes.SAMPLES).iterator());
+		assertEquals(samples.size(), 1);
+		Entity firstRowSample = samples.get(0);
+		assertEquals(firstRowSample.getIdValue(), firstRow.getIdValue() + "0");
+		assertEquals(firstRowSample.getString(VcfAttributes.FORMAT_GT), "0|1");
+
+
+		Entity lastRow = entities.get(entities.size() - 1);
+		assertEquals(lastRow.getString("#CHROM"), "X");
+		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
+		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
+		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
+		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
+		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
+		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
+		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
+		assertEquals(lastRow.getString("AA"), "G|||");
+		assertEquals(lastRow.getString("AC"), "0");
+		assertEquals(lastRow.getString("AF"), "1.99681E-4");
+		assertEquals(lastRow.getString("AFR_AF"), "0.0");
+		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
+		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
+		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
+		assertEquals(lastRow.getString("EAS_AF"), "0.0");
+		assertEquals(lastRow.getString("EUR_AF"), "0.0");
+		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
+		assertEquals(lastRow.getString("SAS_AF"), "0.0");
+
+		// Verify Samples
+		samples = ImmutableList.copyOf(lastRow.getEntities(VcfAttributes.SAMPLES).iterator());
+		assertEquals(samples.size(), 1);
+		Entity lastRowSample = samples.get(0);
+		assertEquals(lastRowSample.getIdValue(), lastRow.getIdValue() + "0");
+		assertEquals(lastRowSample.getString(VcfAttributes.FORMAT_GT), "1|1");
 	}
 
 	@DataProvider(name = "doImportEmxAddProvider")

@@ -71,7 +71,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
   */
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
 		"org.molgenis.data.jobs", "org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
-		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
+		"org.molgenis.data.platform", "org.molgenis.data.meta.model",
 		"org.molgenis.data.meta.util", "org.molgenis.data.system.model", "org.molgenis.data.cache",
 		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
 		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
