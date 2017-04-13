@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -193,12 +194,21 @@ public class EntityTypeValidator
 	 * Validates the attributes owned by this entity:
 	 * 1) validates that the parent entity doesn't have attributes with the same name
 	 * 2) validates that this entity doesn't have attributes with the same name
+	 * 3) validates that this entity has attributes defined at all
 	 *
 	 * @param entityType entity meta data
 	 * @throws MolgenisValidationException if an attribute is owned by another entity or a parent attribute has the same name
 	 */
 	private static void validateOwnAttributes(EntityType entityType)
 	{
+		// Validate that entity has attributes
+		if (asStream(entityType.getAllAttributes()).collect(toList()).size() == 0)
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Entity [%s] does not contain any attributes. Did you use the correct package+entity name combination in both the entities as well as the attributes sheet?",
+							entityType.getId())));
+		}
+
 		// Validate that entity does not contain multiple attributes with the same name
 		Multimap<String, Attribute> attrMultiMap = asStream(entityType.getAllAttributes())
 				.collect(MultimapCollectors.toArrayListMultimap(Attribute::getName, Function.identity()));

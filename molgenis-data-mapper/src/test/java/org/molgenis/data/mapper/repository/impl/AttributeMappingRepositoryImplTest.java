@@ -9,10 +9,12 @@ import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
@@ -227,5 +229,11 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		{
 			return mock(OntologyTagService.class);
 		}
+
+		@Bean
+		DefaultPackage defaultPackage(){ return mock(DefaultPackage.class); }
+
+		@Bean
+		SystemPackageRegistry systemPackageRegistry(){ return mock(SystemPackageRegistry.class); }
 	}
 }

@@ -6,6 +6,7 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -35,7 +36,6 @@ public class DataConverter
 		{
 			return false;
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -63,32 +63,40 @@ public class DataConverter
 	 */
 	public static Object convert(Object source, Attribute attr)
 	{
-		switch (attr.getDataType())
+		try
 		{
-			case BOOL:
-				return toBoolean(source);
-			case XREF:
-			case CATEGORICAL:
-			case CATEGORICAL_MREF:
-			case MREF:
-			case FILE:
-			case ONE_TO_MANY:
-				return source;
-			case COMPOUND:
-				throw new UnsupportedOperationException();
-			case DATE:
-				return toDate(source);
-			case DATE_TIME:
-				return toUtilDate(source);
-			case DECIMAL:
-				return toDouble(source);
-			case INT:
-				return toInt(source);
-			case LONG:
-				return toLong(source);
-			default:
-				return toString(source);
+			switch (attr.getDataType())
+			{
+				case BOOL:
+					return toBoolean(source);
+				case XREF:
+				case CATEGORICAL:
+				case CATEGORICAL_MREF:
+				case MREF:
+				case FILE:
+				case ONE_TO_MANY:
+					return source;
+				case COMPOUND:
+					throw new UnsupportedOperationException();
+				case DATE:
+					return toDate(source);
+				case DATE_TIME:
+					return toUtilDate(source);
+				case DECIMAL:
+					return toDouble(source);
+				case INT:
+					return toInt(source);
+				case LONG:
+					return toLong(source);
+				default:
+					return toString(source);
 
+			}
+		}
+		catch (ConversionFailedException cfe)
+		{
+			throw new MolgenisDataException(String.format("Conversion failure in entity type [%s] attribute [%s]; %s",
+					attr.getEntity().getFullyQualifiedName(), attr.getName(), cfe.getMessage()));
 		}
 	}
 

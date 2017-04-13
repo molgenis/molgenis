@@ -2,9 +2,9 @@ package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.core.convert.ConversionFailedException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -35,6 +35,7 @@ public class StringExpressionEvaluatorTest
 		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("Long").getMock();
 		when(longAttr.getDataType()).thenReturn(LONG);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getFullyQualifiedName()).thenReturn("test");
 		when(entityType.getAttribute("Identifier")).thenReturn(idAttr);
 		when(entityType.getAttribute("Int")).thenReturn(intAttr);
 		when(entityType.getAttribute("String")).thenReturn(stringAttr);
@@ -137,12 +138,14 @@ public class StringExpressionEvaluatorTest
 		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
 	}
 
-	@Test(expectedExceptions = ConversionFailedException.class, expectedExceptionsMessageRegExp = "Failed to convert from type \\[java.lang.String\\] to type \\[java.lang.Long\\] for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Conversion failure in entity type \\[test\\] attribute \\[id\\]; Failed to convert from type \\[java.lang.String\\] to type \\[java.lang.Long\\] for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"")
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
+		when(amd.getName()).thenReturn("id");
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("NonNumericString");
+		when(amd.getEntity()).thenReturn(entityType);
 		new StringExpressionEvaluator(amd, entityType).evaluate(entity);
 	}
 }

@@ -15,9 +15,11 @@ import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -375,13 +377,14 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Target repository does not contain the following attribute: COUNTRY_1")
 	public void testIncompatibleMetaDataUnknownAttribute()
 	{
-		String targetRepositoryName = "target_repository";
+		String targetRepositoryName = "targetRepository";
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
+		targetRepositoryMetaData.setPackage(package_);
 
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
@@ -390,6 +393,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY_1").setDataType(STRING));
+		mappingTargetMetaData.setPackage(package_);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
@@ -408,6 +412,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
+		targetRepositoryMetaData.setPackage(package_);
 
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
@@ -416,6 +421,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(INT));
+		mappingTargetMetaData.setPackage(package_);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
@@ -432,6 +438,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String targetRepositoryRefEntityName = "target_repository_ref";
 		String mappingTargetRefEntityName = "mapping_target_ref";
 
+		String fullyQualifiedTargetRepositoryName = "package_targetRepository";
+		String fullyQualifiedTargetRepositoryRefEntityName = "package_targetRepositoryRef";
+		String fullyQualifiedMappingTargetRefEntityName = "package_mappingTargetRef";
+
 		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName);
 
 		@SuppressWarnings("unchecked")
@@ -440,6 +450,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(
 				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(targetRefEntity));
+		targetRepositoryMetaData.setPackage(package_);
 
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
@@ -451,6 +462,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		mappingTargetMetaData.addAttribute(
 				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(mappingTargetRefEntity));
+		mappingTargetMetaData.setPackage(package_);
+
+		when(metaDataService.createRepository(mappingTargetMetaData)).thenReturn(targetRepository);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
@@ -552,5 +566,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		{
 			return mock(PermissionSystemService.class);
 		}
+
+		@Bean
+		SystemPackageRegistry systemPackageRegistry(){ return new SystemPackageRegistry(); }
+
+		@Bean
+		DefaultPackage defaultPackage(){ return new DefaultPackage(mock(PackageMetadata.class)); }
+
 	}
 }

@@ -63,7 +63,7 @@ public class RepositoryPopulator
 		LOG.trace("Populated settings entities");
 
 		LOG.trace("Populating database with I18N strings ...");
-		i18nPopulator.populateI18nStrings();
+		i18nPopulator.populateL10nStrings();
 		LOG.trace("Populated database with I18N strings");
 
 		LOG.trace("Populating script type entities ...");

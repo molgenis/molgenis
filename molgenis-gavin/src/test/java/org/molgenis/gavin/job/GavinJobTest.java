@@ -2,11 +2,11 @@ package org.molgenis.gavin.job;
 
 import com.google.common.collect.ImmutableMultiset;
 import org.mockito.Mock;
-import org.molgenis.annotation.cmd.conversion.EffectStructureConverter;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;

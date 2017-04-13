@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -1148,11 +1149,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public LocalizationService localizationService()
+		{
+			return mock(LocalizationService.class);
+		}
+
+		@Bean
 		public RestControllerV2 restController()
 		{
 			return new RestControllerV2(dataService(), molgenisPermissionService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager()),
-					languageService(), permissionSystemService(), repositoryCopier());
+					languageService(), permissionSystemService(), repositoryCopier(), localizationService());
 		}
 
 	}

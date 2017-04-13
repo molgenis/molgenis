@@ -4,6 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
@@ -35,6 +36,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
@@ -43,6 +46,8 @@ import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
@@ -52,6 +57,7 @@ import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Controller
@@ -63,6 +69,7 @@ class RestControllerV2
 	static final int MAX_ENTITIES = 1000;
 
 	public static final String BASE_URI = "/api/v2";
+	public static final String TIME_PARAM_NAME = "_t";
 
 	private final DataService dataService;
 	private final RestService restService;
@@ -70,6 +77,7 @@ class RestControllerV2
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
+	private final LocalizationService localizationService;
 
 	static UnknownEntityException createUnknownEntityException(String entityTypeId)
 	{
@@ -123,7 +131,7 @@ class RestControllerV2
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
 			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
-			RepositoryCopier repoCopier)
+			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
@@ -131,6 +139,7 @@ class RestControllerV2
 		this.languageService = requireNonNull(languageService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.repoCopier = requireNonNull(repoCopier);
+		this.localizationService = requireNonNull(localizationService);
 	}
 
 	@Autowired
@@ -205,7 +214,7 @@ class RestControllerV2
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = DELETE)
+	@RequestMapping(value = "/{entityTypeId:^(?!i18n).+}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
 	{
@@ -314,7 +323,7 @@ class RestControllerV2
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
 					.collect(toList());
 			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
-			final List<String> ids = new ArrayList<String>();
+			final List<String> ids = new ArrayList<>();
 
 			// Add all entities
 			if (ATTRIBUTE_META_DATA.equals(entityTypeId))
@@ -402,8 +411,7 @@ class RestControllerV2
 	}
 
 	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String entityTypeId,
-			Package pack,
-			String label)
+			Package pack, String label)
 	{
 		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, entityTypeId, pack, label));
 	}
@@ -483,7 +491,7 @@ class RestControllerV2
 				throw createMolgenisDataExceptionIdentifierAndValue();
 			}
 
-			final List<Entity> updatedEntities = new ArrayList<Entity>();
+			final List<Entity> updatedEntities = new ArrayList<>();
 			int count = 0;
 			for (Entity entity : entities)
 			{
@@ -513,21 +521,70 @@ class RestControllerV2
 	}
 
 	/**
-	 * Get the i18n resource strings in the language of the current user
+	 * Get all l10n resource strings in the language of the current user
 	 */
 	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, String> getI18nStrings()
+	public Map<String, String> getL10nStrings()
 	{
 		Map<String, String> translations = new HashMap<>();
 
 		ResourceBundle bundle = languageService.getBundle();
-		for (String key : bundle.keySet())
+		for (String key : localizationService.getMessageIDs(NAMESPACE_ALL))
 		{
 			translations.put(key, bundle.getString(key));
 		}
 
 		return translations;
+	}
+
+	/**
+	 * Get the localization resource strings for a specific language and namespace.
+	 * Will *not* provide fallback values if the specified language is not available.
+	 */
+	@RequestMapping(value = "/i18n/{namespace}/{language}", method = GET, produces = APPLICATION_JSON_VALUE
+			+ ";charset=UTF-8")
+	@ResponseBody
+	public Map<String, String> getL10nStrings(@PathVariable String namespace, @PathVariable String language)
+	{
+		return localizationService.getMessages(namespace, language);
+	}
+
+	/**
+	 * Get a properties file to put on your classpath.
+	 */
+	@RequestMapping(value = "/i18n/{namespace}_{language}.properties", method = GET, produces = TEXT_PLAIN_VALUE
+			+ ";charset=UTF-8 ")
+	@ResponseBody
+	public String getL10nProperties(@PathVariable String namespace, @PathVariable String language) throws IOException
+	{
+		language = language.toLowerCase();
+		Properties translations = new Properties();
+		translations.putAll(localizationService.getMessages(namespace, language));
+		StringWriter sw = new StringWriter();
+		translations.store(sw, String.format("%s_%s.properties", namespace, language));
+		return sw.toString();
+	}
+
+	/**
+	 * Registers missing message IDs.
+	 * Used by XHR backend of i18next.
+	 * User needs permissions on the entity to add the values, otherwise they'll only be logged.
+	 */
+	@RequestMapping(value = "/i18n/{namespace}", method = POST)
+	@ResponseStatus(CREATED)
+	public void registerMissingResourceStrings(@PathVariable String namespace, HttpServletRequest request)
+	{
+		Set<String> messageIDs = request.getParameterMap().entrySet().stream().map(Map.Entry::getKey)
+				.filter(id -> !id.equals(TIME_PARAM_NAME)).collect(toSet());
+		localizationService.addMissingMessageIDs(namespace, messageIDs);
+	}
+
+	@RequestMapping(value = "/i18n/{namespace}", method = DELETE)
+	@ResponseStatus(NO_CONTENT)
+	public void deleteNamespace(@PathVariable String namespace)
+	{
+		localizationService.deleteNameSpace(namespace);
 	}
 
 	/**
@@ -549,8 +606,7 @@ class RestControllerV2
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public
-	@ResponseBody
+	public @ResponseBody
 	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
 	{
 		LOG.debug("Invalid request body.", exception);
@@ -559,8 +615,7 @@ class RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public
-	@ResponseBody
+	public @ResponseBody
 	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
@@ -672,7 +727,7 @@ class RestControllerV2
 			List<Map<String, Object>> entities = new ArrayList<>();
 			for (Entity entity : it)
 			{
-				Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+				Map<String, Object> responseData = new LinkedHashMap<>();
 				createEntityValuesResponse(entity, fetch, responseData);
 				entities.add(responseData);
 			}
@@ -715,7 +770,7 @@ class RestControllerV2
 
 	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData)
 	{
-		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+		Map<String, Object> responseData = new LinkedHashMap<>();
 		if (includeMetaData)
 		{
 			createEntityTypeResponse(entity.getEntityType(), fetch, responseData);
@@ -761,7 +816,6 @@ class RestControllerV2
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
 											languageService.getCurrentUserLanguageCode());
-							;
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -777,11 +831,10 @@ class RestControllerV2
 						List<Map<String, Object>> refEntityResponses;
 						if (refEntities != null)
 						{
-							refEntityResponses = new ArrayList<Map<String, Object>>();
+							refEntityResponses = new ArrayList<>();
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
 											languageService.getCurrentUserLanguageCode());
-							;
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));

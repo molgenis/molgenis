@@ -52,6 +52,89 @@ paths:
       responses:
         200:
           description: Server version
+  /v2/i18n:
+    get:
+      produces:
+        - application/json
+      tags:
+        - V2
+      summary: Get all localization tokens for the user's current language
+  /v2/i18n/{namespace}/{language}:
+    get:
+      produces:
+        - application/json;charset=UTF-8
+      tags:
+        - V2
+      parameters:
+        - name: namespace
+          in: path
+          type: string
+          description: the localization namespace
+          required: true
+        - name: language
+          in: path
+          type: string
+          description: language code for the items to be retrieved
+          required: true
+      summary: Retrieves the localization values in this namespace for this locale
+      responses:
+        200:
+          description: JSON file
+  /v2/i18n/{namespace}_{language}.properties:
+    get:
+      produces:
+        - text/plain;charset=UTF-8
+      tags:
+        - V2
+      parameters:
+        - name: namespace
+          in: path
+          type: string
+          description: the localization namespace
+          required: true
+        - name: language
+          in: path
+          type: string
+          description: language code for the items to be retrieved
+          required: true
+      summary: Retrieves a properties file for the localization values in this namespace for this locale
+      responses:
+        200:
+          description: Properties file
+  /v2/i18n/{namespace}:
+    post:
+      tags:
+        - V2
+      summary: Adds missing keys to a namespace
+      parameters:
+        - name: namespace
+          in: path
+          type: string
+          description: the localization namespace
+          required: true
+        - name: _t
+          in: form
+          type: string
+        - name: placeholder_key
+          in: form
+          description: one or more keys to add to this namespace
+          type: string
+      responses:
+        201:
+          description: Keys were created
+    delete:
+      tags:
+        - V2
+      summary: Deletes an entire namespace
+      parameters:
+        - name: namespace
+          in: path
+          type: string
+          description: the localization namespace
+          required: true
+      responses:
+        204:
+          description: Deleted namespace
   /v2/{entity_name}:
     get:
       tags:

@@ -2,6 +2,9 @@ package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.meta.DefaultPackage;
+import org.molgenis.data.meta.SystemPackage;
+import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
@@ -72,11 +75,17 @@ public class MappingConfig
 	@Autowired
 	JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
+	@Autowired
+	DefaultPackage defaultPackage;
+
+	@Autowired
+	SystemPackageRegistry systemPackageRegistry;
+
 	@Bean
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(dataService, algorithmServiceImpl(), idGenerator, mappingProjectRepository(),
-				permissionSystemService, attrMetaFactory);
+				permissionSystemService, attrMetaFactory, systemPackageRegistry, defaultPackage);
 	}
 
 	@Bean

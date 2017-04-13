@@ -29,9 +29,11 @@ users who have not yet chosen a language.
 If more than one language is available, users can select their language
 in the menu at the top of the screen.
 
-## System-wide
-In the `Internationalization` entity in the Data Explorer you can provide translations for system-wide
-values. For instance the values whose msgid starts with `form_` allow you to localize how the forms look.
+## UI Messages
+In the `Localization` entity in the Data Explorer you can provide translations for UI messages.
+The translations are split into namespaces.
+For instance the values in the `form` namespace allow you to localize how the forms look.
+Changes you make will be visible in the UI once you reload the page.
 
 ## EMX
 In your EMX files, you can provide translations for your data and metadata in

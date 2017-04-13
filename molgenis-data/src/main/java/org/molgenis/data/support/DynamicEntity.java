@@ -268,6 +268,12 @@ public class DynamicEntity implements Entity
 							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
 									value.getClass().getSimpleName(), Double.class.getSimpleName(), attrName));
 				}
+				if (((Double) value).isNaN())
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] for type [%s] is not allowed for attribute: [%s]", value.toString(),
+									Double.class.getSimpleName(), attrName));
+				}
 				break;
 			case EMAIL:
 			case ENUM:
