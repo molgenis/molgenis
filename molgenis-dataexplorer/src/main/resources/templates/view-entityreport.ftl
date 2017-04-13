@@ -25,6 +25,7 @@
     </div>
 </div>
 
+<#if showStandaloneReportUrl>
 <script>
     $.when(
             $.ajax('<@resource_href "/js/dataexplorer-data.js"/>', {'cache': true}).done(function () {
@@ -46,3 +47,4 @@
             })
     )
 </script>
+</#if>
