@@ -136,7 +136,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			createModDataSettings(modAttr);
 			addAttribute(MOD_REPORTS).setParent(modAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_MOD_REPORT)).setLabel("Reports");
-			addAttribute(MOD_STANDALONE_REPORTS).setParent(modAttr).setDataType(BOOL).setNillable(false)
+			addAttribute(MOD_STANDALONE_REPORTS).setParent(modAttr).setDataType(BOOL).setNillable(true)
 					.setDefaultValue(String.valueOf(DEFAULT_MOD_STANDALONE_REPORT)).setLabel("Standalone Reports");
 			createModReportSettings(modAttr);
 		}
