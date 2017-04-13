@@ -45,7 +45,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getDataMatrix()
 	{
-		String entityName = "entity";
+		String entityTypeId = "entity";
 		List<Entity> entities = new ArrayList<>();
 
 		Attribute patientAttr = attrMetaFactory.create().setName("patient");
@@ -67,7 +67,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		final Repository<Entity> repo = mock(Repository.class);
 		when(repo.iterator()).thenReturn(entities.iterator());
 
-		when(dataServiceMock.getRepository(entityName)).thenAnswer(new Answer<Repository<Entity>>()
+		when(dataServiceMock.getRepository(entityTypeId)).thenAnswer(new Answer<Repository<Entity>>()
 		{
 			@Override
 			public Repository<Entity> answer(InvocationOnMock invocation) throws Throwable
@@ -77,7 +77,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		});
 
 		DataMatrix matrix = chartDataService
-				.getDataMatrix(entityName, Arrays.asList("probe"), "patient", Collections.<QueryRule>emptyList());
+				.getDataMatrix(entityTypeId, Arrays.asList("probe"), "patient", Collections.<QueryRule>emptyList());
 
 		assertNotNull(matrix);
 		assertEquals(matrix.getColumnTargets(), Arrays.asList(new Target("probe")));

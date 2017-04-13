@@ -440,10 +440,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		return getString(Meta.REPORTS_ENTITIES);
 	}
 
-	public String getEntityReport(String entityName)
+	public String getEntityReport(String entityTypeId)
 	{
 		Map<String, String> entityReports = getEntityReportsAsMap();
-		return entityReports != null ? entityReports.get(entityName) : null;
+		return entityReports != null ? entityReports.get(entityTypeId) : null;
 	}
 
 	public void setEntityReports(String entityReportsStr)
@@ -460,9 +460,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			for (String entityReport : entityReportsStr.split(","))
 			{
 				String[] tokens = entityReport.split(":");
-				String entityName = tokens[0];
+				String entityTypeId = tokens[0];
 				String reportName = tokens[1];
-				entityReports.put(entityName, reportName);
+				entityReports.put(entityTypeId, reportName);
 			}
 			return entityReports;
 		}

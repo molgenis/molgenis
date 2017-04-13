@@ -5,7 +5,6 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.meta.AttributeType;
 
 import java.util.List;
 
@@ -46,20 +45,20 @@ public interface MappingService
 	 * Adds the source attribute by default
 	 *
 	 * @param mappingTarget the MappingTarget whose mappings are applied
-	 * @param entityName    the name of the entity to map to
+	 * @param entityTypeId    the name of the entity to map to
 	 * @return fully qualified name of the generated entity
 	 */
-	String applyMappings(MappingTarget mappingTarget, String entityName);
+	String applyMappings(MappingTarget mappingTarget, String entityTypeId);
 
 	/**
 	 * Applies all mappings in a {@link MappingTarget}
 	 *
 	 * @param mappingTarget      the MappingTarget whose mappings are applied
-	 * @param entityName         the name of the entity to map to
+	 * @param entityTypeId         the name of the entity to map to
 	 * @param addSourceAttribute boolean indicating if the 'source' attribute should be added to the target repository
 	 * @return fully qualified name of the generated entity
 	 */
-	String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute);
+	String applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute);
 
 	/**
 	 * Deletes a {@link MappingProject}

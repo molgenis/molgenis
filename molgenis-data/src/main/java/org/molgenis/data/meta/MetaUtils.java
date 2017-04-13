@@ -12,8 +12,8 @@ public class MetaUtils
 	public static Fetch getEntityTypeFetch()
 	{
 		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
-		return new Fetch().field(ID).field(NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
-				.field(ATTRIBUTES).field(IS_ABSTRACT).field(EXTENDS).field(TAGS).field(BACKEND);
+		return new Fetch().field(ID).field(PACKAGE).field(LABEL).field(DESCRIPTION).field(ATTRIBUTES)
+				.field(IS_ABSTRACT).field(EXTENDS).field(TAGS).field(BACKEND);
 	}
 
 	/**
@@ -25,12 +25,14 @@ public class MetaUtils
 	 */
 	public static boolean isSystemPackage(Package package_)
 	{
-		return package_.getFullyQualifiedName().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null && package_
-				.getRootPackage().getFullyQualifiedName().equals(PACKAGE_SYSTEM));
+		return package_.getId().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null && package_
+				.getRootPackage().getId().equals(PACKAGE_SYSTEM));
 	}
 
-	public static String getFullyQualyfiedName(String name, Package aPackage)
+	public static String getFullyQualyfiedName(Package package_)
 	{
-		return aPackage == null ? name : aPackage.getFullyQualifiedName() + PACKAGE_SEPARATOR + name;
+		String packageId = package_.getId();
+		Package parentPackage = package_.getParent();
+		return parentPackage == null ? packageId : getFullyQualyfiedName(parentPackage) + PACKAGE_SEPARATOR + packageId;
 	}
 }

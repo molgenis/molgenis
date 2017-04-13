@@ -40,7 +40,7 @@ public class HasPermissionDirectiveTest
 		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.COUNT)).thenReturn(true);
 
 		Map<String, Object> params = Maps.newHashMap();
-		params.put("entityName", "entity");
+		params.put("entityTypeId", "entity");
 		params.put("permission", "COUNT");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
@@ -63,7 +63,7 @@ public class HasPermissionDirectiveTest
 		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.WRITE)).thenReturn(false);
 
 		Map<String, Object> params = Maps.newHashMap();
-		params.put("entityName", "entity");
+		params.put("entityTypeId", "entity");
 		params.put("permission", "WRITE");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],

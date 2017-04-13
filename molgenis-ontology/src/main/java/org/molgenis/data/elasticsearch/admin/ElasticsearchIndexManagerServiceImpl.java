@@ -35,9 +35,9 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	{
 		// collect indexed repos
 		List<EntityType> indexedEntityTypeList = new ArrayList<>();
-		dataService.getEntityNames().forEach(entityName ->
+		dataService.getEntityTypeIds().forEach(entityTypeId ->
 		{
-			Repository<Entity> repository = dataService.getRepository(entityName);
+			Repository<Entity> repository = dataService.getRepository(entityTypeId);
 			if (repository != null && repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 			{
 				indexedEntityTypeList.add(repository.getEntityType());
@@ -51,12 +51,12 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public void rebuildIndex(String entityName)
+	public void rebuildIndex(String entityTypeId)
 	{
-		Repository<Entity> repository = dataService.getRepository(entityName);
+		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 		if (!repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 		{
-			throw new MolgenisDataAccessException("Repository [" + entityName + "] is not an indexed repository");
+			throw new MolgenisDataAccessException("Repository [" + entityTypeId + "] is not an indexed repository");
 		}
 		elasticsearchService.rebuildIndex(repository);
 	}

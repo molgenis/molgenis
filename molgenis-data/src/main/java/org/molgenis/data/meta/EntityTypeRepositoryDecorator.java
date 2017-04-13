@@ -54,17 +54,14 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final MolgenisPermissionService permissionService;
-	private final IdentifierLookupService identifierLookupService;
 
 	public EntityTypeRepositoryDecorator(Repository<EntityType> decoratedRepo, DataService dataService,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
-			IdentifierLookupService identifierLookupService)
+			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
-		this.identifierLookupService = identifierLookupService;
 	}
 
 	@Override
@@ -304,7 +301,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void addEntityType(EntityType entityType)
 	{
-		validatePermission(entityType.getId(), entityType.getFullyQualifiedName(), Permission.WRITEMETA);
+		validatePermission(entityType, Permission.WRITEMETA);
 
 		// add row to entities table
 		decoratedRepo.add(entityType);
@@ -363,15 +360,14 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	 */
 	private void validateUpdateAllowed(EntityType entityType)
 	{
-		String entityName = entityType.getFullyQualifiedName();
-		String entityId = identifierLookupService.getEntityTypeId(entityName);
-		validatePermission(entityId, entityType.getFullyQualifiedName(), Permission.WRITEMETA);
+		validatePermission(entityType, Permission.WRITEMETA);
 
-		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
+		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityType.getId());
 		//FIXME: should only be possible to update system entities during bootstrap!
 		if (systemEntityType != null && !currentUserisSystem())
 		{
-			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
+			throw new MolgenisDataException(
+					format("Updating system entity meta data [%s] is not allowed", entityType.getLabel()));
 		}
 	}
 
@@ -397,13 +393,14 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void validateDeleteAllowed(EntityType entityType)
 	{
-		String entityName = entityType.getFullyQualifiedName();
-		validatePermission(entityName, entityType.getFullyQualifiedName(), Permission.WRITEMETA);
+		validatePermission(entityType, Permission.WRITEMETA);
 
-		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityName);
+		String entityTypeId = entityType.getId();
+		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityTypeId);
 		if (isSystem)
 		{
-			throw new MolgenisDataException(format("Deleting system entity meta data [%s] is not allowed", entityName));
+			throw new MolgenisDataException(
+					format("Deleting system entity meta data [%s] is not allowed", entityTypeId));
 		}
 	}
 
@@ -424,8 +421,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private void deleteEntityPermissions(EntityType entityType)
 	{
-		String entityName = entityType.getFullyQualifiedName();
-		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
+		String entityTypeId = entityType.getId();
+		List<String> authorities = SecurityUtils.getEntityAuthorities(entityTypeId);
 
 		// User permissions
 		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
@@ -472,7 +469,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
 		return EntityTypeStream.filter(entityType -> permissionService
-				.hasPermissionOnEntity(entityType.getFullyQualifiedName(), permission));
+				.hasPermissionOnEntity(entityType.getId(), permission));
 	}
 
 	private static class FilteredConsumer
@@ -489,7 +486,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 		public void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream().filter(entityType -> permissionService
-					.hasPermissionOnEntity(entityType.getFullyQualifiedName(), READ)).collect(toList());
+					.hasPermissionOnEntity(entityType.getId(), READ)).collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}
 	}

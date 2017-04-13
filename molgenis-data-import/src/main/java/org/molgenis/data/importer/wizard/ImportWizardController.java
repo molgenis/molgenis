@@ -3,7 +3,6 @@ package org.molgenis.data.importer.wizard;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -71,7 +70,6 @@ public class ImportWizardController extends AbstractWizardController
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 	private final UserAccountService userAccountService;
 	private final GroupAuthorityFactory groupAuthorityFactory;
-	private final IdentifierLookupService identifierLookupService;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -88,7 +86,7 @@ public class ImportWizardController extends AbstractWizardController
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			GroupAuthorityFactory groupAuthorityFactory, IdentifierLookupService identifierLookupService)
+			GroupAuthorityFactory groupAuthorityFactory)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -113,7 +111,6 @@ public class ImportWizardController extends AbstractWizardController
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 		this.dataService = dataService;
 		this.asyncImportJobs = Executors.newSingleThreadExecutor();
-		this.identifierLookupService = identifierLookupService;
 	}
 
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
@@ -122,8 +119,7 @@ public class ImportWizardController extends AbstractWizardController
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			ExecutorService executorService, GroupAuthorityFactory groupAuthorityFactory,
-			IdentifierLookupService identifierLookupService)
+			ExecutorService executorService, GroupAuthorityFactory groupAuthorityFactory)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -146,7 +142,6 @@ public class ImportWizardController extends AbstractWizardController
 		this.dataService = dataService;
 		this.asyncImportJobs = executorService;
 		this.groupAuthorityFactory = groupAuthorityFactory;
-		this.identifierLookupService = identifierLookupService;
 	}
 
 	@Override
@@ -179,11 +174,10 @@ public class ImportWizardController extends AbstractWizardController
 			throw new RuntimeException("Current user does not belong to the requested group.");
 		}
 		String entitiesString = webRequest.getParameter("entityIds");
-		List<String> entityNames = Arrays.asList(entitiesString.split(","));
-		Stream<Object> entityIds = entityNames.stream()
-				.map(entityName -> identifierLookupService.getEntityTypeId(entityName));
+		List<String> entityTypeIds = Arrays.asList(entitiesString.split(","));
+		Stream<Object> entityIds = entityTypeIds.stream().map(entityTypeId -> (Object) entityTypeId);
 		List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityIds,
-				new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+				new Fetch().field(EntityTypeMetadata.ID)
 						.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
 
 		Group group = dataService.findOneById(GROUP, groupId, Group.class);
@@ -200,7 +194,7 @@ public class ImportWizardController extends AbstractWizardController
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
 
-		dataService.getEntityIds().forEach(entityClassId ->
+		dataService.getEntityTypeIds().forEach(entityClassId ->
 		{
 			GroupAuthority authority = getGroupAuthority(groupId, entityClassId.toString());
 
@@ -274,7 +268,7 @@ public class ImportWizardController extends AbstractWizardController
 			Map<String, String> entityClassMap = new TreeMap<>();
 			for (EntityType entityType : entityTypes)
 			{
-				entityClassMap.put(entityType.getId(), entityType.getFullyQualifiedName());
+				entityClassMap.put(entityType.getId(), entityType.getId());
 			}
 			permissions.setEntityIds(entityClassMap);
 		}
@@ -375,14 +369,14 @@ public class ImportWizardController extends AbstractWizardController
 	@RequestMapping(method = RequestMethod.POST, value = "/importByUrl")
 	@ResponseBody
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
-			@RequestParam(value = "entityName", required = false) String entityName,
+			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
 		ImportRun importRun;
 		try
 		{
-			File tmpFile = fileLocationToStoredRenamedFile(url, entityName);
+			File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
 			importRun = importFile(request, tmpFile, action, notify);
 		}
 		catch (Exception e)
@@ -396,7 +390,7 @@ public class ImportWizardController extends AbstractWizardController
 	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
 	public ResponseEntity<String> importFile(HttpServletRequest request,
 			@RequestParam(value = "file", required = true) MultipartFile file,
-			@RequestParam(value = "entityName", required = false) String entityName,
+			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
@@ -404,7 +398,7 @@ public class ImportWizardController extends AbstractWizardController
 		String filename;
 		try
 		{
-			filename = getFilename(file.getOriginalFilename(), entityName);
+			filename = getFilename(file.getOriginalFilename(), entityTypeId);
 			File tmpFile = fileStore.store(file.getInputStream(), filename);
 			importRun = importFile(request, tmpFile, action, notify);
 		}
@@ -418,32 +412,31 @@ public class ImportWizardController extends AbstractWizardController
 
 	private ResponseEntity<String> createCreatedResponseEntity(ImportRun importRun) throws URISyntaxException
 	{
-		String href = Href
-				.concatEntityHref("/api/v2", importRun.getEntityType().getFullyQualifiedName(), importRun.getIdValue());
+		String href = Href.concatEntityHref("/api/v2", importRun.getEntityType().getId(), importRun.getIdValue());
 		return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
 	}
 
-	private File fileLocationToStoredRenamedFile(String fileLocation, String entityName) throws IOException
+	private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId) throws IOException
 	{
 		Path path = Paths.get(fileLocation);
 		String filename = path.getFileName().toString();
 		URL url = new URL(fileLocation);
 
-		return fileStore.store(url.openStream(), getFilename(filename, entityName));
+		return fileStore.store(url.openStream(), getFilename(filename, entityTypeId));
 	}
 
-	private String getFilename(String originalFileName, String entityName)
+	private String getFilename(String originalFileName, String entityTypeId)
 	{
 		String filename;
 		String extension = FileExtensionUtils
 				.findExtensionFromPossibilities(originalFileName, GenericImporterExtensions.getAll());
-		if (entityName == null)
+		if (entityTypeId == null)
 		{
 			filename = originalFileName;
 		}
 		else
 		{
-			filename = entityName + "." + extension;
+			filename = entityTypeId + "." + extension;
 			if (!extension.equals("vcf") && (!extension.equals("vcf.gz") && (!extension.equals("vcf.zip"))))
 				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
 		}

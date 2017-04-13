@@ -10,8 +10,8 @@
 <@footer/>
 
 <script>
-    var entityName = '${entityName}'
+    var entityTypeId = '${entityTypeId}'
     $('body').on('click', '#view-full-dataset-btn', function () {
-        window.open(window.location.origin + molgenis.getContextUrl() + '?entity=' + entityName, '_self')
+        window.open(window.location.origin + molgenis.getContextUrl() + '?entity=' + entityTypeId, '_self')
     })
 </script>

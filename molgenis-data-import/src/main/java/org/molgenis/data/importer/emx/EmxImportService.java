@@ -48,12 +48,12 @@ public class EmxImportService implements ImportService
 		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
 		if (GenericImporterExtensions.getEMX().contains(fileNameExtension.toLowerCase()))
 		{
-			for (String entityName : source.getEntityIds())
+			for (String entityTypeId : source.getEntityTypeIds())
 			{
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_I18NSTRINGS)) return true;
-				if (dataService.getMeta().getEntityType(entityName) != null) return true;
+				if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
+				if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;
+				if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_I18NSTRINGS)) return true;
+				if (dataService.getMeta().getEntityType(entityTypeId) != null) return true;
 			}
 		}
 
@@ -129,12 +129,12 @@ public class EmxImportService implements ImportService
 				.getEntityMap();
 
 		LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
-		stream(EntityTypeMap.keySet().spliterator(), false).forEach(entityName ->
+		stream(EntityTypeMap.keySet().spliterator(), false).forEach(entityTypeId ->
 		{
-			boolean importable = skipEntities.contains(entityName) || metaDataService
-					.isEntityTypeCompatible(EntityTypeMap.get(entityName));
+			boolean importable = skipEntities.contains(entityTypeId) || metaDataService
+					.isEntityTypeCompatible(EntityTypeMap.get(entityTypeId));
 
-			importableEntitiesMap.put(entityName, importable);
+			importableEntitiesMap.put(entityTypeId, importable);
 		});
 
 		return importableEntitiesMap;

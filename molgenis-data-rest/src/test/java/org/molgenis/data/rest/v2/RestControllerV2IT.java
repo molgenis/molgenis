@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
 import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
@@ -73,10 +72,10 @@ public class RestControllerV2IT
 		grantSystemRights(adminToken, testUserId, "sys_FileMeta", READ);
 		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
 
-		grantRights(adminToken, testUserId, "TypeTestv2", WRITE);
-		grantRights(adminToken, testUserId, "TypeTestRefv2", WRITE);
-		grantRights(adminToken, testUserId, "Locationv2", WRITE);
-		grantRights(adminToken, testUserId, "Personv2", WRITE);
+		grantRights(adminToken, testUserId, "it_emx_datatypes_TypeTestv2", WRITE);
+		grantRights(adminToken, testUserId, "it_emx_datatypes_TypeTestRefv2", WRITE);
+		grantRights(adminToken, testUserId, "it_emx_datatypes_Locationv2", WRITE);
+		grantRights(adminToken, testUserId, "it_emx_datatypes_Personv2", WRITE);
 
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 		LOG.info("Test user token:" + this.testUserToken);

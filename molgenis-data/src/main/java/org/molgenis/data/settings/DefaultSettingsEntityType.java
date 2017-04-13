@@ -16,6 +16,7 @@ import static org.molgenis.util.EntityUtils.getTypedValue;
 public abstract class DefaultSettingsEntityType extends SystemEntityType
 {
 	public static final String ATTR_ID = "id";
+	private final String id;
 
 	@Autowired
 	private DataService dataService;
@@ -32,6 +33,7 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 	public DefaultSettingsEntityType(String id)
 	{
 		super(id, PACKAGE_SETTINGS);
+		this.id = id;
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 	@RunAsSystem
 	public Entity getSettings()
 	{
-		return dataService.findOneById(getFullyQualifiedName(), getName());
+		return dataService.findOneById(getId(), getSettingsEntityId());
 	}
 
 	public static String getSettingsEntityName(String id)
@@ -65,6 +67,12 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 				defaultSettingsEntity.set(attr.getName(), typedDefaultValue);
 			}
 		}
+		defaultSettingsEntity.set(ATTR_ID, getSettingsEntityId());
 		return defaultSettingsEntity;
+	}
+
+	private String getSettingsEntityId()
+	{
+		return getId().substring(PACKAGE_SETTINGS.length() + PACKAGE_SEPARATOR.length());
 	}
 }

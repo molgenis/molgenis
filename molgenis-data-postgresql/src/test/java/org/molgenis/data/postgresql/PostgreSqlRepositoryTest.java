@@ -54,7 +54,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity#fc2928f6\" AS this LEFT JOIN \"RefEntity#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
+		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
 		long count = 123L;
 		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
 		postgreSqlRepo.setEntityType(entityType);
@@ -73,7 +73,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"RefEntity#07f902bf\" WHERE this.\"entityId\" = \"RefEntity#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity#fc2928f6\" AS this LEFT JOIN \"RefEntity#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"entityId\" = \"refEntityId#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
 		@SuppressWarnings("unchecked")
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
 		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
@@ -93,9 +93,8 @@ public class PostgreSqlRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
-		when(entityType.getFullyQualifiedName()).thenReturn("entity");
+		when(entityType.getId()).thenReturn("entity");
 		when(entityType.getIdValue()).thenReturn("entity");
-		when(entityType.getName()).thenReturn("entity");
 		when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
 		Entity entity0 = mock(Entity.class);
@@ -122,8 +121,7 @@ public class PostgreSqlRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
-		when(entityType.getFullyQualifiedName()).thenReturn("entity");
-		when(entityType.getName()).thenReturn("entity");
+		when(entityType.getId()).thenReturn("entity");
 		when(entityType.getIdValue()).thenReturn("entity");
 		when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
@@ -157,9 +155,8 @@ public class PostgreSqlRepositoryTest
 
 		EntityType refEntityMeta = mock(EntityType.class);
 		String refEntityName = "RefEntity";
-		when(refEntityMeta.getFullyQualifiedName()).thenReturn("refEntityId");
+		when(refEntityMeta.getId()).thenReturn("refEntityId");
 		when(refEntityMeta.getIdValue()).thenReturn("refEntityId");
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute(refIdAttrName)).thenReturn(refIdAttr);
 		when(refEntityMeta.getAttribute(xrefAttrName)).thenReturn(xrefAttr);
@@ -179,10 +176,9 @@ public class PostgreSqlRepositoryTest
 		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		EntityType entityType = mock(EntityType.class);
-		String entityName = "Entity";
-		when(entityType.getFullyQualifiedName()).thenReturn("entityId");
+		String entityTypeId = "Entity";
+		when(entityType.getId()).thenReturn("entityId");
 		when(entityType.getIdValue()).thenReturn("entityId");
-		when(entityType.getName()).thenReturn(entityName);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(entityType.getAttribute(idAttrName)).thenReturn(idAttr);
 		when(entityType.getAttribute(oneToManyAttrName)).thenReturn(oneToManyAttr);

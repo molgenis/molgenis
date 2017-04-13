@@ -30,8 +30,8 @@ public class EntityFactoryRegistry
 	 */
 	<E extends Entity> void registerStaticEntityFactory(EntityFactory<E, ?> staticEntityFactory)
 	{
-		String entityName = staticEntityFactory.getEntityName();
-		staticEntityFactoryMap.put(entityName, staticEntityFactory);
+		String entityTypeId = staticEntityFactory.getEntityTypeId();
+		staticEntityFactoryMap.put(entityTypeId, staticEntityFactory);
 	}
 
 	/**
@@ -42,6 +42,6 @@ public class EntityFactoryRegistry
 	 */
 	EntityFactory<? extends Entity, ?> getEntityFactory(EntityType entityType)
 	{
-		return staticEntityFactoryMap.get(entityType.getFullyQualifiedName());
+		return staticEntityFactoryMap.get(entityType.getId());
 	}
 }

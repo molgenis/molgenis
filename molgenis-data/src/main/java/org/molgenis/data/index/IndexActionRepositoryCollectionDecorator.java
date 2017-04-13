@@ -81,9 +81,9 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public Iterable<String> getEntityIds()
+	public Iterable<String> getEntityTypeIds()
 	{
-		return this.decorated.getEntityIds();
+		return this.decorated.getEntityTypeIds();
 	}
 
 	@Override

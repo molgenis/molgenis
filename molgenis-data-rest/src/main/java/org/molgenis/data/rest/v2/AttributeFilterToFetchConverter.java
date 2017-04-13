@@ -138,7 +138,7 @@ public class AttributeFilterToFetchConverter
 		if (attr == null)
 		{
 			throw new UnknownAttributeException(
-					format("Unknown attribute [%s] of entity [%s]", attrName, entityType.getFullyQualifiedName()));
+					format("Unknown attribute [%s] of entity [%s]", attrName, entityType.getId()));
 		}
 		return attr;
 	}

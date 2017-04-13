@@ -118,9 +118,9 @@ public class AttributeResponse
 			else
 			{
 				this.refEntity = refEntity != null ? new Href(
-						Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getFullyQualifiedName()),
+						Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getId()),
 						String.format("%s/%s", RestController.BASE_URI,
-								refEntity.getFullyQualifiedName())) : null; // FIXME apply Href escaping fix
+								refEntity.getId())) : null; // FIXME apply Href escaping fix
 			}
 		}
 		else this.refEntity = null;

@@ -39,7 +39,7 @@ public class SourceToEntityConverter
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(
-						"Unknown attribute [" + attrName + "] of entity [" + entityType.getFullyQualifiedName());
+						"Unknown attribute [" + attrName + "] of entity [" + entityType.getId());
 			}
 
 			Object sourceValue = entry.getValue();

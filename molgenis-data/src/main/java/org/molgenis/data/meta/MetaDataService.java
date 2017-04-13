@@ -17,22 +17,20 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Returns the repository for the given entity name.
 	 *
-	 * @param entityName entity name
 	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
 	 * @throws UnknownEntityException if no entity with the given name exists
 	 */
-	Repository<Entity> getRepository(String entityName);
+	Repository<Entity> getRepository(String entityTypeId);
 
 	/**
 	 * Returns the typed repository for the given entity name.
 	 *
-	 * @param entityName  entity name
 	 * @param entityClass entity class
 	 * @param <E>         entity type
 	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
 	 * @throws UnknownEntityException if no entity with the given name exists
 	 */
-	<E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass);
+	<E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
 
 	/**
 	 * Returns the repository for the given entity type
@@ -55,10 +53,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.
 	 *
-	 * @param entityName entity name
 	 * @return true if non-abstract entity type exists for the given entity name
 	 */
-	boolean hasRepository(String entityName);
+	boolean hasRepository(String entityTypeId); // FIXME use entity type ids instead of entity type fqns
 
 	/**
 	 * Create a repository for the given entity type.
@@ -131,7 +128,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param name the name of the Package to retrieve
 	 * @return the Package, or null if the package does not exist.
 	 */
-	Package getPackage(String name);
+	Package getPackage(String name); // FIXME use entity type ids instead of entity type fqns
 
 	/**
 	 * Adds a new Package
@@ -160,7 +157,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param name the fullyQualifiedName of the entity
 	 * @return EntityType of the entity, or null if the entity does not exist
 	 */
-	EntityType getEntityType(String name);
+	EntityType getEntityType(String name); // FIXME use entity type ids instead of entity type fqns
 
 	/**
 	 * Gets the entity type for a given entity.
@@ -168,7 +165,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityTypeId the id of the entity
 	 * @return EntityType of the entity, or null if the entity does not exist
 	 */
-	EntityType getEntityTypeById(String entityTypeId);
+	EntityType getEntityTypeById(String entityTypeId); // FIXME remove
 
 	/**
 	 * Returns a stream of all {@link EntityType entity type}.
@@ -216,10 +213,8 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 
 	/**
 	 * Deletes an EntityType
-	 *
-	 * @param entityName entity name
 	 */
-	void deleteEntityType(String entityName);
+	void deleteEntityType(String entityTypeId); // FIXME use entity type ids instead of entity type fqns
 
 	/**
 	 * Deletes a collection of entity type.
@@ -238,10 +233,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Adds attributes to an EntityType
 	 *
-	 * @param entityName String
 	 * @param attrs Stream <Attribute>
 	 */
-	void addAttributes(String entityName, Stream<Attribute> attrs);
+	void addAttributes(String entityTypeId, Stream<Attribute> attrs);
 
 	/**
 	 * Deletes an Attribute from an Entity

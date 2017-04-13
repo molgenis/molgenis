@@ -37,7 +37,7 @@ public class LanguageServiceTest
 	{
 		dataServiceMock = mock(DataService.class);
 		queryMock = mock(Query.class);
-		localizationService= mock(LocalizationService.class);
+		localizationService = mock(LocalizationService.class);
 		when(dataServiceMock.query(USER)).thenReturn(queryMock);
 		when(queryMock.eq(any(), any())).thenReturn(queryMock);
 		appSettingsMock = mock(AppSettings.class);

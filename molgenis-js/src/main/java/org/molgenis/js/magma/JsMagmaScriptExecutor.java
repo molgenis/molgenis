@@ -40,7 +40,7 @@ public class JsMagmaScriptExecutor
 	 */
 	Object executeScript(String jsScript, Map<String, Object> parameters)
 	{
-		EntityType entityType = entityTypeFactory.create().setName("entity");
+		EntityType entityType = entityTypeFactory.create("entity");
 		parameters.keySet().forEach(key -> entityType.addAttribute(attributeFactory.create().setName(key)));
 		Entity entity = new DynamicEntity(entityType);
 		parameters.entrySet().forEach(parameter -> entity.set(parameter.getKey(), parameter.getValue()));

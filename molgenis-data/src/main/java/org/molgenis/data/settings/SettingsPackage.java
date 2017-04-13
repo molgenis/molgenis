@@ -20,7 +20,7 @@ public class SettingsPackage extends SystemPackage
 	@Autowired
 	public SettingsPackage(PackageMetadata packageMetadata)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_SETTINGS, packageMetadata);
 	}
 
 	@Override

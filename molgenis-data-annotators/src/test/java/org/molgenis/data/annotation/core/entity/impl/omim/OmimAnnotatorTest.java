@@ -85,7 +85,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	{
 		List<Entity> entitiesToAnnotate = newArrayList();
 
-		EntityType inputEntityType = entityTypeFactory.create().setName("Test");
+		EntityType inputEntityType = entityTypeFactory.create("Test");
 		inputEntityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		inputEntityType.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
@@ -96,7 +96,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		entitiesToAnnotate.add(inputEntity);
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
-		EntityType expectedEntityType = entityTypeFactory.create().setName("Test");
+		EntityType expectedEntityType = entityTypeFactory.create("Test");
 		expectedEntityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		expectedEntityType.addAttribute(omimAnnotator.getPhenotypeAttr());
 		expectedEntityType.addAttribute(omimAnnotator.getMimNumberAttr());

@@ -29,7 +29,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest
 	public void beforeMethod()
 	{
 		molgenisRSQL = new MolgenisRSQL();
-		when(entityType.getFullyQualifiedName()).thenReturn("Person").getMock();
+		when(entityType.getId()).thenReturn("Person").getMock();
 		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
 		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
@@ -37,7 +37,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest
 		when(entityType.getAttribute("name")).thenReturn(nameAttr);
 		when(entityType.getAttribute("age")).thenReturn(ageAttr);
 
-		when(genderEntityType.getFullyQualifiedName()).thenReturn("Gender").getMock();
+		when(genderEntityType.getId()).thenReturn("Gender").getMock();
 		Attribute genderIdAttribute = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(genderIdAttribute.getDataType()).thenReturn(INT);
 		when(genderEntityType.getIdAttribute()).thenReturn(genderIdAttribute);

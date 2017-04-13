@@ -33,7 +33,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 	@Override
 	public String getName()
 	{
-		if (name == null) name = getEntityType().getFullyQualifiedName();
+		if (name == null) name = getEntityType().getId();
 		return name;
 	}
 

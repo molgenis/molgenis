@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class PropertyType extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Property";
+	private static final String PROPERTY_TYPE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String KEY = "key";
 	public static final String VALUE = "value";

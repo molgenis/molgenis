@@ -39,9 +39,9 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 	@Override
 	public String generateId(EntityType entityType)
 	{
-		String idPart = generateHashcode(entityType.getIdValue().toString());
-		String namePart = truncateName(cleanName(entityType.getName()));
-		return namePart + SEPARATOR + idPart;
+		String idHash = generateHashcode(entityType.getId().toString());
+		String truncatedId = truncateName(cleanName(entityType.getId()));
+		return truncatedId + SEPARATOR + idHash;
 	}
 
 	/**
@@ -53,7 +53,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 	@Override
 	public String generateId(Attribute attribute)
 	{
-		String idPart = generateHashcode(attribute.getEntity().getIdValue().toString() + attribute.getIdentifier());
+		String idPart = generateHashcode(attribute.getEntity().getId().toString() + attribute.getIdentifier());
 		String namePart = truncateName(cleanName(attribute.getName()));
 		return namePart + SEPARATOR + idPart;
 	}

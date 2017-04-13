@@ -53,8 +53,8 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	{
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.of(jobType1));
 		when(jobType1.getExtends()).thenReturn(jobExecutionType);
-		when(jobExecutionType.getFullyQualifiedName()).thenReturn(JOB_EXECUTION);
-		when(jobType1.getFullyQualifiedName()).thenReturn("JobType1");
+		when(jobExecutionType.getId()).thenReturn(JOB_EXECUTION);
+		when(jobType1.getId()).thenReturn("JobType1");
 
 		when(dataService.query("JobType1")).thenReturn(query);
 		when(query.eq(STATUS, RUNNING)).thenReturn(query);

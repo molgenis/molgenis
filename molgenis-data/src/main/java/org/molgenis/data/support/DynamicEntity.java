@@ -86,8 +86,7 @@ public class DynamicEntity implements Entity
 		Attribute idAttr = entityType.getIdAttribute();
 		if (idAttr == null)
 		{
-			throw new IllegalArgumentException(
-					format("Entity [%s] doesn't have an id attribute", entityType.getFullyQualifiedName()));
+			throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute", entityType.getId()));
 		}
 		set(idAttr.getName(), id);
 	}
@@ -314,7 +313,7 @@ public class DynamicEntity implements Entity
 	@Override
 	public String toString()
 	{
-		StringBuilder strBuilder = new StringBuilder(entityType.getFullyQualifiedName()).append('{');
+		StringBuilder strBuilder = new StringBuilder(entityType.getId()).append('{');
 		strBuilder.append(stream(entityType.getAtomicAttributes().spliterator(), false).map(attr ->
 		{
 			StringBuilder attrStrBuilder = new StringBuilder(attr.getName()).append('=');

@@ -5,7 +5,7 @@
 <#assign js=["apps.js"]>
 
 <@header css js/>
-<@hasPermission entityName='${appEntityTypeFullyQualifiedName}' permission="WRITE">
+<@hasPermission entityTypeId='${appEntityTypeId}' permission="WRITE">
 <div class="row header">
     <div class="col-md-12">
         <button class="btn btn-default" id="create-app-btn">Create new App</button>
@@ -34,7 +34,7 @@
                     <h3>${app.name}</h3>
                     <p>${app.description!}</p>
                 </div>
-                <@hasPermission entityName='${appEntityTypeFullyQualifiedName}' permission="WRITE">
+                <@hasPermission entityTypeId='${appEntityTypeId}' permission="WRITE">
                     <button class="btn btn-default edit-app-btn" data-app-id="${app.id}">Edit</button>
             <#if !app.active>
                 <button class="btn btn-success activate-app-btn" data-app-id="${app.id}">Activate</button>
