@@ -106,6 +106,32 @@ The HTML you specify in the template will be shown in a modal dialog, so you'll 
 </div>
 ```
 
+# Entity report in dataexplorer tabs
+If you use the dataexplorer, you might have noticed the tabs showing data or aggregates. MOLGENIS allows you to create tabs with your own 
+content. This content support both HTML and JavaScript.
+
+To Create your own data explorer tab, do the following:
+1. In the top menu, select the Data Explorer.
+2. In the pulldown, select the entity FreemarkerTemplate
+3. Push the plus icon.
+4. The name is `view-<report name>-entitiesreport.ftl`. So for a report called example, the template would be called `view-example-entitiesreport.ftl`
+5. The value is a [Freemarker](http://freemarker.org/) Template specifying the contents of the report.
+
+```html
+<h1>Example</h1>
+<p>
+    This shows you an example of 
+    a report as a tab in the dataexplorer
+</p>
+```
+
+Now that you created a freemarker template, you want to associate this template with your data set:
+1. Go to the dataexplorer and select the cogwheel in the top right corner
+2. Scroll down to the reports section
+3. In the text area, type the following: `<my data set name>:<report name>. For our report, we have a data set called MyData. To link our previously created template, fill in `MyData:example`.
+4. Save, wait for the page to reload, and select MyData from the dropdown in the top right corner.
+5. You will now see a new tab called example, which contains the HTML you filled in in the freemarker template.
+
 ## Accessing entity details from Freemarker
 The model will contain
  * a variable named `entity` of type [`org.molgenis.data.Entity`](https://github.com/molgenis/molgenis/blob/master/molgenis-data/src/main/java/org/molgenis/data/Entity.java) 
