@@ -110,10 +110,7 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		user.setUsername("user");
 		user.setPassword("password");
 		user.setEmail("e@mail.com");
-		RunAsSystemProxy.runAsSystem(() ->
-		{
-			dataService.add(USER, user);
-		});
+		RunAsSystemProxy.runAsSystem(() -> dataService.add(USER, user));
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -385,55 +382,92 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 
 		data.add(createAddData("it_emx_datatypes.xlsx", asList("it", "emx", "datatypes"),
 				ImmutableMap.<String, Integer>builder().put("TypeTestRef", 5).put("TypeTest", 38).build(),
-				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest")));
+				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest"), this::validateItEmxDatatypes));
 
 		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"),
 				ImmutableMap.<String, Integer>builder().put("TestCategorical1", 50).put("TestMref1", 50)
 						.put("TestXref2", 50).put("TestXref1", 50)
 						.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity2", 50).build(),
 				ImmutableSet.of("TestCategorical1", "TestMref1", "TestXref2", "TestXref1", "TestEntity0",
-						"advanced_TestEntity1", "advanced_p_TestEntity2")));
+						"advanced_TestEntity1", "advanced_p_TestEntity2"), this::validateItEmxDeepNesting));
 
 		data.add(createAddData("it_emx_lookup_attribute.xlsx", asList("it", "emx", "lookupattribute"),
 				ImmutableMap.<String, Integer>builder().put("Ref1", 2).put("Ref2", 2).put("Ref3", 2).put("Ref4", 2)
 						.put("Ref5", 2).build(), ImmutableSet
 						.of("AbstractTop", "AbstractMiddle", "Ref1", "Ref2", "Ref3", "Ref4", "Ref5",
-								"TestLookupAttributes")));
+								"TestLookupAttributes"), this::validateItEmxLookupAttribute));
 
 		data.add(createAddData("it_emx_autoid.xlsx", asList("it", "emx", "autoid"), ImmutableMap.of("testAutoId", 4),
-				ImmutableSet.of("testAutoId")));
+				ImmutableSet.of("testAutoId"), this::validateItEmxAutoid));
 
 		data.add(createAddData("it_emx_onetomany.xlsx", asList("it", "emx", "onetomany"),
 				ImmutableMap.<String, Integer>builder().put("book", 4).put("author", 2).put("node", 4).build(),
-				ImmutableSet.of("book", "author", "node")));
+				ImmutableSet.of("book", "author", "node"), this::validateItEmxOneToMany));
 
 		data.add(createAddData("it_emx_self_references.xlsx", asList("it", "emx", "selfreferences"),
-				ImmutableMap.of("PersonTest", 11), ImmutableSet.of("PersonTest")));
+				ImmutableMap.of("PersonTest", 11), ImmutableSet.of("PersonTest"), this::validateItEmxSelfReferences));
 
-		data.add(createAddData("it_emx_tags.xlsx", asList("it", "emx", "tags"), emptyMap(),
-				ImmutableSet.of("TagEntity")));
+		data.add(
+				createAddData("it_emx_tags.xlsx", asList("it", "emx", "tags"), emptyMap(), ImmutableSet.of("TagEntity"),
+						this::validateItEmxTags));
 
 		return data.iterator();
+	}
+
+	private void validateItEmxDatatypes()
+	{
+
+	}
+
+	private void validateItEmxDeepNesting()
+	{
+
+	}
+
+	private void validateItEmxLookupAttribute()
+	{
+
+	}
+
+	private void validateItEmxAutoid()
+	{
+
+	}
+
+	private void validateItEmxOneToMany()
+	{
+
+	}
+
+	private void validateItEmxSelfReferences()
+	{
+
+	}
+
+	private void validateItEmxTags()
+	{
+
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
 			ROLE_READ_TAG, ROLE_READ_OWNED, ROLE_READ_FILE_META })
 	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-
-		validateImportReport(importReport, entityCountMap, addedEntityTypes);
+		testDoImportAddEmx(file, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	public void testDoImportAddEmxAsSuperuser(File file, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
+	{
+		testDoImportAddEmx(file, entityCountMap, addedEntityTypes, entityValidationMethod);
+	}
+
+	private void testDoImportAddEmx(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes,
+			Runnable entityValidationMethod)
 	{
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
@@ -441,6 +475,7 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
+		entityValidationMethod.run();
 	}
 
 	@DataProvider(name = "doImportEmxAddUpdateProvider")
@@ -521,7 +556,7 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	}
 
 	private static Object[] createAddData(String fileName, List<String> packageTokens,
-			Map<String, Integer> entityCountMap, Set<String> entityTypeNames)
+			Map<String, Integer> entityCountMap, Set<String> entityTypeNames, Runnable entityValidationMethod)
 	{
 		File file = getFile("/xls/" + fileName);
 		String packageName = String.join(PACKAGE_SEPARATOR, packageTokens);
@@ -529,7 +564,7 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
 				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
-		return new Object[] { file, entityTypeCountMap, entityTypeFullyQualifiedNames };
+		return new Object[] { file, entityTypeCountMap, entityTypeFullyQualifiedNames, entityValidationMethod };
 	}
 
 	private static Object[] createUpdateData(String fileName, String updateFileName, List<String> packageTokens,
