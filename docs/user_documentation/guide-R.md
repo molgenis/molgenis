@@ -1,5 +1,5 @@
 **
-The R API is a script that allows access to your MOLGENIS data via the R-Project statistical package. It is available on every MOLGENIS on the URL `http[s]://<your.molgenis.url>/molgenis.R`.
+The R API is a script that allows access to your MOLGENIS data via the R-Project statistical package. It is available on every MOLGENIS on the URL `http://molgenis.mydomain.example/molgenis.R`.
 **
 
 ## Example
@@ -152,13 +152,13 @@ But if you want to combine data from multiple server, you can specify a differen
 
 ```
 local({
-  molgenis.api.url <- "https://molgenis56.target.rug.nl:443/api/v1/"
+  molgenis.api.url <- "https://molgenis.mydomain.example:443/api/v1/"
 }, env = molgenis.env)
 ```
 or
 
 ```
 local({
-  molgenis.api.url <- "http://localhost:8080/api/v1/"
+  molgenis.api.url <- "http://molgenis.mydomain.example:8080/api/v1/"
 }, env = molgenis.env)
 ```

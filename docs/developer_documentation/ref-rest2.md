@@ -13,16 +13,16 @@ Key | Type | Description
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v2/<entity_name>/<entity_id>
-GET http://your.molgenis.url/api/v2/<entity_name>/<entity_id>?attrs=attr0
-GET http://your.molgenis.url/api/v2/<entity_name>/<entity_id>?attrs=attr0,attr1
-GET http://your.molgenis.url/api/v2/<entity_name>/<entity_id>?attrs=attr0(subattr0,subattr1),attr1(*)
+GET http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>
+GET http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?attrs=attr0
+GET http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?attrs=attr0,attr1
+GET http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?attrs=attr0(subattr0,subattr1),attr1(*)
 ```
 ```
-POST http://your.molgenis.url/api/v2/<entity_name>/<entity_id>?_method=GET
+POST http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?_method=GET
 ```
 ```
-POST http://your.molgenis.url/api/v2/<entity_name>/<entity_id>?_method=GET
+POST http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?_method=GET
 attrs=attr0(subattr0,subattr1),attr1(*)
 ```
 
@@ -30,7 +30,7 @@ attrs=attr0(subattr0,subattr1),attr1(*)
 
 *Request*
 ```
-DELETE http://your.molgenis.url/api/v2/<entity_name>/<entity_id>
+DELETE http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>
 ```
 
 # Query
@@ -47,18 +47,18 @@ Key | Type | Description
 *_method* | HTTP method | Tunnel request through defined method over default API operation
 
 ```
-GET http://your.molgenis.url/api/v2/<entity_name>
-GET http://your.molgenis.url/api/v2/<entity_name>?attrs=attr0
-GET http://your.molgenis.url/api/v2/<entity_name>?attrs=attr0,attr1
-GET http://your.molgenis.url/api/v2/<entity_name>?attrs=attr0(subattr0,subattr1),attr1(*)
-GET http://your.molgenis.url/api/v2/<entity_name>?sort=attr0
-GET http://your.molgenis.url/api/v2/<entity_name>?sort=attr0:asc
-GET http://your.molgenis.url/api/v2/<entity_name>?sort=attr0:desc
-GET http://your.molgenis.url/api/v2/<entity_name>?sort=attr0:desc,attr1
-GET http://your.molgenis.url/api/v2/<entity_name>?start=40&num=20
-GET http://your.molgenis.url/api/v2/<entity_name>?q=attr0==val
-GET http://your.molgenis.url/api/v2/<entity_name>?q=attr0!=val
-GET http://your.molgenis.url/api/v2/<entity_name>?q=attr0!=val;q=attr1=ge=5
+GET http://molgenis.mydomain.example/api/v2/<entity_name>
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?attrs=attr0
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?attrs=attr0,attr1
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?attrs=attr0(subattr0,subattr1),attr1(*)
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?sort=attr0
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?sort=attr0:asc
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?sort=attr0:desc
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?sort=attr0:desc,attr1
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?start=40&num=20
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0==val
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val;q=attr1=ge=5
 ```
 
 ## Aggregation
@@ -73,10 +73,10 @@ Key | Type | Description
 The aggregation query supports the RSQL selectors 'x', 'y' and 'distinct' and the RSQL operator '=='. The selector 'x' defines the first aggregation attribute name, 'y' defines the second aggregation attribute name, 'distinct' defines the distinct aggregation attribute name.
 
 ```
-GET http://your.molgenis.url/api/v2/<entity_name>?aggs=x==attr0
-GET http://your.molgenis.url/api/v2/<entity_name>?aggs=x==attr0;y==attr1
-GET http://your.molgenis.url/api/v2/<entity_name>?aggs=x==attr0;y==attr1;distinct=attr2
-GET http://your.molgenis.url/api/v2/<entity_name>?aggs=x==attr0;y==attr1;distinct=attr2&q=attr4==val
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1;distinct=attr2
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1;distinct=attr2&q=attr4==val
 ```
 
 # Batch 
@@ -89,7 +89,7 @@ To create/add a list of entities into a collection you can POST the 'entities' p
 
 *Request*
 ```
-POST http://your.molgenis.url/api/v2/person
+POST http://molgenis.mydomain.example/api/v2/person
 Content-Type: application/json
 
 {entities: [
@@ -130,7 +130,7 @@ To batch update a list of entities of a collection you can PUT the 'entities' pa
 
 *Request*
 ```
-PUT http://your.molgenis.url/api/v2/person
+PUT http://molgenis.mydomain.example/api/v2/person
 Content-Type: application/json
 
 {entities: [
@@ -158,7 +158,7 @@ To delete a list of entities of a collection you can DELETE the 'entityIds' para
 
 *Request*
 ```
-DELETE http://your.molgenis.url/api/v2/person
+DELETE http://molgenis.mydomain.example/api/v2/person
 Content-Type: application/json
 
 {
@@ -189,7 +189,7 @@ If you only want to change one attribute without needing to provide all other at
 
 *Request*
 ```
-PUT http://your.molgenis.url/api/v2/person/age
+PUT http://molgenis.mydomain.example/api/v2/person/age
 Content-Type: application/json
 
 {entities: [
