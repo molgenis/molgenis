@@ -401,7 +401,6 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @param model
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
-	 * @author mdehaan, fkelpin
 	 */
 	@RequestMapping(value = "/details", method = POST)
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
@@ -422,6 +421,15 @@ public class DataExplorerController extends MolgenisPluginController
 		return "view-entityreport";
 	}
 
+	/**
+	 * Builds a model containing one entity and returns standalone report ftl view
+	 *
+	 * @param entityName
+	 * @param entityId
+	 * @param model
+	 * @return standalone report view
+	 * @throws Exception if an entity name or id is not found
+	 */
 	@RequestMapping(value = "/details/{entityName}/{entityId}", method = GET)
 	public String viewEntityDetailsById(@PathVariable(value = "entityName") String entityName,
 			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
