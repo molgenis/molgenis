@@ -107,7 +107,7 @@ public class ImportRun extends StaticEntity
 
 	public String getMessage()
 	{
-		return getString(STATUS);
+		return getString(MESSAGE);
 	}
 
 	public void setMessage(String message)
