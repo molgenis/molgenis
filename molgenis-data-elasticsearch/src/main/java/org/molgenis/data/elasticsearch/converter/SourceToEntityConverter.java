@@ -106,7 +106,7 @@ public class SourceToEntityConverter
 					case DATE:
 						try
 						{
-							entityValue = MolgenisDateFormat.getDateFormat().parse((String) sourceValue);
+							entityValue = MolgenisDateFormat.parseLocalDate((String) sourceValue);
 						}
 						catch (Exception e)
 						{
@@ -116,7 +116,7 @@ public class SourceToEntityConverter
 					case DATE_TIME:
 						try
 						{
-							entityValue = MolgenisDateFormat.getDateTimeFormat().parse((String) sourceValue);
+							entityValue = MolgenisDateFormat.parseInstant((String) sourceValue);
 						}
 						catch (Exception e)
 						{

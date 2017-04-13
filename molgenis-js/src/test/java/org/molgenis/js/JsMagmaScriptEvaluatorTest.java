@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import static java.util.Arrays.asList;
@@ -370,7 +370,7 @@ public class JsMagmaScriptEvaluatorTest
 	public void age()
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
-		person.set("birthdate", new Date());
+		person.set("birthdate", LocalDate.now());
 
 		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 		assertEquals(result, 0d);
@@ -380,7 +380,7 @@ public class JsMagmaScriptEvaluatorTest
 	public void testNull()
 	{
 		Entity person0 = new DynamicEntity(personBirthDateMeta);
-		person0.set("birthdate", new Date());
+		person0.set("birthdate", LocalDate.now());
 
 		String script = "$('birthdate').age().value() < 18  || $('birthdate').value() != null";
 

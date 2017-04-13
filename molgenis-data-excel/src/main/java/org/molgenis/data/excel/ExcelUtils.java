@@ -94,11 +94,11 @@ class ExcelUtils
 						value = null;
 						break;
 					default:
-						throw new MolgenisDataException("unsupported cell type: " + cellValue.getCellType());
+						throw new MolgenisDataException("unsupported cell type: " + cellValue.getCellTypeEnum());
 				}
 				break;
 			default:
-				throw new MolgenisDataException("unsupported cell type: " + cell.getCellType());
+				throw new MolgenisDataException("unsupported cell type: " + cell.getCellTypeEnum());
 		}
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);

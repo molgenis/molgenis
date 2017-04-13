@@ -18,7 +18,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 import static java.lang.String.format;
@@ -141,13 +141,11 @@ class PostgreSqlEntityFactory
 						throw new RuntimeException(format("Value mapping not allowed for attribute type [%s]",
 								attr.getDataType().toString()));
 					case DATE:
-						LocalDate localDate = resultSet.getObject(colName, LocalDate.class);
-						value = localDate != null ? Date
-								.from(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant()) : null;
+						value = resultSet.getObject(colName, LocalDate.class);
 						break;
 					case DATE_TIME:
-						// valid, because java.sql.Timestamp extends required type java.util.Date
-						value = resultSet.getTimestamp(colName);
+						ZonedDateTime zonedDateTime = resultSet.getObject(colName, ZonedDateTime.class);
+						value = resultSet.wasNull() ? null : zonedDateTime.toInstant();
 						break;
 					case DECIMAL:
 						BigDecimal bigDecimalValue = resultSet.getBigDecimal(colName);

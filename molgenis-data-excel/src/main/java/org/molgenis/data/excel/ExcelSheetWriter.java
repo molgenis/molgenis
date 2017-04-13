@@ -1,6 +1,7 @@
 package org.molgenis.data.excel;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
@@ -57,7 +58,7 @@ public class ExcelSheetWriter extends AbstractWritable
 		Row poiRow = sheet.createRow(row++);
 		for (Attribute attribute : cachedAttributes)
 		{
-			Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
+			Cell cell = poiRow.createCell(i++, CellType.STRING);
 			cell.setCellValue(toValue(entity.get(attribute.getName())));
 		}
 
@@ -80,7 +81,7 @@ public class ExcelSheetWriter extends AbstractWritable
 			int i = 0;
 			for (Attribute attribute : attributes)
 			{
-				Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
+				Cell cell = poiRow.createCell(i++, CellType.STRING);
 
 				switch (attributeWriteMode)
 				{
