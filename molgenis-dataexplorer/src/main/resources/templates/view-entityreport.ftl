@@ -41,11 +41,12 @@
                 //Add copy functionality
                 document.getElementById('copy-standalone-report-url-btn').addEventListener('click', function (e) {
                     e.preventDefault()
-                    var url = document.createElement("input");
-                    url.setAttribute("value", $("#standalone-report-url").val());
-                    document.body.appendChild(url);
+                    var url = document.createElement("input")
+                    url.setAttribute("value", $("#standalone-report-url").val())
+                    document.body.appendChild(url)
                     url.select();
                     document.execCommand("copy");
+                    document.body.removeChild(url)
                 })
             })
     )
