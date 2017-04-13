@@ -14,18 +14,20 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Array;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 
 import static java.lang.String.format;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getColumnName;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 @Component
 class PostgreSqlEntityFactory
@@ -144,8 +146,8 @@ class PostgreSqlEntityFactory
 						value = resultSet.getObject(colName, LocalDate.class);
 						break;
 					case DATE_TIME:
-						ZonedDateTime zonedDateTime = resultSet.getObject(colName, ZonedDateTime.class);
-						value = resultSet.wasNull() ? null : zonedDateTime.toInstant();
+						OffsetDateTime offsetDateTime = resultSet.getObject(colName, OffsetDateTime.class);
+						value = resultSet.wasNull() ? null : offsetDateTime.toInstant();
 						break;
 					case DECIMAL:
 						BigDecimal bigDecimalValue = resultSet.getBigDecimal(colName);
@@ -277,8 +279,9 @@ class PostgreSqlEntityFactory
 						idAttr = idAttr.getRefEntity().getIdAttribute();
 						continue;
 					case DATE:
+						return parseLocalDate(idValueStr);
 					case DATE_TIME:
-						return Date.valueOf(idValueStr);
+						return parseInstant(idValueStr).atOffset(UTC);
 					case DECIMAL:
 						return Double.valueOf(idValueStr);
 					case EMAIL:

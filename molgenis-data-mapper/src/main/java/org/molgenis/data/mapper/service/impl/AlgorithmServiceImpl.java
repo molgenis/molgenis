@@ -23,8 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.sql.Timestamp;
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +37,7 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Math.round;
 import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -220,11 +225,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return convertedValue;
 	}
 
-	private Date convertToDate(Object value)
+	private LocalDate convertToDate(Object value)
 	{
 		try
 		{
-			return value != null ? new Date(Double.valueOf(value.toString()).longValue()) : null;
+			return value != null ? Instant.ofEpochMilli(Double.valueOf(value.toString()).longValue()).atOffset(UTC)
+					.toLocalDate() : null;
 		}
 		catch (NumberFormatException e)
 		{
@@ -234,11 +240,11 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 	}
 
-	private Timestamp convertToDateTime(Object value)
+	private Instant convertToDateTime(Object value)
 	{
 		try
 		{
-			return value != null ? new Timestamp(Double.valueOf(value.toString()).longValue()) : null;
+			return value != null ? Instant.ofEpochMilli(Double.valueOf(value.toString()).longValue()) : null;
 		}
 		catch (NumberFormatException e)
 		{

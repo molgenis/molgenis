@@ -14,6 +14,22 @@
 import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import {Ace} from "../wrapper/Ace";
+import moment from "moment";
+
+const renderValue = (value) => {
+    if (typeof value === 'object') {
+        return value['__labelValue'];
+    }
+    const parsedDate = moment(value, 'YYYY-MM-DD', true);
+    if (parsedDate.isValid()) {
+        return parsedDate.format('ll');
+    }
+    const parsedDateTime = moment(value, moment.ISO_8601, true);
+    if (parsedDateTime.isValid()) {
+        return parsedDateTime.format('MMMM D, YYYY h:mm:ss A');
+    }
+    return value;
+}
 
 var JobDetails = React.createClass({
     mixins: [DeepPureRenderMixin],
@@ -33,10 +49,7 @@ var JobDetails = React.createClass({
                                                   value={job.log}
                                                   mode='text'
                                                   tail/> :
-                                <p className="form-control-static">{
-                                    typeof job[key] === 'object' ?
-                                        job[key]['__labelValue'] :
-                                        job[key]}</p>}
+                                <p className="form-control-static">{renderValue(job[key])}</p>}
                         </div>
                     </div>)}
             </form>

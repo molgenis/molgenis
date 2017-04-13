@@ -14,6 +14,7 @@ import Form from "./Form";
 import Dialog from "./Dialog";
 import {isCompoundAttr, isMrefAttr, isRefAttr, isXrefAttr} from "rest-client/AttributeFunctions";
 import "./css/Table.css";
+import moment from "moment";
 
 var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
@@ -808,6 +809,12 @@ var TableCellContent = React.createClass({
                             }.bind(this)))
                         )
                     );
+                    break;
+                case 'DATE':
+                    CellContent = span(null, moment(value).format('ll'));
+                    break;
+                case 'DATE_TIME':
+                    CellContent = span(null, moment(value).format('lll'));
                     break;
                 case 'EMAIL':
                     CellContent = a({href: 'mailto:' + value}, value);

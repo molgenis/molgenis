@@ -14,6 +14,8 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.Locale;
 
+import static java.time.Instant.now;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
@@ -370,7 +372,7 @@ public class JsMagmaScriptEvaluatorTest
 	public void age()
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
-		person.set("birthdate", LocalDate.now());
+		person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
 		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 		assertEquals(result, 0d);

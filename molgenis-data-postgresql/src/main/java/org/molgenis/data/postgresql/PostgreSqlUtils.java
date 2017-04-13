@@ -8,7 +8,6 @@ import org.molgenis.file.model.FileMeta;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -141,7 +140,7 @@ class PostgreSqlUtils
 								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
 										queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
 					}
-					return (LocalDate) queryValue;
+					return queryValue;
 				case DATE_TIME:
 					if (queryValue == null)
 					{
@@ -153,7 +152,7 @@ class PostgreSqlUtils
 								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
 										queryValue.getClass().getSimpleName(), Instant.class.getSimpleName()));
 					}
-					return ((Instant) queryValue).atOffset(ZoneOffset.UTC);
+					return ((Instant) queryValue).atOffset(UTC);
 				case DECIMAL:
 					if (queryValue != null && !(queryValue instanceof Double))
 					{

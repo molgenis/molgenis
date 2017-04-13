@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
@@ -967,7 +966,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleEqualsDateNull() throws ParseException
 	{
-		Date value = null;
+		LocalDate value = null;
 		Query<Entity> q = new QueryImpl<>().eq(dateAttrName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -980,7 +979,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleEqualsDateTimeNull() throws ParseException
 	{
-		Date value = null;
+		Instant value = null;
 		Query<Entity> q = new QueryImpl<>().eq(dateTimeAttrName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -1198,7 +1197,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleNotEqualsDateNull() throws ParseException
 	{
-		Date value = null;
+		LocalDate value = null;
 		Query<Entity> q = new QueryImpl<>().not().eq(dateAttrName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -1212,7 +1211,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleNotEqualsDateTimeNull() throws ParseException
 	{
-		Date value = null;
+		Instant value = null;
 		Query<Entity> q = new QueryImpl<>().not().eq(dateTimeAttrName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);

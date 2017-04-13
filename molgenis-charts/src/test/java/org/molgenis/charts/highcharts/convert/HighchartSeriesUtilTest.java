@@ -6,12 +6,16 @@ import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.basic.Series;
 import org.molgenis.data.meta.AttributeType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,7 +24,6 @@ import static org.testng.Assert.*;
 @ContextConfiguration
 public class HighchartSeriesUtilTest
 {
-	@Autowired
 	private HighchartSeriesUtil highchartSeriesUtil;
 
 	@BeforeMethod
@@ -32,34 +35,25 @@ public class HighchartSeriesUtilTest
 	@Test
 	public void convertDateTimeToMilliseconds()
 	{
-		Calendar calendar = Calendar.getInstance();
-		calendar.clear();
-		calendar.set(2014, 1, 1, 1, 1, 1);
-		final TimeZone timeZone = calendar.getTimeZone();
-		long offset = timeZone.getOffset(calendar.getTime().getTime());
-		Long correctResult = offset + calendar.getTime().getTime();
-		assertEquals(highchartSeriesUtil.convertDateTimeToMilliseconds(calendar.getTime()), correctResult);
+		LocalDate value = LocalDate.of(2014, 1, 1);
+		long actual = (Long) (highchartSeriesUtil.convertValue(AttributeType.DATE, value));
+		long expected = value.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+		assertEquals(actual, expected);
 	}
 
 	@Test
 	public void convertDateToMilliseconds()
 	{
-		Calendar calendar = Calendar.getInstance();
-		calendar.clear();
-		calendar.set(2014, 1, 1, 1, 1, 1);
-		final TimeZone timeZone = calendar.getTimeZone();
-		long offset = timeZone.getOffset(calendar.getTime().getTime());
-		long notCorrectResult = offset + calendar.getTime().getTime();
-		Long correctResult = offset + calendar.getTime().getTime() - 3661000l;
-		assertNotEquals(highchartSeriesUtil.convertDateToMilliseconds(calendar.getTime()), notCorrectResult);
-		assertEquals(highchartSeriesUtil.convertDateToMilliseconds(calendar.getTime()), correctResult);
+		Instant value = Instant.ofEpochMilli(1492181129L);
+		long actual = (Long) highchartSeriesUtil.convertValue(AttributeType.DATE_TIME, value);
+		assertEquals(actual, 1492181129L);
 	}
 
 	@Test
 	public void convertValueDateTime()
 	{
 		AttributeType fieldTypeEnum = AttributeType.DATE_TIME;
-		Date value = mock(Date.class);
+		Instant value = Instant.now();
 		assertTrue(highchartSeriesUtil.convertValue(fieldTypeEnum, value) instanceof Long);
 	}
 
@@ -67,7 +61,7 @@ public class HighchartSeriesUtilTest
 	public void convertValueDate()
 	{
 		AttributeType fieldTypeEnum = AttributeType.DATE;
-		Date value = mock(Date.class);
+		LocalDate value = LocalDate.now();
 		assertTrue(highchartSeriesUtil.convertValue(fieldTypeEnum, value) instanceof Long);
 	}
 

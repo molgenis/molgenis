@@ -19,9 +19,9 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.ui.Model;
 import org.testng.annotations.Test;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
@@ -158,16 +158,8 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		serieOne.setAttributeXFieldTypeEnum(AttributeType.DATE);
 		serieOne.setAttributeYFieldTypeEnum(AttributeType.DECIMAL);
 
-		Calendar calOne = Calendar.getInstance();
-		calOne.clear();
-		calOne.set(2014, 1, 21);
-
-		Calendar calTwo = Calendar.getInstance();
-		calTwo.clear();
-		calTwo.set(2014, 1, 22);
-
-		XYData xYDataOne = new XYData(calOne.getTime(), Double.valueOf("1.1"));
-		XYData xYDataTwo = new XYData(calTwo.getTime(), Double.valueOf("2.2"));
+		XYData xYDataOne = new XYData(LocalDate.of(2014, 2, 21), Double.valueOf("1.1"));
+		XYData xYDataTwo = new XYData(LocalDate.of(2014, 2, 22), Double.valueOf("2.2"));
 		serieOne.addData(xYDataOne);
 		serieOne.addData(xYDataTwo);
 		data.add(serieOne);

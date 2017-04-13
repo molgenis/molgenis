@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
+import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -154,8 +155,7 @@ class RestControllerV2
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
 		if (molgenisBuildDate.equals("${maven.build.timestamp}"))
 		{
-			molgenisBuildDate =
-					DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(Instant.now().atZone(getDefaultZoneId()))
+			molgenisBuildDate = DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now(getDefaultZoneId()))
 							+ " by IntelliJ";
 		}
 		Map<String, String> result = new HashMap<>();

@@ -137,7 +137,7 @@ public class RestServiceTest
 		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31T10:34:56.789Z"), expected);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute \\[dateAttr\\] value \\[invalidDate\\] does not match date format \\[yyyy-MM-dd\\]")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to parse attribute \\[dateAttr\\] value \\[invalidDate\\] as a date")
 	public void toEntityDateStringValueInvalid()
 	{
 		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();

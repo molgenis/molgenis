@@ -91,7 +91,12 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	 * with Gson.
 	 * <p>
 	 * This is equivalent to writing
-	 * <code>Converters.registerOffsetDateTime(new GsonBuilder()).create();</code>
+	 * <code>
+	 * GsonBuilder builder = new GsonBuilder()
+	 * Converters.registerInstant(builder);
+	 * Converters.registerLocalDate(builder);
+	 * builder.create();
+	 * </code>
 	 * The builders will be registered after the other type adapters and type adapter factories you set.
 	 *
 	 * @param registerJavaTimeConverters true if they should be registered
@@ -141,9 +146,10 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 		{
 			typeAdapterHierarchyFactoryMap.forEach(builder::registerTypeHierarchyAdapter);
 		}
-		if (registerJavaTimeConverters)
+		if (this.registerJavaTimeConverters)
 		{
-			Converters.registerOffsetDateTime(builder);
+			Converters.registerInstant(builder);
+			Converters.registerLocalDate(builder);
 		}
 		this.gson = builder.create();
 	}

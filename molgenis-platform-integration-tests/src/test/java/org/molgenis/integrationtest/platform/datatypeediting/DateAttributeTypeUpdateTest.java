@@ -3,14 +3,15 @@ package org.molgenis.integrationtest.platform.datatypeediting;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -52,13 +53,14 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	 * @throws ParseException
 	 */
 	@Test(dataProvider = "validConversionTestCases")
-	public void testValidConversion(Object valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
+	public void testValidConversion(String valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
 	{
-		valueToConvert = getDateFormat().parse(valueToConvert.toString());
-		testTypeConversion(valueToConvert, typeToConvertTo);
+		LocalDate localDate = LocalDate.parse(valueToConvert);
+		testTypeConversion(localDate, typeToConvertTo);
 
-		if (typeToConvertTo.equals(DATE_TIME)) convertedValue = getDateTimeFormat().parse(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE_TIME))
+			convertedValue = MolgenisDateFormat.parseInstant(convertedValue.toString());
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);
@@ -117,7 +119,7 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	{
 		try
 		{
-			valueToConvert = getDateFormat().parse(valueToConvert.toString());
+			valueToConvert = parseLocalDate(valueToConvert.toString());
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}

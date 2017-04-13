@@ -12,7 +12,10 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.Iterator;
 
 import static java.util.Arrays.asList;
@@ -228,7 +231,7 @@ public class PostgreSqlUtilsTest
 		when(entity.getLocalDate(attrDateName)).thenReturn(dateValue);
 		when(entity.getLocalDate(attrDateNillableName)).thenReturn(null);
 
-		offsetDateTime = OffsetDateTime.parse("1985-08-12T11:12:13+05:00").withOffsetSameInstant(ZoneOffset.UTC);
+		offsetDateTime = OffsetDateTime.parse("1985-08-12T06:12:13Z");
 		dateTimeValue = offsetDateTime.toInstant();
 		when(entity.getInstant(attrDateTimeName)).thenReturn(dateTimeValue);
 		when(entity.getInstant(attrDateTimeNillableName)).thenReturn(null);
@@ -333,7 +336,8 @@ public class PostgreSqlUtilsTest
 	@Test(dataProvider = "getPostgreSqlValue")
 	public void getPostgreSqlValue(Attribute attr, Object postgreSqlValue)
 	{
-		assertEquals(PostgreSqlUtils.getPostgreSqlValue(entity, attr), postgreSqlValue);
+		Object actual = PostgreSqlUtils.getPostgreSqlValue(entity, attr);
+		assertEquals(actual, postgreSqlValue);
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)

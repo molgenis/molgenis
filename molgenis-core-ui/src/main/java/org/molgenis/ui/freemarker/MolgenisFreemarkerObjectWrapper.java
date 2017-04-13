@@ -1,16 +1,16 @@
 package org.molgenis.ui.freemarker;
 
 import com.google.common.collect.Lists;
-import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
+import no.api.freemarker.java8.Java8ObjectWrapper;
 
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class MolgenisFreemarkerObjectWrapper extends DefaultObjectWrapper
+public class MolgenisFreemarkerObjectWrapper extends Java8ObjectWrapper
 {
 	public MolgenisFreemarkerObjectWrapper(Version incompatibleImprovements)
 	{

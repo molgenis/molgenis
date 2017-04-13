@@ -12,8 +12,7 @@ import org.testng.annotations.DataProvider;
 import java.text.ParseException;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -59,10 +58,10 @@ public class DateTimeAttributeTypeUpdateTest extends AbstractAttributeTypeUpdate
 	public void testValidConversion(Object valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
 	{
-		valueToConvert = getDateTimeFormat().parse(valueToConvert.toString());
+		valueToConvert = parseInstant(valueToConvert.toString());
 		testTypeConversion(valueToConvert, typeToConvertTo);
 
-		if (typeToConvertTo.equals(DATE)) convertedValue = getDateFormat().parse(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE)) convertedValue = parseLocalDate(convertedValue.toString());
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);

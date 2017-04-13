@@ -28,7 +28,7 @@
                         , </#sep></#list>
                     <#elseif type == "CATEGORICAL" || type == "FILE" || type == "XREF"><#if entity.getEntity(key)??>${entity.getEntity(key).getLabelValue()!?html}</#if>
                     <#elseif type == "BOOL">${entity.getBoolean(key)?c}
-                    <#elseif type == "DATE" || type == "DATE_TIME">${entity.get(key)?datetime}
+                    <#elseif type == "DATE_TIME">${entity.get(key).format()}
                     <#else>${entity.get(key)!?html}</#if></td>
                 <#else>
                     <td>&nbsp;</td>
