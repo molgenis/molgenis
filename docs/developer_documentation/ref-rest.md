@@ -9,9 +9,9 @@ Your MOLGENIS data model defines the resources and resource collections that can
 MOLGENIS entity collections are available as end-points:
 
 *Endpoints*
-* http://your.molgenis.url/api/v1/dataset
-* http://your.molgenis.url/api/v1/protocol
-* http://your.molgenis.url/api/v1/feature
+* http://molgenis.mydomain.example/api/v1/dataset
+* http://molgenis.mydomain.example/api/v1/protocol
+* http://molgenis.mydomain.example/api/v1/feature
 
 ## Retrieve collection
 
@@ -19,7 +19,7 @@ Each entity collection has its own end-point:
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset 
+GET http://molgenis.mydomain.example/api/v1/dataset 
 ```
 *Response*
 ```javascript
@@ -50,7 +50,7 @@ Datasets can be completely deleted (Nb. the meta data will be kept):
 
 *Request*
 ```
-DELETE http://your.molgenis.url/api/v1/dataset 
+DELETE http://molgenis.mydomain.example/api/v1/dataset 
 ```
 *Response*
 ```javascript
@@ -68,7 +68,7 @@ Key | Type | Description
 ### start and num
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset?start=1&num=1
+GET http://molgenis.mydomain.example/api/v1/dataset?start=1&num=1
 ```
 *Response*
 ```javascript
@@ -94,7 +94,7 @@ GET http://your.molgenis.url/api/v1/dataset?start=1&num=1
 ### q
 *Request*
 ```
-POST http://your.molgenis.url/api/v1/dataset?_method=GET
+POST http://molgenis.mydomain.example/api/v1/dataset?_method=GET
 Content-Type: application/json
 
 {
@@ -129,15 +129,15 @@ Content-Type: application/json
 Each data row within a collection (i.e. entity instance) can be accessed via its identifier:
 
 *Endpoints*
-* http://your.molgenis.url/api/v1/dataset/<entity id>
-* http://your.molgenis.url/api/v1/protocol/<entity id>
-* http://your.molgenis.url/api/v1/feature/<entity id>
+* http://molgenis.mydomain.example/api/v1/dataset/<entity id>
+* http://molgenis.mydomain.example/api/v1/protocol/<entity id>
+* http://molgenis.mydomain.example/api/v1/feature/<entity id>
 
 ## Retrieve
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset/1
+GET http://molgenis.mydomain.example/api/v1/dataset/1
 ```
 *Response*
 ```javascript
@@ -159,7 +159,7 @@ By psoting a JSON message that matches the meta data attributes you can add new 
 
 *Request*
 ```
-POST http://your.molgenis.url/api/v1/person
+POST http://molgenis.mydomain.example/api/v1/person
 Content-Type: application/json
 
 {
@@ -181,7 +181,7 @@ Existing instances can be updated by putting a complete changed record to the en
 
 *Request*
 ```
-PUT http://your.molgenis.url/api/v1/dataset/3
+PUT http://molgenis.mydomain.example/api/v1/dataset/3
 Content-Type: application/json
 
 {
@@ -199,7 +199,7 @@ If you only want to change one attribute without needing to provide all other at
 
 *Request*
 ```
-PUT http://your.molgenis.url/api/v1/dataset/3/name
+PUT http://molgenis.mydomain.example/api/v1/dataset/3/name
 Content-Type: application/json
 
 {
@@ -215,7 +215,7 @@ Content-Type: application/json
 
 *Request*
 ```
-DELETE http://your.molgenis.url/api/v1/dataset/3
+DELETE http://molgenis.mydomain.example/api/v1/dataset/3
 ```
 *Response*
 ```
@@ -239,7 +239,7 @@ In a query you can specify what attributes to return, useful when having thousan
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset/1?attributes=identifier,name
+GET http://molgenis.mydomain.example/api/v1/dataset/1?attributes=identifier,name
 ```
 *Response*
 ```javascript
@@ -257,7 +257,7 @@ MOLGENIS can have attributes of type xref (foreign key) that you can follow and 
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset/1?expand=protocol
+GET http://molgenis.mydomain.example/api/v1/dataset/1?expand=protocol
 ```
 *Response*
 ```javascript
@@ -281,7 +281,7 @@ Within the expansion you can again specify the attributes to be included:
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset/1?expand=protocol[name]
+GET http://molgenis.mydomain.example/api/v1/dataset/1?expand=protocol[name]
 ```
 *Response*
 ```javascript
@@ -302,7 +302,7 @@ Some browsers do not support operations such as PUT and DELETE. The *_method* pa
 
 *Request*
 ```
-POST http://your.molgenis.url/api/v1/dataset/3?_method=PUT
+POST http://molgenis.mydomain.example/api/v1/dataset/3?_method=PUT
 Content-Type: application/json
 
 {
@@ -317,7 +317,7 @@ Content-Type: application/json
 ### callback
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset/1?callback=myfunction
+GET http://molgenis.mydomain.example/api/v1/dataset/1?callback=myfunction
 ```
 *Response*
 ```javascript
@@ -338,9 +338,9 @@ myfunction(
 Meta data provides details on the attributes within your collection. This allows for client side generation of user interfaces. Assuming that you have entities 'datasets', 'protocol' and 'features' then you can retrieve the metadata as follows:
 
 *Endpoints*
-* http://your.molgenis.url/api/v1/dataset/meta
-* http://your.molgenis.url/api/v1/protocol/meta
-* http://your.molgenis.url/api/v1/feature/meta
+* http://molgenis.mydomain.example/api/v1/dataset/meta
+* http://molgenis.mydomain.example/api/v1/protocol/meta
+* http://molgenis.mydomain.example/api/v1/feature/meta
 
 ## Retrieve meta data
 
@@ -348,7 +348,7 @@ You can retrieve meta data for each collection:
 
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/dataset/meta
+GET http://molgenis.mydomain.example/api/v1/dataset/meta
 ```
 *Response*
 ```javascript
@@ -388,7 +388,7 @@ Deletes resource meta data and all data associated with this resource.
 
 *Request*
 ```
-DELETE http://your.molgenis.url/api/v1/dataset/meta
+DELETE http://molgenis.mydomain.example/api/v1/dataset/meta
 ```
 *Response*
 ```javascript
@@ -400,7 +400,7 @@ DELETE http://your.molgenis.url/api/v1/dataset/meta
 ## Login
 *Request*
 ```
-POST http://your.molgenis.url/api/v1/login
+POST http://molgenis.mydomain.example/api/v1/login
 Content-Type: application/json
 
 {
@@ -430,7 +430,7 @@ x-molgenis-token: 4296ef4fd9324360aa5c-bf8a849003da
 ## Logout
 *Request*
 ```
-GET http://your.molgenis.url/api/v1/logout
+GET http://molgenis.mydomain.example/api/v1/logout
 
 header:
 x-molgenis-token: 4296ef4fd9324360aa5c-bf8a849003da
