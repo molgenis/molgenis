@@ -6,7 +6,9 @@ import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -42,6 +44,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Iterables.getLast;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -75,6 +78,11 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	private static final String ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH = "ENTITY_WRITE_sys_ont_OntologyTermNodePath";
 	private static final String ROLE_WRITE_ONTOLOGY = "ENTITY_WRITE_sys_ont_Ontology";
 	private static final String ROLE_WRITE_ONTOLOGY_TERM = "ENTITY_WRITE_sys_ont_OntologyTerm";
+
+	private static final String CSV_HOSPITAL = "csv_hospital";
+	private static final String CSV_PATIENTS = "csv_patients";
+	private static final String TSV_HOSPITAL = "tsv_hospital";
+	private static final String TSV_PATIENTS = "tsv_patients";
 
 	@Autowired
 	private UserFactory userFactory;
@@ -112,52 +120,80 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	@Test
 	public void testDoImportEmxCsvZipAsNonSuperuser()
 	{
-		String fileName = "emx-csv.zip";
-		File file = getFile("/csv/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("csv_hospital", 3, "csv_patients", 3),
-				ImmutableSet.of("csv_hospital", "csv_patients"));
+		testDoImportEmxCsvZip();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
 	public void testDoImportEmxCsvZipAsSuperuser()
 	{
+		testDoImportEmxCsvZip();
+	}
+
+	private void testDoImportEmxCsvZip()
+	{
 		String fileName = "emx-csv.zip";
 		File file = getFile("/csv/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("csv_hospital", 3, "csv_patients", 3),
-				ImmutableSet.of("csv_hospital", "csv_patients"));
+		validateImportReport(importReport, ImmutableMap.of(CSV_HOSPITAL, 3, CSV_PATIENTS, 3),
+				ImmutableSet.of(CSV_HOSPITAL, CSV_PATIENTS));
+		validateZipHospitalEntity(CSV_HOSPITAL);
+		validateZipPatientEntity(CSV_PATIENTS);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
 	@Test
 	public void testDoImportEmxTsvZipAsNonSuperuser()
 	{
-		String fileName = "emx-tsv.zip";
-		File file = getFile("/tsv/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("tsv_hospital", 3, "tsv_patients", 3),
-				ImmutableSet.of("tsv_hospital", "tsv_patients"));
+		testDoImportEmxTsvZip();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
 	public void testDoImportEmxTsvZipAsSuperuser()
 	{
+		testDoImportEmxTsvZip();
+	}
+
+	private void testDoImportEmxTsvZip()
+	{
 		String fileName = "emx-tsv.zip";
 		File file = getFile("/tsv/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of("tsv_hospital", 3, "tsv_patients", 3),
-				ImmutableSet.of("tsv_hospital", "tsv_patients"));
+		validateImportReport(importReport, ImmutableMap.of(TSV_HOSPITAL, 3, TSV_PATIENTS, 3),
+				ImmutableSet.of(TSV_HOSPITAL, TSV_PATIENTS));
+		validateZipHospitalEntity(TSV_HOSPITAL);
+		validateZipPatientEntity(TSV_PATIENTS);
+	}
+
+	private void validateZipPatientEntity(String patientEntityId)
+	{
+		List<Entity> patients = dataService.findAll(patientEntityId).collect(Collectors.toList());
+		Entity firstPatient = patients.get(0);
+		Entity lastPatient = getLast(patients);
+
+		assertEquals(firstPatient.getString("patient_id"), "1");
+		assertEquals(firstPatient.getString("patient_name"), "John Doe");
+		assertEquals(firstPatient.getEntity("patient_hospital").getIdValue(), "UMCG");
+		assertEquals(lastPatient.getString("patient_id"), "3");
+		assertEquals(lastPatient.getString("patient_name"), "Unknown");
+		assertEquals(lastPatient.getEntity("patient_hospital").getIdValue(), "VUMC");
+	}
+
+	private void validateZipHospitalEntity(String hospitalEntityId)
+	{
+		List<Entity> hospitals = dataService.findAll(hospitalEntityId).collect(Collectors.toList());
+		Entity firstHospital = hospitals.get(0);
+		Entity lastHospital = getLast(hospitals);
+
+		assertEquals(firstHospital.getString("hospital_name"), "UMCG");
+		assertEquals(firstHospital.getString("hospital_city"), "Groningen");
+		assertEquals(lastHospital.getString("hospital_name"), "VUMC");
+		assertEquals(lastHospital.getString("hospital_city"), "Amsterdam");
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
@@ -235,8 +271,7 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of(entityId, 10),
-				ImmutableSet.of(entityId));
+		validateImportReport(importReport, ImmutableMap.of(entityId, 10), ImmutableSet.of(entityId));
 
 		// Check first and last imported row
 		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
@@ -262,7 +297,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
 		assertEquals(firstRow.getString("SAS_AF"), "0.0");
 
-
 		Entity lastRow = entities.get(entities.size() - 1);
 		assertEquals(lastRow.getString("#CHROM"), "X");
 		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
@@ -283,8 +317,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(lastRow.getString("EUR_AF"), "0.0");
 		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
 		assertEquals(lastRow.getString("SAS_AF"), "0.0");
-
-
 
 	}
 
