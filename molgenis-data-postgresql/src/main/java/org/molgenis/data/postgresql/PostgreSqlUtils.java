@@ -58,11 +58,7 @@ class PostgreSqlUtils
 			case DATE_TIME:
 				// As a workaround for #5674, we don't store milliseconds
 				Instant instant = entity.getInstant(attrName);
-				if (instant == null)
-				{
-					return null;
-				}
-				return instant.truncatedTo(ChronoUnit.SECONDS).atOffset(UTC);
+				return instant != null ? instant.truncatedTo(ChronoUnit.SECONDS).atOffset(UTC) : null;
 			case DECIMAL:
 				return entity.getDouble(attrName);
 			case EMAIL:

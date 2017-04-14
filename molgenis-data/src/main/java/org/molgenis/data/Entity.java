@@ -77,12 +77,12 @@ public interface Entity extends Serializable
 	Double getDouble(String attributeName);
 
 	/**
-	 * Retrieves the value of the designated column as {@link java.util.Date}.
+	 * Retrieves the value of the designated column as {@link java.time.Instant}.
 	 */
 	Instant getInstant(String attributeName);
 
 	/**
-	 * Retrieves the value of the designated column as {@link java.sql.Timestamp}.
+	 * Retrieves the value of the designated column as {@link java.time.LocalDate}.
 	 */
 	LocalDate getLocalDate(String attributeName);
 

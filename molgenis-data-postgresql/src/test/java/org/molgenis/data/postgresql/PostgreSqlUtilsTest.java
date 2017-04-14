@@ -336,8 +336,7 @@ public class PostgreSqlUtilsTest
 	@Test(dataProvider = "getPostgreSqlValue")
 	public void getPostgreSqlValue(Attribute attr, Object postgreSqlValue)
 	{
-		Object actual = PostgreSqlUtils.getPostgreSqlValue(entity, attr);
-		assertEquals(actual, postgreSqlValue);
+		assertEquals(PostgreSqlUtils.getPostgreSqlValue(entity, attr), postgreSqlValue);
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)
