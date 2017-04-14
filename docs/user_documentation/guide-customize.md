@@ -128,7 +128,7 @@ To Create your own data explorer tab, do the following:
 Now that you created a freemarker template, you want to associate this template with your data set:
 1. Go to the dataexplorer and select the cogwheel in the top right corner
 2. Scroll down to the reports section
-3. In the text area, type the following: `<my data set name>:<report name>. For our report, we have a data set called MyData. To link our previously created template, fill in `MyData:example`.
+3. In the text area, type the following: `<my data set name>:<report name>`. For our report, we have a data set called MyData. To link our previously created template, fill in `MyData:example`.
 4. Save, wait for the page to reload, and select MyData from the dropdown in the top right corner.
 5. You will now see a new tab called example, which contains the HTML you filled in in the freemarker template.
 
