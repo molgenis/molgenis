@@ -10,10 +10,11 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormatter;
+import static java.time.ZoneOffset.UTC;
 
 class ExcelUtils
 {
@@ -40,9 +41,11 @@ class ExcelUtils
 					try
 					{
 						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
-						// Excel dates are stored without timezone. Parse them as UTC.
-						Instant instant = cell.getDateCellValue().toInstant();
-						value = getDateTimeFormatter().format(instant);
+						// Excel dates are LocalDateTime, stored without timezone.
+						// Interpret them as UTC to prevent ambiguous DST overlaps.
+						Date dateCellValue = cell.getDateCellValue();
+						// Now format as LocalDateTime to express that we don't know the timezone
+						value = LocalDateTime.from(dateCellValue.toInstant().atZone(UTC)).toString();
 					}
 					finally
 					{

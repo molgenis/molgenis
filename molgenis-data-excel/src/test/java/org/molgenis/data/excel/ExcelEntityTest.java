@@ -100,7 +100,7 @@ public class ExcelEntityTest
 		Object val = excelEntity.get("attr1");
 
 		assertNotNull(val);
-		assertEquals(val, "1998-05-02t00:00:00z");
+		assertEquals(val, "1998-05-02t00:00");
 	}
 
 	@Test
