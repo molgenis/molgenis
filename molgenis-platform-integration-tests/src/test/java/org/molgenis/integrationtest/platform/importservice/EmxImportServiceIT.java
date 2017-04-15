@@ -1,44 +1,14 @@
-package org.molgenis.integrationtest.platform;
+package org.molgenis.integrationtest.platform.importservice;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.mockito.Mockito;
 import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.vcf.VcfDataConfig;
-import org.molgenis.data.vcf.importer.VcfImporterService;
-import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
-import org.molgenis.ontology.OntologyDataConfig;
-import org.molgenis.ontology.core.config.OntologyTestConfig;
-import org.molgenis.ontology.importer.OntologyImportService;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.util.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -54,10 +24,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -66,60 +33,22 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
-@ContextConfiguration(classes = { PlatformITConfig.class, ImportServiceIT.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-@Transactional
-@Rollback
-public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTests
+public class EmxImportServiceIT extends ImportServiceIT
 {
-	private final static Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
-
-	private static final String USERNAME = "user";
-	private static final String ROLE_SU = "SU";
-	private static final String ROLE_READ_PACKAGE = "ENTITY_READ_sys_md_Package";
-	private static final String ROLE_READ_ENTITY_TYPE = "ENTITY_READ_sys_md_EntityType";
-	private static final String ROLE_READ_ATTRIBUTE = "ENTITY_READ_sys_md_Attribute";
-	private static final String ROLE_READ_TAG = "ENTITY_READ_sys_md_Tag";
-	private static final String ROLE_READ_OWNED = "ENTITY_READ_sys_sec_Owned";
-	private static final String ROLE_READ_FILE_META = "ENTITY_READ_sys_FileMeta";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ENTITY_WRITE_sys_ont_OntologyTermDynamicAnnotation";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_SYNONYM = "ENTITY_WRITE_sys_ont_OntologyTermSynonym";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH = "ENTITY_WRITE_sys_ont_OntologyTermNodePath";
-	private static final String ROLE_WRITE_ONTOLOGY = "ENTITY_WRITE_sys_ont_Ontology";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM = "ENTITY_WRITE_sys_ont_OntologyTerm";
-
+	private static final String USERNAME = "emx_user";
 	private static final String CSV_HOSPITAL = "csv_hospital";
 	private static final String CSV_PATIENTS = "csv_patients";
 	private static final String TSV_HOSPITAL = "tsv_hospital";
 	private static final String TSV_PATIENTS = "tsv_patients";
 
-	@Autowired
-	private UserFactory userFactory;
-
-	@Autowired
-	private ImportServiceFactory importServiceFactory;
-
-	@Autowired
-	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-
-	@Autowired
-	private ImportServiceRegistrar importServiceRegistrar;
-
-	@Autowired
-	private DataService dataService;
-
-	@BeforeClass
-	public void beforeClass()
+	@Override
+	User getTestUser()
 	{
-		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
-		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
-		importServiceRegistrar.register(contextRefreshedEvent);
-
 		User user = userFactory.create();
-		user.setUsername("user");
+		user.setUsername(USERNAME);
 		user.setPassword("password");
 		user.setEmail("e@mail.com");
-		RunAsSystemProxy.runAsSystem(() -> dataService.add(USER, user));
+		return user;
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -200,306 +129,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(firstHospital.getString("hospital_city"), "Groningen");
 		assertEquals(lastHospital.getString("hospital_name"), "VUMC");
 		assertEquals(lastHospital.getString("hospital_city"), "Amsterdam");
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
-			ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_WRITE_ONTOLOGY_TERM_SYNONYM,
-			ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_WRITE_ONTOLOGY, ROLE_WRITE_ONTOLOGY_TERM })
-	@Test
-	public void testDoImportOboAsNonSuperuser()
-	{
-		testDoImportObo();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportOboAsSuperuser()
-	{
-		testDoImportObo();
-	}
-
-	private void testDoImportObo()
-	{
-		String fileName = "ontology-small.obo.zip";
-		File file = getFile("/obo/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap
-						.of("sys_ont_OntologyTermDynamicAnnotation", 0, "sys_ont_OntologyTermSynonym", 5,
-								"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
-				emptySet());
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
-			ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-			ROLE_WRITE_ONTOLOGY_TERM_SYNONYM, ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_WRITE_ONTOLOGY,
-			ROLE_WRITE_ONTOLOGY_TERM })
-	@Test
-	public void testDoImportOwlAsNonSuperuser()
-	{
-		testDoImportOwl();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportOwlAsSuperuser()
-	{
-		testDoImportOwl();
-	}
-
-	private void testDoImportOwl()
-	{
-		String fileName = "ontology-small.owl.zip";
-		File file = getFile("/owl/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap
-						.of("sys_ont_OntologyTermDynamicAnnotation", 4, "sys_ont_OntologyTermSynonym", 9,
-								"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),
-				emptySet());
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
-	@Test
-	public void testDoImportVcfWithoutSamplesAsNonSuperuser()
-	{
-		testDoImportVcfWithoutSamples();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportVcfWithoutSamplesAsSuperuser()
-	{
-		testDoImportVcfWithoutSamples();
-	}
-
-	private void testDoImportVcfWithoutSamples()
-	{
-		String entityId = "variantsWithoutSamples";
-		String fileName = entityId + ".vcf";
-		File file = getFile("/vcf/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of(entityId, 10), ImmutableSet.of(entityId));
-
-		// Check first and last imported row
-		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
-
-		Entity firstRow = entities.get(0);
-		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
-		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
-		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
-		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
-		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
-		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
-		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
-		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
-		assertEquals(firstRow.getString("AA"), "G|||");
-		assertEquals(firstRow.getString("AC"), "0");
-		assertEquals(firstRow.getString("AF"), "1.99681E-4");
-		assertEquals(firstRow.getString("AFR_AF"), "0.0");
-		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
-		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
-		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
-		assertEquals(firstRow.getString("EAS_AF"), "0.0");
-		assertEquals(firstRow.getString("EUR_AF"), "0.0");
-		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
-		assertEquals(firstRow.getString("SAS_AF"), "0.0");
-
-		Entity lastRow = entities.get(entities.size() - 1);
-		assertEquals(lastRow.getString("#CHROM"), "X");
-		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
-		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
-		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
-		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
-		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
-		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
-		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
-		assertEquals(lastRow.getString("AA"), "G|||");
-		assertEquals(lastRow.getString("AC"), "0");
-		assertEquals(lastRow.getString("AF"), "1.99681E-4");
-		assertEquals(lastRow.getString("AFR_AF"), "0.0");
-		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
-		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
-		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
-		assertEquals(lastRow.getString("EAS_AF"), "0.0");
-		assertEquals(lastRow.getString("EUR_AF"), "0.0");
-		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
-		assertEquals(lastRow.getString("SAS_AF"), "0.0");
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
-	@Test
-	public void testDoImportVcfWithSamplesAsNonSuperuser()
-	{
-		testDoImportVcfWithSamples();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportVcfWithSamplesAsSuperuser()
-	{
-		testDoImportVcfWithSamples();
-	}
-
-	private void testDoImportVcfWithSamples()
-	{
-		String entityId = "variantsWithSamples";
-		String fileName = entityId + ".vcf";
-		File file = getFile("/vcf/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport, ImmutableMap.of(entityId, 10, entityId + "Sample", 10),
-				ImmutableSet.of(entityId, entityId + "Sample"));
-
-		// Check first and last imported row
-		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
-
-		Entity firstRow = entities.get(0);
-		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
-		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
-		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
-		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
-		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
-		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
-		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
-		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
-		assertEquals(firstRow.getString("AA"), "G|||");
-		assertEquals(firstRow.getString("AC"), "0");
-		assertEquals(firstRow.getString("AF"), "1.99681E-4");
-		assertEquals(firstRow.getString("AFR_AF"), "0.0");
-		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
-		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
-		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
-		assertEquals(firstRow.getString("EAS_AF"), "0.0");
-		assertEquals(firstRow.getString("EUR_AF"), "0.0");
-		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
-		assertEquals(firstRow.getString("SAS_AF"), "0.0");
-
-		// Verify Samples
-		ImmutableList<Entity> samples = ImmutableList.copyOf(firstRow.getEntities(VcfAttributes.SAMPLES).iterator());
-		assertEquals(samples.size(), 1);
-		Entity firstRowSample = samples.get(0);
-		assertEquals(firstRowSample.getIdValue(), firstRow.getIdValue() + "0");
-		assertEquals(firstRowSample.getString(VcfAttributes.FORMAT_GT), "0|1");
-
-		Entity lastRow = entities.get(entities.size() - 1);
-		assertEquals(lastRow.getString("#CHROM"), "X");
-		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
-		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
-		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
-		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
-		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
-		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
-		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
-		assertEquals(lastRow.getString("AA"), "G|||");
-		assertEquals(lastRow.getString("AC"), "0");
-		assertEquals(lastRow.getString("AF"), "1.99681E-4");
-		assertEquals(lastRow.getString("AFR_AF"), "0.0");
-		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
-		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
-		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
-		assertEquals(lastRow.getString("EAS_AF"), "0.0");
-		assertEquals(lastRow.getString("EUR_AF"), "0.0");
-		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
-		assertEquals(lastRow.getString("SAS_AF"), "0.0");
-
-		// Verify Samples
-		samples = ImmutableList.copyOf(lastRow.getEntities(VcfAttributes.SAMPLES).iterator());
-		assertEquals(samples.size(), 1);
-		Entity lastRowSample = samples.get(0);
-		assertEquals(lastRowSample.getIdValue(), lastRow.getIdValue() + "0");
-		assertEquals(lastRowSample.getString(VcfAttributes.FORMAT_GT), "1|1");
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
-	@Test
-	public void testDoImportVcfGzWithSamplesAsNonSuperuser()
-	{
-		testDoImportVcfGzWithSamples();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportVcfGzWithSamplesAsSuperuser()
-	{
-		testDoImportVcfGzWithSamples();
-	}
-
-	private void testDoImportVcfGzWithSamples()
-	{
-		String entityId = "variantsWithSamplesGz";
-		String fileName = entityId + ".vcf.gz";
-		File file = getFile("/vcf/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
-		validateImportReport(importReport,
-				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
-				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
-
-		// Check first and last imported row
-		List<Entity> entities = dataService.findAll(entityId).collect(Collectors.toList());
-
-		Entity firstRow = entities.get(0);
-		assertEquals(firstRow.getString(VcfAttributes.CHROM), "1");
-		assertEquals(firstRow.getInt(VcfAttributes.POS), Integer.valueOf(48554748));
-		assertEquals(firstRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
-		assertEquals(firstRow.getString(VcfAttributes.REF), "T");
-		assertEquals(firstRow.getString(VcfAttributes.ALT), "A");
-		assertEquals(firstRow.getString(VcfAttributes.QUAL), "100");
-		assertEquals(firstRow.getString(VcfAttributes.FILTER), "PASS");
-		//	Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
-		assertEquals(firstRow.getString("AA"), "G|||");
-		assertEquals(firstRow.getString("AC"), "0");
-		assertEquals(firstRow.getString("AF"), "1.99681E-4");
-		assertEquals(firstRow.getString("AFR_AF"), "0.0");
-		assertEquals(firstRow.getString("AMR_AF"), "0.0014");
-		assertEquals(firstRow.getInt("AN"), Integer.valueOf(6));
-		assertEquals(firstRow.getInt("DP"), Integer.valueOf(21572));
-		assertEquals(firstRow.getString("EAS_AF"), "0.0");
-		assertEquals(firstRow.getString("EUR_AF"), "0.0");
-		assertEquals(firstRow.getInt("NS"), Integer.valueOf(2504));
-		assertEquals(firstRow.getString("SAS_AF"), "0.0");
-
-		// Verify Samples
-		ImmutableList<Entity> samples = ImmutableList.copyOf(firstRow.getEntities(VcfAttributes.SAMPLES).iterator());
-		assertEquals(samples.size(), 1);
-		Entity firstRowSample = samples.get(0);
-		assertEquals(firstRowSample.getIdValue(), firstRow.getIdValue() + "0");
-		assertEquals(firstRowSample.getString(VcfAttributes.FORMAT_GT), "0|1");
-
-		Entity lastRow = entities.get(entities.size() - 1);
-		assertEquals(lastRow.getString("#CHROM"), "X");
-		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
-		assertEquals(lastRow.getString(VcfAttributes.ID), ""); // dot is imported as empty
-		assertEquals(lastRow.getString(VcfAttributes.REF), "A");
-		assertEquals(lastRow.getString(VcfAttributes.ALT), "T");
-		assertEquals(lastRow.getString(VcfAttributes.QUAL), "100");
-		assertEquals(lastRow.getString(VcfAttributes.FILTER), "PASS");
-		// Verify info "AA=G|||;AC=0;AF=0.000199681;AFR_AF=0;AMR_AF=0.0014;AN=6;DP=21572;EAS_AF=0;EUR_AF=0;NS=2504;SAS_AF=0");
-		assertEquals(lastRow.getString("AA"), "G|||");
-		assertEquals(lastRow.getString("AC"), "0");
-		assertEquals(lastRow.getString("AF"), "1.99681E-4");
-		assertEquals(lastRow.getString("AFR_AF"), "0.0");
-		assertEquals(lastRow.getString("AMR_AF"), "0.0014");
-		assertEquals(lastRow.getInt("AN"), Integer.valueOf(6));
-		assertEquals(lastRow.getInt("DP"), Integer.valueOf(21572));
-		assertEquals(lastRow.getString("EAS_AF"), "0.0");
-		assertEquals(lastRow.getString("EUR_AF"), "0.0");
-		assertEquals(lastRow.getInt("NS"), Integer.valueOf(2504));
-		assertEquals(lastRow.getString("SAS_AF"), "0.0");
-
-		// Verify Samples
-		samples = ImmutableList.copyOf(lastRow.getEntities(VcfAttributes.SAMPLES).iterator());
-		assertEquals(samples.size(), 1);
-		Entity lastRowSample = samples.get(0);
-		assertEquals(lastRowSample.getIdValue(), lastRow.getIdValue() + "0");
-		assertEquals(lastRowSample.getString(VcfAttributes.FORMAT_GT), "1|1");
 	}
 
 	@DataProvider(name = "doImportEmxAddProvider")
@@ -762,38 +391,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
 				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
 		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames };
-	}
-
-	private static void validateImportReport(EntityImportReport importReport, Map<String, Integer> entityTypeCountMap,
-			Set<String> addedEntityTypeIds)
-	{
-		assertEquals(ImmutableSet.copyOf(importReport.getNewEntities()), addedEntityTypeIds);
-		assertEquals(importReport.getNrImportedEntitiesMap(), entityTypeCountMap);
-	}
-
-	private static File getFile(String resourceName)
-	{
-		requireNonNull(resourceName);
-
-		try
-		{
-			File file = ResourceUtils.getFile(ImportServiceIT.class, resourceName);
-			LOG.trace("emx import integration test file: [{}]", file);
-			return file;
-		}
-		catch (Exception e)
-		{
-			LOG.error("File name: [{}]", resourceName);
-			throw new MolgenisDataAccessException(e);
-		}
-	}
-
-	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class, OntologyDataConfig.class,
-			OntologyTestConfig.class, OntologyImportService.class, MolgenisPluginRegistryImpl.class,
-			CsvDataConfig.class })
-	static class Config
-	{
-
 	}
 
 	private static Map<String, Object> typeTestFirstRow = newHashMap();
