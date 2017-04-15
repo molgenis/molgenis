@@ -15,6 +15,7 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
@@ -42,10 +43,15 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.getLast;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -54,8 +60,10 @@ import static java.util.stream.Collectors.toSet;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, ImportServiceIT.Config.class })
@@ -267,7 +275,8 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		testDoImportVcfWithoutSamples();
 	}
 
-	private void testDoImportVcfWithoutSamples() {
+	private void testDoImportVcfWithoutSamples()
+	{
 		String entityId = "variantsWithoutSamples";
 		String fileName = entityId + ".vcf";
 		File file = getFile("/vcf/" + fileName);
@@ -378,7 +387,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(firstRowSample.getIdValue(), firstRow.getIdValue() + "0");
 		assertEquals(firstRowSample.getString(VcfAttributes.FORMAT_GT), "0|1");
 
-
 		Entity lastRow = entities.get(entities.size() - 1);
 		assertEquals(lastRow.getString("#CHROM"), "X");
 		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
@@ -465,7 +473,6 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		assertEquals(firstRowSample.getIdValue(), firstRow.getIdValue() + "0");
 		assertEquals(firstRowSample.getString(VcfAttributes.FORMAT_GT), "0|1");
 
-
 		Entity lastRow = entities.get(entities.size() - 1);
 		assertEquals(lastRow.getString("#CHROM"), "X");
 		assertEquals(Integer.valueOf(100640780), lastRow.getInt("POS"));
@@ -502,7 +509,7 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 
 		data.add(createAddData("it_emx_datatypes.xlsx", asList("it", "emx", "datatypes"),
 				ImmutableMap.<String, Integer>builder().put("TypeTestRef", 5).put("TypeTest", 38).build(),
-				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest"), this::validateItEmxDatatypes));
+				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest"), this::validateItEmxDataTypes));
 
 		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"),
 				ImmutableMap.<String, Integer>builder().put("TestCategorical1", 50).put("TestMref1", 50)
@@ -534,9 +541,66 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 		return data.iterator();
 	}
 
-	private void validateItEmxDatatypes()
+	private Map<String, Object> entityToMap(Entity entity)
 	{
+		Map<String, Object> entityMap = newHashMap();
+		Iterable<Attribute> attributes = entity.getEntityType().getAllAttributes();
 
+		for (Attribute attribute : attributes)
+		{
+			if (attribute.getDataType().equals(COMPOUND))
+			{
+				continue;
+			}
+
+			String attributeName = attribute.getName();
+			Object value = null;
+			switch (attribute.getDataType())
+			{
+				case CATEGORICAL:
+				case FILE:
+				case XREF:
+					if (entity.getEntity(attributeName) != null)
+					{
+						value = entity.getEntity(attributeName).getIdValue();
+					}
+					break;
+				case CATEGORICAL_MREF:
+				case MREF:
+				case ONE_TO_MANY:
+					value = getIdsAsSet(entity.getEntities(attributeName));
+					break;
+				default:
+					value = entity.get(attributeName);
+					break;
+			}
+			entityMap.put(attributeName, value);
+		}
+
+		return entityMap;
+	}
+
+	private void validateItEmxDataTypes()
+	{
+		List<Entity> typeTestEntities = dataService.findAll("it_emx_datatypes_TypeTest").collect(Collectors.toList());
+		Map<String, Object> actualTypeTestFirstRow = entityToMap(typeTestEntities.get(0));
+		Map<String, Object> actualTypeTestLastRow = entityToMap(getLast(typeTestEntities));
+
+		assertEquals(actualTypeTestFirstRow, typeTestFirstRow);
+		assertEquals(actualTypeTestLastRow, typeTestLastRow);
+
+		List<Entity> typeTestRefEntities = dataService.findAll("it_emx_datatypes_TypeTestRef")
+				.collect(Collectors.toList());
+		Map<String, Object> actualTypeTestRefFirstRow = entityToMap(typeTestRefEntities.get(0));
+		Map<String, Object> actualTypeTestRefLastRow = entityToMap(getLast(typeTestRefEntities));
+
+		assertEquals(actualTypeTestRefFirstRow, typeTestRefFirstRow);
+		assertEquals(actualTypeTestRefLastRow, typeTestRefLastRow);
+	}
+
+	private Set<Object> getIdsAsSet(Iterable<Entity> entities)
+	{
+		return asStream(entities).map(Entity::getIdValue).collect(toSet());
 	}
 
 	private void validateItEmxDeepNesting()
@@ -730,5 +794,127 @@ public class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTes
 	static class Config
 	{
 
+	}
+
+	private static Map<String, Object> typeTestFirstRow = newHashMap();
+
+	static
+	{
+		typeTestFirstRow.put("id", 1);
+		typeTestFirstRow.put("xbool", Boolean.TRUE);
+		typeTestFirstRow.put("xboolnillable", Boolean.TRUE);
+		typeTestFirstRow.put("xcompound_int", 1);
+		typeTestFirstRow.put("xcompound_string", "compound strings are here");
+		typeTestFirstRow.put("xcategorical_value", "ref1");
+		typeTestFirstRow.put("xcategoricalnillable_value", "ref1");
+		typeTestFirstRow.put("xcategoricalmref_value", newHashSet("ref2", "ref1")); //FIXME!!! should be [ref1]
+		typeTestFirstRow.put("xcatmrefnillable_value", newHashSet("ref1", "ref3")); //FIXME!!! should be [ref1]
+		typeTestFirstRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
+		typeTestFirstRow.put("xdatenillable", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
+		typeTestFirstRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
+		typeTestFirstRow.put("xdatetimenillable", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
+		typeTestFirstRow.put("xdecimal", 1.23);
+		typeTestFirstRow.put("xdecimalnillable", 1.23);
+		typeTestFirstRow.put("xemail", "molgenis@gmail.com");
+		typeTestFirstRow.put("xemailnillable", "molgenis@gmail.com");
+		typeTestFirstRow.put("xenum", "enum1");
+		typeTestFirstRow.put("xenumnillable", "enum1");
+		typeTestFirstRow.put("xhtml", "<h1>html</h1>");
+		typeTestFirstRow.put("xhtmlnillable", "<h1>html</h1>");
+		typeTestFirstRow.put("xhyperlink", "http://www.molgenis.org/");
+		typeTestFirstRow.put("xhyperlinknillable", "http://www.molgenis.org/");
+		typeTestFirstRow.put("xint", 5);
+		typeTestFirstRow.put("xintnillable", 1);
+		typeTestFirstRow.put("xintrange", 1);
+		typeTestFirstRow.put("xintrangenillable", 2);
+		typeTestFirstRow.put("xlong", 1L);
+		typeTestFirstRow.put("xlongnillable", 1L);
+		typeTestFirstRow.put("xlongrange", 2L);
+		typeTestFirstRow.put("xlongrangenillable", 2L);
+		typeTestFirstRow.put("xmref_value", newHashSet("ref1"));
+		typeTestFirstRow.put("xmrefnillable_value", newHashSet("ref1"));
+		typeTestFirstRow.put("xstring", "str1");
+		typeTestFirstRow.put("xstringnillable", "str1");
+		typeTestFirstRow.put("xtext", "text");
+		typeTestFirstRow.put("xtextnillable", "text");
+		typeTestFirstRow.put("xxref_value", "ref1");
+		typeTestFirstRow.put("xxrefnillable_value", "ref1");
+		typeTestFirstRow.put("xstring_hidden", "hidden");
+		typeTestFirstRow.put("xstringnillable_hidden", "hidden");
+		typeTestFirstRow.put("xstring_unique", "str1");
+		typeTestFirstRow.put("xint_unique", 1);
+		typeTestFirstRow.put("xxref_unique", "ref1");
+		typeTestFirstRow.put("xfile", null);
+		typeTestFirstRow.put("xcomputedxref", 5);
+		typeTestFirstRow.put("xcomputedint", 5);
+	}
+
+	private static Map<String, Object> typeTestLastRow = newHashMap();
+
+	static
+	{
+		typeTestLastRow.put("id", 38);
+		typeTestLastRow.put("xbool", true);
+		typeTestLastRow.put("xboolnillable", true);
+		typeTestLastRow.put("xcompound_int", 38);
+		typeTestLastRow.put("xcompound_string", "compound strings are here");
+		typeTestLastRow.put("xcategorical_value", "ref3");
+		typeTestLastRow.put("xcategoricalnillable_value", "ref2");
+		typeTestLastRow.put("xcategoricalmref_value", newHashSet("ref1", "ref2")); //FIXME should be [ref1, ref2, ref3]
+		typeTestLastRow.put("xcatmrefnillable_value", newHashSet()); //FIXME should be [ref1, ref3]
+		typeTestLastRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
+		typeTestLastRow.put("xdatenillable", Date.from(LocalDate.of(2015, 4, 1).atStartOfDay(UTC).toInstant()));
+		typeTestLastRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
+		typeTestLastRow.put("xdatetimenillable", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
+		typeTestLastRow.put("xdecimal", 7.89);
+		typeTestLastRow.put("xdecimalnillable", 15.666);
+		typeTestLastRow.put("xemail", "molgenis@gmail.com");
+		typeTestLastRow.put("xemailnillable", "molgenis@gmail.com");
+		typeTestLastRow.put("xenum", "enum2");
+		typeTestLastRow.put("xenumnillable", "enum3");
+		typeTestLastRow.put("xhtml", "<h1>html</h1>");
+		typeTestLastRow.put("xhtmlnillable", "<h1>html 2</h1>");
+		typeTestLastRow.put("xhyperlink", "http://www.molgenis.org/");
+		typeTestLastRow.put("xhyperlinknillable", "http://www.github.com/");
+		typeTestLastRow.put("xint", 1);
+		typeTestLastRow.put("xintnillable", 1);
+		typeTestLastRow.put("xintrange", 4);
+		typeTestLastRow.put("xintrangenillable", 77);
+		typeTestLastRow.put("xlong", 3L);
+		typeTestLastRow.put("xlongnillable", 2147483647L); //FIXME should be 12342151234L
+		typeTestLastRow.put("xlongrange", 4L);
+		typeTestLastRow.put("xlongrangenillable", 3L);
+		typeTestLastRow.put("xmref_value", newHashSet("ref1", "ref2", "ref3"));
+		typeTestLastRow.put("xmrefnillable_value", newHashSet());
+		typeTestLastRow.put("xstring", "str3");
+		typeTestLastRow.put("xstringnillable", "xstringnillable");
+		typeTestLastRow.put("xtext", "text");
+		typeTestLastRow.put("xtextnillable", "xtextnillable");
+		typeTestLastRow.put("xxref_value", "ref3");
+		typeTestLastRow.put("xxrefnillable_value", null);
+		typeTestLastRow.put("xstring_hidden", "hidden");
+		typeTestLastRow.put("xstringnillable_hidden", "xstringhidden");
+		typeTestLastRow.put("xstring_unique", "str38");
+		typeTestLastRow.put("xint_unique", 38);
+		typeTestLastRow.put("xxref_unique", null);
+		typeTestLastRow.put("xfile", null);
+		typeTestLastRow.put("xcomputedxref", 1);
+		typeTestLastRow.put("xcomputedint", 1);
+	}
+
+	private static Map<String, Object> typeTestRefFirstRow = newHashMap();
+
+	static
+	{
+		typeTestRefFirstRow.put("value", "ref1");
+		typeTestRefFirstRow.put("label", "label1");
+	}
+
+	private static Map<String, Object> typeTestRefLastRow = newHashMap();
+
+	static
+	{
+		typeTestRefLastRow.put("value", "ref5");
+		typeTestRefLastRow.put("label", "label5");
 	}
 }
