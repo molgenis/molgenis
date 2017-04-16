@@ -40,6 +40,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
@@ -114,6 +115,11 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 			LOG.error("File name: [{}]", resourceName);
 			throw new MolgenisDataAccessException(e);
 		}
+	}
+
+	List<Entity> findAllAsList(String entityName)
+	{
+		return dataService.findAll(entityName).collect(Collectors.toList());
 	}
 
 	static Map<String, Object> firstRowAsMap(List<Entity> typeTestEntities)

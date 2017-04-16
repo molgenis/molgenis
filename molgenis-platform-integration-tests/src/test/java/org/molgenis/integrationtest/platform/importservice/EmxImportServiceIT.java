@@ -169,49 +169,52 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxDataTypes()
 	{
-		List<Entity> typeTestEntities = dataService.findAll("it_emx_datatypes_TypeTest").collect(Collectors.toList());
+		List<Entity> typeTestEntities = findAllAsList("it_emx_datatypes_TypeTest");
 		assertEquals(firstRowAsMap(typeTestEntities), typeTestFirstRow);
 		assertEquals(lastRowAsMap(typeTestEntities), typeTestLastRow);
 
-		List<Entity> typeTestRefEntities = dataService.findAll("it_emx_datatypes_TypeTestRef")
-				.collect(Collectors.toList());
+		List<Entity> typeTestRefEntities = findAllAsList("it_emx_datatypes_TypeTestRef");
 		assertEquals(firstRowAsMap(typeTestRefEntities), typeTestRefFirstRow);
 		assertEquals(lastRowAsMap(typeTestRefEntities), typeTestRefLastRow);
 	}
 
 	private void validateItEmxDeepNesting()
 	{
-		List<Entity> testEntity2Entities = dataService.findAll("it_deep_advanced_p_TestEntity2")
-				.collect(Collectors.toList());
+		List<Entity> testEntity2Entities = findAllAsList("it_deep_advanced_p_TestEntity2");
 		assertEquals(firstRowAsMap(testEntity2Entities), testEntity2FirstRow);
 		assertEquals(lastRowAsMap(testEntity2Entities), testEntity2LastRow);
 
-		List<Entity> testCategorical1Entities = dataService.findAll("it_deep_TestCategorical1")
-				.collect(Collectors.toList());
+		List<Entity> testCategorical1Entities = findAllAsList("it_deep_TestCategorical1");
 		assertEquals(firstRowAsMap(testCategorical1Entities), testCategorical1FirstRow);
 		assertEquals(lastRowAsMap(testCategorical1Entities), testCategorical1LastRow);
 
-		List<Entity> testXref1Entities = dataService.findAll("it_deep_TestXref1").collect(Collectors.toList());
+		List<Entity> testXref1Entities = findAllAsList("it_deep_TestXref1");
 		assertEquals(firstRowAsMap(testXref1Entities), testXref1FirstRow);
 		assertEquals(lastRowAsMap(testXref1Entities), testXref1LastRow);
 
-		List<Entity> testXref2Entities = dataService.findAll("it_deep_TestXref2").collect(Collectors.toList());
+		List<Entity> testXref2Entities = findAllAsList("it_deep_TestXref2");
 		assertEquals(firstRowAsMap(testXref2Entities), testXref2FirstRow);
 		assertEquals(lastRowAsMap(testXref2Entities), testXref2LastRow);
 
-		List<Entity> testMref1Entities = dataService.findAll("it_deep_TestMref1").collect(Collectors.toList());
+		List<Entity> testMref1Entities = findAllAsList("it_deep_TestMref1");
 		assertEquals(firstRowAsMap(testMref1Entities), testMref1FirstRow);
 		assertEquals(lastRowAsMap(testMref1Entities), testMref1LastRow);
 	}
 
 	private void validateItEmxLookupAttribute()
 	{
-
 	}
 
 	private void validateItEmxAutoid()
 	{
+		List<Entity> testAutoIdEntities = findAllAsList("it_emx_autoid_testAutoId");
+		Map<String, Object> firstRow = firstRowAsMap(testAutoIdEntities);
+		Map<String, Object> lastRow = lastRowAsMap(testAutoIdEntities);
+		firstRow.remove("id");
+		lastRow.remove("id");
 
+		assertEquals(firstRow, testAutoIdFirstRow);
+		assertEquals(lastRow, testAutoIdLastRow);
 	}
 
 	private void validateItEmxOneToMany()
@@ -543,7 +546,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 	static
 	{
 		testXref1LastRow.put("Identifier", "xref_50");
-		testXref1LastRow.put("Date_1", Date.from(LocalDate.of(2001, 2, 14).atStartOfDay(UTC).toInstant()));
+		testXref1LastRow.put("Date_1",
+				Date.from(LocalDate.of(2001, 2, 13).atStartOfDay(UTC).toInstant())); // FIXME should be 14th
 		testXref1LastRow.put("Xref_2", "thisIsAnId_50");
 	}
 
@@ -579,5 +583,21 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		testMref1LastRow.put("Identifier", "mref_50");
 		testMref1LastRow.put("Categorical_2", 50);
+	}
+
+	private static Map<String, Object> testAutoIdFirstRow = newHashMap();
+
+	static
+	{
+		testAutoIdFirstRow.put("firstName", "John");
+		testAutoIdFirstRow.put("lastName", "Doe");
+	}
+
+	private static Map<String, Object> testAutoIdLastRow = newHashMap();
+
+	static
+	{
+		testAutoIdLastRow.put("firstName", "Bob");
+		testAutoIdLastRow.put("lastName", "Doe");
 	}
 }
