@@ -6,7 +6,6 @@ import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
@@ -27,10 +26,8 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
 public class EmxImportServiceIT extends ImportServiceIT
@@ -170,71 +167,41 @@ public class EmxImportServiceIT extends ImportServiceIT
 		return data.iterator();
 	}
 
-	private Map<String, Object> entityToMap(Entity entity)
-	{
-		Map<String, Object> entityMap = newHashMap();
-		Iterable<Attribute> attributes = entity.getEntityType().getAllAttributes();
-
-		for (Attribute attribute : attributes)
-		{
-			if (attribute.getDataType().equals(COMPOUND))
-			{
-				continue;
-			}
-
-			String attributeName = attribute.getName();
-			Object value = null;
-			switch (attribute.getDataType())
-			{
-				case CATEGORICAL:
-				case FILE:
-				case XREF:
-					if (entity.getEntity(attributeName) != null)
-					{
-						value = entity.getEntity(attributeName).getIdValue();
-					}
-					break;
-				case CATEGORICAL_MREF:
-				case MREF:
-				case ONE_TO_MANY:
-					value = getIdsAsSet(entity.getEntities(attributeName));
-					break;
-				default:
-					value = entity.get(attributeName);
-					break;
-			}
-			entityMap.put(attributeName, value);
-		}
-
-		return entityMap;
-	}
-
 	private void validateItEmxDataTypes()
 	{
 		List<Entity> typeTestEntities = dataService.findAll("it_emx_datatypes_TypeTest").collect(Collectors.toList());
-		Map<String, Object> actualTypeTestFirstRow = entityToMap(typeTestEntities.get(0));
-		Map<String, Object> actualTypeTestLastRow = entityToMap(getLast(typeTestEntities));
-
-		assertEquals(actualTypeTestFirstRow, typeTestFirstRow);
-		assertEquals(actualTypeTestLastRow, typeTestLastRow);
+		assertEquals(firstRowAsMap(typeTestEntities), typeTestFirstRow);
+		assertEquals(lastRowAsMap(typeTestEntities), typeTestLastRow);
 
 		List<Entity> typeTestRefEntities = dataService.findAll("it_emx_datatypes_TypeTestRef")
 				.collect(Collectors.toList());
-		Map<String, Object> actualTypeTestRefFirstRow = entityToMap(typeTestRefEntities.get(0));
-		Map<String, Object> actualTypeTestRefLastRow = entityToMap(getLast(typeTestRefEntities));
-
-		assertEquals(actualTypeTestRefFirstRow, typeTestRefFirstRow);
-		assertEquals(actualTypeTestRefLastRow, typeTestRefLastRow);
-	}
-
-	private Set<Object> getIdsAsSet(Iterable<Entity> entities)
-	{
-		return asStream(entities).map(Entity::getIdValue).collect(toSet());
+		assertEquals(firstRowAsMap(typeTestRefEntities), typeTestRefFirstRow);
+		assertEquals(lastRowAsMap(typeTestRefEntities), typeTestRefLastRow);
 	}
 
 	private void validateItEmxDeepNesting()
 	{
+		List<Entity> testEntity2Entities = dataService.findAll("it_deep_advanced_p_TestEntity2")
+				.collect(Collectors.toList());
+		assertEquals(firstRowAsMap(testEntity2Entities), testEntity2FirstRow);
+		assertEquals(lastRowAsMap(testEntity2Entities), testEntity2LastRow);
 
+		List<Entity> testCategorical1Entities = dataService.findAll("it_deep_TestCategorical1")
+				.collect(Collectors.toList());
+		assertEquals(firstRowAsMap(testCategorical1Entities), testCategorical1FirstRow);
+		assertEquals(lastRowAsMap(testCategorical1Entities), testCategorical1LastRow);
+
+		List<Entity> testXref1Entities = dataService.findAll("it_deep_TestXref1").collect(Collectors.toList());
+		assertEquals(firstRowAsMap(testXref1Entities), testXref1FirstRow);
+		assertEquals(lastRowAsMap(testXref1Entities), testXref1LastRow);
+
+		List<Entity> testXref2Entities = dataService.findAll("it_deep_TestXref2").collect(Collectors.toList());
+		assertEquals(firstRowAsMap(testXref2Entities), testXref2FirstRow);
+		assertEquals(lastRowAsMap(testXref2Entities), testXref2LastRow);
+
+		List<Entity> testMref1Entities = dataService.findAll("it_deep_TestMref1").collect(Collectors.toList());
+		assertEquals(firstRowAsMap(testMref1Entities), testMref1FirstRow);
+		assertEquals(lastRowAsMap(testMref1Entities), testMref1LastRow);
 	}
 
 	private void validateItEmxLookupAttribute()
@@ -513,5 +480,104 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		typeTestRefLastRow.put("value", "ref5");
 		typeTestRefLastRow.put("label", "label5");
+	}
+
+	private static Map<String, Object> testEntity2FirstRow = newHashMap();
+
+	static
+	{
+		testEntity2FirstRow.put("Identifier", "my_id_1");
+		testEntity2FirstRow.put("String_1", "lalala this is a super interesting string");
+		testEntity2FirstRow.put("Integer_1", 91);
+		testEntity2FirstRow.put("Xref_1", "xref_1");
+		testEntity2FirstRow.put("Boolean_1", false);
+		testEntity2FirstRow.put("Categorical_1", 1);
+		testEntity2FirstRow.put("CompoundXref_1", "xref_1");
+		testEntity2FirstRow.put("CompoundBoolean_1", false);
+		testEntity2FirstRow.put("Mref_1", newHashSet("mref_1", "mref_50"));
+	}
+
+	private static Map<String, Object> testEntity2LastRow = newHashMap();
+
+	static
+	{
+		testEntity2LastRow.put("Identifier", "my_id_50");
+		testEntity2LastRow.put("String_1", "lalala this is a super interesting string");
+		testEntity2LastRow.put("Integer_1", 189);
+		testEntity2LastRow.put("Xref_1", "xref_50");
+		testEntity2LastRow.put("Boolean_1", true);
+		testEntity2LastRow.put("Categorical_1", 50);
+		testEntity2LastRow.put("CompoundXref_1", "xref_50");
+		testEntity2LastRow.put("CompoundBoolean_1", true);
+		testEntity2LastRow.put("Mref_1", newHashSet("mref_50", "mref_1"));
+	}
+
+	private static Map<String, Object> testCategorical1FirstRow = newHashMap();
+
+	static
+	{
+		testCategorical1FirstRow.put("id", 1);
+		testCategorical1FirstRow.put("value", "This is value 1");
+	}
+
+	private static Map<String, Object> testCategorical1LastRow = newHashMap();
+
+	static
+	{
+		testCategorical1LastRow.put("id", 50);
+		testCategorical1LastRow.put("value", "This is value 50");
+	}
+
+	private static Map<String, Object> testXref1FirstRow = newHashMap();
+
+	static
+	{
+		testXref1FirstRow.put("Identifier", "xref_1");
+		testXref1FirstRow.put("Date_1",
+				Date.from(LocalDate.of(2013, 12, 10).atStartOfDay(UTC).toInstant())); // FIXME should be 11th
+		testXref1FirstRow.put("Xref_2", "thisIsAnId_1");
+	}
+
+	private static Map<String, Object> testXref1LastRow = newHashMap();
+
+	static
+	{
+		testXref1LastRow.put("Identifier", "xref_50");
+		testXref1LastRow.put("Date_1", Date.from(LocalDate.of(2001, 2, 14).atStartOfDay(UTC).toInstant()));
+		testXref1LastRow.put("Xref_2", "thisIsAnId_50");
+	}
+
+	private static Map<String, Object> testXref2FirstRow = newHashMap();
+
+	static
+	{
+		testXref2FirstRow.put("Identifier", "thisIsAnId_1");
+		testXref2FirstRow.put("Boolean_2", true);
+		testXref2FirstRow.put("Mref_2", newHashSet("mref_1", "mref_2", "mref_3"));
+	}
+
+	private static Map<String, Object> testXref2LastRow = newHashMap();
+
+	static
+	{
+		testXref2LastRow.put("Identifier", "thisIsAnId_50");
+		testXref2LastRow.put("Boolean_2", true);
+		testXref2LastRow.put("Mref_2", newHashSet("mref_5"));
+	}
+
+	private static Map<String, Object> testMref1FirstRow = newHashMap();
+
+	static
+	{
+		testMref1FirstRow.put("Identifier", "mref_1");
+		testMref1FirstRow.put("Categorical_2", 1);
+	}
+
+	private static Map<String, Object> testMref1LastRow = newHashMap();
+
+	static
+	{
+		testMref1LastRow.put("Identifier", "mref_50");
+		testMref1LastRow.put("Categorical_2", 50);
 	}
 }

@@ -5,12 +5,14 @@ import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -35,11 +37,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeClass;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Iterables.getLast;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, ImportServiceIT.Config.class })
@@ -106,6 +114,60 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 			LOG.error("File name: [{}]", resourceName);
 			throw new MolgenisDataAccessException(e);
 		}
+	}
+
+	static Map<String, Object> firstRowAsMap(List<Entity> typeTestEntities)
+	{
+		return entityToMap(typeTestEntities.get(0));
+	}
+
+	static Map<String, Object> lastRowAsMap(List<Entity> typeTestEntities)
+	{
+		return entityToMap(getLast(typeTestEntities));
+	}
+
+	private static Map<String, Object> entityToMap(Entity entity)
+	{
+		Map<String, Object> entityMap = newHashMap();
+		Iterable<Attribute> attributes = entity.getEntityType().getAllAttributes();
+
+		for (Attribute attribute : attributes)
+		{
+			if (attribute.getDataType().equals(COMPOUND))
+			{
+				continue;
+			}
+
+			String attributeName = attribute.getName();
+			Object value = null;
+			switch (attribute.getDataType())
+			{
+				case CATEGORICAL:
+				case FILE:
+				case XREF:
+					if (entity.getEntity(attributeName) != null)
+					{
+						value = entity.getEntity(attributeName).getIdValue();
+					}
+					break;
+				case CATEGORICAL_MREF:
+				case MREF:
+				case ONE_TO_MANY:
+					value = getIdsAsSet(entity.getEntities(attributeName));
+					break;
+				default:
+					value = entity.get(attributeName);
+					break;
+			}
+			entityMap.put(attributeName, value);
+		}
+
+		return entityMap;
+	}
+
+	private static Set<Object> getIdsAsSet(Iterable<Entity> entities)
+	{
+		return asStream(entities).map(Entity::getIdValue).collect(toSet());
 	}
 
 	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class, OntologyDataConfig.class,
