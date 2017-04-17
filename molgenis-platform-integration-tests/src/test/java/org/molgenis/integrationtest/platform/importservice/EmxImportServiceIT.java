@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.time.ZoneOffset.UTC;
@@ -71,8 +70,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 		validateImportReport(importReport, ImmutableMap.of(CSV_HOSPITAL, 3, CSV_PATIENTS, 3),
 				ImmutableSet.of(CSV_HOSPITAL, CSV_PATIENTS));
-		validateZipHospitalEntity(CSV_HOSPITAL);
-		validateZipPatientEntity(CSV_PATIENTS);
+		validateFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
+		validateFirstAndLastRows(TSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -98,34 +97,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 		validateImportReport(importReport, ImmutableMap.of(TSV_HOSPITAL, 3, TSV_PATIENTS, 3),
 				ImmutableSet.of(TSV_HOSPITAL, TSV_PATIENTS));
-		validateZipHospitalEntity(TSV_HOSPITAL);
-		validateZipPatientEntity(TSV_PATIENTS);
-	}
-
-	private void validateZipPatientEntity(String patientEntityId)
-	{
-		List<Entity> patients = dataService.findAll(patientEntityId).collect(Collectors.toList());
-		Entity firstPatient = patients.get(0);
-		Entity lastPatient = getLast(patients);
-
-		assertEquals(firstPatient.getString("patient_id"), "1");
-		assertEquals(firstPatient.getString("patient_name"), "John Doe");
-		assertEquals(firstPatient.getEntity("patient_hospital").getIdValue(), "UMCG");
-		assertEquals(lastPatient.getString("patient_id"), "3");
-		assertEquals(lastPatient.getString("patient_name"), "Unknown");
-		assertEquals(lastPatient.getEntity("patient_hospital").getIdValue(), "VUMC");
-	}
-
-	private void validateZipHospitalEntity(String hospitalEntityId)
-	{
-		List<Entity> hospitals = dataService.findAll(hospitalEntityId).collect(Collectors.toList());
-		Entity firstHospital = hospitals.get(0);
-		Entity lastHospital = getLast(hospitals);
-
-		assertEquals(firstHospital.getString("hospital_name"), "UMCG");
-		assertEquals(firstHospital.getString("hospital_city"), "Groningen");
-		assertEquals(lastHospital.getString("hospital_name"), "VUMC");
-		assertEquals(lastHospital.getString("hospital_city"), "Amsterdam");
+		validateFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
+		validateFirstAndLastRows(TSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
 	@DataProvider(name = "doImportEmxAddProvider")
@@ -169,40 +142,22 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxDataTypes()
 	{
-		List<Entity> typeTestEntities = findAllAsList("it_emx_datatypes_TypeTest");
-		assertEquals(firstRowAsMap(typeTestEntities), typeTestFirstRow);
-		assertEquals(lastRowAsMap(typeTestEntities), typeTestLastRow);
-
-		List<Entity> typeTestRefEntities = findAllAsList("it_emx_datatypes_TypeTestRef");
-		assertEquals(firstRowAsMap(typeTestRefEntities), typeTestRefFirstRow);
-		assertEquals(lastRowAsMap(typeTestRefEntities), typeTestRefLastRow);
+		validateFirstAndLastRows("it_emx_datatypes_TypeTest", typeTestFirstRow, typeTestLastRow);
+		validateFirstAndLastRows("it_emx_datatypes_TypeTestRef", typeTestRefFirstRow, typeTestRefLastRow);
 	}
 
 	private void validateItEmxDeepNesting()
 	{
-		List<Entity> testEntity2Entities = findAllAsList("it_deep_advanced_p_TestEntity2");
-		assertEquals(firstRowAsMap(testEntity2Entities), testEntity2FirstRow);
-		assertEquals(lastRowAsMap(testEntity2Entities), testEntity2LastRow);
-
-		List<Entity> testCategorical1Entities = findAllAsList("it_deep_TestCategorical1");
-		assertEquals(firstRowAsMap(testCategorical1Entities), testCategorical1FirstRow);
-		assertEquals(lastRowAsMap(testCategorical1Entities), testCategorical1LastRow);
-
-		List<Entity> testXref1Entities = findAllAsList("it_deep_TestXref1");
-		assertEquals(firstRowAsMap(testXref1Entities), testXref1FirstRow);
-		assertEquals(lastRowAsMap(testXref1Entities), testXref1LastRow);
-
-		List<Entity> testXref2Entities = findAllAsList("it_deep_TestXref2");
-		assertEquals(firstRowAsMap(testXref2Entities), testXref2FirstRow);
-		assertEquals(lastRowAsMap(testXref2Entities), testXref2LastRow);
-
-		List<Entity> testMref1Entities = findAllAsList("it_deep_TestMref1");
-		assertEquals(firstRowAsMap(testMref1Entities), testMref1FirstRow);
-		assertEquals(lastRowAsMap(testMref1Entities), testMref1LastRow);
+		validateFirstAndLastRows("it_deep_advanced_p_TestEntity2", testEntity2FirstRow, testEntity2LastRow);
+		validateFirstAndLastRows("it_deep_TestCategorical1", testCategorical1FirstRow, testCategorical1LastRow);
+		validateFirstAndLastRows("it_deep_TestXref1", testXref1FirstRow, testXref2LastRow);
+		validateFirstAndLastRows("it_deep_TestXref2", testXref2FirstRow, testXref2LastRow);
+		validateFirstAndLastRows("it_deep_TestMref1", testMref1FirstRow, testMref1LastRow);
 	}
 
 	private void validateItEmxLookupAttribute()
 	{
+		//TODO
 	}
 
 	private void validateItEmxAutoid()
@@ -219,17 +174,25 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxOneToMany()
 	{
-
+		//TODO
 	}
 
 	private void validateItEmxSelfReferences()
 	{
-
+		//TODO
 	}
 
 	private void validateItEmxTags()
 	{
+		//TODO
+	}
 
+	private void validateFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
+			Map<String, Object> expectedLastRow)
+	{
+		List<Entity> importedEntities = findAllAsList(entityName);
+		assertEquals(firstRowAsMap(importedEntities), expectedFirstRow);
+		assertEquals(lastRowAsMap(importedEntities), expectedLastRow);
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
@@ -361,6 +324,40 @@ public class EmxImportServiceIT extends ImportServiceIT
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
 				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
 		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames };
+	}
+
+	private static Map<String, Object> patientsFirstRow = newHashMap();
+
+	static
+	{
+		patientsFirstRow.put("patient_id", "1");
+		patientsFirstRow.put("patient_name", "John Doe");
+		patientsFirstRow.put("patient_hospital", "UMCG");
+	}
+
+	private static Map<String, Object> patientsLastRow = newHashMap();
+
+	static
+	{
+		patientsLastRow.put("patient_id", "3");
+		patientsLastRow.put("patient_name", "Unknown");
+		patientsLastRow.put("patient_hospital", "VUMC");
+	}
+
+	private static Map<String, Object> hospitalFirstRow = newHashMap();
+
+	static
+	{
+		hospitalFirstRow.put("hospital_name", "UMCG");
+		hospitalFirstRow.put("hospital_city", "Groningen");
+	}
+
+	private static Map<String, Object> hospitalLastRow = newHashMap();
+
+	static
+	{
+		hospitalLastRow.put("hospital_name", "VUMC");
+		hospitalLastRow.put("hospital_city", "Amsterdam");
 	}
 
 	private static Map<String, Object> typeTestFirstRow = newHashMap();
