@@ -124,7 +124,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 								"TestLookupAttributes"), this::validateItEmxLookupAttribute));
 
 		data.add(createAddData("it_emx_autoid.xlsx", asList("it", "emx", "autoid"), ImmutableMap.of("testAutoId", 4),
-				ImmutableSet.of("testAutoId"), this::validateItEmxAutoid));
+				ImmutableSet.of("testAutoId"), this::validateItEmxAutoId));
 
 		data.add(createAddData("it_emx_onetomany.xlsx", asList("it", "emx", "onetomany"),
 				ImmutableMap.<String, Integer>builder().put("book", 4).put("author", 2).put("node", 4).build(),
@@ -160,7 +160,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		//TODO
 	}
 
-	private void validateItEmxAutoid()
+	private void validateItEmxAutoId()
 	{
 		List<Entity> testAutoIdEntities = findAllAsList("it_emx_autoid_testAutoId");
 		Map<String, Object> firstRow = firstRowAsMap(testAutoIdEntities);
@@ -181,7 +181,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxSelfReferences()
 	{
-		//TODO
+		validateFirstAndLastRows("it_emx_selfreferences_PersonTest", personTestFirstRow, personTestLastRow);
 	}
 
 	private void validateItEmxTags()
@@ -654,5 +654,27 @@ public class EmxImportServiceIT extends ImportServiceIT
 		nodeLastRow.put("label", "Child #1");
 		nodeLastRow.put("parent", "node");
 		nodeLastRow.put("children", newHashSet());
+	}
+
+	private static Map<String, Object> personTestFirstRow = newHashMap();
+
+	static
+	{
+		personTestFirstRow.put("id", "me");
+		personTestFirstRow.put("mother", "mom");
+		personTestFirstRow.put("father", "dad");
+		personTestFirstRow.put("brothers", newHashSet("bro0", "bro1"));
+		personTestFirstRow.put("sisters", newHashSet("sis0", "sis1"));
+	}
+
+	private static Map<String, Object> personTestLastRow = newHashMap();
+
+	static
+	{
+		personTestLastRow.put("id", "grandpa_dad");
+		personTestLastRow.put("mother", null);
+		personTestLastRow.put("father", null);
+		personTestLastRow.put("brothers", newHashSet());
+		personTestLastRow.put("sisters", newHashSet());
 	}
 }
