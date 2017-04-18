@@ -70,8 +70,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 		validateImportReport(importReport, ImmutableMap.of(CSV_HOSPITAL, 3, CSV_PATIENTS, 3),
 				ImmutableSet.of(CSV_HOSPITAL, CSV_PATIENTS));
-		validateFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
-		validateFirstAndLastRows(TSV_PATIENTS, patientsFirstRow, patientsLastRow);
+		validateFirstAndLastRows(CSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
+		validateFirstAndLastRows(CSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -150,7 +150,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		validateFirstAndLastRows("it_deep_advanced_p_TestEntity2", testEntity2FirstRow, testEntity2LastRow);
 		validateFirstAndLastRows("it_deep_TestCategorical1", testCategorical1FirstRow, testCategorical1LastRow);
-		validateFirstAndLastRows("it_deep_TestXref1", testXref1FirstRow, testXref2LastRow);
+		validateFirstAndLastRows("it_deep_TestXref1", testXref1FirstRow, testXref1LastRow);
 		validateFirstAndLastRows("it_deep_TestXref2", testXref2FirstRow, testXref2LastRow);
 		validateFirstAndLastRows("it_deep_TestMref1", testMref1FirstRow, testMref1LastRow);
 	}
@@ -174,7 +174,9 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxOneToMany()
 	{
-		//TODO
+		validateFirstAndLastRows("it_emx_onetomany_author", authorFirstRow, authorLastRow);
+		validateFirstAndLastRows("it_emx_onetomany_book", bookFirstRow, bookLastRow);
+		validateFirstAndLastRows("it_emx_onetomany_node", nodeFirstRow, nodeLastRow);
 	}
 
 	private void validateItEmxSelfReferences()
@@ -596,5 +598,61 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		testAutoIdLastRow.put("firstName", "Bob");
 		testAutoIdLastRow.put("lastName", "Doe");
+	}
+
+	private static Map<String, Object> authorFirstRow = newHashMap();
+
+	static
+	{
+		authorFirstRow.put("authorId", "hemingway");
+		authorFirstRow.put("name", "Ernest Hemingway");
+		authorFirstRow.put("books", newHashSet("oldmansea", "belltolls"));
+	}
+
+	private static Map<String, Object> authorLastRow = newHashMap();
+
+	static
+	{
+		authorLastRow.put("authorId", "orwell");
+		authorLastRow.put("name", "George Orwell");
+		authorLastRow.put("books", newHashSet("1984", "animalfarm"));
+	}
+
+	private static Map<String, Object> bookFirstRow = newHashMap();
+
+	static
+	{
+		bookFirstRow.put("bookId", "oldmansea");
+		bookFirstRow.put("title", "The Old Man and the Sea");
+		bookFirstRow.put("author", "hemingway");
+	}
+
+	private static Map<String, Object> bookLastRow = newHashMap();
+
+	static
+	{
+		bookLastRow.put("bookId", "animalfarm");
+		bookLastRow.put("title", "Animal Farm");
+		bookLastRow.put("author", "orwell");
+	}
+
+	private static Map<String, Object> nodeFirstRow = newHashMap();
+
+	static
+	{
+		nodeFirstRow.put("nodeId", "node");
+		nodeFirstRow.put("label", "Node");
+		nodeFirstRow.put("parent", "parent");
+		nodeFirstRow.put("children", newHashSet("child0", "child1"));
+	}
+
+	private static Map<String, Object> nodeLastRow = newHashMap();
+
+	static
+	{
+		nodeLastRow.put("nodeId", "child1");
+		nodeLastRow.put("label", "Child #1");
+		nodeLastRow.put("parent", "node");
+		nodeLastRow.put("children", newHashSet());
 	}
 }
