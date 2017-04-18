@@ -373,8 +373,10 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestFirstRow.put("xcompound_string", "compound strings are here");
 		typeTestFirstRow.put("xcategorical_value", "ref1");
 		typeTestFirstRow.put("xcategoricalnillable_value", "ref1");
-		typeTestFirstRow.put("xcategoricalmref_value", newHashSet("ref2", "ref1")); //FIXME!!! should be [ref1]
-		typeTestFirstRow.put("xcatmrefnillable_value", newHashSet("ref1", "ref3")); //FIXME!!! should be [ref1]
+		typeTestFirstRow.put("xcategoricalmref_value",
+				newHashSet("ref2", "ref1")); //FIXME should be [ref1] (https://github.com/molgenis/molgenis/issues/6046)
+		typeTestFirstRow.put("xcatmrefnillable_value",
+				newHashSet("ref1", "ref3")); //FIXME should be [ref1] (https://github.com/molgenis/molgenis/issues/6046)
 		typeTestFirstRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
 		typeTestFirstRow.put("xdatenillable", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
 		typeTestFirstRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
@@ -426,8 +428,10 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestLastRow.put("xcompound_string", "compound strings are here");
 		typeTestLastRow.put("xcategorical_value", "ref3");
 		typeTestLastRow.put("xcategoricalnillable_value", "ref2");
-		typeTestLastRow.put("xcategoricalmref_value", newHashSet("ref1", "ref2")); //FIXME should be [ref1, ref2, ref3]
-		typeTestLastRow.put("xcatmrefnillable_value", newHashSet()); //FIXME should be [ref1, ref3]
+		typeTestLastRow.put("xcategoricalmref_value", newHashSet("ref1",
+				"ref2")); //FIXME should be [ref1, ref2, ref3] (https://github.com/molgenis/molgenis/issues/6046)
+		typeTestLastRow.put("xcatmrefnillable_value",
+				newHashSet()); //FIXME should be [ref1, ref3] (https://github.com/molgenis/molgenis/issues/6046)
 		typeTestLastRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
 		typeTestLastRow.put("xdatenillable", Date.from(LocalDate.of(2015, 4, 1).atStartOfDay(UTC).toInstant()));
 		typeTestLastRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
@@ -447,7 +451,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestLastRow.put("xintrange", 4);
 		typeTestLastRow.put("xintrangenillable", 77);
 		typeTestLastRow.put("xlong", 3L);
-		typeTestLastRow.put("xlongnillable", 2147483647L); //FIXME should be 12342151234L
+		typeTestLastRow.put("xlongnillable",
+				2147483647L); //FIXME should be 12342151234L (https://github.com/molgenis/molgenis/issues/6048)
 		typeTestLastRow.put("xlongrange", 4L);
 		typeTestLastRow.put("xlongrangenillable", 3L);
 		typeTestLastRow.put("xmref_value", newHashSet("ref1", "ref2", "ref3"));
@@ -535,8 +540,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 	static
 	{
 		testXref1FirstRow.put("Identifier", "xref_1");
-		testXref1FirstRow.put("Date_1",
-				Date.from(LocalDate.of(2013, 12, 10).atStartOfDay(UTC).toInstant())); // FIXME should be 11th
+		testXref1FirstRow.put("Date_1", Date.from(LocalDate.of(2013, 12, 10).atStartOfDay(UTC)
+				.toInstant())); // FIXME should be 11th (https://github.com/molgenis/molgenis/issues/5845)
 		testXref1FirstRow.put("Xref_2", "thisIsAnId_1");
 	}
 
@@ -545,8 +550,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 	static
 	{
 		testXref1LastRow.put("Identifier", "xref_50");
-		testXref1LastRow.put("Date_1",
-				Date.from(LocalDate.of(2001, 2, 13).atStartOfDay(UTC).toInstant())); // FIXME should be 14th
+		testXref1LastRow.put("Date_1", Date.from(LocalDate.of(2001, 2, 13).atStartOfDay(UTC)
+				.toInstant())); // FIXME should be 14th (https://github.com/molgenis/molgenis/issues/5845)
 		testXref1LastRow.put("Xref_2", "thisIsAnId_50");
 	}
 
