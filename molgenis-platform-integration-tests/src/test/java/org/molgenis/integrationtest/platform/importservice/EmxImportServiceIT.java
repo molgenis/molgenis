@@ -256,7 +256,10 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxAddUpdate()
 	{
-		// TODO
+		List<Entity> importedEntities = findAllAsList("it_emx_addupdate_TestAddUpdate");
+		assertEquals(firstRowAsMap(importedEntities), testAddUpdateFirstRow);
+		assertEquals(entityToMap(importedEntities.get(1)), testAddUpdateSecondRow);
+		assertEquals(lastRowAsMap(importedEntities), testAddUpdateLastRow);
 	}
 
 	private void validateItEmxAttrToAbstract()
@@ -753,4 +756,27 @@ public class EmxImportServiceIT extends ImportServiceIT
 		testUpdateLastRow.put("label", "Label #1 – Updated");
 	}
 
+	private static Map<String, Object> testAddUpdateFirstRow = newHashMap();
+
+	static
+	{
+		testAddUpdateFirstRow.put("id", "0");
+		testAddUpdateFirstRow.put("label", "Label #0");
+	}
+
+	private static Map<String, Object> testAddUpdateSecondRow = newHashMap();
+
+	static
+	{
+		testAddUpdateSecondRow.put("id", "1");
+		testAddUpdateSecondRow.put("label", "Label #1 – Updated");
+	}
+
+	private static Map<String, Object> testAddUpdateLastRow = newHashMap();
+
+	static
+	{
+		testAddUpdateLastRow.put("id", "2");
+		testAddUpdateLastRow.put("label", "Label #2");
+	}
 }

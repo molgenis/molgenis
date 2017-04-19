@@ -140,7 +140,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		return entityToMap(getLast(typeTestEntities));
 	}
 
-	private static Map<String, Object> entityToMap(Entity entity)
+	static Map<String, Object> entityToMap(Entity entity)
 	{
 		Map<String, Object> entityMap = newHashMap();
 		Iterable<Attribute> attributes = entity.getEntityType().getAllAttributes();
