@@ -68,6 +68,27 @@ public class OntologyImportServiceIT extends ImportServiceIT
 						.of("sys_ont_OntologyTermDynamicAnnotation", 0, "sys_ont_OntologyTermSynonym", 5,
 								"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
 				emptySet());
+
+		List<Entity> ontologies = dataService.findAll("sys_ont_Ontology").collect(Collectors.toList());
+		Ontology ontology = (Ontology) ontologies.get(0);
+		assertEquals(ontology.getOntologyName(), "ontology-small");
+
+		List<Entity> synonyms = dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
+
+		verifyOboRow(synonyms, "molgenis ontology core", "http://purl.obolibrary.org/obo/TEMP#molgenis-ontology-core");
+
+		verifyOboRow(synonyms, "molgenis", "http://purl.obolibrary.org/obo/TEMP#molgenis");
+
+		verifyOboRow(synonyms, "Thing", "http://purl.obolibrary.org/obo/TEMP#Thing");
+
+	}
+
+	private void verifyOboRow(List<Entity> synonyms, String ontologyTermName, String ontologyTermIRI)
+	{
+		Optional<Entity> molOntCoreOpt = synonyms.stream()
+				.filter(s -> s.getString("ontologyTermName").equals(ontologyTermName)).findFirst();
+		assertTrue(molOntCoreOpt.isPresent());
+		assertEquals(molOntCoreOpt.get().getString("ontologyTermIRI"), ontologyTermIRI);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
