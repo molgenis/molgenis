@@ -264,7 +264,14 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxAttrToAbstract()
 	{
-		// TODO
+		EntityType parent1 = dataService.getEntityType("it_emx_addAttrToAbstract_Parent1");
+		assertNotNull(parent1.getAttribute("newAttr"));
+		EntityType parent2 = dataService.getEntityType("it_emx_addAttrToAbstract_Parent2");
+		assertNotNull(parent2.getAttribute("newAttr"));
+		EntityType child1 = dataService.getEntityType("it_emx_addAttrToAbstract_Child1");
+		assertNotNull(child1.getAttribute("newAttr"));
+		EntityType child2 = dataService.getEntityType("it_emx_addAttrToAbstract_Child2");
+		assertNotNull(child2.getAttribute("newAttr"));
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
