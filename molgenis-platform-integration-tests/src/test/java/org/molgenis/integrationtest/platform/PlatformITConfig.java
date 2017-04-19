@@ -24,6 +24,7 @@ import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.integrationtest.data.TestAppSettings;
+import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
@@ -71,16 +72,15 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
   */
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
 		"org.molgenis.data.jobs", "org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
-		"org.molgenis.data.platform", "org.molgenis.data.meta.model", "org.molgenis.ontology.core.model",
-		"org.molgenis.data.meta.util", "org.molgenis.data.system.model", "org.molgenis.data.cache",
-		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
-		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
-		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
-		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
+		"org.molgenis.data.platform", "org.molgenis.data.meta.model", "org.molgenis.data.meta.util",
+		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
+		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
+		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
+		"org.molgenis.data.importer.emx", "org.molgenis.data.importer.config", "org.molgenis.data.excel",
+		"org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
-		GsonConfig.class,
-		PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
+		GsonConfig.class, PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
+		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
