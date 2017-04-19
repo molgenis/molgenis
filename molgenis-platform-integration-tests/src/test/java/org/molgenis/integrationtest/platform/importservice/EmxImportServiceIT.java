@@ -244,33 +244,44 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 		data.add(createUpdateData("it_emx_addupdate.xlsx", "it_emx_addupdate-addupdate.xlsx",
 				asList("it", "emx", "addupdate"),
-				ImmutableMap.<String, Integer>builder().put("TestAddUpdate", 3).build(), Collections.emptySet()));
+				ImmutableMap.<String, Integer>builder().put("TestAddUpdate", 3).build(), Collections.emptySet(),
+				this::validateItEmxAddUpdate));
 
 		data.add(createUpdateData("it_emx_addAttrToAbstract.xlsx", "it_emx_addAttrToAbstract-update.xlsx",
 				asList("it", "emx", "addAttrToAbstract"),
 				ImmutableMap.<String, Integer>builder().put("Child1", 2).put("Child2", 2).build(),
-				Collections.emptySet()));
+				Collections.emptySet(), this::validateItEmxAttrToAbstract));
 		return data.iterator();
+	}
+
+	private void validateItEmxAddUpdate()
+	{
+		// TODO
+	}
+
+	private void validateItEmxAttrToAbstract()
+	{
+		// TODO
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
 	public void testDoImportAddUpdateEmxAsNonSuperuser(File file, File addUpdateFile,
-			Map<String, Integer> entityCountMap, Set<String> addedEntityTypes)
+			Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	public void testDoImportAddUpdateEmxAsSuperuser(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	private void executeAddUpdateOrUpdateTest(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
 		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(file);
@@ -285,6 +296,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 				.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
+		entityValidationMethod.run();
 	}
 
 	@DataProvider(name = "doImportEmxUpdateProvider")
@@ -293,25 +305,31 @@ public class EmxImportServiceIT extends ImportServiceIT
 		List<Object[]> data = new ArrayList<>();
 
 		data.add(createUpdateData("it_emx_update.xlsx", "it_emx_update-update.xlsx", asList("it", "emx", "update"),
-				ImmutableMap.<String, Integer>builder().put("TestUpdate", 2).build(), Collections.emptySet()));
+				ImmutableMap.<String, Integer>builder().put("TestUpdate", 2).build(), Collections.emptySet(),
+				this::validateItEmxUpdate));
 
 		return data.iterator();
+	}
+
+	private void validateItEmxUpdate()
+	{
+		validateFirstAndLastRows("it_emx_update_TestUpdate", testUpdateFirstRow, testUpdateLastRow);
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
 	public void testDoImportUpdateEmxAsNonSuperuser(File file, File updateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	public void testDoImportUpdateEmxAsSuperuser(File file, File updateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	private static Object[] createAddData(String fileName, List<String> packageTokens,
@@ -327,7 +345,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	private static Object[] createUpdateData(String fileName, String updateFileName, List<String> packageTokens,
-			Map<String, Integer> entityCountMap, Set<String> entityTypeNames)
+			Map<String, Integer> entityCountMap, Set<String> entityTypeNames, Runnable entityValidationMethod)
 	{
 		File addFile = getFile("/xls/" + fileName);
 		File updateFile = getFile("/xls/" + updateFileName);
@@ -336,7 +354,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
 				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
-		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames };
+		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames,
+				entityValidationMethod };
 	}
 
 	private static Map<String, Object> patientsFirstRow = newHashMap();
@@ -717,4 +736,21 @@ public class EmxImportServiceIT extends ImportServiceIT
 		tagLastRow.put("relationLabel", "Documentation and Help");
 		tagLastRow.put("codeSystem", "EDAM");
 	}
+
+	private static Map<String, Object> testUpdateFirstRow = newHashMap();
+
+	static
+	{
+		testUpdateFirstRow.put("id", "0");
+		testUpdateFirstRow.put("label", "Label #0");
+	}
+
+	private static Map<String, Object> testUpdateLastRow = newHashMap();
+
+	static
+	{
+		testUpdateLastRow.put("id", "1");
+		testUpdateLastRow.put("label", "Label #1 – Updated");
+	}
+
 }
