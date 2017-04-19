@@ -194,7 +194,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		validateFirstAndLastRows("sys_md_Tag", tagFirstRow, tagLastRow);
 
-		EntityType entityType = dataService.getEntityTypeById("it_emx_tags_TagEntity");
+		EntityType entityType = dataService.getEntityType("it_emx_tags_TagEntity");
 		Iterable<Tag> entityTags = entityType.getTags();
 		assertEquals(getIdsAsSet(entityTags), newHashSet("entitytag0", "entitytag1"));
 
