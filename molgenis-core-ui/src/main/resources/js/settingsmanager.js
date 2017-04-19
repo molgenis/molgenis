@@ -9,7 +9,7 @@
             api.getAsync('/api/v1/' + event.value.id + '/meta', {'expand': ['attributes']}).done(function (entity) {
                 React.render(molgenis.ui.Form({
                     entity: entity,
-                    entityInstance: event.value.name,
+                    entityInstance: event.value.id.substring(('sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator).length),
                     mode: entity.writable ? 'edit' : 'view',
                     modal: false,
                     enableOptionalFilter: false,
@@ -45,7 +45,6 @@
         onValueChange({
             value: {
                 id: 'sys' + molgenis.packageSeparator + 'set' + molgenis.packageSeparator + 'app',
-                name: 'app'
             }
         });
     });
