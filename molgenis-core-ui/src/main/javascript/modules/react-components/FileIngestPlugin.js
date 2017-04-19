@@ -33,7 +33,7 @@ class FileIngestPlugin extends Component {
                     <legend>
                         '{fileIngest.name}' import jobs
                         <span> (Target: <a
-        href = {'/menu/main/dataexplorer?entityId=' +fileIngest.entityType.id} > {fileIngest.entityType.name}</a >)</span>
+                            href={'/menu/main/dataexplorer?entityId=' + fileIngest.entityType.id}> {fileIngest.entityType.id}</a >)</span>
                     </legend>
 
                     <div className='ingest-table'>
