@@ -117,6 +117,14 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		}
 	}
 
+	void validateFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
+			Map<String, Object> expectedLastRow)
+	{
+		List<Entity> importedEntities = findAllAsList(entityName);
+		assertEquals(firstRowAsMap(importedEntities), expectedFirstRow);
+		assertEquals(lastRowAsMap(importedEntities), expectedLastRow);
+	}
+
 	List<Entity> findAllAsList(String entityName)
 	{
 		return dataService.findAll(entityName).collect(Collectors.toList());
@@ -171,7 +179,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		return entityMap;
 	}
 
-	private static Set<Object> getIdsAsSet(Iterable<Entity> entities)
+	static Set<Object> getIdsAsSet(Iterable<? extends Entity> entities)
 	{
 		return asStream(entities).map(Entity::getIdValue).collect(toSet());
 	}

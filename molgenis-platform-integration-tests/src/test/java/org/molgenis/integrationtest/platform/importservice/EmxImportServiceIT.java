@@ -6,6 +6,9 @@ import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
@@ -28,6 +31,7 @@ import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class EmxImportServiceIT extends ImportServiceIT
 {
@@ -165,9 +169,11 @@ public class EmxImportServiceIT extends ImportServiceIT
 		List<Entity> testAutoIdEntities = findAllAsList("it_emx_autoid_testAutoId");
 		Map<String, Object> firstRow = firstRowAsMap(testAutoIdEntities);
 		Map<String, Object> lastRow = lastRowAsMap(testAutoIdEntities);
+		assertNotNull(firstRow.get("id"));
+		assertNotNull(lastRow.get("id"));
+
 		firstRow.remove("id");
 		lastRow.remove("id");
-
 		assertEquals(firstRow, testAutoIdFirstRow);
 		assertEquals(lastRow, testAutoIdLastRow);
 	}
@@ -186,15 +192,20 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxTags()
 	{
-		//TODO
-	}
+		validateFirstAndLastRows("sys_md_Tag", tagFirstRow, tagLastRow);
 
-	private void validateFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
-			Map<String, Object> expectedLastRow)
-	{
-		List<Entity> importedEntities = findAllAsList(entityName);
-		assertEquals(firstRowAsMap(importedEntities), expectedFirstRow);
-		assertEquals(lastRowAsMap(importedEntities), expectedLastRow);
+		EntityType entityType = dataService.getEntityTypeById("it_emx_tags_TagEntity");
+		Iterable<Tag> entityTags = entityType.getTags();
+		assertEquals(getIdsAsSet(entityTags), newHashSet("entitytag0", "entitytag1"));
+
+		Iterable<Tag> idTags = entityType.getAttribute("id").getTags();
+		Iterable<Tag> labelTags = entityType.getAttribute("label").getTags();
+		assertEquals(getIdsAsSet(idTags), newHashSet("attributetag0", "attributetag1"));
+		assertEquals(getIdsAsSet(labelTags), newHashSet("attributetag0", "attributetag1"));
+
+		Package emxPackage = entityType.getPackage();
+		Iterable<Tag> packageTags = emxPackage.getTags();
+		assertEquals(getIdsAsSet(packageTags), newHashSet("packagetag0", "packagetag1"));
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
@@ -681,5 +692,29 @@ public class EmxImportServiceIT extends ImportServiceIT
 		personTestLastRow.put("father", null);
 		personTestLastRow.put("brothers", newHashSet());
 		personTestLastRow.put("sisters", newHashSet());
+	}
+
+	private static Map<String, Object> tagFirstRow = newHashMap();
+
+	static
+	{
+		tagFirstRow.put("id", "packagetag0");
+		tagFirstRow.put("objectIRI", "http://some.url/package0");
+		tagFirstRow.put("label", "Package tag #0");
+		tagFirstRow.put("relationIRI", "http://molgenis.org/biobankconnect/instanceOf");
+		tagFirstRow.put("relationLabel", "Documentation and Help");
+		tagFirstRow.put("codeSystem", "EDAM");
+	}
+
+	private static Map<String, Object> tagLastRow = newHashMap();
+
+	static
+	{
+		tagLastRow.put("id", "attributetag1");
+		tagLastRow.put("objectIRI", "http://some.url/attribute1");
+		tagLastRow.put("label", "Attribute tag #1");
+		tagLastRow.put("relationIRI", "http://molgenis.org/biobankconnect/instanceOf");
+		tagLastRow.put("relationLabel", "Documentation and Help");
+		tagLastRow.put("codeSystem", "EDAM");
 	}
 }
