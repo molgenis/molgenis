@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.EntityImportReport;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.time.ZoneOffset.UTC;
@@ -74,8 +76,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 		validateImportReport(importReport, ImmutableMap.of(CSV_HOSPITAL, 3, CSV_PATIENTS, 3),
 				ImmutableSet.of(CSV_HOSPITAL, CSV_PATIENTS));
-		validateFirstAndLastRows(CSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
-		validateFirstAndLastRows(CSV_PATIENTS, patientsFirstRow, patientsLastRow);
+		verifyFirstAndLastRows(CSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
+		verifyFirstAndLastRows(CSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
@@ -101,8 +103,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
 		validateImportReport(importReport, ImmutableMap.of(TSV_HOSPITAL, 3, TSV_PATIENTS, 3),
 				ImmutableSet.of(TSV_HOSPITAL, TSV_PATIENTS));
-		validateFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
-		validateFirstAndLastRows(TSV_PATIENTS, patientsFirstRow, patientsLastRow);
+		verifyFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
+		verifyFirstAndLastRows(TSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
 	@DataProvider(name = "doImportEmxAddProvider")
@@ -112,63 +114,80 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 		data.add(createAddData("it_emx_datatypes.xlsx", asList("it", "emx", "datatypes"),
 				ImmutableMap.<String, Integer>builder().put("TypeTestRef", 5).put("TypeTest", 38).build(),
-				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest"), this::validateItEmxDataTypes));
+				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest"), this::verifyItEmxDataTypes));
 
 		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"),
 				ImmutableMap.<String, Integer>builder().put("TestCategorical1", 50).put("TestMref1", 50)
 						.put("TestXref2", 50).put("TestXref1", 50)
 						.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity2", 50).build(),
 				ImmutableSet.of("TestCategorical1", "TestMref1", "TestXref2", "TestXref1", "TestEntity0",
-						"advanced_TestEntity1", "advanced_p_TestEntity2"), this::validateItEmxDeepNesting));
+						"advanced_TestEntity1", "advanced_p_TestEntity2"), this::verifyItEmxDeepNesting));
 
 		data.add(createAddData("it_emx_lookup_attribute.xlsx", asList("it", "emx", "lookupattribute"),
 				ImmutableMap.<String, Integer>builder().put("Ref1", 2).put("Ref2", 2).put("Ref3", 2).put("Ref4", 2)
 						.put("Ref5", 2).build(), ImmutableSet
 						.of("AbstractTop", "AbstractMiddle", "Ref1", "Ref2", "Ref3", "Ref4", "Ref5",
-								"TestLookupAttributes"), this::validateItEmxLookupAttribute));
+								"TestLookupAttributes"), this::verifyItEmxLookupAttribute));
 
 		data.add(createAddData("it_emx_autoid.xlsx", asList("it", "emx", "autoid"), ImmutableMap.of("testAutoId", 4),
-				ImmutableSet.of("testAutoId"), this::validateItEmxAutoId));
+				ImmutableSet.of("testAutoId"), this::verifyItEmxAutoId));
 
 		data.add(createAddData("it_emx_onetomany.xlsx", asList("it", "emx", "onetomany"),
 				ImmutableMap.<String, Integer>builder().put("book", 4).put("author", 2).put("node", 4).build(),
-				ImmutableSet.of("book", "author", "node"), this::validateItEmxOneToMany));
+				ImmutableSet.of("book", "author", "node"), this::verifyItEmxOneToMany));
 
 		data.add(createAddData("it_emx_self_references.xlsx", asList("it", "emx", "selfreferences"),
-				ImmutableMap.of("PersonTest", 11), ImmutableSet.of("PersonTest"), this::validateItEmxSelfReferences));
+				ImmutableMap.of("PersonTest", 11), ImmutableSet.of("PersonTest"), this::verifyItEmxSelfReferences));
 
 		data.add(
 				createAddData("it_emx_tags.xlsx", asList("it", "emx", "tags"), emptyMap(), ImmutableSet.of("TagEntity"),
-						this::validateItEmxTags));
+						this::verifyItEmxTags));
 
 		return data.iterator();
 	}
 
-	private void validateItEmxDataTypes()
+	private void verifyItEmxDataTypes()
 	{
-		validateFirstAndLastRows("it_emx_datatypes_TypeTest", typeTestFirstRow, typeTestLastRow);
-		validateFirstAndLastRows("it_emx_datatypes_TypeTestRef", typeTestRefFirstRow, typeTestRefLastRow);
+		verifyFirstAndLastRows("it_emx_datatypes_TypeTest", typeTestFirstRow, typeTestLastRow);
+		verifyFirstAndLastRows("it_emx_datatypes_TypeTestRef", typeTestRefFirstRow, typeTestRefLastRow);
 	}
 
-	private void validateItEmxDeepNesting()
+	private void verifyItEmxDeepNesting()
 	{
-		validateFirstAndLastRows("it_deep_advanced_p_TestEntity2", testEntity2FirstRow, testEntity2LastRow);
-		validateFirstAndLastRows("it_deep_TestCategorical1", testCategorical1FirstRow, testCategorical1LastRow);
-		validateFirstAndLastRows("it_deep_TestXref1", testXref1FirstRow, testXref1LastRow);
-		validateFirstAndLastRows("it_deep_TestXref2", testXref2FirstRow, testXref2LastRow);
-		validateFirstAndLastRows("it_deep_TestMref1", testMref1FirstRow, testMref1LastRow);
+		verifyFirstAndLastRows("it_deep_advanced_p_TestEntity2", testEntity2FirstRow, testEntity2LastRow);
+		verifyFirstAndLastRows("it_deep_TestCategorical1", testCategorical1FirstRow, testCategorical1LastRow);
+		verifyFirstAndLastRows("it_deep_TestXref1", testXref1FirstRow, testXref1LastRow);
+		verifyFirstAndLastRows("it_deep_TestXref2", testXref2FirstRow, testXref2LastRow);
+		verifyFirstAndLastRows("it_deep_TestMref1", testMref1FirstRow, testMref1LastRow);
 	}
 
-	private void validateItEmxLookupAttribute()
+	private void verifyItEmxLookupAttribute()
 	{
-		//TODO
+		verifyLookupAttributes("it_emx_lookupattribute_AbstractTop", "lookupTop");
+		verifyLookupAttributes("it_emx_lookupattribute_AbstractMiddle", "lookupTop", "lookupMiddle");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref1", "lookupTop", "lookupMiddle");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref2", "lookupTop", "lookupMiddle", "lookupRef2");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref3", "id", "label");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref4", "lookupRef4");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref5", "lookupRef5Int", "lookupRef5String");
 	}
 
-	private void validateItEmxAutoId()
+	private void verifyLookupAttributes(String entityName, String... lookupAttributeNames)
+	{
+		EntityType entityType = dataService.getEntityType(entityName);
+		assertEquals(Iterables.size(entityType.getLookupAttributes()), lookupAttributeNames.length);
+
+		for (String lookupAttributeName : lookupAttributeNames)
+		{
+			assertNotNull(entityType.getLookupAttribute(lookupAttributeName));
+		}
+	}
+
+	private void verifyItEmxAutoId()
 	{
 		List<Entity> testAutoIdEntities = findAllAsList("it_emx_autoid_testAutoId");
-		Map<String, Object> firstRow = firstRowAsMap(testAutoIdEntities);
-		Map<String, Object> lastRow = lastRowAsMap(testAutoIdEntities);
+		Map<String, Object> firstRow = entityToMap(testAutoIdEntities.get(0));
+		Map<String, Object> lastRow = entityToMap(getLast(testAutoIdEntities));
 		assertNotNull(firstRow.get("id"));
 		assertNotNull(lastRow.get("id"));
 
@@ -178,21 +197,21 @@ public class EmxImportServiceIT extends ImportServiceIT
 		assertEquals(lastRow, testAutoIdLastRow);
 	}
 
-	private void validateItEmxOneToMany()
+	private void verifyItEmxOneToMany()
 	{
-		validateFirstAndLastRows("it_emx_onetomany_author", authorFirstRow, authorLastRow);
-		validateFirstAndLastRows("it_emx_onetomany_book", bookFirstRow, bookLastRow);
-		validateFirstAndLastRows("it_emx_onetomany_node", nodeFirstRow, nodeLastRow);
+		verifyFirstAndLastRows("it_emx_onetomany_author", authorFirstRow, authorLastRow);
+		verifyFirstAndLastRows("it_emx_onetomany_book", bookFirstRow, bookLastRow);
+		verifyFirstAndLastRows("it_emx_onetomany_node", nodeFirstRow, nodeLastRow);
 	}
 
-	private void validateItEmxSelfReferences()
+	private void verifyItEmxSelfReferences()
 	{
-		validateFirstAndLastRows("it_emx_selfreferences_PersonTest", personTestFirstRow, personTestLastRow);
+		verifyFirstAndLastRows("it_emx_selfreferences_PersonTest", personTestFirstRow, personTestLastRow);
 	}
 
-	private void validateItEmxTags()
+	private void verifyItEmxTags()
 	{
-		validateFirstAndLastRows("sys_md_Tag", tagFirstRow, tagLastRow);
+		verifyFirstAndLastRows("sys_md_Tag", tagFirstRow, tagLastRow);
 
 		EntityType entityType = dataService.getEntityType("it_emx_tags_TagEntity");
 		Iterable<Tag> entityTags = entityType.getTags();
@@ -244,33 +263,54 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 		data.add(createUpdateData("it_emx_addupdate.xlsx", "it_emx_addupdate-addupdate.xlsx",
 				asList("it", "emx", "addupdate"),
-				ImmutableMap.<String, Integer>builder().put("TestAddUpdate", 3).build(), Collections.emptySet()));
+				ImmutableMap.<String, Integer>builder().put("TestAddUpdate", 3).build(), Collections.emptySet(),
+				this::verifyItEmxAddUpdate));
 
 		data.add(createUpdateData("it_emx_addAttrToAbstract.xlsx", "it_emx_addAttrToAbstract-update.xlsx",
 				asList("it", "emx", "addAttrToAbstract"),
 				ImmutableMap.<String, Integer>builder().put("Child1", 2).put("Child2", 2).build(),
-				Collections.emptySet()));
+				Collections.emptySet(), this::verifyItEmxAttrToAbstract));
 		return data.iterator();
+	}
+
+	private void verifyItEmxAddUpdate()
+	{
+		List<Entity> importedEntities = findAllAsList("it_emx_addupdate_TestAddUpdate");
+		assertEquals(entityToMap(importedEntities.get(0)), testAddUpdateFirstRow);
+		assertEquals(entityToMap(importedEntities.get(1)), testAddUpdateSecondRow);
+		assertEquals(entityToMap(getLast(importedEntities)), testAddUpdateLastRow);
+	}
+
+	private void verifyItEmxAttrToAbstract()
+	{
+		EntityType parent1 = dataService.getEntityType("it_emx_addAttrToAbstract_Parent1");
+		assertNotNull(parent1.getAttribute("newAttr"));
+		EntityType parent2 = dataService.getEntityType("it_emx_addAttrToAbstract_Parent2");
+		assertNotNull(parent2.getAttribute("newAttr"));
+		EntityType child1 = dataService.getEntityType("it_emx_addAttrToAbstract_Child1");
+		assertNotNull(child1.getAttribute("newAttr"));
+		EntityType child2 = dataService.getEntityType("it_emx_addAttrToAbstract_Child2");
+		assertNotNull(child2.getAttribute("newAttr"));
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
 	public void testDoImportAddUpdateEmxAsNonSuperuser(File file, File addUpdateFile,
-			Map<String, Integer> entityCountMap, Set<String> addedEntityTypes)
+			Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	public void testDoImportAddUpdateEmxAsSuperuser(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	private void executeAddUpdateOrUpdateTest(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
 		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(file);
@@ -285,6 +325,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 				.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
+		entityValidationMethod.run();
 	}
 
 	@DataProvider(name = "doImportEmxUpdateProvider")
@@ -293,25 +334,31 @@ public class EmxImportServiceIT extends ImportServiceIT
 		List<Object[]> data = new ArrayList<>();
 
 		data.add(createUpdateData("it_emx_update.xlsx", "it_emx_update-update.xlsx", asList("it", "emx", "update"),
-				ImmutableMap.<String, Integer>builder().put("TestUpdate", 2).build(), Collections.emptySet()));
+				ImmutableMap.<String, Integer>builder().put("TestUpdate", 2).build(), Collections.emptySet(),
+				this::verifyItEmxUpdate));
 
 		return data.iterator();
+	}
+
+	private void verifyItEmxUpdate()
+	{
+		verifyFirstAndLastRows("it_emx_update_TestUpdate", testUpdateFirstRow, testUpdateLastRow);
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
 	public void testDoImportUpdateEmxAsNonSuperuser(File file, File updateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	public void testDoImportUpdateEmxAsSuperuser(File file, File updateFile, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes)
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes);
+		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
 	private static Object[] createAddData(String fileName, List<String> packageTokens,
@@ -327,7 +374,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	private static Object[] createUpdateData(String fileName, String updateFileName, List<String> packageTokens,
-			Map<String, Integer> entityCountMap, Set<String> entityTypeNames)
+			Map<String, Integer> entityCountMap, Set<String> entityTypeNames, Runnable entityValidationMethod)
 	{
 		File addFile = getFile("/xls/" + fileName);
 		File updateFile = getFile("/xls/" + updateFileName);
@@ -336,7 +383,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
 				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
-		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames };
+		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames,
+				entityValidationMethod };
 	}
 
 	private static Map<String, Object> patientsFirstRow = newHashMap();
@@ -716,5 +764,45 @@ public class EmxImportServiceIT extends ImportServiceIT
 		tagLastRow.put("relationIRI", "http://molgenis.org/biobankconnect/instanceOf");
 		tagLastRow.put("relationLabel", "Documentation and Help");
 		tagLastRow.put("codeSystem", "EDAM");
+	}
+
+	private static Map<String, Object> testUpdateFirstRow = newHashMap();
+
+	static
+	{
+		testUpdateFirstRow.put("id", "0");
+		testUpdateFirstRow.put("label", "Label #0");
+	}
+
+	private static Map<String, Object> testUpdateLastRow = newHashMap();
+
+	static
+	{
+		testUpdateLastRow.put("id", "1");
+		testUpdateLastRow.put("label", "Label #1 – Updated");
+	}
+
+	private static Map<String, Object> testAddUpdateFirstRow = newHashMap();
+
+	static
+	{
+		testAddUpdateFirstRow.put("id", "0");
+		testAddUpdateFirstRow.put("label", "Label #0");
+	}
+
+	private static Map<String, Object> testAddUpdateSecondRow = newHashMap();
+
+	static
+	{
+		testAddUpdateSecondRow.put("id", "1");
+		testAddUpdateSecondRow.put("label", "Label #1 – Updated");
+	}
+
+	private static Map<String, Object> testAddUpdateLastRow = newHashMap();
+
+	static
+	{
+		testAddUpdateLastRow.put("id", "2");
+		testAddUpdateLastRow.put("label", "Label #2");
 	}
 }
