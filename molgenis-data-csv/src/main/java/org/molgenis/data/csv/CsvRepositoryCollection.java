@@ -36,8 +36,8 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	private final File file;
 	private EntityTypeFactory entityTypeFactory;
 	private AttributeFactory attrMetaFactory;
-	private List<String> entityNames;
-	private List<String> entityNamesLowerCase;
+	private List<String> entityTypeIds;
+	private List<String> entityTypeIdsLowerCase;
 
 	public CsvRepositoryCollection(File file) throws MolgenisInvalidFormatException, IOException
 	{
@@ -60,27 +60,27 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityIds()
+	public Iterable<String> getEntityTypeIds()
 	{
-		return entityNames;
+		return entityTypeIds;
 	}
 
 	@Override
-	public Repository<Entity> getRepository(String name)
+	public Repository<Entity> getRepository(String id)
 	{
-		if (!entityNamesLowerCase.contains(name.toLowerCase()))
+		if (!entityTypeIdsLowerCase.contains(id.toLowerCase()))
 		{
 			return null;
 		}
 
-		return new CsvRepository(file, entityTypeFactory, attrMetaFactory, name, cellProcessors);
+		return new CsvRepository(file, entityTypeFactory, attrMetaFactory, id, cellProcessors);
 	}
 
 	private void loadEntityNames()
 	{
 		String extension = StringUtils.getFilenameExtension(file.getName());
-		entityNames = Lists.newArrayList();
-		entityNamesLowerCase = Lists.newArrayList();
+		entityTypeIds = Lists.newArrayList();
+		entityTypeIdsLowerCase = Lists.newArrayList();
 
 		if (extension.equalsIgnoreCase(GenericImporterExtensions.ZIP.toString()))
 		{
@@ -95,8 +95,8 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 					if (!entry.getName().contains(MAC_ZIP) && !entry.isDirectory())
 					{
 						String name = getRepositoryName(entry.getName());
-						entityNames.add(name);
-						entityNamesLowerCase.add(name.toLowerCase());
+						entityTypeIds.add(name);
+						entityTypeIdsLowerCase.add(name.toLowerCase());
 					}
 				}
 			}
@@ -112,8 +112,8 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		else
 		{
 			String name = getRepositoryName(file.getName());
-			entityNames.add(name);
-			entityNamesLowerCase.add(name.toLowerCase());
+			entityTypeIds.add(name);
+			entityTypeIdsLowerCase.add(name.toLowerCase());
 		}
 	}
 
@@ -133,7 +133,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	{
 		return new Iterator<Repository<Entity>>()
 		{
-			Iterator<String> it = getEntityIds().iterator();
+			Iterator<String> it = getEntityTypeIds().iterator();
 
 			@Override
 			public boolean hasNext()
@@ -153,13 +153,13 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public boolean hasRepository(String name)
 	{
-		return entityNames.contains(name);
+		return entityTypeIds.contains(name);
 	}
 
 	@Override
 	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityType.getFullyQualifiedName());
+		return hasRepository(entityType.getId());
 	}
 
 	@Autowired

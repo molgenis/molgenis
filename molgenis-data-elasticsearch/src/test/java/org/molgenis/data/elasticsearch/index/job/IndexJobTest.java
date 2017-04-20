@@ -84,7 +84,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		toIndexEntity = harness.createTestRefEntities(testEntityType, 1).get(0);
 		when(dataService.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
 		when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(toIndexEntity);
-		when(dataService.getEntityTypeById("entityType")).thenReturn(testEntityType);
+		when(dataService.getEntityType("entityType")).thenReturn(testEntityType);
 	}
 
 	@Test
@@ -265,17 +265,18 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
 		String entityTypeId = "entityTypeId";
-		String entityTypeName = "entityTypeName";
+		String entityTypeLabel = "entityTypeLabel";
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("pack_"+entityTypeId);
+		when(entityType.getId()).thenReturn(entityTypeId);
+		when(entityType.getLabel()).thenReturn(entityTypeLabel);
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityTypeId(entityTypeId).setEntityTypeName(entityTypeName)
+				.setEntityTypeId(entityTypeId)
 				.setEntityId(null).setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(false);
-		when(dataService.getEntityTypeById("entityTypeName")).thenReturn(null);
+		when(dataService.getEntityType("entityTypeName")).thenReturn(null);
 
 		when(searchService.hasMapping(any(EntityType.class))).thenReturn(true);
 
@@ -289,7 +290,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Dropping entityType with name: entityTypeName and ID: entityTypeId");
+		verify(progress).progress(0, "Dropping entityType with id: entityTypeId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");

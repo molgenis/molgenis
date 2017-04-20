@@ -3,12 +3,10 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			{
 				if ((packageEntity != null) && (packageEntity.getParent() == null))
 				{
-					String matchDesc = "Matched: package '" + packageEntity.getFullyQualifiedName() + "'";
+					String matchDesc = "Matched: package '" + packageEntity.getId() + "'";
 					results.add(new PackageSearchResultItem(packageEntity, matchDesc));
 				}
 			});
@@ -67,8 +65,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				Package p = getRootPackage(entityType);
 				if (p != null)
 				{
-					String matchDesc =
-							"Matched: entity '" + entityType.getString(EntityTypeMetadata.NAME) + "'";
+					String matchDesc = "Matched: entity '" + entityType.getString(EntityTypeMetadata.ID) + "'";
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
 					if ((p != null) && !results.contains(item)) results.add(item);
 				}
@@ -84,7 +81,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		while (it.hasNext())
 		{
 			PackageSearchResultItem item = it.next();
-			if (item.getPackageFound().getFullyQualifiedName().equals("default"))
+			if (item.getPackageFound().getId().equals("default"))
 			{
 				it.remove();
 			}
@@ -100,7 +97,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 
 		if (packageEntity != null)
 		{
-			String packageName = packageEntity.getFullyQualifiedName();
+			String packageName = packageEntity.getId();
 			if (packageName != null)
 			{
 				Package p = metaDataService.getPackage(packageName);

@@ -22,7 +22,7 @@ public class StringExpressionEvaluatorTest
 	@BeforeTest
 	public void createEntity()
 	{
-		entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Source").getMock();
+		entityType = when(mock(EntityType.class).getId()).thenReturn("Source").getMock();
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("Identifier").getMock();
 
 		when(idAttr.getDataType()).thenReturn(INT);
@@ -35,7 +35,7 @@ public class StringExpressionEvaluatorTest
 		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("Long").getMock();
 		when(longAttr.getDataType()).thenReturn(LONG);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getFullyQualifiedName()).thenReturn("test");
+		when(entityType.getId()).thenReturn("test");
 		when(entityType.getAttribute("Identifier")).thenReturn(idAttr);
 		when(entityType.getAttribute("Int")).thenReturn(intAttr);
 		when(entityType.getAttribute("String")).thenReturn(stringAttr);

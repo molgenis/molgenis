@@ -81,7 +81,7 @@ public class SwaggerController extends MolgenisPluginController
 		}
 		model.addAttribute("host", host);
 		model.addAttribute("entityTypes",
-				metaDataService.getEntityTypes().filter(e -> !e.isAbstract()).map(EntityType::getFullyQualifiedName)
+				metaDataService.getEntityTypes().filter(e -> !e.isAbstract()).map(EntityType::getId)
 						.sorted().collect(Collectors.toList()));
 		model.addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
 		return "view-swagger";

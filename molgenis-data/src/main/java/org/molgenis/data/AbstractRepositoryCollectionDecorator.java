@@ -35,9 +35,9 @@ public abstract class AbstractRepositoryCollectionDecorator extends ForwardingOb
 	}
 
 	@Override
-	public Iterable<String> getEntityIds()
+	public Iterable<String> getEntityTypeIds()
 	{
-		return delegate().getEntityIds();
+		return delegate().getEntityTypeIds();
 	}
 
 	@Override

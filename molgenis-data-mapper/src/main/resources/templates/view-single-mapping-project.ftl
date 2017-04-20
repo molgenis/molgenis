@@ -177,7 +177,7 @@
                         <select name="source" id="source-entity-select" class="form-control" required="required"
                                 placeholder="Select source entity">
                         <#list entityTypes as entityType>
-                            <option value="${entityType.fullyQualifiedName?html}">${entityType.fullyQualifiedName?html}</option>
+                            <option value="${entityType.id?html}">${entityType.id?html}</option>
                         </#list>
                         </select>
                     </div>
@@ -208,7 +208,9 @@
                     <div>
                         <label>Enter a name for the integrated dataset.</label>
                         <input name="newEntityName" type="text" value="" required/>
-                        <p></p><small>The mapped entity will be placed in the same package as the target.</small></p>
+                        <p></p>
+                        <small>The mapped entity will be placed in the same package as the target.</small>
+                        </p>
                     </div>
                     <div>
                         <label>Add source attribute</label>

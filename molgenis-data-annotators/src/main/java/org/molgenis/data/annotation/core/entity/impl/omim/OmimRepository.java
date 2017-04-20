@@ -59,7 +59,7 @@ public class OmimRepository extends AbstractRepository
 	@Override
 	public EntityType getEntityType()
 	{
-		EntityType entityType = entityTypeFactory.create().setName(NAME);
+		EntityType entityType = entityTypeFactory.create(NAME);
 		entityType.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName(OMIM_PHENOTYPE_COL_NAME));
 		entityType.addAttribute(attributeFactory.create().setName(OMIM_MIM_NUMBER_COL_NAME));

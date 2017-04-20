@@ -63,7 +63,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		l2CacheRepositoryDecorator = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache,
 				transactionInformation);
 		when(decoratedRepository.getEntityType()).thenReturn(emd);
-		when(decoratedRepository.getName()).thenReturn(emd.getFullyQualifiedName());
+		when(decoratedRepository.getName()).thenReturn(emd.getId());
 	}
 
 	@Test

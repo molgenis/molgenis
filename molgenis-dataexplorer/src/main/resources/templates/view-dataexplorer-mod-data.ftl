@@ -168,10 +168,10 @@
                         }
                 )
                 ;
-                molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{
-                    'name': '${entityName?js_string}',
-                    'label': '${genomeEntities[entityName]?js_string}'
-                }<#if entityName_has_next>,</#if></#list>]);
+                molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityTypeId>{
+                    'name': '${entityTypeId?js_string}',
+                    'label': '${genomeEntities[entityTypeId]?js_string}'
+                }<#if entityTypeId_has_next>,</#if></#list>]);
                 if (molgenis.dataexplorer.data.doShowGenomeBrowser() === true) {
                     molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${plugin_settings.gb_init_highlight_region?c}});
                 }

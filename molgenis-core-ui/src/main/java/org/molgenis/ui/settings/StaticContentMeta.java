@@ -25,6 +25,7 @@ public class StaticContentMeta extends SystemEntityType
 	@Override
 	public void init()
 	{
+		setLabel("Static content");
 		addAttribute(KEY, ROLE_ID).setLabel("Key");
 		addAttribute(CONTENT).setDataType(TEXT).setLabel("Content");
 	}

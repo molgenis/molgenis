@@ -12,8 +12,6 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class NameValidator
 {
-	private static final int MAX_ATTRIBUTE_LENGTH = 30;
-
 	public static final Set<String> KEYWORDS = newHashSet();
 
 	static
@@ -60,7 +58,7 @@ public class NameValidator
 		checkForIllegalCharacters(name);
 	}
 
-	public static void validatePackageName(String name)
+	public static void validatePackageId(String name)
 	{
 		validateName(name);
 		checkForIllegalCharacters(name);
@@ -68,12 +66,6 @@ public class NameValidator
 
 	private static void validateName(String name)
 	{
-		if (name.length() > MAX_ATTRIBUTE_LENGTH)
-		{
-			throw new MolgenisDataException(
-					"Name [" + name + "] is too long: maximum length is " + MAX_ATTRIBUTE_LENGTH + " characters.");
-		}
-
 		if (Character.isDigit(name.charAt(0)))
 		{
 			throw new MolgenisDataException("Invalid name: [" + name + "] Names must start with a letter.");
@@ -82,7 +74,7 @@ public class NameValidator
 
 	private static void checkForIllegalCharacters(String name)
 	{
-		if (!name.matches("[a-zA-Z0-9#]+(-[a-z]{2,3})??$"))
+		if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$")) // FIXME too restrictive
 		{
 			throw new MolgenisDataException("Invalid characters in: [" + name
 					+ "] Only letters (a-z, A-Z), digits (0-9) and hashes (#) are allowed.");

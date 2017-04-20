@@ -57,13 +57,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		if (querySupported(q))
 		{
-			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
+			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.findOne(q);
 		}
 		else
 		{
-			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
+			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
 			return searchService.findOne(q, getEntityType());
 		}
@@ -75,13 +75,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		if (querySupported(q))
 		{
-			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
+			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.findAll(q);
 		}
 		else
 		{
-			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
+			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
 			return searchService.searchAsStream(q, getEntityType());
 		}
@@ -113,13 +113,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		// TODO check if the index is stable. If index is stable you can better check index for count results
 		if (querySupported(q))
 		{
-			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
+			LOG.debug("public long count({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					DECORATED_REPOSITORY);
 			return decoratedRepo.count(q);
 		}
 		else
 		{
-			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityType().getFullyQualifiedName(),
+			LOG.debug("public long count({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
 			return searchService.count(q, getEntityType());
 		}

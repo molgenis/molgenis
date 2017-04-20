@@ -70,8 +70,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
-		when(indexAction.setEntityTypeName("entityTypeName")).thenReturn(indexAction);
-		when(indexAction.getEntityTypeName()).thenReturn("entityTypeName");
 		when(indexAction.setEntityTypeId("entityTypeId")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn("entityTypeId");
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
@@ -79,9 +77,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn("entityTypeName");
 		when(entityType.getId()).thenReturn("entityTypeId");
-		when(entityType.getFullyQualifiedName()).thenReturn("TestEntityName");
 
 		@SuppressWarnings("unchecked")
 		Query<Attribute> query = mock(Query.class);
@@ -109,8 +105,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
-		when(indexAction.setEntityTypeName("entityTypeName")).thenReturn(indexAction);
-		when(indexAction.getEntityTypeName()).thenReturn("entityTypeName");
 		when(indexAction.setEntityTypeId("entityTypeId")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn("entityTypeId");
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
@@ -118,9 +112,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn("entityTypeName");
 		when(entityType.getId()).thenReturn("entityTypeId");
-		when(entityType.getFullyQualifiedName()).thenReturn("TestEntityName");
 		indexActionRegisterServiceImpl.register(entityType, "123");
 
 		verifyZeroInteractions(dataService);
@@ -141,8 +133,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
-		when(indexAction.setEntityTypeName("entityTypeName")).thenReturn(indexAction);
-		when(indexAction.getEntityTypeName()).thenReturn("entityTypeName");
 		when(indexAction.setEntityTypeId("entityTypeId")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn("entityTypeId");
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
@@ -151,9 +141,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn("entityTypeName");
 		when(entityType.getId()).thenReturn("entityTypeId");
-		when(entityType.getFullyQualifiedName()).thenReturn("ABC");
 		indexActionRegisterServiceImpl.addExcludedEntity("ABC");
 
 		indexActionRegisterServiceImpl.register(entityType, "123");
@@ -165,7 +153,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	{
 		String entityTypeId = "myEntityTypeId";
 		String entityTypeName = "myEntityTypeName";
-		String entityName = "org_test_Test";
 		String entityIdString = "123";
 		Integer entityIdInteger = Integer.valueOf("123");
 
@@ -173,8 +160,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
-		when(indexAction.setEntityTypeName(entityTypeName)).thenReturn(indexAction);
-		when(indexAction.getEntityTypeName()).thenReturn(entityTypeName);
 		when(indexAction.setEntityTypeId(entityTypeId)).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn(entityTypeId);
 		when(indexAction.setEntityId(entityIdString)).thenReturn(indexAction);
@@ -183,9 +168,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(entityTypeName);
 		when(entityType.getId()).thenReturn(entityTypeId);
-		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		indexActionRegisterServiceImpl.register(entityType, entityIdString);
 		EntityKey entityKey = EntityKey.create(entityTypeId, entityIdInteger);
 		assertTrue(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
@@ -196,7 +179,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	{
 		String entityTypeId = "myEntityTypeId";
 		String entityTypeName = "myEntityTypeName";
-		String entityName = "org_test_Test";
 		String entityId1 = "123";
 		String entityId2 = "false";
 
@@ -204,8 +186,6 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
-		when(indexAction.setEntityTypeName(entityTypeName)).thenReturn(indexAction);
-		when(indexAction.getEntityTypeName()).thenReturn(entityTypeName);
 		when(indexAction.setEntityTypeId(entityTypeId)).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn(entityTypeName);
 		when(indexAction.setEntityId(entityId1)).thenReturn(indexAction);
@@ -214,11 +194,9 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getName()).thenReturn(entityTypeName);
 		when(entityType.getId()).thenReturn(entityTypeId);
-		when(entityType.getFullyQualifiedName()).thenReturn(entityName);
 		indexActionRegisterServiceImpl.register(entityType, entityId1);
-		EntityKey entityKey = EntityKey.create(entityName, entityId2);
+		EntityKey entityKey = EntityKey.create(entityTypeId, entityId2);
 		assertFalse(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
 	}
 }

@@ -24,7 +24,7 @@ public class DataRequest
 	}
 
 	@NotNull
-	private String entityName;
+	private String entityTypeId;
 	@NotNull
 	private QueryImpl<Entity> query;
 	@NotNull
@@ -38,12 +38,12 @@ public class DataRequest
 
 	public String getEntityName()
 	{
-		return entityName;
+		return entityTypeId;
 	}
 
-	public void setEntityName(String entityName)
+	public void setEntityName(String entityTypeId)
 	{
-		this.entityName = entityName;
+		this.entityTypeId = entityTypeId;
 	}
 
 	public QueryImpl<Entity> getQuery()

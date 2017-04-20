@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A {@link org.springframework.context.MessageSource} that allows you to look up messages in the LocalizationService.
- *
+ * <p>
  * Contains fallback logic that tries to fill in the best available value for a required Locale.
  * Marks missing values with # characters.
  * <p>

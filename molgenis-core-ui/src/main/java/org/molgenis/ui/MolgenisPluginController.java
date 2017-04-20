@@ -72,13 +72,13 @@ public abstract class MolgenisPluginController
 	 */
 	public Entity getPluginSettings()
 	{
-		String entityName = DefaultSettingsEntityType.getSettingsEntityName(getId());
-		return RunAsSystemProxy.runAsSystem(() -> getPluginSettings(entityName));
+		String entityTypeId = DefaultSettingsEntityType.getSettingsEntityName(getId());
+		return RunAsSystemProxy.runAsSystem(() -> getPluginSettings(entityTypeId));
 	}
 
-	private Entity getPluginSettings(String entityName)
+	private Entity getPluginSettings(String entityTypeId)
 	{
-		return dataService.hasRepository(entityName) ? dataService.findOneById(entityName, getId()) : null;
+		return dataService.hasRepository(entityTypeId) ? dataService.findOneById(entityTypeId, getId()) : null;
 	}
 
 	@PostConstruct

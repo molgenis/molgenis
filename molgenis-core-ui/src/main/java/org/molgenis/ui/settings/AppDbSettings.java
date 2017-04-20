@@ -118,7 +118,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 			addAttribute(AGGREGATE_THRESHOLD).setDataType(INT).setNillable(true).setLabel("Aggregate threshold")
 					.setDescription(
-							"Aggregate value counts below this threshold are reported as the threshold. (e.g. a count of 100 is reported as <= 10)");
+							"Aggregate value counts below this threshold are reported as the threshold. (e.g. a count of 1 is reported as <= 10)");
 
 			addAttribute(CUSTOM_JAVASCRIPT).setDataType(TEXT).setNillable(true).setLabel("Custom javascript headers")
 					.setDescription(

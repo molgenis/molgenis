@@ -95,8 +95,9 @@ public class DataConverter
 		}
 		catch (ConversionFailedException cfe)
 		{
-			throw new MolgenisDataException(String.format("Conversion failure in entity type [%s] attribute [%s]; %s",
-					attr.getEntity().getFullyQualifiedName(), attr.getName(), cfe.getMessage()));
+			throw new MolgenisDataException(
+					String.format("Conversion failure in entity type [%s] attribute [%s]; %s", attr.getEntity().getId(),
+							attr.getName(), cfe.getMessage()));
 		}
 	}
 

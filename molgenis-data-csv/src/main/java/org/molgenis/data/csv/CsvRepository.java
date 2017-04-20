@@ -71,7 +71,7 @@ public class CsvRepository extends AbstractRepository
 	{
 		if (entityType == null)
 		{
-			entityType = entityTypeFactory.create().setName(sheetName);
+			entityType = entityTypeFactory.create(sheetName);
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{

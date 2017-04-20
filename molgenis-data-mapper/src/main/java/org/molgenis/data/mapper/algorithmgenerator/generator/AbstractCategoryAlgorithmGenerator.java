@@ -34,7 +34,7 @@ abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 
 		if (refEntity != null)
 		{
-			dataService.findAll(refEntity.getFullyQualifiedName()).forEach(entity ->
+			dataService.findAll(refEntity.getId()).forEach(entity ->
 			{
 				String code = DataConverter.toString(entity.get(refEntity.getIdAttribute().getName()));
 				String label = DataConverter.toString(entity.get(refEntity.getLabelAttribute().getName()));

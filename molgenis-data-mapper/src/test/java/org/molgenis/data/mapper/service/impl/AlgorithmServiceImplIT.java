@@ -346,12 +346,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testCreateAttributeMappingIfOnlyOneMatch()
 	{
-		EntityType targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityType.addAttribute(targetAttribute);
 
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		Attribute sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDescription("height");
 		sourceEntityType.addAttribute(sourceAttribute);
@@ -390,12 +390,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testWhenSourceDoesNotMatchThenNoMappingGetsCreated()
 	{
-		EntityType targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityType.addAttribute(targetAttribute);
 
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		Attribute sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDescription("weight");
 		sourceEntityType.addAttribute(sourceAttribute);
@@ -429,12 +429,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
-		EntityType targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityType.addAttribute(targetAttribute);
 
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		Attribute sourceAttribute1 = attrMetaFactory.create().setName("sourceHeight1");
 		sourceAttribute1.setDescription("height");
 		Attribute sourceAttribute2 = attrMetaFactory.create().setName("sourceHeight2");

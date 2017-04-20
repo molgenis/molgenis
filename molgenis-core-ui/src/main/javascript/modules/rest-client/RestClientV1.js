@@ -105,8 +105,8 @@ export default class RestClient {
         return href.substring(href.lastIndexOf('/') + 1);
     };
 
-    getHref(entityName, primaryKey) {
-        return '/api/v1/' + entityName + (primaryKey ? '/' + primaryKey : '');
+    getHref(entityTypeId, primaryKey) {
+        return '/api/v1/' + entityTypeId + (primaryKey ? '/' + primaryKey : '');
     };
 
     remove(href, callback) {

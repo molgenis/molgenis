@@ -31,17 +31,17 @@ public class TabixVcfRepository extends VcfRepository
 	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfRepository.class);
 	private final TabixReader tabixReader;
 
-	public TabixVcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
+	public TabixVcfRepository(File file, String entityTypeId, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory) throws IOException
 	{
-		super(file, entityName, vcfAttributes, entityTypeFactory, attrMetaFactory);
+		super(file, entityTypeId, vcfAttributes, entityTypeFactory, attrMetaFactory);
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
-	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName,
+	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityTypeId,
 			VcfAttributes vcfAttributes, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
 	{
-		super(readerFactory, entityName, vcfAttributes, entityTypeFactory, attrMetaFactory);
+		super(readerFactory, entityTypeId, vcfAttributes, entityTypeFactory, attrMetaFactory);
 		this.tabixReader = tabixReader;
 	}
 

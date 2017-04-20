@@ -107,7 +107,7 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 	{
 		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
 		EntityType entityType = spreadsheetRepository.getEntityType();
-		assertEquals(entityType.getFullyQualifiedName(), "name");
+		assertEquals(entityType.getId(), "name");
 		Iterator<Attribute> it = entityType.getAttributes().iterator();
 		assertEquals(it.next().getName(), "col1");
 		assertTrue(it.hasNext());

@@ -116,17 +116,17 @@ public class SystemEntityTypePersister
 		{
 			return false;
 		}
-		if (package_.getFullyQualifiedName().equals(PACKAGE_SYSTEM))
+		if (package_.getId().equals(PACKAGE_SYSTEM))
 		{
 			return true;
 		}
 		Package rootPackage = package_.getRootPackage();
-		return rootPackage != null && rootPackage.getFullyQualifiedName().equals(PACKAGE_SYSTEM);
+		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
 	}
 
 	private boolean isNotExists(EntityType entityType)
 	{
-		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getFullyQualifiedName());
+		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getId());
 	}
 
 	private boolean isNotExists(Package package_)
@@ -137,11 +137,11 @@ public class SystemEntityTypePersister
 	private void injectExistingPackageIdentifiers(List<Package> systemPackages)
 	{
 		Map<String, Package> existingPackageMap = dataService.findAll(PACKAGE, Package.class)
-				.collect(toMap(Package::getFullyQualifiedName, pack -> pack));
+				.collect(toMap(Package::getId, pack -> pack));
 
 		systemPackages.forEach(pack ->
 		{
-			Package existingPackage = existingPackageMap.get(pack.getFullyQualifiedName());
+			Package existingPackage = existingPackageMap.get(pack.getId());
 
 			if (existingPackage != null)
 			{
@@ -158,11 +158,11 @@ public class SystemEntityTypePersister
 	private void injectExistingEntityTypeAttributeIdentifiers(List<EntityType> entityTypes)
 	{
 		Map<String, EntityType> existingEntityTypeMap = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-				.collect(toMap(EntityType::getFullyQualifiedName, entityType -> entityType));
+				.collect(toMap(EntityType::getId, entityType -> entityType));
 
 		entityTypes.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 
 			if (existingEntityType != null)
 			{

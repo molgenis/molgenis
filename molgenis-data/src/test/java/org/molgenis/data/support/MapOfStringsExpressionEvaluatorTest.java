@@ -33,7 +33,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
 
 	private EntityType createDynamicLocationMetaData()
 	{
-		return entityTypeFactory.create().setName("Location")
+		return entityTypeFactory.create("Location")
 				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
 				.addAttribute(attributeFactory.create().setName("Chromosome").setDataType(STRING))
 				.addAttribute(attributeFactory.create().setName("Position").setDataType(STRING));
@@ -41,7 +41,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
 
 	private EntityType createDynamicSourceMetaData()
 	{
-		return entityTypeFactory.create().setName("Source")
+		return entityTypeFactory.create("Source")
 				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
 				.addAttribute(attributeFactory.create().setName("Int").setDataType(INT))
 				.addAttribute(attributeFactory.create().setName("String").setDataType(STRING))

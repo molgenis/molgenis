@@ -20,7 +20,7 @@ public class MapperPackage extends SystemPackage
 	@Autowired
 	public MapperPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_MAPPER, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

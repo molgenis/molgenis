@@ -88,14 +88,14 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		annotatedEntityType =  entityTypeFactory.create().setName("test");
-		metaDataCanAnnotate =  entityTypeFactory.create().setName("test");
-		metaDataCantAnnotate =  entityTypeFactory.create().setName("test");
-		geneMeta =  entityTypeFactory.create().setName(GENES);
+		annotatedEntityType = entityTypeFactory.create("test");
+		metaDataCanAnnotate = entityTypeFactory.create("test");
+		metaDataCantAnnotate = entityTypeFactory.create("test");
+		geneMeta = entityTypeFactory.create(GENES);
 
-		effectMeta =  entityTypeFactory.create().setName(EFFECT);
-		vcfMeta =  entityTypeFactory.create().setName("vcfMeta");
-		sampleEntityType =  entityTypeFactory.create().setName("vcfSampleEntity");
+		effectMeta = entityTypeFactory.create(EFFECT);
+		vcfMeta = entityTypeFactory.create("vcfMeta");
+		sampleEntityType = entityTypeFactory.create("vcfSampleEntity");
 		attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING).setIdAttribute(true);
 		attributePos = attributeFactory.create().setName(POS).setDataType(INT);
 		attributeRef = attributeFactory.create().setName(REF).setDataType(STRING);
@@ -226,14 +226,14 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 		String idAttrName = "idAttr";
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		EntityType sampleEntityType =  entityTypeFactory.create().setName("vcfSampleEntity");
+		EntityType sampleEntityType = entityTypeFactory.create("vcfSampleEntity");
 		Attribute sampleId = attributeFactory.create().setName(sampleIdAttrName).setIdAttribute(true);
 		sampleEntityType.addAttribute(sampleId);
 		sampleEntityType.addAttribute(attributeFactory.create().setName(formatDpAttrName));
 		sampleEntityType.addAttribute(attributeFactory.create().setName(formatEcAttrName));
 		sampleEntityType.addAttribute(attributeFactory.create().setName(formatGtAttrName));
 
-		EntityType entityType =  entityTypeFactory.create().setName("vcfEntity");
+		EntityType entityType = entityTypeFactory.create("vcfEntity");
 		Attribute id = attributeFactory.create().setName(idAttrName).setIdAttribute(true);
 		entityType.addAttribute(id);
 		entityType.addAttribute(vcfAttributes.getChromAttribute());

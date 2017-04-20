@@ -45,7 +45,7 @@ public abstract class ExplainedAttribute
 		map.put(AttributeMetadata.IS_UNIQUE, attribute.isUnique());
 		if (attribute.getRefEntity() != null)
 		{
-			map.put(AttributeMetadata.REF_ENTITY_TYPE, attribute.getRefEntity().getFullyQualifiedName());
+			map.put(AttributeMetadata.REF_ENTITY_TYPE, attribute.getRefEntity().getId());
 		}
 		return map;
 	}

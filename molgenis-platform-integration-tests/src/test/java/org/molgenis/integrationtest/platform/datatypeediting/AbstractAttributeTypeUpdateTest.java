@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
@@ -24,9 +24,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
@@ -60,9 +57,6 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	@Autowired
 	MetaDataService metaDataService;
 
-	@Autowired
-	IdentifierLookupService identifierLookupService;
-
 	private EntityType entityType;
 	private String mainId = "id";
 	private String mainAttribute = "mainAttribute";
@@ -71,41 +65,28 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	private String refId = "id";
 	private String refLabel = "label";
 
-	List<GrantedAuthority> setAuthorities(IdentifierLookupService identifierLookupService)
+	List<GrantedAuthority> setAuthorities()
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(ENTITY_TYPE_META_DATA)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(ENTITY_TYPE_META_DATA)));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
 
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(ATTRIBUTE_META_DATA)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(ATTRIBUTE_META_DATA)));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + AttributeMetadata.ATTRIBUTE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + AttributeMetadata.ATTRIBUTE_META_DATA));
 
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(PackageMetadata.PACKAGE)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(PackageMetadata.PACKAGE)));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + PackageMetadata.PACKAGE));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PackageMetadata.PACKAGE));
 
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId("sys_sec_UserAuthority")));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + UserAuthorityMetaData.USER_AUTHORITY));
 
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITEMETA_" + identifierLookupService.getEntityTypeId(MAIN_ENTITY)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(MAIN_ENTITY)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(MAIN_ENTITY)));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + MAIN_ENTITY));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + MAIN_ENTITY));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + MAIN_ENTITY));
 
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITEMETA_" + identifierLookupService.getEntityTypeId(REFERENCE_ENTITY)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_WRITE_" + identifierLookupService.getEntityTypeId(REFERENCE_ENTITY)));
-		authorities.add(new SimpleGrantedAuthority(
-				"ROLE_ENTITY_READ_" + identifierLookupService.getEntityTypeId(REFERENCE_ENTITY)));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + REFERENCE_ENTITY));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + REFERENCE_ENTITY));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + REFERENCE_ENTITY));
 
 		return authorities;
 	}
@@ -118,12 +99,12 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	 */
 	void setup(AttributeType type, AttributeType refIdType)
 	{
-		entityType = entityTypeFactory.create("1");
-		entityType.setName(MAIN_ENTITY);
+		entityType = entityTypeFactory.create(MAIN_ENTITY);
+		entityType.setLabel(MAIN_ENTITY);
 		entityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
-		referenceEntityType = entityTypeFactory.create("2");
-		referenceEntityType.setName(REFERENCE_ENTITY);
+		referenceEntityType = entityTypeFactory.create(REFERENCE_ENTITY);
+		referenceEntityType.setLabel(REFERENCE_ENTITY);
 		referenceEntityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		Attribute mainIdAttribute = attributeFactory.create().setName(mainId).setIdAttribute(true);
@@ -177,7 +158,7 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 			metaDataService.upsertEntityTypes(newArrayList(entityType, referenceEntityType));
 			dataService.add(REFERENCE_ENTITY, Stream.of(refEntity_1, refEntity_2, refEntity_3));
 		});
-		List<GrantedAuthority> authorities = setAuthorities(identifierLookupService);
+		List<GrantedAuthority> authorities = setAuthorities();
 		getContext().setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
 	}
 
