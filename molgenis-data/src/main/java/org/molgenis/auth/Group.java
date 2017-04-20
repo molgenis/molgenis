@@ -11,7 +11,6 @@ public class Group extends StaticEntity
 	public Group(Entity entity)
 	{
 		super(entity);
-		setDefaultValues();
 	}
 
 	public Group(EntityType entityType)
