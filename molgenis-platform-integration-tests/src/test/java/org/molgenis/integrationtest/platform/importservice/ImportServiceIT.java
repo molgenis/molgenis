@@ -117,27 +117,17 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		}
 	}
 
-	void validateFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
+	void verifyFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
 			Map<String, Object> expectedLastRow)
 	{
 		List<Entity> importedEntities = findAllAsList(entityName);
-		assertEquals(firstRowAsMap(importedEntities), expectedFirstRow);
-		assertEquals(lastRowAsMap(importedEntities), expectedLastRow);
+		assertEquals(entityToMap(importedEntities.get(0)), expectedFirstRow);
+		assertEquals(entityToMap(getLast(importedEntities)), expectedLastRow);
 	}
 
 	List<Entity> findAllAsList(String entityName)
 	{
 		return dataService.findAll(entityName).collect(Collectors.toList());
-	}
-
-	static Map<String, Object> firstRowAsMap(List<Entity> typeTestEntities)
-	{
-		return entityToMap(typeTestEntities.get(0));
-	}
-
-	static Map<String, Object> lastRowAsMap(List<Entity> typeTestEntities)
-	{
-		return entityToMap(getLast(typeTestEntities));
 	}
 
 	static Map<String, Object> entityToMap(Entity entity)
