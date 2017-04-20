@@ -10,8 +10,8 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.security.permission.PermissionSystemService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,15 +29,13 @@ import static org.molgenis.util.EntityUtils.asStream;
 @Service
 public class OntologyImportService implements ImportService
 {
-	private final DataService dataService;
-	private final PermissionSystemService permissionSystemService;
+	private static final Logger LOG = LoggerFactory.getLogger(OntologyImportService.class);
 
-	@Autowired
-	public OntologyImportService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
-			DataService dataService, PermissionSystemService permissionSystemService)
+	private final DataService dataService;
+
+	public OntologyImportService(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
@@ -51,18 +49,18 @@ public class OntologyImportService implements ImportService
 		}
 
 		EntityImportReport report = new EntityImportReport();
-		for (String entityTypeId : source.getEntityIds())
+
+		for (String entityTypeId : source.getEntityTypeIds())
 		{
 			try (Repository<Entity> sourceRepository = source.getRepository(entityTypeId))
 			{
 				Repository<Entity> targetRepository = dataService.getRepository(entityTypeId);
 				Integer count = targetRepository.add(asStream(sourceRepository));
 				report.addEntityCount(entityTypeId, count);
-
-				permissionSystemService.giveUserWriteMetaPermissions(targetRepository.getEntityType());
 			}
 			catch (IOException e)
 			{
+				LOG.error("", e);
 				throw new MolgenisDataException(e);
 			}
 		}
@@ -70,9 +68,7 @@ public class OntologyImportService implements ImportService
 	}
 
 	@Override
-	/**
-	 * Ontology validation
-	 */ public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
+	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
