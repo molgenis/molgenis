@@ -47,5 +47,4 @@
     </div>
 </#list>
 </div>
-<div id="form-modal-container"></div>
 <@footer/>
