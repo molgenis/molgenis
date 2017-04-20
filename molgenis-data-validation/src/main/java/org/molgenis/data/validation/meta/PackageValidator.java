@@ -39,7 +39,7 @@ public class PackageValidator
 	{
 		if (MetaUtils.isSystemPackage(package_) && !systemPackageRegistry.containsPackage(package_))
 		{
-			LOG.error("validatePackageAllowed, the system package registry does not contain package: " + package_.getFullyQualifiedName());
+			LOG.error("validatePackageAllowed, the system package registry does not contain package with id {} and label {}", package_.getId(), package_.getLabel());
 			throw new MolgenisValidationException(new ConstraintViolation("Modifying system packages is not allowed"));
 		}
 	}
