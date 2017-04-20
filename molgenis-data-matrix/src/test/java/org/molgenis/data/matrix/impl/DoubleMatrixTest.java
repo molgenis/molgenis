@@ -13,7 +13,7 @@ public class DoubleMatrixTest {
 
     @BeforeTest
     public void setup() {
-        doubleMatrix = new DoubleMatrix(ResourceUtils.getFile(getClass(), "/testMatrix.txt"), '\t');
+        doubleMatrix = new DoubleMatrix(ResourceUtils.getFile(getClass(), "/testmatrix.txt"), '\t');
     }
 
     @Test

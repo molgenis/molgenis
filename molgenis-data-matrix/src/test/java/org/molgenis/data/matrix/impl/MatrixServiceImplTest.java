@@ -25,7 +25,7 @@ public class MatrixServiceImplTest {
     private void setUp() {
         Entity entity = mock(Entity.class);
 
-        when(entity.getString(MatrixMetadata.FILE_LOCATION)).thenReturn(ResourceUtils.getFile(getClass(), "/testMatrix.txt").getAbsolutePath());
+        when(entity.getString(MatrixMetadata.FILE_LOCATION)).thenReturn(ResourceUtils.getFile(getClass(), "/testmatrix.txt").getAbsolutePath());
         when(entity.getString(MatrixMetadata.SEPERATOR)).thenReturn("TAB");
 
         DataService dataService = mock(DataService.class);
