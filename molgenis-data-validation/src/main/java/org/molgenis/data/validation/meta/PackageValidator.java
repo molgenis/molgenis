@@ -38,15 +38,10 @@ public class PackageValidator
 
 	private void validatePackageAllowed(Package package_)
 	{
-		if (MetaUtils.isSystemPackage(package_))
+		if (MetaUtils.isSystemPackage(package_) && !systemPackageRegistry.containsPackage(package_))
 		{
-			LOG.info("validatePackageAllowed package: " + package_.getFullyQualifiedName() + " is a system package");
-
-			if(!systemPackageRegistry.containsPackage(package_))
-			{
-				LOG.error("validatePackageAllowed, the system package registry does not contain package: " + package_.getFullyQualifiedName());
-				throw new MolgenisValidationException(new ConstraintViolation("Modifying system packages is not allowed"));
-			}
+			LOG.error("validatePackageAllowed, the system package registry does not contain package: " + package_.getFullyQualifiedName());
+			throw new MolgenisValidationException(new ConstraintViolation("Modifying system packages is not allowed"));
 		}
 	}
 
