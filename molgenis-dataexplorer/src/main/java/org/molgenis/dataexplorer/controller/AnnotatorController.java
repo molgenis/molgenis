@@ -82,30 +82,30 @@ public class AnnotatorController
 	 * option is ticked by the user.
 	 *
 	 * @param annotatorNames
-	 * @param entityName
+	 * @param entityTypeId
 	 * @return repositoryName
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
 	public String annotateData(HttpServletRequest request,
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
-			@RequestParam("dataset-identifier") String entityName)
+			@RequestParam("dataset-identifier") String entityTypeId)
 	{
-		Repository<Entity> repository = dataService.getRepository(entityName);
+		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 		if (annotatorNames != null && repository != null)
 		{
-			scheduleAnnotatorRun(repository.getEntityType().getFullyQualifiedName(), annotatorNames);
+			scheduleAnnotatorRun(repository.getEntityType().getId(), annotatorNames);
 		}
-		return entityName;
+		return entityTypeId;
 	}
 
-	public String scheduleAnnotatorRun(String entityName, String[] annotatorNames)
+	public String scheduleAnnotatorRun(String entityTypeId, String[] annotatorNames)
 	{
 		AnnotationJobExecution annotationJobExecution = annotationJobExecutionFactory.create();
 		annotationJobExecution.setUser(userAccountService.getCurrentUser());
-		annotationJobExecution.setTargetName(entityName);
+		annotationJobExecution.setTargetName(entityTypeId);
 		annotationJobExecution.setAnnotators(String.join(",", (CharSequence[]) annotatorNames));
-		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + entityName);
+		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + entityTypeId);
 		AnnotationJob job = annotationJobFactory.createJob(annotationJobExecution);
 		taskExecutor.submit(job);
 		return annotationJobExecution.getIdentifier();

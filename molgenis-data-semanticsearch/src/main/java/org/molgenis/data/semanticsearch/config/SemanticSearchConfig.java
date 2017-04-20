@@ -3,7 +3,6 @@ package org.molgenis.data.semanticsearch.config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetadata;
@@ -56,9 +55,6 @@ public class SemanticSearchConfig
 	@Autowired
 	DocumentIdGenerator documentIdGenerator;
 
-	@Autowired
-	IdentifierLookupService identifierLookupService;
-
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
@@ -68,8 +64,7 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetadata,
-				identifierLookupService);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetadata);
 	}
 
 	@Bean

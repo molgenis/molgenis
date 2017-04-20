@@ -93,11 +93,11 @@ public class OntologyImportService implements ImportService
 
 		if (ontologyExists) throw new MolgenisDataException("The ontology you are trying to import already exists");
 
-		Iterator<String> it = source.getEntityIds().iterator();
+		Iterator<String> it = source.getEntityTypeIds().iterator();
 		while (it.hasNext())
 		{
-			String entityName = it.next();
-			report.getSheetsImportable().put(entityName, !ontologyExists);
+			String entityTypeId = it.next();
+			report.getSheetsImportable().put(entityTypeId, !ontologyExists);
 		}
 		return report;
 	}

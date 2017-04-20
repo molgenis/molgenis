@@ -11,8 +11,8 @@ import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.emx.EmxImportService;
 import org.molgenis.data.importer.emx.EmxMetaDataParser;
 import org.molgenis.data.importer.emx.ImportWriter;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
@@ -78,7 +78,7 @@ public class ImporterConfiguration
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	@Autowired
-	private IdentifierLookupService identifierLookupService;
+	private DefaultPackage defaultPackage;
 
 	@Bean
 	public ImportService emxImportService()
@@ -90,7 +90,7 @@ public class ImporterConfiguration
 	public ImportWriter importWriter()
 	{
 		return new ImportWriter(dataService, permissionSystemService, molgenisPermissionService, entityManager,
-				entityTypeDependencyResolver, identifierLookupService);
+				entityTypeDependencyResolver);
 	}
 
 	@Bean
@@ -98,6 +98,6 @@ public class ImporterConfiguration
 	{
 		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
 				languageFactory, l10nStringFactory, entityTypeValidator, attributeValidator, tagValidator,
-				entityTypeDependencyResolver, identifierLookupService);
+				entityTypeDependencyResolver, defaultPackage);
 	}
 }

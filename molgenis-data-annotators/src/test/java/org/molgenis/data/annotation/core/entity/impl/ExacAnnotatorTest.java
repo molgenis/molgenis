@@ -65,7 +65,7 @@ public class ExacAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotate()
 	{
-		EntityType emdIn = entityTypeFactory.create().setName("exac");
+		EntityType emdIn = entityTypeFactory.create("exac");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());

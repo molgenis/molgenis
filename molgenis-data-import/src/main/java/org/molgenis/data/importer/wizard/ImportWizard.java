@@ -30,7 +30,7 @@ public class ImportWizard extends Wizard
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
 	private Iterable<Group> groups;
-	private List<String> entityNames;
+	private List<String> entityTypeIds;
 	private boolean allowPermissions;
 	private List<String> packages;
 	private List<String> entitiesInDefaultPackage;
@@ -166,14 +166,14 @@ public class ImportWizard extends Wizard
 		return groups;
 	}
 
-	public void setImportedEntities(List<String> entityNames)
+	public void setImportedEntities(List<String> entityTypeIds)
 	{
-		this.entityNames = entityNames;
+		this.entityTypeIds = entityTypeIds;
 	}
 
 	public List<String> getImportedEntities()
 	{
-		return this.entityNames;
+		return this.entityTypeIds;
 	}
 
 	public List<String> getPackages()

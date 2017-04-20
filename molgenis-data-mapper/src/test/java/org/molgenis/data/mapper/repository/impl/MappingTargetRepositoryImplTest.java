@@ -88,8 +88,8 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 	public void beforeMethod()
 	{
 		// POJOs
-		EntityType sourceEntityType = entityTypeFactory.create("source").setName("source");
-		targetEntityType = entityTypeFactory.create("target").setName("target");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		targetEntityType = entityTypeFactory.create("target");
 		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
 		targetEntityType.addAttribute(targetAttribute);
 		entityMappings = singletonList(
@@ -192,7 +192,10 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		DefaultPackage defaultPackage(){ return mock(DefaultPackage.class); }
+		DefaultPackage defaultPackage()
+		{
+			return mock(DefaultPackage.class);
+		}
 
 	}
 }

@@ -8,10 +8,10 @@
      *
      * @param rsql
      * @param restApi
-     * @param entityName
+     * @param entityTypeId
      */
-    self.createFiltersFromRsql = function createFilters(rsql, restApi, entityName) {
-        fetchModelParts(rsql, entityName, restApi).then(function (modelParts) {
+    self.createFiltersFromRsql = function createFilters(rsql, restApi, entityTypeId) {
+        fetchModelParts(rsql, entityTypeId, restApi).then(function (modelParts) {
             var filters = []
             $.each(Object.keys(modelParts), function () {
                 var modelPart = modelParts[this]
@@ -144,11 +144,11 @@
      * Uses the RSQL to create model parts which can be used to create complex and simple filters
      *
      * @param rsql
-     * @param entityName
+     * @param entityTypeId
      * @param restApi
      * @returns {Promise.modelParts}
      */
-    function fetchModelParts(rsql, entityName, restApi) {
+    function fetchModelParts(rsql, entityTypeId, restApi) {
         var tree = molgenis.rsql.parser.parse(rsql)
         var constraintsBySelector = molgenis.rsql.transformer.groupBySelector(tree)
 
@@ -165,7 +165,7 @@
                 var referringAttributeName = attributeName.slice(0, seperatorPosition)
                 var referredAttributeName = attributeName.slice(seperatorPosition + 1, attributeName.length)
 
-                promises.push(getAttribute(entityName, referringAttributeName, restApi).then(function (attribute) {
+                promises.push(getAttribute(entityTypeId, referringAttributeName, restApi).then(function (attribute) {
                     var referedEntityName = attribute.refEntity.name
                     return getAttribute(referedEntityName, referredAttributeName, restApi).then(function (referredAttribute) {
                         var model = molgenis.rsql.transformer.transformModelPart(referredAttribute.fieldType, [], constraint)
@@ -189,7 +189,7 @@
                 }))
             } else {
                 // Retrieve V1 metadata for every attribute so we support legacy javascript
-                promises.push(getAttribute(entityName, attributeName, restApi).then(function (attribute) {
+                promises.push(getAttribute(entityTypeId, attributeName, restApi).then(function (attribute) {
 
                     // Only retrieve labels if the attribute has a refEntity
                     if (attribute.refEntity) {
@@ -224,8 +224,8 @@
     /**
      * Fetches metadata for an attribute from the V1 RestClient
      */
-    function getAttribute(entityName, attributeName, restApi) {
-        return restApi.getAsync('/api/v1/' + entityName + '/meta/' + attributeName + '?expand=refEntity')
+    function getAttribute(entityTypeId, attributeName, restApi) {
+        return restApi.getAsync('/api/v1/' + entityTypeId + '/meta/' + attributeName + '?expand=refEntity')
     }
 
     /**

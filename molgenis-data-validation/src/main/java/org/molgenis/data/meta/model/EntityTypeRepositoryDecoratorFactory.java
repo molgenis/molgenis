@@ -4,7 +4,6 @@ import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
@@ -23,18 +22,16 @@ public class EntityTypeRepositoryDecoratorFactory
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final MolgenisPermissionService permissionService;
-	private final IdentifierLookupService identifierLookupService;
 	private final EntityTypeValidator entityTypeValidator;
 
 	public EntityTypeRepositoryDecoratorFactory(DataService dataService, EntityTypeMetadata entityTypeMetadata,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
-			IdentifierLookupService identifierLookupService, EntityTypeValidator entityTypeValidator)
+			EntityTypeValidator entityTypeValidator)
 	{
 		super(entityTypeMetadata);
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
-		this.identifierLookupService = requireNonNull(identifierLookupService);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 	}
 
@@ -42,7 +39,7 @@ public class EntityTypeRepositoryDecoratorFactory
 	public Repository<EntityType> createDecoratedRepository(Repository<EntityType> repository)
 	{
 		repository = new EntityTypeRepositoryDecorator(repository, dataService, systemEntityTypeRegistry,
-				permissionService, identifierLookupService);
+				permissionService);
 		return new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
 	}
 }

@@ -43,7 +43,7 @@ public class PostgreSqlQueryUtilsTest
 	@Test(dataProvider = "getPersistedAttributesProvider")
 	public void getPersistedAttributes(Attribute attr, List<Attribute> persistedAttrs)
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
 		assertEquals(PostgreSqlQueryUtils.getPersistedAttributes(entityType).collect(toList()), persistedAttrs);
 	}
@@ -51,7 +51,7 @@ public class PostgreSqlQueryUtilsTest
 	@Test
 	public void getJunctionTableAttributes() throws Exception
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute stringAttr = mock(Attribute.class);
 		when(stringAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = mock(Attribute.class);
@@ -76,7 +76,7 @@ public class PostgreSqlQueryUtilsTest
 	@Test
 	public void getTableAttributes() throws Exception
 	{
-		EntityType entityType = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute stringAttr = mock(Attribute.class);
 		when(stringAttr.getDataType()).thenReturn(STRING);
 		Attribute mrefAttr = mock(Attribute.class);

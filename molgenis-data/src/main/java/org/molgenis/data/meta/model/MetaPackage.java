@@ -19,7 +19,7 @@ public class MetaPackage extends SystemPackage
 	@Autowired
 	public MetaPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_META, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

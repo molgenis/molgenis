@@ -53,9 +53,9 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public Iterable<String> getEntityIds()
+	public Iterable<String> getEntityTypeIds()
 	{
-		return decoratedRepositoryCollection.getEntityIds();
+		return decoratedRepositoryCollection.getEntityTypeIds();
 	}
 
 	@Override

@@ -39,12 +39,12 @@ public class CatalogueController extends MolgenisPluginController
 	{
 		AtomicBoolean showEntitySelectBoolean = new AtomicBoolean(true);
 		List<EntityType> emds = Lists.newArrayList();
-		dataService.getEntityNames().forEach(entityName ->
+		dataService.getEntityTypeIds().forEach(entityTypeId ->
 		{
-			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName))
+			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityTypeId))
 			{
-				emds.add(dataService.getEntityType(entityName));
-				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
+				emds.add(dataService.getEntityType(entityTypeId));
+				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityTypeId))
 				{
 					// Hide entity dropdown
 					showEntitySelectBoolean.set(false);
@@ -68,7 +68,7 @@ public class CatalogueController extends MolgenisPluginController
 			if (!emds.isEmpty())
 			{
 				// Select first entity
-				selectedEntityNameValue = emds.get(0).getFullyQualifiedName();
+				selectedEntityNameValue = emds.get(0).getId();
 			}
 		}
 

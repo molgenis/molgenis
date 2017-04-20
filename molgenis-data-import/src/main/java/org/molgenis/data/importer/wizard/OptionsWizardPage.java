@@ -127,15 +127,15 @@ public class OptionsWizardPage extends AbstractWizardPage
 		Set<String> allPackages = new HashSet<>(validationReport.getPackages());
 		for (Package p : dataService.getMeta().getPackages())
 		{
-			allPackages.add(p.getFullyQualifiedName());
+			allPackages.add(p.getId());
 		}
 
 		List<String> entitiesInDefaultPackage = new ArrayList<>();
-		for (String entityName : validationReport.getSheetsImportable().keySet())
+		for (String entityTypeId : validationReport.getSheetsImportable().keySet())
 		{
-			if (validationReport.getSheetsImportable().get(entityName))
+			if (validationReport.getSheetsImportable().get(entityTypeId))
 			{
-				if (isInDefaultPackage(entityName, allPackages)) entitiesInDefaultPackage.add(entityName);
+				if (isInDefaultPackage(entityTypeId, allPackages)) entitiesInDefaultPackage.add(entityTypeId);
 			}
 		}
 		wizard.setEntitiesInDefaultPackage(entitiesInDefaultPackage);
@@ -159,11 +159,11 @@ public class OptionsWizardPage extends AbstractWizardPage
 		return msg;
 	}
 
-	private boolean isInDefaultPackage(String entityName, Set<String> packages)
+	private boolean isInDefaultPackage(String entityTypeId, Set<String> packages)
 	{
 		for (String packageName : packages)
 		{
-			if (entityName.toLowerCase().startsWith(packageName.toLowerCase())) return false;
+			if (entityTypeId.toLowerCase().startsWith(packageName.toLowerCase())) return false;
 		}
 
 		return true;

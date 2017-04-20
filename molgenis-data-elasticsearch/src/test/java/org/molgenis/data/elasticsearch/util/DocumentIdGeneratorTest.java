@@ -28,19 +28,17 @@ public class DocumentIdGeneratorTest
 	public static Iterator<Object[]> generateIdEntityTypeProvider()
 	{
 		List<Object[]> dataList = new ArrayList<>(4);
-		dataList.add(new Object[] { "012345", "myEntity", "myEntity_0f6b6fb8" });
-		dataList.add(new Object[] { "543210", "myEntity", "myEntity_54782194" });
-		dataList.add(new Object[] { "012345", "_my|En%ti-ty/", "myEntity_0f6b6fb8" });
-		dataList.add(new Object[] { "012345", "myEntitymyEntitymyEntitymyEntity", "myEntitymyEntitymyEntit_0f6b6fb8" });
+		dataList.add(new Object[] { "myEntity", "myEntity_061f7aef" });
+		dataList.add(new Object[] { "_my|En%ti-ty/", "myEntity_d8309562" });
+		dataList.add(new Object[] { "myEntitymyEntitymyEntitymyEntity", "myEntitymyEntitymyEntit_6e9381ec" });
 		return dataList.iterator();
 	}
 
 	@Test(dataProvider = "generateIdEntityTypeProvider")
-	public void testGenerateIdEntityType(String entityTypeId, String entityTypeName, String expectedId)
+	public void testGenerateIdEntityType(String entityTypeId, String expectedId)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getIdValue()).thenReturn(entityTypeId);
-		when(entityType.getName()).thenReturn(entityTypeName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		String id = documentIdGenerator.generateId(entityType);
 		assertEquals(id, expectedId);
 	}
@@ -62,7 +60,7 @@ public class DocumentIdGeneratorTest
 	public void testGenerateIdAttribute(String entityTypeId, String attrId, String attrName, String expectedId)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getIdValue()).thenReturn(entityTypeId);
+		when(entityType.getId()).thenReturn(entityTypeId);
 
 		Attribute attr = mock(Attribute.class);
 		when(attr.getEntity()).thenReturn(entityType);

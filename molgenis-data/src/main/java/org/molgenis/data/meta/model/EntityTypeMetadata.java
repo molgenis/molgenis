@@ -20,15 +20,14 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class EntityTypeMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME_ = "EntityType";
-	public static final String ENTITY_TYPE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
+	private static final String SIMPLE_NAME = "EntityType";
+	public static final String ENTITY_TYPE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	private AttributeMetadata attributeMetadata;
 	private PackageMetadata packageMetadata;
 	private TagMetadata tagMetadata;
 
 	public static final String ID = "id";
-	public static final String NAME = "name";
 	public static final String PACKAGE = "package";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
@@ -43,7 +42,7 @@ public class EntityTypeMetadata extends SystemEntityType
 
 	EntityTypeMetadata()
 	{
-		super(SIMPLE_NAME_, PACKAGE_META);
+		super(SIMPLE_NAME, PACKAGE_META);
 	}
 
 	public void init()
@@ -51,14 +50,13 @@ public class EntityTypeMetadata extends SystemEntityType
 		requireNonNull(backendEnumOptions, "backend enum options not set!");
 
 		setId(ENTITY_TYPE_META_DATA);
-		setLabel("Entity");
+		setLabel("Entity type");
 		setDescription("Meta data for entity classes");
 
-		addAttribute(ID, ROLE_ID).setAuto(true);
-		addAttribute(NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package");
-		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
+		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
+		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package");
 		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);
 		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY).setRefEntity(attributeMetadata).setMappedBy(refAttr)
 				.setOrderBy(new Sort(SEQUENCE_NR)).setNillable(true).setLabel("Attributes");

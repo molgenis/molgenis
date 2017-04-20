@@ -80,7 +80,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	public void init()
 	{
 		vcf = mock(EntityType.class);
-		when(vcf.getFullyQualifiedName()).thenReturn("VCF");
+		when(vcf.getId()).thenReturn("VCF");
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute effAttr = when(mock(Attribute.class).getName()).thenReturn("EFF").getMock();
@@ -119,8 +119,8 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testInit() throws RemoteException
 	{
-		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
-		EntityType nonVcf = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("NonVCF").getMock();
+		when(dataService.getEntityTypeIds()).thenReturn(Stream.of("NonVCF", "VCF"));
+		EntityType nonVcf = when(mock(EntityType.class).getId()).thenReturn("NonVCF").getMock();
 		Attribute idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn("id");
 		when(nonVcf.getIdAttribute()).thenReturn(idAttr);

@@ -13,7 +13,7 @@ public abstract class EmxResourceImpl extends ResourceImpl
 	@Override
 	public synchronized boolean isAvailable()
 	{
-		//FIXME: check attributes and entityName
+		//FIXME: check attributes and entityTypeId
 		return super.isAvailable();
 	}
 }

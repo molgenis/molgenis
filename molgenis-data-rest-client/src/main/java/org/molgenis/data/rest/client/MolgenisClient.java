@@ -92,33 +92,33 @@ public class MolgenisClient
 	/**
 	 * Retrieves an entity's metadata
 	 *
-	 * @param entityName fully qualified name of the entity
+	 * @param entityTypeId fully qualified name of the entity
 	 * @param token      molgenis session token
 	 * @return {@link ResponseEntity} with the {@link MetaDataResponse}
 	 */
-	public ResponseEntity<MetaDataResponse> getMeta(String token, String entityName)
+	public ResponseEntity<MetaDataResponse> getMeta(String token, String entityTypeId)
 	{
-		return template.exchange("{apiHref}/{entityName}/meta?_method=GET", POST,
-				createHttpEntity(token, MetaDataRequest.create()), MetaDataResponse.class, apiHref, entityName);
+		return template.exchange("{apiHref}/{entityTypeId}/meta?_method=GET", POST,
+				createHttpEntity(token, MetaDataRequest.create()), MetaDataResponse.class, apiHref, entityTypeId);
 	}
 
 	/**
 	 * Queries an attribute for entities which have one specific attribute set to a specific value.
 	 *
-	 * @param entityName    name of the entity
+	 * @param entityTypeId    name of the entity
 	 * @param attributeName name of the attribute
 	 * @param value         value of the attribute
 	 * @param token         molgenis session token
 	 * @return {@link ResponseEntity} with a {@link QueryResponse} body containing the entities which have attributeName
 	 * set to value
 	 */
-	public QueryResponse queryEquals(String token, String entityName, String attributeName, Object value)
+	public QueryResponse queryEquals(String token, String entityTypeId, String attributeName, Object value)
 	{
 		Map<String, Object> query = of("q",
 				singletonList(of("field", attributeName, "operator", "EQUALS", "value", value)));
 		ResponseEntity<QueryResponse> response = template
-				.exchange("{apiHref}/{entityName}?_method=GET", POST, createHttpEntity(token, query),
-						QueryResponse.class, apiHref, entityName);
+				.exchange("{apiHref}/{entityTypeId}?_method=GET", POST, createHttpEntity(token, query),
+						QueryResponse.class, apiHref, entityTypeId);
 		return response.getBody();
 	}
 
@@ -126,78 +126,80 @@ public class MolgenisClient
 	 * Updates an entity.
 	 *
 	 * @param token      molgenis session token
-	 * @param entityName name of the entity
+	 * @param entityTypeId name of the entity
 	 * @param id         id of the entity
 	 * @param newEntity  new values for the entity
 	 */
-	public void update(String token, String entityName, String id, ImmutableMap<String, Object> newEntity)
+	public void update(String token, String entityTypeId, String id, ImmutableMap<String, Object> newEntity)
 	{
-		template.exchange("{apiHref}/{entityName}/{id}", PUT, createHttpEntity(token, newEntity), Object.class, apiHref,
-				entityName, id);
+		template.exchange("{apiHref}/{entityTypeId}/{id}", PUT, createHttpEntity(token, newEntity), Object.class,
+				apiHref, entityTypeId, id);
 	}
 
 	/**
 	 * Updates an entity's attribute value.
 	 *
 	 * @param token         molgenis session token
-	 * @param entityName    name of the entity
+	 * @param entityTypeId    name of the entity
 	 * @param id            id of the entity
 	 * @param attributeName name of the attribute to update
 	 * @param value         new value for the attribute
 	 */
-	public void update(String token, String entityName, String id, String attributeName, Object value)
+	public void update(String token, String entityTypeId, String id, String attributeName, Object value)
 	{
-		template.exchange("{apiHref}/{entityName}/{id}/{attributeName}", PUT, createHttpEntity(token, value),
-				Object.class, apiHref, entityName, id, attributeName);
+		template.exchange("{apiHref}/{entityTypeId}/{id}/{attributeName}", PUT, createHttpEntity(token, value),
+				Object.class, apiHref, entityTypeId, id, attributeName);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> get(String token, String entityName, Object id)
+	public Map<String, Object> get(String token, String entityTypeId, Object id)
 	{
 		ResponseEntity<Map> responseEntity = template
-				.exchange("{apiHref}/{entityName}/{id}", GET, createHttpEntity(token), Map.class, apiHref, entityName,
+				.exchange("{apiHref}/{entityTypeId}/{id}", GET, createHttpEntity(token), Map.class, apiHref,
+						entityTypeId,
 						id);
 		return responseEntity.getBody();
 	}
 
-	public QueryResponse get(String token, String entityName)
+	public QueryResponse get(String token, String entityTypeId)
 	{
 		ResponseEntity<QueryResponse> responseEntity = template
-				.exchange("{apiHref}/{entityName}", GET, createHttpEntity(token), QueryResponse.class, apiHref,
-						entityName);
+				.exchange("{apiHref}/{entityTypeId}", GET, createHttpEntity(token), QueryResponse.class, apiHref,
+						entityTypeId);
 		return responseEntity.getBody();
 	}
 
-	public void create(String token, String entityName, Map<String, Object> entity)
+	public void create(String token, String entityTypeId, Map<String, Object> entity)
 	{
-		template.exchange("{apiHref}/{entityName}/", POST, createHttpEntity(token, entity), Object.class, apiHref,
-				entityName);
+		template.exchange("{apiHref}/{entityTypeId}/", POST, createHttpEntity(token, entity), Object.class, apiHref,
+				entityTypeId);
 	}
 
-	public void delete(String token, String entityName, Object id)
+	public void delete(String token, String entityTypeId, Object id)
 	{
-		template.exchange("{apiHref}/{entityName}/{id}", DELETE, createHttpEntity(token), Object.class, apiHref,
-				entityName, id);
-	}
-
-	/**
-	 * Deletes an entity's metadata including all of its rows.
-	 *
-	 * @param entityName name of the entity
-	 */
-	public void deleteData(String token, String entityName)
-	{
-		template.exchange("{apiHref}/{entityName}", DELETE, createHttpEntity(token), Object.class, apiHref, entityName);
+		template.exchange("{apiHref}/{entityTypeId}/{id}", DELETE, createHttpEntity(token), Object.class, apiHref,
+				entityTypeId, id);
 	}
 
 	/**
 	 * Deletes an entity's metadata including all of its rows.
 	 *
-	 * @param entityName name of the entity
+	 * @param entityTypeId name of the entity
 	 */
-	public void deleteMetadata(String token, String entityName)
+	public void deleteData(String token, String entityTypeId)
 	{
-		template.exchange("{apiHref}/{entityName}/meta", DELETE, createHttpEntity(token), Object.class, apiHref,
-				entityName);
+		template.exchange("{apiHref}/{entityTypeId}", DELETE, createHttpEntity(token), Object.class, apiHref,
+				entityTypeId);
+	}
+
+	/**
+	 * Deletes an entity's metadata including all of its rows.
+	 *
+	 * @param entityTypeId name of the entity
+	 */
+	public void deleteMetadata(String token, String entityTypeId)
+	{
+		template.exchange("{apiHref}/{entityTypeId}/meta", DELETE, createHttpEntity(token), Object.class, apiHref,
+				entityTypeId);
 	}
 }

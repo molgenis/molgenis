@@ -28,7 +28,7 @@ import static org.testng.Assert.assertNull;
 
 public class DataServiceImplTest
 {
-	private final List<String> entityNames = asList("Entity1", "Entity2", "Entity3");
+	private final List<String> entityTypeIds = asList("Entity1", "Entity2", "Entity3");
 	private Repository<Entity> repo1;
 	private Repository<Entity> repo2;
 	private Repository<Entity> repoToRemove;
@@ -66,9 +66,9 @@ public class DataServiceImplTest
 		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
 		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
 		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
-		EntityType entityType1 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity1").getMock();
-		EntityType entityType2 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity2").getMock();
-		EntityType entityType3 = when(mock(EntityType.class).getFullyQualifiedName()).thenReturn("Entity3").getMock();
+		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn("Entity1").getMock();
+		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn("Entity2").getMock();
+		EntityType entityType3 = when(mock(EntityType.class).getId()).thenReturn("Entity3").getMock();
 
 		when(metaDataService.getEntityTypes()).thenAnswer(new Answer<Stream<EntityType>>()
 		{
@@ -116,7 +116,7 @@ public class DataServiceImplTest
 	@Test
 	public void getEntityNames()
 	{
-		assertEquals(dataService.getEntityNames().collect(toList()), asList("Entity1", "Entity2", "Entity3"));
+		assertEquals(dataService.getEntityTypeIds().collect(toList()), asList("Entity1", "Entity2", "Entity3"));
 	}
 
 	@Test

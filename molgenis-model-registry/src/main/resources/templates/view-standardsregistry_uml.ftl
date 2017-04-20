@@ -90,14 +90,14 @@ textObj.textContent = "..."; //can't place at all
 <#macro addVertices package>
     <#list package.entityTypes as entityType>
         <#if entityType.extends??>
-        if (classes['<@entityName entityType.extends />']) {
-        graph.addCell(new uml.Generalization({ source: { id: classes['<@entityName entityType />'].id }, target: { id: classes['<@entityName entityType.extends />'].id }}));
+        if (classes['<@entityTypeId entityType.extends />']) {
+        graph.addCell(new uml.Generalization({ source: { id: classes['<@entityTypeId entityType />'].id }, target: { id: classes['<@entityTypeId entityType.extends />'].id }}));
         }
         </#if>
         <#list entityType.attributes as amd>
             <#if amd.type == 'xref' || amd.type == 'mref' || amd.type == 'categorical'>
-            if (classes['<@entityName amd.refEntity />']) {
-            graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityName entityType />'].id }, target: { id: classes['<@entityName amd.refEntityType />'].id }}));
+            if (classes['<@entityTypeId amd.refEntity />']) {
+            graph.addCell(new uml.Aggregation({ source: { id: classes['<@entityTypeId entityType />'].id }, target: { id: classes['<@entityTypeId amd.refEntityType />'].id }}));
             }
             </#if>
         </#list>
@@ -107,12 +107,12 @@ textObj.textContent = "..."; //can't place at all
     </#list>
 </#macro>
 
-<#macro entityName entityType>${entityType.fullyQualifiedName?replace("-", "_")?replace(" ", "_")?js_string}</#macro>
+<#macro entityTypeId entityType>${entityType.id?replace("-", "_")?replace(" ", "_")?js_string}</#macro>
 
 <#macro listClasses package classes=[]>
     <#list package.entityTypes as entityType>
         <#if entityType.isAbstract()>
-        '<@entityName entityType />': new uml.Abstract({
+        '<@entityTypeId entityType />': new uml.Abstract({
         size: { width: RECT_WIDTH, height: ${(50 + 12 * entityType.attributes?size)?c} },
         name: '${entityType.label?js_string}',
         attrs: {
@@ -122,7 +122,7 @@ textObj.textContent = "..."; //can't place at all
         attributes: [<#list entityType.attributes as amd>'${amd.label?js_string}: ${amd.type}'<#if amd_has_next>,</#if></#list>]
         }),
         <#else>
-        '<@entityName entityType />': new uml.Class({
+        '<@entityTypeId entityType />': new uml.Class({
         size: { width: RECT_WIDTH, height: ${(50 + 12 * entityType.attributes?size)?c} },
         name: '${entityType.label?js_string}',
         attrs: {

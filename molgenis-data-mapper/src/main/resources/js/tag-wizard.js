@@ -10,7 +10,7 @@
     var selectedAttributeName,
         relationIRI,
         selectedOntologyIds = [],
-        entityName;
+        entityTypeId;
 
     function noOntologySelectedHandler(messageType) {
         molgenis.createAlert([{
@@ -69,7 +69,7 @@
     }
 
     $(function () {
-        entityName = $('#global-information').data('entity');
+        entityTypeId = $('#global-information').data('entity');
 
         $('#select-target').on('change', function () {
             $('#change-entity-form').submit();
@@ -97,7 +97,7 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
-                        'entityName': entityName,
+                        'entityTypeId': entityTypeId,
                         'ontologyIds': selectedOntologyIds
                     }),
                     success: function (data) {
@@ -123,7 +123,7 @@
                         url: 'tagwizard/clearalltags',
                         type: 'POST',
                         data: {
-                            'entityName': entityName
+                            'entityTypeId': entityTypeId
                         },
                         success: function () {
                             // empty columns with class tag-column
@@ -161,7 +161,7 @@
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    'entityName': entityName,
+                    'entityTypeId': entityTypeId,
                     'attributeName': attributeName,
                     'relationIRI': relationIRI,
                     'ontologyTermIRIs': ontologyTermIRIs
@@ -184,7 +184,7 @@
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    'entityName': entityName,
+                    'entityTypeId': entityTypeId,
                     'attributeName': attributeName,
                     'relationIRI': relationIRI,
                     'ontologyTermIRI': ontologyTermIRI

@@ -107,6 +107,6 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 		{
 			packageValidator.validate(package_);
 			return true;
-		}).map(Package::getFullyQualifiedName));
+		}).map(Package::getId));
 	}
 }

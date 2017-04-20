@@ -106,7 +106,7 @@ public class DataConverterTest
 	public void testWrapExceptionOnInvalidConversion()
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getFullyQualifiedName()).thenReturn("test");
+		when(entityType.getId()).thenReturn("test");
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
 		when(attr.getName()).thenReturn("id");

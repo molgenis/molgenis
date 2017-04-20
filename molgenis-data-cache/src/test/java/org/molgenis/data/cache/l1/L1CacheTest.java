@@ -64,7 +64,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		entityType = entityTypeFactory.create(repository).setName(repository);
+		entityType = entityTypeFactory.create(repository);
 		entityType.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		entityType.addAttribute(attributeFactory.create().setName("ATTRIBUTE_1"));
 
