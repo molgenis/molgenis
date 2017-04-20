@@ -7,6 +7,7 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.ontology.core.meta.Ontology;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
@@ -69,6 +70,14 @@ public class OntologyImportServiceIT extends ImportServiceIT
 								"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
 				emptySet());
 
+		// Verify the import as system as we need write permissions on sys tables to carry out the verification
+		RunAsSystemProxy.runAsSystem(
+				() -> verifyOboAsSystem()
+		);
+	}
+
+	private void verifyOboAsSystem()
+	{
 		List<Entity> ontologies = dataService.findAll("sys_ont_Ontology").collect(Collectors.toList());
 		Ontology ontology = (Ontology) ontologies.get(0);
 		assertEquals(ontology.getOntologyName(), "ontology-small");
@@ -80,7 +89,6 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		verifyOboRow(synonyms, "molgenis", "http://purl.obolibrary.org/obo/TEMP#molgenis");
 
 		verifyOboRow(synonyms, "Thing", "http://purl.obolibrary.org/obo/TEMP#Thing");
-
 	}
 
 	private void verifyOboRow(List<Entity> synonyms, String ontologyTermName, String ontologyTermIRI)
@@ -120,6 +128,14 @@ public class OntologyImportServiceIT extends ImportServiceIT
 								"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),
 				emptySet());
 
+		// Verify the import as system as we need write permissions on sys tables to carry out the verification
+		RunAsSystemProxy.runAsSystem(
+				() -> verifyOwlAsSystem()
+		);
+	}
+
+	private void verifyOwlAsSystem()
+	{
 		// Verify two imported rows (organization and team, as these are interesting examples)
 		List<Entity> entities = dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
 		Optional<Entity> organizationOpt = entities.stream()
