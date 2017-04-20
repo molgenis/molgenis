@@ -20,7 +20,7 @@ public class OntologyPackage extends SystemPackage
 	@Autowired
 	public OntologyPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
-		super(SIMPLE_NAME, packageMetadata);
+		super(PACKAGE_ONTOLOGY, packageMetadata);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 

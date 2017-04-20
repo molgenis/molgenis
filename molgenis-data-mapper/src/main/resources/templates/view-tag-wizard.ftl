@@ -8,7 +8,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <input type="hidden" id="global-information" data-entity="${entity.fullyQualifiedName}"></input>
+        <input type="hidden" id="global-information" data-entity="${entity.id}"></input>
         <h3>Tag Wizard</h3>
         <p>
             Tag attributes with ontology terms from the selected ontologies either manually or automatically.
@@ -26,9 +26,9 @@
     <div class="col-md-3">
         <form id="change-entity-form" method="POST" action="${context_url}">
             <select id="select-target" name="selectedTarget" class="form-control">
-            <#list entityNames as entityName>
+            <#list entityTypeIds as entityTypeId>
                 <option
-                    <#if entityName == entity.fullyQualifiedName>selected="selected"</#if>value="${entityName?html}">${entityName?html}</option>
+                    <#if entityTypeId == entity.id>selected="selected"</#if>value="${entityTypeId?html}">${entityTypeId?html}</option>
             </#list>
             </select>
         </form>

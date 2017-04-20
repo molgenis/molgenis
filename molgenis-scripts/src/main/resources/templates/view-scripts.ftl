@@ -10,7 +10,7 @@
         <div class="col-md-12">
             <legend>
                 Scripts
-            <@hasPermission entityName='sys_scr_Script' permission="WRITE">
+            <@hasPermission entityTypeId='sys_scr_Script' permission="WRITE">
                 <a id="create-script-btn" href="#" style="margin:30px 10px"><img src="/img/new.png"></a>
             </@hasPermission>
             </legend>
@@ -18,10 +18,10 @@
             <table class="table table-condensed table-bordered">
                 <thead>
                 <tr>
-                <@hasPermission entityName='sys_scr_Script' permission="WRITE">
+                <@hasPermission entityTypeId='sys_scr_Script' permission="WRITE">
                     <th class="edit-icon-holder"></th>
                 </@hasPermission>
-                <@hasPermission entityName='sys_scr_Script' permission="WRITE">
+                <@hasPermission entityTypeId='sys_scr_Script' permission="WRITE">
                     <th class="edit-icon-holder"></th>
                 </@hasPermission>
                     <th>Name</th>
@@ -36,12 +36,12 @@
                 <#if scripts?has_content>
                     <#list scripts as script>
                     <tr>
-                        <@hasPermission entityName='sys_scr_Script' permission="WRITE">
+                        <@hasPermission entityTypeId='sys_scr_Script' permission="WRITE">
                             <td>
                                 <a href="#" class="edit-script-btn"><img src="/img/editview.gif"></a>
                             </td>
                         </@hasPermission>
-                        <@hasPermission entityName='sys_scr_Script' permission="WRITE">
+                        <@hasPermission entityTypeId='sys_scr_Script' permission="WRITE">
                             <td>
                                 <a href="#" class="delete-script-btn"><img src="/img/delete.png"></a>
                             </td>
@@ -74,7 +74,7 @@
         <div class="col-md-12">
             <legend>
                 Parameters
-            <@hasPermission entityName='sys_scr_ScriptParameter' permission="WRITE">
+            <@hasPermission entityTypeId='sys_scr_ScriptParameter' permission="WRITE">
                 <a id="create-scriptparameter-btn" href="#" style="margin:30px 10px">
                     <img src="/img/new.png">
                 </a>
@@ -85,7 +85,7 @@
                 <thead>
                 <tr>
                     <th>Name</th>
-                <@hasPermission entityName='sys_scr_ScriptParameter' permission="WRITE">
+                <@hasPermission entityTypeId='sys_scr_ScriptParameter' permission="WRITE">
                     <th class="edit-icon-holder"></th>
                 </@hasPermission>
                 <tr>
@@ -96,7 +96,7 @@
                     <#list parameters as parameter>
                     <tr>
                         <td class="name">${parameter.name!?html}</td>
-                        <@hasPermission entityName='sys_scr_ScriptParameter' permission="WRITE">
+                        <@hasPermission entityTypeId='sys_scr_ScriptParameter' permission="WRITE">
                             <td>
                                 <a href="#" class="delete-script-parameter-btn"><img src="/img/delete.png"></a>
                             </td>

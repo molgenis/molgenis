@@ -128,7 +128,7 @@ This endpoint can be used to import a file into MOLGENIS by providing a URL to t
 String url
 
 ##### optional parameters for both endpoints:
-entityName: The name of the entity, this only has effect for VCF files (.vcf and .vcf.gz)
+entityTypeId: The name of the entity, this only has effect for VCF files (.vcf and .vcf.gz)
 	Default value is the filename.
 
 action: the database action to import with, options are:
@@ -151,7 +151,7 @@ The href can be used to poll the status of the import by checking the status fie
 ### importByURL Example:
 
     https://molgenis01.gcc.rug.nl/plugin/importwizard/importByUrl
-    notify=false&entityName=demo&url=https://raw.githubusercontent.com/bartcharbon/molgenis/feature/importService/
+    notify=false&entityTypeId=demo&url=https://raw.githubusercontent.com/bartcharbon/molgenis/feature/importService/
     molgenis-app/src/test/resources/vcf/test.vcf
 
 #####Response:
@@ -160,7 +160,7 @@ The href can be used to poll the status of the import by checking the status fie
     /api/v2/ImportRun/[ImportRunID]
 
 ### importFile example using cURL(https://curl.haxx.se):
-    curl -H "x-molgenis-token:[TOKEN]" -X POST -F"file=@path/to/file/test.vcf" -Faction=update -FentityName=newName
+    curl -H "x-molgenis-token:[TOKEN]" -X POST -F"file=@path/to/file/test.vcf" -Faction=update -FentityTypeId=newName
     -Fnotify=true https://[SERVER URL]/plugin/importwizard/importFile
 
 A token can be obtained using:

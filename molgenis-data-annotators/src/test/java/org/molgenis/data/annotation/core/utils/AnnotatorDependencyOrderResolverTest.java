@@ -67,7 +67,7 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		Attribute attri = attributeFactory.create().setName("I").setDataType(STRING);
 		Attribute attrj = attributeFactory.create().setName("J").setDataType(STRING);
 
-		EntityType emd = entityTypeFactory.create().setName("test");
+		EntityType emd = entityTypeFactory.create("test");
 		emd.addAttributes(Arrays.asList(attra, attrb));
 		when(repo.getEntityType()).thenReturn(emd);
 

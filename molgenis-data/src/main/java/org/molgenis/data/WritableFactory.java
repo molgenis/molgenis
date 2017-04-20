@@ -11,8 +11,8 @@ import java.util.List;
  */
 public interface WritableFactory extends Closeable
 {
-	Writable createWritable(String entityName, List<String> attributeNames);
+	Writable createWritable(String entityTypeId, List<String> attributeNames);
 
-	Writable createWritable(String entityName, Iterable<Attribute> attributes,
+	Writable createWritable(String entityTypeId, Iterable<Attribute> attributes,
 			AttributeWriteMode attributeWriteMode);
 }

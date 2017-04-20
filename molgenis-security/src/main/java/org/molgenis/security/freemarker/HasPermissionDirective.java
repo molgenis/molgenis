@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Directive that prints the body of the tag if the current user has permission on entity
  * <p>
- * usage: <@hasPermission entityName='celiacsprue' permission="WRITE">write permission</@hasPermission>
+ * usage: <@hasPermission entityTypeId='celiacsprue' permission="WRITE">write permission</@hasPermission>
  */
 public class HasPermissionDirective extends PermissionDirective
 {

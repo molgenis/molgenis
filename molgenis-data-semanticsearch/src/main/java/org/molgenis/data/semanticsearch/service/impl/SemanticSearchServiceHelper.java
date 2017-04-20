@@ -230,7 +230,7 @@ public class SemanticSearchServiceHelper
 				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
 
 		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(
-				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getFullyQualifiedName());
+				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getId());
 
 		List<String> attributeIdentifiers = new ArrayList<>();
 

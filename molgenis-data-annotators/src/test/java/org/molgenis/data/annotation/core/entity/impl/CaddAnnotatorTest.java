@@ -81,8 +81,8 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 
 	public void setValues()
 	{
-		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
-		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create("test");
+		metaDataCantAnnotate = entityTypeFactory.create("test");
 
 		Attribute attributeChrom = attributeFactory.create().setName(CHROM).setDataType(STRING);
 		Attribute attributePos = attributeFactory.create().setName(POS).setDataType(INT);

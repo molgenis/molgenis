@@ -89,7 +89,7 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 	{
 		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
 		when(directorySettings.getCollectionEntityType()).thenReturn(entityType);
-		when(entityType.getName()).thenReturn("Other");
+		when(entityType.getId()).thenReturn("Other");
 
 		assertFalse(controller.showDirectoryButton("blah"));
 	}
@@ -99,7 +99,7 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 	{
 		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
 		when(directorySettings.getCollectionEntityType()).thenReturn(entityType);
-		when(entityType.getName()).thenReturn("blah");
+		when(entityType.getId()).thenReturn("blah");
 
 		assertFalse(controller.showDirectoryButton("blah"));
 	}

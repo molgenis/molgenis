@@ -93,7 +93,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private List<EntityType> getVCFEntities()
 	{
-		return stream(dataService.getEntityNames().spliterator(), false).map(dataService::getEntityType)
+		return stream(dataService.getEntityTypeIds().spliterator(), false).map(dataService::getEntityType)
 				.filter(this::hasEffectAttribute).collect(toList());
 	}
 

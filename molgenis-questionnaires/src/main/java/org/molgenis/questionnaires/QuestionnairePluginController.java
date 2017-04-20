@@ -66,7 +66,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		List<EntityType> questionnaireMeta = runAsSystem(
 				() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
-		questionnaires = questionnaireMeta.stream().map(EntityType::getFullyQualifiedName)
+		questionnaires = questionnaireMeta.stream().map(EntityType::getId)
 				.filter(name -> currentUserIsSu() || currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name))
 				.map(name ->
 				{
@@ -135,7 +135,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 			entity = entityManager.create(entityType, POPULATE);
 			entity.set(OWNER_USERNAME, getCurrentUsername());
 			entity.set(ATTR_STATUS, status.toString());
-			dataService.add(entityType.getFullyQualifiedName(), entity);
+			dataService.add(entityType.getId(), entity);
 		}
 		return entity;
 	}
@@ -143,7 +143,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType entityType)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return new Questionnaire(entityType.getFullyQualifiedName(),
+		return new Questionnaire(entityType.getId(),
 				entityType.getLabel(languageService.getCurrentUserLanguageCode()), status,
 				entityType.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}

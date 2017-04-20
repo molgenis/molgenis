@@ -81,7 +81,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
-			LOG.trace("Removing all entities from L1 cache that belong to {}", entityType.getFullyQualifiedName());
+			LOG.trace("Removing all entities from L1 cache that belong to {}", entityType.getId());
 			entityCache.evictAll(entityType);
 		}
 	}
@@ -99,13 +99,13 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	/**
 	 * Retrieves an entity from the L1 cache based on a combination of entity name and entity id.
 	 *
-	 * @param entityName name of the entity to retrieve
+	 * @param entityTypeId name of the entity to retrieve
 	 * @param id         id value of the entity to retrieve
 	 * @return the retrieved {@link Entity} or Optional.empty() if deletion of this entity is stored in the cache or
 	 * null if no information available about this entity in the cache
 	 */
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
-	public Optional<Entity> get(String entityName, Object id, EntityType entityType)
+	public Optional<Entity> get(String entityTypeId, Object id, EntityType entityType)
 	{
 		CombinedEntityCache cache = caches.get();
 		if (cache == null)
@@ -115,11 +115,11 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		Optional<Entity> result = cache.getIfPresent(entityType, id);
 		if (result != null)
 		{
-			LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityName);
+			LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityTypeId);
 		}
 		else
 		{
-			LOG.trace("No entity with id [{}] present in L1 cache that belongs to {}", id, entityName);
+			LOG.trace("No entity with id [{}] present in L1 cache that belongs to {}", id, entityTypeId);
 		}
 		return result;
 	}
@@ -127,16 +127,16 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	/**
 	 * Puts an entity into the L1 cache, if the cache exists for the current thread.
 	 *
-	 * @param entityName name of the entity to put into the cache
+	 * @param entityTypeId name of the entity to put into the cache
 	 * @param entity     the entity to put into the cache
 	 */
-	public void put(String entityName, Entity entity)
+	public void put(String entityTypeId, Entity entity)
 	{
 		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
 			entityCache.put(entity);
-			LOG.trace("Added dehydrated row [{}] from entity {} to the L1 cache", entity.getIdValue(), entityName);
+			LOG.trace("Added dehydrated row [{}] from entity {} to the L1 cache", entity.getIdValue(), entityTypeId);
 		}
 	}
 }

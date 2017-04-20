@@ -5,7 +5,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.*;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.MetaDataSearchService;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -124,7 +127,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		for (PackageSearchResultItem searchResult : searchResults)
 		{
 			Package p = searchResult.getPackageFound();
-			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getFullyQualifiedName());
+			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
 			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists
 					.newArrayList(Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
 					{
@@ -133,21 +136,21 @@ public class StandardsRegistryController extends MolgenisPluginController
 						{
 							if (entity.isAbtract()) return false;
 
-							String entityName = entity.getName();
+							String entityTypeId = entity.getName();
 
 							// Check read permission
-							if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
+							if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
 								return false;
 
 							// Check has data
-							if (!dataService.hasRepository(entityName)
-									|| dataService.count(entityName, new QueryImpl<>()) == 0) return false;
+							if (!dataService.hasRepository(entityTypeId)
+									|| dataService.count(entityTypeId, new QueryImpl<>()) == 0) return false;
 
 							return true;
 						}
 					}));
 
-			PackageResponse pr = new PackageResponse(p.getName(), p.getLabel(), p.getDescription(),
+			PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(),
 					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
@@ -181,7 +184,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		if (selectedPackageName == null)
 		{
 			List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
-			selectedPackageName = packages.get(0).getFullyQualifiedName();
+			selectedPackageName = packages.get(0).getId();
 		}
 		model.addAttribute("tagService", tagService);
 		model.addAttribute("selectedPackageName", selectedPackageName);
@@ -210,8 +213,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
 
-		return new PackageResponse(molgenisPackage.getFullyQualifiedName(), molgenisPackage.getLabel(),
-				molgenisPackage.getDescription(), null, getEntitiesInPackage(molgenisPackage.getFullyQualifiedName()),
+		return new PackageResponse(molgenisPackage.getId(), molgenisPackage.getLabel(),
+				molgenisPackage.getDescription(), null, getEntitiesInPackage(molgenisPackage.getId()),
 				getTagsForPackage(molgenisPackage));
 	}
 
@@ -228,8 +231,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	private PackageTreeNode createPackageTreeNode(Package package_)
 	{
-		String title = package_.getLabel() != null ? package_.getLabel() : package_.getName();
-		String key = package_.getFullyQualifiedName();
+		String title = package_.getLabel() != null ? package_.getLabel() : package_.getId();
+		String key = package_.getId();
 		String tooltip = package_.getDescription();
 		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
 		boolean folder = true;
@@ -254,7 +257,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private PackageTreeNode createPackageTreeNode(EntityType emd)
 	{
 		String title = emd.getLabel();
-		String key = emd.getFullyQualifiedName();
+		String key = emd.getId();
 		String tooltip = emd.getDescription();
 		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
 		boolean folder = true;
@@ -262,7 +265,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "entity");
-		data.put("href", "/api/v1/" + emd.getFullyQualifiedName() + "/meta");
+		data.put("href", "/api/v1/" + emd.getId() + "/meta");
 
 		for (Attribute amd : emd.getAttributes())
 		{
@@ -283,7 +286,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "attribute");
-		data.put("href", "/api/v1/" + emd.getFullyQualifiedName() + "/meta/" + amd.getName());
+		data.put("href", "/api/v1/" + emd.getId() + "/meta/" + amd.getName());
 		data.put("tags", tagService.getTagsForAttribute(emd, amd));
 
 		if (amd.getDataType() == AttributeType.COMPOUND)
@@ -327,7 +330,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		for (EntityType emd : aPackage.getEntityTypes())
 		{
-			entiesForThisPackage.add(new PackageResponse.Entity(emd.getFullyQualifiedName(), emd.getLabel(), emd.isAbstract()));
+			entiesForThisPackage.add(new PackageResponse.Entity(emd.getId(), emd.getLabel(), emd.isAbstract()));
 		}
 		Iterable<Package> subPackages = aPackage.getChildren();
 		if (subPackages != null)

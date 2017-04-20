@@ -12,7 +12,6 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.IdentifierLookupService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
@@ -57,7 +56,6 @@ public class ImportWriter
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final EntityManager entityManager;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private final IdentifierLookupService identifierLookupService;
 
 	/**
 	 * Creates the ImportWriter
@@ -69,14 +67,13 @@ public class ImportWriter
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
 			MolgenisPermissionService molgenisPermissionService, EntityManager entityManager,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, IdentifierLookupService identifierLookupService)
+			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.entityManager = requireNonNull(entityManager);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.identifierLookupService = requireNonNull(identifierLookupService);
 	}
 
 	@Transactional
@@ -108,7 +105,7 @@ public class ImportWriter
 		}
 		upsertEntityTypes(groupedEntityTypes);
 
-		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getFullyQualifiedName)
+		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getId)
 				.forEach(importReport::addNewEntity);
 	}
 
@@ -119,7 +116,7 @@ public class ImportWriter
 
 	private void validateEntityTypePermission(EntityType entityType)
 	{
-		String entityTypeName = entityType.getFullyQualifiedName();
+		String entityTypeName = entityType.getId();
 		if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeName, Permission.READ))
 		{
 			throw new MolgenisValidationException(
@@ -139,20 +136,19 @@ public class ImportWriter
 			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
 			for (EntityType entityType : entities)
 			{
-				EntityType existing = dataService.findOne(ENTITY_TYPE_META_DATA,
-						new QueryImpl<EntityType>().eq(EntityTypeMetadata.NAME, entityType.getName()).and()
-								.eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()), EntityType.class);
+				EntityType existing = dataService
+						.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
 				if(existing != null){
-					existingEntityTypeMap.put(entityType.getFullyQualifiedName(),entityType);
+					existingEntityTypeMap.put(entityType.getId(), entityType);
 				}
 			}
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
-					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
+					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getId()))
 					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
 			ImmutableCollection<EntityType> existingEntityTypes = entities.stream()
-					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getFullyQualifiedName()))
+					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getId()))
 					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
 			return new GroupedEntityTypes(newEntityTypes, existingEntityTypes);
@@ -223,21 +219,20 @@ public class ImportWriter
 	{
 		for (final EntityType entityType : resolved)
 		{
-			String name = entityType.getFullyQualifiedName();
+			String name = entityType.getId();
 
 			// Languages and i18nstrings are already done
 			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(L10N_STRING) && dataService
 					.hasRepository(name))
 			{
 				Repository<Entity> repository = dataService.getRepository(name);
-				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getFullyQualifiedName());
+				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getId());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getFullyQualifiedName()
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId()
 						.toLowerCase().startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
-					emxEntityRepo = source
-							.getRepository(entityType.getFullyQualifiedName().substring(defaultPackage.length() + 1));
+					emxEntityRepo = source.getRepository(entityType.getId().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -369,8 +364,7 @@ public class ImportWriter
 						}
 
 						// do not set generated auto refEntities to null
-						if ((!attr.isAuto() || !refEntities.isEmpty()) && (!attr.hasDefaultValue() || refEntities
-								.isEmpty()))
+						if (!refEntities.isEmpty())
 						{
 							entity.set(attrName, refEntities);
 						}
@@ -395,18 +389,16 @@ public class ImportWriter
 		Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
 		for (EntityType entityType : updatedEntityTypes)
 		{
-			EntityType existing = dataService.findOne(ENTITY_TYPE_META_DATA,
-					new QueryImpl<EntityType>().eq(EntityTypeMetadata.NAME, entityType.getName()).and()
-							.eq(EntityTypeMetadata.PACKAGE, entityType.getPackage()), EntityType.class);
+			EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
 			if(existing != null){
-				existingEntityTypeMap.put(entityType.getFullyQualifiedName(),existing);
+				existingEntityTypeMap.put(entityType.getId(), existing);
 			}
 		}
 
 		// inject attribute and entityType identifiers in entity types to import
 		updatedEntityTypes.forEach(entityType ->
 		{
-			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getFullyQualifiedName());
+			EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
 			entityType.getOwnAllAttributes().forEach(ownAttr ->
 			{
 				Attribute existingAttr = existingEntityType.getAttribute(ownAttr.getName());

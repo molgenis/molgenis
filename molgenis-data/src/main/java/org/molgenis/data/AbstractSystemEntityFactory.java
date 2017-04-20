@@ -53,9 +53,9 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 	}
 
 	@Override
-	public String getEntityName()
+	public String getEntityTypeId()
 	{
-		return systemEntityType.getFullyQualifiedName();
+		return systemEntityType.getId();
 	}
 
 	@Override

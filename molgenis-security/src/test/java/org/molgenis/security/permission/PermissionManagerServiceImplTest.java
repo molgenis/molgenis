@@ -5,8 +5,6 @@ import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.IdentifierLookupService;
-import org.molgenis.data.meta.IdentifierLookupServiceImpl;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
@@ -34,8 +32,8 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
@@ -67,11 +65,6 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		public GrantedAuthoritiesMapper grantedAuthoritiesMapper()
 		{
 			return mock(GrantedAuthoritiesMapper.class);
-		}
-
-		@Bean
-		public IdentifierLookupService identifierLookupService(){
-			return new IdentifierLookupServiceImpl(dataService());
 		}
 	}
 
@@ -185,7 +178,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(Stream.empty());
 		when(dataService
 				.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), anyObject(),
-						eq(new Fetch().field(EntityTypeMetadata.NAME).field(EntityTypeMetadata.ID)
+						eq(new Fetch().field(EntityTypeMetadata.ID)
 								.field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class))).thenReturn(Stream.empty());
 	}
 

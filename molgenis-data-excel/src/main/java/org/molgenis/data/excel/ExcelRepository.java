@@ -145,7 +145,8 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityType == null)
 		{
-			EntityType entityType = entityTypeFactory.create().setName(sheet.getSheetName());
+			String sheetName = sheet.getSheetName();
+			EntityType entityType = entityTypeFactory.create(sheetName).setLabel(sheetName);
 
 			if (colNamesMap == null)
 			{

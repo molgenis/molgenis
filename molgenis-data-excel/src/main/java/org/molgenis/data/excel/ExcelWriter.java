@@ -63,10 +63,10 @@ public class ExcelWriter implements WritableFactory
 	}
 
 	@Override
-	public ExcelSheetWriter createWritable(String entityName, Iterable<Attribute> attributes,
+	public ExcelSheetWriter createWritable(String entityTypeId, Iterable<Attribute> attributes,
 			AttributeWriteMode attributeWriteMode)
 	{
-		Sheet poiSheet = workbook.createSheet(entityName);
+		Sheet poiSheet = workbook.createSheet(entityTypeId);
 		return new ExcelSheetWriter(poiSheet, attributes, attributeWriteMode, cellProcessors);
 	}
 
@@ -85,11 +85,11 @@ public class ExcelWriter implements WritableFactory
 	}
 
 	@Override
-	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
+	public ExcelSheetWriter createWritable(String entityTypeId, List<String> attributeNames)
 	{
 		List<Attribute> attributes = attributeNames != null ? attributeNames.stream()
 				.map(attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
-		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
+		return createWritable(entityTypeId, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
 }

@@ -34,20 +34,18 @@ public class PostgreSqlIdGeneratorTest
 	public static Iterator<Object[]> generateIdEntityTypeProvider()
 	{
 		List<Object[]> dataList = new ArrayList<>(4);
-		dataList.add(new Object[] { "012345", "myEntity", "myEntity#0f6b6fb8" });
-		dataList.add(new Object[] { "543210", "myEntity", "myEntity#54782194" });
-		dataList.add(new Object[] { "012345", "my_Entity", "my_Entity#0f6b6fb8" });
-		dataList.add(new Object[] { "012345", "my|En%ti-ty/", "myEntity#0f6b6fb8" });
-		dataList.add(new Object[] { "012345", "myEntitymyEntitymyEntitymyEntity", "myEntitymyEntitymyEntit#0f6b6fb8" });
+		dataList.add(new Object[] { "myEntity", "myEntity#061f7aef" });
+		dataList.add(new Object[] { "my_Entity", "my_Entity#4581e195" });
+		dataList.add(new Object[] { "my|En%ti-ty/", "myEntity#7152ce38" });
+		dataList.add(new Object[] { "myEntitymyEntitymyEntitymyEntity", "myEntitymyEntitymyEntit#6e9381ec" });
 		return dataList.iterator();
 	}
 
 	@Test(dataProvider = "generateIdEntityTypeProvider")
-	public void testGenerateIdEntityType(String entityTypeId, String entityTypeName, String expectedId)
+	public void testGenerateIdEntityType(String entityTypeId, String expectedId)
 	{
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getIdValue()).thenReturn(entityTypeId);
-		when(entityType.getName()).thenReturn(entityTypeName);
+		when(entityType.getId()).thenReturn(entityTypeId);
 		String id = postgreSqlIdGenerator.generateId(entityType);
 		assertEquals(id, expectedId);
 	}

@@ -3,26 +3,21 @@ package org.molgenis.dataexplorer.service;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.GenomicDataSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 
 public class GenomeBrowserServiceTest
@@ -53,7 +48,7 @@ public class GenomeBrowserServiceTest
 
 		EntityType genomeEntityType = mock(EntityType.class);
 		when(genomeEntityType.isAbstract()).thenReturn(false);
-		when(genomeEntityType.getFullyQualifiedName()).thenReturn("FullyQualifiedName");
+		when(genomeEntityType.getId()).thenReturn("FullyQualifiedName");
 		when(genomeEntityType.getLabel()).thenReturn("Label");
 		EntityType abtractGenomeEntityType = mock(EntityType.class);
 		when(abtractGenomeEntityType.isAbstract()).thenReturn(true);

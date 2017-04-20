@@ -61,7 +61,7 @@ public class AppsController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("appEntityTypeFullyQualifiedName", APP);
+		model.addAttribute("appEntityTypeId", APP);
 		model.addAttribute("apps", getApps().map(this::toAppInfoDto).collect(toList()));
 		return VIEW_NAME;
 	}

@@ -33,9 +33,9 @@ public class PostgreSqlIdGenerator extends AbstractMetadataIdGenerator
 	@Override
 	public String generateId(EntityType entityType)
 	{
-		String idPart = generateHashcode(entityType.getIdValue());
-		String namePart = truncateName(cleanName(entityType.getName()));
-		return namePart + SEPARATOR + idPart;
+		String idHash = generateHashcode(entityType.getId());
+		String truncatedId = truncateName(cleanName(entityType.getId()));
+		return truncatedId + SEPARATOR + idHash;
 	}
 
 	@Override
