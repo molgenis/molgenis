@@ -43,7 +43,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>update package.json version</id>
+                        <id>update-package.json-version</id>
                         <goals>
                             <goal>gulp</goal>
                         </goals>

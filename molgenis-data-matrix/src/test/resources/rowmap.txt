@@ -1,0 +1,4 @@
+matrix  mapping
+gene1   row1
+gene2   row2
+gene3   row3
