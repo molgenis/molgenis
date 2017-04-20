@@ -433,7 +433,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestFirstRow.put("xcategorical_value", "ref1");
 		typeTestFirstRow.put("xcategoricalnillable_value", "ref1");
 		typeTestFirstRow.put("xcategoricalmref_value", newHashSet( "ref1"));
-		typeTestFirstRow.put("xcatmrefnillable_value", newHashSet("ref3"));
+		typeTestFirstRow.put("xcatmrefnillable_value", newHashSet("ref1"));
 		typeTestFirstRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
 		typeTestFirstRow.put("xdatenillable", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
 		typeTestFirstRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
