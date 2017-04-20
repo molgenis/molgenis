@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.EntityImportReport;
@@ -161,7 +162,24 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void validateItEmxLookupAttribute()
 	{
-		//TODO
+		verifyLookupAttributes("it_emx_lookupattribute_AbstractTop", "lookupTop");
+		verifyLookupAttributes("it_emx_lookupattribute_AbstractMiddle", "lookupTop", "lookupMiddle");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref1", "lookupTop", "lookupMiddle");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref2", "lookupTop", "lookupMiddle", "lookupRef2");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref3", "id", "label");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref4", "lookupRef4");
+		verifyLookupAttributes("it_emx_lookupattribute_Ref5", "lookupRef5Int", "lookupRef5String");
+	}
+
+	private void verifyLookupAttributes(String entityName, String... lookupAttributeNames)
+	{
+		EntityType entityType = dataService.getEntityType(entityName);
+		assertEquals(Iterables.size(entityType.getLookupAttributes()), lookupAttributeNames.length);
+
+		for (String lookupAttributeName : lookupAttributeNames)
+		{
+			assertNotNull(entityType.getLookupAttribute(lookupAttributeName));
+		}
 	}
 
 	private void validateItEmxAutoId()
