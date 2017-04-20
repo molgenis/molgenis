@@ -41,7 +41,8 @@ public class ExcelUtils
 					// read an integer if the double value equals the
 					// integer value
 					double x = cell.getNumericCellValue();
-					if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x)) value = String.valueOf((int) x);
+					if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x))
+						value = String.valueOf((long) x);
 					else value = String.valueOf(x);
 				}
 				break;
@@ -69,7 +70,7 @@ public class ExcelUtils
 							// integer value
 							double x = cellValue.getNumberValue();
 							if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x))
-								value = String.valueOf((int) x);
+								value = String.valueOf((long) x);
 							else value = String.valueOf(x);
 						}
 						break;
