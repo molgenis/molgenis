@@ -19,7 +19,6 @@ import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static org.molgenis.ui.MolgenisMenuController.URI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
-import static org.molgenis.util.MolgenisDateFormat.getDefaultZoneId;
 
 @Controller
 @RequestMapping(URI)
@@ -48,8 +47,7 @@ public class MolgenisMenuController
 		this.molgenisVersion = molgenisVersion;
 		// workaround for Eclipse bug: https://github.com/molgenis/molgenis/issues/2667
 		this.molgenisBuildData = molgenisBuildData.equals("${maven.build.timestamp}") ?
-				DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now(getDefaultZoneId()))
-						+ " by Eclipse" : molgenisBuildData;
+				DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by Eclipse" : molgenisBuildData;
 	}
 
 	@RequestMapping

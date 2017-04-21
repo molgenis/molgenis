@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -15,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDefaultZoneId;
 
 /**
  * Populate entity values for auto attributes
@@ -74,7 +74,7 @@ public class AutoValuePopulator
 				switch (type)
 				{
 					case DATE:
-						entity.set(attr.getName(), LocalDate.now(getDefaultZoneId()));
+						entity.set(attr.getName(), LocalDate.now(ZoneId.systemDefault()));
 						break;
 					case DATE_TIME:
 						entity.set(attr.getName(), Instant.now());

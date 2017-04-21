@@ -40,12 +40,14 @@ class ExcelUtils
 				{
 					try
 					{
-						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
 						// Excel dates are LocalDateTime, stored without timezone.
-						// Interpret them as UTC to prevent ambiguous DST overlaps.
+						// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
+						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
 						Date dateCellValue = cell.getDateCellValue();
-						// Now format as LocalDateTime to express that we don't know the timezone
-						value = LocalDateTime.from(dateCellValue.toInstant().atZone(UTC)).toString();
+						// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
+						LocalDateTime localDateTime = dateCellValue.toInstant().atZone(UTC).toLocalDateTime();
+						// And format to string
+						value = localDateTime.toString();
 					}
 					finally
 					{

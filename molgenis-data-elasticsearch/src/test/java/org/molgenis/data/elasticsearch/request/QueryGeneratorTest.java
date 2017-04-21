@@ -28,7 +28,6 @@ import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DE
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
-import static org.molgenis.util.MolgenisDateFormat.*;
 import static org.testng.Assert.assertEquals;
 
 // FIXME add nillable tests
@@ -427,8 +426,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.inFilter(dateAttrName,
-						new Object[] { getLocalDateFormatter().format(date1), getLocalDateFormatter().format(date2) }));
+				.inFilter(dateAttrName, new Object[] { date1.toString(), date2.toString() }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -443,8 +441,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.inFilter(dateTimeAttrName,
-						new Object[] { getDateTimeFormatter().format(date1), getDateTimeFormatter().format(date2) }));
+				.inFilter(dateTimeAttrName, new Object[] { date1.toString(), date2.toString() }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1456,7 +1453,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-				FilterBuilders.termFilter(dateTimeAttrName, getDateTimeFormatter().format(value)));
+				FilterBuilders.termFilter(dateTimeAttrName, value.toString()));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1674,7 +1671,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
 				.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(dateAttrName, getLocalDateFormatter().format(value))));
+						FilterBuilders.termFilter(dateAttrName, value.toString())));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1688,7 +1685,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
 				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-						.termFilter(dateTimeAttrName, getDateTimeFormatter().format(value))));
+						.termFilter(dateTimeAttrName, value.toString())));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1949,7 +1946,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleSearchOneFieldDateTime() throws ParseException
 	{
-		String value = parseInstant("2015-05-22T11:12:13+0500").toString(); // TODO: why?
+		String value = "2015-05-22T06:12:13Z";
 		Query<Entity> q = new QueryImpl<>().search(dateTimeAttrName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);

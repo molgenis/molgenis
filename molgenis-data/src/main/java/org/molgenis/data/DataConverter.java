@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.meta.model.Attribute;
@@ -275,7 +274,6 @@ public class DataConverter
 			{
 				// We are not in a Spring managed environment
 				conversionService = new DefaultConversionService();
-				((DefaultConversionService) conversionService).addConverter(new DateToStringConverter());
 				((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
 				((DefaultConversionService) conversionService).addConverter(new StringToDateTimeConverter());
 			}

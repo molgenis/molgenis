@@ -5,39 +5,23 @@ import org.testng.annotations.Test;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 
+import static java.time.ZoneId.systemDefault;
 import static org.testng.Assert.assertEquals;
 
 public class MolgenisDateFormatTest
 {
-	@Test
-	public void testFormatLocalDate()
-	{
-		assertEquals(MolgenisDateFormat.getLocalDateFormatter().format(LocalDate.parse("2014-12-31")), "2014-12-31");
-	}
-
-	@Test
-	public void testFormatInstant()
-	{
-		assertEquals(MolgenisDateFormat.getDateTimeFormatter().format(Instant.parse("2000-12-31T12:34:56.789Z")),
-				"2000-12-31T12:34:56.789Z");
-	}
-
-	@Test
-	public void testGetDefaultZoneId()
-	{
-		assertEquals(MolgenisDateFormat.getDefaultZoneId(), ZoneId.of("Europe/Amsterdam"));
-	}
-
 	@DataProvider(name = "parseInstantDataProvider")
 	public Object[][] parseInstantDataProvider()
 	{
 		return new Object[][] { { "2000-12-31T12:34:56.789+0200", "2000-12-31T10:34:56.789Z" },
-				{ "2000-12-31T12:34:56.789+02:00", "2000-12-31T10:34:56.789Z" },
-				{ "2000-12-31T12:34:56.789", "2000-12-31T11:34:56.789Z" },
-				{ "2000-12-31T12:34", "2000-12-31T11:34:00Z" }, { "2000-12-31T12:34Z", "2000-12-31T12:34:00Z" },
-				{ "2000-12-31", "2000-12-30T23:00:00Z" }, };
+				{ "2000-12-31T12:34:56.789+02:00", "2000-12-31T10:34:56.789Z" }, { "2000-12-31T12:34:56.789",
+				LocalDateTime.parse("2000-12-31T12:34:56.789").atZone(systemDefault()).toInstant().toString() },
+				{ "2000-12-31T12:34",
+						LocalDateTime.parse("2000-12-31T12:34").atZone(systemDefault()).toInstant().toString() },
+				{ "2000-12-31T12:34Z", "2000-12-31T12:34:00Z" },
+				{ "2000-12-31", LocalDate.parse("2000-12-31").atStartOfDay(systemDefault()).toInstant().toString() }, };
 	}
 
 	@Test(dataProvider = "parseInstantDataProvider")

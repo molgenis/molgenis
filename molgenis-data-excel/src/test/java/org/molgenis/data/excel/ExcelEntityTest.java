@@ -1,6 +1,9 @@
 package org.molgenis.data.excel;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
@@ -13,6 +16,7 @@ import org.testng.annotations.Test;
 import java.time.ZoneId;
 import java.util.*;
 
+import static org.apache.poi.ss.usermodel.CellType.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
@@ -44,7 +48,7 @@ public class ExcelEntityTest
 	@Test
 	public void getStringType()
 	{
-		when(cell.getCellTypeEnum()).thenReturn(CellType.STRING);
+		when(cell.getCellTypeEnum()).thenReturn(STRING);
 		when(cell.getStringCellValue()).thenReturn("XXX");
 
 		Object val = excelEntity.get("attr1");
@@ -55,7 +59,7 @@ public class ExcelEntityTest
 	@Test
 	public void getBlankType()
 	{
-		when(cell.getCellTypeEnum()).thenReturn(CellType.BLANK);
+		when(cell.getCellTypeEnum()).thenReturn(BLANK);
 		Object val = excelEntity.get("attr1");
 		assertNull(val);
 	}
@@ -63,7 +67,7 @@ public class ExcelEntityTest
 	@Test
 	public void getIntegerType()
 	{
-		when(cell.getCellTypeEnum()).thenReturn(CellType.NUMERIC);
+		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
 		when(cell.getNumericCellValue()).thenReturn(1d);
 
 		Object val = excelEntity.get("attr1");
@@ -74,7 +78,7 @@ public class ExcelEntityTest
 	@Test
 	public void getDoubleType()
 	{
-		when(cell.getCellTypeEnum()).thenReturn(CellType.NUMERIC);
+		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
 		when(cell.getNumericCellValue()).thenReturn(1.8d);
 
 		Object val = excelEntity.get("attr1");
@@ -89,7 +93,7 @@ public class ExcelEntityTest
 		TimeZone utcTimeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
 		Date javaDate = DateUtil.getJavaDate(dateDouble, utcTimeZone);
 
-		when(cell.getCellTypeEnum()).thenReturn(CellType.NUMERIC);
+		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
 		when(cell.getNumericCellValue()).thenReturn(dateDouble);
 		when(cell.getDateCellValue()).thenReturn(javaDate);
 		CellStyle cellStyle = mock(CellStyle.class);
@@ -106,7 +110,7 @@ public class ExcelEntityTest
 	@Test
 	public void getBooleanType()
 	{
-		when(cell.getCellTypeEnum()).thenReturn(CellType.BOOLEAN);
+		when(cell.getCellTypeEnum()).thenReturn(BOOLEAN);
 		when(cell.getBooleanCellValue()).thenReturn(true);
 
 		Object val = excelEntity.get("attr1");
@@ -117,7 +121,7 @@ public class ExcelEntityTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void getErrorType()
 	{
-		when(cell.getCellTypeEnum()).thenReturn(CellType.ERROR);
+		when(cell.getCellTypeEnum()).thenReturn(ERROR);
 		excelEntity.get("attr1");
 	}
 

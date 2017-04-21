@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,7 +38,6 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Math.round;
 import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
-import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -225,12 +225,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return convertedValue;
 	}
 
-	private LocalDate convertToDate(Object value)
+	LocalDate convertToDate(Object value)
 	{
 		try
 		{
-			return value != null ? Instant.ofEpochMilli(Double.valueOf(value.toString()).longValue()).atOffset(UTC)
-					.toLocalDate() : null;
+			return value != null ? Instant.ofEpochMilli(Double.valueOf(value.toString()).longValue())
+					.atZone(ZoneId.systemDefault()).toLocalDate() : null;
 		}
 		catch (NumberFormatException e)
 		{

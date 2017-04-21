@@ -27,8 +27,6 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 import static org.molgenis.data.elasticsearch.index.MappingsBuilder.FIELD_NOT_ANALYZED;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormatter;
-import static org.molgenis.util.MolgenisDateFormat.getLocalDateFormatter;
 
 /**
  * Creates Elasticsearch query from MOLGENIS query
@@ -892,7 +890,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case DATE:
 				if (queryRuleValue instanceof LocalDate)
 				{
-					return getLocalDateFormatter().format((LocalDate) queryRuleValue);
+					return queryRuleValue.toString();
 				}
 				else if (queryRuleValue instanceof String)
 				{
@@ -906,7 +904,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case DATE_TIME:
 				if (queryRuleValue instanceof Instant)
 				{
-					return getDateTimeFormatter().format((Instant) queryRuleValue);
+					return queryRuleValue.toString();
 				}
 				else if (queryRuleValue instanceof String)
 				{

@@ -10,7 +10,6 @@ import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,6 @@ import java.time.LocalDate;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
-import static org.molgenis.util.MolgenisDateFormat.getLocalDateFormatter;
 
 /**
  * Creates entities from Elasticsearch document sources and vice versa.
@@ -147,8 +145,7 @@ public class ElasticsearchEntityFactory
 				LocalDate date = entity.getLocalDate(attrName);
 				if (date != null)
 				{
-					String dateValue = getLocalDateFormatter().format(date);
-					generator.writeString(dateValue);
+					generator.writeString(date.toString());
 				}
 				else
 				{
@@ -159,8 +156,7 @@ public class ElasticsearchEntityFactory
 				Instant dateTime = entity.getInstant(attrName);
 				if (dateTime != null)
 				{
-					String dateTimeValue = MolgenisDateFormat.getDateTimeFormatter().format(dateTime);
-					generator.writeString(dateTimeValue);
+					generator.writeString(dateTime.toString());
 				}
 				else
 				{

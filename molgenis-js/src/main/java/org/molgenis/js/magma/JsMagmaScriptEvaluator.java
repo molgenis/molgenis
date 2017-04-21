@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.stream.Collectors.toList;
@@ -112,7 +112,7 @@ public class JsMagmaScriptEvaluator
 				LocalDate localDate = entity.getLocalDate(attrName);
 				if (localDate != null)
 				{
-					value = localDate.atStartOfDay().atOffset(UTC).toInstant().toEpochMilli();
+					value = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 				}
 				break;
 			case DATE_TIME:

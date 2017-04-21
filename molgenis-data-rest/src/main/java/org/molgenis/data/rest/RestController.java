@@ -27,7 +27,6 @@ import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1228,12 +1227,12 @@ public class RestController
 			else if (attrType == DATE)
 			{
 				LocalDate date = entity.getLocalDate(attrName);
-				entityMap.put(attrName, date != null ? MolgenisDateFormat.getLocalDateFormatter().format(date) : null);
+				entityMap.put(attrName, date != null ? date.toString() : null);
 			}
 			else if (attrType == DATE_TIME)
 			{
 				Instant date = entity.getInstant(attrName);
-				entityMap.put(attrName, date != null ? MolgenisDateFormat.getDateTimeFormatter().format(date) : null);
+				entityMap.put(attrName, date != null ? date.toString() : null);
 			}
 			else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
 					&& attrType != ONE_TO_MANY && attrType != FILE)

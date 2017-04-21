@@ -57,7 +57,6 @@ import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDe
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.molgenis.util.MolgenisDateFormat.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
@@ -155,8 +154,7 @@ class RestControllerV2
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
 		if (molgenisBuildDate.equals("${maven.build.timestamp}"))
 		{
-			molgenisBuildDate = DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now(getDefaultZoneId()))
-							+ " by IntelliJ";
+			molgenisBuildDate = DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by IntelliJ";
 		}
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
@@ -854,14 +852,11 @@ class RestControllerV2
 						throw new RuntimeException("Invalid data type [" + dataType + "]");
 					case DATE:
 						LocalDate dateValue = entity.getLocalDate(attrName);
-						String dateValueStr = dateValue != null ? getLocalDateFormatter().format(dateValue) : null;
-						responseData.put(attrName, dateValueStr);
+						responseData.put(attrName, dateValue != null ? dateValue.toString() : null);
 						break;
 					case DATE_TIME:
 						Instant dateTimeValue = entity.getInstant(attrName);
-						String dateTimeValueStr =
-								dateTimeValue != null ? getDateTimeFormatter().format(dateTimeValue) : null;
-						responseData.put(attrName, dateTimeValueStr);
+						responseData.put(attrName, dateTimeValue != null ? dateTimeValue.toString() : null);
 						break;
 					case DECIMAL:
 						responseData.put(attrName, entity.getDouble(attrName));

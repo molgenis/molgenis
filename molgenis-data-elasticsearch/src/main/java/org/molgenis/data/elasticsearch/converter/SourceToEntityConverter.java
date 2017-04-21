@@ -7,10 +7,11 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
@@ -106,7 +107,7 @@ public class SourceToEntityConverter
 					case DATE:
 						try
 						{
-							entityValue = MolgenisDateFormat.parseLocalDate((String) sourceValue);
+							entityValue = LocalDate.parse((String) sourceValue);
 						}
 						catch (Exception e)
 						{
@@ -116,7 +117,7 @@ public class SourceToEntityConverter
 					case DATE_TIME:
 						try
 						{
-							entityValue = MolgenisDateFormat.parseInstant((String) sourceValue);
+							entityValue = Instant.parse((String) sourceValue);
 						}
 						catch (Exception e)
 						{
