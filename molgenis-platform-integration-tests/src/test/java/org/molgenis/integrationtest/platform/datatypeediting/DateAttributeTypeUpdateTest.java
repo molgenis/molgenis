@@ -3,13 +3,13 @@ package org.molgenis.integrationtest.platform.datatypeediting;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
 import java.time.LocalDate;
 
+import static java.time.ZoneId.systemDefault;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
@@ -39,8 +39,9 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	@DataProvider(name = "validConversionTestCases")
 	public Object[][] validConversionTestCases()
 	{
-		return new Object[][] { { "2016-11-13", STRING, "2016-11-13" }, { "2016-11-13", TEXT, "2016-11-13" },
-				{ "2016-11-13", DATE_TIME, "2016-11-13T00:00:00+0100" } };
+		return new Object[][] { { LocalDate.parse("2016-11-13"), STRING, "2016-11-13" },
+				{ LocalDate.parse("2016-11-13"), TEXT, "2016-11-13" }, { LocalDate.parse("2016-11-13"), DATE_TIME,
+				LocalDate.parse("2016-11-13").atStartOfDay(systemDefault()).toInstant() } };
 	}
 
 	/**
@@ -53,14 +54,10 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	 * @throws ParseException
 	 */
 	@Test(dataProvider = "validConversionTestCases")
-	public void testValidConversion(String valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
+	public void testValidConversion(LocalDate valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
 	{
-		LocalDate localDate = LocalDate.parse(valueToConvert);
-		testTypeConversion(localDate, typeToConvertTo);
-
-		if (typeToConvertTo.equals(DATE_TIME))
-			convertedValue = MolgenisDateFormat.parseInstant(convertedValue.toString());
+		testTypeConversion(valueToConvert, typeToConvertTo);
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);

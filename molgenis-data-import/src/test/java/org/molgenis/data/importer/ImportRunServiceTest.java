@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
+import java.time.ZoneId;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,7 +46,7 @@ public class ImportRunServiceTest extends AbstractMolgenisSpringTest
 		Instant endDate = Instant.parse("2016-02-13T12:35:12.231Z");
 		when(importRun.getEndDate()).thenReturn(endDate);
 
-		String mailText = importRunService.createEnglishMailText(importRun);
+		String mailText = importRunService.createEnglishMailText(importRun, ZoneId.of("Europe/Amsterdam"));
 		assertEquals(mailText, "The import started by you on Saturday, February 13, 2016 1:34:56 PM CET "
 				+ "finished on 1:35:12 PM with status: FAILED\nMessage:\nEntity already exists.");
 	}

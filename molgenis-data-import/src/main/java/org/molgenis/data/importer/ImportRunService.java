@@ -88,7 +88,7 @@ public class ImportRunService
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 			mailMessage.setTo(userService.getUser(importRun.getUsername()).getEmail());
 			mailMessage.setSubject(createMailTitle(importRun));
-			mailMessage.setText(createEnglishMailText(importRun));
+			mailMessage.setText(createEnglishMailText(importRun, ZoneId.systemDefault()));
 			mailSender.send(mailMessage);
 		}
 		catch (MailException mce)
@@ -105,10 +105,10 @@ public class ImportRunService
 	 * @param importRun the ImportRun to describe, it should have non-null start and end dates.
 	 * @return String containing the mail message.
 	 */
-	String createEnglishMailText(ImportRun importRun)
+	String createEnglishMailText(ImportRun importRun, ZoneId zone)
 	{
-		ZonedDateTime start = importRun.getStartDate().atZone(ZoneId.systemDefault());
-		ZonedDateTime end = importRun.getEndDate().atZone(ZoneId.systemDefault());
+		ZonedDateTime start = importRun.getStartDate().atZone(zone);
+		ZonedDateTime end = importRun.getEndDate().atZone(zone);
 		String startDateTimeString = ofLocalizedDateTime(FULL).withLocale(ENGLISH).format(start);
 		String endTimeString = ofLocalizedTime(MEDIUM).withLocale(ENGLISH).format(end);
 
