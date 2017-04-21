@@ -202,9 +202,7 @@ If you only want to change one attribute without needing to provide all other at
 PUT http://your.molgenis.url/api/v1/dataset/3/name
 Content-Type: application/json
 
-{
-    "name": "renamed data set"
-}
+"renamed data set"
 ```
 *Response*
 ```
