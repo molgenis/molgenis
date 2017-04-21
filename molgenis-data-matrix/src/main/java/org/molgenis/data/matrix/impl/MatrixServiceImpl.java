@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -38,8 +35,8 @@ public class MatrixServiceImpl implements MatrixService
 	@Autowired
 	public MatrixServiceImpl(DataService dataService, FileStore fileStore)
 	{
-		this.dataService = dataService;
-		this.fileStore = fileStore;
+		this.dataService = Objects.requireNonNull(dataService);
+		this.fileStore = Objects.requireNonNull(fileStore);
 	}
 
 	private DoubleMatrix getMatrixByEntityTypeId(String entityId)
@@ -47,7 +44,7 @@ public class MatrixServiceImpl implements MatrixService
 		Entity entity = dataService.findOneById(MatrixMetadata.PACKAGE + "_" + MatrixMetadata.SIMPLE_NAME, entityId);
 		if (entity != null)
 		{
-			return getMatrix(entityId, entity);
+			return getMatrix(entity);
 		}
 		else
 		{
@@ -55,21 +52,21 @@ public class MatrixServiceImpl implements MatrixService
 		}
 	}
 
-	private DoubleMatrix getMatrix(String entityId, Entity entity)
+	private DoubleMatrix getMatrix(Entity entity)
 	{
 		DoubleMatrix matrix;
-		if (matrixMap.get(entityId) == null)
+		if (matrixMap.get(entity.getIdValue()) == null)
 		{
 			String fileLocation = entity.getString(MatrixMetadata.FILE_LOCATION);
 			char seperator = MatrixMetadata.getSeparatorValue(entity.getString(MatrixMetadata.SEPERATOR));
 			matrix = new DoubleMatrix(new File(fileLocation), seperator);
-			matrixMap.put(entityId, matrix);
+			matrixMap.put(entity.getIdValue().toString(), matrix);
 		}
 		else
 		{
-			matrix = matrixMap.get(entityId);
+			matrix = matrixMap.get(entity.getIdValue().toString());
 		}
-		getMappers(entityId, entity);
+		getMappers(entity.getIdValue().toString(), entity);
 		return matrix;
 	}
 
@@ -121,7 +118,7 @@ public class MatrixServiceImpl implements MatrixService
 			{
 				MatrixMapper columnMapper = columnMappingMap.get(entityName);
 				if (columnMapper != null) column = columnMapper.map(column);
-				results.add(new Score(row, column, matrix.getValueByName(row, column)));
+				results.add(Score.createScore(row, column, matrix.getValueByName(row, column)));
 			}
 		}
 		return results;

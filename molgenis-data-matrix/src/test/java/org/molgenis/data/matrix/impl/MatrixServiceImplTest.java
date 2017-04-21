@@ -30,7 +30,7 @@ public class MatrixServiceImplTest
 		when(entity.getString(MatrixMetadata.FILE_LOCATION))
 				.thenReturn(ResourceUtils.getFile(getClass(), "/testmatrix.txt").getAbsolutePath());
 		when(entity.getString(MatrixMetadata.SEPERATOR)).thenReturn("TAB");
-
+		when(entity.getIdValue()).thenReturn("test");
 		DataService dataService = mock(DataService.class);
 		when(dataService.findOneById(MatrixMetadata.PACKAGE + "_" + MatrixMetadata.SIMPLE_NAME, "test"))
 				.thenReturn(entity);
@@ -51,10 +51,10 @@ public class MatrixServiceImplTest
 	{
 		List<Score> results = matrixService.getValueByNames("test", "gene1,gene2", "hpo234,hpo123");
 
-		assertTrue(results.contains(new Score("gene1", "hpo123", 1.123)));
-		assertTrue(results.contains(new Score("gene1", "hpo234", 1.234)));
-		assertTrue(results.contains(new Score("gene2", "hpo123", 2.123)));
-		assertTrue(results.contains(new Score("gene2", "hpo234", 2.234)));
+		assertTrue(results.contains(Score.createScore("gene1", "hpo123", 1.123)));
+		assertTrue(results.contains(Score.createScore("gene1", "hpo234", 1.234)));
+		assertTrue(results.contains(Score.createScore("gene2", "hpo123", 2.123)));
+		assertTrue(results.contains(Score.createScore("gene2", "hpo234", 2.234)));
 		assertEquals(results.size(), 4);
 	}
 }
