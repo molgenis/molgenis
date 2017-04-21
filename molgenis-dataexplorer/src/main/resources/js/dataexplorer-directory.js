@@ -21,7 +21,7 @@ $.when($,
     function sendNegotiatorRequest() {
         var entityTypeId = molgenis.dataexplorer.getSelectedEntityMeta().name
         var rsql = molgenis.dataexplorer.getRSQL()
-        var uri = '/api/v2/' + entityTypeId + '?q=' + rsql
+        var uri = '/api/v2/' + entityTypeId + '?num=10000&q=' + rsql
 
         var collections = []
 
