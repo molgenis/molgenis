@@ -1,10 +1,16 @@
 package org.molgenis.dataexplorer;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -22,11 +28,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
@@ -35,6 +45,23 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 {
 	@InjectMocks
 	private DataExplorerController controller = new DataExplorerController();
+
+	@Mock
+	private Repository<Entity> repository;
+
+	@Mock
+	private EntityType entityType;
+	private String entityTypeId = "id";
+
+	@Mock
+	private Entity entity;
+	private String entityId = "1";
+
+	@Mock
+	private Attribute idAttr;
+
+	@Mock
+	private Configuration configuration;
 
 	@Mock
 	public AppSettings appSettings;
@@ -57,10 +84,22 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	private MockMvc mockMvc;
 
 	@BeforeMethod
-	public void beforeTest()
+	public void beforeTest() throws IOException
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity("yes", Permission.WRITEMETA)).thenReturn(true);
 		when(molgenisPermissionService.hasPermissionOnEntity("no", Permission.WRITEMETA)).thenReturn(false);
+
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(repository.findOneById(entityId)).thenReturn(entity);
+		when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
+		when(dataService.getRepository(entityTypeId)).thenReturn(repository);
+		when(dataExplorerSettings.getEntityReport(entityTypeId)).thenReturn("template");
+
+		when(configuration.getTemplate(entityTypeId + ".ftl")).thenReturn(mock(Template.class));
+		when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
+
+		when(dataExplorerSettings.getModStandaloneReports()).thenReturn(true);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
@@ -76,5 +115,23 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public void getAnnotatorModuleFail() throws Exception
 	{
 		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
+	}
+
+	@Test
+	public void testViewEntityDetails() throws Exception
+	{
+		String actual = controller.viewEntityDetails(entityTypeId, entityId, mock(Model.class));
+		String expected = "view-entityreport";
+
+		Assert.assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testViewEntityDetailsById() throws Exception
+	{
+		String actual = controller.viewEntityDetailsById(entityTypeId, entityId, mock(Model.class));
+		String expected = "view-standalone-report";
+
+		Assert.assertEquals(actual, expected);
 	}
 }
