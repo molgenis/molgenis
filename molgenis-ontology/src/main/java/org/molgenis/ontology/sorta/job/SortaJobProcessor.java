@@ -1,10 +1,10 @@
 package org.molgenis.ontology.sorta.job;
 
-import org.elasticsearch.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.controller.SortaServiceController;

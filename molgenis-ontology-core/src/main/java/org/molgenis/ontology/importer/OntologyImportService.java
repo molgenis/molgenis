@@ -64,7 +64,6 @@ public class OntologyImportService implements ImportService
 				throw new MolgenisDataException(e);
 			}
 		}
-
 		return report;
 	}
 
