@@ -4,16 +4,20 @@
     <div class="modal-dialog modal-xxl">
         <div class="modal-content">
         <#if showStandaloneReportUrl>
-            <form class="form-inline" style="text-align: right;margin-right: 1em;">
+            <form class="form-inline" style="text-align: right; margin-right: 2em; margin-top: 1em">
                 <div class="form-group">
                     <small><label for="standalone-report-url">Share this entity report</label></small>
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-12 input-group">
+
                             <input type="text" class="form-control input-sm" id="standalone-report-url"
                                    readonly="readonly">
-                            <button title="Copy to clipboard" class="btn btn-default btn-sm"
-                                    id="copy-standalone-report-url-btn"><span
-                                    class="glyphicon glyphicon-duplicate" aria-hidden="true"></span></button>
+                            <span class="input-group-btn">
+                                <button title="Copy to clipboard" class="btn btn-default btn-sm" type="button"
+                                        id="copy-standalone-report-url-btn">
+                                    <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
+                                </button>
+                            </span>
                         </div>
                     </div>
                 </div>
