@@ -45,6 +45,14 @@
                                 </#list>
                                 </td>
                             </#if>
+                        <#elseif sourceAttribute.dataType == "DATE">
+                            <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+                                <td>${feedbackRow.sourceEntity.get(sourceAttribute.name).format('MMM d, yyyy')}</td>
+                            </#if>
+                        <#elseif sourceAttribute.dataType == "DATE_TIME">
+                            <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+                                <td>${feedbackRow.sourceEntity.get(sourceAttribute.name).format('MMM d, yyyy HH:mm:SS a')}</td>
+                            </#if>
                         <#else>
                             <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
                                 <#assign value = feedbackRow.sourceEntity.get(sourceAttribute.name)>
@@ -67,8 +75,10 @@
                 </#if>
                 <#if feedbackRow.success>
                     <#if feedbackRow.value??>
-                        <#if feedbackRow.value?is_date_like> <!-- its a date or datetime -->
-                            <td>${feedbackRow.value?datetime}</td>
+                        <#if targetAttribute.dataType == 'DATE'> <!-- its a date -->
+                            <td>${feedbackRow.value.format('MMM d, yyyy')}</td>
+                        <#elseif targetAttribute.dataType == 'DATE_TIME'> <!-- its a date_time -->
+                            <td>${feedbackRow.value.format('MMM d, yyyy HH:mm:SS a')}</td>
                         <#elseif feedbackRow.value?is_hash> <!-- its an entity -->
                             <td>${feedbackRow.value.getLabelValue()?html}</td>
                         <#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
