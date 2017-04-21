@@ -171,6 +171,10 @@ public class AccountController
 			accountService.activateUser(activationCode);
 			model.addAttribute("successMessage", "Your account has been activated, you can now sign in.");
 		}
+		catch (MolgenisUserException e)
+		{
+			model.addAttribute("warningMessage", e.getMessage());
+		}
 		catch (RuntimeException e)
 		{
 			model.addAttribute("errorMessage", e.getMessage());

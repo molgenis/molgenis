@@ -364,8 +364,7 @@ public class ImportWriter
 						}
 
 						// do not set generated auto refEntities to null
-						if ((!attr.isAuto() || !refEntities.isEmpty()) && (!attr.hasDefaultValue() || refEntities
-								.isEmpty()))
+						if (!refEntities.isEmpty())
 						{
 							entity.set(attrName, refEntities);
 						}
