@@ -9,7 +9,6 @@ import org.molgenis.file.model.FileMeta;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
@@ -134,7 +133,7 @@ class PostgreSqlUtils
 					{
 						throw new MolgenisDataException(
 								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
+										queryValue.getClass().getSimpleName(), LocalDate.class.getSimpleName()));
 					}
 					return queryValue;
 				case DATE_TIME:
