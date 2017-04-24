@@ -106,6 +106,52 @@ The HTML you specify in the template will be shown in a modal dialog, so you'll 
 </div>
 ```
 
+# Entity report in dataexplorer tabs
+If you use the dataexplorer, you might have noticed the tabs showing data or aggregates. MOLGENIS allows you to create tabs with your own 
+content. This content support both HTML and JavaScript.
+
+To Create your own data explorer tab, do the following:
+1. In the top menu, select the Data Explorer.
+2. In the pulldown, select the entity FreemarkerTemplate
+3. Push the plus icon.
+4. The name is `view-<report name>-entitiesreport.ftl`. So for a report called example, the template would be called `view-example-entitiesreport.ftl`
+5. The value is a [Freemarker](http://freemarker.org/) Template specifying the contents of the report.
+
+```html
+<h1>Example</h1>
+<p>
+    This shows you an example of 
+    a report as a tab in the dataexplorer
+</p>
+```
+
+Now that you created a freemarker template, you want to associate this template with your data set:
+1. Go to the dataexplorer and select the cogwheel in the top right corner
+2. Scroll down to the reports section
+3. In the text area, type the following: `<my data set name>:<report name>`. For our report, we have a data set called MyData. To link our previously created template, fill in `MyData:example`.
+4. Save, wait for the page to reload, and select MyData from the dropdown in the top right corner.
+5. You will now see a new tab called example, which contains the HTML you filled in in the freemarker template.
+
+# Standalone entity report
+In some cases it would be nice to be able to share a row in your data with someone else. Therefore MOLGENIS contains the “standalone report” functionality. This can be set in the dataexplorer settings. To go there, go to the dataexplorer and click on the gear below the logout button.
+![Setting cog](../images/customize/setting_cog.png?raw=true, "setting cog")
+
+In section “Modules”, subsection “Data” the setting “Standalone Reports” can be found. By default the “Standalone Reports” are turned off. 
+![Dataexplorer settings](../images/customize/dataexplorer_settings.png?raw=true, "dataexplorer settings")
+
+When turning them on, keep in mind that when customizing your entity report in the FreeMarkerTemplate table (see above), you also need to add a customized “view-standalone-report-specific-*Your entity name here*.ftl”. This file should contain what you want to show in your standalone report. 
+![Freemarker table](../images/customize/freemarker_table.png?raw=true, "freemarker table")
+![Standalone Report form](../images/customize/standalone_report_form.png?raw=true, "standalone report form")
+
+With the configuration being completed, clicking on the magnifying glass button in front of a row in your dataset will result in your specific freemarker template with the addition of a share link in the upper right corner. 
+![Share URL](../images/customize/share_url.png?raw=true, "share url")
+
+When clicking the copy button, the URL is copied to your clipboard. You can paste it in your address bar in the browser to go to the specific entity report of that row. This way you can bookmark it and share it with others. Opening the link shows the content of your entity report on a new page. Clicking the blue button with: “View full dataset” leads back to the specific table in the dataexplorer. 
+![Standalone view](../images/customize/standalone_view.png?raw=true, "standalone view")
+
+[Download the example dataset here](../data/standalone_report_data_example.xlsx)
+[Download the freemarker template example here](../data/view-standalone-report-specific-root_hospital_patients.ftl)
+
 ## Accessing entity details from Freemarker
 The model will contain
  * a variable named `entity` of type [`org.molgenis.data.Entity`](https://github.com/molgenis/molgenis/blob/master/molgenis-data/src/main/java/org/molgenis/data/Entity.java) 

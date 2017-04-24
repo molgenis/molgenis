@@ -21,7 +21,6 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -90,9 +89,6 @@ public class DataExplorerController extends MolgenisPluginController
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Autowired
-	MenuManagerService menuManager;
-
-	@Autowired
 	private Gson gson;
 
 	@Autowired
@@ -115,12 +111,10 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @param model
 	 * @return the view name
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = GET)
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
 			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model) throws Exception
 	{
-		boolean entityExists = false;
-		boolean hasEntityPermission = false;
 		StringBuilder message = new StringBuilder("");
 
 		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
@@ -142,7 +136,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 			if (selectedEntityName != null)
 			{
-				checkExistsAndPermission(selectedEntityName, message, entityExists, hasEntityPermission);
+				checkExistsAndPermission(selectedEntityName, message);
 			}
 		}
 		if (StringUtils.isNotEmpty(message.toString()))
@@ -156,10 +150,11 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	private void checkExistsAndPermission(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			StringBuilder message, boolean entityExists, boolean hasEntityPermission)
+			StringBuilder message)
 	{
-		entityExists = dataService.hasRepository(selectedEntityName);
-		hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
+		boolean entityExists = dataService.hasRepository(selectedEntityName);
+		boolean hasEntityPermission = molgenisPermissionService
+				.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -182,36 +177,36 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
-		if (moduleId.equals(MOD_DATA))
+		switch (moduleId)
 		{
-			model.addAttribute("genomicDataSettings", genomicDataSettings);
-			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
-		}
-		else if (moduleId.equals(MOD_ENTITIESREPORT))
-		{
-			model.addAttribute("genomicDataSettings", genomicDataSettings);
-			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
-			model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
+			case MOD_DATA:
+				model.addAttribute("genomicDataSettings", genomicDataSettings);
+				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
+				break;
+			case MOD_ENTITIESREPORT:
+				model.addAttribute("genomicDataSettings", genomicDataSettings);
+				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 
-			model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
-			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
-		}
-		else if (moduleId.equals(MOD_ANNOTATORS))
-		{
-			// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
-			// self-explanatory
-			if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
-			{
-				throw new MolgenisDataAccessException(
-						"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
-								+ "], this permission is necessary run the annotators.");
-			}
-			Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
-					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
-							.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
-			model.addAttribute("annotationRun", annotationRun);
-			model.addAttribute("entityTypeId", entityTypeId);
+				model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
+				model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
+				break;
+			case MOD_ANNOTATORS:
+				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
+				// self-explanatory
+				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
+				{
+					throw new MolgenisDataAccessException(
+							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
+									+ "], this permission is necessary run the annotators.");
+				}
+				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
+						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
+								.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
+				model.addAttribute("annotationRun", annotationRun);
+				model.addAttribute("entityTypeId", entityTypeId);
+				break;
 		}
 
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -221,9 +216,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService
+		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService
 				.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
-		return showCopy;
 	}
 
 	/**
@@ -338,8 +332,8 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
-		String fileName = "";
-		ServletOutputStream outputStream = null;
+		String fileName;
+		ServletOutputStream outputStream;
 
 		switch (dataRequest.getDownloadType())
 		{
@@ -404,9 +398,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @param model
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
-	 * @author mdehaan, fkelpin
 	 */
-	@RequestMapping(value = "/details", method = RequestMethod.POST)
+	@RequestMapping(value = "/details", method = POST)
 	public String viewEntityDetails(@RequestParam(value = "entityTypeId") String entityTypeId,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
@@ -415,11 +408,41 @@ public class DataExplorerController extends MolgenisPluginController
 
 		model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
 		model.addAttribute("entityType", entityType);
-		model.addAttribute("viewName", getViewName(entityTypeId));
+		model.addAttribute("viewName", getEntityReportViewName(entityTypeId));
+
+		// Used to create a URL to a standalone report
+		model.addAttribute("showStandaloneReportUrl", dataExplorerSettings.getModStandaloneReports());
+		model.addAttribute("entityTypeId", entityTypeId);
+		model.addAttribute("entityId", entityId);
+
 		return "view-entityreport";
 	}
 
-	private String getViewName(String entityTypeId)
+	/**
+	 * Builds a model containing one entity and returns standalone report ftl view
+	 *
+	 * @param entityTypeId
+	 * @param entityId
+	 * @param model
+	 * @return standalone report view
+	 * @throws Exception if an entity name or id is not found
+	 */
+	@RequestMapping(value = "/details/{entityTypeId}/{entityId}", method = GET)
+	public String viewEntityDetailsById(@PathVariable(value = "entityTypeId") String entityTypeId,
+			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
+	{
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+		Object id = getTypedValue(entityId, entityType.getIdAttribute());
+
+		model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
+		model.addAttribute("entityType", entityType);
+		model.addAttribute("entityTypeId", entityTypeId);
+		model.addAttribute("viewName", getStandaloneReportViewName(entityTypeId));
+
+		return "view-standalone-report";
+	}
+
+	private String getEntityReportViewName(String entityTypeId)
 	{
 		// check if entity report is set for this entity
 		String reportTemplate = dataExplorerSettings.getEntityReport(entityTypeId);
@@ -443,6 +466,16 @@ public class DataExplorerController extends MolgenisPluginController
 			return "view-entityreport-generic";
 		}
 		return "view-entityreport-generic-default";
+	}
+
+	private String getStandaloneReportViewName(String entityTypeId)
+	{
+		final String specificStandaloneReportViewName = "view-standalone-report-specific-" + entityTypeId;
+		if (viewExists(specificStandaloneReportViewName))
+		{
+			return specificStandaloneReportViewName;
+		}
+		return "view-standalone-report-default";
 	}
 
 	private boolean viewExists(String viewName)
@@ -477,7 +510,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
+		return new ErrorMessageResponse(new ErrorMessage(
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
