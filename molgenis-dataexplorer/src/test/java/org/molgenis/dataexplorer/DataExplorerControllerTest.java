@@ -34,8 +34,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
@@ -62,6 +61,9 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
 	@Mock
 	private Configuration configuration;
+
+	@Mock
+	private Model model;
 
 	@Mock
 	public AppSettings appSettings;
@@ -94,12 +96,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(repository.findOneById(entityId)).thenReturn(entity);
 		when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
 		when(dataService.getRepository(entityTypeId)).thenReturn(repository);
+
 		when(dataExplorerSettings.getEntityReport(entityTypeId)).thenReturn("template");
-
-		when(configuration.getTemplate(entityTypeId + ".ftl")).thenReturn(mock(Template.class));
-		when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
-
 		when(dataExplorerSettings.getModStandaloneReports()).thenReturn(true);
+
+		when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
@@ -120,18 +121,40 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void testViewEntityDetails() throws Exception
 	{
-		String actual = controller.viewEntityDetails(entityTypeId, entityId, mock(Model.class));
+		when(configuration.getTemplate("view-entityreport-specific-template.ftl")).thenReturn(mock(Template.class));
+
+		String actual = controller.viewEntityDetails(entityTypeId, entityId, model);
 		String expected = "view-entityreport";
 
 		Assert.assertEquals(actual, expected);
+		verify(model).addAttribute("entity", entity);
+		verify(model).addAttribute("entityType", entityType);
+		verify(model).addAttribute("viewName", "view-entityreport-specific-template");
+		verify(model).addAttribute("showStandaloneReportUrl", true);
+		verify(model).addAttribute("entityTypeId", entityTypeId);
+		verify(model).addAttribute("entityId", entityId);
 	}
 
 	@Test
 	public void testViewEntityDetailsById() throws Exception
 	{
-		String actual = controller.viewEntityDetailsById(entityTypeId, entityId, mock(Model.class));
+		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl"))
+				.thenReturn(mock(Template.class));
+
+		String actual = controller.viewEntityDetailsById(entityTypeId, entityId, model);
 		String expected = "view-standalone-report";
 
 		Assert.assertEquals(actual, expected);
+		verify(model).addAttribute("entity", entity);
+		verify(model).addAttribute("entityType", entityType);
+		verify(model).addAttribute("entityTypeId", entityTypeId);
+		verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "EntityType with id \\[id\\] does not exist\\. Did you use the correct URL\\?")
+	public void testViewEntityDetailsByIdEntityTypeNotExists() throws Exception
+	{
+		when(dataService.getEntityType(entityTypeId)).thenReturn(null);
+		controller.viewEntityDetailsById(entityTypeId, entityId, model);
 	}
 }
