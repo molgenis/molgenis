@@ -425,21 +425,30 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @param entityId
 	 * @param model
 	 * @return standalone report view
-	 * @throws Exception if an entity name or id is not found
+	 * @throws Exception                   if an entity name or id is not found
+	 * @throws MolgenisDataAccessException if an EntityType does not exist
 	 */
 	@RequestMapping(value = "/details/{entityTypeId}/{entityId}", method = GET)
 	public String viewEntityDetailsById(@PathVariable(value = "entityTypeId") String entityTypeId,
 			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeId);
-		Object id = getTypedValue(entityId, entityType.getIdAttribute());
+		if (entityType == null)
+		{
+			throw new MolgenisDataAccessException(
+					"EntityType with id [" + entityTypeId + "] does not exist. Did you use the correct URL?");
+		}
+		else
+		{
+			Object id = getTypedValue(entityId, entityType.getIdAttribute());
 
-		model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
-		model.addAttribute("entityType", entityType);
-		model.addAttribute("entityTypeId", entityTypeId);
-		model.addAttribute("viewName", getStandaloneReportViewName(entityTypeId));
+			model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
+			model.addAttribute("entityType", entityType);
+			model.addAttribute("entityTypeId", entityTypeId);
+			model.addAttribute("viewName", getStandaloneReportViewName(entityTypeId));
 
-		return "view-standalone-report";
+			return "view-standalone-report";
+		}
 	}
 
 	private String getEntityReportViewName(String entityTypeId)
