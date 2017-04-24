@@ -25,7 +25,6 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -55,10 +54,12 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
+import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
+import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -530,10 +531,11 @@ public class MappingServiceController extends MolgenisPluginController
 	 */
 	@RequestMapping("/createIntegratedEntity")
 	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String newEntityName,
-			@RequestParam boolean addSourceAttribute)
+			@RequestParam(required = false) boolean addSourceAttribute)
 	{
-		scheduleMappingJobInternal(mappingProjectId, newEntityName, addSourceAttribute);
-		return "redirect:" + menuReaderService.getMenu().findMenuItemPath(JobsController.ID);
+		String jobHref = scheduleMappingJobInternal(mappingProjectId, newEntityName, addSourceAttribute);
+		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(JobsController.ID);
+		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=10000", jobControllerURL, jobHref);
 	}
 
 	/**
@@ -547,12 +549,8 @@ public class MappingServiceController extends MolgenisPluginController
 	public ResponseEntity<String> scheduleMappingJob(@RequestParam String mappingProjectId,
 			@RequestParam String targetEntityTypeId, @RequestParam boolean addSourceAttribute) throws URISyntaxException
 	{
-		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
-				addSourceAttribute);
-
-		String href = Href.concatEntityHref("/api/v2", mappingJobExecution.getEntityType().getId(),
-				mappingJobExecution.getIdValue());
-		return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
+		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute);
+		return ResponseEntity.created(new java.net.URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
 	}
 
 	/**
@@ -561,9 +559,9 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param mappingProjectId   ID for the mapping project to run
 	 * @param targetEntityTypeId ID for the integrated dataset
 	 * @param addSourceAttribute indication if a source attribute should be added to the target {@link EntityType}
-	 * @return the scheduled {@link MappingJobExecution}
+	 * @return the HREF for the scheduled {@link MappingJobExecution}
 	 */
-	private MappingJobExecution scheduleMappingJobInternal(String mappingProjectId, String targetEntityTypeId,
+	private String scheduleMappingJobInternal(String mappingProjectId, String targetEntityTypeId,
 			boolean addSourceAttribute)
 	{
 		MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
@@ -576,7 +574,8 @@ public class MappingServiceController extends MolgenisPluginController
 		mappingJobExecution.setResultUrl(resultUrl);
 		MappingJob job = mappingJobFactory.createJob(mappingJobExecution);
 		executorService.submit(job);
-		return mappingJobExecution;
+		return concatEntityHref("/api/v2", mappingJobExecution.getEntityType().getId(),
+				mappingJobExecution.getIdValue());
 	}
 
 	/**

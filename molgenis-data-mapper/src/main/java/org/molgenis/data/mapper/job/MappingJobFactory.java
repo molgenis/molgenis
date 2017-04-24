@@ -56,7 +56,7 @@ public class MappingJobFactory
 		dataService.add(MAPPING_JOB_EXECUTION, mappingJobExecution);
 		String mappingProjectId = mappingJobExecution.getMappingProjectId();
 		String targetEntityTypeId = mappingJobExecution.getTargetEntityTypeId();
-		String addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
+		boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
 		String username = mappingJobExecution.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job

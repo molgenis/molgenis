@@ -43,9 +43,9 @@ public class MappingJobExecution extends JobExecution
 		set(MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID, targetEntityTypeId);
 	}
 
-	public String isAddSourceAttribute()
+	public boolean isAddSourceAttribute()
 	{
-		return getString(MappingJobExecutionMetadata.ADD_SOURCE_ATTRIBUTE);
+		return getBoolean(MappingJobExecutionMetadata.ADD_SOURCE_ATTRIBUTE);
 	}
 
 	public void setAddSourceAttribute(boolean addSourceAttribute)
