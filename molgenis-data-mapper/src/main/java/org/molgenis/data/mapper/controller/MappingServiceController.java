@@ -62,8 +62,7 @@ import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty
 import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.MediaType.*;
 
 @Controller
 @RequestMapping(URI)
@@ -545,7 +544,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param targetEntityTypeId ID of the new entity to create
 	 * @return the href of the created MappingJobExecution
 	 */
-	@RequestMapping("/map")
+	@RequestMapping(value = "/map", method = RequestMethod.POST, produces = TEXT_PLAIN_VALUE)
 	public ResponseEntity<String> scheduleMappingJob(@RequestParam String mappingProjectId,
 			@RequestParam String targetEntityTypeId, @RequestParam boolean addSourceAttribute) throws URISyntaxException
 	{
