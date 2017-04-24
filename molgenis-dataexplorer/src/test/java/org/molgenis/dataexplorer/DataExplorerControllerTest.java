@@ -156,5 +156,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	{
 		when(dataService.getEntityType(entityTypeId)).thenReturn(null);
 		controller.viewEntityDetailsById(entityTypeId, entityId, model);
+		verifyNoMoreInteractions(model);
 	}
 }
