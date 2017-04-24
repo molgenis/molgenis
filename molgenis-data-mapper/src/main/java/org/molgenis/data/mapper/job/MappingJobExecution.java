@@ -1,10 +1,8 @@
-package org.molgenis.data.mapper.meta;
+package org.molgenis.data.mapper.job;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
-
-import static org.molgenis.data.mapper.meta.MappingJobExecutionMetadata.*;
 
 public class MappingJobExecution extends JobExecution
 {
@@ -27,36 +25,36 @@ public class MappingJobExecution extends JobExecution
 
 	public String getMappingProjectId()
 	{
-		return getString(MAPPING_PROJECT_ID);
+		return getString(MappingJobExecutionMetadata.MAPPING_PROJECT_ID);
 	}
 
 	public void setMappingProjectId(String mappingProjectId)
 	{
-		set(MAPPING_PROJECT_ID, mappingProjectId);
+		set(MappingJobExecutionMetadata.MAPPING_PROJECT_ID, mappingProjectId);
 	}
 
 	public String getTargetEntityTypeId()
 	{
-		return getString(TARGET_ENTITY_TYPE_ID);
+		return getString(MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID);
 	}
 
 	public void setTargetEntityTypeId(String targetEntityTypeId)
 	{
-		set(TARGET_ENTITY_TYPE_ID, targetEntityTypeId);
+		set(MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID, targetEntityTypeId);
 	}
 
 	public String isAddSourceAttribute()
 	{
-		return getString(ADD_SOURCE_ATTRIBUTE);
+		return getString(MappingJobExecutionMetadata.ADD_SOURCE_ATTRIBUTE);
 	}
 
 	public void setAddSourceAttribute(boolean addSourceAttribute)
 	{
-		set(ADD_SOURCE_ATTRIBUTE, addSourceAttribute);
+		set(MappingJobExecutionMetadata.ADD_SOURCE_ATTRIBUTE, addSourceAttribute);
 	}
 
 	private void setDefaultValues()
 	{
-		setType(MAPPING_JOB_TYPE);
+		setType(MappingJobExecutionMetadata.MAPPING_JOB_TYPE);
 	}
 }

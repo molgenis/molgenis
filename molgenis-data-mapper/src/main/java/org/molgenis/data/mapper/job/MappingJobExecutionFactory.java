@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.meta;
+package org.molgenis.data.mapper.job;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;

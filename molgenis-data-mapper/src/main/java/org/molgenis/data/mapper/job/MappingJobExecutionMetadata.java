@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.meta;
+package org.molgenis.data.mapper.job;
 
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityType;
@@ -34,7 +34,7 @@ public class MappingJobExecutionMetadata extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Mapping job execution");
+		setLabel("Mapping Job Execution");
 		setExtends(jobExecutionMetaData);
 
 		addAttribute(MAPPING_PROJECT_ID).setDataType(STRING).setLabel("Mapping Project ID").setNillable(false);
