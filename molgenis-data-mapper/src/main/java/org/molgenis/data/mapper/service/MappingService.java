@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.service;
 
 import org.molgenis.auth.User;
+import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -45,20 +46,20 @@ public interface MappingService
 	 * Adds the source attribute by default
 	 *
 	 * @param mappingTarget the MappingTarget whose mappings are applied
-	 * @param entityTypeId    the name of the entity to map to
-	 * @return fully qualified name of the generated entity
+	 * @param entityTypeId  the name of the entity to map to
+	 * @param progress      progress of the mapping
 	 */
-	String applyMappings(MappingTarget mappingTarget, String entityTypeId);
+	void applyMappings(MappingTarget mappingTarget, String entityTypeId, Progress progress);
 
 	/**
 	 * Applies all mappings in a {@link MappingTarget}
 	 *
 	 * @param mappingTarget      the MappingTarget whose mappings are applied
-	 * @param entityTypeId         the name of the entity to map to
+	 * @param entityTypeId       the name of the entity to map to
 	 * @param addSourceAttribute boolean indicating if the 'source' attribute should be added to the target repository
-	 * @return fully qualified name of the generated entity
+	 * @param progress           progress of the mapping
 	 */
-	String applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute);
+	void applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute, Progress progress);
 
 	/**
 	 * Deletes a {@link MappingProject}

@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.service.impl;
 
 import org.molgenis.auth.User;
 import org.molgenis.data.*;
+import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -167,14 +168,16 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	public String applyMappings(MappingTarget mappingTarget, String entityTypeId)
+	@Override
+	public void applyMappings(MappingTarget mappingTarget, String entityTypeId, Progress progress)
 	{
-		return applyMappings(mappingTarget, entityTypeId, true);
+		applyMappings(mappingTarget, entityTypeId, true, progress);
 	}
 
 	@Override
 	@Transactional
-	public String applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute)
+	public void applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute,
+			Progress progress)
 	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetaData.setId(idGenerator.generateId());
@@ -224,7 +227,6 @@ public class MappingServiceImpl implements MappingService
 				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			}
 			LOG.info("Done applying mappings to repository [" + targetMetaData.getId() + "]");
-			return targetMetaData.getId();
 		}
 		catch (RuntimeException ex)
 		{
