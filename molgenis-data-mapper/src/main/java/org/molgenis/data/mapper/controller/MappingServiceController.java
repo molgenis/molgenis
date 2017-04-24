@@ -678,7 +678,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String targetAttributeIdAttribute = null;
 		String targetAttributeLabelAttribute = null;
 
-		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
+		if (EntityTypeUtils.isReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService
 					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getId());
@@ -714,7 +714,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
+		if (EntityTypeUtils.isReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService
 					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getId());
