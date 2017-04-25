@@ -20,7 +20,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 /**
  * Validates {@link Query queries} based on the {@link EntityType entity type} that will be queried. Converts query
@@ -378,7 +378,7 @@ public class QueryValidator
 			catch (DateTimeParseException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Failed to parse Attribute [%s] value [%s] as a datetime.", attr.getName(),
+						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(),
 								paramStrValue)));
 			}
 		}
@@ -416,7 +416,7 @@ public class QueryValidator
 			catch (DateTimeParseException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Failed to parse attribute [%s] value [%s] as a date.", attr.getName(), paramStrValue)));
+						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramStrValue)));
 			}
 		}
 		else

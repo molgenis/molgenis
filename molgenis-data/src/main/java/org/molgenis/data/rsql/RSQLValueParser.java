@@ -11,8 +11,7 @@ import java.time.format.DateTimeParseException;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 /**
  * Converts RSQL value symbols to the relevant data type.
@@ -73,7 +72,7 @@ public class RSQLValueParser
 		catch (DateTimeParseException e)
 		{
 			throw new MolgenisDataException(
-					format("Failed to parse attribute [%s] value [%s] as datetime", attr.getName(), paramValue));
+					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramValue));
 		}
 	}
 
@@ -86,7 +85,7 @@ public class RSQLValueParser
 		catch (DateTimeParseException e)
 		{
 			throw new MolgenisDataException(
-					format("Failed to parse attribute [%s] value [%s] as a date.", attr.getName(), paramValue));
+					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramValue));
 		}
 	}
 

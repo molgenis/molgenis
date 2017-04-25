@@ -22,8 +22,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 public class EntityUtils
 {
@@ -85,7 +84,8 @@ public class EntityUtils
 				}
 				catch (DateTimeParseException e)
 				{
-					throw new MolgenisDataException("Failed to parse " + valueStr + " as a date.", e);
+					throw new MolgenisDataException(
+							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), valueStr), e);
 				}
 			case DATE_TIME:
 				try
@@ -94,7 +94,8 @@ public class EntityUtils
 				}
 				catch (DateTimeParseException e)
 				{
-					throw new MolgenisDataException("Failed to parse " + valueStr + " as a datetime.", e);
+					throw new MolgenisDataException(
+							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), valueStr), e);
 				}
 			case DECIMAL:
 				return Double.valueOf(valueStr);

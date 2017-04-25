@@ -39,8 +39,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 @Service
 public class RestService
@@ -304,7 +303,7 @@ public class RestService
 				catch (DateTimeParseException e)
 				{
 					throw new MolgenisDataException(
-							format("Failed to parse Attribute [%s] value [%s] as a dateTime.", attr.getName(),
+							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(),
 									paramStrValue));
 				}
 			}
@@ -341,8 +340,7 @@ public class RestService
 				}
 				catch (DateTimeParseException e)
 				{
-					throw new MolgenisDataException(
-							format("Failed to parse attribute [%s] value [%s] as a date", attr.getName(),
+					throw new MolgenisDataException(format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(),
 									paramStrValue));
 				}
 			}
