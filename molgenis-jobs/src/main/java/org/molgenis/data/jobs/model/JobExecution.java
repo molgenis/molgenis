@@ -153,7 +153,7 @@ public class JobExecution extends StaticEntity
 		return getString(LOG);
 	}
 
-	public void setLog(String value)
+	private void setLog(String value)
 	{
 		set(LOG, value);
 	}
