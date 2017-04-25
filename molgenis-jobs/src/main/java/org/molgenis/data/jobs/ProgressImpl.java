@@ -13,6 +13,7 @@ import org.springframework.mail.SimpleMailMessage;
 import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.molgenis.data.jobs.model.JobExecution.Status.*;
 
 /**
@@ -46,6 +47,7 @@ public class ProgressImpl implements Progress
 		JobExecutionContext.set(jobExecution);
 		JOB_EXECUTION_LOG.info("Execution started.");
 		jobExecution.setStartDate(new Date());
+		jobExecution.setProgressInt(0);
 		jobExecution.setStatus(RUNNING);
 		update();
 	}
@@ -56,6 +58,13 @@ public class ProgressImpl implements Progress
 		jobExecution.setProgressInt(progress);
 		jobExecution.setProgressMessage(message);
 		JOB_EXECUTION_LOG.debug("progress ({}, {})", progress, message);
+		update();
+	}
+
+	@Override
+	public void increment(int amount)
+	{
+		jobExecution.setProgressInt(jobExecution.getProgressInt() + amount);
 		update();
 	}
 
@@ -82,7 +91,7 @@ public class ProgressImpl implements Progress
 		JOB_EXECUTION_LOG.error("Failed. " + ex.getMessage(), ex);
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(FAILED);
-		jobExecution.setProgressMessage(ex.getMessage());
+		jobExecution.setProgressMessage(abbreviate(ex.getMessage(), 255));
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
 		JobExecutionContext.unset();
@@ -156,5 +165,4 @@ public class ProgressImpl implements Progress
 	{
 		return jobExecution;
 	}
-
 }
