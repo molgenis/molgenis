@@ -60,6 +60,13 @@ public class ProgressImpl implements Progress
 	}
 
 	@Override
+	public void increment(int amount)
+	{
+		jobExecution.setProgressInt(jobExecution.getProgressInt() + amount);
+		update();
+	}
+
+	@Override
 	public void success()
 	{
 		jobExecution.setEndDate(new Date());
@@ -156,5 +163,4 @@ public class ProgressImpl implements Progress
 	{
 		return jobExecution;
 	}
-
 }
