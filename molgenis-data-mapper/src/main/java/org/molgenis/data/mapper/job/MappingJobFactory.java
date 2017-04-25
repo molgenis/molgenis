@@ -54,9 +54,6 @@ public class MappingJobFactory
 	public MappingJob createJob(MappingJobExecution mappingJobExecution)
 	{
 		dataService.add(MAPPING_JOB_EXECUTION, mappingJobExecution);
-		String mappingProjectId = mappingJobExecution.getMappingProjectId();
-		String targetEntityTypeId = mappingJobExecution.getTargetEntityTypeId();
-		String addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
 		String username = mappingJobExecution.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
@@ -64,6 +61,7 @@ public class MappingJobFactory
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		return new MappingJob(username, new ProgressImpl(mappingJobExecution, jobExecutionUpdater, mailSender),
-				runAsAuthentication, new TransactionTemplate(transactionManager));
+				runAsAuthentication, new TransactionTemplate(transactionManager), mappingService, mappingJobExecution,
+				dataService);
 	}
 }
