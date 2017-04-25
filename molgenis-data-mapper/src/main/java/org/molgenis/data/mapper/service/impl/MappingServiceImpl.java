@@ -180,24 +180,57 @@ public class MappingServiceImpl implements MappingService
 	public void applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute,
 			Progress progress)
 	{
+		EntityType targetMetadata = createTargetMetadata(entityTypeId, mappingTarget, addSourceAttribute);
+		Repository<Entity> targetRepo = getTargetRepository(targetMetadata, addSourceAttribute);
+
+		try
+		{
+			LOG.info("Applying mappings to repository [" + targetMetadata.getId() + "]");
+			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute, progress);
+			if (hasSelfReferences(targetRepo.getEntityType()))
+			{
+				LOG.info("Self reference found, applying the mapping for a second time to set references");
+				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute, progress);
+			}
+			LOG.info("Done applying mappings to repository [" + targetMetadata.getId() + "]");
+		}
+		catch (RuntimeException ex)
+		{
+			// Mapping to the target model, if something goes wrong we do not want to delete it
+			LOG.error("Error applying mappings to the target", ex);
+			throw ex;
+		}
+	}
+
+	private EntityType createTargetMetadata(String entityTypeId, MappingTarget mappingTarget,
+			boolean addSourceAttribute)
+	{
 		EntityType targetMetaData = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
-		targetMetaData.setId(idGenerator.generateId());
+		targetMetaData.setId(entityTypeId);
 		targetMetaData.setLabel(entityTypeId);
+
 		if (addSourceAttribute)
 		{
 			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
-		Repository<Entity> targetRepo;
 		if (targetMetaData.getPackage() == null || systemPackageRegistry.containsPackage(targetMetaData.getPackage()))
 		{
 			targetMetaData.setPackage(defaultPackage);
 		}
+
+		return targetMetaData;
+	}
+
+	private Repository<Entity> getTargetRepository(EntityType targetMetadata, boolean addSourceAttribute)
+	{
+		Repository<Entity> targetRepo;
+		String entityTypeId = targetMetadata.getId();
 		if (!dataService.hasRepository(entityTypeId))
 		{
 			// Create a new repository
-			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
-			permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
+			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetadata));
+			permissionSystemService.giveUserWriteMetaPermissions(targetMetadata);
 		}
 		else
 		{
@@ -206,7 +239,7 @@ public class MappingServiceImpl implements MappingService
 
 			// Compare the metadata between the target repository and the mapping target
 			// Returns detailed information in case something is not compatible
-			compareTargetMetaDatas(targetRepo.getEntityType(), targetMetaData);
+			compareTargetMetaDatas(targetRepo.getEntityType(), targetMetadata);
 
 			// If the addSourceAttribute is true, but the existing repository does not have the SOURCE attribute yet
 			// Get the existing metadata and add the SOURCE attribute
@@ -217,24 +250,7 @@ public class MappingServiceImpl implements MappingService
 				dataService.getMeta().updateEntityType(existingTargetMetaData);
 			}
 		}
-
-		try
-		{
-			LOG.info("Applying mappings to repository [" + targetMetaData.getId() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute, progress);
-			if (hasSelfReferences(targetRepo.getEntityType()))
-			{
-				LOG.info("Self reference found, applying the mapping for a second time to set references");
-				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute, progress);
-			}
-			LOG.info("Done applying mappings to repository [" + targetMetaData.getId() + "]");
-		}
-		catch (RuntimeException ex)
-		{
-			// Mapping to the target model, if something goes wrong we do not want to delete it
-			LOG.error("Error applying mappings to the target", ex);
-			throw ex;
-		}
+		return targetRepo;
 	}
 
 	/**

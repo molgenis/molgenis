@@ -128,7 +128,8 @@
                             <#if source.getAttributeMapping(attribute.name)??>
                                 <#assign attributeMapping = source.getAttributeMapping(attribute.name)>
                                 <#list attributeMapping.sourceAttributes as mappedSourceAttribute>
-                                <#if mappedSourceAttribute??>${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if></#if>
+                                    <#if mappedSourceAttribute??>${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>
+                                        , </#if></#if>
                                     <#if attributeMapping.algorithmState??></#if>
                                 </#list>
                             <#elseif !attribute.nillable>
@@ -206,7 +207,7 @@
                 <form id="create-integrated-entity-form" method="post" action="${context_url}/createIntegratedEntity">
 
                     <div>
-                        <label>Enter a name for the integrated dataset.</label>
+                        <label>Enter an id for the integrated dataset:</label>
                         <input name="newEntityName" type="text" value="" required/>
                         <p></p>
                         <small>The mapped entity will be placed in the same package as the target.</small>
