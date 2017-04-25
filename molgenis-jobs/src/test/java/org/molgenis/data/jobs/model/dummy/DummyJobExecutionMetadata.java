@@ -9,14 +9,14 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class DummyJobExecutionEntityType extends SystemEntityType
+public class DummyJobExecutionMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "DummyJobExecution";
 
 	private final JobExecutionMetaData jobExecutionMetaData;
 
 	@Autowired
-	DummyJobExecutionEntityType(JobExecutionMetaData jobExecutionMetaData)
+	DummyJobExecutionMetadata(JobExecutionMetaData jobExecutionMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);

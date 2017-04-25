@@ -3,8 +3,8 @@ package org.molgenis.data.jobs.model;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.jobs.model.dummy.DummyJobExecution;
-import org.molgenis.data.jobs.model.dummy.DummyJobExecutionEntityType;
 import org.molgenis.data.jobs.model.dummy.DummyJobExecutionFactory;
+import org.molgenis.data.jobs.model.dummy.DummyJobExecutionMetadata;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { DummyJobExecutionFactory.class, DummyJobExecutionEntityType.class,
+@ContextConfiguration(classes = { DummyJobExecutionFactory.class, DummyJobExecutionMetadata.class,
 		JobExecutionMetaData.class })
 public class JobExecutionTest extends AbstractMolgenisSpringTest
 {
