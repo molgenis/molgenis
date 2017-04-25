@@ -1,1 +1,3 @@
-See the [RESTv1](ref-rest) and [RESTv2](ref-rest2) references
+The MOLGENIS REST API allows you to create, read, update and delete entities. The REST API is versioned, functionality overlaps between versions. For example REST API v1 provides authentication endpoints for signing in and signing out and REST API v2 provides endpoints for batch data manipulation operations.
+ 
+See the [REST API v1](ref-rest.md) and [REST API v2](ref-rest2.md) references for information about available endpoints and how to use them.

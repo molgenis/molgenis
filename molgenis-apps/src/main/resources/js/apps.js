@@ -10,7 +10,7 @@
                 onSubmitSuccess: function () {
                     window.location = molgenis.contextUrl;
                 }
-            }), $('#form-modal-container')[0]).setState({showModal: true});
+            }), $('<div>')[0]);
         });
 
         $('.edit-app-btn').on('click', function () {
@@ -23,7 +23,7 @@
                 onSubmitSuccess: function () {
                     window.location = molgenis.contextUrl;
                 }
-            }), $('#form-modal-container')[0]).setState({showModal: true});
+            }), $('<div>')[0]);
         });
 
         $('.activate-app-btn').on('click', function () {

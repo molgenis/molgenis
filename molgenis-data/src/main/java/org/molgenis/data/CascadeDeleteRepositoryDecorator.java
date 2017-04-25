@@ -31,49 +31,84 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 	@Override
 	public void delete(Entity entity)
 	{
-		prepareCascadeDeletes(entity);
-		super.delete(entity);
-		handleCascadeDeletes(entity);
+		if (hasCascadeDeleteAttributes())
+		{
+			prepareCascadeDeletes(entity);
+			super.delete(entity);
+			handleCascadeDeletes(entity);
+		}
+		else
+		{
+			decoratedRepository.delete(entity);
+		}
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		Entity entity = findOneById(id);
-		super.deleteById(id);
-		handleCascadeDeletes(entity);
+		if (hasCascadeDeleteAttributes())
+		{
+			Entity entity = findOneById(id);
+			super.deleteById(id);
+			handleCascadeDeletes(entity);
+		}
+		else
+		{
+			decoratedRepository.deleteById(id);
+		}
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		Iterators.partition(query().findAll().iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch ->
+		if (hasCascadeDeleteAttributes())
 		{
-			super.delete(entitiesBatch.stream());
-			entitiesBatch.forEach(this::handleCascadeDeletes);
-		});
+			Iterators.partition(query().findAll().iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch ->
+			{
+				super.delete(entitiesBatch.stream());
+				entitiesBatch.forEach(this::handleCascadeDeletes);
+			});
+		}
+		else
+		{
+			decoratedRepository.deleteAll();
+		}
 	}
 
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch ->
+		if (hasCascadeDeleteAttributes())
 		{
-			entitiesBatch.forEach(this::prepareCascadeDeletes);
-			super.delete(entitiesBatch.stream());
-			entitiesBatch.forEach(this::handleCascadeDeletes);
-		});
+			Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch ->
+			{
+				entitiesBatch.forEach(this::prepareCascadeDeletes);
+				super.delete(entitiesBatch.stream());
+				entitiesBatch.forEach(this::handleCascadeDeletes);
+			});
+		}
+		else
+		{
+			decoratedRepository.delete(entities);
+		}
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch ->
+		if (hasCascadeDeleteAttributes())
 		{
-			Stream<Entity> entities = findAll(idsBatch.stream());
-			super.deleteAll(idsBatch.stream());
-			entities.forEach(this::handleCascadeDeletes);
-		});
+			Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch ->
+			{
+				Stream<Entity> entities = findAll(idsBatch.stream());
+				super.deleteAll(idsBatch.stream());
+				entities.forEach(this::handleCascadeDeletes);
+			});
+		}
+		else
+		{
+			decoratedRepository.deleteAll(ids);
+		}
 	}
 
 	/**
@@ -120,4 +155,11 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		return asStream(getEntityType().getAtomicAttributes())
 				.filter(attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
 	}
+
+	private boolean hasCascadeDeleteAttributes()
+	{
+		return asStream(getEntityType().getAtomicAttributes())
+				.anyMatch(attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
+	}
+
 }

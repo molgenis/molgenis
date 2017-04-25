@@ -5,10 +5,10 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -61,8 +61,7 @@ public class UserMetaData extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true)
-				.setNillable(false);
+		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true).setNillable(false);
 		addAttribute(PASSWORD_).setLabel("Password")
 				.setDescription("This is the hashed password, enter a new plaintext password to update.")
 				.setNillable(false);
@@ -97,7 +96,9 @@ public class UserMetaData extends SystemEntityType
 		addAttribute(CHANGE_PASSWORD).setLabel("Change password").setDataType(BOOL).setDefaultValue("false")
 				.setDescription("If true the user must first change his password before he can proceed")
 				.setAggregatable(true).setNillable(false);
+		// TODO use LanguageService.getLanguageCodes() instead of hardcoded language list
 		addAttribute(LANGUAGECODE).setLabel("Language code").setDescription("Selected language for this site.")
+				.setDataType(ENUM).setEnumOptions(asList("en", "nl", "de", "es", "it", "pt", "fr", "xx"))
 				.setNillable(true);
 		addAttribute(GOOGLEACCOUNTID).setLabel("Google account ID")
 				.setDescription("An identifier for the user, unique among all Google accounts and never reused.")
