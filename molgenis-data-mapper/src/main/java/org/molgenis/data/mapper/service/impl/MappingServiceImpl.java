@@ -41,9 +41,10 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class MappingServiceImpl implements MappingService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
+	public static final int MAPPING_BATCH_SIZE = 1000;
 
-	public static final String SOURCE = "source";
+	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
+	private static final String SOURCE = "source";
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
@@ -220,11 +221,11 @@ public class MappingServiceImpl implements MappingService
 		try
 		{
 			LOG.info("Applying mappings to repository [" + targetMetaData.getId() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
+			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute, progress);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
 				LOG.info("Self reference found, applying the mapping for a second time to set references");
-				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
+				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute, progress);
 			}
 			LOG.info("Done applying mappings to repository [" + targetMetaData.getId() + "]");
 		}
@@ -291,50 +292,68 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
-			boolean addSourceAttribute)
+			boolean addSourceAttribute, Progress progress)
 	{
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo, addSourceAttribute);
+			applyMappingToRepo(sourceMapping, targetRepo, addSourceAttribute, progress);
 		}
 	}
 
 	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo,
-			boolean addSourceAttribute)
+			boolean addSourceAttribute, Progress progress)
 	{
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
+		progress.status(format("Mapping source %s", sourceRepo.getEntityType().getLabel()));
+
 		if (targetRepo.count() == 0)
 		{
-			sourceRepo.forEachBatched(entities -> targetRepo.add(entities.stream()
-					.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-							sourceMapping.getSourceEntityType(), addSourceAttribute))), 1000);
+			sourceRepo.forEachBatched(entities ->
+			{
+				mapAndAddEntities(sourceMapping, targetRepo, addSourceAttribute, targetMetaData, entities);
+				progress.increment(1);
+			}, MAPPING_BATCH_SIZE);
 		}
 		else
 		{
-			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
-			sourceRepo.iterator().forEachRemaining(sourceEntity ->
+			sourceRepo.forEachBatched(entities ->
 			{
-				{
-					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-							sourceMapping.getSourceEntityType(), addSourceAttribute);
-					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
-					{
-						targetRepo.add(mappedEntity);
-					}
-					else
-					{
-						targetRepo.update(mappedEntity);
-					}
-				}
-			});
+				mapAndUpsertEntities(sourceMapping, targetRepo, addSourceAttribute, targetMetaData, entities);
+				progress.increment(1);
+			}, MAPPING_BATCH_SIZE);
 		}
+	}
 
+	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
+			boolean addSourceAttribute, EntityType targetMetaData, List<Entity> entities)
+	{
+		entities.forEach(sourceEntity ->
+		{
+			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
+			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData, addSourceAttribute);
+			if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+			{
+				targetRepo.add(mappedEntity);
+			}
+			else
+			{
+				targetRepo.update(mappedEntity);
+			}
+		});
+	}
+
+	private void mapAndAddEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
+			boolean addSourceAttribute, EntityType targetMetaData, List<Entity> entities)
+	{
+		targetRepo.add(entities.stream()
+				.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+						addSourceAttribute)));
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData,
-			EntityType sourceEntityType, boolean addSourceAttribute)
+			boolean addSourceAttribute)
 	{
 		Entity target = new DynamicEntity(targetMetaData);
 		if (addSourceAttribute)
@@ -343,7 +362,8 @@ public class MappingServiceImpl implements MappingService
 		}
 
 		sourceMapping.getAttributeMappings().forEach(
-				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target, sourceEntityType));
+				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
+						sourceMapping.getSourceEntityType()));
 		return target;
 	}
 
