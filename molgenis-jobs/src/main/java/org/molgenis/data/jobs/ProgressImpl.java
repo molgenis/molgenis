@@ -46,6 +46,7 @@ public class ProgressImpl implements Progress
 		JobExecutionContext.set(jobExecution);
 		JOB_EXECUTION_LOG.info("Execution started.");
 		jobExecution.setStartDate(new Date());
+		jobExecution.setProgressInt(0);
 		jobExecution.setStatus(RUNNING);
 		update();
 	}
