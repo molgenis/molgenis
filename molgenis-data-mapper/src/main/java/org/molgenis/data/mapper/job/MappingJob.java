@@ -36,7 +36,7 @@ public class MappingJob extends Job<Void>
 
 		progress.setProgressMax(calculateMaxProgress(mappingTarget));
 
-		mappingService.applyMappings(mappingTarget, mappingJobExecution.getNewEntityTypeId(),
+		mappingService.applyMappings(mappingTarget, mappingJobExecution.getTargetEntityTypeId(),
 				mappingJobExecution.isAddSourceAttribute(), progress);
 
 		return null;

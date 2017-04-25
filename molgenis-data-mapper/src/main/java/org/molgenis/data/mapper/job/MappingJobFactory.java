@@ -6,8 +6,6 @@ import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
@@ -26,9 +24,7 @@ import static org.molgenis.data.mapper.job.MappingJobExecutionMetadata.MAPPING_J
 @Component
 public class MappingJobFactory
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MappingJobFactory.class);
-
-	final DataService dataService;
+	private final DataService dataService;
 	private final PlatformTransactionManager transactionManager;
 	private final UserDetailsService userDetailsService;
 	private final JobExecutionUpdater jobExecutionUpdater;
