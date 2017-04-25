@@ -153,7 +153,7 @@ class Session():
         print(entity, id, attr, value)
         response = self.session.put(self.url + "v1/" + quote_plus(entity)+"/"+id+"/"+attr,
                                      headers=self._get_token_header_with_content_type(),
-                                     data='"'+value+'"')
+                                     data=json.dumps(value))
         response.raise_for_status()
         return response
 
