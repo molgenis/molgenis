@@ -19,7 +19,7 @@ public class MappingJobExecutionMetadata extends SystemEntityType
 	public static final String MAPPING_JOB_TYPE = "mapping";
 
 	public static final String MAPPING_PROJECT_ID = "mappingProjectId";
-	public static final String TARGET_ENTITY_TYPE_ID = "targetEntityTypeId";
+	public static final String NEW_ENTITY_TYPE_ID = "newEntityTypeId";
 	public static final String ADD_SOURCE_ATTRIBUTE = "addSourceAttribute";
 
 	private final JobExecutionMetaData jobExecutionMetaData;
@@ -38,7 +38,7 @@ public class MappingJobExecutionMetadata extends SystemEntityType
 		setExtends(jobExecutionMetaData);
 
 		addAttribute(MAPPING_PROJECT_ID).setDataType(STRING).setLabel("Mapping Project ID").setNillable(false);
-		addAttribute(TARGET_ENTITY_TYPE_ID).setDataType(STRING).setLabel("Target Entity Type ID").setNillable(false);
+		addAttribute(NEW_ENTITY_TYPE_ID).setDataType(STRING).setLabel("Target Entity Type ID").setNillable(false);
 		addAttribute(ADD_SOURCE_ATTRIBUTE).setDataType(BOOL).setLabel("Add source attribute").setNillable(false);
 	}
 }

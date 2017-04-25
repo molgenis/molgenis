@@ -10,15 +10,16 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
+
 public class MappingJob extends Job<Void>
 {
 	private final MappingService mappingService;
 	private final MappingJobExecution mappingJobExecution;
 	private final DataService dataService;
 
-	MappingJob(String username, Progress progress, Authentication userAuthentication,
-			TransactionTemplate transactionTemplate, MappingService mappingService,
-			MappingJobExecution mappingJobExecution, DataService dataService)
+	MappingJob(MappingJobExecution mappingJobExecution, Progress progress, Authentication userAuthentication,
+			TransactionTemplate transactionTemplate, MappingService mappingService, DataService dataService)
 	{
 		super(progress, transactionTemplate, userAuthentication);
 
@@ -43,21 +44,21 @@ public class MappingJob extends Job<Void>
 
 	private int calculateMaxProgress(MappingTarget mappingTarget)
 	{
-		return (int) mappingTarget.getEntityMappings().stream().map(this::countProgressBatches).count();
+		return mappingTarget.getEntityMappings().stream().mapToInt(this::countBatches).sum();
 	}
 
-	private Long countProgressBatches(EntityMapping entityMapping)
+	private int countBatches(EntityMapping entityMapping)
 	{
 		long sourceRows = dataService.count(entityMapping.getSourceEntityType().getId());
 
-		long batches = sourceRows / 1000;
-		long remainder = sourceRows % 1000;
+		long batches = sourceRows / MAPPING_BATCH_SIZE;
+		long remainder = sourceRows % MAPPING_BATCH_SIZE;
 
-		if (remainder > 0 || batches == 0)
+		if (remainder > 0)
 		{
 			batches++;
 		}
 
-		return batches;
+		return (int) batches;
 	}
 }

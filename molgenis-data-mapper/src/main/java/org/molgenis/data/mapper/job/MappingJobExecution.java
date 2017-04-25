@@ -33,14 +33,14 @@ public class MappingJobExecution extends JobExecution
 		set(MappingJobExecutionMetadata.MAPPING_PROJECT_ID, mappingProjectId);
 	}
 
-	public String getTargetEntityTypeId()
+	public String getNewEntityTypeId()
 	{
-		return getString(MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID);
+		return getString(MappingJobExecutionMetadata.NEW_ENTITY_TYPE_ID);
 	}
 
-	public void setTargetEntityTypeId(String targetEntityTypeId)
+	public void setNewEntityTypeId(String targetEntityTypeId)
 	{
-		set(MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID, targetEntityTypeId);
+		set(MappingJobExecutionMetadata.NEW_ENTITY_TYPE_ID, targetEntityTypeId);
 	}
 
 	public boolean isAddSourceAttribute()
