@@ -1,13 +1,14 @@
 package org.molgenis.data.jobs.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
-import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 
 /**
@@ -17,6 +18,11 @@ import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
  */
 public class JobExecution extends StaticEntity
 {
+	public static final String TRUNCATION_BANNER = "<<< THIS LOG HAS BEEN TRUNCATED >>>";
+	public static final int MAX_PROGRESS_MESSAGE_LENGTH = 255;
+	public static final int MAX_LOG_LENGTH = 65535;
+	private boolean logTruncated = false;
+
 	public JobExecution(Entity entity)
 	{
 		super(entity);
@@ -129,7 +135,7 @@ public class JobExecution extends StaticEntity
 
 	public void setProgressMessage(String value)
 	{
-		set(PROGRESS_MESSAGE, value);
+		set(PROGRESS_MESSAGE, StringUtils.abbreviate(value, MAX_PROGRESS_MESSAGE_LENGTH));
 	}
 
 	public Integer getProgressMax()
@@ -147,7 +153,7 @@ public class JobExecution extends StaticEntity
 		return getString(LOG);
 	}
 
-	public void setLog(String value)
+	private void setLog(String value)
 	{
 		set(LOG, value);
 	}
@@ -165,7 +171,7 @@ public class JobExecution extends StaticEntity
 	public String[] getSuccessEmail()
 	{
 		String email = getString(SUCCESS_EMAIL);
-		if (StringUtils.isEmpty(email))
+		if (isEmpty(email))
 		{
 			return new String[] {};
 		}
@@ -175,7 +181,7 @@ public class JobExecution extends StaticEntity
 	public String[] getFailureEmail()
 	{
 		String email = getString(FAILURE_EMAIL);
-		if (StringUtils.isEmpty(email))
+		if (isEmpty(email))
 		{
 			return new String[] {};
 		}
@@ -190,6 +196,26 @@ public class JobExecution extends StaticEntity
 	public void setFailureEmail(String failureEmail)
 	{
 		set(FAILURE_EMAIL, failureEmail);
+	}
+
+	/**
+	 * Appends a log message to the execution log.
+	 * The first time the log exceeds MAX_LOG_LENGTH, it gets truncated and the TRUNCATION_BANNER gets added.
+	 * Subsequent calls to appendLog will be ignored.
+	 *
+	 * @param formattedMessage The formatted message to append to the log.
+	 */
+	public void appendLog(String formattedMessage)
+	{
+		if (logTruncated) return;
+		String combined = join(getLog(), formattedMessage);
+		if (combined.length() > MAX_LOG_LENGTH)
+		{
+			String truncated = abbreviate(combined, MAX_LOG_LENGTH - TRUNCATION_BANNER.length() * 2 - 2);
+			combined = join(new String[] { TRUNCATION_BANNER, truncated, TRUNCATION_BANNER }, "\n");
+			logTruncated = true;
+		}
+		setLog(combined);
 	}
 
 	public enum Status
