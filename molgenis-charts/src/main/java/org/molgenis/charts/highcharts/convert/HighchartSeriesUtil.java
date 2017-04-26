@@ -10,7 +10,12 @@ import org.molgenis.charts.highcharts.basic.SeriesType;
 import org.molgenis.data.meta.AttributeType;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.time.ZoneOffset.UTC;
 
 /**
  * This data util is made for converting the Molgenis charts structure to the Highchart structure
@@ -114,21 +119,21 @@ public class HighchartSeriesUtil
 	}
 
 	/**
-	 * Convert values to match the Highcharts demand when using json
+	 * Convert values to match the Highcharts demand when using JSON.
 	 *
-	 * @param fieldTypeEnum
-	 * @param value
-	 * @return Object
+	 * @param attributeType the type of the attribute
+	 * @param value the attribute value to convert
+	 * @return Object the converted value
 	 */
-	public Object convertValue(AttributeType fieldTypeEnum, Object value)
+	public Object convertValue(AttributeType attributeType, Object value)
 	{
-		if (AttributeType.DATE_TIME.equals(fieldTypeEnum))
+		if (AttributeType.DATE_TIME.equals(attributeType))
 		{
-			return (convertDateTimeToMilliseconds((Date) value));
+			return ((Instant) value).toEpochMilli();
 		}
-		else if (AttributeType.DATE.equals(fieldTypeEnum))
+		else if (AttributeType.DATE.equals(attributeType))
 		{
-			return (convertDateToMilliseconds((Date) value));
+			return ((LocalDate) value).atStartOfDay(UTC).toInstant().toEpochMilli();
 		}
 		else
 		{
@@ -137,45 +142,4 @@ public class HighchartSeriesUtil
 		}
 	}
 
-	/**
-	 * Convert date to long keeping the timezone valued date. When asking the time of a Date object java return the
-	 * milliseconds from the begin of counting. "Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
-	 * represented by this Date object."
-	 * <p>
-	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
-	 * ..
-	 */
-	public Long convertDateToMilliseconds(Date date)
-	{
-		if (date == null) return null;
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		Calendar calendarConverted = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
-		calendarConverted.clear();
-		calendarConverted.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
-		return calendarConverted.getTimeInMillis();
-	}
-
-	/**
-	 * Convert date to long keeping the timezone valued date. When asking the time of a Date object java return the
-	 * milliseconds from the begin of counting. "Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
-	 * represented by this Timestamp object."
-	 * <p>
-	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
-	 * ..
-	 */
-	public Long convertDateTimeToMilliseconds(Date date)
-	{
-		if (date == null) return null;
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-
-		Calendar calendarConverted = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
-		calendarConverted.clear();
-
-		calendarConverted.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
-				calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
-
-		return calendarConverted.getTimeInMillis();
-	}
 }

@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.springframework.util.StringUtils;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 
@@ -82,32 +82,32 @@ public class JobExecution extends StaticEntity
 		set(TYPE, value);
 	}
 
-	public Date getSubmissionDate()
+	public Instant getSubmissionDate()
 	{
-		return getUtilDate(SUBMISSION_DATE);
+		return getInstant(SUBMISSION_DATE);
 	}
 
-	public void setSubmissionDate(Date value)
+	public void setSubmissionDate(Instant value)
 	{
 		set(SUBMISSION_DATE, value);
 	}
 
-	public Date getStartDate()
+	public Instant getStartDate()
 	{
-		return getUtilDate(START_DATE);
+		return getInstant(START_DATE);
 	}
 
-	public void setStartDate(Date value)
+	public void setStartDate(Instant value)
 	{
 		set(START_DATE, value);
 	}
 
-	public Date getEndDate()
+	public Instant getEndDate()
 	{
-		return getUtilDate(END_DATE);
+		return getInstant(END_DATE);
 	}
 
-	public void setEndDate(Date value)
+	public void setEndDate(Instant value)
 	{
 		set(END_DATE, value);
 	}
@@ -199,7 +199,7 @@ public class JobExecution extends StaticEntity
 
 	private void setDefaultValues()
 	{
-		setSubmissionDate(new Date());
+		setSubmissionDate(Instant.now());
 		setStatus(Status.PENDING);
 	}
 }

@@ -13,7 +13,6 @@ import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +21,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +39,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 @Service
 public class RestService
@@ -285,27 +284,27 @@ public class RestService
 		return value;
 	}
 
-	private static Date convertDateTime(Attribute attr, Object paramValue)
+	private static Instant convertDateTime(Attribute attr, Object paramValue)
 	{
-		Date value;
+		Instant value;
 		if (paramValue != null)
 		{
-			if (paramValue instanceof Date)
+			if (paramValue instanceof Instant)
 			{
-				value = (Date) paramValue;
+				value = (Instant) paramValue;
 			}
 			else if (paramValue instanceof String)
 			{
 				String paramStrValue = (String) paramValue;
 				try
 				{
-					value = getDateTimeFormat().parse(paramStrValue);
+					value = parseInstant(paramStrValue);
 				}
-				catch (ParseException e)
+				catch (DateTimeParseException e)
 				{
 					throw new MolgenisDataException(
-							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.getDateTimeFormat().toPattern()));
+							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(),
+									paramStrValue));
 				}
 			}
 			else
@@ -313,7 +312,7 @@ public class RestService
 				throw new MolgenisDataException(
 						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
 								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								Date.class.getSimpleName()));
+								Instant.class.getSimpleName()));
 			}
 		}
 		else
@@ -323,34 +322,34 @@ public class RestService
 		return value;
 	}
 
-	private static Date convertDate(Attribute attr, Object paramValue)
+	private static LocalDate convertDate(Attribute attr, Object paramValue)
 	{
-		Date value;
+		LocalDate value;
 		if (paramValue != null)
 		{
-			if (paramValue instanceof Date)
+			if (paramValue instanceof LocalDate)
 			{
-				value = (Date) paramValue;
+				value = (LocalDate) paramValue;
 			}
 			else if (paramValue instanceof String)
 			{
 				String paramStrValue = (String) paramValue;
 				try
 				{
-					value = getDateFormat().parse(paramStrValue);
+					value = parseLocalDate(paramStrValue);
 				}
-				catch (ParseException e)
+				catch (DateTimeParseException e)
 				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.getDateFormat().toPattern()));
+					throw new MolgenisDataException(format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(),
+									paramStrValue));
 				}
 			}
 			else
 			{
 				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName()));
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								LocalDate.class.getSimpleName()));
 			}
 		}
 		else

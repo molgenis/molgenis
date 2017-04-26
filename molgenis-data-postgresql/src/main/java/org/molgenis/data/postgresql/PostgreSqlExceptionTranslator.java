@@ -230,7 +230,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			case "date":
 				type = DATE.toString();
 				break;
-			case "timestamp":
+			case "timestamp with time zone":
 				type = DATE_TIME.toString();
 				break;
 			case "double precision":

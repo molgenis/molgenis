@@ -151,7 +151,8 @@ public class AttributeValidatorTest
 		}
 		catch (MolgenisDataException actual)
 		{
-			assertEquals(actual.getCause().getMessage(), "Unparseable date: \"test\"");
+			assertEquals(actual.getCause().getMessage(),
+					"Text 'test' could not be parsed, unparsed text found at index 0");
 		}
 	}
 
@@ -159,7 +160,7 @@ public class AttributeValidatorTest
 	public void testDefaultValueDateValid()
 	{
 		Attribute attr = mock(Attribute.class);
-		when(attr.getDefaultValue()).thenReturn("01-01-2016");
+		when(attr.getDefaultValue()).thenReturn("2016-01-01");
 		when(attr.getDataType()).thenReturn(AttributeType.DATE);
 		attributeValidator.validateDefaultValue(attr);
 	}
@@ -177,7 +178,8 @@ public class AttributeValidatorTest
 		}
 		catch (MolgenisDataException actual)
 		{
-			assertEquals(actual.getCause().getMessage(), "Unparseable date: \"test\"");
+			assertEquals(actual.getCause().getMessage(),
+					"Text 'test' could not be parsed, unparsed text found at index 0");
 		}
 	}
 

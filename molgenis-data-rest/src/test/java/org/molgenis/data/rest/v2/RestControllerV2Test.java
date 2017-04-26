@@ -50,6 +50,8 @@ import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -65,8 +67,6 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -297,8 +297,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		entity.set(attrCategoricalMrefName, asList(refEntity0, refEntity1));
 		entity.set(attrCompoundAttr0Name, "compoundAttr0Str");
 		entity.set(attrCompoundAttrCompoundAttr0Name, "compoundAttrCompoundAttr0Str");
-		entity.set(attrDateName, getDateFormat().parse("2015-05-22"));
-		entity.set(attrDateTimeName, getDateTimeFormat().parse("2015-05-22T11:12:13+0500"));
+		entity.set(attrDateName, LocalDate.parse("2015-05-22"));
+		entity.set(attrDateTimeName, Instant.parse("2015-05-22T06:12:13Z"));
 		entity.set(attrDecimalName, 3.14);
 		entity.set(attrEmailName, "my@mail.com");
 		entity.set(attrEnumName, enum0);
@@ -814,8 +814,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
-		assertEquals(MolgenisDateFormat.getDateTimeFormat().format(entity.get("date_time")),
-				"1985-08-12T08:12:13+0200");
+		assertEquals(entity.get("date_time"), MolgenisDateFormat.parseInstant("1985-08-12T08:12:13+0200"));
 	}
 
 	/**
@@ -1547,7 +1546,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			+ "      \"id\": \"ref0\"\n" + "    },\n" + "    {\n" + "      \"_href\": \"/api/v2/refEntity/ref0\",\n"
 			+ "      \"id\": \"ref0\"\n" + "    }\n" + "  ],\n" + "  \"compound_attr0\": \"compoundAttr0Str\",\n"
 			+ "  \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\",\n" + "  \"date\": \"2015-05-22\",\n"
-			+ "  \"date_time\": \"2015-05-22T08:12:13+0200\",\n" + "  \"decimal\": 3.14,\n"
+			+ "  \"date_time\": \"2015-05-22T06:12:13Z\",\n" + "  \"decimal\": 3.14,\n"
 			+ "  \"email\": \"my@mail.com\",\n" + "  \"enum\": \"enum0\",\n" + "  \"html\": \"<h1>html</h1>\",\n"
 			+ "  \"hyperlink\": \"http://www.molgenis.org/\",\n" + "  \"int\": 123,\n"
 			+ "  \"long\": 9223372036854775807,\n" + "  \"mref\": [\n" + "    {\n"
@@ -2159,7 +2158,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					+ "          \"id\": \"ref0\"\n" + "        }\n" + "      ],\n"
 					+ "      \"compound_attr0\": \"compoundAttr0Str\",\n"
 					+ "      \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\",\n"
-					+ "      \"date\": \"2015-05-22\",\n" + "      \"date_time\": \"2015-05-22T08:12:13+0200\",\n"
+					+ "      \"date\": \"2015-05-22\",\n" + "      \"date_time\": \"2015-05-22T06:12:13Z\",\n"
 					+ "      \"decimal\": 3.14,\n" + "      \"email\": \"my@mail.com\",\n"
 					+ "      \"enum\": \"enum0\",\n" + "      \"html\": \"<h1>html</h1>\",\n"
 					+ "      \"hyperlink\": \"http://www.molgenis.org/\",\n" + "      \"int\": 123,\n"

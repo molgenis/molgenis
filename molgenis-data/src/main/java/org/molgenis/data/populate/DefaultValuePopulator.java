@@ -6,12 +6,12 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.ListEscapeUtils;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static java.lang.Boolean.FALSE;
@@ -20,8 +20,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.util.EntityUtils.asStream;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 /**
  * Populate entity values for attributes with default values
@@ -115,31 +114,29 @@ public class DefaultValuePopulator
 		return Double.valueOf(valueAsString);
 	}
 
-	private static Date convertDate(Attribute attr, String valueAsString)
+	private static LocalDate convertDate(Attribute attr, String valueAsString)
 	{
 		try
 		{
-			return getDateFormat().parse(valueAsString);
+			return parseLocalDate(valueAsString);
 		}
-		catch (ParseException e)
+		catch (DateTimeParseException e)
 		{
 			throw new RuntimeException(
-					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), valueAsString,
-							MolgenisDateFormat.getDateFormat().toPattern()));
+					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), valueAsString));
 		}
 	}
 
-	private static Date convertDateTime(Attribute attr, String valueAsString)
+	private static Instant convertDateTime(Attribute attr, String valueAsString)
 	{
 		try
 		{
-			return getDateTimeFormat().parse(valueAsString);
+			return parseInstant(valueAsString);
 		}
-		catch (ParseException e)
+		catch (DateTimeParseException e)
 		{
 			throw new RuntimeException(
-					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), valueAsString,
-							MolgenisDateFormat.getDateTimeFormat().toPattern()));
+					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), valueAsString));
 		}
 	}
 

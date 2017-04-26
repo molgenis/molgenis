@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
@@ -434,10 +433,10 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestFirstRow.put("xcategoricalnillable_value", "ref1");
 		typeTestFirstRow.put("xcategoricalmref_value", newHashSet( "ref1"));
 		typeTestFirstRow.put("xcatmrefnillable_value", newHashSet("ref1"));
-		typeTestFirstRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
-		typeTestFirstRow.put("xdatenillable", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
-		typeTestFirstRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
-		typeTestFirstRow.put("xdatetimenillable", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
+		typeTestFirstRow.put("xdate", LocalDate.of(1985, 8, 1));
+		typeTestFirstRow.put("xdatenillable", LocalDate.of(1985, 8, 1));
+		typeTestFirstRow.put("xdatetime", Instant.parse("1985-08-12T06:12:13Z"));
+		typeTestFirstRow.put("xdatetimenillable", Instant.parse("1985-08-12T06:12:13Z"));
 		typeTestFirstRow.put("xdecimal", 1.23);
 		typeTestFirstRow.put("xdecimalnillable", 1.23);
 		typeTestFirstRow.put("xemail", "molgenis@gmail.com");
@@ -487,10 +486,10 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestLastRow.put("xcategoricalnillable_value", "ref2");
 		typeTestLastRow.put("xcategoricalmref_value", newHashSet("ref1", "ref2", "ref3"));
 		typeTestLastRow.put("xcatmrefnillable_value", newHashSet("ref1", "ref3"));
-		typeTestLastRow.put("xdate", Date.from(LocalDate.of(1985, 8, 1).atStartOfDay(UTC).toInstant()));
-		typeTestLastRow.put("xdatenillable", Date.from(LocalDate.of(2015, 4, 1).atStartOfDay(UTC).toInstant()));
-		typeTestLastRow.put("xdatetime", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
-		typeTestLastRow.put("xdatetimenillable", Date.from(Instant.parse("1985-08-12T06:12:13Z")));
+		typeTestLastRow.put("xdate", LocalDate.of(1985, 8, 1));
+		typeTestLastRow.put("xdatenillable", LocalDate.of(2015, 4, 1));
+		typeTestLastRow.put("xdatetime", Instant.parse("1985-08-12T06:12:13Z"));
+		typeTestLastRow.put("xdatetimenillable", Instant.parse("1985-08-12T06:12:13Z"));
 		typeTestLastRow.put("xdecimal", 7.89);
 		typeTestLastRow.put("xdecimalnillable", 15.666);
 		typeTestLastRow.put("xemail", "molgenis@gmail.com");
@@ -594,8 +593,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	static
 	{
 		testXref1FirstRow.put("Identifier", "xref_1");
-		testXref1FirstRow.put("Date_1", Date.from(LocalDate.of(2013, 12, 10).atStartOfDay(UTC)
-				.toInstant())); // FIXME should be 11th (https://github.com/molgenis/molgenis/issues/5845)
+		testXref1FirstRow.put("Date_1", LocalDate.of(2013, 12, 11));
 		testXref1FirstRow.put("Xref_2", "thisIsAnId_1");
 	}
 
@@ -604,8 +602,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	static
 	{
 		testXref1LastRow.put("Identifier", "xref_50");
-		testXref1LastRow.put("Date_1", Date.from(LocalDate.of(2001, 2, 13).atStartOfDay(UTC)
-				.toInstant())); // FIXME should be 14th (https://github.com/molgenis/molgenis/issues/5845)
+		testXref1LastRow.put("Date_1", LocalDate.of(2001, 2, 14));
 		testXref1LastRow.put("Xref_2", "thisIsAnId_50");
 	}
 

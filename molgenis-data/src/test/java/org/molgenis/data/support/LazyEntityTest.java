@@ -8,8 +8,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
@@ -84,17 +84,6 @@ public class LazyEntityTest
 		when(entity.getBoolean(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getBoolean(attrName));
 		assertEquals(value, lazyEntity.getBoolean(attrName));
-		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
-	}
-
-	@Test
-	public void getDate()
-	{
-		String attrName = "attr";
-		Date value = new Date(0);
-		when(entity.getDate(attrName)).thenReturn(value);
-		assertEquals(value, lazyEntity.getDate(attrName));
-		assertEquals(value, lazyEntity.getDate(attrName));
 		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
@@ -234,24 +223,24 @@ public class LazyEntityTest
 	}
 
 	@Test
-	public void getTimestamp()
+	public void getLocalDate()
 	{
 		String attrName = "attr";
-		Timestamp value = new Timestamp(0);
-		when(entity.getTimestamp(attrName)).thenReturn(value);
-		assertEquals(value, lazyEntity.getTimestamp(attrName));
-		assertEquals(value, lazyEntity.getTimestamp(attrName));
+		LocalDate value = LocalDate.now();
+		when(entity.getLocalDate(attrName)).thenReturn(value);
+		assertEquals(value, lazyEntity.getLocalDate(attrName));
+		assertEquals(value, lazyEntity.getLocalDate(attrName));
 		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
-	public void getUtilDate()
+	public void getInstant()
 	{
 		String attrName = "attr";
-		java.util.Date value = new java.util.Date();
-		when(entity.getUtilDate(attrName)).thenReturn(value);
-		assertEquals(value, lazyEntity.getUtilDate(attrName));
-		assertEquals(value, lazyEntity.getUtilDate(attrName));
+		Instant value = Instant.now();
+		when(entity.getInstant(attrName)).thenReturn(value);
+		assertEquals(value, lazyEntity.getInstant(attrName));
+		assertEquals(value, lazyEntity.getInstant(attrName));
 		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 

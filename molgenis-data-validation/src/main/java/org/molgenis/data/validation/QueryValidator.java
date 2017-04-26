@@ -9,8 +9,9 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static java.lang.Boolean.FALSE;
@@ -19,8 +20,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 /**
  * Validates {@link Query queries} based on the {@link EntityType entity type} that will be queried. Converts query
@@ -354,11 +354,11 @@ public class QueryValidator
 		return doubleValue;
 	}
 
-	private static Date convertDateTime(Attribute attr, Object value)
+	private static Instant convertDateTime(Attribute attr, Object value)
 	{
-		if (value instanceof Date)
+		if (value instanceof Instant)
 		{
-			return (Date) value;
+			return (Instant) value;
 		}
 
 		if (value == null)
@@ -367,19 +367,19 @@ public class QueryValidator
 		}
 
 		// try to convert value
-		Date dateValue;
+		Instant dateValue;
 		if (value instanceof String)
 		{
 			String paramStrValue = (String) value;
 			try
 			{
-				dateValue = getDateTimeFormat().parse(paramStrValue);
+				dateValue = MolgenisDateFormat.parseInstant(paramStrValue);
 			}
-			catch (ParseException e)
+			catch (DateTimeParseException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-								paramStrValue, MolgenisDateFormat.getDateTimeFormat().toPattern())));
+						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(),
+								paramStrValue)));
 			}
 		}
 		else
@@ -387,16 +387,16 @@ public class QueryValidator
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
 							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Date.class.getSimpleName())));
+							Instant.class.getSimpleName())));
 		}
 		return dateValue;
 	}
 
-	private static Date convertDate(Attribute attr, Object value)
+	private static LocalDate convertDate(Attribute attr, Object value)
 	{
-		if (value instanceof Date)
+		if (value instanceof LocalDate)
 		{
-			return (Date) value;
+			return (LocalDate) value;
 		}
 
 		if (value == null)
@@ -405,26 +405,26 @@ public class QueryValidator
 		}
 
 		// try to convert value
-		Date dateValue;
+		LocalDate dateValue;
 		if (value instanceof String)
 		{
 			String paramStrValue = (String) value;
 			try
 			{
-				dateValue = getDateFormat().parse(paramStrValue);
+				dateValue = parseLocalDate(paramStrValue);
 			}
-			catch (ParseException e)
+			catch (DateTimeParseException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
-								paramStrValue, MolgenisDateFormat.getDateFormat().toPattern())));
+						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramStrValue)));
 			}
 		}
 		else
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName())));
+					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s].", attr.getName(),
+							value.getClass().getSimpleName(), LocalDate.class.getSimpleName(),
+							String.class.getSimpleName())));
 		}
 		return dateValue;
 	}

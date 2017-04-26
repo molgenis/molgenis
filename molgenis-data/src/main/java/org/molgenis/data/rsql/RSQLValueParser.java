@@ -3,16 +3,15 @@ package org.molgenis.data.rsql;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.*;
 
 /**
  * Converts RSQL value symbols to the relevant data type.
@@ -64,31 +63,29 @@ public class RSQLValueParser
 		}
 	}
 
-	private static Date convertDateTime(Attribute attr, String paramValue)
+	private static Instant convertDateTime(Attribute attr, String paramValue)
 	{
 		try
 		{
-			return getDateTimeFormat().parse(paramValue);
+			return parseInstant(paramValue);
 		}
-		catch (ParseException e)
+		catch (DateTimeParseException e)
 		{
 			throw new MolgenisDataException(
-					format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(), paramValue,
-							MolgenisDateFormat.getDateTimeFormat().toPattern()));
+					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramValue));
 		}
 	}
 
-	private static Date convertDate(Attribute attr, String paramValue)
+	private static LocalDate convertDate(Attribute attr, String paramValue)
 	{
 		try
 		{
-			return getDateFormat().parse(paramValue);
+			return parseLocalDate(paramValue);
 		}
-		catch (ParseException e)
+		catch (DateTimeParseException e)
 		{
 			throw new MolgenisDataException(
-					format("Attribute [%s] value [%s] does not match date format [%s].", attr.getName(), paramValue,
-							MolgenisDateFormat.getDateFormat().toPattern()));
+					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramValue));
 		}
 	}
 

@@ -5,8 +5,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
@@ -62,17 +62,6 @@ public class EntityWithComputedAttributes implements Entity
 			return (Boolean) expressionEvaluator.evaluate(this);
 		}
 		return decoratedEntity.getBoolean(attributeName);
-	}
-
-	@Override
-	public Date getDate(String attributeName)
-	{
-		ExpressionEvaluator expressionEvaluator = expressionEvaluators.get(attributeName);
-		if (expressionEvaluator != null)
-		{
-			return (Date) expressionEvaluator.evaluate(this);
-		}
-		return decoratedEntity.getDate(attributeName);
 	}
 
 	@Override
@@ -184,25 +173,25 @@ public class EntityWithComputedAttributes implements Entity
 	}
 
 	@Override
-	public Timestamp getTimestamp(String attributeName)
+	public LocalDate getLocalDate(String attributeName)
 	{
 		ExpressionEvaluator expressionEvaluator = expressionEvaluators.get(attributeName);
 		if (expressionEvaluator != null)
 		{
-			return (Timestamp) expressionEvaluator.evaluate(this);
+			return (LocalDate) expressionEvaluator.evaluate(this);
 		}
-		return decoratedEntity.getTimestamp(attributeName);
+		return decoratedEntity.getLocalDate(attributeName);
 	}
 
 	@Override
-	public java.util.Date getUtilDate(String attributeName)
+	public Instant getInstant(String attributeName)
 	{
 		ExpressionEvaluator expressionEvaluator = expressionEvaluators.get(attributeName);
 		if (expressionEvaluator != null)
 		{
-			return (java.util.Date) expressionEvaluator.evaluate(this);
+			return (Instant) expressionEvaluator.evaluate(this);
 		}
-		return decoratedEntity.getUtilDate(attributeName);
+		return decoratedEntity.getInstant(attributeName);
 	}
 
 	@Override

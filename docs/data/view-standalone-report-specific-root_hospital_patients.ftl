@@ -12,7 +12,7 @@
 		<#if entity.get('birthdate')??>
 			<tr>
 				<th>Birthdate</th>
-				<td>${entity.get('birthdate')?date}</td>
+                <td>${entity.get('birthdate').format("MMM d, yyyy")}</td>
 			</tr>
 		</#if>
 		 <#if entity.get('birthplace')??>

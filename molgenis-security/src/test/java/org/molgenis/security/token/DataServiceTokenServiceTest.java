@@ -1,9 +1,6 @@
 package org.molgenis.security.token;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.Token;
 import org.molgenis.auth.TokenFactory;
 import org.molgenis.auth.User;
@@ -15,8 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Date;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.eq;
@@ -41,14 +36,7 @@ public class DataServiceTokenServiceTest
 		dataService = mock(DataService.class);
 		userDetailsService = mock(UserDetailsService.class);
 		TokenFactory tokenFactory = mock(TokenFactory.class);
-		when(tokenFactory.create()).thenAnswer(new Answer<Token>()
-		{
-			@Override
-			public Token answer(InvocationOnMock invocation) throws Throwable
-			{
-				return mock(Token.class);
-			}
-		});
+		when(tokenFactory.create()).thenAnswer(invocation -> mock(Token.class));
 		tokenService = new DataServiceTokenService(tokenGenerator, dataService, userDetailsService, tokenFactory);
 	}
 
@@ -78,7 +66,7 @@ public class DataServiceTokenServiceTest
 	{
 		Token token = mock(Token.class);
 		when(token.getToken()).thenReturn("token");
-		when(token.getExpirationDate()).thenReturn(DateUtils.addDays(new Date(), -1));
+		when(token.isExpired()).thenReturn(true);
 
 		@SuppressWarnings("unchecked")
 		Query<Token> q = mock(Query.class);

@@ -291,7 +291,8 @@ public class PostgreSqlExceptionTranslatorTest
 	public void translateInvalidIntegerExceptionDateTime()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
-		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type timestamp: \"str1\"");
+		when(serverErrorMessage.getMessage())
+				.thenReturn("invalid input syntax for type timestamp with time zone: \"str1\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = PostgreSqlExceptionTranslator
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));

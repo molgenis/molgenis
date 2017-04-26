@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
@@ -16,7 +15,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -60,8 +60,8 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		// create hydrated entity
 		hydratedEntity = entityTestHarness.createTestEntities(entityType, 1, refEntities).collect(toList()).get(0);
 
-		Date date = MolgenisDateFormat.getDateFormat().parse("2012-12-21");
-		Date dateTime = MolgenisDateFormat.getDateTimeFormat().parse("1985-08-12T11:12:13+0500");
+		LocalDate date = LocalDate.parse("2012-12-21");
+		Instant dateTime = Instant.parse("1985-08-12T06:12:13Z");
 
 		// create dehydrated entity
 		dehydratedEntity = newHashMap();

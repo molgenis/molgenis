@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
@@ -46,7 +47,7 @@ public class ProgressImpl implements Progress
 	{
 		JobExecutionContext.set(jobExecution);
 		JOB_EXECUTION_LOG.info("Execution started.");
-		jobExecution.setStartDate(new Date());
+		jobExecution.setStartDate(Instant.now());
 		jobExecution.setProgressInt(0);
 		jobExecution.setStatus(RUNNING);
 		update();
@@ -71,7 +72,7 @@ public class ProgressImpl implements Progress
 	@Override
 	public void success()
 	{
-		jobExecution.setEndDate(new Date());
+		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(SUCCESS);
 		jobExecution.setProgressInt(jobExecution.getProgressMax());
 		Duration yourDuration = Duration.millis(timeRunning());
@@ -89,7 +90,7 @@ public class ProgressImpl implements Progress
 	public void failed(Exception ex)
 	{
 		JOB_EXECUTION_LOG.error("Failed. " + ex.getMessage(), ex);
-		jobExecution.setEndDate(new Date());
+		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(FAILED);
 		jobExecution.setProgressMessage(abbreviate(ex.getMessage(), 255));
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
@@ -121,7 +122,7 @@ public class ProgressImpl implements Progress
 	public void canceled()
 	{
 		JOB_EXECUTION_LOG.warn("Canceled");
-		jobExecution.setEndDate(new Date());
+		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(CANCELED);
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
@@ -131,12 +132,12 @@ public class ProgressImpl implements Progress
 	@Override
 	public Long timeRunning()
 	{
-		Date startDate = jobExecution.getStartDate();
+		Instant startDate = jobExecution.getStartDate();
 		if (startDate == null)
 		{
 			return null;
 		}
-		return System.currentTimeMillis() - startDate.getTime();
+		return ChronoUnit.MILLIS.between(startDate, Instant.now());
 	}
 
 	@Override

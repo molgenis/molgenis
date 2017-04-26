@@ -4,36 +4,51 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.molgenis.data.DataConverter;
+import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
-public class ExcelUtils
+import static java.time.ZoneOffset.UTC;
+
+class ExcelUtils
 {
-	public static String toValue(Cell cell)
+	static String toValue(Cell cell)
 	{
 		return toValue(cell, null);
 	}
 
 	// Gets a cell value as String and process the value with the given cellProcessors
-	public static String toValue(Cell cell, List<CellProcessor> cellProcessors)
+	static String toValue(Cell cell, List<CellProcessor> cellProcessors)
 	{
 		String value;
-		switch (cell.getCellType())
+		switch (cell.getCellTypeEnum())
 		{
-			case Cell.CELL_TYPE_BLANK:
+			case BLANK:
 				value = null;
 				break;
-			case Cell.CELL_TYPE_STRING:
+			case STRING:
 				value = cell.getStringCellValue();
 				break;
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell))
 				{
-					value = DataConverter.toString(cell.getDateCellValue());
+					try
+					{
+						// Excel dates are LocalDateTime, stored without timezone.
+						// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
+						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
+						Date dateCellValue = cell.getDateCellValue();
+						value = formatUTCDateAsLocalDateTime(dateCellValue);
+					}
+					finally
+					{
+						LocaleUtil.resetUserTimeZone();
+					}
 				}
 				else
 				{
@@ -46,22 +61,34 @@ public class ExcelUtils
 					else value = String.valueOf(x);
 				}
 				break;
-			case Cell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 				value = String.valueOf(cell.getBooleanCellValue());
 				break;
-			case Cell.CELL_TYPE_FORMULA:
+			case FORMULA:
 				// evaluate formula
 				FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
 				CellValue cellValue = evaluator.evaluate(cell);
-				switch (cellValue.getCellType())
+				switch (cellValue.getCellTypeEnum())
 				{
-					case Cell.CELL_TYPE_BOOLEAN:
+					case BOOLEAN:
 						value = String.valueOf(cellValue.getBooleanValue());
 						break;
-					case Cell.CELL_TYPE_NUMERIC:
+					case NUMERIC:
 						if (DateUtil.isCellDateFormatted(cell))
 						{
-							value = DataConverter.toString(DateUtil.getJavaDate(cellValue.getNumberValue(), false));
+							try
+							{
+								// Excel dates are LocalDateTime, stored without timezone.
+								// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
+								LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
+								Date javaDate = DateUtil.getJavaDate(cellValue.getNumberValue(), false);
+								value = formatUTCDateAsLocalDateTime(javaDate);
+
+							}
+							finally
+							{
+								LocaleUtil.resetUserTimeZone();
+							}
 						}
 						else
 						{
@@ -74,20 +101,35 @@ public class ExcelUtils
 							else value = String.valueOf(x);
 						}
 						break;
-					case Cell.CELL_TYPE_STRING:
+					case STRING:
 						value = cellValue.getStringValue();
 						break;
-					case Cell.CELL_TYPE_BLANK:
+					case BLANK:
 						value = null;
 						break;
 					default:
-						throw new MolgenisDataException("unsupported cell type: " + cellValue.getCellType());
+						throw new MolgenisDataException("unsupported cell type: " + cellValue.getCellTypeEnum());
 				}
 				break;
 			default:
-				throw new MolgenisDataException("unsupported cell type: " + cell.getCellType());
+				throw new MolgenisDataException("unsupported cell type: " + cell.getCellTypeEnum());
 		}
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
+	}
+
+	/**
+	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
+	 *
+	 * @param javaDate Parsed Date representing start of day in UTC
+	 * @return Formatted {@link LocalDateTime} string of the java.util.Date
+	 */
+	private static String formatUTCDateAsLocalDateTime(Date javaDate)
+	{
+		String value;// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
+		LocalDateTime localDateTime = javaDate.toInstant().atZone(UTC).toLocalDateTime();
+		// And format to string
+		value = localDateTime.toString();
+		return value;
 	}
 }

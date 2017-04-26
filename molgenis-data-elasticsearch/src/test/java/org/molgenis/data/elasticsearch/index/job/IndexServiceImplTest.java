@@ -21,21 +21,19 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -126,13 +124,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		assertTrue(queryMatcher.matches());
 
 		// check the endDate time limit in the query
-		String dateString = queryMatcher.group(1);
-		DateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-		Date date = sdf.parse(dateString);
-		assertEquals(date.toString(), dateString);
-		long ago = System.currentTimeMillis() - date.getTime();
-		assertTrue(ago > MINUTES.toMillis(5));
-		assertTrue(ago < MINUTES.toMillis(5) + SECONDS.toMillis(3));
+		assertEquals(Duration.between(parseInstant(queryMatcher.group(1)), Instant.now()).toMinutes(), 5);
 	}
 
 	@Configuration

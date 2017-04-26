@@ -1,11 +1,11 @@
 package org.molgenis.data.excel;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
@@ -57,7 +57,7 @@ public class ExcelSheetWriter extends AbstractWritable
 		Row poiRow = sheet.createRow(row++);
 		for (Attribute attribute : cachedAttributes)
 		{
-			Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
+			Cell cell = poiRow.createCell(i++, CellType.STRING);
 			cell.setCellValue(toValue(entity.get(attribute.getName())));
 		}
 
@@ -80,7 +80,7 @@ public class ExcelSheetWriter extends AbstractWritable
 			int i = 0;
 			for (Attribute attribute : attributes)
 			{
-				Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
+				Cell cell = poiRow.createCell(i++, CellType.STRING);
 
 				switch (attributeWriteMode)
 				{
@@ -111,10 +111,6 @@ public class ExcelSheetWriter extends AbstractWritable
 		if (obj == null)
 		{
 			value = null;
-		}
-		else if (obj instanceof java.util.Date)
-		{
-			value = new DateToStringConverter().convert((java.util.Date) obj);
 		}
 		else if (obj instanceof Entity)
 		{
