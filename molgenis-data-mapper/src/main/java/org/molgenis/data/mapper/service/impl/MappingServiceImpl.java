@@ -16,7 +16,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -48,7 +47,6 @@ public class MappingServiceImpl implements MappingService
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
-	private final IdGenerator idGenerator;
 	private final MappingProjectRepository mappingProjectRepository;
 	private final PermissionSystemService permissionSystemService;
 	private final AttributeFactory attrMetaFactory;
@@ -56,14 +54,13 @@ public class MappingServiceImpl implements MappingService
 	private final DefaultPackage defaultPackage;
 
 	@Autowired
-	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
+	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
 			AttributeFactory attrMetaFactory, SystemPackageRegistry systemPackageRegistry,
 			DefaultPackage defaultPackage)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
-		this.idGenerator = requireNonNull(idGenerator);
 		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
@@ -115,7 +112,7 @@ public class MappingServiceImpl implements MappingService
 				clonedMappingProjectName = mappingProjectName + " - Copy (" + i + ")";
 			}
 
-			if (mappingProjectRepository.getMappingProjects(new QueryImpl<Entity>().eq(NAME, clonedMappingProjectName))
+			if (mappingProjectRepository.getMappingProjects(new QueryImpl<>().eq(NAME, clonedMappingProjectName))
 					.isEmpty())
 			{
 				break;
