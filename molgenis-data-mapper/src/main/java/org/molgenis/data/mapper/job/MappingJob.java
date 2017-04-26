@@ -10,35 +10,36 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 
 public class MappingJob extends Job<Void>
 {
+	private final String mappingProjectId;
+	private final String targetEntityTypeId;
+	private final boolean addSourceAttribute;
 	private final MappingService mappingService;
-	private final MappingJobExecution mappingJobExecution;
 	private final DataService dataService;
 
-	MappingJob(MappingJobExecution mappingJobExecution, Progress progress, Authentication userAuthentication,
-			TransactionTemplate transactionTemplate, MappingService mappingService, DataService dataService)
+	MappingJob(String mappingProjectId, String targetEntityTypeId, boolean addSourceAttribute, Progress progress,
+			Authentication userAuthentication, TransactionTemplate transactionTemplate, MappingService mappingService,
+			DataService dataService)
 	{
 		super(progress, transactionTemplate, userAuthentication);
-
-		this.mappingService = mappingService;
-		this.mappingJobExecution = mappingJobExecution;
-		this.dataService = dataService;
+		this.mappingProjectId = requireNonNull(mappingProjectId);
+		this.targetEntityTypeId = requireNonNull(targetEntityTypeId);
+		this.addSourceAttribute = requireNonNull(addSourceAttribute);
+		this.mappingService = requireNonNull(mappingService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
 	public Void call(Progress progress) throws Exception
 	{
-		MappingProject mappingProject = mappingService.getMappingProject(mappingJobExecution.getMappingProjectId());
+		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = mappingProject.getMappingTargets().get(0);
-
 		progress.setProgressMax(calculateMaxProgress(mappingTarget));
-
-		mappingService.applyMappings(mappingTarget, mappingJobExecution.getTargetEntityTypeId(),
-				mappingJobExecution.isAddSourceAttribute(), progress);
-
+		mappingService.applyMappings(mappingTarget, targetEntityTypeId, addSourceAttribute, progress);
 		return null;
 	}
 
