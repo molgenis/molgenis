@@ -4,16 +4,16 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
+import org.testng.annotations.*;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -41,9 +41,11 @@ public class DateTimeAttributeTypeUpdateTest extends AbstractAttributeTypeUpdate
 	@DataProvider(name = "validConversionTestCases")
 	public Object[][] validConversionTestCases()
 	{
-		return new Object[][] { { "2016-11-13T20:20:20+0100", STRING, "2016-11-13 20:20:20" },
-				{ "2016-11-13T20:20:20+0100", TEXT, "2016-11-13 20:20:20" },
-				{ "2016-11-13T20:20:20+0100", DATE, "2016-11-13" } };
+		Instant value = Instant.parse("2016-11-13T19:20:20Z");
+		String formattedInDefaultTimezone = value.atZone(ZoneId.systemDefault())
+				.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx"));
+		return new Object[][] { { value, STRING, formattedInDefaultTimezone },
+				{ value, TEXT, formattedInDefaultTimezone }, { value, DATE, "2016-11-13" } };
 	}
 
 	/**
@@ -55,14 +57,14 @@ public class DateTimeAttributeTypeUpdateTest extends AbstractAttributeTypeUpdate
 	 * @param convertedValue  The expected value after converting the type
 	 * @throws ParseException
 	 */
-	// FIXME @Test(dataProvider = "validConversionTestCases")
-	public void testValidConversion(Object valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
+	@Test(dataProvider = "validConversionTestCases")
+	public void testValidConversion(Instant valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
 	{
-		valueToConvert = getDateTimeFormat().parse(valueToConvert.toString());
+		valueToConvert = parseInstant(valueToConvert.toString());
 		testTypeConversion(valueToConvert, typeToConvertTo);
 
-		if (typeToConvertTo.equals(DATE)) convertedValue = getDateFormat().parse(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE)) convertedValue = parseLocalDate(convertedValue.toString());
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);
@@ -121,7 +123,7 @@ public class DateTimeAttributeTypeUpdateTest extends AbstractAttributeTypeUpdate
 	{
 		try
 		{
-			valueToConvert = getDateTimeFormat().parse(valueToConvert.toString());
+			valueToConvert = parseInstant(valueToConvert.toString());
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}

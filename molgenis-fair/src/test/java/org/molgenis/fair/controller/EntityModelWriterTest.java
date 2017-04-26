@@ -19,9 +19,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -226,9 +224,8 @@ public class EntityModelWriterTest
 
 		when(objectEntity.getEntityType()).thenReturn(entityType);
 		LocalDate value = LocalDate.of(2013, Month.AUGUST, 12);
-		Date utilDateValue = Date.from(value.atStartOfDay(ZoneId.systemDefault()).toInstant());
 		when(objectEntity.get("attributeName")).thenReturn(value);
-		when(objectEntity.getUtilDate("attributeName")).thenReturn(utilDateValue);
+		when(objectEntity.getLocalDate("attributeName")).thenReturn(value);
 
 		when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 		when(attribute.getName()).thenReturn("attributeName");
@@ -243,9 +240,8 @@ public class EntityModelWriterTest
 
 		assertEquals(result.size(), 1);
 		Iterator results = result.iterator();
-		//TODO: This test documents bug #6066, fix it!
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2013-08-12T00:00:00.000+02:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]");
+				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2013-08-12\"^^<http://www.w3.org/2001/XMLSchema#date>) [null]");
 	}
 
 	@Test
@@ -260,9 +256,8 @@ public class EntityModelWriterTest
 
 		when(objectEntity.getEntityType()).thenReturn(entityType);
 		Instant value = Instant.parse("2011-12-03T10:15:30Z");
-		Date dateValue = Date.from(value);
 		when(objectEntity.get("attributeName")).thenReturn(value);
-		when(objectEntity.getUtilDate("attributeName")).thenReturn(dateValue);
+		when(objectEntity.getInstant("attributeName")).thenReturn(value);
 
 		when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 		when(attribute.getName()).thenReturn("attributeName");
@@ -278,7 +273,7 @@ public class EntityModelWriterTest
 		assertEquals(result.size(), 1);
 		Iterator results = result.iterator();
 		assertEquals(results.next().toString(),
-				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2011-12-03T11:15:30.000+01:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]");
+				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2011-12-03T10:15:30Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]");
 	}
 
 	@Test

@@ -6,8 +6,8 @@ import org.molgenis.data.support.StaticEntity;
 import org.molgenis.security.owned.OwnedEntityType;
 import org.molgenis.util.ValueLabel;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.molgenis.data.importer.ImportRunMetaData.*;
@@ -55,22 +55,22 @@ public class ImportRun extends StaticEntity
 		set(ID, id);
 	}
 
-	public Date getStartDate()
+	public Instant getStartDate()
 	{
-		return getUtilDate(STARTDATE);
+		return getInstant(STARTDATE);
 	}
 
-	public void setStartDate(Date startDate)
+	public void setStartDate(Instant startDate)
 	{
 		set(STARTDATE, startDate);
 	}
 
-	public Date getEndDate()
+	public Instant getEndDate()
 	{
-		return getUtilDate(ENDDATE);
+		return getInstant(ENDDATE);
 	}
 
-	public void setEndDate(Date endDate)
+	public void setEndDate(Instant endDate)
 	{
 		set(ENDDATE, endDate);
 	}

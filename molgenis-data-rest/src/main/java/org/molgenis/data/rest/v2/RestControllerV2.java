@@ -38,12 +38,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
+import static java.time.ZonedDateTime.now;
+import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -53,8 +57,6 @@ import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDe
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
@@ -150,10 +152,10 @@ class RestControllerV2
 	{
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ?
-				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())
-						+ " by IntelliJ" : molgenisBuildDate;
-
+		if (molgenisBuildDate.equals("${maven.build.timestamp}"))
+		{
+			molgenisBuildDate = DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by IntelliJ";
+		}
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
 		result.put("buildDate", molgenisBuildDate);
@@ -849,15 +851,12 @@ class RestControllerV2
 					case COMPOUND:
 						throw new RuntimeException("Invalid data type [" + dataType + "]");
 					case DATE:
-						Date dateValue = entity.getUtilDate(attrName);
-						String dateValueStr = dateValue != null ? getDateFormat().format(dateValue) : null;
-						responseData.put(attrName, dateValueStr);
+						LocalDate dateValue = entity.getLocalDate(attrName);
+						responseData.put(attrName, dateValue != null ? dateValue.toString() : null);
 						break;
 					case DATE_TIME:
-						Date dateTimeValue = entity.getUtilDate(attrName);
-						String dateTimeValueStr =
-								dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
-						responseData.put(attrName, dateTimeValueStr);
+						Instant dateTimeValue = entity.getInstant(attrName);
+						responseData.put(attrName, dateTimeValue != null ? dateTimeValue.toString() : null);
 						break;
 					case DECIMAL:
 						responseData.put(attrName, entity.getDouble(attrName));

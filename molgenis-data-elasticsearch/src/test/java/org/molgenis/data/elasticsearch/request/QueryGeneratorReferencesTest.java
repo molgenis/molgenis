@@ -11,14 +11,14 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -129,7 +129,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	public void generateOneQueryRuleGreaterDate() throws ParseException
 	{
 		String date = "2015-05-22";
-		Date value = MolgenisDateFormat.getDateFormat().parse(date);
+		LocalDate value = LocalDate.parse(date);
 		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDateAttributeName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -142,7 +142,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateOneQueryRuleGreaterDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Instant value = Instant.parse("2015-05-22T06:12:13Z");
 		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDateTimeAttributeName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -196,7 +196,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	public void generateOneQueryRuleGreaterEqualDate() throws ParseException
 	{
 		String date = "2015-05-22";
-		Date value = MolgenisDateFormat.getDateFormat().parse(date);
+		LocalDate value = LocalDate.parse(date);
 		Query<Entity> q = new QueryImpl<Entity>().ge(PREFIX + refDateAttributeName, value);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);

@@ -112,10 +112,8 @@
                         <#if (category[idAttr.name])??>
                             <#assign value = category[idAttr.name] />
                             <#assign dataType = idAttr.dataType />
-                                <#if dataType == "DATE_TIME">
-                                ${value?datetime}
-                                <#elseif dataType == "DATE">
-                                ${value?date}
+                            <#if dataType == "DATE_TIME" || dataType == "DATE">
+                                ${value.format()}
                                 <#else>
                                 ${value?string}
                                 </#if>
@@ -126,10 +124,8 @@
                                 =
                                 <#assign value = category[labelAttr.name] />
                                 <#assign dataType = labelAttr.dataType />
-                                <#if dataType == "DATE_TIME">
-                                ${value?datetime}
-                                <#elseif dataType == "DATE">
-                                ${value?date}
+                                <#if dataType == "DATE_TIME" || dataType == "DATE">
+                                ${value.format()}
                                 <#else>
                                 ${value?string}
                                 </#if>

@@ -6,10 +6,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -75,12 +74,10 @@ public class AutoValuePopulator
 				switch (type)
 				{
 					case DATE:
-						Date localDateUTC = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant());
-						entity.set(attr.getName(), localDateUTC);
+						entity.set(attr.getName(), LocalDate.now(ZoneId.systemDefault()));
 						break;
 					case DATE_TIME:
-						Date dateUTC = new Date();
-						entity.set(attr.getName(), dateUTC);
+						entity.set(attr.getName(), Instant.now());
 						break;
 					default:
 						throw new RuntimeException(format("Unexpected data type [%s]", type.toString()));

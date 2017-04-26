@@ -26,7 +26,7 @@ public class GsonConfig
 
 		GsonFactoryBean gsonFactoryBean = new GsonFactoryBean();
 		gsonFactoryBean.registerTypeHierarchyAdapter(Entity.class, new EntitySerializer());
-		gsonFactoryBean.setDateFormatPattern(MolgenisDateFormat.getDateTimeFormat().toPattern());
+		gsonFactoryBean.setRegisterJavaTimeConverters(true);
 		gsonFactoryBean.setDisableHtmlEscaping(true);
 		gsonFactoryBean.setPrettyPrinting(prettyPrinting);
 		gsonFactoryBean.setSerializeNulls(false);

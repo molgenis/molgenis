@@ -4,8 +4,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import java.util.Date;
+import java.time.Instant;
 
+import static java.time.Instant.now;
 import static org.molgenis.auth.TokenMetaData.*;
 
 public class Token extends StaticEntity
@@ -56,22 +57,22 @@ public class Token extends StaticEntity
 		set(TOKEN_ATTR, token);
 	}
 
-	public Date getExpirationDate()
+	public Instant getExpirationDate()
 	{
-		return getUtilDate(EXPIRATIONDATE);
+		return getInstant(EXPIRATIONDATE);
 	}
 
-	public void setExpirationDate(Date expirationDate)
+	public void setExpirationDate(Instant expirationDate)
 	{
 		set(EXPIRATIONDATE, expirationDate);
 	}
 
-	public Date getCreationDate()
+	public Instant getCreationDate()
 	{
-		return getUtilDate(CREATIONDATE);
+		return getInstant(CREATIONDATE);
 	}
 
-	public void setCreationDate(Date creationDate)
+	public void setCreationDate(Instant creationDate)
 	{
 		set(CREATIONDATE, creationDate);
 	}
@@ -84,5 +85,10 @@ public class Token extends StaticEntity
 	public void setDescription(String description)
 	{
 		set(DESCRIPTION, description);
+	}
+
+	public boolean isExpired()
+	{
+		return (getExpirationDate() != null) && getExpirationDate().isBefore(now());
 	}
 }

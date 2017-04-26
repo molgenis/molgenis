@@ -10,10 +10,10 @@ import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.MolgenisDateFormat;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -888,10 +888,9 @@ public class QueryGenerator implements QueryPartGenerator
 			case XREF:
 				return queryRuleValue instanceof Entity ? ((Entity) queryRuleValue).getIdValue() : queryRuleValue;
 			case DATE:
-			case DATE_TIME:
-				if (queryRuleValue instanceof Date)
+				if (queryRuleValue instanceof LocalDate)
 				{
-					return getESDateQueryValue((Date) queryRuleValue, attribute);
+					return queryRuleValue.toString();
 				}
 				else if (queryRuleValue instanceof String)
 				{
@@ -899,7 +898,21 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				else
 				{
-					throw new MolgenisQueryException(format("Query value must be of type Date instead of [%s]",
+					throw new MolgenisQueryException(format("Query value must be of type LocalDate instead of [%s]",
+							queryRuleValue.getClass().getSimpleName()));
+				}
+			case DATE_TIME:
+				if (queryRuleValue instanceof Instant)
+				{
+					return queryRuleValue.toString();
+				}
+				else if (queryRuleValue instanceof String)
+				{
+					return queryRuleValue;
+				}
+				else
+				{
+					throw new MolgenisQueryException(format("Query value must be of type Instant instead of [%s]",
 							queryRuleValue.getClass().getSimpleName()));
 				}
 			case COMPOUND:
@@ -909,13 +922,4 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	private String getESDateQueryValue(Date queryValue, Attribute attr)
-	{
-		if (attr.getDataType() == AttributeType.DATE_TIME)
-		{
-			return MolgenisDateFormat.getDateTimeFormat().format(queryValue);
-		}
-
-		return MolgenisDateFormat.getDateFormat().format(queryValue);
-	}
 }

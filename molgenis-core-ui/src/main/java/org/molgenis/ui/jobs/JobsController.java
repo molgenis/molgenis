@@ -14,7 +14,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
@@ -62,9 +66,7 @@ public class JobsController extends MolgenisPluginController
 	{
 		final List<Entity> jobs = new ArrayList<>();
 
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -7);
-		Date weekAgo = cal.getTime();
+		Instant weekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
 		User currentUser = userAccountService.getCurrentUser();
 
 		dataService.getMeta().getEntityTypes()
@@ -80,7 +82,7 @@ public class JobsController extends MolgenisPluginController
 				});
 
 		Collections.sort(jobs,
-				(job1, job2) -> job2.getUtilDate(SUBMISSION_DATE).compareTo(job1.getUtilDate(SUBMISSION_DATE)));
+				(job1, job2) -> job2.getInstant(SUBMISSION_DATE).compareTo(job1.getInstant(SUBMISSION_DATE)));
 		if (jobs.size() > MAX_JOBS_TO_RETURN)
 		{
 			return jobs.subList(0, MAX_JOBS_TO_RETURN);

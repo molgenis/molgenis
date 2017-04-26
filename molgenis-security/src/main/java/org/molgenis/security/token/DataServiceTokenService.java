@@ -1,6 +1,5 @@
 package org.molgenis.security.token;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.molgenis.auth.Token;
 import org.molgenis.auth.TokenFactory;
 import org.molgenis.auth.User;
@@ -12,9 +11,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-
 import static java.lang.String.format;
+import static java.time.Instant.now;
+import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.TokenMetaData.TOKEN;
 import static org.molgenis.auth.TokenMetaData.TOKEN_ATTR;
@@ -81,7 +80,7 @@ public class DataServiceTokenService implements TokenService
 		molgenisToken.setUser(user);
 		molgenisToken.setToken(token);
 		molgenisToken.setDescription(description);
-		molgenisToken.setExpirationDate(DateUtils.addHours(new Date(), 2));
+		molgenisToken.setExpirationDate(now().plus(2, HOURS));
 		dataService.add(TOKEN, molgenisToken);
 
 		return token;
@@ -99,8 +98,7 @@ public class DataServiceTokenService implements TokenService
 	private Token getMolgenisToken(String token) throws UnknownTokenException
 	{
 		Token molgenisToken = dataService.query(TOKEN, Token.class).eq(TOKEN_ATTR, token).findOne();
-		if ((molgenisToken == null) || ((molgenisToken.getExpirationDate() != null) && new Date()
-				.after(molgenisToken.getExpirationDate())))
+		if (molgenisToken == null || molgenisToken.isExpired())
 		{
 			throw new UnknownTokenException("Invalid token");
 		}

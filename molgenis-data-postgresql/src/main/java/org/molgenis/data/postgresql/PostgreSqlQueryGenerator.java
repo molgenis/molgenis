@@ -1014,7 +1014,7 @@ class PostgreSqlQueryGenerator
 				case DATE:
 					return "date";
 				case DATE_TIME:
-					return "timestamp";
+					return "timestamp with time zone"; // this matters when converting from STRING to DATE_TIME!
 				case DECIMAL:
 					return "double precision"; // alias: float8
 				case EMAIL:
