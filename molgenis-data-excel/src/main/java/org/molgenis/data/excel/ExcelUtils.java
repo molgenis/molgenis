@@ -5,7 +5,6 @@ import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.util.LocaleUtil;
-import org.molgenis.data.DataConverter;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
@@ -44,10 +43,7 @@ class ExcelUtils
 						// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
 						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
 						Date dateCellValue = cell.getDateCellValue();
-						// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
-						LocalDateTime localDateTime = dateCellValue.toInstant().atZone(UTC).toLocalDateTime();
-						// And format to string
-						value = localDateTime.toString();
+						value = formatUTCDateAsLocalDateTime(dateCellValue);
 					}
 					finally
 					{
@@ -80,7 +76,19 @@ class ExcelUtils
 					case NUMERIC:
 						if (DateUtil.isCellDateFormatted(cell))
 						{
-							value = DataConverter.toString(DateUtil.getJavaDate(cellValue.getNumberValue(), false));
+							try
+							{
+								// Excel dates are LocalDateTime, stored without timezone.
+								// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
+								LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
+								Date javaDate = DateUtil.getJavaDate(cellValue.getNumberValue(), false);
+								value = formatUTCDateAsLocalDateTime(javaDate);
+
+							}
+							finally
+							{
+								LocaleUtil.resetUserTimeZone();
+							}
 						}
 						else
 						{
@@ -108,5 +116,20 @@ class ExcelUtils
 		}
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
+	}
+
+	/**
+	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
+	 *
+	 * @param javaDate Parsed Date representing start of day in UTC
+	 * @return Formatted {@link LocalDateTime} string of the java.util.Date
+	 */
+	private static String formatUTCDateAsLocalDateTime(Date javaDate)
+	{
+		String value;// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
+		LocalDateTime localDateTime = javaDate.toInstant().atZone(UTC).toLocalDateTime();
+		// And format to string
+		value = localDateTime.toString();
+		return value;
 	}
 }
