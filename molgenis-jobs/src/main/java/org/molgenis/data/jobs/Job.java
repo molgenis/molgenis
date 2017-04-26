@@ -31,18 +31,22 @@ public abstract class Job<Result> implements Callable<Result>
 	@Override
 	public Result call()
 	{
+		if (transactionTemplate != null)
+		{
+			return transactionTemplate.execute((status) -> doCallInTransaction());
+		}
+		else
+		{
+			return doCallInTransaction();
+		}
+	}
+
+	private Result doCallInTransaction()
+	{
 		progress.start();
 		try
 		{
-			Result result;
-			if (transactionTemplate != null)
-			{
-				result = transactionTemplate.execute((status) -> tryRunWithAuthentication());
-			}
-			else
-			{
-				result = tryRunWithAuthentication();
-			}
+			Result result = tryRunWithAuthentication();
 			progress.success();
 			return result;
 		}
