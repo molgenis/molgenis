@@ -15,12 +15,14 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 public class MappingJobExecutionMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "MappingJobExecution";
-	public static final String MAPPING_JOB_EXECUTION = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
-	public static final String MAPPING_JOB_TYPE = "mapping";
+	static final String MAPPING_JOB_EXECUTION = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	static final String MAPPING_JOB_TYPE = "mapping";
 
-	public static final String MAPPING_PROJECT_ID = "mappingProjectId";
-	public static final String TARGET_ENTITY_TYPE_ID = "targetEntityTypeId";
-	public static final String ADD_SOURCE_ATTRIBUTE = "addSourceAttribute";
+	static final String MAPPING_PROJECT_ID = "mappingProjectId";
+	static final String TARGET_ENTITY_TYPE_ID = "targetEntityTypeId";
+	static final String ADD_SOURCE_ATTRIBUTE = "addSourceAttribute";
+	static final String PACKAGE = "package";
+	static final String LABEL = "label";
 
 	private final JobExecutionMetaData jobExecutionMetaData;
 
@@ -40,5 +42,9 @@ public class MappingJobExecutionMetadata extends SystemEntityType
 		addAttribute(MAPPING_PROJECT_ID).setDataType(STRING).setLabel("Mapping Project ID").setNillable(false);
 		addAttribute(TARGET_ENTITY_TYPE_ID).setDataType(STRING).setLabel("Target Entity Type ID").setNillable(false);
 		addAttribute(ADD_SOURCE_ATTRIBUTE).setDataType(BOOL).setLabel("Add source attribute").setNillable(false);
+		addAttribute(PACKAGE).setDataType(STRING).setLabel("Package").setNillable(false).setDescription(
+				"The destination package of the target entity type. Ignored when mapping to an existing entity type.");
+		addAttribute(LABEL).setDataType(STRING).setLabel("Label").setNillable(false).setDescription(
+				"The label of the target entity type. Ignored when mapping to an existing entity type.");
 	}
 }
