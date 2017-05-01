@@ -534,7 +534,7 @@ public class MappingServiceController extends MolgenisPluginController
 	{
 		String jobHref = scheduleMappingJobInternal(mappingProjectId, newEntityName, addSourceAttribute);
 		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(JobsController.ID);
-		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=10000", jobControllerURL, jobHref);
+		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=1000", jobControllerURL, jobHref);
 	}
 
 	/**
