@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.api.client.util.Maps.newHashMap;
 import static java.lang.String.format;
@@ -250,6 +252,28 @@ public class MappingServiceImpl implements MappingService
 		return targetRepo;
 	}
 
+	public Stream<EntityType> getCompatibleEntityTypes(EntityType target)
+	{
+		return dataService.getMeta().getEntityTypes().filter(candidate -> !candidate.isAbstract())
+				.filter(isCompatible(target));
+	}
+
+	private Predicate<EntityType> isCompatible(EntityType target)
+	{
+		return candidate ->
+		{
+			try
+			{
+				compareTargetMetaDatas(candidate, target);
+				return true;
+			}
+			catch (MolgenisDataException incompatible)
+			{
+				return false;
+			}
+		};
+	}
+
 	/**
 	 * Compares the attributes between the target repository and the mapping target.
 	 * Applied Rules:
@@ -257,17 +281,17 @@ public class MappingServiceImpl implements MappingService
 	 * - The attributes of the mapping target with the same name as attributes in the target repository should have the same type
 	 * - If there are reference attributes, the name of the reference entity should be the same in both the target repository as in the mapping target
 	 *
-	 * @param targetRepositoryMetaData
-	 * @param mappingTargetMetaData
-	 * @return A {@link String} containing details on a potential mapping exception, or null if the attributes of both the target repository and mapping target are compatible
+	 * @param targetRepositoryEntityType the target repository EntityType to check
+	 * @param mappingTargetEntityType the mapping target EntityType to check
+	 * @throws MolgenisDataException if the types are not compatible
 	 */
-	private void compareTargetMetaDatas(EntityType targetRepositoryMetaData, EntityType mappingTargetMetaData)
+	private void compareTargetMetaDatas(EntityType targetRepositoryEntityType, EntityType mappingTargetEntityType)
 	{
 		Map<String, Attribute> targetRepositoryAttributeMap = newHashMap();
-		targetRepositoryMetaData.getAtomicAttributes()
+		targetRepositoryEntityType.getAtomicAttributes()
 				.forEach(attribute -> targetRepositoryAttributeMap.put(attribute.getName(), attribute));
 
-		for (Attribute mappingTargetAttribute : mappingTargetMetaData.getAtomicAttributes())
+		for (Attribute mappingTargetAttribute : mappingTargetEntityType.getAtomicAttributes())
 		{
 			String mappingTargetAttributeName = mappingTargetAttribute.getName();
 			Attribute targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
