@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+/**
+ * Creates {@link DummyJobExecution}s.
+ */
 public class DummyJobExecutionFactory
 		extends AbstractSystemEntityFactory<DummyJobExecution, DummyJobExecutionMetadata, String>
 {

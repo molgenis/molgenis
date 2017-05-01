@@ -5,7 +5,7 @@ import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Dummy subclass plus metadata to instantiate a testable JobExecution.
+ * Dummy subclass to instantiate testable {@link JobExecution}s.
  */
 public class DummyJobExecution extends JobExecution
 {

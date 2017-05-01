@@ -9,6 +9,9 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
+/**
+ * Metadata for {@link DummyJobExecution}s.
+ */
 public class DummyJobExecutionMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "DummyJobExecution";
