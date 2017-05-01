@@ -19,7 +19,15 @@ import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 public class JobExecution extends StaticEntity
 {
 	public static final String TRUNCATION_BANNER = "<<< THIS LOG HAS BEEN TRUNCATED >>>";
+	/**
+	 * If the progress message is larger than this value, it will be abbreviated.
+	 * This value shouldn't exceed the max length of the {@link org.molgenis.data.meta.AttributeType#STRING}
+	 */
 	public static final int MAX_PROGRESS_MESSAGE_LENGTH = 255;
+	/**
+	 * If log is larger than this value, it will be truncated.
+	 * This value shouldn't exceed the max length of the {@link org.molgenis.data.meta.AttributeType#TEXT}
+	 */
 	public static final int MAX_LOG_LENGTH = 65535;
 	private boolean logTruncated = false;
 
