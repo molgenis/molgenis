@@ -32,9 +32,7 @@ public class JobExecutionLogAppender extends AppenderBase<ILoggingEvent>
 	{
 		String formattedMessage = layout.doLayout(eventObject);
 		JobExecution jobExecution = JobExecutionContext.get();
-		String oldLog = jobExecution.getLog();
-		String newLog = oldLog == null ? formattedMessage : oldLog + formattedMessage;
-		jobExecution.setLog(newLog);
+		jobExecution.appendLog(formattedMessage);
 	}
 
 }
