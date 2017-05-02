@@ -2,7 +2,8 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
+<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
+'jquery.validate.min.js']>
 
 <@header css js/>
 
@@ -227,11 +228,15 @@
                             </form>
                         </div>
                         <div class="tab-pane panel-collapse" id="new">
-                            <form method="post" action="${context_url}/createIntegratedEntity">
+                            <form method="post" id="newIntegratedDatasetForm"
+                                  action="${context_url}/createIntegratedEntity">
                                 <p class="help-block">Creates a new integrated dataset.</p>
                                 <div>
                                     <label for="newTargetEntityId">ID</label>
-                                    <input type="text" value="" name="id" id="newTargetEntityId" class="form-control">
+                                    <input type="text" value="" name="id" id="newTargetEntityId" class="form-control"
+                                           required minlength="1" maxlength="150"
+                                           regex="^[a-zA-Z0-9_#]+(-[a-z]{2,3})??$"
+                                           data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed.">
                                     <p class="help-block">Enter an ID for the integrated dataset.</p>
                                 </div>
                                 <div>
