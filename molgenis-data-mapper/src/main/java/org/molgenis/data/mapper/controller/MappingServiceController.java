@@ -45,6 +45,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -56,14 +57,17 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
+import static org.molgenis.data.meta.NameValidator.validateEntityName;
 import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.MediaType.*;
+import static org.springframework.http.ResponseEntity.created;
 
 @Controller
 @RequestMapping(URI)
@@ -556,9 +560,35 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = false, name = "package") String packageId,
 			@RequestParam(required = false) Boolean addSourceAttribute) throws URISyntaxException
 	{
+		mappingProjectId = mappingProjectId.trim();
+		targetEntityTypeId = targetEntityTypeId.trim();
+		label = trim(label);
+		packageId = trim(packageId);
+
+		try
+		{
+			validateEntityName(targetEntityTypeId);
+			if (mappingService.getMappingProject(mappingProjectId) == null)
+			{
+				throw new MolgenisDataException("No mapping project found with ID " + mappingProjectId);
+			}
+			if (packageId != null)
+			{
+				if (dataService.getMeta().getPackage(packageId) == null)
+				{
+					throw new MolgenisDataException("No package found with ID " + packageId);
+				}
+			}
+		}
+		catch (MolgenisDataException mde)
+		{
+			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
+		}
+
+
 		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId,
 				label);
-		return ResponseEntity.created(new java.net.URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
+		return created(new URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
 	}
 
 	/**
