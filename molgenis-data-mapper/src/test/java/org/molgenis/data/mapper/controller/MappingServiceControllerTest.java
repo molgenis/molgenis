@@ -1,8 +1,11 @@
 package org.molgenis.data.mapper.controller;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.stubbing.OngoingStubbing;
 import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -12,11 +15,13 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.user.UserService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -33,13 +38,19 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.ui.Model;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.semantic.Relation.isAssociatedWith;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.testng.Assert.assertEquals;
@@ -81,14 +92,37 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Mock
 	private MenuReaderService menuReaderService;
 
+	@Mock
+	private Model model;
+
+	@Mock
+	private MappingTarget mappingTarget;
+
+	@Mock
+	private EntityType targetEntityType;
+
+	@Mock
+	private EntityType target1;
+	@Mock
+	private EntityType target2;
+	@Mock
+	private MetaDataService metaDataService;
+	@Mock
+	private Package system;
+	@Mock
+	private Package base;
+
 	private User me;
 
 	private EntityType lifeLines;
 	private EntityType hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
+	private Attribute ageAttr;
+	private Attribute dobAttr;
 
 	private MockMvc mockMvc;
+	private OngoingStubbing<Multimap<Relation, OntologyTerm>> multimapOngoingStubbing;
 
 	@BeforeMethod
 	public void beforeTest()
@@ -100,9 +134,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		hop = entityTypeFactory.create("HOP");
-		hop.addAttribute(attrMetaFactory.create().setName("age").setDataType(INT));
+		ageAttr = attrMetaFactory.create().setName("age").setDataType(INT);
+		hop.addAttribute(ageAttr);
+		dobAttr = attrMetaFactory.create().setName("dob").setDataType(DATE);
+		hop.addAttribute(dobAttr);
+		hop.setAbstract(true);
+
 		lifeLines = entityTypeFactory.create("LifeLines");
-		hop.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);
 		mappingProject.setIdentifier("asdf");
@@ -134,7 +172,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		ageMapping.setAlgorithm("$('length').value()");
 		ageMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -161,7 +199,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		heightMapping.setAlgorithm("$('length').value()");
 		heightMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -181,7 +219,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		expected.setIdentifier("asdf");
 		MappingTarget mappingTarget = expected.addTarget(hop);
 		mappingTarget.addSource(lifeLines);
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -253,6 +291,41 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		String actual3 = result3.getResponse().getContentAsString();
 
 		assertEquals(actual3, "");
+	}
+
+	@Test
+	public void testViewMappingProject()
+	{
+		when(mappingService.getMappingProject("hop hop hop")).thenReturn(mappingProject);
+		when(dataService.getEntityTypeIds()).thenReturn(Stream.of("LifeLines", "entity1", "entity2"));
+		when(mappingService.getCompatibleEntityTypes(hop)).thenReturn(Stream.of(lifeLines, target1, target2));
+
+		when(dataService.getEntityType("HOP")).thenReturn(hop);
+		OntologyTerm ontologyTermAge = OntologyTerm.create("iri1", "label1");
+		OntologyTerm ontologyTermDateOfBirth = OntologyTerm.create("iri2", "label2");
+		when(ontologyTagService.getTagsForAttribute(hop, ageAttr))
+				.thenReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermAge));
+		when(ontologyTagService.getTagsForAttribute(hop, dobAttr))
+				.thenReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermDateOfBirth));
+
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getPackages()).thenReturn(asList(system, base));
+		when(system.getId()).thenReturn(PACKAGE_SYSTEM); // system package, not a valid choice
+		when(base.getId()).thenReturn("base");
+		when(dataService.getEntityType("entity1")).thenReturn(target1);
+		when(dataService.getEntityType("entity2")).thenReturn(target2);
+
+		String view = controller.viewMappingProject("hop hop hop", model);
+
+		assertEquals(view, "view-single-mapping-project");
+		verify(model).addAttribute("entityTypes", asList(target1, target2));
+		verify(model).addAttribute("packages", singletonList(base));
+		verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
+		verify(model).addAttribute("selectedTarget", "HOP");
+		verify(model).addAttribute("mappingProject", mappingProject);
+		verify(model).addAttribute("hasWritePermission", true);
+		verify(model).addAttribute("attributeTagMap",
+				ImmutableMap.of("dob", singletonList(ontologyTermDateOfBirth), "age", singletonList(ontologyTermAge)));
 	}
 
 }
