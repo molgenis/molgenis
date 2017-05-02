@@ -212,7 +212,8 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active panel-collapse" id="existing">
-                        <form method="post" action="${context_url}/createIntegratedEntity">
+                        <form method="post" action="${context_url}/createIntegratedEntity"
+                              id="existingIntegratedDatasetForm">
                             <p class="help-block">Maps to an existing compatible dataset.<br/>
                                 New sources will be added to this dataset, any existing rows will be updated.</p>
                             <div>
@@ -228,7 +229,8 @@
                         </form>
                     </div>
                     <div class="tab-pane panel-collapse" id="new">
-                        <form method="post" action="${context_url}/createIntegratedEntity">
+                        <form method="post" action="${context_url}/createIntegratedEntity"
+                              id="newIntegratedDatasetForm">
                             <p class="help-block">Creates a new integrated dataset.</p>
                             <div>
                                 <label for="targetEntityTypeId">ID</label>
