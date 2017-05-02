@@ -286,7 +286,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@Override
 			public boolean matches(Object obj)
 			{
-				return obj instanceof EntityType && ((EntityType) obj).getLabel().equals(entityTypeId);
+				return obj instanceof EntityType && ((EntityType) obj).getId().equals(entityTypeId);
 			}
 		}))).thenReturn(addEntityRepo);
 
@@ -308,7 +308,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		// apply mapping again
 		mappingService
-				.applyMappings(project.getMappingTarget(hopMetaData.getId()), entityTypeId, true, mock(Progress.class));
+				.applyMappings(project.getMappingTarget(hopMetaData.getId()), entityTypeId, true, "packageId", "label",
+						mock(Progress.class));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
@@ -365,7 +366,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		MappingProject project = createMappingProjectWithMappings();
 
 		// apply mapping again
-		mappingService.applyMappings(project.getMappingTarget(hopMetaData.getId()), entityTypeId, mock(Progress.class));
+		mappingService
+				.applyMappings(project.getMappingTarget(hopMetaData.getId()), entityTypeId, false, "packageId", "label",
+						mock(Progress.class));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
@@ -397,7 +400,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		mappingService.applyMappings(mappingTarget, targetRepositoryName, false, mock(Progress.class));
+		mappingService
+				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
@@ -425,7 +429,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		mappingService.applyMappings(mappingTarget, targetRepositoryName, false, mock(Progress.class));
+		mappingService
+				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
@@ -468,7 +473,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		mappingService.applyMappings(mappingTarget, targetRepositoryName, false, mock(Progress.class));
+		mappingService
+				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
 	}
 
 	private void createEntities(EntityType targetMeta, List<Entity> sourceGeneEntities, List<Entity> expectedEntities)

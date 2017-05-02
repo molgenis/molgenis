@@ -57,7 +57,7 @@ public class MappingJobTest
 
 		verify(progress).start();
 		verify(progress).setProgressMax(1);
-		verify(mappingService).applyMappings(mappingTarget, "test", true, progress);
+		verify(mappingService).applyMappings(mappingTarget, "test", true, "packageId", "label", progress);
 		verify(progress).success();
 	}
 
@@ -72,7 +72,7 @@ public class MappingJobTest
 
 		verify(progress).start();
 		verify(progress).setProgressMax(4);
-		verify(mappingService).applyMappings(mappingTarget, "test", true, progress);
+		verify(mappingService).applyMappings(mappingTarget, "test", true, "packageId", "label", progress);
 		verify(progress).success();
 	}
 
@@ -88,7 +88,7 @@ public class MappingJobTest
 
 		verify(progress).start();
 		verify(progress).setProgressMax(3);
-		verify(mappingService).applyMappings(mappingTarget, "test", true, progress);
+		verify(mappingService).applyMappings(mappingTarget, "test", true, "packageId", "label", progress);
 		verify(progress).success();
 	}
 
@@ -104,7 +104,7 @@ public class MappingJobTest
 
 	private MappingJob getDummyMappingJob()
 	{
-		return new MappingJob("test", "test", true, progress, authentication,
+		return new MappingJob("test", "test", true, "packageId", "label", progress, authentication,
 				new TransactionTemplate(transactionManager), mappingService, dataService);
 	}
 }

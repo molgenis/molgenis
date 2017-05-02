@@ -523,35 +523,41 @@ public class MappingServiceController extends MolgenisPluginController
 	/**
 	 * Creates the integrated entity for a mapping project's target
 	 *
-	 * @param mappingProjectId ID of the mapping project
-	 * @param id               ID of the target entity to create or update
-	 * @param label            label of the target entity to create
-	 * @param _package         ID of the package to put the newly created entity in
+	 * @param mappingProjectId   ID of the mapping project
+	 * @param targetEntityTypeId ID of the target entity to create or update
+	 * @param label              label of the target entity to create
+	 * @param packageId          ID of the package to put the newly created entity in
 	 * @return redirect URL to the data explorer displaying the newly generated entity
 	 */
 	@RequestMapping("/createIntegratedEntity")
-	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String id,
+	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String targetEntityTypeId,
 			@RequestParam(required = false) String label,
-			@RequestParam(required = false, name = "package") String _package,
-			@RequestParam(required = false) boolean addSourceAttribute)
+			@RequestParam(required = false, name = "package") String packageId,
+			@RequestParam(required = false) Boolean addSourceAttribute)
 	{
-		String jobHref = scheduleMappingJobInternal(mappingProjectId, id, addSourceAttribute);
+		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId,
+				label);
 		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(JobsController.ID);
-		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=10000", jobControllerURL, jobHref);
+		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=1000", jobControllerURL, jobHref);
 	}
 
 	/**
 	 * Schedules a {@link MappingJobExecution}.
 	 *
 	 * @param mappingProjectId   ID of the mapping project
-	 * @param targetEntityTypeId ID of the new entity to create
+	 * @param targetEntityTypeId ID of the target entity to create or update
+	 * @param label              label of the target entity to create
+	 * @param packageId          ID of the package to put the newly created entity in
 	 * @return the href of the created MappingJobExecution
 	 */
 	@RequestMapping(value = "/map", method = RequestMethod.POST, produces = TEXT_PLAIN_VALUE)
 	public ResponseEntity<String> scheduleMappingJob(@RequestParam String mappingProjectId,
-			@RequestParam String targetEntityTypeId, @RequestParam boolean addSourceAttribute) throws URISyntaxException
+			@RequestParam String targetEntityTypeId, @RequestParam(required = false) String label,
+			@RequestParam(required = false, name = "package") String packageId,
+			@RequestParam(required = false) Boolean addSourceAttribute) throws URISyntaxException
 	{
-		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute);
+		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId,
+				label);
 		return ResponseEntity.created(new java.net.URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
 	}
 
@@ -564,13 +570,16 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return the HREF for the scheduled {@link MappingJobExecution}
 	 */
 	private String scheduleMappingJobInternal(String mappingProjectId, String targetEntityTypeId,
-			boolean addSourceAttribute)
+			Boolean addSourceAttribute, String packageId, String label)
 	{
 		MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
 		mappingJobExecution.setUser(userAccountService.getCurrentUser());
 		mappingJobExecution.setMappingProjectId(mappingProjectId);
 		mappingJobExecution.setTargetEntityTypeId(targetEntityTypeId);
 		mappingJobExecution.setAddSourceAttribute(addSourceAttribute);
+		mappingJobExecution.setPackageId(packageId);
+		mappingJobExecution.setLabel(label);
+
 		String resultUrl = menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
 				+ targetEntityTypeId;
 		mappingJobExecution.setResultUrl(resultUrl);
