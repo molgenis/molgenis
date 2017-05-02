@@ -17,18 +17,22 @@ public class MappingJob extends Job<Void>
 {
 	private final String mappingProjectId;
 	private final String targetEntityTypeId;
-	private final boolean addSourceAttribute;
+	private final Boolean addSourceAttribute;
+	private final String packageId;
+	private final String label;
 	private final MappingService mappingService;
 	private final DataService dataService;
 
-	MappingJob(String mappingProjectId, String targetEntityTypeId, boolean addSourceAttribute, Progress progress,
-			Authentication userAuthentication, TransactionTemplate transactionTemplate, MappingService mappingService,
-			DataService dataService)
+	MappingJob(String mappingProjectId, String targetEntityTypeId, Boolean addSourceAttribute, String packageId,
+			String label, Progress progress, Authentication userAuthentication, TransactionTemplate transactionTemplate,
+			MappingService mappingService, DataService dataService)
 	{
 		super(progress, transactionTemplate, userAuthentication);
 		this.mappingProjectId = requireNonNull(mappingProjectId);
 		this.targetEntityTypeId = requireNonNull(targetEntityTypeId);
-		this.addSourceAttribute = requireNonNull(addSourceAttribute);
+		this.addSourceAttribute = addSourceAttribute;
+		this.packageId = packageId;
+		this.label = label;
 		this.mappingService = requireNonNull(mappingService);
 		this.dataService = requireNonNull(dataService);
 	}
@@ -39,7 +43,7 @@ public class MappingJob extends Job<Void>
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = mappingProject.getMappingTargets().get(0);
 		progress.setProgressMax(calculateMaxProgress(mappingTarget));
-		mappingService.applyMappings(mappingTarget, targetEntityTypeId, addSourceAttribute, progress);
+		mappingService.applyMappings(mappingTarget, targetEntityTypeId, addSourceAttribute, packageId, label, progress);
 		return null;
 	}
 
