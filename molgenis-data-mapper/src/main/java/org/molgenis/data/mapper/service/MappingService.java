@@ -6,8 +6,10 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface MappingService
 {
@@ -85,4 +87,12 @@ public interface MappingService
 	 * @return cloned {@link MappingProject}
 	 */
 	MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName);
+
+	/**
+	 * Retrieves a Stream of existing compatible {@link EntityType}s that are valid as a mapping target.
+	 * @param target EntityType of the mapping target
+	 * @return Stream of compatible {@link EntityType}s
+	 */
+	Stream<EntityType> getCompatibleEntityTypes(EntityType target);
+
 }

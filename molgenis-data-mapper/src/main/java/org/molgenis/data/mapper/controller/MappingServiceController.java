@@ -59,6 +59,7 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
+import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
 import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -420,26 +421,24 @@ public class MappingServiceController extends MolgenisPluginController
 	 * Displays a mapping project.
 	 *
 	 * @param identifier identifier of the {@link MappingProject}
-	 * @param target     Name of the selected {@link MappingTarget}'s target entity
 	 * @param model      the model
-	 * @return View name of the
+	 * @return View name for a single mapping project
 	 */
 	@RequestMapping("/mappingproject/{id}")
-	public String viewMappingProject(@PathVariable("id") String identifier,
-			@RequestParam(value = "target", required = false) String target, Model model)
+	public String viewMappingProject(@PathVariable("id") String identifier, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(identifier);
-		if (target == null)
-		{
-			target = project.getMappingTargets().get(0).getName();
-		}
-
+		MappingTarget mappingTarget = project.getMappingTargets().get(0);
+		String target = mappingTarget.getName();
+		model.addAttribute("entityTypes", getNewSources(mappingTarget));
+		model.addAttribute("compatibleTargetEntities",
+				mappingService.getCompatibleEntityTypes(mappingTarget.getTarget()).collect(toList()));
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
-		model.addAttribute("entityTypes", getNewSources(project.getMappingTarget(target)));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
-
+		model.addAttribute("packages",
+				dataService.getMeta().getPackages().stream().filter(p -> !isSystemPackage(p)).collect(toList()));
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
@@ -525,14 +524,18 @@ public class MappingServiceController extends MolgenisPluginController
 	 * Creates the integrated entity for a mapping project's target
 	 *
 	 * @param mappingProjectId ID of the mapping project
-	 * @param newEntityName    name of the new entity to create
+	 * @param id               ID of the target entity to create or update
+	 * @param label            label of the target entity to create
+	 * @param _package         ID of the package to put the newly created entity in
 	 * @return redirect URL to the data explorer displaying the newly generated entity
 	 */
 	@RequestMapping("/createIntegratedEntity")
-	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String newEntityName,
+	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String id,
+			@RequestParam(required = false) String label,
+			@RequestParam(required = false, name = "package") String _package,
 			@RequestParam(required = false) boolean addSourceAttribute)
 	{
-		String jobHref = scheduleMappingJobInternal(mappingProjectId, newEntityName, addSourceAttribute);
+		String jobHref = scheduleMappingJobInternal(mappingProjectId, id, addSourceAttribute);
 		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(JobsController.ID);
 		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=1000", jobControllerURL, jobHref);
 	}
