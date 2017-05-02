@@ -6,8 +6,10 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface MappingService
 {
@@ -43,23 +45,16 @@ public interface MappingService
 
 	/**
 	 * Applies all mappings in a {@link MappingTarget}
-	 * Adds the source attribute by default
-	 *
-	 * @param mappingTarget the MappingTarget whose mappings are applied
-	 * @param entityTypeId  the name of the entity to map to
-	 * @param progress      progress of the mapping
-	 */
-	void applyMappings(MappingTarget mappingTarget, String entityTypeId, Progress progress);
-
-	/**
-	 * Applies all mappings in a {@link MappingTarget}
 	 *
 	 * @param mappingTarget      the MappingTarget whose mappings are applied
 	 * @param entityTypeId       the name of the entity to map to
 	 * @param addSourceAttribute boolean indicating if the 'source' attribute should be added to the target repository
+	 * @param packageId          the id of the destination Package, ignored when mapping to existing EntityType
+	 * @param label              label of the target EntityType, ignored when mapping to existing EntityType
 	 * @param progress           progress of the mapping
 	 */
-	void applyMappings(MappingTarget mappingTarget, String entityTypeId, boolean addSourceAttribute, Progress progress);
+	void applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute, String packageId,
+			String label, Progress progress);
 
 	/**
 	 * Deletes a {@link MappingProject}
@@ -85,4 +80,12 @@ public interface MappingService
 	 * @return cloned {@link MappingProject}
 	 */
 	MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName);
+
+	/**
+	 * Retrieves a Stream of existing compatible {@link EntityType}s that are valid as a mapping target.
+	 * @param target EntityType of the mapping target
+	 * @return Stream of compatible {@link EntityType}s
+	 */
+	Stream<EntityType> getCompatibleEntityTypes(EntityType target);
+
 }

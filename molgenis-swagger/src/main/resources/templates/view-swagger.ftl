@@ -374,15 +374,28 @@ paths:
         - name: mappingProjectId
           in: query
           type: string
+          required: true
           description: ID of the mapping project
         - name: targetEntityTypeId
           in: query
           type: string
+          required: true
           description: ID of the created EntityType, may be an existing EntityType
         - name: addSourceAttribute
           in: query
           type: boolean
-          description: indicates if a source attribute should be added to the EntityType
+          required: false
+          description: indicates if a source attribute should be added to the EntityType, ignored when mapping to an existing EntityType
+        - name: package
+          in: query
+          type: string
+          required: false
+          description: ID of the target package, ignored when mapping to an existing EntityType
+        - name: label
+          in: query
+          type: string
+          required: false
+          description: label of the target EntityType, ignored when mapping to an existing EntityType
       responses:
         201:
           description: If the mapping job was successfully created

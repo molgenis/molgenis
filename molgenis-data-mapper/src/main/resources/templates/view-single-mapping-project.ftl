@@ -204,27 +204,72 @@
                 <h4 class="modal-title" id="create-integrated-entity-modal-label">Create integrated dataset</h4>
             </div>
             <div class="modal-body">
-                <form id="create-integrated-entity-form" method="post" action="${context_url}/createIntegratedEntity">
-
-                    <div>
-                        <label>Enter an id for the integrated dataset:</label>
-                        <input name="newEntityName" type="text" value="" required/>
-                        <p></p>
-                        <small>The mapped entity will be placed in the same package as the target.</small>
-                        </p>
+                <p>Where shall we store the integrated dataset?</p>
+                <ul class="nav nav-tabs" id="tabContent">
+                    <li class="active"><a href="#existing" data-toggle="tab">Existing compatible dataset</a></li>
+                    <li><a href="#new" data-toggle="tab">New dataset</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active panel-collapse" id="existing">
+                        <form method="post" action="${context_url}/createIntegratedEntity">
+                            <p class="help-block">Maps to an existing compatible dataset.<br/>
+                                New sources will be added to this dataset, any existing rows will be updated.</p>
+                            <div>
+                                <label for="existingTargetEntityId">Target dataset</label>
+                                <select id="existingTargetEntityId" name="id" class="form-control">
+                                <#list compatibleTargetEntities as target>
+                                    <option value="${target.id?html}">${target.id?html}(${target.label?html})
+                                    </option>
+                                </#list>
+                                </select>
+                            </div>
+                            <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+                        </form>
                     </div>
-                    <div>
-                        <label>Add source attribute</label>
-                        <input name="addSourceAttribute" type="checkbox"/>
+                    <div class="tab-pane panel-collapse" id="new">
+                        <form method="post" action="${context_url}/createIntegratedEntity">
+                            <p class="help-block">Creates a new integrated dataset.</p>
+                            <div>
+                                <label for="targetEntityTypeId">ID</label>
+                                <input type="text" value="" name="targetEntityTypeId" id="targetEntityTypeId"
+                                       class="form-control">
+                                <p class="help-block">Enter an ID for the integrated dataset.</p>
+                            </div>
+                            <div>
+                                <label for="newTargetEntityLabel">Label</label>
+                                <input type="text" value="" name="label" id="newTargetEntityLabel"
+                                       class="form-control">
+                                <p class="help-block">Optionally, enter a custom label for the integrated
+                                    dataset.</p>
+                            </div>
+                            <div>
+                                <label for="newTargetEntityPackage">Package</label>
+                                <select id="newTargetEntityPackage" name="package" class="form-control">
+                                <#list packages as package>
+                                    <option value="${package.id?html}">${package.id?html} (${package.label?html})
+                                    </option>
+                                </#list>
+                                </select>
+                                <p class="help-block">Choose the package where the integrated dataset will be
+                                    created</p>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="addSourceAttribute"> <b>Add source attribute</b>
+                                </label>
+                                <p class="help-block">Will add a source attribute to the integrated dataset, and
+                                    fill it
+                                    with the ID of the source dataset</p>
+                            </div>
+                            <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+                        </form>
                     </div>
-
-                    <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
-                    <input type="hidden" name="target" value="${selectedTarget}">
+                </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" id="create-integrated-entity-btn" class="btn btn-primary">Create integrated
-                    dataset
+                <button type="button" id="create-integrated-entity-btn" class="btn btn-primary"
+                        onclick="$('#create-integrated-entity-modal form:visible').submit()">Start mapping!
                 </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>

@@ -50,13 +50,15 @@ public class MappingJobFactory
 		String username = mappingJobExecution.getUser();
 		String mappingProjectId = mappingJobExecution.getMappingProjectId();
 		String targetEntityTypeId = mappingJobExecution.getTargetEntityTypeId();
-		boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
+		Boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
+		String packageId = mappingJobExecution.getPackageId();
+		String label = mappingJobExecution.getLabel();
 
 		// create an authentication to run as the user that is listed as the owner of the job
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
-		return new MappingJob(mappingProjectId, targetEntityTypeId, addSourceAttribute,
+		return new MappingJob(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label,
 				new ProgressImpl(mappingJobExecution, jobExecutionUpdater, mailSender), runAsAuthentication,
 				new TransactionTemplate(transactionManager), mappingService, dataService);
 	}
