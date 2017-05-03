@@ -29,13 +29,13 @@ import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
@@ -47,10 +47,12 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.testng.Assert.assertEquals;
@@ -160,7 +162,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(post(MappingServiceController.URI + "/saveattributemapping").param("mappingProjectId", "asdf")
+		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
 				.param("target", "HOP").param("source", "LifeLines").param("targetAttribute", "age")
 				.param("algorithm", "$('length').value()").param("algorithmState", "CURATED"))
 				.andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
@@ -183,7 +185,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
+		mockMvc.perform(post(URI + "/saveattributemapping")
 				.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 				.param("targetAttribute", "height").param("algorithm", "$('length').value()")
 				.param("algorithmState", "CURATED"))
@@ -210,7 +212,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
+		mockMvc.perform(post(URI + "/saveattributemapping")
 				.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 				.param("targetAttribute", "age").param("algorithm", "").param("algorithmState", "CURATED"))
 				.andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
@@ -230,8 +232,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		MvcResult result = mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result = mockMvc.perform(post(URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();
@@ -254,15 +255,38 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 				.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
 		MvcResult result2 = mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
-						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
-				.andReturn();
+				post(URI + "/firstattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
+						.param("source", "LifeLines").param("skipAlgorithmStates[]", "CURATED", "DISCUSS")
+						.accept(MediaType.APPLICATION_JSON)).andReturn();
 
 		String actual2 = result2.getResponse().getContentAsString();
 
 		assertEquals(actual2,
 				"{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"dob\"}");
+	}
+
+	@Test
+	public void testIsNewEntityReturnsTrueIfEntityIsNew() throws Exception
+	{
+		MockHttpServletResponse response = mockMvc.perform(
+				get(URI + "/isNewEntity").param("targetEntityTypeId", "blah").accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+		assertEquals(response.getContentAsString(), "true",
+				"When checking for a new entity type, the result should be the String \"true\"");
+		assertEquals(response.getContentType(), "application/json");
+		verify(dataService).getEntityType("blah");
+	}
+
+	@Test
+	public void testIsNewEntityReturnsFalseIfEntityExists() throws Exception
+	{
+		when(dataService.getEntityType("it_emx_test_TypeTest")).thenReturn(mock(EntityType.class));
+		MockHttpServletResponse response = mockMvc.perform(
+				get(URI + "/isNewEntity").param("targetEntityTypeId", "it_emx_test_TypeTest")
+						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+		assertEquals(response.getContentType(), "application/json");
+		assertEquals(response.getContentAsString(), "false",
+				"When checking for an existing entity type, the result should be the String \"false\"");
 	}
 
 	@Test
@@ -282,8 +306,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		attributeMapping.setAlgorithm("$('dob').age()");
 		attributeMapping.setAlgorithmState(AttributeMapping.AlgorithmState.DISCUSS);
 
-		MvcResult result3 = mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result3 = mockMvc.perform(post(URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();

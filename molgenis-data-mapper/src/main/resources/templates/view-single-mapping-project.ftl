@@ -237,8 +237,10 @@
                                 <input type="text" value="" name="targetEntityTypeId" id="targetEntityTypeId"
                                        class="form-control"
                                        required minlength="1" maxlength="150"
-                                       regex="^[a-zA-Z][a-zA-Z0-9_#]*(-[a-z]{2,3})??$"
-                                       data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed. Must start with a letter.">
+                                       data-rule-regex="^[a-zA-Z][a-zA-Z0-9_#]*$"
+                                       data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed. Must start with a letter."
+                                       data-rule-remote="${context_url}/isNewEntity"
+                                       data-msg-remote="This is an existing entity."/>
                                 <p class="help-block">Enter an ID for the integrated dataset.</p>
                             </div>
                             <div>
