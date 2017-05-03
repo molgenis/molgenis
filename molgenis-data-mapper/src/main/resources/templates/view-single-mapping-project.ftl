@@ -2,7 +2,8 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
+<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
+'jquery.validate.min.js']>
 
 <@header css js/>
 
@@ -211,7 +212,8 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active panel-collapse" id="existing">
-                        <form method="post" action="${context_url}/createIntegratedEntity">
+                        <form method="post" action="${context_url}/createIntegratedEntity"
+                              id="existingIntegratedDatasetForm">
                             <p class="help-block">Maps to an existing compatible dataset.<br/>
                                 New sources will be added to this dataset, any existing rows will be updated.</p>
                             <div>
@@ -227,12 +229,16 @@
                         </form>
                     </div>
                     <div class="tab-pane panel-collapse" id="new">
-                        <form method="post" action="${context_url}/createIntegratedEntity">
+                        <form method="post" action="${context_url}/createIntegratedEntity"
+                              id="newIntegratedDatasetForm">
                             <p class="help-block">Creates a new integrated dataset.</p>
                             <div>
                                 <label for="targetEntityTypeId">ID</label>
                                 <input type="text" value="" name="targetEntityTypeId" id="targetEntityTypeId"
-                                       class="form-control">
+                                       class="form-control"
+                                       required minlength="1" maxlength="150"
+                                       regex="^[a-zA-Z][a-zA-Z0-9_#]*(-[a-z]{2,3})??$"
+                                       data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed. Must start with a letter.">
                                 <p class="help-block">Enter an ID for the integrated dataset.</p>
                             </div>
                             <div>
@@ -258,8 +264,7 @@
                                     <input type="checkbox" name="addSourceAttribute"> <b>Add source attribute</b>
                                 </label>
                                 <p class="help-block">Will add a source attribute to the integrated dataset, and
-                                    fill it
-                                    with the ID of the source dataset</p>
+                                    fill it with the ID of the source dataset</p>
                             </div>
                             <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
                         </form>
