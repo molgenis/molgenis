@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import static com.google.api.client.util.Maps.newHashMap;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
@@ -339,7 +340,7 @@ public class MappingServiceImpl implements MappingService
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		progress.status(format("Mapping source %s", sourceRepo.getEntityType().getLabel()));
+		progress.status(format("Mapping source [%s]...", sourceRepo.getEntityType().getLabel()));
 
 		if (targetRepo.count() == 0)
 		{
@@ -357,6 +358,9 @@ public class MappingServiceImpl implements MappingService
 				progress.increment(1);
 			}, MAPPING_BATCH_SIZE);
 		}
+
+		progress.status(
+				format("Mapped %s [%s] entities.", valueOf(sourceRepo.count()), sourceRepo.getEntityType().getLabel()));
 	}
 
 	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
