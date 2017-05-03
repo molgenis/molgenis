@@ -525,6 +525,17 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	/**
+	 * Checks if an entityTypeID already exists.
+	 * Used to validate ID field in the "New dataset" tab when creating a new integrated dataset.
+	 */
+	@RequestMapping("/isNewEntity")
+	@ResponseBody
+	public boolean isNewEntity(@RequestParam String targetEntityTypeId)
+	{
+		return dataService.getEntityType(targetEntityTypeId) == null;
+	}
+
+	/**
 	 * Creates the integrated entity for a mapping project's target
 	 *
 	 * @param mappingProjectId   ID of the mapping project
