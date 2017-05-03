@@ -218,7 +218,7 @@
                                 New sources will be added to this dataset, any existing rows will be updated.</p>
                             <div>
                                 <label for="existingTargetEntityId">Target dataset</label>
-                                <select id="existingTargetEntityId" name="id" class="form-control">
+                                <select id="existingTargetEntityId" name="targetEntityTypeId" class="form-control">
                                 <#list compatibleTargetEntities as target>
                                     <option value="${target.id?html}">${target.id?html}(${target.label?html})
                                     </option>
