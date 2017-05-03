@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -334,12 +335,13 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
+	void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
 	{
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		progress.status(format("Mapping source %s", sourceRepo.getEntityType().getLabel()));
+		progress.status(format("Mapping source [%s]...", sourceRepo.getEntityType().getLabel()));
+		AtomicLong counter = new AtomicLong(0);
 
 		if (targetRepo.count() == 0)
 		{
@@ -347,6 +349,7 @@ public class MappingServiceImpl implements MappingService
 			{
 				mapAndAddEntities(sourceMapping, targetRepo, targetMetaData, entities);
 				progress.increment(1);
+				counter.addAndGet(entities.size());
 			}, MAPPING_BATCH_SIZE);
 		}
 		else
@@ -355,8 +358,11 @@ public class MappingServiceImpl implements MappingService
 			{
 				mapAndUpsertEntities(sourceMapping, targetRepo, targetMetaData, entities);
 				progress.increment(1);
+				counter.addAndGet(entities.size());
 			}, MAPPING_BATCH_SIZE);
 		}
+
+		progress.status(format("Mapped %s [%s] entities.", counter, sourceRepo.getEntityType().getLabel()));
 	}
 
 	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
