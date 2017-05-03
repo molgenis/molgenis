@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.config.GroupAuthorityTestConfig;
@@ -53,7 +51,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -110,6 +110,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private ImportService importService;
 	private Instant date;
 	private EntityType entityType;
+	private String packageName;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -177,37 +178,18 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
 		when(dataService
 				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
-						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
-		{
-			@Override
-			public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(authority1, authority2, authority3, authority4);
-			}
-		});
+						GroupAuthority.class))
+				.thenAnswer(invocation -> Stream.of(authority1, authority2, authority3, authority4));
 
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
-				eq(new Fetch().field(EntityTypeMetadata.ID)
-						.field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
-				.thenAnswer(new Answer<Stream<EntityType>>()
-				{
-					@Override
-					public Stream<EntityType> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.of(entityType, entityType);
-					}
-				});
+				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
+				.thenAnswer(invocation -> Stream.of(entityType, entityType));
 
 		when(dataService
 				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
-						GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
-		{
-			@Override
-			public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(authority1, authority2, authority3, authority4);
-			}
-		});
+						GroupAuthority.class))
+				.thenAnswer(invocation -> Stream.of(authority1, authority2, authority3, authority4));
+
 		when(dataService.getEntityTypeIds())
 				.thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
@@ -227,6 +209,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 
 		date = Instant.parse("2016-01-01T12:34:28.123Z");
+		packageName = "test";
 
 		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(group1));
 
@@ -338,7 +321,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "add", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, packageName, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
@@ -369,7 +352,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "update", null);
+		ResponseEntity<String> response = controller
+				.importFile(request, multipartFile, null, packageName, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -401,7 +385,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "addsss", null);
+		ResponseEntity<String> response = controller
+				.importFile(request, multipartFile, null, packageName, "addsss", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -433,7 +418,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "add", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, packageName, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -465,7 +450,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, "newName", "add", null);
+		ResponseEntity<String> response = controller
+				.importFile(request, multipartFile, "newName", packageName, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -497,7 +483,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "update", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, packageName, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -529,7 +515,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "update", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, packageName, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -561,7 +547,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "add", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, packageName, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -597,8 +583,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(),
-					grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper());
 		}
 
 		@Bean

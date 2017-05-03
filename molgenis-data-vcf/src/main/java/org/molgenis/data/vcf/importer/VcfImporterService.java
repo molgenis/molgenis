@@ -6,9 +6,11 @@ import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -36,21 +38,22 @@ public class VcfImporterService implements ImportService
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
+	private final DefaultPackage defaultPackage;
 
 	@Autowired
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
-			MetaDataService metaDataService)
+			MetaDataService metaDataService, DefaultPackage defaultPackage)
 
 	{
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.defaultPackage = requireNonNull(defaultPackage);
 	}
 
 	@Transactional
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
-			String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageName)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -62,7 +65,7 @@ public class VcfImporterService implements ImportService
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				report = importVcf(repo, addedEntities);
+				report = importVcf(repo, addedEntities, packageName);
 			}
 			catch (IOException e)
 			{
@@ -134,8 +137,8 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities)
-			throws IOException
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities,
+			String packageName) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository<Entity> sampleRepository;
@@ -149,11 +152,16 @@ public class VcfImporterService implements ImportService
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
+		Package package_ = dataService.getMeta().getPackage(packageName);
+		if (package_ == null) package_ = defaultPackage;
+		entityType.setPackage(package_);
+
 		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
+			samplesEntityType.setPackage(package_);
 			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
 			permissionSystemService.giveUserWriteMetaPermissions(samplesEntityType);
 			addedEntities.add(sampleAttribute.getRefEntity());

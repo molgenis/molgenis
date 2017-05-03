@@ -39,6 +39,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -177,8 +178,8 @@ public class ImportWizardController extends AbstractWizardController
 		List<String> entityTypeIds = Arrays.asList(entitiesString.split(","));
 		Stream<Object> entityIds = entityTypeIds.stream().map(entityTypeId -> (Object) entityTypeId);
 		List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityIds,
-				new Fetch().field(EntityTypeMetadata.ID)
-						.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
+				new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
+				.collect(Collectors.toList());
 
 		Group group = dataService.findOneById(GROUP, groupId, Group.class);
 		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
@@ -370,6 +371,7 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseBody
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
+			@RequestParam(value = "packageName", required = false) String packageName,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
@@ -377,7 +379,13 @@ public class ImportWizardController extends AbstractWizardController
 		try
 		{
 			File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
-			importRun = importFile(request, tmpFile, action, notify);
+			if (packageName != null && dataService.getMeta().getPackage(packageName) == null)
+			{
+				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
+						.body(MessageFormat.format("Package [{0}] does not exist.", packageName));
+			}
+			if (packageName == null) packageName = PACKAGE_DEFAULT;
+			importRun = importFile(request, tmpFile, action, notify, packageName);
 		}
 		catch (Exception e)
 		{
@@ -389,8 +397,9 @@ public class ImportWizardController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
 	public ResponseEntity<String> importFile(HttpServletRequest request,
-			@RequestParam(value = "file", required = true) MultipartFile file,
+			@RequestParam(value = "file") MultipartFile file,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
+			@RequestParam(value = "packageName", required = false) String packageName,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
@@ -400,7 +409,15 @@ public class ImportWizardController extends AbstractWizardController
 		{
 			filename = getFilename(file.getOriginalFilename(), entityTypeId);
 			File tmpFile = fileStore.store(file.getInputStream(), filename);
-			importRun = importFile(request, tmpFile, action, notify);
+
+			if (packageName != null && dataService.getMeta().getPackage(packageName) == null)
+			{
+				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
+						.body(MessageFormat.format("Package [{0}] does not exist.", packageName));
+			}
+			if (packageName == null) packageName = PACKAGE_DEFAULT;
+			
+			importRun = importFile(request, tmpFile, action, notify, packageName);
 		}
 		catch (Exception e)
 		{
@@ -438,12 +455,13 @@ public class ImportWizardController extends AbstractWizardController
 		{
 			filename = entityTypeId + "." + extension;
 			if (!extension.equals("vcf") && (!extension.equals("vcf.gz") && (!extension.equals("vcf.zip"))))
-				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
+				LOG.warn("Specifying a filename for a non-VCF file has no effect on entity names.");
 		}
 		return filename;
 	}
 
-	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify)
+	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify,
+			String packageName)
 	{
 		// no action specified? default is ADD just like the importerPlugin
 		ImportRun importRun;
@@ -461,7 +479,7 @@ public class ImportWizardController extends AbstractWizardController
 		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 		asyncImportJobs.execute(
 				new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, databaseAction,
-						importRun.getId(), importRunService, request.getSession(), PACKAGE_DEFAULT));
+						importRun.getId(), importRunService, request.getSession(), packageName));
 
 		return importRun;
 	}

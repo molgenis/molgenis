@@ -41,7 +41,7 @@ public class OntologyImportService implements ImportService
 	@Override
 	@Transactional
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
-			String defaultPackage)
+			String packageName)
 	{
 		if (databaseAction != DatabaseAction.ADD)
 		{

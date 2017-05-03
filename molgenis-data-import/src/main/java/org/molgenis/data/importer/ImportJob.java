@@ -21,11 +21,11 @@ public class ImportJob implements Runnable
 	private final String importRunId;
 	private final ImportRunService importRunService;
 	private final HttpSession session;
-	private final String defaultPackage;
+	private final String packageName;
 
 	public ImportJob(ImportService importService, SecurityContext securityContext, RepositoryCollection source,
 			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService, HttpSession session,
-			String defaultPackage)
+			String packageName)
 	{
 		this.importService = importService;
 		this.securityContext = securityContext;
@@ -34,7 +34,7 @@ public class ImportJob implements Runnable
 		this.importRunId = importRunId;
 		this.importRunService = importRunService;
 		this.session = session;
-		this.defaultPackage = defaultPackage;
+		this.packageName = packageName;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class ImportJob implements Runnable
 
 			SecurityContextHolder.setContext(securityContext);
 
-			EntityImportReport importReport = importService.doImport(source, databaseAction, defaultPackage);
+			EntityImportReport importReport = importService.doImport(source, databaseAction, packageName);
 
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
