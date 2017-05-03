@@ -15,7 +15,6 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
-import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -35,15 +34,19 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
+import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
@@ -72,7 +75,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private AttributeFactory attrMetaFactory;
 
 	@Autowired
-	private MappingService mappingService;
+	private MappingServiceImpl mappingService;
 
 	@Autowired
 	private UserFactory userFactory;
@@ -318,7 +321,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		verify(permissionSystemService).giveUserWriteMetaPermissions(entityTypeCaptor.capture());
-		//assertEquals(entityTypeCaptor.getValue().getId(), generatedEntityTypeId); // FIXME
+		assertEquals(entityTypeCaptor.getValue().getId(), entityTypeId);
 	}
 
 	/**
@@ -443,10 +446,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String targetRepositoryRefEntityName = "target_repository_ref";
 		String mappingTargetRefEntityName = "mapping_target_ref";
 
-		String fullyQualifiedTargetRepositoryName = "package_targetRepository";
-		String fullyQualifiedTargetRepositoryRefEntityName = "package_targetRepositoryRef";
-		String fullyQualifiedMappingTargetRefEntityName = "package_mappingTargetRef";
-
 		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName);
 
 		@SuppressWarnings("unchecked")
@@ -475,6 +474,105 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		mappingService
 				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
+	}
+
+	@Test
+	public void testGetCompatibleEntityTypes()
+	{
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.of(hopMetaData, geneMetaData));
+		Set<Entity> compatibleEntityTypes = mappingService.getCompatibleEntityTypes(hopMetaData).collect(toSet());
+		assertEquals(compatibleEntityTypes, newHashSet(hopMetaData));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testApplyMappingsToRepoAdd()
+	{
+
+		Repository<Entity> targetRepo = mock(Repository.class);
+		Repository<Entity> sourceRepo = mock(Repository.class);
+		EntityMapping sourceMapping = mock(EntityMapping.class);
+		Progress progress = mock(Progress.class);
+
+		EntityType sourceEntityType = mock(EntityType.class);
+		when(sourceEntityType.getLabel()).thenReturn("test");
+		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
+		when(sourceMapping.getName()).thenReturn("test");
+		when(dataService.getRepository("test")).thenReturn(sourceRepo);
+		when(targetRepo.count()).thenReturn(0L);
+
+		List<Entity> batch = newArrayList(mock(Entity.class));
+		doAnswer(invocationOnMock ->
+		{
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
+					.getArgumentAt(0, Consumer.class);
+
+			consumer.accept(batch);
+			consumer.accept(batch);
+			consumer.accept(batch);
+			return null;
+		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
+
+		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
+
+		verify(targetRepo, times(3)).add(any(Stream.class));
+		verify(progress, times(3)).increment(1);
+		verify(progress).status("Mapping source [test]...");
+		verify(progress).status("Mapped 3 [test] entities.");
+		verifyNoMoreInteractions(progress);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testApplyMappingsToRepoUpsert()
+	{
+		Repository<Entity> targetRepo = mock(Repository.class);
+		Repository<Entity> sourceRepo = mock(Repository.class);
+		EntityMapping sourceMapping = mock(EntityMapping.class);
+		Progress progress = mock(Progress.class);
+
+		EntityType sourceEntityType = mock(EntityType.class);
+		when(sourceEntityType.getLabel()).thenReturn("test");
+		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
+		when(sourceMapping.getName()).thenReturn("test");
+		when(dataService.getRepository("test")).thenReturn(sourceRepo);
+		when(targetRepo.count()).thenReturn(3L);
+
+		EntityType targetEntityType = mock(EntityType.class);
+		when(targetEntityType.getId()).thenReturn("targetEntityType");
+		when(targetEntityType.getAtomicAttributes()).thenReturn(newArrayList());
+		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
+
+		List<Entity> batch = newArrayList(mock(Entity.class), mock(Entity.class));
+
+		doAnswer(invocationOnMock ->
+		{
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
+					.getArgumentAt(0, Consumer.class);
+
+			when(targetRepo.findOneById(any(String.class))).thenReturn(mock(Entity.class));
+			consumer.accept(batch);
+
+			when(targetRepo.findOneById(any(String.class))).thenReturn(null);
+			consumer.accept(batch);
+			return null;
+		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
+
+		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
+
+		verify(targetRepo, times(2)).add(any(Entity.class));
+		verify(targetRepo, times(2)).update(any(Entity.class));
+		verify(progress, times(2)).increment(1);
+		verify(progress).status("Mapping source [test]...");
+		verify(progress).status("Mapped 4 [test] entities.");
+		verifyNoMoreInteractions(progress);
+	}
+
+	private Entity mockEntity(String id)
+	{
+		Entity entity = mock(Entity.class);
+		when(entity.getIdValue()).thenReturn(id);
+		return entity;
 	}
 
 	private void createEntities(EntityType targetMeta, List<Entity> sourceGeneEntities, List<Entity> expectedEntities)
