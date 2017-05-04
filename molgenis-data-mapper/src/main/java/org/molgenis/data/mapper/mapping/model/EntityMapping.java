@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
+
 public class EntityMapping
 {
 	private String identifier;
@@ -166,4 +168,8 @@ public class EntityMapping
 		attributeMappings.remove(attribute);
 	}
 
+	public boolean targetHasSelfReferences()
+	{
+		return hasSelfReferences(targetEntityType);
+	}
 }

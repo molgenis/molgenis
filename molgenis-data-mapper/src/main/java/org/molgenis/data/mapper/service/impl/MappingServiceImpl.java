@@ -233,14 +233,14 @@ public class MappingServiceImpl implements MappingService
 	{
 		try
 		{
-			LOG.info("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+			progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
 			long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
-				LOG.info("Self reference found, applying the mapping for a second time to set references");
+				progress.status("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 			}
-			LOG.info("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+			progress.status("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
 			return result;
 		}
 		catch (RuntimeException ex)

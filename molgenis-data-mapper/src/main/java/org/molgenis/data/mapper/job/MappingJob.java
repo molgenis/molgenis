@@ -12,7 +12,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
-import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
 
 public class MappingJob extends Job<Void>
 {
@@ -65,7 +64,7 @@ public class MappingJob extends Job<Void>
 			batches++;
 		}
 
-		if (hasSelfReferences(entityMapping.getTargetEntityType()))
+		if (entityMapping.targetHasSelfReferences())
 		{
 			batches *= 2;
 		}

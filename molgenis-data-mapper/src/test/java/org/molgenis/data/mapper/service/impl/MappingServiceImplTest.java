@@ -488,17 +488,17 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@SuppressWarnings("unchecked")
 	public void testApplyMappingsToRepoAdd()
 	{
-
 		Repository<Entity> targetRepo = mock(Repository.class);
 		Repository<Entity> sourceRepo = mock(Repository.class);
 		EntityMapping sourceMapping = mock(EntityMapping.class);
+		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
+		when(sourceMapping.getName()).thenReturn("sourceMappingID");
 		Progress progress = mock(Progress.class);
 
 		EntityType sourceEntityType = mock(EntityType.class);
 		when(sourceEntityType.getLabel()).thenReturn("test");
 		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
-		when(sourceMapping.getName()).thenReturn("test");
-		when(dataService.getRepository("test")).thenReturn(sourceRepo);
+		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
 		when(targetRepo.count()).thenReturn(0L);
 
 		List<Entity> batch = newArrayList(mock(Entity.class));
@@ -517,8 +517,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		verify(targetRepo, times(3)).add(any(Stream.class));
 		verify(progress, times(3)).increment(1);
-		verify(progress).status("Mapping source [test]...");
-		verify(progress).status("Mapped 3 [test] entities.");
+		verify(progress).status("Mapping source [sourceMappingLabel]...");
+		verify(progress).status("Mapped 3 [sourceMappingLabel] entities.");
 		verifyNoMoreInteractions(progress);
 	}
 
@@ -529,13 +529,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		Repository<Entity> targetRepo = mock(Repository.class);
 		Repository<Entity> sourceRepo = mock(Repository.class);
 		EntityMapping sourceMapping = mock(EntityMapping.class);
+		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
+		when(sourceMapping.getName()).thenReturn("sourceMappingID");
 		Progress progress = mock(Progress.class);
 
-		EntityType sourceEntityType = mock(EntityType.class);
-		when(sourceEntityType.getLabel()).thenReturn("test");
-		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
-		when(sourceMapping.getName()).thenReturn("test");
-		when(dataService.getRepository("test")).thenReturn(sourceRepo);
+		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
 		when(targetRepo.count()).thenReturn(3L);
 
 		EntityType targetEntityType = mock(EntityType.class);
@@ -563,8 +561,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		verify(targetRepo, times(2)).add(any(Entity.class));
 		verify(targetRepo, times(2)).update(any(Entity.class));
 		verify(progress, times(2)).increment(1);
-		verify(progress).status("Mapping source [test]...");
-		verify(progress).status("Mapped 4 [test] entities.");
+		verify(progress).status("Mapping source [sourceMappingLabel]...");
+		verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");
 		verifyNoMoreInteractions(progress);
 	}
 
