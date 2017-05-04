@@ -346,11 +346,13 @@ public class MappingServiceImpl implements MappingService
 		progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
 		AtomicLong counter = new AtomicLong(0);
 
-		if (targetRepo.count() == 0)
+		boolean canAdd = targetRepo.count() == 0;
+		if (canAdd)
 		{
 			sourceRepo.forEachBatched(entities ->
 			{
-				mapAndAddEntities(sourceMapping, targetRepo, targetMetaData, entities);
+				targetRepo.add(entities.stream()
+						.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData)));
 				progress.increment(1);
 				counter.addAndGet(entities.size());
 			}, MAPPING_BATCH_SIZE);
@@ -359,7 +361,19 @@ public class MappingServiceImpl implements MappingService
 		{
 			sourceRepo.forEachBatched(entities ->
 			{
-				mapAndUpsertEntities(sourceMapping, targetRepo, targetMetaData, entities);
+				entities.forEach(sourceEntity ->
+				{
+					// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
+					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData);
+					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+					{
+						targetRepo.add(mappedEntity);
+					}
+					else
+					{
+						targetRepo.update(mappedEntity);
+					}
+				});
 				progress.increment(1);
 				counter.addAndGet(entities.size());
 			}, MAPPING_BATCH_SIZE);
@@ -367,31 +381,6 @@ public class MappingServiceImpl implements MappingService
 
 		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
 		return counter.get();
-	}
-
-	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
-			EntityType targetMetaData, List<Entity> entities)
-	{
-		entities.forEach(sourceEntity ->
-		{
-			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
-			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData);
-			if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
-			{
-				targetRepo.add(mappedEntity);
-			}
-			else
-			{
-				targetRepo.update(mappedEntity);
-			}
-		});
-	}
-
-	private void mapAndAddEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
-			EntityType targetMetaData, List<Entity> entities)
-	{
-		targetRepo.add(entities.stream()
-				.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData)));
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)
