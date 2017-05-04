@@ -34,6 +34,7 @@ import static com.google.api.client.util.Maps.newHashMap;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
@@ -231,24 +232,15 @@ public class MappingServiceImpl implements MappingService
 
 	private long applyMappingsInternal(MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress)
 	{
-		try
+		progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+		long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
+		if (hasSelfReferences(targetRepo.getEntityType()))
 		{
-			progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-			long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
-			if (hasSelfReferences(targetRepo.getEntityType()))
-			{
-				progress.status("Self reference found, applying the mapping for a second time to set references");
-				applyMappingsToRepositories(mappingTarget, targetRepo, progress);
-			}
-			progress.status("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-			return result;
+			progress.status("Self reference found, applying the mapping for a second time to set references");
+			applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 		}
-		catch (RuntimeException ex)
-		{
-			// Mapping to the target model, if something goes wrong we do not want to delete it
-			LOG.error("Error applying mappings to the target", ex);
-			throw ex;
-		}
+		progress.status("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+		return result;
 	}
 
 	public Stream<EntityType> getCompatibleEntityTypes(EntityType target)
@@ -330,52 +322,45 @@ public class MappingServiceImpl implements MappingService
 	private long applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
 			Progress progress)
 	{
-		long result = 0;
-		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
-		{
-			result += applyMappingToRepo(sourceMapping, targetRepo, progress);
-		}
-		return result;
+		return mappingTarget.getEntityMappings().stream()
+				.mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress)).sum();
 	}
 
 	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
 	{
-		EntityType targetMetaData = targetRepo.getEntityType();
-		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
-
 		progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
-		AtomicLong counter = new AtomicLong(0);
+		AtomicLong counter = new AtomicLong();
 
-		if (targetRepo.count() == 0)
-		{
-			sourceRepo.forEachBatched(entities ->
-			{
-				mapAndAddEntities(sourceMapping, targetRepo, targetMetaData, entities);
-				progress.increment(1);
-				counter.addAndGet(entities.size());
-			}, MAPPING_BATCH_SIZE);
-		}
-		else
-		{
-			sourceRepo.forEachBatched(entities ->
-			{
-				mapAndUpsertEntities(sourceMapping, targetRepo, targetMetaData, entities);
-				progress.increment(1);
-				counter.addAndGet(entities.size());
-			}, MAPPING_BATCH_SIZE);
-		}
+		boolean canAdd = targetRepo.count() == 0;
+		dataService.getRepository(sourceMapping.getName()).forEachBatched(
+				entities -> processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities),
+				MAPPING_BATCH_SIZE);
 
 		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
 		return counter.get();
 	}
 
-	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
-			EntityType targetMetaData, List<Entity> entities)
+	private void processBatch(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress,
+			AtomicLong counter, boolean canAdd, List<Entity> entities)
 	{
-		entities.forEach(sourceEntity ->
+		Stream<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
+		if (canAdd)
+		{
+			targetRepo.add(mappedEntities);
+		}
+		else
+		{
+			upsertBatch(targetRepo, mappedEntities.collect(toList()));
+		}
+		progress.increment(1);
+		counter.addAndGet(entities.size());
+	}
+
+	private static void upsertBatch(Repository<Entity> targetRepo, List<Entity> mappedEntities)
+	{
+		mappedEntities.forEach(mappedEntity ->
 		{
 			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
-			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData);
 			if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
 			{
 				targetRepo.add(mappedEntity);
@@ -387,11 +372,9 @@ public class MappingServiceImpl implements MappingService
 		});
 	}
 
-	private void mapAndAddEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
-			EntityType targetMetaData, List<Entity> entities)
+	private Stream<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
 	{
-		targetRepo.add(entities.stream()
-				.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData)));
+		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData));
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)

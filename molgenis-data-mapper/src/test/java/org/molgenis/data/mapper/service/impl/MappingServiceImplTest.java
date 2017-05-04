@@ -431,6 +431,86 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		verifyZeroInteractions(permissionSystemService);
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testApplyMappingsToRepoAdd()
+	{
+		Repository<Entity> targetRepo = mock(Repository.class);
+		Repository<Entity> sourceRepo = mock(Repository.class);
+		EntityMapping sourceMapping = mock(EntityMapping.class);
+		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
+		when(sourceMapping.getName()).thenReturn("sourceMappingID");
+
+		EntityType sourceEntityType = mock(EntityType.class);
+		when(sourceEntityType.getLabel()).thenReturn("test");
+		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
+		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
+		when(targetRepo.count()).thenReturn(0L);
+
+		List<Entity> batch = newArrayList(mock(Entity.class));
+		doAnswer(invocationOnMock ->
+		{
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
+					.getArgumentAt(0, Consumer.class);
+
+			consumer.accept(batch);
+			consumer.accept(batch);
+			consumer.accept(batch);
+			return null;
+		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
+
+		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
+
+		verify(targetRepo, times(3)).add(any(Stream.class));
+		verify(progress, times(3)).increment(1);
+		verify(progress).status("Mapping source [sourceMappingLabel]...");
+		verify(progress).status("Mapped 3 [sourceMappingLabel] entities.");
+		verifyNoMoreInteractions(progress);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testApplyMappingsToRepoUpsert()
+	{
+		Repository<Entity> targetRepo = mock(Repository.class);
+		Repository<Entity> sourceRepo = mock(Repository.class);
+		EntityMapping sourceMapping = mock(EntityMapping.class);
+		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
+		when(sourceMapping.getName()).thenReturn("sourceMappingID");
+
+		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
+		when(targetRepo.count()).thenReturn(3L);
+
+		EntityType targetEntityType = mock(EntityType.class);
+		when(targetEntityType.getId()).thenReturn("targetEntityType");
+		when(targetEntityType.getAtomicAttributes()).thenReturn(newArrayList());
+		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
+
+		List<Entity> batch = newArrayList(mock(Entity.class), mock(Entity.class));
+
+		doAnswer(invocationOnMock ->
+		{
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
+					.getArgumentAt(0, Consumer.class);
+
+			when(targetRepo.findOneById(any(String.class))).thenReturn(mock(Entity.class));
+			consumer.accept(batch);
+
+			when(targetRepo.findOneById(any(String.class))).thenReturn(null);
+			consumer.accept(batch);
+			return null;
+		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
+
+		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
+
+		verify(targetRepo, times(2)).add(any(Entity.class));
+		verify(targetRepo, times(2)).update(any(Entity.class));
+		verify(progress, times(2)).increment(1);
+		verify(progress).status("Mapping source [sourceMappingLabel]...");
+		verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");
+		verifyNoMoreInteractions(progress);
+	}
+
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Target repository does not contain the following attribute: COUNTRY_1")
 	public void testIncompatibleMetaDataUnknownAttribute()
 	{
@@ -530,93 +610,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(metaDataService.getEntityTypes()).thenReturn(Stream.of(hopMetaData, geneMetaData));
 		Set<Entity> compatibleEntityTypes = mappingService.getCompatibleEntityTypes(hopMetaData).collect(toSet());
 		assertEquals(compatibleEntityTypes, newHashSet(hopMetaData));
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testApplyMappingsToRepoAdd()
-	{
-		Repository<Entity> targetRepo = mock(Repository.class);
-		Repository<Entity> sourceRepo = mock(Repository.class);
-		EntityMapping sourceMapping = mock(EntityMapping.class);
-		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
-		when(sourceMapping.getName()).thenReturn("sourceMappingID");
-
-		EntityType sourceEntityType = mock(EntityType.class);
-		when(sourceEntityType.getLabel()).thenReturn("test");
-		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
-		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
-		when(targetRepo.count()).thenReturn(0L);
-
-		List<Entity> batch = newArrayList(mock(Entity.class));
-		doAnswer(invocationOnMock ->
-		{
-			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
-					.getArgumentAt(0, Consumer.class);
-
-			consumer.accept(batch);
-			consumer.accept(batch);
-			consumer.accept(batch);
-			return null;
-		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
-
-		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
-
-		verify(targetRepo, times(3)).add(any(Stream.class));
-		verify(progress, times(3)).increment(1);
-		verify(progress).status("Mapping source [sourceMappingLabel]...");
-		verify(progress).status("Mapped 3 [sourceMappingLabel] entities.");
-		verifyNoMoreInteractions(progress);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testApplyMappingsToRepoUpsert()
-	{
-		Repository<Entity> targetRepo = mock(Repository.class);
-		Repository<Entity> sourceRepo = mock(Repository.class);
-		EntityMapping sourceMapping = mock(EntityMapping.class);
-		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
-		when(sourceMapping.getName()).thenReturn("sourceMappingID");
-
-		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
-		when(targetRepo.count()).thenReturn(3L);
-
-		EntityType targetEntityType = mock(EntityType.class);
-		when(targetEntityType.getId()).thenReturn("targetEntityType");
-		when(targetEntityType.getAtomicAttributes()).thenReturn(newArrayList());
-		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
-
-		List<Entity> batch = newArrayList(mock(Entity.class), mock(Entity.class));
-
-		doAnswer(invocationOnMock ->
-		{
-			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
-					.getArgumentAt(0, Consumer.class);
-
-			when(targetRepo.findOneById(any(String.class))).thenReturn(mock(Entity.class));
-			consumer.accept(batch);
-
-			when(targetRepo.findOneById(any(String.class))).thenReturn(null);
-			consumer.accept(batch);
-			return null;
-		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
-
-		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
-
-		verify(targetRepo, times(2)).add(any(Entity.class));
-		verify(targetRepo, times(2)).update(any(Entity.class));
-		verify(progress, times(2)).increment(1);
-		verify(progress).status("Mapping source [sourceMappingLabel]...");
-		verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");
-		verifyNoMoreInteractions(progress);
-	}
-
-	private Entity mockEntity(String id)
-	{
-		Entity entity = mock(Entity.class);
-		when(entity.getIdValue()).thenReturn(id);
-		return entity;
 	}
 
 	private void createEntities(EntityType targetMeta, List<Entity> sourceGeneEntities, List<Entity> expectedEntities)
