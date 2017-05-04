@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -44,7 +45,7 @@ public class MappingServiceImpl implements MappingService
 	public static final int MAPPING_BATCH_SIZE = 1000;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
-	private static final String SOURCE = "source";
+	static final String SOURCE = "source";
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
@@ -165,17 +166,17 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@Transactional
-	public void applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute,
+	public long applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute,
 			String packageId, String label, Progress progress)
 	{
 		EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
 				addSourceAttribute);
 		Repository<Entity> targetRepo = getTargetRepository(entityTypeId, targetMetadata);
-		applyMappingsInternal(mappingTarget, targetRepo, progress);
+		return applyMappingsInternal(mappingTarget, targetRepo, progress);
 	}
 
-	private EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId,
-			String label, Boolean addSourceAttribute)
+	EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId, String label,
+			Boolean addSourceAttribute)
 	{
 		EntityType targetMetadata = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetadata.setId(entityTypeId);
@@ -228,18 +229,19 @@ public class MappingServiceImpl implements MappingService
 		return targetRepo;
 	}
 
-	private void applyMappingsInternal(MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress)
+	private long applyMappingsInternal(MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress)
 	{
 		try
 		{
-			LOG.info("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo, progress);
+			progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+			long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
-				LOG.info("Self reference found, applying the mapping for a second time to set references");
+				progress.status("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 			}
-			LOG.info("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+			progress.status("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+			return result;
 		}
 		catch (RuntimeException ex)
 		{
@@ -325,21 +327,24 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
+	private long applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
 			Progress progress)
 	{
+		long result = 0;
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo, progress);
+			result += applyMappingToRepo(sourceMapping, targetRepo, progress);
 		}
+		return result;
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
+	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
 	{
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		progress.status(format("Mapping source %s", sourceRepo.getEntityType().getLabel()));
+		progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
+		AtomicLong counter = new AtomicLong(0);
 
 		if (targetRepo.count() == 0)
 		{
@@ -347,6 +352,7 @@ public class MappingServiceImpl implements MappingService
 			{
 				mapAndAddEntities(sourceMapping, targetRepo, targetMetaData, entities);
 				progress.increment(1);
+				counter.addAndGet(entities.size());
 			}, MAPPING_BATCH_SIZE);
 		}
 		else
@@ -355,8 +361,12 @@ public class MappingServiceImpl implements MappingService
 			{
 				mapAndUpsertEntities(sourceMapping, targetRepo, targetMetaData, entities);
 				progress.increment(1);
+				counter.addAndGet(entities.size());
 			}, MAPPING_BATCH_SIZE);
 		}
+
+		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
+		return counter.get();
 	}
 
 	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,

@@ -49,7 +49,12 @@ public class MappingJob extends Job<Void>
 
 	private int calculateMaxProgress(MappingTarget mappingTarget)
 	{
-		return mappingTarget.getEntityMappings().stream().mapToInt(this::countBatches).sum();
+		int batches = mappingTarget.getEntityMappings().stream().mapToInt(this::countBatches).sum();
+		if (mappingTarget.hasSelfReferences())
+		{
+			batches *= 2;
+		}
+		return batches;
 	}
 
 	private int countBatches(EntityMapping entityMapping)

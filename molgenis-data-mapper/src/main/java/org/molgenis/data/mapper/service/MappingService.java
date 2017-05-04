@@ -52,8 +52,9 @@ public interface MappingService
 	 * @param packageId          the id of the destination Package, ignored when mapping to existing EntityType
 	 * @param label              label of the target EntityType, ignored when mapping to existing EntityType
 	 * @param progress           progress of the mapping
+	 * @return the total amount of entities mapped
 	 */
-	void applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute, String packageId,
+	long applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute, String packageId,
 			String label, Progress progress);
 
 	/**

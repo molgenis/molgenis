@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.mapping.model;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.EntityTypeUtils;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -144,5 +145,10 @@ public class MappingTarget
 	public boolean hasMappingFor(String name)
 	{
 		return entityMappings.containsKey(name);
+	}
+
+	public boolean hasSelfReferences()
+	{
+		return EntityTypeUtils.hasSelfReferences(getTarget());
 	}
 }
