@@ -45,7 +45,7 @@ public class MappingServiceImpl implements MappingService
 	public static final int MAPPING_BATCH_SIZE = 1000;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
-	private static final String SOURCE = "source";
+	static final String SOURCE = "source";
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
@@ -175,8 +175,8 @@ public class MappingServiceImpl implements MappingService
 		return applyMappingsInternal(mappingTarget, targetRepo, progress);
 	}
 
-	private EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId,
-			String label, Boolean addSourceAttribute)
+	EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId, String label,
+			Boolean addSourceAttribute)
 	{
 		EntityType targetMetadata = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetadata.setId(entityTypeId);
