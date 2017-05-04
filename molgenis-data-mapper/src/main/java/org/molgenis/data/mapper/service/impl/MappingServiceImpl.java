@@ -166,13 +166,13 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@Transactional
-	public void applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute,
+	public long applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute,
 			String packageId, String label, Progress progress)
 	{
 		EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
 				addSourceAttribute);
 		Repository<Entity> targetRepo = getTargetRepository(entityTypeId, targetMetadata);
-		applyMappingsInternal(mappingTarget, targetRepo, progress);
+		return applyMappingsInternal(mappingTarget, targetRepo, progress);
 	}
 
 	private EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId,
@@ -229,18 +229,19 @@ public class MappingServiceImpl implements MappingService
 		return targetRepo;
 	}
 
-	private void applyMappingsInternal(MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress)
+	private long applyMappingsInternal(MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress)
 	{
 		try
 		{
 			LOG.info("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo, progress);
+			long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 			if (hasSelfReferences(targetRepo.getEntityType()))
 			{
 				LOG.info("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 			}
 			LOG.info("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+			return result;
 		}
 		catch (RuntimeException ex)
 		{
@@ -326,16 +327,18 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
+	private long applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
 			Progress progress)
 	{
+		long result = 0;
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo, progress);
+			result += applyMappingToRepo(sourceMapping, targetRepo, progress);
 		}
+		return result;
 	}
 
-	void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
+	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
 	{
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
@@ -363,6 +366,7 @@ public class MappingServiceImpl implements MappingService
 		}
 
 		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
+		return counter.get();
 	}
 
 	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
