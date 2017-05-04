@@ -43,7 +43,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
@@ -95,6 +94,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Mock
 	private Repository<Entity> exonRepo;
 
+	@Mock
+	private Progress progress;
+
 	private MetaDataService metaDataService;
 
 	private User user;
@@ -113,6 +115,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		reset(hopRepo);
 		reset(geneRepo);
 		reset(exonRepo);
+		reset(progress);
 
 		user = userFactory.create();
 		user.setUsername(USERNAME);
@@ -124,6 +127,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		hopMetaData.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
 
 		geneMetaData = entityTypeFactory.create(SOURCE_GENE_ENTITY).setPackage(package_);
+		geneMetaData.setLabel("Genes");
 		geneMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 		geneMetaData.addAttribute(attrMetaFactory.create().setName("length").setDataType(DECIMAL).setNillable(false));
 
@@ -272,6 +276,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	 * New entities in the source should be added to the target when a new mapping to the same target is performed.
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testApplyMappingsAdd()
 	{
 		String entityTypeId = "addEntity";
@@ -298,30 +303,37 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		List<Entity> expectedEntities = newArrayList();
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> addEntityQ = mock(Query.class);
-		when(addEntityRepo.query()).thenReturn(addEntityQ);
-		when(addEntityQ.eq("source", geneMetaData.getId())).thenReturn(addEntityQ);
-		when(addEntityQ.findAll()).thenAnswer(invocation -> Stream.empty());
+		doAnswer(invocationOnMock ->
+		{
+			@SuppressWarnings("unchecked")
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
+					.getArgumentAt(0, Consumer.class);
 
-		when(geneRepo.iterator()).thenAnswer(invocation -> sourceGeneEntities.iterator());
+			consumer.accept(sourceGeneEntities);
+			return null;
+		}).when(geneRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
+
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
 
 		// apply mapping again
-		mappingService
+		assertEquals(mappingService
 				.applyMappings(project.getMappingTarget(hopMetaData.getId()), entityTypeId, true, "packageId", "label",
-						mock(Progress.class));
+						progress), 4);
 
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
-		verify(geneRepo).forEachBatched(consumerCaptor.capture(), any(Integer.class));
+		verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		verify(permissionSystemService).giveUserWriteMetaPermissions(entityTypeCaptor.capture());
 		assertEquals(entityTypeCaptor.getValue().getId(), entityTypeId);
+		verify(progress).status("Applying mappings to repository [HopEntity]");
+		verify(progress).status("Mapping source [Genes]...");
+		verify(progress).increment(1);
+		verify(progress).status("Mapped 4 [Genes] entities.");
+		verify(progress).status("Done applying mappings to repository [HopEntity]");
+		verifyNoMoreInteractions(progress);
 	}
 
 	/**
@@ -342,6 +354,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository(entityTypeId)).thenReturn(true);
 		when(dataService.getRepository(entityTypeId)).thenReturn(updateEntityRepo);
 
+		when(updateEntityRepo.count()).thenReturn(4L);
+		when(updateEntityRepo.findOneById(any())).thenReturn(mock(Entity.class));
+
 		when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
 		{
@@ -357,26 +372,32 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		List<Entity> expectedEntities = newArrayList();
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> addEntityQ = mock(Query.class);
-		when(updateEntityRepo.query()).thenReturn(addEntityQ);
-		when(addEntityQ.eq("source", geneMetaData.getId())).thenReturn(addEntityQ);
-		when(addEntityQ.findAll()).thenAnswer(invocation -> expectedEntities.stream());
+		doAnswer(invocationOnMock ->
+		{
+			@SuppressWarnings("unchecked")
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
+					.getArgumentAt(0, Consumer.class);
 
-		when(geneRepo.iterator()).thenAnswer(invocation -> sourceGeneEntities.iterator());
+			consumer.accept(sourceGeneEntities);
+			return null;
+		}).when(geneRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
 
 		// apply mapping again
-		mappingService
-				.applyMappings(project.getMappingTarget(hopMetaData.getId()), entityTypeId, false, "packageId", "label",
-						mock(Progress.class));
+		assertEquals(mappingService
+				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityTypeId, false, "packageId", "label",
+						progress), 4);
 
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor = forClass((Class) Consumer.class);
 		verify(geneRepo).forEachBatched(consumerCaptor.capture(), any(Integer.class));
+		verify(updateEntityRepo, times(4)).update(any(Entity.class));
 
+		verify(progress).status("Applying mappings to repository [HopEntity]");
+		verify(progress).status("Mapping source [Genes]...");
+		verify(progress).increment(1);
+		verify(progress).status("Mapped 4 [Genes] entities.");
+		verify(progress).status("Done applying mappings to repository [HopEntity]");
 		verifyZeroInteractions(permissionSystemService);
 	}
 
@@ -403,8 +424,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		mappingService
-				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
+		mappingService.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", progress);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
@@ -432,8 +452,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		mappingService
-				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
+		mappingService.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", progress);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
@@ -472,8 +491,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		mappingService
-				.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", mock(Progress.class));
+		mappingService.applyMappings(mappingTarget, targetRepositoryName, false, "packageId", "label", progress);
 	}
 
 	@Test
@@ -493,7 +511,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityMapping sourceMapping = mock(EntityMapping.class);
 		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
 		when(sourceMapping.getName()).thenReturn("sourceMappingID");
-		Progress progress = mock(Progress.class);
 
 		EntityType sourceEntityType = mock(EntityType.class);
 		when(sourceEntityType.getLabel()).thenReturn("test");
@@ -531,7 +548,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityMapping sourceMapping = mock(EntityMapping.class);
 		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
 		when(sourceMapping.getName()).thenReturn("sourceMappingID");
-		Progress progress = mock(Progress.class);
 
 		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
 		when(targetRepo.count()).thenReturn(3L);
