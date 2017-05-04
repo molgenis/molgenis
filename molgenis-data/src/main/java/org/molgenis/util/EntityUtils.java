@@ -318,6 +318,26 @@ public class EntityUtils
 	}
 
 	/**
+	 * Returns true if an Iterable equals another Iterable.
+	 *
+	 * @param entityIterable
+	 * @param otherEntityIterable
+	 * @return
+	 */
+	public static boolean equalsEntities(Iterable<Entity> entityIterable, Iterable<Entity> otherEntityIterable)
+	{
+		List<Entity> attrs = newArrayList(entityIterable);
+		List<Entity> otherAttrs = newArrayList(otherEntityIterable);
+
+		if (attrs.size() != otherAttrs.size()) return false;
+		for (int i = 0; i < attrs.size(); ++i)
+		{
+			if (!equals(attrs.get(i), otherAttrs.get(i))) return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Returns true if a Tag equals another Tag.
 	 *
 	 * @param tag

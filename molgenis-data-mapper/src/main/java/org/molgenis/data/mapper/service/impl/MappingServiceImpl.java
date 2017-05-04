@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -35,7 +34,7 @@ import static com.google.api.client.util.Maps.newHashMap;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
@@ -357,33 +356,23 @@ public class MappingServiceImpl implements MappingService
 	private void processBatch(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress,
 			AtomicLong counter, boolean canAdd, List<Entity> entities)
 	{
-		Stream<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
+		List<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
 		if (canAdd)
 		{
-			targetRepo.add(mappedEntities);
+			targetRepo.add(mappedEntities.stream());
 		}
 		else
 		{
-			upsertBatch(targetRepo, mappedEntities.collect(toList()));
+			targetRepo.upsertBatch(mappedEntities);
 		}
 		progress.increment(1);
 		counter.addAndGet(entities.size());
 	}
 
-	private static void upsertBatch(Repository<Entity> targetRepo, List<Entity> entities)
+	private List<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
 	{
-		Set<Object> ids = entities.stream().map(Entity::getIdValue).collect(toSet());
-		Fetch idFetch = new Fetch().field(targetRepo.getEntityType().getIdAttribute().getName());
-		Set<Object> existingIDs = targetRepo.findAll(ids.stream(), idFetch).collect(toSet());
-		Map<Boolean, List<Entity>> partitioned = entities.stream()
-				.collect(partitioningBy(entity -> existingIDs.contains(entity.getIdValue())));
-		targetRepo.add(partitioned.get(Boolean.FALSE).stream());
-		targetRepo.update(partitioned.get(Boolean.TRUE).stream());
-	}
-
-	private Stream<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
-	{
-		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData));
+		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData))
+				.collect(toList());
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)
