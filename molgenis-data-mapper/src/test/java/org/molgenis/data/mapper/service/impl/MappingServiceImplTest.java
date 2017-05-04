@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
+import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -19,7 +20,6 @@ import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -47,11 +47,13 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
+import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.SOURCE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
-@ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class })
+@ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class,
+		EntityBaseTestConfig.class, DefaultPackage.class })
 public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 {
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
@@ -266,6 +268,35 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, hopMetaData.getId());
 		mappingProject.addTarget(hopMetaData);
+	}
+
+	@Test
+	public void createMetaWithNullParameters()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
+		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "target id", null, null, null);
+		assertEquals(targetMetadata.getId(), "target id");
+		assertEquals(targetMetadata.getLabel(), "target id");
+		assertEquals(targetMetadata.getPackage().getId(), "base");
+		assertNull(targetMetadata.getAttribute(SOURCE));
+	}
+
+	@Test
+	public void createMetaWithNonNullParameters()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
+
+		Package targetPackage = mock(Package.class);
+		when(metaDataService.getPackage("targetPackage")).thenReturn(targetPackage);
+
+		EntityType targetMetadata = mappingService
+				.createTargetMetadata(mappingTarget, "test", "targetPackage", "target label", true);
+		assertEquals(targetMetadata.getId(), "test");
+		assertEquals(targetMetadata.getLabel(), "target label");
+		assertEquals(targetMetadata.getPackage(), targetPackage);
+		assertNotNull(targetMetadata.getAttribute(SOURCE));
 	}
 
 	/**
@@ -648,12 +679,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		EntityManager entityManager()
-		{
-			return mock(EntityManager.class);
-		}
-
-		@Bean
 		JsMagmaScriptEvaluator jsMagmaScriptEvaluator()
 		{
 			return mock(JsMagmaScriptEvaluator.class);
@@ -670,18 +695,5 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		{
 			return mock(PermissionSystemService.class);
 		}
-
-		@Bean
-		SystemPackageRegistry systemPackageRegistry()
-		{
-			return new SystemPackageRegistry();
-		}
-
-		@Bean
-		DefaultPackage defaultPackage()
-		{
-			return new DefaultPackage(mock(PackageMetadata.class));
-		}
-
 	}
 }
