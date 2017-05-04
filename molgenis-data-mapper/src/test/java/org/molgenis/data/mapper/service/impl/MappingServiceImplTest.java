@@ -364,6 +364,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		verify(permissionSystemService).giveUserWriteMetaPermissions(entityTypeCaptor.capture());
 		assertEquals(entityTypeCaptor.getValue().getId(), entityTypeId);
+		verify(progress).progress(0, "Checking target repository [addEntity]...");
 		verify(progress).status("Applying mappings to repository [HopEntity]");
 		verify(progress).status("Mapping source [Genes]...");
 		verify(progress).increment(1);
