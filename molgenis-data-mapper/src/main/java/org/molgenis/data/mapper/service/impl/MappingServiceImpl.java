@@ -232,24 +232,15 @@ public class MappingServiceImpl implements MappingService
 
 	private long applyMappingsInternal(MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress)
 	{
-		try
+		progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+		long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
+		if (hasSelfReferences(targetRepo.getEntityType()))
 		{
-			progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-			long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
-			if (hasSelfReferences(targetRepo.getEntityType()))
-			{
-				progress.status("Self reference found, applying the mapping for a second time to set references");
-				applyMappingsToRepositories(mappingTarget, targetRepo, progress);
-			}
-			progress.status("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-			return result;
+			progress.status("Self reference found, applying the mapping for a second time to set references");
+			applyMappingsToRepositories(mappingTarget, targetRepo, progress);
 		}
-		catch (RuntimeException ex)
-		{
-			// Mapping to the target model, if something goes wrong we do not want to delete it
-			LOG.error("Error applying mappings to the target", ex);
-			throw ex;
-		}
+		progress.status("Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
+		return result;
 	}
 
 	public Stream<EntityType> getCompatibleEntityTypes(EntityType target)
