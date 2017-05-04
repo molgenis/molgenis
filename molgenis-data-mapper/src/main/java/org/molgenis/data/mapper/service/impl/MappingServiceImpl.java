@@ -34,6 +34,7 @@ import static com.google.api.client.util.Maps.newHashMap;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
@@ -340,47 +341,53 @@ public class MappingServiceImpl implements MappingService
 
 	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
 	{
-		EntityType targetMetaData = targetRepo.getEntityType();
-		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
-
 		progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
-		AtomicLong counter = new AtomicLong(0);
+		AtomicLong counter = new AtomicLong();
 
 		boolean canAdd = targetRepo.count() == 0;
-		if (canAdd)
-		{
-			sourceRepo.forEachBatched(entities ->
-			{
-				targetRepo.add(entities.stream()
-						.map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData)));
-				progress.increment(1);
-				counter.addAndGet(entities.size());
-			}, MAPPING_BATCH_SIZE);
-		}
-		else
-		{
-			sourceRepo.forEachBatched(entities ->
-			{
-				entities.forEach(sourceEntity ->
-				{
-					// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
-					Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData);
-					if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
-					{
-						targetRepo.add(mappedEntity);
-					}
-					else
-					{
-						targetRepo.update(mappedEntity);
-					}
-				});
-				progress.increment(1);
-				counter.addAndGet(entities.size());
-			}, MAPPING_BATCH_SIZE);
-		}
+		dataService.getRepository(sourceMapping.getName()).forEachBatched(
+				entities -> processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities),
+				MAPPING_BATCH_SIZE);
 
 		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
 		return counter.get();
+	}
+
+	private void processBatch(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress,
+			AtomicLong counter, boolean canAdd, List<Entity> entities)
+	{
+		Stream<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
+		if (canAdd)
+		{
+			targetRepo.add(mappedEntities);
+		}
+		else
+		{
+			upsertBatch(targetRepo, mappedEntities.collect(toList()));
+		}
+		progress.increment(1);
+		counter.addAndGet(entities.size());
+	}
+
+	private static void upsertBatch(Repository<Entity> targetRepo, List<Entity> mappedEntities)
+	{
+		mappedEntities.forEach(mappedEntity ->
+		{
+			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
+			if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+			{
+				targetRepo.add(mappedEntity);
+			}
+			else
+			{
+				targetRepo.update(mappedEntity);
+			}
+		});
+	}
+
+	private Stream<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
+	{
+		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData));
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)
