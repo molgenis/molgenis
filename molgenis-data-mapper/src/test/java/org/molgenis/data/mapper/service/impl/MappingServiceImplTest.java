@@ -377,7 +377,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			@SuppressWarnings("unchecked")
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
 					.getArgumentAt(0, Consumer.class);
-
 			consumer.accept(sourceGeneEntities);
 			return null;
 		}).when(geneRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
@@ -390,7 +389,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityTypeId, false, "packageId", "label",
 						progress), 4);
 
-		verify(geneRepo).forEachBatched(consumerCaptor.capture(), any(Integer.class));
+		verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 		verify(updateEntityRepo, times(4)).update(any(Entity.class));
 
 		verify(progress).status("Applying mappings to repository [HopEntity]");

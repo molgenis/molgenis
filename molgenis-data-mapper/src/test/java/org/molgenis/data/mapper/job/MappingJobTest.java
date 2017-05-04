@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
@@ -49,8 +50,8 @@ public class MappingJobTest
 	@Test
 	public void testMappingJobWithOneSourceOneBatch()
 	{
-		List<EntityMapping> mappings = newArrayList();
-		mappings.add(getMockEntityMapping("a", MAPPING_BATCH_SIZE - 1));
+		EntityMapping entityMapping = getMockEntityMapping("a", MAPPING_BATCH_SIZE - 1);
+		List<EntityMapping> mappings = singletonList(entityMapping);
 		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
 
 		getDummyMappingJob().call();
@@ -64,8 +65,8 @@ public class MappingJobTest
 	@Test
 	public void testMappingJobWithOneSourceMultipleBatches()
 	{
-		List<EntityMapping> mappings = newArrayList();
-		mappings.add(getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1));
+		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
+		List<EntityMapping> mappings = singletonList(entityMapping);
 		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
 
 		getDummyMappingJob().call();
@@ -77,11 +78,44 @@ public class MappingJobTest
 	}
 
 	@Test
+	public void testMappingJobWithOneSourceMultipleBatchesSelfReferencing()
+	{
+		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
+		when(mappingTarget.hasSelfReferences()).thenReturn(true);
+		List<EntityMapping> mappings = singletonList(entityMapping);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		getDummyMappingJob().call();
+
+		verify(progress).start();
+		verify(progress).setProgressMax(8);
+		verify(mappingService).applyMappings(mappingTarget, "test", true, "packageId", "label", progress);
+		verify(progress).success();
+	}
+
+	@Test
+	public void testMappingJobWithMultipleSourcesSelfReferencing()
+	{
+		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
+		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
+		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
+		when(mappingTarget.hasSelfReferences()).thenReturn(true);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		getDummyMappingJob().call();
+
+		verify(progress).start();
+		verify(progress).setProgressMax(6);
+		verify(mappingService).applyMappings(mappingTarget, "test", true, "packageId", "label", progress);
+		verify(progress).success();
+	}
+
+	@Test
 	public void testMappingJobWithMultipleSources()
 	{
-		List<EntityMapping> mappings = newArrayList();
-		mappings.add(getMockEntityMapping("a", MAPPING_BATCH_SIZE));
-		mappings.add(getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1));
+		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
+		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
+		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
 		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
 
 		getDummyMappingJob().call();
