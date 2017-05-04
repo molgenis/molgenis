@@ -340,7 +340,7 @@ public class MappingServiceImpl implements MappingService
 		EntityType targetMetaData = targetRepo.getEntityType();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		progress.status(format("Mapping source [%s]...", sourceRepo.getEntityType().getLabel()));
+		progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
 		AtomicLong counter = new AtomicLong(0);
 
 		if (targetRepo.count() == 0)
@@ -362,7 +362,7 @@ public class MappingServiceImpl implements MappingService
 			}, MAPPING_BATCH_SIZE);
 		}
 
-		progress.status(format("Mapped %s [%s] entities.", counter, sourceRepo.getEntityType().getLabel()));
+		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
 	}
 
 	private void mapAndUpsertEntities(EntityMapping sourceMapping, Repository<Entity> targetRepo,
