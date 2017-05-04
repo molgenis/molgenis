@@ -385,9 +385,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository(entityTypeId)).thenReturn(true);
 		when(dataService.getRepository(entityTypeId)).thenReturn(updateEntityRepo);
 
-		when(updateEntityRepo.count()).thenReturn(4L);
-		when(updateEntityRepo.findOneById(any())).thenReturn(mock(Entity.class));
-
 		when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
 		{
@@ -402,6 +399,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		List<Entity> sourceGeneEntities = newArrayList();
 		List<Entity> expectedEntities = newArrayList();
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
+
+		when(updateEntityRepo.count()).thenReturn(4L);
+		when(updateEntityRepo.findAll(any(), any())).thenReturn(expectedEntities.stream());
 
 		doAnswer(invocationOnMock ->
 		{
@@ -421,7 +421,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 						progress), 4);
 
 		verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
-		verify(updateEntityRepo, times(4)).update(any(Entity.class));
+		verify(updateEntityRepo).update(any(Stream.class));
 
 		verify(progress).status("Applying mappings to repository [HopEntity]");
 		verify(progress).status("Mapping source [Genes]...");
@@ -484,6 +484,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType targetEntityType = mock(EntityType.class);
 		when(targetEntityType.getId()).thenReturn("targetEntityType");
 		when(targetEntityType.getAtomicAttributes()).thenReturn(newArrayList());
+		Attribute targetID = mock(Attribute.class);
+		when(targetID.getName()).thenReturn("targetID");
+		when(targetEntityType.getIdAttribute()).thenReturn(targetID);
 		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
 
 		List<Entity> batch = newArrayList(mock(Entity.class), mock(Entity.class));
@@ -492,19 +495,18 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		{
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
 					.getArgumentAt(0, Consumer.class);
-
-			when(targetRepo.findOneById(any(String.class))).thenReturn(mock(Entity.class));
+			when(targetRepo.findAll(any(Stream.class), any(Fetch.class))).thenReturn(batch.stream());
 			consumer.accept(batch);
 
-			when(targetRepo.findOneById(any(String.class))).thenReturn(null);
+			when(targetRepo.findAll(any(Stream.class), any(Fetch.class))).thenReturn(Stream.empty());
 			consumer.accept(batch);
 			return null;
 		}).when(sourceRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
 		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
 
-		verify(targetRepo, times(2)).add(any(Entity.class));
-		verify(targetRepo, times(2)).update(any(Entity.class));
+		verify(targetRepo, times(2)).add(any(Stream.class));
+		verify(targetRepo, times(2)).update(any(Stream.class));
 		verify(progress, times(2)).increment(1);
 		verify(progress).status("Mapping source [sourceMappingLabel]...");
 		verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");
