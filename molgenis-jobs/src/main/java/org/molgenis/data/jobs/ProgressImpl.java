@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.molgenis.data.jobs.model.JobExecution.Status.*;
 
 /**
@@ -48,7 +47,6 @@ public class ProgressImpl implements Progress
 		JobExecutionContext.set(jobExecution);
 		JOB_EXECUTION_LOG.info("Execution started.");
 		jobExecution.setStartDate(Instant.now());
-		jobExecution.setProgressInt(0);
 		jobExecution.setStatus(RUNNING);
 		update();
 	}
@@ -92,7 +90,7 @@ public class ProgressImpl implements Progress
 		JOB_EXECUTION_LOG.error("Failed. " + ex.getMessage(), ex);
 		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(FAILED);
-		jobExecution.setProgressMessage(abbreviate(ex.getMessage(), 255));
+		jobExecution.setProgressMessage(ex.getMessage());
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
 		JobExecutionContext.unset();

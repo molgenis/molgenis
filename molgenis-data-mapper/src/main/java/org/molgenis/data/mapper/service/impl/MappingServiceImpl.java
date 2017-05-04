@@ -170,6 +170,7 @@ public class MappingServiceImpl implements MappingService
 	public long applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute,
 			String packageId, String label, Progress progress)
 	{
+		progress.progress(0, format("Checking target repository [%s]...", entityTypeId));
 		EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
 				addSourceAttribute);
 		Repository<Entity> targetRepo = getTargetRepository(entityTypeId, targetMetadata);
