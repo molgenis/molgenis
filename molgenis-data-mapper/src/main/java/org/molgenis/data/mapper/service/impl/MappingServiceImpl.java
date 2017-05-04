@@ -322,12 +322,8 @@ public class MappingServiceImpl implements MappingService
 	private long applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
 			Progress progress)
 	{
-		long result = 0;
-		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
-		{
-			result += applyMappingToRepo(sourceMapping, targetRepo, progress);
-		}
-		return result;
+		return mappingTarget.getEntityMappings().stream()
+				.mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress)).sum();
 	}
 
 	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
