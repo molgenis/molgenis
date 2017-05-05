@@ -9,7 +9,6 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +50,10 @@ public class FileIngester
 	/**
 	 * Imports a csv file defined in the fileIngest entity
 	 *
-	 * @see FileIngestMetaData
+	 * @see org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData
 	 */
 	public FileMeta ingest(String entityTypeId, String url, String loader, String jobExecutionID, Progress progress,
-			String failureEmail)
+			String[] failureEmail)
 	{
 		if (!"CSV".equals(loader))
 		{

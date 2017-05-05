@@ -13,10 +13,10 @@ public class FileIngestJob extends Job<FileMeta>
 	private final String url;
 	private final String loader;
 	private final String jobExecutionID;
-	private final String failureEmail;
+	private final String[] failureEmail;
 
 	public FileIngestJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			FileIngester fileIngester, String entityTypeId, String url, String loader, String failureEmail,
+			FileIngester fileIngester, String entityTypeId, String url, String loader, String[] failureEmail,
 			String jobExecutionID)
 	{
 		super(progress, transactionTemplate, authentication);

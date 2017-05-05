@@ -24,6 +24,7 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String CRONEXPRESSION = "cronexpression";
 	public static final String ACTIVE = "active";
 	public static final String FAILURE_EMAIL = "failureEmail";
+	public static final String SUCCESS_EMAIL = "successEmail";
 	public static final String TYPE = "type";
 	public static final String PARAMETERS = "parameters";
 
@@ -65,8 +66,11 @@ public class ScheduledJobMetadata extends SystemEntityType
 						+ "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
-		addAttribute(FAILURE_EMAIL).setDataType(EMAIL).setLabel("Failure email")
-				.setDescription("Leave blank if you don't want to receive emails if the jobs failed.")
+		addAttribute(FAILURE_EMAIL).setDataType(EMAIL).setLabel("Failure email").setDescription(
+				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs failed.")
+				.setNillable(true);
+		addAttribute(SUCCESS_EMAIL).setDataType(EMAIL).setLabel("Success email").setDescription(
+				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
 				.setNillable(true);
 		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(JobType.class).setNillable(false);
 		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("Job parameters").setNillable(false);

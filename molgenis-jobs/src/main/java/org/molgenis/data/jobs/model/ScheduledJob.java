@@ -53,7 +53,7 @@ public class ScheduledJob extends StaticEntity
 	public boolean isActive()
 	{
 		Boolean active = getBoolean(ACTIVE);
-		return active != null ? active.booleanValue() : false;
+		return active != null && active;
 	}
 
 	public String getFailureEmail()
@@ -61,6 +61,10 @@ public class ScheduledJob extends StaticEntity
 		return getString(FAILURE_EMAIL);
 	}
 
+	public String getSuccessEmail()
+	{
+		return getString(SUCCESS_EMAIL);
+	}
 	public String getParameters()
 	{
 		return getString(PARAMETERS);
@@ -72,6 +76,11 @@ public class ScheduledJob extends StaticEntity
 		return type != null ? ScheduledJobMetadata.JobType.valueOf(type) : null;
 	}
 
+	public void setType(JobType type)
+	{
+		set(TYPE, type.name());
+	}
+
 	public String getGroup()
 	{
 		return getType().name();
@@ -81,4 +90,5 @@ public class ScheduledJob extends StaticEntity
 	{
 		return getType().getJobClass();
 	}
+
 }

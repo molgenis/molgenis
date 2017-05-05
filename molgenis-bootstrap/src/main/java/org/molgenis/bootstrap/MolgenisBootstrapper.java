@@ -7,7 +7,6 @@ import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
-import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final RegistryBootstrapper registryBootstrapper;
 	private final SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 	private final RepositoryPopulator repositoryPopulator;
-	private final FileIngesterJobRegistrar fileIngesterJobRegistrar;
 	private final JobBootstrapper jobBootstrapper;
 	private final AnnotatorBootstrapper annotatorBootstrapper;
 	private final IndexBootstrapper indexBootstrapper;
@@ -44,16 +42,15 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
-			RepositoryPopulator repositoryPopulator, FileIngesterJobRegistrar fileIngesterJobRegistrar,
-			JobBootstrapper jobBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
-			IndexBootstrapper indexBootstrapper, EntityTypeRegistryPopulator entityTypeRegistryPopulator)
+			RepositoryPopulator repositoryPopulator, JobBootstrapper jobBootstrapper,
+			AnnotatorBootstrapper annotatorBootstrapper, IndexBootstrapper indexBootstrapper,
+			EntityTypeRegistryPopulator entityTypeRegistryPopulator)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
 		this.systemEntityTypeBootstrapper = requireNonNull(systemEntityTypeBootstrapper);
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
-		this.fileIngesterJobRegistrar = requireNonNull(fileIngesterJobRegistrar);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
 		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
@@ -91,10 +88,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Bootstrapping jobs ...");
 		jobBootstrapper.bootstrap();
 		LOG.debug("Bootstrapped jobs");
-
-		LOG.trace("Scheduling file ingest jobs ...");
-		fileIngesterJobRegistrar.scheduleJobs();
-		LOG.debug("Scheduled file ingest jobs");
 
 		LOG.trace("Bootstrapping annotators ...");
 		annotatorBootstrapper.bootstrap(event);

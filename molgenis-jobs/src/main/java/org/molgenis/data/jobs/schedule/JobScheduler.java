@@ -21,7 +21,7 @@ import java.util.Map;
 import static java.text.MessageFormat.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
+import static org.molgenis.data.jobs.model.ScheduledJobMetadata.*;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -162,6 +162,8 @@ public class JobScheduler
 	private void schedule(ScheduledJob scheduledJob, Trigger trigger) throws SchedulerException
 	{
 		JobDataMap jobDataMap = new JobDataMap();
+		jobDataMap.put(SUCCESS_EMAIL, scheduledJob.getSuccessEmail());
+		jobDataMap.put(FAILURE_EMAIL, scheduledJob.getFailureEmail());
 		Map<String, Object> parameters = gson.fromJson(scheduledJob.getParameters(), MAP_TOKEN);
 		parameters.forEach(jobDataMap::put);
 		JobDetail job = newJob(scheduledJob.getJobClass()).withIdentity(scheduledJob.getId(), scheduledJob.getGroup())

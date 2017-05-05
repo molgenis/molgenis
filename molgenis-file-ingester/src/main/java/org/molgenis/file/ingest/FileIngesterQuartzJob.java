@@ -1,26 +1,21 @@
 package org.molgenis.file.ingest;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.jobs.model.ScheduledJobMetadata;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
-import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionFactory;
-import org.molgenis.file.model.FileMeta;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
-import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static java.net.URLEncoder.encode;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
@@ -56,21 +51,27 @@ public class FileIngesterQuartzJob implements Job
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException
 	{
-		Object fileIngestId = context.getMergedJobDataMap().get(ENTITY_KEY);
-		runAsSystem(() -> run(fileIngestId));
+		runAsSystem(() -> run(context.getMergedJobDataMap()));
 	}
 
-	private void run(Object fileIngestId)
+	private void run(JobDataMap jobDataMap)
 	{
-		FileIngest fileIngest = dataService.findOneById(FILE_INGEST, fileIngestId, FileIngest.class);
 		FileIngestJobExecution jobExecution = fileIngestJobExecutionFactory.create();
 		jobExecution.setUser("admin");// TODO system
-		jobExecution.setFileIngest(fileIngest);
-		jobExecution.setFailureEmail(fileIngest.getFailureEmail());
+
+		// set job-specific parameters from job data map
+		jobExecution.setUrl(jobDataMap.getString(URL));
+		jobExecution.setLoader(jobDataMap.getString(LOADER));
+		String targetEntityId = jobDataMap.getString(ENTITY_META_DATA);
+		EntityType targetEntity = dataService.getEntityType(targetEntityId);
+		jobExecution.setTargetEntity(targetEntity);
+
+		// set generic ScheduledJob parameters from job data map
+		jobExecution.setSuccessEmail(jobDataMap.getString(ScheduledJobMetadata.SUCCESS_EMAIL));
+		jobExecution.setFailureEmail(jobDataMap.getString(ScheduledJobMetadata.FAILURE_EMAIL));
 		try
 		{
-			jobExecution.setResultUrl(
-					"/menu/main/dataexplorer?entity=" + URLEncoder.encode(fileIngest.getTargetEntityName(), "UTF-8"));
+			jobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + encode(targetEntityId, "UTF-8"));
 		}
 		catch (UnsupportedEncodingException ex)
 		{

@@ -1,13 +1,11 @@
 package org.molgenis.file.ingest.execution;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
@@ -52,13 +50,11 @@ public class FileIngestJobFactory
 		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
-		Entity fileIngestEntity = fileIngestJobExecution.getFileIngest();
-		EntityType targetEntityEntity = fileIngestEntity
-				.getEntity(FileIngestMetaData.ENTITY_META_DATA, EntityType.class);
+		EntityType targetEntityEntity = fileIngestJobExecution.getTargetEntity();
 		String targetEntityName = targetEntityEntity.getId();
-		String url = fileIngestEntity.getString(FileIngestMetaData.URL);
-		String loader = fileIngestEntity.getString(FileIngestMetaData.LOADER);
-		String failureEmail = fileIngestEntity.getString(FileIngestMetaData.FAILURE_EMAIL);
+		String url = fileIngestJobExecution.getUrl();
+		String loader = fileIngestJobExecution.getLoader();
+		String[] failureEmail = fileIngestJobExecution.getFailureEmail();
 
 		return new FileIngestJob(progress, transactionTemplate, runAsAuthentication, fileIngester, targetEntityName,
 				url, loader, failureEmail, fileIngestJobExecution.getIdentifier());
