@@ -1,5 +1,6 @@
 package org.molgenis.data.jobs.model;
 
+import org.molgenis.data.jobs.schedule.SampleQuartzJob;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.util.RegexUtils;
@@ -28,21 +29,30 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String TYPE = "type";
 	public static final String PARAMETERS = "parameters";
 
+	// TODO: replace with entity class that contains parameter schema and job class etc
 	public enum JobType
 	{
-		FILE_INGEST, SCRIPT, MAPPING;
+		FILE_INGEST("org.molgenis.file.ingest.FileIngesterQuartzJob"), SCRIPT(
+			"org.molgenis.data.jobs.schedule.SampleQuartzJob"), MAPPING(
+			"org.molgenis.data.jobs.schedule.SampleQuartzJob");
 
-		public Class<? extends Job> getJobClass()
+		private Class<? extends Job> jobClass;
+
+		private JobType(String jobClassName)
 		{
-			// TODO: lookup proper job class. Should JobType be an entity?
 			try
 			{
-				return (Class<? extends Job>) Class.forName("org.molgenis.data.jobs.schedule.SampleQuartzJob");
+				this.jobClass = (Class<? extends Job>) Class.forName(jobClassName);
 			}
 			catch (ClassNotFoundException e)
 			{
-				throw new IllegalStateException("Class not found!");
+				this.jobClass = SampleQuartzJob.class;
 			}
+		}
+
+		public Class<? extends Job> getJobClass()
+		{
+			return jobClass;
 		}
 	}
 

@@ -27,6 +27,6 @@ public class ScheduledJobRepositoryDecoratorFactory
 	@Override
 	public Repository<ScheduledJob> createDecoratedRepository(Repository<ScheduledJob> repository)
 	{
-		return new ScheduledJobRepositoryDecorator(repository, jobScheduler, dataService);
+		return new ScheduledJobRepositoryDecorator(repository, jobScheduler);
 	}
 }

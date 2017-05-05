@@ -1,6 +1,5 @@
 package org.molgenis.file.ingest;
 
-import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,13 +13,11 @@ public class FileIngesterPluginController extends MolgenisPluginController
 {
 	public static final String ID = "fileingest";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private final JobScheduler scheduler;
 
 	@Autowired
-	public FileIngesterPluginController(JobScheduler scheduler)
+	public FileIngesterPluginController()
 	{
 		super(URI);
-		this.scheduler = scheduler;
 	}
 
 	@RequestMapping(method = GET)

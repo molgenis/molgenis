@@ -26,7 +26,6 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 @DisallowConcurrentExecution
 public class FileIngesterQuartzJob implements Job
 {
-	public static final String ENTITY_KEY = "entity";
 	private static final Logger LOG = LoggerFactory.getLogger(FileIngesterQuartzJob.class);
 
 	@Autowired

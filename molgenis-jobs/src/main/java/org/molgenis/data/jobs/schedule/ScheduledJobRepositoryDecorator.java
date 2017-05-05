@@ -1,7 +1,6 @@
 package org.molgenis.data.jobs.schedule;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.ScheduledJob;
@@ -13,14 +12,11 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 {
 	private final Repository<ScheduledJob> decorated;
 	private final JobScheduler scheduler;
-	private final DataService dataService;
 
-	public ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler,
-			DataService dataService)
+	public ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler)
 	{
 		this.decorated = decorated;
 		this.scheduler = scheduler;
-		this.dataService = dataService;
 	}
 
 	@Override
@@ -50,9 +46,8 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	public void delete(ScheduledJob entity)
 	{
 		String entityId = entity.getString(ScheduledJobMetadata.ID);
-		scheduler.unschedule(entityId);
-		//		removeJobExecutions(entityId);
 		decorated.delete(entity);
+		scheduler.unschedule(entityId);
 	}
 
 	@Override
@@ -62,7 +57,6 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		{
 			String entityId = e.getString(ScheduledJobMetadata.ID);
 			scheduler.unschedule(entityId);
-			//			removeJobExecutions(entityId);
 			return true;
 		}));
 	}
@@ -74,7 +68,6 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		{
 			String entityId = (String) id;
 			scheduler.unschedule(entityId);
-			//			removeJobExecutions(entityId);
 		}
 		decorated.deleteById(id);
 	}
@@ -88,7 +81,6 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 			{
 				String entityId = (String) id;
 				scheduler.unschedule(entityId);
-				//				removeJobExecutions(entityId);
 			}
 			return true;
 		}));
