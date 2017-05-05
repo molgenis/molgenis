@@ -2,9 +2,12 @@ package org.molgenis.data.jobs;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.jobs.schedule.JobRegistrar;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,17 +25,26 @@ public class JobBootstrapper
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
+	private final JobRegistrar jobRegistrar;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(JobBootstrapper.class);
 
 	@Autowired
-	public JobBootstrapper(SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService)
+	public JobBootstrapper(SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
+			JobRegistrar jobRegistrar)
 	{
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.dataService = requireNonNull(dataService);
+		this.jobRegistrar = requireNonNull(jobRegistrar);
 	}
 
 	public void bootstrap()
 	{
 		systemEntityTypeRegistry.getSystemEntityTypes().filter(this::isJobExecution).forEach(this::bootstrap);
+
+		LOGGER.trace("Scheduling ScheduledJobs...");
+		jobRegistrar.scheduleJobs();
+		LOGGER.debug("Scheduled ScheduledJobs.");
 	}
 
 	private void bootstrap(SystemEntityType systemEntityType)
