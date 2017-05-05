@@ -7,7 +7,7 @@ info:
 host: ${host}
 schemes:
   - ${scheme}
-basePath: /api/
+basePath: /
 consumes:
   - application/json
   - application/x-www-form-urlencoded
@@ -22,6 +22,14 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /plugin/jobs/run/{scheduledJobId}:
+    post:
+      tags:
+        - Jobs
+      summary: Runs a job
+      parameters:
+        - name: scheduledJobId
+          in: path
   /v1/login:
     post:
       tags:

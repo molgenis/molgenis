@@ -3,7 +3,6 @@ package org.molgenis.data.jobs.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
-import org.quartz.Job;
 
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.*;
 
@@ -65,6 +64,17 @@ public class ScheduledJob extends StaticEntity
 	{
 		return getString(SUCCESS_EMAIL);
 	}
+
+	public String getUser()
+	{
+		return getString(USER);
+	}
+
+	public void setUser(String username)
+	{
+		set(USER, username);
+	}
+
 	public String getParameters()
 	{
 		return getString(PARAMETERS);
@@ -84,11 +94,6 @@ public class ScheduledJob extends StaticEntity
 	public String getGroup()
 	{
 		return getType().name();
-	}
-
-	public Class<? extends Job> getJobClass()
-	{
-		return getType().getJobClass();
 	}
 
 }

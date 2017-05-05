@@ -197,7 +197,7 @@ public class JobExecution extends StaticEntity
 		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
 	}
 
-	private void setDefaultValues()
+	public void setDefaultValues()
 	{
 		setSubmissionDate(Instant.now());
 		setStatus(Status.PENDING);

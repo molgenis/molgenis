@@ -1,7 +1,5 @@
 package org.molgenis.data.jobs.schedule;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityException;
@@ -12,40 +10,35 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Type;
-import java.util.Map;
+import org.springframework.stereotype.Service;
 
 import static java.text.MessageFormat.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.ScheduledJobMetadata.*;
+import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
- * Schedules, runs and unschedules {@link ScheduledJob}s.
+ * Schedules and unschedules {@link ScheduledJob}s with Quartz.
  */
-@Component
+@Service
 public class JobScheduler
 {
+	/**
+	 * the key under which the JobScheduler puts the ScheduledJob ID in the JobDataMap
+	 */
+	static final String SCHEDULED_JOB_ID = "scheduledJobID";
 	private static final Logger LOG = LoggerFactory.getLogger(JobScheduler.class);
-	public static final Type MAP_TOKEN = new TypeToken<Map<String, Object>>()
-	{
-	}.getType();
+
 	private final Scheduler quartzScheduler;
 	private final DataService dataService;
-	private Gson gson;
 
-	@Autowired
-	public JobScheduler(Scheduler quartzScheduler, DataService dataService, Gson gson)
+	public JobScheduler(Scheduler quartzScheduler, DataService dataService)
 	{
 		this.quartzScheduler = requireNonNull(quartzScheduler);
 		this.dataService = requireNonNull(dataService);
-		this.gson = requireNonNull(gson);
 	}
 
 	/**
@@ -55,11 +48,7 @@ public class JobScheduler
 	 */
 	public synchronized void runNow(String scheduledJobId)
 	{
-		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
-		if (scheduledJob == null)
-		{
-			throw new UnknownEntityException(format("Unknown ScheduledJob entity with id ''{0}''", scheduledJobId));
-		}
+		ScheduledJob scheduledJob = getJob(scheduledJobId);
 
 		try
 		{
@@ -81,6 +70,16 @@ public class JobScheduler
 			LOG.error("Error runNow ScheduledJob", e);
 			throw new MolgenisDataException("Error job runNow", e);
 		}
+	}
+
+	private ScheduledJob getJob(String scheduledJobId)
+	{
+		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
+		if (scheduledJob == null)
+		{
+			throw new UnknownEntityException(format("Unknown ScheduledJob entity with id ''{0}''", scheduledJobId));
+		}
+		return scheduledJob;
 	}
 
 	/**
@@ -136,17 +135,11 @@ public class JobScheduler
 	/**
 	 * Remove a job from the quartzScheduler
 	 *
-	 * @param scheduledJobId
+	 * @param scheduledJobId ID of the ScheduledJob to unschedule
 	 */
 	public synchronized void unschedule(String scheduledJobId)
 	{
-		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
-		if (scheduledJob == null)
-		{
-			String message = format("No {0} entity found with id {1}.", SCHEDULED_JOB, scheduledJobId);
-			LOG.error(message);
-			throw new UnknownEntityException(message);
-		}
+		ScheduledJob scheduledJob = getJob(scheduledJobId);
 		try
 		{
 			quartzScheduler.deleteJob(new JobKey(scheduledJob.getId(), scheduledJob.getGroup()));
@@ -162,11 +155,8 @@ public class JobScheduler
 	private void schedule(ScheduledJob scheduledJob, Trigger trigger) throws SchedulerException
 	{
 		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(SUCCESS_EMAIL, scheduledJob.getSuccessEmail());
-		jobDataMap.put(FAILURE_EMAIL, scheduledJob.getFailureEmail());
-		Map<String, Object> parameters = gson.fromJson(scheduledJob.getParameters(), MAP_TOKEN);
-		parameters.forEach(jobDataMap::put);
-		JobDetail job = newJob(scheduledJob.getJobClass()).withIdentity(scheduledJob.getId(), scheduledJob.getGroup())
+		jobDataMap.put(SCHEDULED_JOB_ID, scheduledJob.getIdValue());
+		JobDetail job = newJob(MolgenisQuartzJob.class).withIdentity(scheduledJob.getId(), scheduledJob.getGroup())
 				.usingJobData(jobDataMap).build();
 		quartzScheduler.scheduleJob(job, trigger);
 	}

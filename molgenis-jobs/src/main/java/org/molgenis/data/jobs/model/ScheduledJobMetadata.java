@@ -1,10 +1,7 @@
 package org.molgenis.data.jobs.model;
 
-import org.molgenis.data.jobs.schedule.SampleQuartzJob;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.util.RegexUtils;
-import org.quartz.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,36 +25,16 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String SUCCESS_EMAIL = "successEmail";
 	public static final String TYPE = "type";
 	public static final String PARAMETERS = "parameters";
+	public static final String USER = "user";
 
 	// TODO: replace with entity class that contains parameter schema and job class etc
 	public enum JobType
 	{
-		FILE_INGEST("org.molgenis.file.ingest.FileIngesterQuartzJob"), SCRIPT(
-			"org.molgenis.data.jobs.schedule.SampleQuartzJob"), MAPPING(
-			"org.molgenis.data.jobs.schedule.SampleQuartzJob");
-
-		private Class<? extends Job> jobClass;
-
-		private JobType(String jobClassName)
-		{
-			try
-			{
-				this.jobClass = (Class<? extends Job>) Class.forName(jobClassName);
-			}
-			catch (ClassNotFoundException e)
-			{
-				this.jobClass = SampleQuartzJob.class;
-			}
-		}
-
-		public Class<? extends Job> getJobClass()
-		{
-			return jobClass;
-		}
+		FILE_INGEST, SCRIPT, MAPPING;
 	}
 
 	@Autowired
-	public ScheduledJobMetadata(EntityTypeMetadata entityTypeMetadata)
+	public ScheduledJobMetadata()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 	}
@@ -76,6 +53,8 @@ public class ScheduledJobMetadata extends SystemEntityType
 						+ "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
+		addAttribute(USER).setLabel("Username").setDescription("Name of the user to run the job as.")
+				.setNillable(false);
 		addAttribute(FAILURE_EMAIL).setDataType(EMAIL).setLabel("Failure email").setDescription(
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs failed.")
 				.setNillable(true);

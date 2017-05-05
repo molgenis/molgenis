@@ -16,13 +16,11 @@ public class SortaJobExecution extends JobExecution
 	public SortaJobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
 	}
 
 	public SortaJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
-		setDefaultValues();
 	}
 
 	public String getName()
@@ -85,8 +83,9 @@ public class SortaJobExecution extends JobExecution
 		return getDouble(THRESHOLD).doubleValue();
 	}
 
-	private void setDefaultValues()
+	public void setDefaultValues()
 	{
+		super.setDefaultValues();
 		setType(SORTA_MATCH_JOB_TYPE);
 	}
 }

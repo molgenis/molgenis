@@ -52,8 +52,7 @@ public class FileIngester
 	 *
 	 * @see org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData
 	 */
-	public FileMeta ingest(String entityTypeId, String url, String loader, String jobExecutionID, Progress progress,
-			String[] failureEmail)
+	public FileMeta ingest(String entityTypeId, String url, String loader, String jobExecutionID, Progress progress)
 	{
 		if (!"CSV".equals(loader))
 		{

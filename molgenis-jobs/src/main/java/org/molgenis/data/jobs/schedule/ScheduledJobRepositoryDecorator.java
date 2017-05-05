@@ -8,6 +8,9 @@ import org.molgenis.data.jobs.model.ScheduledJobMetadata;
 
 import java.util.stream.Stream;
 
+/**
+ * Decorator that makes sure all active {@link ScheduledJob} instances are scheduled using the {@link JobScheduler}.
+ */
 public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator<ScheduledJob>
 {
 	private final Repository<ScheduledJob> decorated;

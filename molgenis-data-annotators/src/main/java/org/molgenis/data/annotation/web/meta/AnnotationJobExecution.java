@@ -17,13 +17,11 @@ public class AnnotationJobExecution extends JobExecution
 	public AnnotationJobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
 	}
 
 	public AnnotationJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
-		setDefaultValues();
 	}
 
 	public String getTargetName()
@@ -46,8 +44,9 @@ public class AnnotationJobExecution extends JobExecution
 		set(ANNOTATORS, value);
 	}
 
-	private void setDefaultValues()
+	public void setDefaultValues()
 	{
+		super.setDefaultValues();
 		setType(ANNOTATORS);
 	}
 }

@@ -46,19 +46,14 @@ public class FileIngestJobExecution extends JobExecution
 		return getString(URL);
 	}
 
-	public EntityType getTargetEntity()
+	public String getTargetEntityId()
 	{
-		return getEntity(ENTITY_META_DATA, EntityType.class);
+		return getString(TARGET_ENTITY_ID);
 	}
 
-	public void setTargetEntity(EntityType entityType)
+	public void setTargetEntityId(String targetEntityId)
 	{
-		set(ENTITY_META_DATA, entityType);
-	}
-
-	public String getTargetEntityName()
-	{
-		return getEntity(ENTITY_META_DATA, EntityType.class).getId();
+		set(TARGET_ENTITY_ID, targetEntityId);
 	}
 
 	public void setLoader(String loader)
@@ -71,9 +66,9 @@ public class FileIngestJobExecution extends JobExecution
 		return getString(LOADER);
 	}
 
-	private void setDefaultValues()
+	public void setDefaultValues()
 	{
+		super.setDefaultValues();
 		setType(FILE_INGEST_JOB_TYPE);
 	}
-
 }

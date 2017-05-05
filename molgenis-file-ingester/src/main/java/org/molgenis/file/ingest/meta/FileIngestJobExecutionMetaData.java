@@ -2,7 +2,6 @@ package org.molgenis.file.ingest.meta;
 
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,8 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -27,21 +25,18 @@ public class FileIngestJobExecutionMetaData extends SystemEntityType
 	public static final List<String> LOADERS = Collections.singletonList("CSV");
 
 	public static final String FILE = "file";
-	public static final String ENTITY_META_DATA = "entityType";
+	public static final String TARGET_ENTITY_ID = "targetEntityId";
 	public static final String FILE_INGEST_JOB_TYPE = "FileIngesterJob";
 
 	private final FileMetaMetaData fileMetaMetaData;
 	private final JobExecutionMetaData jobExecutionMetaData;
-	private final EntityTypeMetadata entityTypeMetadata;
 
 	@Autowired
-	FileIngestJobExecutionMetaData(FileMetaMetaData fileMetaMetaData, JobExecutionMetaData jobExecutionMetaData,
-			EntityTypeMetadata entityTypeMetadata)
+	FileIngestJobExecutionMetaData(FileMetaMetaData fileMetaMetaData, JobExecutionMetaData jobExecutionMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 		this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
-		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
 	}
 
 	@Override
@@ -53,7 +48,7 @@ public class FileIngestJobExecutionMetaData extends SystemEntityType
 				.setRefEntity(fileMetaMetaData).setNillable(true);
 		addAttribute(URL).setLabel("Url").setDescription("Url of the file to download.").setNillable(false);
 		addAttribute(LOADER).setDataType(ENUM).setEnumOptions(LOADERS).setLabel("Loader type").setNillable(false);
-		addAttribute(ENTITY_META_DATA).setDataType(XREF).setRefEntity(entityTypeMetadata).setLabel("Target EntityType")
+		addAttribute(TARGET_ENTITY_ID).setDataType(STRING).setLabel("Target EntityType ID")
 				.setNillable(false);
 	}
 }

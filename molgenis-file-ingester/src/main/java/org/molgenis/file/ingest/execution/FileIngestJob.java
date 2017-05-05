@@ -13,25 +13,22 @@ public class FileIngestJob extends Job<FileMeta>
 	private final String url;
 	private final String loader;
 	private final String jobExecutionID;
-	private final String[] failureEmail;
 
 	public FileIngestJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			FileIngester fileIngester, String entityTypeId, String url, String loader, String[] failureEmail,
-			String jobExecutionID)
+			FileIngester fileIngester, String entityTypeId, String url, String loader, String jobExecutionID)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.fileIngester = fileIngester;
 		this.entityTypeId = entityTypeId;
 		this.url = url;
 		this.loader = loader;
-		this.failureEmail = failureEmail;
 		this.jobExecutionID = jobExecutionID;
 	}
 
 	@Override
 	public FileMeta call(Progress progress) throws Exception
 	{
-		return fileIngester.ingest(entityTypeId, url, loader, jobExecutionID, progress, failureEmail);
+		return fileIngester.ingest(entityTypeId, url, loader, jobExecutionID, progress);
 	}
 
 }

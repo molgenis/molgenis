@@ -1,6 +1,5 @@
 package org.molgenis.data.jobs.schedule;
 
-import com.google.gson.Gson;
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -159,15 +158,12 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	public static class Config
 	{
 		@Autowired
-		private Gson gson;
-
-		@Autowired
 		private DataService dataService;
 
 		@Bean
 		public JobScheduler jobScheduler()
 		{
-			return new JobScheduler(scheduler(), dataService, gson);
+			return new JobScheduler(scheduler(), dataService);
 		}
 
 		@Bean
