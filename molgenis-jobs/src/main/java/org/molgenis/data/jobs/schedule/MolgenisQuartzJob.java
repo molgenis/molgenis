@@ -18,6 +18,6 @@ public class MolgenisQuartzJob implements Job
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException
 	{
-		jobExecutor.execute(context.getMergedJobDataMap().getString(JobScheduler.SCHEDULED_JOB_ID));
+		jobExecutor.executeScheduledJob(context.getMergedJobDataMap().getString(JobScheduler.SCHEDULED_JOB_ID));
 	}
 }

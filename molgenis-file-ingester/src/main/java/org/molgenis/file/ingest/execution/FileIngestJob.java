@@ -1,23 +1,23 @@
 package org.molgenis.file.ingest.execution;
 
-import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.JobInterface;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.model.FileMeta;
-import org.springframework.security.core.Authentication;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-public class FileIngestJob extends Job<FileMeta>
+@Component
+@Scope("prototype")
+public class FileIngestJob implements JobInterface<FileMeta>
 {
-	private final FileIngester fileIngester;
+	private FileIngester fileIngester;
 	private final String entityTypeId;
 	private final String url;
 	private final String loader;
 	private final String jobExecutionID;
 
-	public FileIngestJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			FileIngester fileIngester, String entityTypeId, String url, String loader, String jobExecutionID)
+	FileIngestJob(FileIngester fileIngester, String entityTypeId, String url, String loader, String jobExecutionID)
 	{
-		super(progress, transactionTemplate, authentication);
 		this.fileIngester = fileIngester;
 		this.entityTypeId = entityTypeId;
 		this.url = url;
@@ -31,4 +31,9 @@ public class FileIngestJob extends Job<FileMeta>
 		return fileIngester.ingest(entityTypeId, url, loader, jobExecutionID, progress);
 	}
 
+	@Override
+	public boolean isTransactional()
+	{
+		return false;
+	}
 }

@@ -79,7 +79,7 @@ public class MolgenisQuartzJobTest extends AbstractMolgenisSpringTest
 		when(molgenisJobFactory.createJob(jobExecution)).thenReturn(job);
 
 		FileMeta fileMeta = mock(FileMeta.class);
-		when(job.call()).thenReturn(fileMeta);
+		//		when(job.call()).thenReturn(fileMeta);
 
 		molgenisQuartzJob.execute(jobExecutionContext);
 

@@ -4,18 +4,25 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.jobs.*;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.mail.MailSender;
+import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 /**
@@ -29,34 +36,69 @@ public class JobExecutor
 	}.getType();
 
 	private DataService dataService;
-	//TODO: determine which exact factory based on the ScheduledJob
-	private MolgenisJobFactory jobFactory;
+	//TODO: have the factory decide which bean to create depending on the job type
+	private Function<JobExecution, ? extends JobInterface> jobFactory;
+
 	private EntityManager entityManager;
 	private Gson gson;
+	private JobExecutionTemplate jobExecutionTemplate;
+	private JobExecutionUpdater jobExecutionUpdater;
+	private MailSender mailSender;
+	private UserDetailsService userDetailsService;
 
-	public JobExecutor(DataService dataService, MolgenisJobFactory jobFactory, EntityManager entityManager, Gson gson)
+	public JobExecutor(DataService dataService, Function<JobExecution, ? extends JobInterface> jobFactory,
+			EntityManager entityManager, Gson gson, JobExecutionTemplate jobExecutionTemplate,
+			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.jobFactory = requireNonNull(jobFactory);
 		this.entityManager = requireNonNull(entityManager);
 		this.gson = requireNonNull(gson);
+		this.jobExecutionTemplate = requireNonNull(jobExecutionTemplate);
+		this.userDetailsService = requireNonNull(userDetailsService);
+		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
+		this.mailSender = requireNonNull(mailSender);
 	}
 
 	@RunAsSystem
-	public void execute(String scheduledJobId)
+	public void executeScheduledJob(String scheduledJobId)
 	{
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
+		JobExecution jobExecution = createJobExecution(scheduledJob);
+		JobInterface<?> molgenisJob = jobFactory.apply(jobExecution);
+		runJob(jobExecution, molgenisJob);
+	}
 
-		JobExecution jobExecution = (JobExecution) entityManager
-				.create(jobFactory.getJobExecutionType(), EntityManager.CreationMode.POPULATE);
+	private JobExecution createJobExecution(ScheduledJob scheduledJob)
+	{
+		EntityType jobExecutionEntityType = getJobExecutionEntityTypeName(scheduledJob);
+		JobExecution jobExecution = (JobExecution) entityManager.create(jobExecutionEntityType, POPULATE);
 		jobExecution.setDefaultValues();
 		writePropertyValues(jobExecution, getPropertyValues(scheduledJob.getParameters()));
 		jobExecution.setFailureEmail(scheduledJob.getFailureEmail());
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());
 		jobExecution.setUser(scheduledJob.getUser());
+		dataService.add(jobExecution.getEntityType().getId(), jobExecution);
+		return jobExecution;
+	}
 
-		org.molgenis.data.jobs.Job molgenisJob = jobFactory.createJob(jobExecution);
-		molgenisJob.call();
+	private void runJob(JobExecution jobExecution, JobInterface<?> molgenisJob)
+	{
+		Progress progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
+		RunAsUserToken runAsAuthentication = createAuthorization(jobExecution.getUser());
+		jobExecutionTemplate.call(molgenisJob, progress, runAsAuthentication);
+	}
+
+	private RunAsUserToken createAuthorization(String username)
+	{
+		return new RunAsUserToken("Job Execution", username, null,
+				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
+	}
+
+	private EntityType getJobExecutionEntityTypeName(ScheduledJob scheduledJob)
+	{
+		// TODO where and how?!?
+		return dataService.getEntityType("sys_FileIngestJobExecution");
 	}
 
 	private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs)
@@ -65,9 +107,9 @@ public class JobExecutor
 		bw.setPropertyValues(pvs, true);
 	}
 
-	private MutablePropertyValues getPropertyValues(String scheduledJobParameters)
+	private MutablePropertyValues getPropertyValues(String parameterJson)
 	{
-		Map<String, Object> parameters = gson.fromJson(scheduledJobParameters, MAP_TOKEN);
+		Map<String, Object> parameters = gson.fromJson(parameterJson, MAP_TOKEN);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValues(parameters);
 		return pvs;
