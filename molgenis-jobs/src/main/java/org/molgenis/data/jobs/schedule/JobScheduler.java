@@ -160,4 +160,9 @@ public class JobScheduler
 				.usingJobData(jobDataMap).build();
 		quartzScheduler.scheduleJob(job, trigger);
 	}
+
+	public void scheduleJobs()
+	{
+		dataService.findAll(SCHEDULED_JOB, ScheduledJob.class).forEach(this::schedule);
+	}
 }

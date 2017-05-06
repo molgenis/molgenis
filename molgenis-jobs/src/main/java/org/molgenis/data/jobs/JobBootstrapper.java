@@ -2,7 +2,7 @@ package org.molgenis.data.jobs;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.schedule.JobRegistrar;
+import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
@@ -25,17 +25,17 @@ public class JobBootstrapper
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
-	private final JobRegistrar jobRegistrar;
+	private final JobScheduler jobScheduler;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JobBootstrapper.class);
 
 	@Autowired
 	public JobBootstrapper(SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
-			JobRegistrar jobRegistrar)
+			JobScheduler jobScheduler)
 	{
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.dataService = requireNonNull(dataService);
-		this.jobRegistrar = requireNonNull(jobRegistrar);
+		this.jobScheduler = requireNonNull(jobScheduler);
 	}
 
 	public void bootstrap()
@@ -43,7 +43,7 @@ public class JobBootstrapper
 		systemEntityTypeRegistry.getSystemEntityTypes().filter(this::isJobExecution).forEach(this::bootstrap);
 
 		LOGGER.trace("Scheduling ScheduledJobs...");
-		jobRegistrar.scheduleJobs();
+		jobScheduler.scheduleJobs();
 		LOGGER.debug("Scheduled ScheduledJobs.");
 	}
 
