@@ -31,7 +31,7 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	default Set<Object> getExistingIDs(Set<Object> ids)
 	{
 		Fetch idFetch = new Fetch().field(getEntityType().getIdAttribute().getName());
-		return findAll(ids.stream(), idFetch).collect(toSet());
+		return findAll(ids.stream(), idFetch).map(Entity::getIdValue).collect(toSet());
 	}
 
 	/**
