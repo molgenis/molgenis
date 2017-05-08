@@ -72,4 +72,40 @@ public class ImportJob implements Runnable
 			importRunService.failImportRun(importRunId, e.getMessage());
 		}
 	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ImportJob importJob = (ImportJob) o;
+
+		if (importService != null ? !importService.equals(importJob.importService) : importJob.importService != null)
+			return false;
+		if (securityContext != null ? !securityContext.equals(importJob.securityContext) :
+				importJob.securityContext != null) return false;
+		if (source != null ? !source.equals(importJob.source) : importJob.source != null) return false;
+		if (databaseAction != importJob.databaseAction) return false;
+		if (importRunId != null ? !importRunId.equals(importJob.importRunId) : importJob.importRunId != null)
+			return false;
+		if (importRunService != null ? !importRunService.equals(importJob.importRunService) :
+				importJob.importRunService != null) return false;
+		if (session != null ? !session.equals(importJob.session) : importJob.session != null) return false;
+		return packageName != null ? packageName.equals(importJob.packageName) : importJob.packageName == null;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int result = importService != null ? importService.hashCode() : 0;
+		result = 31 * result + (securityContext != null ? securityContext.hashCode() : 0);
+		result = 31 * result + (source != null ? source.hashCode() : 0);
+		result = 31 * result + (databaseAction != null ? databaseAction.hashCode() : 0);
+		result = 31 * result + (importRunId != null ? importRunId.hashCode() : 0);
+		result = 31 * result + (importRunService != null ? importRunService.hashCode() : 0);
+		result = 31 * result + (session != null ? session.hashCode() : 0);
+		result = 31 * result + (packageName != null ? packageName.hashCode() : 0);
+		return result;
+	}
 }

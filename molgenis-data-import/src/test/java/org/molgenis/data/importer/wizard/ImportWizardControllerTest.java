@@ -15,6 +15,7 @@ import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -66,6 +67,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
@@ -95,6 +97,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private GroupAuthorityFactory groupAuthorityFactory;
+
+	@Autowired
+	private MetaDataService metaDataService;
 
 	@Captor
 	private ArgumentCaptor<GroupAuthority> groupAuthorityArgumentCaptor;
@@ -519,7 +524,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testImportIntoDefaultPackageAddVCFGZ() throws IOException, URISyntaxException
+	public void testImportAddVCFGZ() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -546,8 +551,78 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
-		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
-		verify(executorService, times(1)).execute(captor.capture());
+		ImportJob expectedJob = new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, DatabaseAction.ADD,
+				importRun.getId(), importRunService, request.getSession(), PACKAGE_DEFAULT);
+
+		verify(executorService).execute(expectedJob);
+		verify(executorService, times(1)).execute(expectedJob);
+	}
+
+	@Test
+	public void testImportVCFIntoSpecifiedPackage() throws IOException, URISyntaxException
+	{
+		// set up the test
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		File file = new File("/src/test/resources/example.vcf");
+
+		DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(),
+				file.getParentFile());
+		fileItem.getOutputStream();
+		MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+		ArgumentCaptor<InputStream> streamCaptor = ArgumentCaptor.forClass(InputStream.class);
+		when(fileStore.store(streamCaptor.capture(), eq("example.vcf"))).thenReturn(file);
+		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
+		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
+		ImportRun importRun = importRunFactory.create();
+		importRun.setStartDate(date);
+		importRun.setProgress(0);
+		importRun.setStatus(ImportStatus.RUNNING.toString());
+		importRun.setOwner("Harry");
+		importRun.setNotify(false);
+		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
+
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(dataService.getMeta().getPackage("test")).thenReturn(mock(Package.class));
+
+		// the actual test
+		controller.importFile(request, multipartFile, null, "test", "add", null);
+		ImportJob expectedJob = new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, DatabaseAction.ADD,
+				importRun.getId(), importRunService, request.getSession(), "test");
+
+		verify(executorService).execute(expectedJob);
+	}
+
+	@Test
+	public void testImportVCFIntoNonExistingPackage() throws IOException, URISyntaxException
+	{
+		// set up the test
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		File file = new File("/src/test/resources/example.vcf");
+
+		DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(),
+				file.getParentFile());
+		fileItem.getOutputStream();
+		MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+		ArgumentCaptor<InputStream> streamCaptor = ArgumentCaptor.forClass(InputStream.class);
+		when(fileStore.store(streamCaptor.capture(), eq("example.vcf"))).thenReturn(file);
+		when(fileRepositoryCollectionFactory.createFileRepositoryCollection(file)).thenReturn(repositoryCollection);
+		when(importServiceFactory.getImportService(file.getName())).thenReturn(importService);
+		ImportRun importRun = importRunFactory.create();
+		importRun.setStartDate(date);
+		importRun.setProgress(0);
+		importRun.setStatus(ImportStatus.RUNNING.toString());
+		importRun.setOwner("Harry");
+		importRun.setNotify(false);
+		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
+
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(dataService.getMeta().getPackage("does_not_exist")).thenReturn(mock(Package.class));
+
+		// the actual test
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "test", "add", null);
+		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
+		assertEquals(response.getBody(), "Package [test] does not exist.");
 	}
 
 	@Configuration
