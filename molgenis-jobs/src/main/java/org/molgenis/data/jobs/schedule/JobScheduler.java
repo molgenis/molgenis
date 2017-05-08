@@ -30,6 +30,7 @@ public class JobScheduler
 	 * the key under which the JobScheduler puts the ScheduledJob ID in the JobDataMap
 	 */
 	static final String SCHEDULED_JOB_ID = "scheduledJobID";
+	static final String SCHEDULED_JOB_GROUP = Scheduler.DEFAULT_GROUP; // Group under which the jobs are scheduled in Quartz.
 	private static final Logger LOG = LoggerFactory.getLogger(JobScheduler.class);
 
 	private final Scheduler quartzScheduler;
@@ -52,7 +53,7 @@ public class JobScheduler
 
 		try
 		{
-			JobKey jobKey = new JobKey(scheduledJobId, scheduledJob.getGroup());
+			JobKey jobKey = new JobKey(scheduledJobId, SCHEDULED_JOB_GROUP);
 			if (quartzScheduler.checkExists(jobKey))
 			{
 				// Run job now
@@ -61,7 +62,7 @@ public class JobScheduler
 			else
 			{
 				// Schedule with 'now' trigger
-				Trigger trigger = newTrigger().withIdentity(scheduledJobId, scheduledJob.getGroup()).startNow().build();
+				Trigger trigger = newTrigger().withIdentity(scheduledJobId, SCHEDULED_JOB_GROUP).startNow().build();
 				schedule(scheduledJob, trigger);
 			}
 		}
@@ -107,7 +108,7 @@ public class JobScheduler
 		try
 		{
 			// If already scheduled, remove it from the quartzScheduler
-			if (quartzScheduler.checkExists(new JobKey(id, scheduledJob.getGroup())))
+			if (quartzScheduler.checkExists(new JobKey(id, SCHEDULED_JOB_GROUP)))
 			{
 				unschedule(id);
 			}
@@ -119,7 +120,7 @@ public class JobScheduler
 			}
 
 			// Schedule with 'cron' trigger
-			Trigger trigger = newTrigger().withIdentity(id, scheduledJob.getGroup())
+			Trigger trigger = newTrigger().withIdentity(id, SCHEDULED_JOB_GROUP)
 					.withSchedule(cronSchedule(cronExpression)).build();
 			schedule(scheduledJob, trigger);
 
@@ -139,10 +140,9 @@ public class JobScheduler
 	 */
 	public synchronized void unschedule(String scheduledJobId)
 	{
-		ScheduledJob scheduledJob = getJob(scheduledJobId);
 		try
 		{
-			quartzScheduler.deleteJob(new JobKey(scheduledJob.getId(), scheduledJob.getGroup()));
+			quartzScheduler.deleteJob(new JobKey(scheduledJobId, SCHEDULED_JOB_GROUP));
 		}
 		catch (SchedulerException e)
 		{
@@ -156,7 +156,7 @@ public class JobScheduler
 	{
 		JobDataMap jobDataMap = new JobDataMap();
 		jobDataMap.put(SCHEDULED_JOB_ID, scheduledJob.getIdValue());
-		JobDetail job = newJob(MolgenisQuartzJob.class).withIdentity(scheduledJob.getId(), scheduledJob.getGroup())
+		JobDetail job = newJob(MolgenisQuartzJob.class).withIdentity(scheduledJob.getId(), SCHEDULED_JOB_GROUP)
 				.usingJobData(jobDataMap).build();
 		quartzScheduler.scheduleJob(job, trigger);
 	}

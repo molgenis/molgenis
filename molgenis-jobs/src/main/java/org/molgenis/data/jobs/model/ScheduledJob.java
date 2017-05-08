@@ -90,10 +90,4 @@ public class ScheduledJob extends StaticEntity
 	{
 		set(TYPE, type.name());
 	}
-
-	public String getGroup()
-	{
-		return getType().name();
-	}
-
 }
