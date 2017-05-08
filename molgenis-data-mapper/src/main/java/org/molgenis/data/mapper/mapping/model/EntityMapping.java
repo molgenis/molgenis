@@ -165,5 +165,4 @@ public class EntityMapping
 	{
 		attributeMappings.remove(attribute);
 	}
-
 }

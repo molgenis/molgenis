@@ -12,8 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.abbreviateMiddle;
+import static org.molgenis.data.jobs.model.JobExecution.MAX_LOG_LENGTH;
 import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
+import static org.molgenis.data.jobs.model.JobExecution.TRUNCATION_BANNER;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -64,7 +67,8 @@ public class JobBootstrapper
 			log.append('\n');
 		}
 		log.append("FAILED - Application terminated unexpectedly");
-		jobExecutionEntity.set(LOG, log.toString());
+		String abbreviatedLog = abbreviateMiddle(log.toString(), "...\n" + TRUNCATION_BANNER + "\n...", MAX_LOG_LENGTH);
+		jobExecutionEntity.set(LOG, abbreviatedLog);
 		dataService.update(jobExecutionEntity.getEntityType().getId(), jobExecutionEntity);
 	}
 

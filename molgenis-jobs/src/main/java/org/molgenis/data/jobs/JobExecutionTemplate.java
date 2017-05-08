@@ -6,86 +6,88 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.TransactionOperations;
 
 /**
- * Template to execute molgenis jobs and keeps track of their progress.
+ * Template to execute molgenis jobs.
  */
 public class JobExecutionTemplate
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionTemplate.class);
-	private TransactionTemplate transactionTemplate;
+	private TransactionOperations transactionOperations;
 
-	public JobExecutionTemplate(TransactionTemplate transactionTemplate)
+	/**
+	 * Creates a new {@link JobExecutionTemplate}.
+	 *
+	 * @param transactionTemplate {@link TransactionOperations} to use for transactions, may be null.
+	 */
+	public JobExecutionTemplate(TransactionOperations transactionTemplate)
 	{
-		this.transactionTemplate = transactionTemplate;
+		this.transactionOperations = transactionTemplate;
 	}
 
+	/**
+	 * Executes a job in the calling thread.
+	 *
+	 * @param job the {@link JobInterface} to execute.
+	 * @param progress {@link Progress} to report progress to
+	 * @param authentication {@link Authentication} to run the job with
+	 * @param <Result> type of the job execution
+	 *
+	 * @throws JobExecutionException if job execution throws an exception
+	 * @return the result of the job execution
+	 */
 	public <Result> Result call(JobInterface<Result> job, Progress progress, Authentication authentication)
 	{
-		progress.start();
-		try
-		{
-			Result result;
-			if (job.isTransactional())
-			{
-				result = transactionTemplate
-						.execute((status) -> tryRunWithAuthentication(job, authentication, progress));
-			}
-			else
-			{
-				result = tryRunWithAuthentication(job, authentication, progress);
-			}
-			progress.success();
-			return result;
-		}
-		catch (JobExecutionException ex)
-		{
-			Exception cause = (Exception) ex.getCause();
-			LOG.warn("Error executing job", cause);
-			progress.failed(cause);
-			throw ex;
-		}
-		catch (TransactionException te)
-		{
-			LOG.error("Error rolling back transaction for failed job execution", te);
-			progress.failed(te);
-			throw te;
-		}
-		catch (Exception other)
-		{
-			LOG.error("Error logging job success", other);
-			progress.failed(other);
-			throw other;
-		}
-	}
-
-	private <Result> Result tryRunWithAuthentication(JobInterface<Result> job, Authentication authentication,
-			Progress progress)
-	{
-		try
-		{
-			return runWithAuthentication(job, authentication, progress);
-		}
-		catch (Exception e)
-		{
-			throw new JobExecutionException(e);
-		}
-	}
-
-	private <Result> Result runWithAuthentication(JobInterface<Result> job, Authentication authentication,
-			Progress progress) throws Exception
-	{
-		SecurityContext originalContext = SecurityContextHolder.getContext();
+		final SecurityContext originalContext = SecurityContextHolder.getContext();
 		try
 		{
 			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			return job.call(progress);
+			return authenticatedCall(job, progress);
 		}
 		finally
 		{
 			SecurityContextHolder.setContext(originalContext);
+		}
+	}
+
+	private <Result> Result authenticatedCall(JobInterface<Result> job, Progress progress)
+	{
+		if (transactionOperations != null)
+		{
+			try
+			{
+				return transactionOperations.execute((status) -> tryCall(job, progress));
+			}
+			catch (TransactionException te)
+			{
+				LOG.error("Transaction error while running job", te);
+				progress.failed(te);
+				throw te;
+			}
+
+		}
+		else
+		{
+			return tryCall(job, progress);
+		}
+	}
+
+	private <Result> Result tryCall(JobInterface<Result> job, Progress progress) throws JobExecutionException
+	{
+		progress.start();
+		try
+		{
+			Result result = job.call(progress);
+			progress.success();
+			return result;
+		}
+		catch (Exception ex)
+		{
+			LOG.warn("Error executing job", ex);
+			progress.failed(ex);
+			throw new JobExecutionException(ex);
 		}
 	}
 

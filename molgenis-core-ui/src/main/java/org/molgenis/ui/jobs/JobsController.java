@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -65,6 +66,15 @@ public class JobsController extends MolgenisPluginController
 	{
 		model.addAttribute("username", userAccountService.getCurrentUser().getUsername());
 		return "view-jobs";
+	}
+
+	@RequestMapping(method = GET, value = "/viewJob")
+	public String viewJob(Model model, @RequestParam(name = "jobHref") String jobHref,
+			@RequestParam(name = "refreshTimeoutMillis", defaultValue = "10000") Integer refreshTimeoutMillis)
+	{
+		model.addAttribute("jobHref", jobHref);
+		model.addAttribute("refreshTimeoutMillis", refreshTimeoutMillis);
+		return "view-job";
 	}
 
 	@RequestMapping(method = GET, value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)

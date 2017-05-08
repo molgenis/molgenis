@@ -13,6 +13,16 @@ If you are unfamiliar with PostGreSQL, follow one of their [PostGreSQL installat
 - Add a user 'molgenis' (password 'molgenis') under Login Roles
 - Add 'can create databases' privilege to user 'molgenis'
 
+When running molgenis-cargo on a server, and you are unable to access the pgAdmin tool, you can use the following psql commands
+
+```sql
+CREATE DATABASE molgenis;
+createuser molgenis
+```
+When asked `Shall the new role be allowed to create databases? (y/n)` answer yes
+
+Now that the PostGreSQL setup is done, fire up the application on port 8080 with the following command:
+
 ```bash
 mvn clean resources:resources org.codehaus.cargo:cargo-maven2-plugin:run
 ```
