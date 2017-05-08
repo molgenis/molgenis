@@ -34,13 +34,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.7.12</slf4j.version>
         <logback.version>1.1.3</logback.version>
-
         <spring.version>4.3.7.RELEASE</spring.version>
         <spring.security.version>4.2.0.RELEASE</spring.security.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <httpclient.version>4.5.1</httpclient.version>
         <google.auto-value.version>1.3</google.auto-value.version>
         <google.guava.version>21.0</google.guava.version>
+        <apache.commons.lang.version>3.1</apache.commons.lang.version>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
         <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
@@ -609,6 +609,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${google.guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache.commons.lang.version}</version>
         </dependency>
         <!-- logging -->
         <dependency>

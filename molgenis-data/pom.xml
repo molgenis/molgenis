@@ -26,30 +26,30 @@
     </build>
 
     <dependencies>
+        <!-- TODO replace dependency with molgenis-utils dependency (molgenis-core should be removed eventually) -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- TODO remove dependency (molgenis-data should be security agnostic -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- TODO check if we can replace with a lower level spring library dependency such as spring-context -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
         </dependency>
+        <!-- TODO remove dependency (molgenis-data should not do HTTP stuff) -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpclient.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
-        </dependency>
+        <!-- TODO remove dependency (molgenis-data should not do RSQL stuff, this is a REST thingy) -->
         <dependency>
             <groupId>cz.jirutka.rsql</groupId>
             <artifactId>rsql-parser</artifactId>
@@ -60,11 +60,13 @@
             <artifactId>uuid</artifactId>
             <version>3.2</version>
         </dependency>
+        <!-- TODO can be removed since we use Java 8 -->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.9.2</version>
         </dependency>
+        <!-- TODO move to molgenis-data-postgres -->
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
