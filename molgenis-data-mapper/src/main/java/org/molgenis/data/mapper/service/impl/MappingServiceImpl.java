@@ -344,38 +344,23 @@ public class MappingServiceImpl implements MappingService
 	private void processBatch(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress,
 			AtomicLong counter, boolean canAdd, List<Entity> entities)
 	{
-		Stream<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
+		List<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
 		if (canAdd)
 		{
-			targetRepo.add(mappedEntities);
+			targetRepo.add(mappedEntities.stream());
 		}
 		else
 		{
-			upsertBatch(targetRepo, mappedEntities.collect(toList()));
+			targetRepo.upsertBatch(mappedEntities);
 		}
 		progress.increment(1);
 		counter.addAndGet(entities.size());
 	}
 
-	private static void upsertBatch(Repository<Entity> targetRepo, List<Entity> mappedEntities)
+	private List<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
 	{
-		mappedEntities.forEach(mappedEntity ->
-		{
-			// FIXME adding/updating row-by-row is a performance bottleneck, this code could do streaming upsert
-			if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
-			{
-				targetRepo.add(mappedEntity);
-			}
-			else
-			{
-				targetRepo.update(mappedEntity);
-			}
-		});
-	}
-
-	private Stream<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
-	{
-		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData));
+		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData))
+				.collect(toList());
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)

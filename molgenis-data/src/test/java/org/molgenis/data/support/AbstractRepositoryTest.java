@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
-import org.mockito.Matchers;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -12,15 +11,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 public class AbstractRepositoryTest
@@ -28,9 +23,19 @@ public class AbstractRepositoryTest
 	private AbstractRepository abstractRepository;
 	private EntityType entityType;
 
+	@Captor
+	private ArgumentCaptor<Stream<Entity>> addStreamCaptor;
+
+	@Captor
+	private ArgumentCaptor<Stream<Entity>> updateStreamCaptor;
+
+	@Captor
+	private ArgumentCaptor<Stream<Object>> objectStreamCaptor;
+
 	@BeforeTest
 	public void beforeTest()
 	{
+		MockitoAnnotations.initMocks(this);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
@@ -96,7 +101,7 @@ public class AbstractRepositoryTest
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 
-		Mockito.doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+		doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
 
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
@@ -113,11 +118,32 @@ public class AbstractRepositoryTest
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 
-		Mockito.doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+		doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
 
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
 	//	// Note: streamFetch cannot be tested because mocking default methods is not supported by Mockito
+
+	@Test
+	public void testUpsertBatch()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
+		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
+		List<Entity> batch = Arrays.asList(entity0, entity1);
+
+		doReturn(Stream.of(entity0)).when(abstractRepository).findAll(objectStreamCaptor.capture(), any(Fetch.class));
+		doReturn(1).when(abstractRepository).add(addStreamCaptor.capture());
+		doNothing().when(abstractRepository).update(updateStreamCaptor.capture());
+
+		abstractRepository.upsertBatch(batch);
+
+		assertEquals(addStreamCaptor.getValue().collect(Collectors.toList()), Collections.singletonList(entity1),
+				"New entity should get added.");
+		assertEquals(updateStreamCaptor.getValue().collect(Collectors.toList()), Collections.singletonList(entity0),
+				"Existing entity should get updated.");
+	}
 }
