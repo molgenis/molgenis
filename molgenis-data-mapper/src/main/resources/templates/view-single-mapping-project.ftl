@@ -202,16 +202,16 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title" id="create-integrated-entity-modal-label">Create integrated dataset</h4>
+                <h4 class="modal-title" id="create-integrated-entity-modal-label">Where shall we store the integrated
+                    dataset?</h4>
             </div>
             <div class="modal-body">
-                <p>Where shall we store the integrated dataset?</p>
-                <ul class="nav nav-tabs" id="tabContent">
-                    <li class="active"><a href="#existing" data-toggle="tab">Existing compatible dataset</a></li>
+                <ul class="nav nav-pills" id="tabContent">
+                    <li><a href="#existing" data-toggle="tab">Existing dataset</a></li>
                     <li><a href="#new" data-toggle="tab">New dataset</a></li>
                 </ul>
                 <div class="tab-content">
-                    <div class="tab-pane active panel-collapse" id="existing">
+                    <div class="tab-pane panel-collapse" id="existing">
                         <form method="post" action="${context_url}/createIntegratedEntity"
                               id="existingIntegratedDatasetForm">
                             <p class="help-block">Maps to an existing compatible dataset.<br/>

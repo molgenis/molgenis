@@ -19,6 +19,7 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -585,9 +586,14 @@ public class MappingServiceController extends MolgenisPluginController
 			}
 			if (packageId != null)
 			{
-				if (dataService.getMeta().getPackage(packageId) == null)
+				Package package_ = dataService.getMeta().getPackage(packageId);
+				if (package_ == null)
 				{
 					throw new MolgenisDataException("No package found with ID " + packageId);
+				}
+				if (isSystemPackage(package_))
+				{
+					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
 				}
 			}
 		}
