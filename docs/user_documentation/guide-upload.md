@@ -131,6 +131,10 @@ String url
 entityTypeId: The name of the entity, this only has effect for VCF files (.vcf and .vcf.gz)
 	Default value is the filename.
 
+packageId: The id of the package you want the imported file to be placed under. If package does not exist, an error will be thrown. Not supplying the package will place an imported file under the default package 'base'
+
+Note: Both entityTypeId and packageId are only used when importing VCF files. EMX files containing their own packages and entities sheet will ignore these two arguments
+
 action: the database action to import with, options are:
 	ADD: add records, error on duplicate records
 	ADD_UPDATE_EXISTING: add, update existing records

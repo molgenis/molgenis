@@ -12,7 +12,7 @@ import java.util.Set;
 
 public interface ImportService extends Ordered
 {
-	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage);
+	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageId);
 
 	EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 
