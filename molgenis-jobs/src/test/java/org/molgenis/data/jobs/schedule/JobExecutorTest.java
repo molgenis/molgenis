@@ -8,7 +8,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.UserTestConfig;
+import org.molgenis.data.jobs.JobExecutionTemplate;
 import org.molgenis.data.jobs.JobInterface;
+import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
@@ -20,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -49,6 +52,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	UserDetailsService userDetailsService;
+
+	@Autowired
+	JobExecutionTemplate jobExecutionTemplate;
 
 	@Mock
 	private ScheduledJob scheduledJob;
@@ -118,6 +124,11 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(jobExecution).setSuccessEmail("a@b.c");
 		verify(jobExecution).setParam1("param1Value");
 		verify(jobExecution).setParam2(2);
+		verify(jobExecution).setDefaultValues();
+
+		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
+
+		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
 	}
 
 	public static class TestJobExecution extends JobExecution
