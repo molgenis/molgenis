@@ -19,14 +19,14 @@ public class EmxImportJob
 	// TODO: there is high overlap between report and metaDataChanges
 	public final EntityImportReport report = new EntityImportReport();
 	public final MetaDataChanges metaDataChanges = new MetaDataChanges();
-	public String packageName;
+	public String packageId;
 
 	public EmxImportJob(DatabaseAction dbAction, RepositoryCollection source, ParsedMetaData parsedMetaData,
-			String packageName)
+			String packageId)
 	{
 		this.dbAction = dbAction;
 		this.source = source;
 		this.parsedMetaData = parsedMetaData;
-		this.packageName = packageName;
+		this.packageId = packageId;
 	}
 }

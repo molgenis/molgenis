@@ -21,11 +21,11 @@ public class ImportJob implements Runnable
 	private final String importRunId;
 	private final ImportRunService importRunService;
 	private final HttpSession session;
-	private final String packageName;
+	private final String packageId;
 
 	public ImportJob(ImportService importService, SecurityContext securityContext, RepositoryCollection source,
 			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService, HttpSession session,
-			String packageName)
+			String packageId)
 	{
 		this.importService = importService;
 		this.securityContext = securityContext;
@@ -34,7 +34,7 @@ public class ImportJob implements Runnable
 		this.importRunId = importRunId;
 		this.importRunService = importRunService;
 		this.session = session;
-		this.packageName = packageName;
+		this.packageId = packageId;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class ImportJob implements Runnable
 
 			SecurityContextHolder.setContext(securityContext);
 
-			EntityImportReport importReport = importService.doImport(source, databaseAction, packageName);
+			EntityImportReport importReport = importService.doImport(source, databaseAction, packageId);
 
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
@@ -92,7 +92,7 @@ public class ImportJob implements Runnable
 		if (importRunService != null ? !importRunService.equals(importJob.importRunService) :
 				importJob.importRunService != null) return false;
 		if (session != null ? !session.equals(importJob.session) : importJob.session != null) return false;
-		return packageName != null ? packageName.equals(importJob.packageName) : importJob.packageName == null;
+		return packageId != null ? packageId.equals(importJob.packageId) : importJob.packageId == null;
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class ImportJob implements Runnable
 		result = 31 * result + (importRunId != null ? importRunId.hashCode() : 0);
 		result = 31 * result + (importRunService != null ? importRunService.hashCode() : 0);
 		result = 31 * result + (session != null ? session.hashCode() : 0);
-		result = 31 * result + (packageName != null ? packageName.hashCode() : 0);
+		result = 31 * result + (packageId != null ? packageId.hashCode() : 0);
 		return result;
 	}
 }

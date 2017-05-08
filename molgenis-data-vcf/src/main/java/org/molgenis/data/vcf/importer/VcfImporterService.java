@@ -53,7 +53,7 @@ public class VcfImporterService implements ImportService
 
 	@Transactional
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageName)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageId)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -65,7 +65,7 @@ public class VcfImporterService implements ImportService
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				report = importVcf(repo, addedEntities, packageName);
+				report = importVcf(repo, addedEntities, packageId);
 			}
 			catch (IOException e)
 			{
@@ -138,7 +138,7 @@ public class VcfImporterService implements ImportService
 	}
 
 	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities,
-			String packageName) throws IOException
+			String packageId) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository<Entity> sampleRepository;
@@ -152,7 +152,7 @@ public class VcfImporterService implements ImportService
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
-		Package package_ = dataService.getMeta().getPackage(packageName);
+		Package package_ = dataService.getMeta().getPackage(packageId);
 		if (package_ == null) package_ = defaultPackage;
 		entityType.setPackage(package_);
 

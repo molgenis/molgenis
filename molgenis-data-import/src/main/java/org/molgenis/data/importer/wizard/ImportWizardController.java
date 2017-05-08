@@ -377,7 +377,7 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseBody
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
-			@RequestParam(value = "packageName", required = false) String packageName,
+			@RequestParam(value = "packageId", required = false) String packageId,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
@@ -385,13 +385,13 @@ public class ImportWizardController extends AbstractWizardController
 		try
 		{
 			File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
-			if (packageName != null && dataService.getMeta().getPackage(packageName) == null)
+			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
 				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
-						.body(MessageFormat.format("Package [{0}] does not exist.", packageName));
+						.body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
-			if (packageName == null) packageName = PACKAGE_DEFAULT;
-			importRun = importFile(request, tmpFile, action, notify, packageName);
+			if (packageId == null) packageId = PACKAGE_DEFAULT;
+			importRun = importFile(request, tmpFile, action, notify, packageId);
 		}
 		catch (Exception e)
 		{
@@ -406,7 +406,7 @@ public class ImportWizardController extends AbstractWizardController
 	 *
 	 * @param file         File containing entities. Can be VCF, VCF.gz, or EMX
 	 * @param entityTypeId Only for VCF and VCF.gz. If set, uses this ID for the table name. Is ignored when uploading EMX
-	 * @param packageName  Only for VCF and VCF.gz. If set, places the VCF under the provided package. Is ignored when uploading EMX. If not set, uses the default package 'base'. Throws an error when the supplied package does not exist
+	 * @param packageId    Only for VCF and VCF.gz. If set, places the VCF under the provided package. Is ignored when uploading EMX. If not set, uses the default package 'base'. Throws an error when the supplied package does not exist
 	 * @param action       Specifies the import method. Supported: ADD, ADD_UPDATE
 	 * @param notify       Should admin be notified when the import fails?
 	 * @return ResponseEntity containing the API URL with the current import status
@@ -417,7 +417,7 @@ public class ImportWizardController extends AbstractWizardController
 	public ResponseEntity<String> importFile(HttpServletRequest request,
 			@RequestParam(value = "file") MultipartFile file,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
-			@RequestParam(value = "packageName", required = false) String packageName,
+			@RequestParam(value = "packageId", required = false) String packageId,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
@@ -428,14 +428,14 @@ public class ImportWizardController extends AbstractWizardController
 			filename = getFilename(file.getOriginalFilename(), entityTypeId);
 			File tmpFile = fileStore.store(file.getInputStream(), filename);
 
-			if (packageName != null && dataService.getMeta().getPackage(packageName) == null)
+			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
 				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
-						.body(MessageFormat.format("Package [{0}] does not exist.", packageName));
+						.body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
-			if (packageName == null) packageName = PACKAGE_DEFAULT;
+			if (packageId == null) packageId = PACKAGE_DEFAULT;
 
-			importRun = importFile(request, tmpFile, action, notify, packageName);
+			importRun = importFile(request, tmpFile, action, notify, packageId);
 		}
 		catch (Exception e)
 		{
@@ -479,7 +479,7 @@ public class ImportWizardController extends AbstractWizardController
 	}
 
 	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify,
-			String packageName)
+			String packageId)
 	{
 		// no action specified? default is ADD just like the importerPlugin
 		ImportRun importRun;
@@ -497,7 +497,7 @@ public class ImportWizardController extends AbstractWizardController
 		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 		asyncImportJobs.execute(
 				new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, databaseAction,
-						importRun.getId(), importRunService, request.getSession(), packageName));
+						importRun.getId(), importRunService, request.getSession(), packageId));
 
 		return importRun;
 	}

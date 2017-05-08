@@ -89,7 +89,7 @@ public class ImportWriter
 		importEntityTypes(job.parsedMetaData.getEntities(), job.report);
 
 		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(job.parsedMetaData.getEntities());
-		importData(job.report, resolvedEntityTypes, job.source, job.dbAction, job.packageName);
+		importData(job.report, resolvedEntityTypes, job.source, job.dbAction, job.packageId);
 		importI18nStrings(job.report, job.parsedMetaData.getL10nStrings(), job.dbAction);
 
 		return job.report;

@@ -213,19 +213,19 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	@Override
 	//FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
-	public ParsedMetaData parse(final RepositoryCollection source, String packageName)
+	public ParsedMetaData parse(final RepositoryCollection source, String packageId)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
 		{
 			IntermediateParseResults intermediateResults = getEntityTypeFromSource(source);
 			List<EntityType> entities;
-			if (packageName == null)
+			if (packageId == null)
 			{
 				entities = intermediateResults.getEntities();
 			}
 			else
 			{
-				entities = putEntitiesInDefaultPackage(intermediateResults, packageName);
+				entities = putEntitiesInDefaultPackage(intermediateResults, packageId);
 			}
 
 			return new ParsedMetaData(entityTypeDependencyResolver.resolve(entities), intermediateResults.getPackages(),
