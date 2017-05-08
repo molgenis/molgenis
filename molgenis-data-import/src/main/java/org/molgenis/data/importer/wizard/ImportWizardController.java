@@ -367,6 +367,12 @@ public class ImportWizardController extends AbstractWizardController
 		return role.substring(0, role.indexOf('_')).toLowerCase();
 	}
 
+	/**
+	 * Imports entities present in the submitted file
+	 *
+	 * @param url   URL from which a file is downloaded
+	 * @param @Link importFile
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/importByUrl")
 	@ResponseBody
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
@@ -395,6 +401,18 @@ public class ImportWizardController extends AbstractWizardController
 		return createCreatedResponseEntity(importRun);
 	}
 
+	/**
+	 * Imports entities present in the submitted file
+	 *
+	 * @param file         File containing entities. Can be VCF, VCF.gz, or EMX
+	 * @param entityTypeId Only for VCF and VCF.gz. If set, uses this ID for the table name. Is ignored when uploading EMX
+	 * @param packageName  Only for VCF and VCF.gz. If set, places the VCF under the provided package. Is ignored when uploading EMX. If not set, uses the default package 'base'. Throws an error when the supplied package does not exist
+	 * @param action       Specifies the import method. Supported: ADD, ADD_UPDATE
+	 * @param notify       Should admin be notified when the import fails?
+	 * @return ResponseEntity containing the API URL with the current import status
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
 	public ResponseEntity<String> importFile(HttpServletRequest request,
 			@RequestParam(value = "file") MultipartFile file,
@@ -416,7 +434,7 @@ public class ImportWizardController extends AbstractWizardController
 						.body(MessageFormat.format("Package [{0}] does not exist.", packageName));
 			}
 			if (packageName == null) packageName = PACKAGE_DEFAULT;
-			
+
 			importRun = importFile(request, tmpFile, action, notify, packageName);
 		}
 		catch (Exception e)
