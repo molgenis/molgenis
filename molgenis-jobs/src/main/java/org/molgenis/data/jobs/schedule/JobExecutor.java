@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.jobs.*;
+import org.molgenis.data.jobs.JobExecutionTemplate;
+import org.molgenis.data.jobs.JobExecutionUpdater;
+import org.molgenis.data.jobs.JobInterface;
+import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.meta.model.EntityType;
@@ -12,6 +15,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -46,8 +50,8 @@ public class JobExecutor
 	private MailSender mailSender;
 	private UserDetailsService userDetailsService;
 
-	public JobExecutor(DataService dataService, Function<JobExecution, ? extends JobInterface> jobFactory,
-			EntityManager entityManager, Gson gson, JobExecutionTemplate jobExecutionTemplate,
+	@Autowired
+	public JobExecutor(DataService dataService, Function<JobExecution, ? extends JobInterface> jobFactory, EntityManager entityManager, Gson gson, JobExecutionTemplate jobExecutionTemplate,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -84,9 +88,8 @@ public class JobExecutor
 
 	private void runJob(JobExecution jobExecution, JobInterface<?> molgenisJob)
 	{
-		Progress progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
-		RunAsUserToken runAsAuthentication = createAuthorization(jobExecution.getUser());
-		jobExecutionTemplate.call(molgenisJob, progress, runAsAuthentication);
+		jobExecutionTemplate.call(molgenisJob, new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender),
+				createAuthorization(jobExecution.getUser()));
 	}
 
 	private RunAsUserToken createAuthorization(String username)
