@@ -9,6 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
@@ -16,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 import static org.testng.Assert.assertEquals;
@@ -58,6 +61,18 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	private ArgumentCaptor<String> stringCaptor;
+
+	@Autowired
+	JobScheduler jobScheduler;
+
+	@Autowired
+	private Config config;
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		config.resetMocks();
+	}
 
 	@Test
 	public void testBootstrap()
@@ -105,12 +120,32 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 
 		verify(dataService).update("JobType1", job1);
 		verify(dataService).update("JobType1", job2);
+		verify(jobScheduler).scheduleJobs();
 
 	}
 
 	@Configuration
 	public static class Config
 	{
+		@Mock
+		private JobScheduler jobScheduler;
+
+		public void resetMocks()
+		{
+			reset(jobScheduler);
+		}
+
+		public Config()
+		{
+			initMocks(this);
+		}
+
+		@Bean
+		public JobScheduler jobScheduler()
+		{
+			return jobScheduler;
+		}
+
 		@Bean
 		public SystemEntityTypeRegistry systemEntityTypeRegistry()
 		{
