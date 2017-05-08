@@ -83,8 +83,8 @@ public class MappingConfig
 	@Bean
 	public MappingService mappingService()
 	{
-		return new MappingServiceImpl(dataService, algorithmServiceImpl(), idGenerator, mappingProjectRepository(),
-				permissionSystemService, attrMetaFactory, systemPackageRegistry, defaultPackage);
+		return new MappingServiceImpl(dataService, algorithmServiceImpl(), mappingProjectRepository(),
+				permissionSystemService, attrMetaFactory, defaultPackage);
 	}
 
 	@Bean

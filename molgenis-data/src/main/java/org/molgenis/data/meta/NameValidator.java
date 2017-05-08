@@ -77,7 +77,7 @@ public class NameValidator
 		if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$")) // FIXME too restrictive
 		{
 			throw new MolgenisDataException("Invalid characters in: [" + name
-					+ "] Only letters (a-z, A-Z), digits (0-9) and hashes (#) are allowed.");
+					+ "] Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed.");
 		}
 	}
 }
