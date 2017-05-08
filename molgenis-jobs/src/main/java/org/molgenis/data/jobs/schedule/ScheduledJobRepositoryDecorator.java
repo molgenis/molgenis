@@ -46,19 +46,19 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	}
 
 	@Override
-	public void delete(ScheduledJob entity)
+	public void delete(ScheduledJob scheduledJob)
 	{
-		String entityId = entity.getString(ScheduledJobMetadata.ID);
-		decorated.delete(entity);
+		String entityId = scheduledJob.getId();
+		decorated.delete(scheduledJob);
 		scheduler.unschedule(entityId);
 	}
 
 	@Override
-	public void delete(Stream<ScheduledJob> entities)
+	public void delete(Stream<ScheduledJob> jobs)
 	{
-		decorated.delete(entities.filter(e ->
+		decorated.delete(jobs.filter(job ->
 		{
-			String entityId = e.getString(ScheduledJobMetadata.ID);
+			String entityId = job.getId();
 			scheduler.unschedule(entityId);
 			return true;
 		}));
@@ -96,24 +96,23 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		{
 			String entityId = e.getString(ScheduledJobMetadata.ID);
 			scheduler.unschedule(entityId);
-			//			removeJobExecutions(entityId);
 		}
 		decorated.deleteAll();
 	}
 
 	@Override
-	public void add(ScheduledJob entity)
+	public void add(ScheduledJob scheduledJob)
 	{
-		decorated.add(entity);
-		scheduler.schedule(entity);
+		decorated.add(scheduledJob);
+		scheduler.schedule(scheduledJob);
 	}
 
 	@Override
-	public Integer add(Stream<ScheduledJob> entities)
+	public Integer add(Stream<ScheduledJob> jobs)
 	{
-		return decorated.add(entities.filter(e ->
+		return decorated.add(jobs.filter(job ->
 		{
-			scheduler.schedule(e);
+			scheduler.schedule(job);
 			return true;
 		}));
 	}
