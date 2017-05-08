@@ -26,7 +26,7 @@
     </build>
 
     <dependencies>
-        <!-- TODO replace dependency with molgenis-utils dependency (molgenis-core should be removed eventually) -->
+        <!-- TODO remove dependency -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core</artifactId>
@@ -37,6 +37,10 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
         </dependency>
         <!-- TODO check if we can replace with a lower level spring library dependency such as spring-context -->
         <dependency>

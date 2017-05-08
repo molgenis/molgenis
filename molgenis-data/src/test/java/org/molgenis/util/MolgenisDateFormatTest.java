@@ -1,5 +1,6 @@
 package org.molgenis.util;
 
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -8,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static java.time.ZoneId.systemDefault;
-import static org.testng.Assert.assertEquals;
 
 public class MolgenisDateFormatTest
 {
@@ -27,7 +27,7 @@ public class MolgenisDateFormatTest
 	@Test(dataProvider = "parseInstantDataProvider")
 	public void testParseInstant(String text, String expected)
 	{
-		assertEquals(MolgenisDateFormat.parseInstant(text), Instant.parse(expected));
+		Assert.assertEquals(MolgenisDateFormat.parseInstant(text), Instant.parse(expected));
 	}
 
 	@DataProvider(name = "parseLocalDateDataProvider")
@@ -42,6 +42,6 @@ public class MolgenisDateFormatTest
 	@Test(dataProvider = "parseLocalDateDataProvider")
 	public void testParseLocalDate(String text, String expected)
 	{
-		assertEquals(MolgenisDateFormat.parseLocalDate(text), LocalDate.parse(expected));
+		Assert.assertEquals(MolgenisDateFormat.parseLocalDate(text), LocalDate.parse(expected));
 	}
 }
