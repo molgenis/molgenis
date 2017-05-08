@@ -60,12 +60,6 @@
             <artifactId>uuid</artifactId>
             <version>3.2</version>
         </dependency>
-        <!-- TODO can be removed since we use Java 8 -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.2</version>
-        </dependency>
         <!-- TODO move to molgenis-data-postgres -->
         <dependency>
             <groupId>com.mchange</groupId>
