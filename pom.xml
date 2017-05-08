@@ -628,6 +628,10 @@
             <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
             <version>${findbugs.annotations.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
         <!-- logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
