@@ -105,8 +105,7 @@ public class JobExecutor
 
 	private EntityType getJobExecutionEntityTypeName(ScheduledJob scheduledJob)
 	{
-		// TODO where and how?!?
-		return dataService.getEntityType("sys_FileIngestJobExecution");
+		return scheduledJob.getType().getJobExecutionType();
 	}
 
 	private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs)
