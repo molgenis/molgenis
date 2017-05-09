@@ -34,10 +34,10 @@ public class ScheduledScriptConfig
 	Gson gson;
 
 	/**
-	 * The FileIngestJob Factory bean.
+	 * The Script JobFactory bean.
 	 */
 	@Bean
-	public JobFactory fileIngestJobFactory()
+	public JobFactory scriptJobFactory()
 	{
 		return new JobFactory<ScriptJobExecution>()
 		{
