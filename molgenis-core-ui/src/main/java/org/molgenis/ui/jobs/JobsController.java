@@ -12,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -55,11 +51,6 @@ public class JobsController extends MolgenisPluginController
 		this.jobMetaDataMetaData = requireNonNull(jobMetaDataMetaData);
 		this.jobScheduler = requireNonNull(jobScheduler);
 	}
-
-	//	public JobsController()
-	//	{
-	//		super(URI);
-	//	}
 
 	@RequestMapping(method = GET)
 	public String init(Model model)
