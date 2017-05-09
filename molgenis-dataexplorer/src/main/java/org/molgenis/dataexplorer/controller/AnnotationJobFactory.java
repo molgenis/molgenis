@@ -71,7 +71,7 @@ public class AnnotationJobFactory
 		String username = metaData.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
+		RunAsUserToken runAsAuthentication = new RunAsUserToken("JobImpl Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		Repository<Entity> repository = dataService.getRepository(targetName);

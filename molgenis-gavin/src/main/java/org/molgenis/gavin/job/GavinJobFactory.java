@@ -73,7 +73,7 @@ public class GavinJobFactory
 		dataService.add(gavinJobExecution.getEntityType().getId(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
 		// create an authentication to run as the user that is listed as the owner of the job
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
+		RunAsUserToken runAsAuthentication = new RunAsUserToken("JobImpl Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
@@ -101,7 +101,7 @@ public class GavinJobFactory
 		if (result == null)
 		{
 
-			throw new JobNotFoundException("Job not found.");
+			throw new JobNotFoundException("JobImpl not found.");
 		}
 		return result;
 	}

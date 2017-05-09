@@ -1,6 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
-import org.molgenis.data.jobs.JobInterface;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.model.FileMeta;
 import org.springframework.context.annotation.Scope;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class FileIngestJob implements JobInterface<FileMeta>
+public class FileIngestJob implements Job<FileMeta>
 {
 	private FileIngester fileIngester;
 	private final String entityTypeId;

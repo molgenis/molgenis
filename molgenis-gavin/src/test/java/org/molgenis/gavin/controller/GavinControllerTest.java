@@ -103,7 +103,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		User user = mock(User.class);
 		when(user.getUsername()).thenReturn("tommy");
 
-		// Job Factory sets the Identifier in the JobExecution object.
+		// JobImpl Factory sets the Identifier in the JobExecution object.
 		ArgumentCaptor<GavinJobExecution> captor = ArgumentCaptor.forClass(GavinJobExecution.class);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		doAnswer(invocation ->

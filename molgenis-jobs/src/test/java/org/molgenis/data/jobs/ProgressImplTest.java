@@ -101,13 +101,13 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	public void jobSucceedsButMailFails()
 	{
 		doThrow(new MailPreparationException("fail!")).when(mailSender).send(any(SimpleMailMessage.class));
-		jobExecution.setProgressMessage("Job finished.");
+		jobExecution.setProgressMessage("JobImpl finished.");
 		jobExecution.setSuccessEmail("test@test");
 		progress.start();
 		progress.success();
 
 		Mockito.verify(mailSender).send(any(SimpleMailMessage.class));
-		assertEquals(jobExecution.getProgressMessage(), "Job finished. (Mail not sent: fail!)");
+		assertEquals(jobExecution.getProgressMessage(), "JobImpl finished. (Mail not sent: fail!)");
 	}
 
 	@Test

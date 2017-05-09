@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobExecutionTemplate;
 import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.jobs.JobInterface;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
@@ -41,7 +41,7 @@ public class JobExecutor
 
 	private DataService dataService;
 	//TODO: have the factory decide which bean to create depending on the job type
-	private Function<JobExecution, ? extends JobInterface> jobFactory;
+	private Function<JobExecution, ? extends Job> jobFactory;
 
 	private EntityManager entityManager;
 	private Gson gson;
@@ -51,7 +51,8 @@ public class JobExecutor
 	private UserDetailsService userDetailsService;
 
 	@Autowired
-	public JobExecutor(DataService dataService, Function<JobExecution, ? extends JobInterface> jobFactory, EntityManager entityManager, Gson gson, JobExecutionTemplate jobExecutionTemplate,
+	public JobExecutor(DataService dataService, Function<JobExecution, ? extends Job> jobFactory,
+			EntityManager entityManager, Gson gson, JobExecutionTemplate jobExecutionTemplate,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -69,7 +70,7 @@ public class JobExecutor
 	{
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		JobExecution jobExecution = createJobExecution(scheduledJob);
-		JobInterface<?> molgenisJob = jobFactory.apply(jobExecution);
+		Job<?> molgenisJob = jobFactory.apply(jobExecution);
 		runJob(jobExecution, molgenisJob);
 	}
 
@@ -86,7 +87,7 @@ public class JobExecutor
 		return jobExecution;
 	}
 
-	private void runJob(JobExecution jobExecution, JobInterface<?> molgenisJob)
+	private void runJob(JobExecution jobExecution, Job<?> molgenisJob)
 	{
 		jobExecutionTemplate.call(molgenisJob, new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender),
 				createAuthorization(jobExecution.getUser()));
@@ -94,7 +95,7 @@ public class JobExecutor
 
 	private RunAsUserToken createAuthorization(String username)
 	{
-		return new RunAsUserToken("Job Execution", username, null,
+		return new RunAsUserToken("JobImpl Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 	}
 

@@ -1,6 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
-import org.molgenis.data.jobs.JobInterface;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class FileIngestConfig
 	 * The FileIngestJob Factory bean.
 	 */
 	@Bean
-	public Function<JobExecution, ? extends JobInterface> fileIngestJobFactory()
+	public Function<JobExecution, ? extends Job> fileIngestJobFactory()
 	{
 		return this::fileIngestJob;
 	}

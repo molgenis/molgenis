@@ -36,7 +36,7 @@ public class MappingJobExecutionMetadata extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Mapping Job Execution");
+		setLabel("Mapping JobImpl Execution");
 		setExtends(jobExecutionMetaData);
 
 		addAttribute(MAPPING_PROJECT_ID).setDataType(STRING).setLabel("Mapping Project ID").setNillable(false);

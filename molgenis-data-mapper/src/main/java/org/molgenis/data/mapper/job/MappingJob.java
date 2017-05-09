@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.JobImpl;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -13,7 +13,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 
-public class MappingJob extends Job<Void>
+public class MappingJob extends JobImpl<Void>
 {
 	private final String mappingProjectId;
 	private final String targetEntityTypeId;

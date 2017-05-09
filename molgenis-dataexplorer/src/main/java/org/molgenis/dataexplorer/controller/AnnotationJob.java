@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
-import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.JobImpl;
 import org.molgenis.data.jobs.Progress;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -15,7 +15,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public class AnnotationJob extends Job<Void>
+public class AnnotationJob extends JobImpl<Void>
 {
 	private final CrudRepositoryAnnotator crudRepositoryAnnotator;
 	private final String username;

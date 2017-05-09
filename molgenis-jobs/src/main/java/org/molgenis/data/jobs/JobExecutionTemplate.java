@@ -29,15 +29,14 @@ public class JobExecutionTemplate
 	/**
 	 * Executes a job in the calling thread.
 	 *
-	 * @param job the {@link JobInterface} to execute.
-	 * @param progress {@link Progress} to report progress to
+	 * @param job            the {@link Job} to execute.
+	 * @param progress       {@link Progress} to report progress to
 	 * @param authentication {@link Authentication} to run the job with
-	 * @param <Result> type of the job execution
-	 *
-	 * @throws JobExecutionException if job execution throws an exception
+	 * @param <Result>       type of the job execution
 	 * @return the result of the job execution
+	 * @throws JobExecutionException if job execution throws an exception
 	 */
-	public <Result> Result call(JobInterface<Result> job, Progress progress, Authentication authentication)
+	public <Result> Result call(Job<Result> job, Progress progress, Authentication authentication)
 	{
 		final SecurityContext originalContext = SecurityContextHolder.getContext();
 		try
@@ -52,7 +51,7 @@ public class JobExecutionTemplate
 		}
 	}
 
-	private <Result> Result authenticatedCall(JobInterface<Result> job, Progress progress)
+	private <Result> Result authenticatedCall(Job<Result> job, Progress progress)
 	{
 		if (transactionOperations != null)
 		{
@@ -74,7 +73,7 @@ public class JobExecutionTemplate
 		}
 	}
 
-	private <Result> Result tryCall(JobInterface<Result> job, Progress progress) throws JobExecutionException
+	private <Result> Result tryCall(Job<Result> job, Progress progress) throws JobExecutionException
 	{
 		progress.start();
 		try

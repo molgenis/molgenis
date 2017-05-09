@@ -55,7 +55,7 @@ public class MappingJobFactory
 		String label = mappingJobExecution.getLabel();
 
 		// create an authentication to run as the user that is listed as the owner of the job
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
+		RunAsUserToken runAsAuthentication = new RunAsUserToken("JobImpl Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		return new MappingJob(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label,

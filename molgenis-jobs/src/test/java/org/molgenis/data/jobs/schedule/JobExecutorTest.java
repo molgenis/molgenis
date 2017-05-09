@@ -8,8 +8,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.UserTestConfig;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobExecutionTemplate;
-import org.molgenis.data.jobs.JobInterface;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
@@ -48,7 +48,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	JobExecutor jobExecutor;
 
 	@Autowired
-	Function<JobExecution, ? extends JobInterface> jobFactory;
+	Function<JobExecution, ? extends Job> jobFactory;
 
 	@Autowired
 	UserDetailsService userDetailsService;
@@ -60,7 +60,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	private ScheduledJob scheduledJob;
 
 	@Mock
-	private JobInterface<Void> job;
+	private Job<Void> job;
 
 	@Mock
 	private JobExecutionContext jobExecutionContext;
@@ -172,10 +172,10 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		}
 
 		@Mock
-		Function<JobExecution, ? extends JobInterface> factoryMock;
+		Function<JobExecution, ? extends Job> factoryMock;
 
 		@Bean
-		public Function<JobExecution, ? extends JobInterface> jobFactory()
+		public Function<JobExecution, ? extends Job> jobFactory()
 		{
 			return factoryMock;
 		}
