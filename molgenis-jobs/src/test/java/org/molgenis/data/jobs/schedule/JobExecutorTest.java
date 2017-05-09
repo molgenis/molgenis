@@ -102,6 +102,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		config.resetMocks();
 		reset(jobExecutionContext);
 		when(jobFactory.getJobType()).thenReturn(jobType);
+		when(jobType.getJobExecutionType()).thenReturn(jobExecutionType);
 		when(jobType.getName()).thenReturn("jobName");
 	}
 
@@ -110,7 +111,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	{
 		when(dataService.findOneById(SCHEDULED_JOB, "aaaacw67ejuwq7wron3yjriaae", ScheduledJob.class))
 				.thenReturn(scheduledJob);
-		when(dataService.getEntityType("sys_FileIngestJobExecution")).thenReturn(jobExecutionType);
 		when(entityManager.create(jobExecutionType, EntityManager.CreationMode.POPULATE)).thenReturn(jobExecution);
 
 		when(jobFactory.createJob(jobExecution)).thenReturn(job);

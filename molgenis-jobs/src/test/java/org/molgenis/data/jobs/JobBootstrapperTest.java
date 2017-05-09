@@ -9,6 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.schedule.JobExecutor;
 import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
@@ -66,6 +67,9 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	JobScheduler jobScheduler;
 
 	@Autowired
+	JobExecutor jobExecutor;
+
+	@Autowired
 	private Config config;
 
 	@BeforeMethod
@@ -121,6 +125,7 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		verify(dataService).update("JobType1", job1);
 		verify(dataService).update("JobType1", job2);
 		verify(jobScheduler).scheduleJobs();
+		verify(jobExecutor).upsertJobTypes();
 
 	}
 
@@ -130,9 +135,12 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		@Mock
 		private JobScheduler jobScheduler;
 
-		public void resetMocks()
+		@Mock
+		private JobExecutor jobExecutor;
+
+		private void resetMocks()
 		{
-			reset(jobScheduler);
+			reset(jobScheduler, jobExecutor);
 		}
 
 		public Config()
@@ -144,6 +152,12 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		public JobScheduler jobScheduler()
 		{
 			return jobScheduler;
+		}
+
+		@Bean
+		public JobExecutor jobExecutor()
+		{
+			return jobExecutor;
 		}
 
 		@Bean
