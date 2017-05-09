@@ -77,6 +77,7 @@ public class JobExecutor
 	{
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		JobExecution jobExecution = createJobExecution(scheduledJob);
+		dataService.add(jobExecution.getEntityType().getId(), jobExecution);
 		execute(jobExecution);
 	}
 
@@ -88,7 +89,6 @@ public class JobExecutor
 	@RunAsSystem
 	public void execute(JobExecution jobExecution)
 	{
-		dataService.add(jobExecution.getEntityType().getId(), jobExecution);
 		JobFactory jobFactory = getJobFactoryForType(jobExecution.getEntityType().getId());
 		Job molgenisJob = jobFactory.createJob(jobExecution);
 		runJob(jobExecution, molgenisJob);

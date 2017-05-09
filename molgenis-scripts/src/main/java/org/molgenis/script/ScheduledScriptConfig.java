@@ -14,6 +14,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.text.MessageFormat.format;
+
 @Configuration
 public class ScheduledScriptConfig
 {
@@ -42,7 +44,7 @@ public class ScheduledScriptConfig
 		return new JobFactory<ScriptJobExecution>()
 		{
 			@Override
-			public Job createJob(ScriptJobExecution scriptJobExecution)
+			public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution)
 			{
 				final String name = scriptJobExecution.getName();
 				final String parameterString = scriptJobExecution.getParameters();
@@ -52,7 +54,11 @@ public class ScheduledScriptConfig
 					params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
 					params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
 					ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
-					progress.status(scriptResult.getOutput());
+					if (scriptResult.getOutputFile() != null)
+					{
+						scriptJobExecution.setResultUrl(format("/files/{0}", scriptResult.getOutputFile().getId()));
+					}
+					progress.appendLog(scriptResult.getOutput());
 					return scriptResult;
 				};
 			}
