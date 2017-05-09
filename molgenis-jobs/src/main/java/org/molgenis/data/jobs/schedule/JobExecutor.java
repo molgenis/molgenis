@@ -4,11 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobExecutionTemplate;
-import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.jobs.ProgressImpl;
+import org.molgenis.data.jobs.*;
 import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -22,11 +20,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.jobs.model.JobTypeMetadata.JOB_TYPE;
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 /**
@@ -39,30 +39,33 @@ public class JobExecutor
 	{
 	}.getType();
 
-	private DataService dataService;
-	//TODO: have the factory decide which bean to create depending on the job type
-	private Function<JobExecution, ? extends Job> jobFactory;
-
-	private EntityManager entityManager;
-	private Gson gson;
-	private JobExecutionTemplate jobExecutionTemplate;
-	private JobExecutionUpdater jobExecutionUpdater;
-	private MailSender mailSender;
-	private UserDetailsService userDetailsService;
+	private final DataService dataService;
+	private final EntityManager entityManager;
+	private final Gson gson;
+	private final JobExecutionTemplate jobExecutionTemplate;
+	private final JobExecutionUpdater jobExecutionUpdater;
+	private final MailSender mailSender;
+	private final UserDetailsService userDetailsService;
+	private final List<JobFactory> jobFactories;
 
 	@Autowired
-	public JobExecutor(DataService dataService, Function<JobExecution, ? extends Job> jobFactory,
-			EntityManager entityManager, Gson gson, JobExecutionTemplate jobExecutionTemplate,
-			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender)
+	public JobExecutor(DataService dataService, List<JobFactory> jobFactories, EntityManager entityManager, Gson gson,
+			JobExecutionTemplate jobExecutionTemplate, UserDetailsService userDetailsService,
+			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.jobFactory = requireNonNull(jobFactory);
 		this.entityManager = requireNonNull(entityManager);
 		this.gson = requireNonNull(gson);
 		this.jobExecutionTemplate = requireNonNull(jobExecutionTemplate);
 		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
+		this.jobFactories = jobFactories;
+	}
+
+	private JobFactory getJobFactoryForType(JobType jobType)
+	{
+		return jobFactories.stream().filter(f -> f.getJobType().getName().equals(jobType.getName())).findFirst().get();
 	}
 
 	@RunAsSystem
@@ -70,7 +73,8 @@ public class JobExecutor
 	{
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		JobExecution jobExecution = createJobExecution(scheduledJob);
-		Job<?> molgenisJob = jobFactory.apply(jobExecution);
+		JobFactory jobFactory = getJobFactoryForType(scheduledJob.getType());
+		Job molgenisJob = jobFactory.createJob(jobExecution);
 		runJob(jobExecution, molgenisJob);
 	}
 
@@ -117,5 +121,12 @@ public class JobExecutor
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValues(parameters);
 		return pvs;
+	}
+
+	public void upsertJobTypes()
+	{
+		dataService.getRepository(JOB_TYPE)
+				.upsertBatch(jobFactories.stream().map(JobFactory::getJobType).collect(toList()));
+
 	}
 }

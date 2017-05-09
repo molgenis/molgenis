@@ -12,9 +12,4 @@ public interface Job<Result>
 	 * @throws Exception if something goes wrong
 	 */
 	Result call(Progress progress) throws Exception;
-
-	/**
-	 * Indicates if this job is transactional.
-	 */
-	boolean isTransactional();
 }

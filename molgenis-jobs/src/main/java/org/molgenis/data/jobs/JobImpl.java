@@ -29,12 +29,6 @@ public abstract class JobImpl<Result> implements Callable<Result>, Job<Result>
 		return new JobExecutionTemplate(transactionOperations).call(this, progress, authentication);
 	}
 
-	@Override
-	public boolean isTransactional()
-	{
-		return transactionOperations != null;
-	}
-
 	/**
 	 * Executes this JobImpl. For concrete subclasses to implement.
 	 *

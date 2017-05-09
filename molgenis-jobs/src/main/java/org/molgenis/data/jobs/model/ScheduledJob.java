@@ -82,12 +82,11 @@ public class ScheduledJob extends StaticEntity
 
 	public JobType getType()
 	{
-		String type = getString(TYPE);
-		return type != null ? ScheduledJobMetadata.JobType.valueOf(type) : null;
+		return getEntity(TYPE, JobType.class);
 	}
 
 	public void setType(JobType type)
 	{
-		set(TYPE, type.name());
+		set(TYPE, type);
 	}
 }

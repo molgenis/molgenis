@@ -2,6 +2,7 @@ package org.molgenis.data.jobs;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.jobs.schedule.JobExecutor;
 import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
@@ -29,25 +30,33 @@ public class JobBootstrapper
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
 	private final JobScheduler jobScheduler;
+	private final JobExecutor jobExecutor;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JobBootstrapper.class);
 
 	@Autowired
 	public JobBootstrapper(SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
-			JobScheduler jobScheduler)
+			JobScheduler jobScheduler, JobExecutor jobExecutor)
 	{
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.dataService = requireNonNull(dataService);
 		this.jobScheduler = requireNonNull(jobScheduler);
+		this.jobExecutor = requireNonNull(jobExecutor);
 	}
 
 	public void bootstrap()
 	{
+		LOGGER.trace("Failing JobExecutions that were left running...");
 		systemEntityTypeRegistry.getSystemEntityTypes().filter(this::isJobExecution).forEach(this::bootstrap);
+		LOGGER.debug("Failed JobExecutions that were left running.");
 
 		LOGGER.trace("Scheduling ScheduledJobs...");
 		jobScheduler.scheduleJobs();
 		LOGGER.debug("Scheduled ScheduledJobs.");
+
+		LOGGER.trace("Upserting JobTypes...");
+		jobExecutor.upsertJobTypes();
+		LOGGER.debug("Upserted JobTypes.");
 	}
 
 	private void bootstrap(SystemEntityType systemEntityType)

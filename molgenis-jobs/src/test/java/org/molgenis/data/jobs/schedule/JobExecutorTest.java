@@ -1,8 +1,6 @@
 package org.molgenis.data.jobs.schedule;
 
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -10,9 +8,11 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobExecutionTemplate;
+import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GsonConfig;
@@ -33,14 +33,17 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 @ContextConfiguration(classes = { JobExecutorTest.Config.class, JobExecutor.class, JobTestConfig.class })
 public class JobExecutorTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private Config config;
+
 	@Autowired
 	private DataService dataService;
 
@@ -48,7 +51,10 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	JobExecutor jobExecutor;
 
 	@Autowired
-	Function<JobExecution, ? extends Job> jobFactory;
+	JobFactory jobFactory;
+
+	@Autowired
+	JobType jobType;
 
 	@Autowired
 	UserDetailsService userDetailsService;
@@ -86,13 +92,17 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		MockitoAnnotations.initMocks(this);
+		initMocks(this);
+
 	}
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Mockito.reset(jobExecutionContext);
+		config.resetMocks();
+		reset(jobExecutionContext);
+		when(jobFactory.getJobType()).thenReturn(jobType);
+		when(jobType.getName()).thenReturn("jobName");
 	}
 
 	@Test
@@ -103,11 +113,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(dataService.getEntityType("sys_FileIngestJobExecution")).thenReturn(jobExecutionType);
 		when(entityManager.create(jobExecutionType, EntityManager.CreationMode.POPULATE)).thenReturn(jobExecution);
 
-		when(jobFactory.apply(jobExecution)).thenReturn(job);
+		when(jobFactory.createJob(jobExecution)).thenReturn(job);
 		when(scheduledJob.getParameters()).thenReturn("{param1:'param1Value', param2:2}");
 		when(scheduledJob.getFailureEmail()).thenReturn("x@y.z");
 		when(scheduledJob.getSuccessEmail()).thenReturn("a@b.c");
 		when(scheduledJob.getUser()).thenReturn("fjant");
+		when(scheduledJob.getType()).thenReturn(jobType);
 
 		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
 
@@ -168,16 +179,30 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	{
 		public Config()
 		{
-			MockitoAnnotations.initMocks(this);
+			initMocks(this);
 		}
 
 		@Mock
-		Function<JobExecution, ? extends Job> factoryMock;
+		JobFactory jobFactory;
+
+		@Mock
+		JobType jobType;
+
+		public void resetMocks()
+		{
+			reset(jobFactory, jobType);
+		}
 
 		@Bean
-		public Function<JobExecution, ? extends Job> jobFactory()
+		public JobFactory jobFactory()
 		{
-			return factoryMock;
+			return jobFactory;
+		}
+
+		@Bean
+		JobType jobType()
+		{
+			return jobType;
 		}
 
 		@Bean

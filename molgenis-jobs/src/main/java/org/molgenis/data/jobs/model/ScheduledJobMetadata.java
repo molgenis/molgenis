@@ -5,6 +5,7 @@ import org.molgenis.util.RegexUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -27,16 +28,13 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String PARAMETERS = "parameters";
 	public static final String USER = "user";
 
-	// TODO: replace with entity class that contains parameter schema and job class etc
-	public enum JobType
-	{
-		FILE_INGEST, SCRIPT, MAPPING;
-	}
+	private JobTypeMetadata jobTypeMetadata;
 
 	@Autowired
-	public ScheduledJobMetadata()
+	public ScheduledJobMetadata(JobTypeMetadata jobTypeMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+		this.jobTypeMetadata = requireNonNull(jobTypeMetadata);
 	}
 
 	@Override
@@ -61,7 +59,7 @@ public class ScheduledJobMetadata extends SystemEntityType
 		addAttribute(SUCCESS_EMAIL).setDataType(EMAIL).setLabel("Success email").setDescription(
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
 				.setNillable(true);
-		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(JobType.class).setNillable(false);
+		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(jobTypeMetadata).setNillable(false);
 		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("JobImpl parameters").setNillable(false);
 	}
 }
