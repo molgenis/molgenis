@@ -6,9 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.jobs.*;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
@@ -63,30 +61,47 @@ public class JobExecutor
 		this.jobFactories = jobFactories;
 	}
 
-	private JobFactory getJobFactoryForType(JobType jobType)
+	private JobFactory getJobFactoryForType(String jobExecutionTypeId)
 	{
-		return jobFactories.stream().filter(f -> f.getJobType().getName().equals(jobType.getName())).findFirst().get();
+		return jobFactories.stream()
+				.filter(f -> f.getJobType().getJobExecutionType().getId().equals(jobExecutionTypeId)).findFirst().get();
 	}
 
+	/**
+	 * Executes a {@link ScheduledJob} in the current thread.
+	 *
+	 * @param scheduledJobId ID of the {@link ScheduledJob} to run
+	 */
 	@RunAsSystem
 	public void executeScheduledJob(String scheduledJobId)
 	{
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		JobExecution jobExecution = createJobExecution(scheduledJob);
-		JobFactory jobFactory = getJobFactoryForType(scheduledJob.getType());
+		execute(jobExecution);
+	}
+
+	/**
+	 * Executes a JobExecution in the current thread.
+	 *
+	 * @param jobExecution the {@link JobExecution} to execute.
+	 */
+	@RunAsSystem
+	public void execute(JobExecution jobExecution)
+	{
+		dataService.add(jobExecution.getEntityType().getId(), jobExecution);
+		JobFactory jobFactory = getJobFactoryForType(jobExecution.getEntityType().getId());
 		Job molgenisJob = jobFactory.createJob(jobExecution);
 		runJob(jobExecution, molgenisJob);
 	}
 
 	private JobExecution createJobExecution(ScheduledJob scheduledJob)
 	{
-		EntityType jobExecutionEntityType = getJobExecutionEntityTypeName(scheduledJob);
-		JobExecution jobExecution = (JobExecution) entityManager.create(jobExecutionEntityType, POPULATE);
+		JobExecution jobExecution = (JobExecution) entityManager
+				.create(scheduledJob.getType().getJobExecutionType(), POPULATE);
 		writePropertyValues(jobExecution, getPropertyValues(scheduledJob.getParameters()));
 		jobExecution.setFailureEmail(scheduledJob.getFailureEmail());
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());
 		jobExecution.setUser(scheduledJob.getUser());
-		dataService.add(jobExecution.getEntityType().getId(), jobExecution);
 		return jobExecution;
 	}
 
@@ -100,11 +115,6 @@ public class JobExecutor
 	{
 		return new RunAsUserToken("JobImpl Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
-	}
-
-	private EntityType getJobExecutionEntityTypeName(ScheduledJob scheduledJob)
-	{
-		return scheduledJob.getType().getJobExecutionType();
 	}
 
 	private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs)

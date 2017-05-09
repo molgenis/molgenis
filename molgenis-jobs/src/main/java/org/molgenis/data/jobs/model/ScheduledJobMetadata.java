@@ -60,6 +60,6 @@ public class ScheduledJobMetadata extends SystemEntityType
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
 				.setNillable(true);
 		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(jobTypeMetadata).setNillable(false);
-		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("JobImpl parameters").setNillable(false);
+		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("Job parameters").setNillable(false);
 	}
 }
