@@ -47,16 +47,17 @@ public class JobExecutionMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("JobImpl execution");
+		setLabel("Job execution");
 		setAbstract(true);
-		addAttribute(IDENTIFIER, ROLE_ID).setLabel("JobImpl ID").setAuto(true).setNillable(false);
-		addAttribute(USER).setDataType(STRING).setLabel("JobImpl owner").setNillable(false);
-		addAttribute(STATUS).setDataType(ENUM).setEnumOptions(jobStatusOptions).setLabel("JobImpl status")
+		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
+		addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);
+		addAttribute(STATUS).setDataType(ENUM).setEnumOptions(jobStatusOptions).setLabel("Job status")
 				.setNillable(false).setDefaultValue(PENDING);
-		addAttribute(TYPE).setDataType(STRING).setLabel("JobImpl type").setNillable(false);
-		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME).setLabel("JobImpl submission date").setNillable(false);
-		addAttribute(START_DATE).setDataType(DATE_TIME).setLabel("JobImpl start date").setNillable(true);
-		addAttribute(END_DATE).setDataType(DATE_TIME).setLabel("JobImpl end date").setNillable(true);
+		addAttribute(TYPE).setDataType(STRING).setLabel("Job type").setNillable(false);
+		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME).setLabel("Job submission date").setNillable(false)
+				.setAuto(true);
+		addAttribute(START_DATE).setDataType(DATE_TIME).setLabel("Job start date").setNillable(true);
+		addAttribute(END_DATE).setDataType(DATE_TIME).setLabel("Job end date").setNillable(true);
 		addAttribute(PROGRESS_INT).setDataType(INT).setLabel("Progress").setNillable(true);
 		addAttribute(PROGRESS_MAX).setDataType(INT).setLabel("Maximum progress").setNillable(true);
 		addAttribute(PROGRESS_MESSAGE).setDataType(STRING).setLabel("Progress message").setNillable(true);

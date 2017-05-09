@@ -82,7 +82,6 @@ public class JobExecutor
 	{
 		EntityType jobExecutionEntityType = getJobExecutionEntityTypeName(scheduledJob);
 		JobExecution jobExecution = (JobExecution) entityManager.create(jobExecutionEntityType, POPULATE);
-		jobExecution.setDefaultValues();
 		writePropertyValues(jobExecution, getPropertyValues(scheduledJob.getParameters()));
 		jobExecution.setFailureEmail(scheduledJob.getFailureEmail());
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());

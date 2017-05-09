@@ -135,7 +135,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(jobExecution).setSuccessEmail("a@b.c");
 		verify(jobExecution).setParam1("param1Value");
 		verify(jobExecution).setParam2(2);
-		verify(jobExecution).setDefaultValues();
 
 		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
 

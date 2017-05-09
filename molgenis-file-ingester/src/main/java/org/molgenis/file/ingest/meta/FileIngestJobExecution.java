@@ -66,9 +66,8 @@ public class FileIngestJobExecution extends JobExecution
 		return getString(LOADER);
 	}
 
-	public void setDefaultValues()
+	private void setDefaultValues()
 	{
-		super.setDefaultValues();
 		setType(FILE_INGEST_JOB_TYPE);
 	}
 }

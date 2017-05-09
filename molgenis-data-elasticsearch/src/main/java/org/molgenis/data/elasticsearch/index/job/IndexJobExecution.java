@@ -17,11 +17,13 @@ public class IndexJobExecution extends JobExecution
 	public IndexJobExecution(EntityType entityType)
 	{
 		super(entityType);
+		setDefaultValues();
 	}
 
 	public IndexJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
+		setDefaultValues();
 	}
 
 	public String getIndexActionJobID()
@@ -34,9 +36,8 @@ public class IndexJobExecution extends JobExecution
 		set(IndexJobExecutionMeta.INDEX_ACTION_JOB_ID, id);
 	}
 
-	public void setDefaultValues()
+	private void setDefaultValues()
 	{
-		super.setDefaultValues();
 		setType("Index");
 	}
 }
