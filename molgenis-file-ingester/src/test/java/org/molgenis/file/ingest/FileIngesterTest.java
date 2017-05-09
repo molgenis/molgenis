@@ -2,7 +2,6 @@ package org.molgenis.file.ingest;
 
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.importer.EntityImportReport;
@@ -77,7 +76,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		when(importServiceFactoryMock.getImportService(f, fileRepositoryCollectionMock)).thenReturn(importServiceMock);
 		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT))
 				.thenReturn(report);
-		when(progress.getJobExecution()).thenReturn(new FileIngestJobExecution(mock(Entity.class)));
+		when(progress.getJobExecution()).thenReturn(mock(FileIngestJobExecution.class));
 
 		FileMeta fileMeta = fileIngester.ingest(entityTypeId, url, "CSV", identifier, progress);
 
