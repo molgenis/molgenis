@@ -96,7 +96,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	{
 		ScheduledJob scheduledJob = scheduledJobFactory.create();
 		scheduledJob.setId(id);
-		scheduledJob.set(ScheduledJobMetadata.CRONEXPRESSION, "	0/20 * * * * ?");
+		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, true);
 		scheduledJob.setType(jobType);
@@ -113,7 +113,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	{
 		ScheduledJob scheduledJob = scheduledJobFactory.create();
 		scheduledJob.setId(id);
-		scheduledJob.set(ScheduledJobMetadata.CRONEXPRESSION, "	0/20 * * * * ?");
+		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, false);
 		scheduledJob.setType(jobType);
@@ -130,7 +130,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	{
 		ScheduledJob scheduledJob = scheduledJobFactory.create();
 		scheduledJob.setId(id);
-		scheduledJob.set(ScheduledJobMetadata.CRONEXPRESSION, "XXX");
+		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "XXX");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, false);
 		scheduledJob.setType(jobType);
@@ -143,7 +143,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	{
 		ScheduledJob scheduledJob = scheduledJobFactory.create();
 		scheduledJob.setId(id);
-		scheduledJob.set(ScheduledJobMetadata.CRONEXPRESSION, "	0/20 * * * * ?");
+		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, true);
 		scheduledJob.setType(jobType);

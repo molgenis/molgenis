@@ -20,7 +20,7 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
-	public static final String CRONEXPRESSION = "cronexpression";
+	public static final String CRON_EXPRESSION = "cronExpression";
 	public static final String ACTIVE = "active";
 	public static final String FAILURE_EMAIL = "failureEmail";
 	public static final String SUCCESS_EMAIL = "successEmail";
@@ -44,12 +44,12 @@ public class ScheduledJobMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
-		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false).setDescription(
+		addAttribute(CRON_EXPRESSION).setLabel("Cron expression").setNillable(false).setDescription(
 				"Cron expression. A cron expression is a string comprised of 6 or 7 fields separated by white space. "
 						+ "These fields are: Seconds, Minutes, Hours, Day of month, Month, Day of week, and optionally Year. "
 						+ "An example input is 0 0 12 * * ? for a job that fires at noon every day. "
 						+ "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
-				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
+				.setValidationExpression("$('" + CRON_EXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
 		addAttribute(USER).setLabel("Username").setDescription("Name of the user to run the job as.")
 				.setNillable(false);

@@ -14,7 +14,7 @@ import org.springframework.transaction.support.TransactionOperations;
 public class JobExecutionTemplate
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionTemplate.class);
-	private TransactionOperations transactionOperations;
+	private final TransactionOperations transactionOperations;
 
 	/**
 	 * Creates a new {@link JobExecutionTemplate}.

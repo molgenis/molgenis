@@ -46,7 +46,7 @@ public class ScheduledJob extends StaticEntity
 
 	public String getCronExpression()
 	{
-		return getString(CRONEXPRESSION);
+		return getString(CRON_EXPRESSION);
 	}
 
 	public boolean isActive()
