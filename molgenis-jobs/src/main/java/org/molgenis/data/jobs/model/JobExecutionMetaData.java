@@ -17,10 +17,10 @@ public class JobExecutionMetaData extends SystemEntityType
 	private static final String SIMPLE_NAME = "JobExecution";
 	public static final String JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String IDENTIFIER = "identifier"; // JobImpl ID
+	public static final String IDENTIFIER = "identifier"; // Job ID
 	public static final String USER = "user"; // Owner of the job
-	public static final String STATUS = "status"; // JobImpl status like running or failed
-	public static final String TYPE = "type"; // JobImpl type like ImportJob
+	public static final String STATUS = "status"; // Job status like running or failed
+	public static final String TYPE = "type"; // Job type like ImportJob
 	public static final String SUBMISSION_DATE = "submissionDate";
 	public static final String START_DATE = "startDate";
 	public static final String END_DATE = "endDate";

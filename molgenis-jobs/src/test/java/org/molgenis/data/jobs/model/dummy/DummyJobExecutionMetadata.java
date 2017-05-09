@@ -28,7 +28,7 @@ public class DummyJobExecutionMetadata extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Dummy JobImpl Execution");
+		setLabel("Dummy Job Execution");
 		setExtends(jobExecutionMetaData);
 	}
 }

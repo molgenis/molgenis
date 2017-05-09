@@ -17,13 +17,13 @@
                 <div id="instant-import-alert"></div>
 
             <#if jobExecution.status == 'RUNNING' || jobExecution.status == 'PENDING'>
-            <#-- JobImpl running, show progress -->
+            <#-- Job running, show progress -->
                 <div id="gavin-job" data-execution-id="${jobExecution.identifier}"></div>
                 <p>No results yet. Check back later at <a
                         href="${pageUrl}">${pageUrl}</a>.
                     Results will remain available for 24 hours.</p>
             <#else>
-            <#-- JobImpl finished -->
+            <#-- Job finished -->
                 <h4>Input</h4>
                 <p>Input file contained:</p>
                 <ul>
