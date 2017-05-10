@@ -1,5 +1,7 @@
 package org.molgenis.data.security.meta;
 
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -8,6 +10,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +21,9 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -36,13 +42,16 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private final Repository<EntityType> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final MolgenisPermissionService permissionService;
+	private final DataService dataService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> decoratedRepo,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService)
+			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -235,6 +244,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void delete(EntityType entity)
 	{
 		validateDeleteAllowed(entity);
+		deleteEntityPermissions(entity);
 		super.delete(entity);
 	}
 
@@ -244,6 +254,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		super.update(entities.filter(entityType ->
 		{
 			validateDeleteAllowed(entityType);
+			deleteEntityPermissions(entityType);
 			return true;
 		}));
 	}
@@ -252,6 +263,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void deleteById(Object id)
 	{
 		validateDeleteAllowed(id);
+		deleteEntityPermissions(id.toString());
 		super.deleteById(id);
 	}
 
@@ -261,6 +273,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		super.deleteAll(ids.filter(id ->
 		{
 			validateDeleteAllowed(id);
+			deleteEntityPermissions(id.toString());
 			return true;
 		}));
 	}
@@ -268,8 +281,37 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::validateDeleteAllowed);
+		iterator().forEachRemaining(entityType ->
+		{
+			this.validateDeleteAllowed(entityType);
+			deleteEntityPermissions(entityType);
+		});
 		super.deleteAll();
+	}
+
+	private void deleteEntityPermissions(EntityType entityType)
+	{
+		deleteEntityPermissions(entityType.getId());
+	}
+
+	private void deleteEntityPermissions(String entityTypeId)
+	{
+		List<String> authorities = SecurityUtils.getEntityAuthorities(entityTypeId);
+
+		// User permissions
+		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
+				.in(ROLE, authorities).findAll().collect(toList());
+		if (!userPermissions.isEmpty())
+		{
+			dataService.delete(USER_AUTHORITY, userPermissions.stream());
+		}
+		// Group permissions
+		List<GroupAuthority> groupPermissions = dataService.query(GROUP_AUTHORITY, GroupAuthority.class)
+				.in(ROLE, authorities).findAll().collect(toList());
+		if (!groupPermissions.isEmpty())
+		{
+			dataService.delete(GROUP_AUTHORITY, groupPermissions.stream());
+		}
 	}
 
 	@Override

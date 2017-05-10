@@ -1,15 +1,11 @@
 package org.molgenis.data.meta;
 
 import com.google.common.collect.TreeTraverser;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.utils.SecurityUtils;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -19,12 +15,8 @@ import java.util.stream.StreamSupport;
 import static com.google.common.collect.Sets.difference;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
 /**
@@ -175,9 +167,6 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 			deleteEntityRepository(entityType);
 		}
 
-		// delete EntityType permissions
-		deleteEntityPermissions(entityType);
-
 		// delete rows from attributes table
 		deleteEntityAttributes(entityType);
 
@@ -200,35 +189,12 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 		dataService.getMeta().getBackend(backend).deleteRepository(entityType);
 	}
 
-	private void deleteEntityPermissions(EntityType entityType)
-	{
-		String entityTypeId = entityType.getId();
-		List<String> authorities = SecurityUtils.getEntityAuthorities(entityTypeId);
-
-		// User permissions
-		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
-				.in(ROLE, authorities).findAll().collect(toList());
-		if (!userPermissions.isEmpty())
-		{
-			dataService.delete(USER_AUTHORITY, userPermissions.stream());
-		}
-		// Group permissions
-		List<GroupAuthority> groupPermissions = dataService.query(GROUP_AUTHORITY, GroupAuthority.class)
-				.in(ROLE, authorities).findAll().collect(toList());
-		if (!groupPermissions.isEmpty())
-		{
-			dataService.delete(GROUP_AUTHORITY, groupPermissions.stream());
-		}
-	}
-
 	private static class AttributeTreeTraverser extends TreeTraverser<Attribute>
 	{
-
 		@Override
 		public Iterable<Attribute> children(@Nonnull Attribute attr)
 		{
 			return attr.getChildren();
 		}
-
 	}
 }
