@@ -3,9 +3,10 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
@@ -21,9 +22,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -113,37 +111,11 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
-		@SuppressWarnings("unchecked")
-		Query<UserAuthority> userAuthorityQ = mock(Query.class);
-		when(userAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
-						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
-		UserAuthority userAuthority = mock(UserAuthority.class);
-		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
-		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
-		@SuppressWarnings("unchecked")
-		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
-		when(groupAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
-						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
-		GroupAuthority groupAuthority = mock(GroupAuthority.class);
-		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
-		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
 
 		repo.delete(entityType);
 
 		verify(decoratedRepo).delete(entityType);
 		verify(repoCollection).deleteRepository(entityType);
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
-		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
-		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -164,38 +136,11 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
-		@SuppressWarnings("unchecked")
-		Query<UserAuthority> userAuthorityQ = mock(Query.class);
-		when(userAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
-						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
-		UserAuthority userAuthority = mock(UserAuthority.class);
-		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
-		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
-
-		@SuppressWarnings("unchecked")
-		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
-		when(groupAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
-						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
-		GroupAuthority groupAuthority = mock(GroupAuthority.class);
-		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
-		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
 
 		repo.delete(entityType);
 
 		verify(decoratedRepo).delete(entityType);
 		verify(repoCollection, times(0)).deleteRepository(entityType); // entity is abstract
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
-		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
-		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);

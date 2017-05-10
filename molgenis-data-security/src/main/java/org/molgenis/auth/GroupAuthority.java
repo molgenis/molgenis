@@ -3,8 +3,8 @@ package org.molgenis.auth;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 
-import static org.molgenis.auth.GroupAuthorityMetaData.ID;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP;
+import static org.molgenis.auth.GroupAuthorityMetaData.ID;
 
 public class GroupAuthority extends Authority
 {
