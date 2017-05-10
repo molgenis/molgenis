@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.jobs.model.JobTypeMetadata.JOB_TYPE;
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 /**
@@ -129,12 +127,5 @@ public class JobExecutor
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValues(parameters);
 		return pvs;
-	}
-
-	public void upsertJobTypes()
-	{
-		dataService.getRepository(JOB_TYPE)
-				.upsertBatch(jobFactories.stream().map(JobFactory::getJobType).collect(toList()));
-
 	}
 }

@@ -2,11 +2,11 @@ package org.molgenis.file.ingest.execution;
 
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.JobTypeFactory;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.file.model.FileMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,14 +29,13 @@ public class FileIngestConfig
 	 * The FileIngestJob Factory bean.
 	 */
 	@Bean
-	public JobFactory fileIngestJobFactory()
+	public JobFactory<FileIngestJobExecution> fileIngestJobFactory()
 	{
-		return new JobFactory()
+		return new JobFactory<FileIngestJobExecution>()
 		{
 			@Override
-			public Job createJob(JobExecution jobExecution)
+			public Job<FileMeta> createJob(FileIngestJobExecution fileIngestJobExecution)
 			{
-				final FileIngestJobExecution fileIngestJobExecution = (FileIngestJobExecution) jobExecution;
 				final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
 				final String url = fileIngestJobExecution.getUrl();
 				final String loader = fileIngestJobExecution.getLoader();
