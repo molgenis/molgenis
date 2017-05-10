@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
@@ -43,11 +44,12 @@ public class JobExecutor
 	private final MailSender mailSender;
 	private final UserDetailsService userDetailsService;
 	private final List<JobFactory> jobFactories;
+	private final ExecutorService executorService;
 
 	@Autowired
 	public JobExecutor(DataService dataService, List<JobFactory> jobFactories, EntityManager entityManager, Gson gson,
 			JobExecutionTemplate jobExecutionTemplate, UserDetailsService userDetailsService,
-			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender)
+			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
@@ -57,6 +59,7 @@ public class JobExecutor
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
 		this.jobFactories = jobFactories;
+		this.executorService = requireNonNull(executorService);
 	}
 
 	private JobFactory getJobFactoryForType(String jobExecutionTypeId)
@@ -75,20 +78,7 @@ public class JobExecutor
 	{
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		JobExecution jobExecution = createJobExecution(scheduledJob);
-		execute(jobExecution);
-	}
-
-	/**
-	 * Executes a JobExecution in the current thread.
-	 *
-	 * @param jobExecution the {@link JobExecution} to execute.
-	 */
-	@RunAsSystem
-	public void execute(JobExecution jobExecution)
-	{
-		dataService.add(jobExecution.getEntityType().getId(), jobExecution);
-		JobFactory jobFactory = getJobFactoryForType(jobExecution.getEntityType().getId());
-		Job molgenisJob = jobFactory.createJob(jobExecution);
+		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
 		runJob(jobExecution, molgenisJob);
 	}
 
@@ -101,6 +91,25 @@ public class JobExecutor
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());
 		jobExecution.setUser(scheduledJob.getUser());
 		return jobExecution;
+	}
+
+	/**
+	 * Saves execution in the current thread, then creates a Job and submits that for asynchronous execution.
+	 * @param jobExecution the {@link JobExecution} to save and submit.
+	 */
+	@RunAsSystem
+	public void submit(JobExecution jobExecution)
+	{
+		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
+		executorService.submit(() -> runJob(jobExecution, molgenisJob));
+	}
+
+	private Job saveExecutionAndCreateJob(JobExecution jobExecution)
+	{
+		String entityTypeId = jobExecution.getEntityType().getId();
+		dataService.add(entityTypeId, jobExecution);
+		JobFactory jobFactory = getJobFactoryForType(entityTypeId);
+		return jobFactory.createJob(jobExecution);
 	}
 
 	private void runJob(JobExecution jobExecution, Job<?> molgenisJob)

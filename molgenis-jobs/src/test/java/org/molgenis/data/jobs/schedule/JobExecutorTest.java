@@ -1,5 +1,7 @@
 package org.molgenis.data.jobs.schedule;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -33,6 +35,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -62,6 +65,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	@Autowired
 	JobExecutionTemplate jobExecutionTemplate;
 
+	@Autowired
+	private ExecutorService executorService;
+
 	@Mock
 	private ScheduledJob scheduledJob;
 
@@ -88,6 +94,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private GrantedAuthority grantedAuthority2;
+
+	@Captor
+	private ArgumentCaptor<Runnable> jobCaptor;
 
 	@BeforeClass
 	public void beforeClass()
@@ -141,6 +150,28 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
 	}
 
+	@Test
+	public void submitJobExecution() throws Exception
+	{
+		when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
+		when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
+		when(jobExecution.getUser()).thenReturn("fjant");
+
+		when(jobFactory.createJob(jobExecution)).thenReturn(job);
+		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
+
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(grantedAuthority1, grantedAuthority2);
+		when(userDetails.getAuthorities()).thenAnswer(i -> authorities);
+
+		jobExecutor.submit(jobExecution);
+
+		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
+		verify(executorService).submit(jobCaptor.capture());
+
+		jobCaptor.getValue().run();
+		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
+	}
+
 	public static class TestJobExecution extends JobExecution
 	{
 		private String param1;
@@ -187,9 +218,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		@Mock
 		JobType jobType;
 
+		@Mock
+		private ExecutorService executorService;
+
 		public void resetMocks()
 		{
-			reset(jobFactory, jobType);
+			reset(jobFactory, jobType, executorService);
 		}
 
 		@Bean
@@ -202,6 +236,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		JobType jobType()
 		{
 			return jobType;
+		}
+
+		@Bean
+		ExecutorService executorService()
+		{
+			return executorService;
 		}
 
 		@Bean
