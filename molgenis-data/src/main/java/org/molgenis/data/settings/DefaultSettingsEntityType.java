@@ -6,7 +6,6 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -43,7 +42,6 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 		setPackage(settingsPackage);
 	}
 
-	@RunAsSystem
 	public Entity getSettings()
 	{
 		return dataService.findOneById(getId(), getSettingsEntityId());
