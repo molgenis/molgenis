@@ -22,21 +22,21 @@ $.when($,
       var entityTypeId = molgenis.dataexplorer.getSelectedEntityMeta().name
       // Remove the nToken from the URL to prevent duplication on the negotiator side
       var url = window.location.href.replace(/&nToken=\w{32}/, '')
-      var googleSearch = '*=q=' + url.replace(/&filter=.+/, '').split('value%5D=')[1]
+      var googleSearch = url.replace(/&filter=.+/, '').split('value%5D=')[1]
       var uri = '/api/v2/' + entityTypeId + '?num=10000&q='
       var rsql = molgenis.dataexplorer.getRSQL()
       var humanReadable = ''
       if (rsql && googleSearch) {
-        uri = uri + rsql + '&' + googleSearch
-        humanReadable = molgenis.rsql.getHumanReadable(googleSearch).replace('*', '') + ' and ' + molgenis.rsql.getHumanReadable(rsql)
+        uri = uri + rsql + '&*=q=' + googleSearch
+        humanReadable = 'Free text search contains ' + googleSearch + ' and ' + molgenis.rsql.getHumanReadable(rsql)
       }
       else if (rsql) {
         uri = uri + rsql
         humanReadable = molgenis.rsql.getHumanReadable(rsql)
       }
       else if (googleSearch) {
-        uri = uri + googleSearch
-        humanReadable = molgenis.rsql.getHumanReadable(googleSearch).replace('*', '')
+        uri = uri + '*=q=' + googleSearch
+        humanReadable = 'Free text search contains ' + googleSearch
       }
       var collections = []
       restApi.getAsync(uri).then(function (response) {
