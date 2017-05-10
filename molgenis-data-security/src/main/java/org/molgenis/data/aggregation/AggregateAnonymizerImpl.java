@@ -2,9 +2,6 @@ package org.molgenis.data.aggregation;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.molgenis.data.aggregation.AggregateAnonymizer;
-import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.aggregation.AnonymizedAggregateResult;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

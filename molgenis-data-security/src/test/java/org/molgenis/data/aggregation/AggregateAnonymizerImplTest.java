@@ -1,9 +1,6 @@
-package org.molgenis.data.support;
+package org.molgenis.data.aggregation;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.aggregation.AggregateAnonymizerImpl;
-import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.aggregation.AnonymizedAggregateResult;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

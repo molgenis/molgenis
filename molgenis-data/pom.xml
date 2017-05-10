@@ -32,7 +32,7 @@
             <artifactId>molgenis-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- TODO remove dependency (molgenis-data should be security agnostic -->
+        <!-- TODO remove dependency -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security-core</artifactId>

@@ -692,6 +692,7 @@
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
         <module>molgenis-data-i18n</module>
+        <module>molgenis-data-security</module>
         <module>molgenis-fair</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
