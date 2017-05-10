@@ -3,9 +3,9 @@ package org.molgenis.data.jobs.model;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.jobs.model.dummy.DummyJobExecution;
-import org.molgenis.data.jobs.model.dummy.DummyJobExecutionFactory;
-import org.molgenis.data.jobs.model.dummy.DummyJobExecutionMetadata;
+import org.molgenis.data.jobs.model.hello.HelloWorldJobExecution;
+import org.molgenis.data.jobs.model.hello.HelloWorldJobExecutionFactory;
+import org.molgenis.data.jobs.model.hello.HelloWorldJobExecutionMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
@@ -14,13 +14,13 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { DummyJobExecutionFactory.class, DummyJobExecutionMetadata.class,
+@ContextConfiguration(classes = { HelloWorldJobExecutionFactory.class, HelloWorldJobExecutionMetadata.class,
 		JobExecutionMetaData.class })
 public class JobExecutionTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private DummyJobExecutionFactory factory;
-	private DummyJobExecution jobExecution;
+	private HelloWorldJobExecutionFactory factory;
+	private HelloWorldJobExecution jobExecution;
 
 	@BeforeMethod
 	public void beforeMethod()
