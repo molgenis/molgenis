@@ -39,15 +39,11 @@ public class JobExecution extends StaticEntity
 	public JobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
-
 	}
 
 	public JobExecution(String identifier, EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
-
 		setIdentifier(identifier);
 	}
 
@@ -229,11 +225,5 @@ public class JobExecution extends StaticEntity
 	public enum Status
 	{
 		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
-	}
-
-	private void setDefaultValues()
-	{
-		setSubmissionDate(Instant.now());
-		setStatus(Status.PENDING);
 	}
 }

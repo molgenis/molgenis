@@ -37,7 +37,6 @@ public class JobExecutionMetaData extends SystemEntityType
 	public static final String FAILED = "FAILED";
 	public static final String CANCELED = "CANCELED";
 
-
 	private final List<String> jobStatusOptions = newArrayList(PENDING, RUNNING, SUCCESS, FAILED, CANCELED);
 
 	JobExecutionMetaData()
@@ -53,9 +52,10 @@ public class JobExecutionMetaData extends SystemEntityType
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);
 		addAttribute(STATUS).setDataType(ENUM).setEnumOptions(jobStatusOptions).setLabel("Job status")
-				.setNillable(false);
+				.setNillable(false).setDefaultValue(PENDING);
 		addAttribute(TYPE).setDataType(STRING).setLabel("Job type").setNillable(false);
-		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME).setLabel("Job submission date").setNillable(false);
+		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME).setLabel("Job submission date").setNillable(false)
+				.setAuto(true);
 		addAttribute(START_DATE).setDataType(DATE_TIME).setLabel("Job start date").setNillable(true);
 		addAttribute(END_DATE).setDataType(DATE_TIME).setLabel("Job end date").setNillable(true);
 		addAttribute(PROGRESS_INT).setDataType(INT).setLabel("Progress").setNillable(true);

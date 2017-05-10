@@ -5,15 +5,14 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -25,7 +24,9 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
 import static org.molgenis.ui.jobs.JobsController.URI;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -38,20 +39,17 @@ public class JobsController extends MolgenisPluginController
 	private UserAccountService userAccountService;
 	private DataService dataService;
 	private JobExecutionMetaData jobMetaDataMetaData;
+	private JobScheduler jobScheduler;
 
 	@Autowired
 	public JobsController(UserAccountService userAccountService, DataService dataService,
-			JobExecutionMetaData jobMetaDataMetaData)
+			JobExecutionMetaData jobMetaDataMetaData, JobScheduler jobScheduler)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.dataService = requireNonNull(dataService);
 		this.jobMetaDataMetaData = requireNonNull(jobMetaDataMetaData);
-	}
-
-	public JobsController()
-	{
-		super(URI);
+		this.jobScheduler = requireNonNull(jobScheduler);
 	}
 
 	@RequestMapping(method = GET)
@@ -99,5 +97,12 @@ public class JobsController extends MolgenisPluginController
 		}
 
 		return jobs;
+	}
+
+	@RequestMapping(value = "/run/{scheduledJobId}", method = POST)
+	@ResponseStatus(NO_CONTENT)
+	public void runNow(@PathVariable("scheduledJobId") String scheduledJobId)
+	{
+		jobScheduler.runNow(scheduledJobId);
 	}
 }

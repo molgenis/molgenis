@@ -22,6 +22,14 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /plugin/jobs/run/{scheduledJobId}:
+    post:
+      tags:
+        - Jobs
+      summary: Runs a job
+      parameters:
+        - name: scheduledJobId
+          in: path
   /api/v1/login:
     post:
       tags:

@@ -3,7 +3,7 @@ package org.molgenis.gavin.job;
 import com.google.common.collect.Multiset;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.JobImpl;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
@@ -20,7 +20,7 @@ import static java.text.MessageFormat.format;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 import static org.molgenis.gavin.job.input.model.LineType.*;
 
-public class GavinJob extends Job<Void>
+public class GavinJob extends JobImpl<Void>
 {
 	private final String jobIdentifier;
 	private final MenuReaderService menuReaderService;

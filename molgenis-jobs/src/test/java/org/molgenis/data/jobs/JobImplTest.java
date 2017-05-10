@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.*;
 
-public class JobTest
+public class JobImplTest
 {
 	@Mock
 	Callable<Authentication> callable;
@@ -47,14 +47,14 @@ public class JobTest
 	private Answer<Authentication> authenticationAnswer = (call) -> SecurityContextHolder.getContext()
 			.getAuthentication();
 
-	private Job<Authentication> job;
-	private Job<Authentication> jobWithoutTransaction;
+	private JobImpl<Authentication> job;
+	private JobImpl<Authentication> jobWithoutTransaction;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
-		job = new Job<Authentication>(progress, transactionOperations, authentication)
+		job = new JobImpl<Authentication>(progress, transactionOperations, authentication)
 		{
 			@Override
 			public Authentication call(Progress progress) throws Exception
@@ -63,7 +63,7 @@ public class JobTest
 			}
 		};
 
-		jobWithoutTransaction = new Job<Authentication>(progress, null, authentication)
+		jobWithoutTransaction = new JobImpl<Authentication>(progress, null, authentication)
 		{
 			@Override
 			public Authentication call(Progress progress) throws Exception
@@ -131,7 +131,7 @@ public class JobTest
 		when(callable.call()).thenAnswer(authenticationAnswer);
 		Authentication actual = jobWithoutTransaction.call();
 
-		assertSame(actual, authentication, "Job should run with authentication");
+		assertSame(actual, authentication, "JobImpl should run with authentication");
 
 		verify(progress).start();
 		verify(progress).success();
@@ -150,7 +150,7 @@ public class JobTest
 		try
 		{
 			job.call();
-			fail("Job call should throw exception if subclass execution fails.");
+			fail("JobImpl call should throw exception if subclass execution fails.");
 		}
 		catch (JobExecutionException ex)
 		{
@@ -173,7 +173,7 @@ public class JobTest
 		try
 		{
 			jobWithoutTransaction.call();
-			fail("Job call should throw exception if subclass execution fails.");
+			fail("JobImpl call should throw exception if subclass execution fails.");
 		}
 		catch (JobExecutionException ex)
 		{
