@@ -624,7 +624,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String resultUrl = menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
 				+ targetEntityTypeId;
 		mappingJobExecution.setResultUrl(resultUrl);
-		jobExecutor.execute(mappingJobExecution);
+		jobExecutor.submit(mappingJobExecution);
 
 		return concatEntityHref("/api/v2", mappingJobExecution.getEntityType().getId(),
 				mappingJobExecution.getIdValue());

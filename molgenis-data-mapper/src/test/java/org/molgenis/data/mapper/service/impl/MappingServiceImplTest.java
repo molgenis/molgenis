@@ -629,6 +629,75 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		assertEquals(compatibleEntityTypes, newHashSet(hopMetaData));
 	}
 
+	@Test
+	public void testMaxProgressOneSourceOneBatch()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		EntityMapping entityMapping = getMockEntityMapping("a", MAPPING_BATCH_SIZE - 1);
+		List<EntityMapping> mappings = singletonList(entityMapping);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 1);
+	}
+
+	@Test
+	public void testMaxProgressOneSourceMultipleBatches()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
+		List<EntityMapping> mappings = singletonList(entityMapping);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 4);
+	}
+
+	@Test
+	public void testMaxProgressOneSourceMultipleBatchesSelfReferencing()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
+		when(mappingTarget.hasSelfReferences()).thenReturn(true);
+		List<EntityMapping> mappings = singletonList(entityMapping);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 8);
+	}
+
+	@Test
+	public void testMaxProgressMultipleSourcesSelfReferencing()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
+		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
+		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
+		when(mappingTarget.hasSelfReferences()).thenReturn(true);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 6);
+	}
+
+	@Test
+	public void testMaxProgressMultipleSources()
+	{
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
+		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
+		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
+		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
+
+		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 3);
+	}
+
+	private EntityMapping getMockEntityMapping(String id, long sourceRows)
+	{
+		EntityMapping entityMapping = mock(EntityMapping.class);
+		EntityType sourceEntityType = mock(EntityType.class);
+		when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
+		when(sourceEntityType.getId()).thenReturn(id);
+		when(dataService.count(id)).thenReturn(sourceRows);
+		return entityMapping;
+	}
+
 	private void createEntities(EntityType targetMeta, List<Entity> sourceGeneEntities, List<Entity> expectedEntities)
 	{
 		for (int i = 0; i < 4; ++i)
@@ -697,6 +766,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Import(UserTestConfig.class)
 	static class Config
 	{
+
 		@Bean
 		public AlgorithmService algorithmService()
 		{
@@ -720,74 +790,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		{
 			return mock(PermissionSystemService.class);
 		}
-	}
 
-	@Test
-	public void testMaxProgressOneSourceOneBatch()
-	{
-		MappingTarget mappingTarget = mock(MappingTarget.class);
-		EntityMapping entityMapping = getMockEntityMapping("a", MAPPING_BATCH_SIZE - 1);
-		List<EntityMapping> mappings = singletonList(entityMapping);
-		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
-
-		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 1);
-	}
-
-	@Test
-	public void testMappingJobWithOneSourceMultipleBatches()
-	{
-		MappingTarget mappingTarget = mock(MappingTarget.class);
-		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
-		List<EntityMapping> mappings = singletonList(entityMapping);
-		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
-
-		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 4);
-	}
-
-	@Test
-	public void testMappingJobWithOneSourceMultipleBatchesSelfReferencing()
-	{
-		MappingTarget mappingTarget = mock(MappingTarget.class);
-		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
-		when(mappingTarget.hasSelfReferences()).thenReturn(true);
-		List<EntityMapping> mappings = singletonList(entityMapping);
-		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
-
-		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 8);
-	}
-
-	@Test
-	public void testMappingJobWithMultipleSourcesSelfReferencing()
-	{
-		MappingTarget mappingTarget = mock(MappingTarget.class);
-		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
-		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
-		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
-		when(mappingTarget.hasSelfReferences()).thenReturn(true);
-		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
-
-		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 6);
-	}
-
-	@Test
-	public void testMappingJobWithMultipleSources()
-	{
-		MappingTarget mappingTarget = mock(MappingTarget.class);
-		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
-		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
-		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
-		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
-
-		assertEquals(mappingService.calculateMaxProgress(mappingTarget), 3);
-	}
-
-	private EntityMapping getMockEntityMapping(String id, long sourceRows)
-	{
-		EntityMapping entityMapping = mock(EntityMapping.class);
-		EntityType sourceEntityType = mock(EntityType.class);
-		when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
-		when(sourceEntityType.getId()).thenReturn(id);
-		when(dataService.count(id)).thenReturn(sourceRows);
-		return entityMapping;
 	}
 }
