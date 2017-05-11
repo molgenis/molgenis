@@ -7,9 +7,6 @@ import org.molgenis.file.FileStore;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Created by Bart on 5/10/2017.
- */
 public interface AmazonBucketClient
 {
 	AmazonS3 getClient(String profile);

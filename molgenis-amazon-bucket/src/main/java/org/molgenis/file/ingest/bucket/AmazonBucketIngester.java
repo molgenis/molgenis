@@ -45,7 +45,7 @@ public class AmazonBucketIngester
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
 			String profile, boolean isExpression, Progress progress)
 	{
-		FileMeta fileMeta = null;
+		FileMeta fileMeta;
 		try
 		{
 			progress.setProgressMax(3);

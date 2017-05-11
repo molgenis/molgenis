@@ -17,13 +17,13 @@ import org.springframework.context.annotation.Import;
 public class AmazonBucketConfig
 {
 	@Autowired
-	AmazonBucketIngester ingester;
+	private AmazonBucketIngester ingester;
 
 	@Autowired
-	JobTypeFactory jobTypeFactory;
+	private JobTypeFactory jobTypeFactory;
 
 	@Autowired
-	AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData;
+	private AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData;
 
 	@Bean
 	public JobFactory amazonBucketJobFactory()
