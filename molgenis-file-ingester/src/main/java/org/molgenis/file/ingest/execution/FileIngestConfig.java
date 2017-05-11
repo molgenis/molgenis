@@ -49,7 +49,7 @@ public class FileIngestConfig
 				JobType result = jobTypeFactory.create("fileIngest");
 				result.setLabel("File ingest");
 				result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
-				result.setSchema("{\"title\": \"Mapping Job\",\n \"type\": \"object\",\n \"properties\": {\n"
+				result.setSchema("{\"title\": \"FileIngest Job\",\n \"type\": \"object\",\n \"properties\": {\n"
 						+ "\"url\": {\n\"type\": \"string\",\n\"format\": \"uri\",\n"
 						+ "\"description\": \"URL to download the file to ingest from\"\n    },\n"
 						+ "\"loader\": {\n \"enum\": [ \"CSV\" ]\n },\n \"targetEntityId\": {\n"
