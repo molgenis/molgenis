@@ -14,7 +14,7 @@ import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.model.JobType;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GsonConfig;
@@ -57,7 +57,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	JobFactory jobFactory;
 
 	@Autowired
-	JobType jobType;
+	ScheduledJobType scheduledJobType;
 
 	@Autowired
 	UserDetailsService userDetailsService;
@@ -110,9 +110,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	{
 		config.resetMocks();
 		reset(jobExecutionContext);
-		when(jobFactory.getJobType()).thenReturn(jobType);
-		when(jobType.getJobExecutionType()).thenReturn(jobExecutionType);
-		when(jobType.getName()).thenReturn("jobName");
+		when(jobFactory.getJobType()).thenReturn(scheduledJobType);
+		when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
+		when(scheduledJobType.getName()).thenReturn("jobName");
 	}
 
 	@Test
@@ -127,7 +127,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(scheduledJob.getFailureEmail()).thenReturn("x@y.z");
 		when(scheduledJob.getSuccessEmail()).thenReturn("a@b.c");
 		when(scheduledJob.getUser()).thenReturn("fjant");
-		when(scheduledJob.getType()).thenReturn(jobType);
+		when(scheduledJob.getType()).thenReturn(scheduledJobType);
 
 		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
 
@@ -216,14 +216,14 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		JobFactory jobFactory;
 
 		@Mock
-		JobType jobType;
+		ScheduledJobType scheduledJobType;
 
 		@Mock
 		private ExecutorService executorService;
 
 		public void resetMocks()
 		{
-			reset(jobFactory, jobType, executorService);
+			reset(jobFactory, scheduledJobType, executorService);
 		}
 
 		@Bean
@@ -233,9 +233,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		JobType jobType()
+		ScheduledJobType jobType()
 		{
-			return jobType;
+			return scheduledJobType;
 		}
 
 		@Bean

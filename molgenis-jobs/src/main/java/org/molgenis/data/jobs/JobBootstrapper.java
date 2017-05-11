@@ -2,7 +2,7 @@ package org.molgenis.data.jobs;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.model.JobType;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
@@ -23,7 +23,7 @@ import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.model.JobExecution.TRUNCATION_BANNER;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
-import static org.molgenis.data.jobs.model.JobTypeMetadata.JOB_TYPE;
+import static org.molgenis.data.jobs.model.ScheduledJobTypeMetadata.JOB_TYPE;
 import static org.springframework.util.StringUtils.isEmpty;
 
 /**
@@ -71,7 +71,7 @@ public class JobBootstrapper
 
 	private void upsertJobTypes()
 	{
-		dataService.getRepository(JOB_TYPE, JobType.class)
+		dataService.getRepository(JOB_TYPE, ScheduledJobType.class)
 				.upsertBatch(jobFactories.stream().map(JobFactory::getJobType).collect(toList()));
 
 	}

@@ -2,8 +2,8 @@ package org.molgenis.data.jobs.model.hello;
 
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,7 @@ public class HelloWorldConfig
 	HelloWorldService helloWorldService;
 
 	@Autowired
-	JobTypeFactory jobTypeFactory;
+	ScheduledJobTypeFactory scheduledJobTypeFactory;
 
 	@Autowired
 	HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata;
@@ -36,9 +36,9 @@ public class HelloWorldConfig
 			}
 
 			@Override
-			public JobType getJobType()
+			public ScheduledJobType getJobType()
 			{
-				JobType result = jobTypeFactory.create("helloWorld");
+				ScheduledJobType result = scheduledJobTypeFactory.create("helloWorld");
 				result.setJobExecutionType(helloWorldJobExecutionMetadata);
 				result.setLabel("Hello World");
 				result.setDescription("Simple job example");

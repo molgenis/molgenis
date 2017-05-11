@@ -2,8 +2,8 @@ package org.molgenis.data.mapper.job;
 
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class MappingJobConfig
 	private MappingService mappingService;
 
 	@Autowired
-	private JobTypeFactory jobTypeFactory;
+	private ScheduledJobTypeFactory scheduledJobTypeFactory;
 
 	@Autowired
 	private MappingJobExecutionMetadata mappingJobExecutionMetadata;
@@ -47,9 +47,9 @@ public class MappingJobConfig
 			}
 
 			@Override
-			public JobType getJobType()
+			public ScheduledJobType getJobType()
 			{
-				JobType result = jobTypeFactory.create(MappingJobExecutionMetadata.MAPPING_JOB_TYPE);
+				ScheduledJobType result = scheduledJobTypeFactory.create(MappingJobExecutionMetadata.MAPPING_JOB_TYPE);
 				result.setLabel("Mapping");
 				result.setDescription("This job runs a Mapping Project.");
 				result.setSchema(

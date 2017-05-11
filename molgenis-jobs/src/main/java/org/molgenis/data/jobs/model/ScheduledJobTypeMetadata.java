@@ -12,9 +12,9 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class JobTypeMetadata extends SystemEntityType
+public class ScheduledJobTypeMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "JobType";
+	private static final String SIMPLE_NAME = "ScheduledJobType";
 	public static final String JOB_TYPE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
@@ -24,7 +24,7 @@ public class JobTypeMetadata extends SystemEntityType
 	public static final String SCHEMA = "schema";
 	private EntityTypeMetadata entityTypeMetadata;
 
-	JobTypeMetadata(EntityTypeMetadata entityTypeMetadata)
+	ScheduledJobTypeMetadata(EntityTypeMetadata entityTypeMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);

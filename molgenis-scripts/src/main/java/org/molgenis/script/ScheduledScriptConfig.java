@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +25,7 @@ public class ScheduledScriptConfig
 	SavedScriptRunner savedScriptRunner;
 
 	@Autowired
-	JobTypeFactory jobTypeFactory;
+	ScheduledJobTypeFactory scheduledJobTypeFactory;
 
 	@Autowired
 	ScriptJobExecutionMetadata scriptJobExecutionMetadata;
@@ -58,9 +58,9 @@ public class ScheduledScriptConfig
 			}
 
 			@Override
-			public JobType getJobType()
+			public ScheduledJobType getJobType()
 			{
-				JobType result = jobTypeFactory.create("script");
+				ScheduledJobType result = scheduledJobTypeFactory.create("script");
 				result.setLabel("Script");
 				result.setDescription("This job executes a script created in the Scripts plugin.");
 				result.setSchema("TODO");

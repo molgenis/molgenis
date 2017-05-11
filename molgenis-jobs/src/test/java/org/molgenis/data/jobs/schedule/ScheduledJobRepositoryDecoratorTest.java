@@ -7,7 +7,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.jobs.model.JobType;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.BeforeClass;
@@ -47,11 +47,11 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	{
 		reset(jobScheduler, decoratedRepo, scheduledJob);
 
-		JobType jobType = mock(JobType.class);
-		when(jobType.getSchema()).thenReturn("{\"type\": \"object\",\n \"properties\": {\n"
+		ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+		when(scheduledJobType.getSchema()).thenReturn("{\"type\": \"object\",\n \"properties\": {\n"
 				+ "\"text\": {\n\"type\": \"string\"}},\n  \"required\": [\n\"text\"\n]\n}");
 		when(scheduledJob.getParameters()).thenReturn("{\"text\": \"test\"}");
-		when(scheduledJob.getType()).thenReturn(jobType);
+		when(scheduledJob.getType()).thenReturn(scheduledJobType);
 
 		scheduledJobRepositoryDecorator = new ScheduledJobRepositoryDecorator(decoratedRepo, jobScheduler);
 	}

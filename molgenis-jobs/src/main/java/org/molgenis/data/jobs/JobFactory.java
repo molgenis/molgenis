@@ -1,7 +1,7 @@
 package org.molgenis.data.jobs;
 
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.model.JobType;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 
 /**
  * @param <T> Type of the JobExecutions that this factory understands.
@@ -17,7 +17,7 @@ public interface JobFactory<T extends JobExecution>
 	Job createJob(T jobExecution);
 
 	/**
-	 * Creates a JobType to use when scheduling jobs.
+	 * Creates a ScheduledJobType to use when scheduling jobs.
 	 */
-	JobType getJobType();
+	ScheduledJobType getJobType();
 }
