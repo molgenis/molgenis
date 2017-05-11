@@ -11,18 +11,19 @@ public class MappingJobExecution extends JobExecution
 	public MappingJobExecution(Entity entity)
 	{
 		super(entity);
+		setType(MappingJobExecutionMetadata.MAPPING_JOB_TYPE);
 	}
 
 	public MappingJobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
+		setType(MappingJobExecutionMetadata.MAPPING_JOB_TYPE);
 	}
 
 	public MappingJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
-		setDefaultValues();
+		setType(MappingJobExecutionMetadata.MAPPING_JOB_TYPE);
 	}
 
 	public String getMappingProjectId()
@@ -73,10 +74,5 @@ public class MappingJobExecution extends JobExecution
 	public void setLabel(String label)
 	{
 		set(LABEL, label);
-	}
-
-	private void setDefaultValues()
-	{
-		setType(MAPPING_JOB_TYPE);
 	}
 }
