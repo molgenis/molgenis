@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -57,9 +57,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	UserDetailsService userDetailsService;
-
-	@Autowired
-	JobExecutionTemplate jobExecutionTemplate;
 
 	@Autowired
 	private ExecutorService executorService;
@@ -109,6 +106,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(jobFactory.getJobType()).thenReturn(jobType);
 		when(jobType.getJobExecutionType()).thenReturn(jobExecutionType);
 		when(jobType.getName()).thenReturn("jobName");
+		when(jobExecution.getStartDate()).thenReturn(Instant.now());
+		when(jobExecution.getSuccessEmail()).thenReturn(new String[] {});
+		when(jobExecution.getFailureEmail()).thenReturn(new String[] {});
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
 
-		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
+		verify(job).call(any(Progress.class));
 	}
 
 	@Test
@@ -165,7 +165,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(executorService).submit(jobCaptor.capture());
 
 		jobCaptor.getValue().run();
-		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
+		verify(job).call(any(Progress.class));
 	}
 
 	public static class TestJobExecution extends JobExecution
@@ -217,12 +217,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		@Mock
 		private ExecutorService executorService;
 
-		@Mock
-		JobExecutionTemplate jobExecutionTemplate;
-
 		public void resetMocks()
 		{
-			reset(jobFactory, jobType, executorService, jobExecutionTemplate);
+			reset(jobFactory, jobType, executorService);
 		}
 
 		@Bean
@@ -259,12 +256,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		public EntityManager entityManager()
 		{
 			return mock(EntityManager.class);
-		}
-
-		@Bean
-		public JobExecutionTemplate jobExecutionTemplate()
-		{
-			return jobExecutionTemplate;
 		}
 	}
 }
