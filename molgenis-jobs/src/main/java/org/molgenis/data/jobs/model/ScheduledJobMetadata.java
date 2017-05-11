@@ -51,8 +51,9 @@ public class ScheduledJobMetadata extends SystemEntityType
 						+ "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
 				.setValidationExpression("$('" + CRON_EXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
-		addAttribute(USER).setLabel("Username").setDescription("Name of the user to run the job as.")
-				.setNillable(false);
+		addAttribute(USER).setLabel("Username")
+				.setDescription("Name of the user to run the job as. Will be automatically filled in by the system.")
+				.setNillable(true);
 		addAttribute(FAILURE_EMAIL).setDataType(EMAIL).setLabel("Failure email").setDescription(
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs failed.")
 				.setNillable(true);

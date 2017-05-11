@@ -4,10 +4,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,9 +22,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-public class ScheduledJobRepositoryDecoratorTest
+public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
-
 	private ScheduledJobRepositoryDecorator scheduledJobRepositoryDecorator;
 
 	@Mock
@@ -106,6 +107,23 @@ public class ScheduledJobRepositoryDecoratorTest
 	{
 		when(scheduledJob.getParameters()).thenReturn("{}");
 		scheduledJobRepositoryDecorator.add(scheduledJob);
+	}
+
+	@Test
+	@WithMockUser("admin")
+	public void testSetUsernameAdd()
+	{
+		scheduledJobRepositoryDecorator.add(scheduledJob);
+		verify(scheduledJob).setUser("admin");
+	}
+
+	@Test
+	@WithMockUser("other_user")
+	public void testSetUsernameUpdate()
+	{
+		when(scheduledJob.getUser()).thenReturn("admin");
+		scheduledJobRepositoryDecorator.update(scheduledJob);
+		verify(scheduledJob).setUser("other_user");
 	}
 
 	@Test(enabled = false) //FIXME

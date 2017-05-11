@@ -11,6 +11,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.stream.Stream;
 
@@ -40,6 +41,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	public void update(ScheduledJob scheduledJob)
 	{
 		validateJobParameters(scheduledJob);
+		setUsername(scheduledJob);
 		decorated.update(scheduledJob);
 		scheduler.schedule(scheduledJob);
 	}
@@ -50,6 +52,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		decorated.update(scheduledJobs.filter(job ->
 		{
 			validateJobParameters(job);
+			setUsername(job);
 			scheduler.schedule(job);
 			return true;
 		}));
@@ -114,6 +117,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	public void add(ScheduledJob scheduledJob)
 	{
 		validateJobParameters(scheduledJob);
+		setUsername(scheduledJob);
 		decorated.add(scheduledJob);
 		scheduler.schedule(scheduledJob);
 	}
@@ -124,6 +128,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		return decorated.add(jobs.filter(job ->
 		{
 			validateJobParameters(job);
+			setUsername(job);
 			scheduler.schedule(job);
 			return true;
 		}));
@@ -141,5 +146,10 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		{
 			throw new MolgenisDataException(String.join(", ", validationException.getAllMessages()));
 		}
+	}
+
+	private static void setUsername(ScheduledJob job)
+	{
+		job.setUser(SecurityUtils.getCurrentUsername());
 	}
 }
