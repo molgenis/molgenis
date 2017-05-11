@@ -22,7 +22,6 @@ import static org.molgenis.data.jobs.model.JobExecution.Status.*;
  */
 public class ProgressImpl implements Progress
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
 	private static final Logger JOB_EXECUTION_LOG = LoggerFactory.getLogger(JobExecution.class);
 
 	private final JobExecution jobExecution;
@@ -75,8 +74,9 @@ public class ProgressImpl implements Progress
 		jobExecution.setProgressInt(jobExecution.getProgressMax());
 		Duration yourDuration = Duration.millis(timeRunning());
 		Period period = yourDuration.toPeriod();
-		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendMinutes()
-				.appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis().appendSuffix("ms ").toFormatter();
+		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendHours()
+				.appendSuffix("h ").appendMinutes().appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis()
+				.appendSuffix("ms ").toFormatter();
 		String timeSpent = periodFormatter.print(period);
 		JOB_EXECUTION_LOG.info("Execution successful. Time spent: {}", timeSpent);
 		sendEmail(jobExecution.getSuccessEmail(), jobExecution.getType() + " job succeeded.", jobExecution.getLog());
