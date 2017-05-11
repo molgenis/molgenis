@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Import(HelloWorldService.class)
 @Configuration
 public class HelloWorldConfig
@@ -36,15 +38,22 @@ public class HelloWorldConfig
 			}
 
 			@Override
-			public ScheduledJobType getJobType()
+			public String getJobType()
 			{
-				ScheduledJobType result = scheduledJobTypeFactory.create("helloWorld");
-				result.setJobExecutionType(helloWorldJobExecutionMetadata);
-				result.setLabel("Hello World");
-				result.setDescription("Simple job example");
-				result.setSchema("TODO! JSON schema goes here for parameter validation");
-				return result;
+				return HelloWorldJobExecution.class.toString();
 			}
 		};
+	}
+
+	@Lazy
+	@Bean
+	public ScheduledJobType getScheduledJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("helloWorld");
+		result.setJobExecutionType(helloWorldJobExecutionMetadata);
+		result.setLabel("Hello World");
+		result.setDescription("Simple job example");
+		result.setSchema("TODO! JSON schema goes here for parameter validation");
+		return result;
 	}
 }

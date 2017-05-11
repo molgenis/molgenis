@@ -9,11 +9,13 @@ import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 public class ScheduledScriptConfig
 {
@@ -58,15 +60,22 @@ public class ScheduledScriptConfig
 			}
 
 			@Override
-			public ScheduledJobType getJobType()
+			public String getJobType()
 			{
-				ScheduledJobType result = scheduledJobTypeFactory.create("script");
-				result.setLabel("Script");
-				result.setDescription("This job executes a script created in the Scripts plugin.");
-				result.setSchema("TODO");
-				result.setJobExecutionType(scriptJobExecutionMetadata);
-				return result;
+				return ScriptJobExecution.class.toString();
 			}
 		};
+	}
+
+	@Lazy
+	@Bean
+	public ScheduledJobType getScheduledJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("script");
+		result.setLabel("Script");
+		result.setDescription("This job executes a script created in the Scripts plugin.");
+		result.setSchema("TODO");
+		result.setJobExecutionType(scriptJobExecutionMetadata);
+		return result;
 	}
 }

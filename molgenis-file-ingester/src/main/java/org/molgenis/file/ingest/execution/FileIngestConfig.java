@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @Import(FileIngester.class)
 public class FileIngestConfig
@@ -44,21 +46,27 @@ public class FileIngestConfig
 			}
 
 			@Override
-			public ScheduledJobType getJobType()
+			public String getJobType()
 			{
-				ScheduledJobType result = scheduledJobTypeFactory.create("fileIngest");
-				result.setLabel("File ingest");
-				result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
-				result.setSchema("{\"title\": \"FileIngest Job\",\n \"type\": \"object\",\n \"properties\": {\n"
-						+ "\"url\": {\n\"type\": \"string\",\n\"format\": \"uri\",\n"
-						+ "\"description\": \"URL to download the file to ingest from\"\n    },\n"
-						+ "\"loader\": {\n \"enum\": [ \"CSV\" ]\n },\n \"targetEntityId\": {\n"
-						+ "\"type\": \"string\",\n \"description\": \"ID of the entity to import to\"\n"
-						+ "}\n  },\n  \"required\": [\n \"url\",\n \"loader\",\n \"targetEntityId\"\n]\n}");
-				result.setJobExecutionType(fileIngestJobExecutionMetaData);
-				return result;
+				return FileIngestJobExecution.class.toString();
 			}
 		};
 	}
 
+	@Lazy
+	@Bean
+	public ScheduledJobType getScheduledJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("fileIngest");
+		result.setLabel("File ingest");
+		result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
+		result.setSchema("{\"title\": \"FileIngest Job\",\n \"type\": \"object\",\n \"properties\": {\n"
+				+ "\"url\": {\n\"type\": \"string\",\n\"format\": \"uri\",\n"
+				+ "\"description\": \"URL to download the file to ingest from\"\n    },\n"
+				+ "\"loader\": {\n \"enum\": [ \"CSV\" ]\n },\n \"targetEntityId\": {\n"
+				+ "\"type\": \"string\",\n \"description\": \"ID of the entity to import to\"\n"
+				+ "}\n  },\n  \"required\": [\n \"url\",\n \"loader\",\n \"targetEntityId\"\n]\n}");
+		result.setJobExecutionType(fileIngestJobExecutionMetaData);
+		return result;
+	}
 }
