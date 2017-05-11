@@ -1,10 +1,9 @@
-package org.molgenis.data.jobs.schedule;
+package org.molgenis.data.jobs;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.jobs.*;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;

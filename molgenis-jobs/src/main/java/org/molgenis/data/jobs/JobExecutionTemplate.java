@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 /**
  * Template to execute jobs.
  */
-public class JobExecutionTemplate
+class JobExecutionTemplate
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionTemplate.class);
 
@@ -27,8 +27,10 @@ public class JobExecutionTemplate
 	 * @param <T>            Job result type
 	 * @return the result of the job execution
 	 * @throws JobExecutionException if job execution throws an exception
+	 * @deprecated Create a service bean with a @Transactional annotation instead
 	 */
-	public <T> T call(Job<T> job, Progress progress, Authentication authentication,
+	@Deprecated
+	<T> T call(Job<T> job, Progress progress, Authentication authentication,
 			TransactionOperations transactionOperations)
 	{
 		return runWithAuthentication(authentication, () -> tryCallInTransaction(job, progress, transactionOperations));
@@ -44,7 +46,7 @@ public class JobExecutionTemplate
 	 * @return the result of hte job execution
 	 * @throws JobExecutionException if job execution throws an exception
 	 */
-	public <T> T call(Job<T> job, Progress progress, Authentication authentication)
+	<T> T call(Job<T> job, Progress progress, Authentication authentication)
 	{
 		return runWithAuthentication(authentication, () -> tryCall(job, progress));
 	}

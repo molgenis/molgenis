@@ -26,7 +26,7 @@ public abstract class TransactionalJob<T> implements Callable<T>, Job<T>
 			Authentication authentication)
 	{
 		this.progress = requireNonNull(progress);
-		this.transactionOperations = transactionOperations;
+		this.transactionOperations = requireNonNull(transactionOperations);
 		this.authentication = requireNonNull(authentication);
 	}
 

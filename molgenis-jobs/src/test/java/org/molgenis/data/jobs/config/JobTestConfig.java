@@ -1,7 +1,6 @@
 package org.molgenis.data.jobs.config;
 
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.jobs.JobExecutionTemplate;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.model.*;
 import org.springframework.context.annotation.Bean;
@@ -15,12 +14,6 @@ import static org.mockito.Mockito.mock;
 		JobTypeFactory.class, ScheduledJobFactory.class })
 public class JobTestConfig
 {
-	@Bean
-	public JobExecutionTemplate jobExecutionTemplate()
-	{
-		return mock(JobExecutionTemplate.class);
-	}
-
 	@Bean
 	public JobExecutionUpdater jobExecutionUpdater()
 	{

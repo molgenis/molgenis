@@ -1,4 +1,4 @@
-package org.molgenis.data.jobs.schedule;
+package org.molgenis.data.jobs;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -8,10 +8,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.UserTestConfig;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobExecutionTemplate;
-import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobType;
@@ -221,9 +217,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		@Mock
 		private ExecutorService executorService;
 
+		@Mock
+		JobExecutionTemplate jobExecutionTemplate;
+
 		public void resetMocks()
 		{
-			reset(jobFactory, jobType, executorService);
+			reset(jobFactory, jobType, executorService, jobExecutionTemplate);
 		}
 
 		@Bean
@@ -260,6 +259,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		public EntityManager entityManager()
 		{
 			return mock(EntityManager.class);
+		}
+
+		@Bean
+		public JobExecutionTemplate jobExecutionTemplate()
+		{
+			return jobExecutionTemplate;
 		}
 	}
 }

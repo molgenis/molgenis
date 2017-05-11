@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.*;
 
-public class TransactionalJobTest
+public class JobTest
 {
 	@Mock
 	Callable<Authentication> callable;
@@ -48,7 +48,7 @@ public class TransactionalJobTest
 			.getAuthentication();
 
 	private TransactionalJob<Authentication> job;
-	private TransactionalJob<Authentication> jobWithoutTransaction;
+	private NontransactionalJob<Authentication> jobWithoutTransaction;
 
 	@BeforeClass
 	public void beforeClass()
@@ -63,7 +63,7 @@ public class TransactionalJobTest
 			}
 		};
 
-		jobWithoutTransaction = new TransactionalJob<Authentication>(progress, null, authentication)
+		jobWithoutTransaction = new NontransactionalJob<Authentication>(progress, authentication)
 		{
 			@Override
 			public Authentication call(Progress progress) throws Exception
