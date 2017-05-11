@@ -1,13 +1,13 @@
 package org.molgenis.ontology.sorta.job;
 
-import org.molgenis.data.jobs.JobImpl;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.jobs.TransactionalJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static java.util.Objects.requireNonNull;
 
-public class SortaJobImpl extends JobImpl<Void>
+public class SortaJobImpl extends TransactionalJob<Void>
 {
 	private final SortaJobProcessor sortaJobProcessor;
 

@@ -120,7 +120,7 @@ public class JobExecutor
 
 	private RunAsUserToken createAuthorization(String username)
 	{
-		return new RunAsUserToken("JobImpl Execution", username, null,
+		return new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 	}
 
