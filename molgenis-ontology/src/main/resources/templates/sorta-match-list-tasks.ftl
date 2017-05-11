@@ -14,7 +14,7 @@
 <script>
     $(document).ready(function () {
         var customColumns = [{
-            th: 'JobImpl name', td: function (job) {
+            th: 'Job name', td: function (job) {
                 return job.name
             }
         }, {

@@ -7,7 +7,7 @@ import org.molgenis.data.support.StaticEntity;
 import static org.molgenis.data.jobs.model.JobTypeMetadata.*;
 
 /**
- * Describes a Job type.
+ * Describes a schedulable Job type.
  */
 public class JobType extends StaticEntity
 {

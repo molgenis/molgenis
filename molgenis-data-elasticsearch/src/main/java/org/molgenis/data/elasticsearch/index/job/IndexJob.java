@@ -27,7 +27,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
 /**
- * {@link JobImpl} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
+ * {@link org.molgenis.data.jobs.Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
  */
 class IndexJob extends JobImpl
 {
@@ -147,7 +147,7 @@ class IndexJob extends JobImpl
 				}
 				else
 				{
-					// Index JobImpl is finished, here we concluded that we don't have enough info to continue the index job
+					// Index Job is finished, here we concluded that we don't have enough info to continue the index job
 					progress.progress(progressCount, format("Skip index entity {0}.{1}", entityType.getId(),
 									indexAction.getEntityId()));
 				}

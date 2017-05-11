@@ -75,9 +75,8 @@ public class MappingJobExecution extends JobExecution
 		set(LABEL, label);
 	}
 
-	public void setDefaultValues()
+	private void setDefaultValues()
 	{
-		super.setDefaultValues();
 		setType(MAPPING_JOB_TYPE);
 	}
 }

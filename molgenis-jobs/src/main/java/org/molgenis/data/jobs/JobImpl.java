@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  * Superclass for molgenis jobs that keeps track of their progress.
  * Delegates the hard work to {@link JobExecutionTemplate}
  */
-public abstract class JobImpl<Result> implements Callable<Result>, Job<Result>
+public abstract class JobImpl<T> implements Callable<T>, Job<T>
 {
 	private final Progress progress;
 	private TransactionOperations transactionOperations;
@@ -24,16 +24,8 @@ public abstract class JobImpl<Result> implements Callable<Result>, Job<Result>
 	}
 
 	@Override
-	public Result call()
+	public T call()
 	{
 		return new JobExecutionTemplate(transactionOperations).call(this, progress, authentication);
 	}
-
-	/**
-	 * Executes this JobImpl. For concrete subclasses to implement.
-	 *
-	 * @param progress The {@link Progress} to report job progress to
-	 * @throws Exception if something goes wrong. If an exception is thrown here, the job status will be set to failed.
-	 */
-	public abstract Result call(Progress progress) throws Exception;
 }

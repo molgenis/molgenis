@@ -12,18 +12,19 @@ public class FileIngestJobExecution extends JobExecution
 	public FileIngestJobExecution(Entity entity)
 	{
 		super(entity);
+		setType(FILE_INGEST_JOB_TYPE);
 	}
 
 	public FileIngestJobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
+		setType(FILE_INGEST_JOB_TYPE);
 	}
 
 	public FileIngestJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
-		setDefaultValues();
+		setType(FILE_INGEST_JOB_TYPE);
 	}
 
 	public FileMeta getFile()
@@ -66,9 +67,4 @@ public class FileIngestJobExecution extends JobExecution
 		return getString(LOADER);
 	}
 
-	public void setDefaultValues()
-	{
-		super.setDefaultValues();
-		setType(FILE_INGEST_JOB_TYPE);
-	}
 }

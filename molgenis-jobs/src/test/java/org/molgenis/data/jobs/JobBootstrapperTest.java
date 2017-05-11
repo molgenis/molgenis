@@ -4,12 +4,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.schedule.JobExecutor;
+import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
@@ -21,12 +18,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+import static org.molgenis.data.jobs.model.JobTypeMetadata.JOB_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -42,17 +41,23 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 
-	@Mock
-	private SystemEntityType jobType1;
+	@Autowired
+	private JobType jobType;
 
 	@Mock
-	private JobExecution job1;
+	private Repository<JobType> jobTypeRepo;
 
 	@Mock
-	private JobExecution job2;
+	private SystemEntityType fileIngestJobExecutionType;
 
 	@Mock
-	private JobExecution job3;
+	private JobExecution fileIngestJob1;
+
+	@Mock
+	private JobExecution fileIngestJob2;
+
+	@Mock
+	private JobExecution fileIngestJob3;
 
 	@Mock
 	private EntityType jobExecutionType;
@@ -67,9 +72,6 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	JobScheduler jobScheduler;
 
 	@Autowired
-	JobExecutor jobExecutor;
-
-	@Autowired
 	private Config config;
 
 	@BeforeMethod
@@ -81,51 +83,53 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testBootstrap()
 	{
-		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.of(jobType1));
-		when(jobType1.getExtends()).thenReturn(jobExecutionType);
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.of(fileIngestJobExecutionType));
+		when(fileIngestJobExecutionType.getExtends()).thenReturn(jobExecutionType);
 		when(jobExecutionType.getId()).thenReturn(JOB_EXECUTION);
-		when(jobType1.getId()).thenReturn("JobType1");
+		when(fileIngestJobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
 
-		when(dataService.query("JobType1")).thenReturn(query);
+		when(dataService.query("sys_FileIngestJobExecution")).thenReturn(query);
 		when(query.eq(STATUS, RUNNING)).thenReturn(query);
 		when(query.eq(STATUS, PENDING)).thenReturn(query);
 		when(query.or()).thenReturn(query);
 
-		when(query.findAll()).thenReturn(Stream.of(job1, job2, job3));
+		when(query.findAll()).thenReturn(Stream.of(fileIngestJob1, fileIngestJob2, fileIngestJob3));
 
-		when(job1.get(LOG)).thenReturn("Current log");
-		when(job1.getEntityType()).thenReturn(jobType1);
+		when(dataService.getRepository(JOB_TYPE, JobType.class)).thenReturn(jobTypeRepo);
 
-		when(job2.get(LOG)).thenReturn(null);
-		when(job2.getEntityType()).thenReturn(jobType1);
+		when(fileIngestJob1.get(LOG)).thenReturn("Current log");
+		when(fileIngestJob1.getEntityType()).thenReturn(fileIngestJobExecutionType);
+
+		when(fileIngestJob2.get(LOG)).thenReturn(null);
+		when(fileIngestJob2.getEntityType()).thenReturn(fileIngestJobExecutionType);
 
 		String hugeLog = RandomStringUtils.random(JobExecution.MAX_LOG_LENGTH - 10);
-		when(job3.get(LOG)).thenReturn(hugeLog);
-		when(job3.getEntityType()).thenReturn(jobType1);
+		when(fileIngestJob3.get(LOG)).thenReturn(hugeLog);
+		when(fileIngestJob3.getEntityType()).thenReturn(fileIngestJobExecutionType);
 
 		jobBootstrapper.bootstrap();
 
-		verify(job1).set(STATUS, FAILED);
-		verify(job1).set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
-		verify(job1).set(LOG, "Current log\nFAILED - Application terminated unexpectedly");
+		verify(fileIngestJob1).set(STATUS, FAILED);
+		verify(fileIngestJob1).set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
+		verify(fileIngestJob1).set(LOG, "Current log\nFAILED - Application terminated unexpectedly");
 
-		verify(job2).set(STATUS, FAILED);
-		verify(job2).set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
-		verify(job2).set(LOG, "FAILED - Application terminated unexpectedly");
+		verify(fileIngestJob2).set(STATUS, FAILED);
+		verify(fileIngestJob2).set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
+		verify(fileIngestJob2).set(LOG, "FAILED - Application terminated unexpectedly");
 
-		verify(job3).set(STATUS, FAILED);
-		verify(job3).set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
-		verify(job3).set(eq(LOG), stringCaptor.capture());
+		verify(fileIngestJob3).set(STATUS, FAILED);
+		verify(fileIngestJob3).set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
+		verify(fileIngestJob3).set(eq(LOG), stringCaptor.capture());
 
 		String log3 = stringCaptor.getValue();
 		assertEquals(log3.length(), JobExecution.MAX_LOG_LENGTH, "Updated log length mustn't exceed MAX_LOG_LENGTH");
 		assertTrue(log3.contains(JobExecution.TRUNCATION_BANNER), "Updated log should contain truncation banner");
 		assertTrue(log3.endsWith("\nFAILED - Application terminated unexpectedly"));
 
-		verify(dataService).update("JobType1", job1);
-		verify(dataService).update("JobType1", job2);
+		verify(dataService).update("sys_FileIngestJobExecution", fileIngestJob1);
+		verify(dataService).update("sys_FileIngestJobExecution", fileIngestJob2);
 		verify(jobScheduler).scheduleJobs();
-		verify(jobExecutor).upsertJobTypes();
+		verify(jobTypeRepo).upsertBatch(Collections.singletonList(jobType));
 
 	}
 
@@ -133,14 +137,18 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	public static class Config
 	{
 		@Mock
-		private JobScheduler jobScheduler;
+		private JobFactory fileIngestJobFactory;
 
 		@Mock
-		private JobExecutor jobExecutor;
+		private JobType fileIngestJobType;
+
+		@Mock
+		private JobScheduler jobScheduler;
 
 		private void resetMocks()
 		{
-			reset(jobScheduler, jobExecutor);
+			reset(jobScheduler, fileIngestJobType, fileIngestJobFactory);
+			when(fileIngestJobFactory.getJobType()).thenReturn(fileIngestJobType);
 		}
 
 		public Config()
@@ -149,15 +157,21 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public JobScheduler jobScheduler()
+		public JobFactory fileIngestJobFactory()
 		{
-			return jobScheduler;
+			return fileIngestJobFactory;
 		}
 
 		@Bean
-		public JobExecutor jobExecutor()
+		public JobType jobType()
 		{
-			return jobExecutor;
+			return fileIngestJobType;
+		}
+
+		@Bean
+		public JobScheduler jobScheduler()
+		{
+			return jobScheduler;
 		}
 
 		@Bean

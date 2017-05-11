@@ -8,6 +8,8 @@ import org.molgenis.data.jobs.model.ScheduledJobMetadata;
 
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Decorator that makes sure all active {@link ScheduledJob} instances are scheduled using the {@link JobScheduler}.
  */
@@ -18,8 +20,8 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 
 	public ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler)
 	{
-		this.decorated = decorated;
-		this.scheduler = scheduler;
+		this.decorated = requireNonNull(decorated);
+		this.scheduler = requireNonNull(scheduler);
 	}
 
 	@Override
@@ -116,5 +118,4 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 			return true;
 		}));
 	}
-
 }

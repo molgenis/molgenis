@@ -9,12 +9,12 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.TransactionOperations;
 
 /**
- * Template to execute molgenis jobs.
+ * Template to execute jobs.
  */
 public class JobExecutionTemplate
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionTemplate.class);
-	private TransactionOperations transactionOperations;
+	private final TransactionOperations transactionOperations;
 
 	/**
 	 * Creates a new {@link JobExecutionTemplate}.
@@ -32,11 +32,11 @@ public class JobExecutionTemplate
 	 * @param job            the {@link Job} to execute.
 	 * @param progress       {@link Progress} to report progress to
 	 * @param authentication {@link Authentication} to run the job with
-	 * @param <Result>       type of the job execution
+	 * @param <T>            type of the job execution
 	 * @return the result of the job execution
 	 * @throws JobExecutionException if job execution throws an exception
 	 */
-	public <Result> Result call(Job<Result> job, Progress progress, Authentication authentication)
+	public <T> T call(Job<T> job, Progress progress, Authentication authentication)
 	{
 		final SecurityContext originalContext = SecurityContextHolder.getContext();
 		try
@@ -51,7 +51,7 @@ public class JobExecutionTemplate
 		}
 	}
 
-	private <Result> Result authenticatedCall(Job<Result> job, Progress progress)
+	private <T> T authenticatedCall(Job<T> job, Progress progress)
 	{
 		if (transactionOperations != null)
 		{
@@ -73,12 +73,12 @@ public class JobExecutionTemplate
 		}
 	}
 
-	private <Result> Result tryCall(Job<Result> job, Progress progress) throws JobExecutionException
+	private <T> T tryCall(Job<T> job, Progress progress) throws JobExecutionException
 	{
 		progress.start();
 		try
 		{
-			Result result = job.call(progress);
+			T result = job.call(progress);
 			progress.success();
 			return result;
 		}

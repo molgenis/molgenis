@@ -50,7 +50,7 @@ public class SortaJobFactory
 		ProgressImpl progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
 
 		String username = jobExecution.getUser();
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("JobImpl Execution", username, null,
+		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		SortaJobProcessor matchInputTermBatchService = new SortaJobProcessor(jobExecution.getOntologyIri(),

@@ -221,8 +221,8 @@ public class SortaServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			LOG.info("JobImpl execution with id " + sortaJobExecutionId + " not found.");
-			model.addAttribute("message", "JobImpl execution not found.");
+			LOG.info("Job execution with id " + sortaJobExecutionId + " not found.");
+			model.addAttribute("message", "Job execution not found.");
 			return init(model);
 		}
 	}
