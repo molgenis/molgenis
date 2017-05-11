@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -44,6 +45,13 @@ public class ScheduledJobRepositoryDecoratorTest
 	public void setUpBeforeMethod()
 	{
 		reset(jobScheduler, decoratedRepo, scheduledJob);
+
+		JobType jobType = mock(JobType.class);
+		when(jobType.getSchema()).thenReturn("{\"type\": \"object\",\n \"properties\": {\n"
+				+ "\"text\": {\n\"type\": \"string\"}},\n  \"required\": [\n\"text\"\n]\n}");
+		when(scheduledJob.getParameters()).thenReturn("{\"text\": \"test\"}");
+		when(scheduledJob.getType()).thenReturn(jobType);
+
 		scheduledJobRepositoryDecorator = new ScheduledJobRepositoryDecorator(decoratedRepo, jobScheduler);
 	}
 
@@ -91,6 +99,13 @@ public class ScheduledJobRepositoryDecoratorTest
 		{
 		}
 		verifyNoMoreInteractions(jobScheduler);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "#: required key \\[text\\] not found")
+	public void testParameterValidation()
+	{
+		when(scheduledJob.getParameters()).thenReturn("{}");
+		scheduledJobRepositoryDecorator.add(scheduledJob);
 	}
 
 	@Test(enabled = false) //FIXME

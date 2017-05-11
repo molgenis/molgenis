@@ -26,6 +26,7 @@ public class JobType extends StaticEntity
 		super(entityType);
 		setName(name);
 	}
+
 	public String getName()
 	{
 		return getString(NAME);
@@ -66,7 +67,7 @@ public class JobType extends StaticEntity
 		set(JOB_EXECUTION_TYPE, jobExecutionType);
 	}
 
-	String getSchema()
+	public String getSchema()
 	{
 		return getString(SCHEMA);
 	}
