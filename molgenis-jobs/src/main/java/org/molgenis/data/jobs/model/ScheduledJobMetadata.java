@@ -42,7 +42,7 @@ public class ScheduledJobMetadata extends SystemEntityType
 	{
 		setLabel("Scheduled job");
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
 		addAttribute(CRON_EXPRESSION).setLabel("Cron expression").setNillable(false).setDescription(
 				"Cron expression. A cron expression is a string comprised of 6 or 7 fields separated by white space. "
