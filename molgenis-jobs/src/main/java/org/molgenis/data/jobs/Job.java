@@ -3,13 +3,14 @@ package org.molgenis.data.jobs;
 /**
  * Interface for molgenis jobs.
  */
-public interface Job<Result>
+@FunctionalInterface
+public interface Job<T>
 {
 	/**
 	 * Execute this job.
 	 *
 	 * @param progress     the {@link Progress} to report progress to
-	 * @throws Exception if something goes wrong
+	 * @throws Exception if something goes wrong. If an exception is thrown here, the job status will be set to failed.
 	 */
-	Result call(Progress progress) throws Exception;
+	T call(Progress progress) throws Exception;
 }
