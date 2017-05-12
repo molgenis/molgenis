@@ -4,9 +4,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,9 +22,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-public class ScheduledJobRepositoryDecoratorTest
+public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
-
 	private ScheduledJobRepositoryDecorator scheduledJobRepositoryDecorator;
 
 	@Mock
@@ -44,6 +46,13 @@ public class ScheduledJobRepositoryDecoratorTest
 	public void setUpBeforeMethod()
 	{
 		reset(jobScheduler, decoratedRepo, scheduledJob);
+
+		ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+		when(scheduledJobType.getSchema()).thenReturn("{\"type\": \"object\",\n \"properties\": {\n"
+				+ "\"text\": {\n\"type\": \"string\"}},\n  \"required\": [\n\"text\"\n]\n}");
+		when(scheduledJob.getParameters()).thenReturn("{\"text\": \"test\"}");
+		when(scheduledJob.getType()).thenReturn(scheduledJobType);
+
 		scheduledJobRepositoryDecorator = new ScheduledJobRepositoryDecorator(decoratedRepo, jobScheduler);
 	}
 
@@ -91,6 +100,30 @@ public class ScheduledJobRepositoryDecoratorTest
 		{
 		}
 		verifyNoMoreInteractions(jobScheduler);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "#: required key \\[text\\] not found")
+	public void testParameterValidation()
+	{
+		when(scheduledJob.getParameters()).thenReturn("{}");
+		scheduledJobRepositoryDecorator.add(scheduledJob);
+	}
+
+	@Test
+	@WithMockUser("admin")
+	public void testSetUsernameAdd()
+	{
+		scheduledJobRepositoryDecorator.add(scheduledJob);
+		verify(scheduledJob).setUser("admin");
+	}
+
+	@Test
+	@WithMockUser("other_user")
+	public void testSetUsernameUpdate()
+	{
+		when(scheduledJob.getUser()).thenReturn("admin");
+		scheduledJobRepositoryDecorator.update(scheduledJob);
+		verify(scheduledJob).setUser("other_user");
 	}
 
 	@Test(enabled = false) //FIXME

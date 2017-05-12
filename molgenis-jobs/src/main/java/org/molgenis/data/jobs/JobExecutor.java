@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
@@ -42,13 +41,14 @@ public class JobExecutor
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final MailSender mailSender;
 	private final UserDetailsService userDetailsService;
-	private final List<JobFactory> jobFactories;
 	private final ExecutorService executorService;
+	private final JobFactoryRegistry jobFactoryRegistry;
 
 	@Autowired
-	public JobExecutor(DataService dataService, List<JobFactory> jobFactories, EntityManager entityManager, Gson gson,
-			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
-			ExecutorService executorService)
+	public JobExecutor(DataService dataService, EntityManager entityManager, Gson gson,
+			UserDetailsService userDetailsService,
+			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
+			JobFactoryRegistry jobFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
@@ -56,14 +56,8 @@ public class JobExecutor
 		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
-		this.jobFactories = jobFactories;
 		this.executorService = requireNonNull(executorService);
-	}
-
-	private JobFactory getJobFactoryForType(String jobExecutionTypeId)
-	{
-		return jobFactories.stream()
-				.filter(f -> f.getJobType().getJobExecutionType().getId().equals(jobExecutionTypeId)).findFirst().get();
+		this.jobFactoryRegistry = jobFactoryRegistry;
 	}
 
 	/**
@@ -93,6 +87,7 @@ public class JobExecutor
 
 	/**
 	 * Saves execution in the current thread, then creates a Job and submits that for asynchronous execution.
+	 *
 	 * @param jobExecution the {@link JobExecution} to save and submit.
 	 */
 	@RunAsSystem
@@ -106,7 +101,7 @@ public class JobExecutor
 	{
 		String entityTypeId = jobExecution.getEntityType().getId();
 		dataService.add(entityTypeId, jobExecution);
-		JobFactory jobFactory = getJobFactoryForType(entityTypeId);
+		JobFactory jobFactory = jobFactoryRegistry.getJobFactory(jobExecution);
 		return jobFactory.createJob(jobExecution);
 	}
 

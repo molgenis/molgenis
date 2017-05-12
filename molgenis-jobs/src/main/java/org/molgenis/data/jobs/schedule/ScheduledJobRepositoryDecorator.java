@@ -1,10 +1,17 @@
 package org.molgenis.data.jobs.schedule;
 
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.stream.Stream;
 
@@ -31,18 +38,22 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	}
 
 	@Override
-	public void update(ScheduledJob entity)
+	public void update(ScheduledJob scheduledJob)
 	{
-		decorated.update(entity);
-		scheduler.schedule(entity);
+		validateJobParameters(scheduledJob);
+		setUsername(scheduledJob);
+		decorated.update(scheduledJob);
+		scheduler.schedule(scheduledJob);
 	}
 
 	@Override
-	public void update(Stream<ScheduledJob> entities)
+	public void update(Stream<ScheduledJob> scheduledJobs)
 	{
-		decorated.update(entities.filter(e ->
+		decorated.update(scheduledJobs.filter(job ->
 		{
-			scheduler.schedule(e);
+			validateJobParameters(job);
+			setUsername(job);
+			scheduler.schedule(job);
 			return true;
 		}));
 	}
@@ -105,6 +116,8 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public void add(ScheduledJob scheduledJob)
 	{
+		validateJobParameters(scheduledJob);
+		setUsername(scheduledJob);
 		decorated.add(scheduledJob);
 		scheduler.schedule(scheduledJob);
 	}
@@ -114,8 +127,29 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		return decorated.add(jobs.filter(job ->
 		{
+			validateJobParameters(job);
+			setUsername(job);
 			scheduler.schedule(job);
 			return true;
 		}));
+	}
+
+	private static void validateJobParameters(ScheduledJob scheduledJob)
+	{
+		try
+		{
+			JSONObject rawSchema = new JSONObject(new JSONTokener(scheduledJob.getType().getSchema()));
+			Schema schema = SchemaLoader.load(rawSchema);
+			schema.validate(new JSONObject(scheduledJob.getParameters()));
+		}
+		catch (ValidationException validationException)
+		{
+			throw new MolgenisDataException(String.join(", ", validationException.getAllMessages()));
+		}
+	}
+
+	private static void setUsername(ScheduledJob job)
+	{
+		job.setUser(SecurityUtils.getCurrentUsername());
 	}
 }
