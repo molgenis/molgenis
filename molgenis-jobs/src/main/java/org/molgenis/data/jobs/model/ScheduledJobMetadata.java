@@ -28,13 +28,13 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String PARAMETERS = "parameters";
 	public static final String USER = "user";
 
-	private JobTypeMetadata jobTypeMetadata;
+	private ScheduledJobTypeMetadata scheduledJobTypeMetadata;
 
 	@Autowired
-	public ScheduledJobMetadata(JobTypeMetadata jobTypeMetadata)
+	public ScheduledJobMetadata(ScheduledJobTypeMetadata scheduledJobTypeMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.jobTypeMetadata = requireNonNull(jobTypeMetadata);
+		this.scheduledJobTypeMetadata = requireNonNull(scheduledJobTypeMetadata);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class ScheduledJobMetadata extends SystemEntityType
 		addAttribute(SUCCESS_EMAIL).setDataType(EMAIL).setLabel("Success email").setDescription(
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
 				.setNillable(true);
-		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(jobTypeMetadata).setNillable(false);
+		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(scheduledJobTypeMetadata).setNillable(false);
 		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("Job parameters").setNillable(false);
 	}
 }
