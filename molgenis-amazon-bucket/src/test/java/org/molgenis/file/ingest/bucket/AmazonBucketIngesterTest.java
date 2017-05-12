@@ -1,24 +1,23 @@
 package org.molgenis.file.ingest.bucket;
 
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.*;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.ingest.bucket.config.AmazonBucketTestConfig;
 import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecution;
+import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecutionMetaData;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.security.owned.OwnedEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,8 +50,6 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 
 	private FileRepositoryCollection fileRepositoryCollectionMock;
 
-	private static final String entityTypeId = "test";
-	private static final String identifier = "identifier";
 	private final File f = new File("");
 	private EntityImportReport report;
 
@@ -78,7 +75,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 				.thenReturn(fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService("test")).thenReturn(importServiceMock);
 		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT))).thenReturn(report);
-		when(progress.getJobExecution()).thenReturn(new AmazonBucketJobExecution(mock(Entity.class)));
+		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
 		amazonBucketIngester
 				.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", "test", true, progress);
@@ -142,6 +139,12 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 				e.printStackTrace();
 			}
 			return amazonBucketClient;
+		}
+
+		@Bean
+		public SecurityPackage securityPackage()
+		{
+			return mock(SecurityPackage.class);
 		}
 	}
 }

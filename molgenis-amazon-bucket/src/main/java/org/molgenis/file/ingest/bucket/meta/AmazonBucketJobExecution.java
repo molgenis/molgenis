@@ -12,18 +12,19 @@ public class AmazonBucketJobExecution extends JobExecution
 	public AmazonBucketJobExecution(Entity entity)
 	{
 		super(entity);
+		setType(AMAZON_BUCKET_JOB_TYPE);
 	}
 
 	public AmazonBucketJobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
+		setType(AMAZON_BUCKET_JOB_TYPE);
 	}
 
 	public AmazonBucketJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
-		setDefaultValues();
+		setType(AMAZON_BUCKET_JOB_TYPE);
 	}
 
 	public String getKey()
@@ -84,11 +85,5 @@ public class AmazonBucketJobExecution extends JobExecution
 	public void setTargetEntityId(String targetEntityId)
 	{
 		set(TARGET_ENTITY_ID, targetEntityId);
-	}
-
-	public void setDefaultValues()
-	{
-		super.setDefaultValues();
-		setType(AMAZON_BUCKET_JOB_TYPE);
 	}
 }
