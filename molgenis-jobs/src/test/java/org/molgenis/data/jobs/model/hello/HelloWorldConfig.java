@@ -1,6 +1,5 @@
 package org.molgenis.data.jobs.model.hello;
 
-import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
@@ -27,27 +26,17 @@ public class HelloWorldConfig
 	@Bean
 	public JobFactory<HelloWorldJobExecution> helloWorldJobFactory()
 	{
-		return new JobFactory<HelloWorldJobExecution>()
+		return jobExecution ->
 		{
-			@Override
-			public Job<String> createJob(HelloWorldJobExecution jobExecution)
-			{
-				final String who = jobExecution.getUser();
-				final int delay = jobExecution.getDelay();
-				return progress -> helloWorldService.helloWorld(progress, who, delay);
-			}
-
-			@Override
-			public String getJobType()
-			{
-				return HelloWorldJobExecution.class.toString();
-			}
+			final String who = jobExecution.getUser();
+			final int delay = jobExecution.getDelay();
+			return progress -> helloWorldService.helloWorld(progress, who, delay);
 		};
 	}
 
 	@Lazy
 	@Bean
-	public ScheduledJobType getScheduledJobType()
+	public ScheduledJobType helloWorldJobType()
 	{
 		ScheduledJobType result = scheduledJobTypeFactory.create("helloWorld");
 		result.setJobExecutionType(helloWorldJobExecutionMetadata);

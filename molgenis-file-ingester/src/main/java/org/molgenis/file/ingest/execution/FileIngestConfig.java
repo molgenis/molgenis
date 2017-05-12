@@ -1,12 +1,10 @@
 package org.molgenis.file.ingest.execution;
 
-import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.molgenis.file.model.FileMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,29 +31,19 @@ public class FileIngestConfig
 	@Bean
 	public JobFactory<FileIngestJobExecution> fileIngestJobFactory()
 	{
-		return new JobFactory<FileIngestJobExecution>()
+		return fileIngestJobExecution ->
 		{
-			@Override
-			public Job<FileMeta> createJob(FileIngestJobExecution fileIngestJobExecution)
-			{
-				final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
-				final String url = fileIngestJobExecution.getUrl();
-				final String loader = fileIngestJobExecution.getLoader();
-				return progress -> fileIngester
-						.ingest(targetEntityId, url, loader, fileIngestJobExecution.getIdentifier(), progress);
-			}
-
-			@Override
-			public String getJobType()
-			{
-				return FileIngestJobExecution.class.toString();
-			}
+			final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
+			final String url = fileIngestJobExecution.getUrl();
+			final String loader = fileIngestJobExecution.getLoader();
+			return progress -> fileIngester
+					.ingest(targetEntityId, url, loader, fileIngestJobExecution.getIdentifier(), progress);
 		};
 	}
 
 	@Lazy
 	@Bean
-	public ScheduledJobType getScheduledJobType()
+	public ScheduledJobType fileIngestJobType()
 	{
 		ScheduledJobType result = scheduledJobTypeFactory.create("fileIngest");
 		result.setLabel("File ingest");

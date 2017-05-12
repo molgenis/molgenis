@@ -15,7 +15,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 public class ScheduledJobTypeMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "ScheduledJobType";
-	public static final String JOB_TYPE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String SCHEDULED_JOB_TYPE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
 	public static final String LABEL = "label";
@@ -33,7 +33,7 @@ public class ScheduledJobTypeMetadata extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Job Type");
+		setLabel("Scheduled Job Type");
 		addAttribute(NAME, ROLE_ID).setLabel("Name");
 		addAttribute(LABEL, ROLE_LABEL).setDataType(STRING).setLabel("Label").setNillable(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);

@@ -5,6 +5,7 @@ import org.molgenis.data.jobs.model.JobExecution;
 /**
  * @param <T> Type of the JobExecutions that this factory understands.
  */
+@FunctionalInterface
 public interface JobFactory<T extends JobExecution>
 {
 	/**
@@ -14,9 +15,4 @@ public interface JobFactory<T extends JobExecution>
 	 * @return the job
 	 */
 	Job createJob(T jobExecution);
-
-	/**
-	 * Creates a ScheduledJobType to use when scheduling jobs.
-	 */
-	String getJobType();
 }
