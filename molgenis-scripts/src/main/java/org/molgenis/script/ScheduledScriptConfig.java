@@ -75,7 +75,9 @@ public class ScheduledScriptConfig
 		ScheduledJobType result = scheduledJobTypeFactory.create("script");
 		result.setLabel("Script");
 		result.setDescription("This job executes a script created in the Scripts plugin.");
-		result.setSchema("TODO");
+		result.setSchema("{\n\"title\": \"Script Job\",\n\"type\": \"object\",\n\"properties\": {\n"
+				+ "\"name\": {\"type\": \"string\"},\n\"parameters\": {\"type\": \"string\"}},\n"
+				+ "\"required\": [\"name\", \"parameters\"]\n" + "}");
 		result.setJobExecutionType(scriptJobExecutionMetadata);
 		return result;
 	}
