@@ -2,7 +2,6 @@ package org.molgenis.script;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.DataService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.jobs.JobsController;
@@ -38,19 +37,17 @@ public class ScriptRunnerController
 	private final SavedScriptRunner savedScriptRunner;
 	private final Gson gson;
 	private final MenuReaderService menuReaderService;
-	private final DataService dataService;
 	private final UserAccountService userAccountService;
 
 	private ScriptRunnerController(ScriptJobExecutionFactory scriptJobExecutionFactory, JobExecutor jobExecutor,
 			SavedScriptRunner savedScriptRunner, Gson gson, MenuReaderService menuReaderService,
-			DataService dataService, UserAccountService userAccountService)
+			UserAccountService userAccountService)
 	{
 		this.scriptJobExecutionFactory = requireNonNull(scriptJobExecutionFactory);
 		this.jobExecutor = requireNonNull(jobExecutor);
 		this.savedScriptRunner = requireNonNull(savedScriptRunner);
 		this.gson = requireNonNull(gson);
 		this.menuReaderService = requireNonNull(menuReaderService);
-		this.dataService = requireNonNull(dataService);
 		this.userAccountService = requireNonNull(userAccountService);
 	}
 
