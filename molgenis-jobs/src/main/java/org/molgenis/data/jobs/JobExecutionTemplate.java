@@ -43,7 +43,7 @@ class JobExecutionTemplate
 	 * @param progress       {@link Progress} to report progress to
 	 * @param authentication {@link Authentication} to run the job with
 	 * @param <T>            Job result type
-	 * @return the result of hte job execution
+	 * @return the result of the job execution
 	 * @throws JobExecutionException if job execution throws an exception
 	 */
 	<T> T call(Job<T> job, Progress progress, Authentication authentication)
