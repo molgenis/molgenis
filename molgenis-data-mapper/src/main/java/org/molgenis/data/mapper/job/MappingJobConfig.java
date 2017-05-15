@@ -17,14 +17,18 @@ import org.springframework.context.annotation.Lazy;
 @Import(MappingServiceImpl.class)
 public class MappingJobConfig
 {
-	@Autowired
-	private MappingService mappingService;
+	private final MappingService mappingService;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final MappingJobExecutionMetadata mappingJobExecutionMetadata;
 
 	@Autowired
-	private ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	private MappingJobExecutionMetadata mappingJobExecutionMetadata;
+	public MappingJobConfig(MappingService mappingService, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			MappingJobExecutionMetadata mappingJobExecutionMetadata)
+	{
+		this.mappingService = mappingService;
+		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
+		this.mappingJobExecutionMetadata = mappingJobExecutionMetadata;
+	}
 
 	/**
 	 * The MappingJob Factory bean.

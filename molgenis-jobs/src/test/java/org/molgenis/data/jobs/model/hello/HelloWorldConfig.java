@@ -4,7 +4,6 @@ import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -15,14 +14,17 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 public class HelloWorldConfig
 {
-	@Autowired
-	HelloWorldService helloWorldService;
+	private HelloWorldService helloWorldService;
+	private ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata;
 
-	@Autowired
-	ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata;
+	public HelloWorldConfig(HelloWorldService helloWorldService, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata)
+	{
+		this.helloWorldService = helloWorldService;
+		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
+		this.helloWorldJobExecutionMetadata = helloWorldJobExecutionMetadata;
+	}
 
 	@Bean
 	public JobFactory<HelloWorldJobExecution> helloWorldJobFactory()

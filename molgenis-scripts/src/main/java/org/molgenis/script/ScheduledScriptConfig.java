@@ -25,17 +25,20 @@ public class ScheduledScriptConfig
 	{
 	}.getType();
 
-	@Autowired
-	SavedScriptRunner savedScriptRunner;
+	private final SavedScriptRunner savedScriptRunner;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final ScriptJobExecutionMetadata scriptJobExecutionMetadata;
+	private final Gson gson;
 
 	@Autowired
-	ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	ScriptJobExecutionMetadata scriptJobExecutionMetadata;
-
-	@Autowired
-	Gson gson;
+	public ScheduledScriptConfig(SavedScriptRunner savedScriptRunner, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			ScriptJobExecutionMetadata scriptJobExecutionMetadata, Gson gson)
+	{
+		this.savedScriptRunner = savedScriptRunner;
+		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
+		this.scriptJobExecutionMetadata = scriptJobExecutionMetadata;
+		this.gson = gson;
+	}
 
 	/**
 	 * The Script JobFactory bean.

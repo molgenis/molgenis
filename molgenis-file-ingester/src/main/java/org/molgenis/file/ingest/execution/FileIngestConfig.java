@@ -17,14 +17,18 @@ import org.springframework.context.annotation.Lazy;
 @Import(FileIngester.class)
 public class FileIngestConfig
 {
-	@Autowired
-	FileIngester fileIngester;
+	private final FileIngester fileIngester;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
 
 	@Autowired
-	ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
+	public FileIngestConfig(FileIngester fileIngester, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
+	{
+		this.fileIngester = fileIngester;
+		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
+		this.fileIngestJobExecutionMetaData = fileIngestJobExecutionMetaData;
+	}
 
 	/**
 	 * The FileIngestJob Factory bean.
