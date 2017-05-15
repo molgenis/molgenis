@@ -8,42 +8,65 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.TransactionOperations;
 
+import java.util.concurrent.Callable;
+
 /**
- * Template to execute molgenis jobs.
+ * Template to execute jobs.
  */
-public class JobExecutionTemplate
+class JobExecutionTemplate
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionTemplate.class);
-	private final TransactionOperations transactionOperations;
 
 	/**
-	 * Creates a new {@link JobExecutionTemplate}.
+	 * Executes a job in the calling thread within a transaction.
 	 *
-	 * @param transactionTemplate {@link TransactionOperations} to use for transactions, may be null.
+	 * @param job            the {@link Job} to execute.
+	 * @param progress       {@link Progress} to report progress to
+	 * @param authentication {@link Authentication} to run the job with
+	 * @param transactionOperations TransactionOperations to use for a transactional call
+	 * @param <T>            Job result type
+	 * @return the result of the job execution
+	 * @throws JobExecutionException if job execution throws an exception
+	 * @deprecated Create a service bean with a @Transactional annotation instead
 	 */
-	public JobExecutionTemplate(TransactionOperations transactionTemplate)
+	@Deprecated
+	<T> T call(Job<T> job, Progress progress, Authentication authentication,
+			TransactionOperations transactionOperations)
 	{
-		this.transactionOperations = transactionTemplate;
+		return runWithAuthentication(authentication, () -> tryCallInTransaction(job, progress, transactionOperations));
 	}
 
 	/**
 	 * Executes a job in the calling thread.
 	 *
-	 * @param job            the {@link Job} to execute.
+	 * @param job            the {@link Job} to execute
 	 * @param progress       {@link Progress} to report progress to
 	 * @param authentication {@link Authentication} to run the job with
-	 * @param <Result>       type of the job execution
+	 * @param <T>            Job result type
 	 * @return the result of the job execution
 	 * @throws JobExecutionException if job execution throws an exception
 	 */
-	public <Result> Result call(Job<Result> job, Progress progress, Authentication authentication)
+	<T> T call(Job<T> job, Progress progress, Authentication authentication)
+	{
+		return runWithAuthentication(authentication, () -> tryCall(job, progress));
+	}
+
+	private <T> T runWithAuthentication(Authentication authentication, Callable<T> callable)
 	{
 		final SecurityContext originalContext = SecurityContextHolder.getContext();
 		try
 		{
 			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			return authenticatedCall(job, progress);
+			return callable.call();
+		}
+		catch (RuntimeException rte)
+		{
+			throw rte;
+		}
+		catch (Exception e)
+		{
+			throw new IllegalStateException("Lambda should only throw runtime exception", e);
 		}
 		finally
 		{
@@ -51,34 +74,26 @@ public class JobExecutionTemplate
 		}
 	}
 
-	private <Result> Result authenticatedCall(Job<Result> job, Progress progress)
+	private <T> T tryCallInTransaction(Job<T> job, Progress progress, TransactionOperations transactionOperations)
 	{
-		if (transactionOperations != null)
+		try
 		{
-			try
-			{
-				return transactionOperations.execute((status) -> tryCall(job, progress));
-			}
-			catch (TransactionException te)
-			{
-				LOG.error("Transaction error while running job", te);
-				progress.failed(te);
-				throw te;
-			}
-
+			return transactionOperations.execute((status) -> tryCall(job, progress));
 		}
-		else
+		catch (TransactionException te)
 		{
-			return tryCall(job, progress);
+			LOG.error("Transaction error while running job", te);
+			progress.failed(te);
+			throw te;
 		}
 	}
 
-	private <Result> Result tryCall(Job<Result> job, Progress progress) throws JobExecutionException
+	private <T> T tryCall(Job<T> job, Progress progress) throws JobExecutionException
 	{
 		progress.start();
 		try
 		{
-			Result result = job.call(progress);
+			T result = job.call(progress);
 			progress.success();
 			return result;
 		}

@@ -6,7 +6,7 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.jobs.config.JobTestConfig;
-import org.molgenis.data.jobs.model.JobType;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
@@ -45,7 +45,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	private ScheduledJobFactory scheduledJobFactory;
 
 	@Mock
-	private JobType jobType;
+	private ScheduledJobType scheduledJobType;
 
 	private String id = "id";
 	private ScheduledJob scheduledJob;
@@ -55,10 +55,10 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	public void setUpBeforeMethod()
 	{
 		config.resetMocks();
-		reset(jobType);
+		reset(scheduledJobType);
 		scheduledJob = scheduledJobFactory.create();
 		scheduledJob.setId(id);
-		scheduledJob.setType(jobType);
+		scheduledJob.setType(scheduledJobType);
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, true);
-		scheduledJob.setType(jobType);
+		scheduledJob.setType(scheduledJobType);
 
 		when(quartzScheduler.checkExists(jobKey)).thenReturn(false);
 
@@ -116,7 +116,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, false);
-		scheduledJob.setType(jobType);
+		scheduledJob.setType(scheduledJobType);
 
 		when(quartzScheduler.checkExists(jobKey)).thenReturn(false);
 
@@ -133,7 +133,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "XXX");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, false);
-		scheduledJob.setType(jobType);
+		scheduledJob.setType(scheduledJobType);
 
 		jobScheduler.schedule(scheduledJob);
 	}
@@ -146,7 +146,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
 		scheduledJob.set(ScheduledJobMetadata.NAME, "name");
 		scheduledJob.set(ScheduledJobMetadata.ACTIVE, true);
-		scheduledJob.setType(jobType);
+		scheduledJob.setType(scheduledJobType);
 
 		when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
 		when(dataService.findOneById(SCHEDULED_JOB, id, ScheduledJob.class)).thenReturn(scheduledJob);

@@ -7,6 +7,11 @@ import org.molgenis.data.jobs.model.JobExecution;
  */
 public class JobExecutionContext
 {
+	private JobExecutionContext()
+	{
+
+	}
+
 	public static final ThreadLocal<JobExecution> jobContextHolder = new ThreadLocal<>();
 
 	public static void set(JobExecution jobExecution)

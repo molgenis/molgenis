@@ -4,11 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.Map;
 
 import static java.text.MessageFormat.format;
 
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 public class ScheduledScriptConfig
 {
@@ -27,7 +29,7 @@ public class ScheduledScriptConfig
 	SavedScriptRunner savedScriptRunner;
 
 	@Autowired
-	JobTypeFactory jobTypeFactory;
+	ScheduledJobTypeFactory scheduledJobTypeFactory;
 
 	@Autowired
 	ScriptJobExecutionMetadata scriptJobExecutionMetadata;
@@ -39,10 +41,11 @@ public class ScheduledScriptConfig
 	 * The Script JobFactory bean.
 	 */
 	@Bean
-	public JobFactory scriptJobFactory()
+	public JobFactory<ScriptJobExecution> scriptJobFactory()
 	{
 		return new JobFactory<ScriptJobExecution>()
 		{
+
 			@Override
 			public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution)
 			{
@@ -62,17 +65,18 @@ public class ScheduledScriptConfig
 					return scriptResult;
 				};
 			}
-
-			@Override
-			public JobType getJobType()
-			{
-				JobType result = jobTypeFactory.create("script");
-				result.setLabel("Script");
-				result.setDescription("This job executes a script created in the Scripts plugin.");
-				result.setSchema("TODO");
-				result.setJobExecutionType(scriptJobExecutionMetadata);
-				return result;
-			}
 		};
+	}
+
+	@Lazy
+	@Bean
+	public ScheduledJobType scriptJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("script");
+		result.setLabel("Script");
+		result.setDescription("This job executes a script created in the Scripts plugin.");
+		result.setSchema("TODO");
+		result.setJobExecutionType(scriptJobExecutionMetadata);
+		return result;
 	}
 }

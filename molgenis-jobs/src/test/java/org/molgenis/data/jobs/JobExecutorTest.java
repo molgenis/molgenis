@@ -1,19 +1,17 @@
-package org.molgenis.data.jobs.schedule;
+package org.molgenis.data.jobs;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.UserTestConfig;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobExecutionTemplate;
-import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.model.JobType;
 import org.molgenis.data.jobs.model.ScheduledJob;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GsonConfig;
 import org.quartz.JobExecutionContext;
@@ -22,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,8 +28,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -48,19 +47,22 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 
 	@Autowired
-	JobExecutor jobExecutor;
+	private JobExecutor jobExecutor;
 
 	@Autowired
-	JobFactory jobFactory;
+	private JobFactory jobFactory;
 
 	@Autowired
-	JobType jobType;
+	private ScheduledJobType scheduledJobType;
 
 	@Autowired
-	UserDetailsService userDetailsService;
+	private UserDetailsService userDetailsService;
 
 	@Autowired
-	JobExecutionTemplate jobExecutionTemplate;
+	private JobFactoryRegistry jobFactoryRegistry;
+
+	@Autowired
+	private ExecutorService executorService;
 
 	@Mock
 	private ScheduledJob scheduledJob;
@@ -78,7 +80,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	private EntityType jobExecutionType;
 
 	@Mock
-	TestJobExecution jobExecution;
+	private TestJobExecution jobExecution;
 
 	@Mock
 	private UserDetails userDetails;
@@ -88,6 +90,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private GrantedAuthority grantedAuthority2;
+
+	@Captor
+	private ArgumentCaptor<Runnable> jobCaptor;
 
 	@BeforeClass
 	public void beforeClass()
@@ -101,9 +106,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	{
 		config.resetMocks();
 		reset(jobExecutionContext);
-		when(jobFactory.getJobType()).thenReturn(jobType);
-		when(jobType.getJobExecutionType()).thenReturn(jobExecutionType);
-		when(jobType.getName()).thenReturn("jobName");
+		when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
+		when(scheduledJobType.getName()).thenReturn("jobName");
+		when(jobExecution.getStartDate()).thenReturn(Instant.now());
+		when(jobExecution.getSuccessEmail()).thenReturn(new String[] {});
+		when(jobExecution.getFailureEmail()).thenReturn(new String[] {});
+		when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
 	}
 
 	@Test
@@ -118,7 +126,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(scheduledJob.getFailureEmail()).thenReturn("x@y.z");
 		when(scheduledJob.getSuccessEmail()).thenReturn("a@b.c");
 		when(scheduledJob.getUser()).thenReturn("fjant");
-		when(scheduledJob.getType()).thenReturn(jobType);
+		when(scheduledJob.getType()).thenReturn(scheduledJobType);
 
 		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
 
@@ -138,7 +146,29 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
 
-		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
+		verify(job).call(any(Progress.class));
+	}
+
+	@Test
+	public void submitJobExecution() throws Exception
+	{
+		when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
+		when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
+		when(jobExecution.getUser()).thenReturn("fjant");
+
+		when(jobFactory.createJob(jobExecution)).thenReturn(job);
+		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
+
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(grantedAuthority1, grantedAuthority2);
+		when(userDetails.getAuthorities()).thenAnswer(i -> authorities);
+
+		jobExecutor.submit(jobExecution);
+
+		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
+		verify(executorService).submit(jobCaptor.capture());
+
+		jobCaptor.getValue().run();
+		verify(job).call(any(Progress.class));
 	}
 
 	public static class TestJobExecution extends JobExecution
@@ -185,11 +215,23 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		JobFactory jobFactory;
 
 		@Mock
-		JobType jobType;
+		ScheduledJobType scheduledJobType;
+
+		@Mock
+		JobFactoryRegistry jobFactoryRegistry;
+
+		@Mock
+		private ExecutorService executorService;
 
 		public void resetMocks()
 		{
-			reset(jobFactory, jobType);
+			reset(jobFactory, scheduledJobType, executorService);
+		}
+
+		@Bean
+		public JobFactoryRegistry jobFactoryRegistry()
+		{
+			return jobFactoryRegistry;
 		}
 
 		@Bean
@@ -199,9 +241,15 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		JobType jobType()
+		ScheduledJobType jobType()
 		{
-			return jobType;
+			return scheduledJobType;
+		}
+
+		@Bean
+		ExecutorService executorService()
+		{
+			return executorService;
 		}
 
 		@Bean

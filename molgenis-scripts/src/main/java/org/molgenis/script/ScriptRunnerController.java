@@ -3,7 +3,7 @@ package org.molgenis.script;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.schedule.JobExecutor;
+import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
@@ -38,20 +37,18 @@ public class ScriptRunnerController
 	private final JobExecutor jobExecutor;
 	private final SavedScriptRunner savedScriptRunner;
 	private final Gson gson;
-	private final ExecutorService executorService;
 	private final MenuReaderService menuReaderService;
 	private final DataService dataService;
 	private final UserAccountService userAccountService;
 
 	private ScriptRunnerController(ScriptJobExecutionFactory scriptJobExecutionFactory, JobExecutor jobExecutor,
-			SavedScriptRunner savedScriptRunner, Gson gson, ExecutorService executorService,
-			MenuReaderService menuReaderService, DataService dataService, UserAccountService userAccountService)
+			SavedScriptRunner savedScriptRunner, Gson gson, MenuReaderService menuReaderService,
+			DataService dataService, UserAccountService userAccountService)
 	{
 		this.scriptJobExecutionFactory = requireNonNull(scriptJobExecutionFactory);
 		this.jobExecutor = requireNonNull(jobExecutor);
 		this.savedScriptRunner = requireNonNull(savedScriptRunner);
 		this.gson = requireNonNull(gson);
-		this.executorService = requireNonNull(executorService);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.dataService = requireNonNull(dataService);
 		this.userAccountService = requireNonNull(userAccountService);
@@ -66,9 +63,7 @@ public class ScriptRunnerController
 		scriptJobExecution.setParameters(gson.toJson(parameters));
 		scriptJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 
-		dataService.add(scriptJobExecution.getEntityType().getId(), scriptJobExecution);
-
-		executorService.submit(() -> jobExecutor.execute(scriptJobExecution));
+		jobExecutor.submit(scriptJobExecution);
 
 		String jobHref = concatEntityHref("/api/v2", scriptJobExecution.getEntityType().getId(),
 				scriptJobExecution.getIdValue());
