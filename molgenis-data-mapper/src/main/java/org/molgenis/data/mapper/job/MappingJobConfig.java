@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.job;
 
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
@@ -31,16 +32,20 @@ public class MappingJobConfig
 	@Bean
 	public JobFactory<MappingJobExecution> mappingJobFactory()
 	{
-		return mappingJobExecution ->
+		return new JobFactory<MappingJobExecution>()
 		{
-			final String mappingProjectId = mappingJobExecution.getMappingProjectId();
-			final String targetEntityTypeId = mappingJobExecution.getTargetEntityTypeId();
-			final String packageId = mappingJobExecution.getPackageId();
-			final String label = mappingJobExecution.getLabel();
-			final Boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
-			return progress -> mappingService
-					.applyMappings(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label,
-							progress);
+			@Override
+			public Job createJob(MappingJobExecution mappingJobExecution)
+			{
+				final String mappingProjectId = mappingJobExecution.getMappingProjectId();
+				final String targetEntityTypeId = mappingJobExecution.getTargetEntityTypeId();
+				final String packageId = mappingJobExecution.getPackageId();
+				final String label = mappingJobExecution.getLabel();
+				final Boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
+				return progress -> mappingService
+						.applyMappings(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label,
+								progress);
+			}
 		};
 	}
 

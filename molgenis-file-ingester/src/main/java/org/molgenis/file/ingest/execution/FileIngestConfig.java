@@ -1,5 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
@@ -31,13 +32,17 @@ public class FileIngestConfig
 	@Bean
 	public JobFactory<FileIngestJobExecution> fileIngestJobFactory()
 	{
-		return fileIngestJobExecution ->
+		return new JobFactory<FileIngestJobExecution>()
 		{
-			final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
-			final String url = fileIngestJobExecution.getUrl();
-			final String loader = fileIngestJobExecution.getLoader();
-			return progress -> fileIngester
-					.ingest(targetEntityId, url, loader, fileIngestJobExecution.getIdentifier(), progress);
+			@Override
+			public Job createJob(FileIngestJobExecution fileIngestJobExecution)
+			{
+				final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
+				final String url = fileIngestJobExecution.getUrl();
+				final String loader = fileIngestJobExecution.getLoader();
+				return progress -> fileIngester
+						.ingest(targetEntityId, url, loader, fileIngestJobExecution.getIdentifier(), progress);
+			}
 		};
 	}
 

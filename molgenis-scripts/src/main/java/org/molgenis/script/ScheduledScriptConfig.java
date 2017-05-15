@@ -2,6 +2,7 @@ package org.molgenis.script;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
@@ -38,21 +39,25 @@ public class ScheduledScriptConfig
 	 * The Script JobFactory bean.
 	 */
 	@Bean
-	public JobFactory scriptJobFactory()
+	public JobFactory<ScriptJobExecution> scriptJobFactory()
 	{
-		return (JobFactory<ScriptJobExecution>) scriptJobExecution ->
+		return new JobFactory<ScriptJobExecution>()
 		{
-			final String name = scriptJobExecution.getName();
-			final String parameterString = scriptJobExecution.getParameters();
-			return progress ->
+			@Override
+			public Job createJob(ScriptJobExecution scriptJobExecution)
 			{
-				Map<String, Object> params = new HashMap<>();
-				params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
-				params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
-				ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
-				progress.status(scriptResult.getOutput());
-				return scriptResult;
-			};
+				final String name = scriptJobExecution.getName();
+				final String parameterString = scriptJobExecution.getParameters();
+				return progress ->
+				{
+					Map<String, Object> params = new HashMap<>();
+					params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
+					params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
+					ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
+					progress.status(scriptResult.getOutput());
+					return scriptResult;
+				};
+			}
 		};
 	}
 
