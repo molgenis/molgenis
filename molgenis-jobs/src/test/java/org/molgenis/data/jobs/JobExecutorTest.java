@@ -1,4 +1,4 @@
-package org.molgenis.data.jobs.schedule;
+package org.molgenis.data.jobs;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -8,7 +8,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.UserTestConfig;
-import org.molgenis.data.jobs.*;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
@@ -21,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -58,9 +57,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private UserDetailsService userDetailsService;
-
-	@Autowired
-	private JobExecutionTemplate jobExecutionTemplate;
 
 	@Autowired
 	private JobFactoryRegistry jobFactoryRegistry;
@@ -110,9 +106,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	{
 		config.resetMocks();
 		reset(jobExecutionContext);
-		when(jobFactoryRegistry.getJobFactory(any())).thenReturn(jobFactory);
 		when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
 		when(scheduledJobType.getName()).thenReturn("jobName");
+		when(jobExecution.getStartDate()).thenReturn(Instant.now());
+		when(jobExecution.getSuccessEmail()).thenReturn(new String[] {});
+		when(jobExecution.getFailureEmail()).thenReturn(new String[] {});
+		when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
 	}
 
 	@Test
@@ -147,7 +146,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
 
-		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
+		verify(job).call(any(Progress.class));
 	}
 
 	@Test
@@ -169,7 +168,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(executorService).submit(jobCaptor.capture());
 
 		jobCaptor.getValue().run();
-		verify(jobExecutionTemplate).call(eq(job), any(Progress.class), any(Authentication.class));
+		verify(job).call(any(Progress.class));
 	}
 
 	public static class TestJobExecution extends JobExecution

@@ -1,10 +1,9 @@
-package org.molgenis.data.jobs.schedule;
+package org.molgenis.data.jobs;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.jobs.*;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -38,7 +37,7 @@ public class JobExecutor
 	private final DataService dataService;
 	private final EntityManager entityManager;
 	private final Gson gson;
-	private final JobExecutionTemplate jobExecutionTemplate;
+	private final JobExecutionTemplate jobExecutionTemplate = new JobExecutionTemplate();
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final MailSender mailSender;
 	private final UserDetailsService userDetailsService;
@@ -47,14 +46,13 @@ public class JobExecutor
 
 	@Autowired
 	public JobExecutor(DataService dataService, EntityManager entityManager, Gson gson,
-			JobExecutionTemplate jobExecutionTemplate, UserDetailsService userDetailsService,
+			UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
 			JobFactoryRegistry jobFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.gson = requireNonNull(gson);
-		this.jobExecutionTemplate = requireNonNull(jobExecutionTemplate);
 		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
@@ -115,7 +113,7 @@ public class JobExecutor
 
 	private RunAsUserToken createAuthorization(String username)
 	{
-		return new RunAsUserToken("JobImpl Execution", username, null,
+		return new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 	}
 

@@ -7,7 +7,7 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.molgenis.data.jobs.JobImpl;
+import org.molgenis.data.jobs.NontransactionalJob;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -29,7 +29,7 @@ import static org.molgenis.util.EntityUtils.getTypedValue;
 /**
  * {@link org.molgenis.data.jobs.Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
  */
-class IndexJob extends JobImpl
+class IndexJob extends NontransactionalJob<Void>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
 	private final String transactionId;
@@ -40,7 +40,7 @@ class IndexJob extends JobImpl
 	IndexJob(Progress progress, Authentication authentication, String transactionId, DataService dataService,
 			SearchService searchService, EntityTypeFactory entityTypeFactory)
 	{
-		super(progress, null, authentication);
+		super(progress, authentication);
 		this.transactionId = requireNonNull(transactionId);
 		this.dataService = requireNonNull(dataService);
 		this.searchService = requireNonNull(searchService);
