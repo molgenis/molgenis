@@ -274,13 +274,13 @@ public class ElasticSearchService implements SearchService
 		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
 				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("*** REQUEST\n" + builder);
-		}
 		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
 				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2(),
 				request.getAggregateFieldDistinct(), entityMetaData);
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("*** REQUEST\n" + builder);
+		}		
 		SearchResponse response = builder.execute().actionGet();
 		if (LOG.isTraceEnabled())
 		{
