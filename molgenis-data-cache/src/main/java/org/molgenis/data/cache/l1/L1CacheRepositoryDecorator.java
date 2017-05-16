@@ -25,7 +25,7 @@ import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 /**
- * Adds, removes and retrieves entities from the {@link L1Cache} when a {@link Repository} is {@link RepositoryCapability#CACHEABLE}.
+ * Adds, removes and retrieves entities from the {@link TransactionListener} when a {@link Repository} is {@link RepositoryCapability#CACHEABLE}.
  * Delegates to the underlying repository when an action is not supported by the cache or when the cache doesn't contain
  * the needed entity.
  */
@@ -34,11 +34,11 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	private static final int ID_BATCH_SIZE = 1000;
 
 	private final Repository<Entity> decoratedRepository;
-	private final L1Cache l1Cache;
+	private final TransactionListener l1Cache;
 
 	private final boolean cacheable;
 
-	public L1CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L1Cache l1Cache)
+	public L1CacheRepositoryDecorator(Repository<Entity> decoratedRepository, TransactionListener l1Cache)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l1Cache = requireNonNull(l1Cache);

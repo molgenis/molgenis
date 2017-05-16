@@ -26,16 +26,15 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * Each transaction is given a unique transaction id.
  */
-public class MolgenisTransactionManager extends DataSourceTransactionManager
+public class PostgreSqlTransactionManager extends DataSourceTransactionManager implements TransactionManager
 {
 	private static final long serialVersionUID = 1L;
-	public static final String TRANSACTION_ID_RESOURCE_NAME = "transactionId";
-	private static final Logger LOG = LoggerFactory.getLogger(MolgenisTransactionManager.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlTransactionManager.class);
 	private final IdGenerator idGenerator;
-	private final List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
+	private final List<TransactionListener> transactionListeners = new ArrayList<>();
 	private final TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
 
-	public MolgenisTransactionManager(IdGenerator idGenerator, DataSource dataSource,
+	public PostgreSqlTransactionManager(IdGenerator idGenerator, DataSource dataSource,
 			TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry)
 	{
 		super(dataSource);
@@ -45,7 +44,8 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		this.transactionExceptionTranslatorRegistry = requireNonNull(transactionExceptionTranslatorRegistry);
 	}
 
-	public void addTransactionListener(MolgenisTransactionListener transactionListener)
+	@Override
+	public void addTransactionListener(TransactionListener transactionListener)
 	{
 		//FIXME: make concurrent using ReeentrantReadWriteLock.
 		transactionListeners.add(transactionListener);

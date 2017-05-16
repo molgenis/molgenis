@@ -9,7 +9,7 @@ import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,19 +26,19 @@ import static org.slf4j.LoggerFactory.getLogger;
  * cache. When the transaction is committed the cache is removed.
  */
 @Component
-public class L1Cache extends DefaultMolgenisTransactionListener
+public class TransactionListener extends DefaultMolgenisTransactionListener
 {
-	private static final Logger LOG = getLogger(L1Cache.class);
+	private static final Logger LOG = getLogger(TransactionListener.class);
 	private static final int MAX_CACHE_SIZE = 1000;
 	private final ThreadLocal<CombinedEntityCache> caches;
 	private final EntityHydration entityHydration;
 
 	@Autowired
-	public L1Cache(MolgenisTransactionManager molgenisTransactionManager, EntityHydration entityHydration)
+	public TransactionListener(TransactionManager transactionManager, EntityHydration entityHydration)
 	{
 		caches = new ThreadLocal<>();
 		this.entityHydration = requireNonNull(entityHydration);
-		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
+		requireNonNull(transactionManager).addTransactionListener(this);
 	}
 
 	@Override

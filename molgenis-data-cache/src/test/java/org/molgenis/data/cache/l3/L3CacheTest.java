@@ -9,8 +9,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -48,7 +48,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	private TransactionInformation transactionInformation;
 
 	@Mock
-	private MolgenisTransactionManager molgenisTransactionManager;
+	private TransactionManager transactionManager;
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -86,7 +86,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 		when(decoratedRepository.getName()).thenReturn(repositoryName);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 
-		l3Cache = new L3Cache(molgenisTransactionManager, transactionInformation);
+		l3Cache = new L3Cache(transactionManager, transactionInformation);
 	}
 
 	@Test

@@ -11,7 +11,7 @@ import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,7 +31,7 @@ public class IndexConfig
 	private IndexActionRegisterService indexActionRegisterService;
 
 	@Autowired
-	private MolgenisTransactionManager molgenisTransactionManager;
+	private TransactionManager transactionManager;
 
 	@Autowired
 	private DataService dataService;
@@ -58,7 +58,7 @@ public class IndexConfig
 	{
 		final IndexTransactionListener indexTransactionListener = new IndexTransactionListener(rebuildIndexService(),
 				indexActionRegisterService);
-		molgenisTransactionManager.addTransactionListener(indexTransactionListener);
+		transactionManager.addTransactionListener(indexTransactionListener);
 		return indexTransactionListener;
 	}
 

@@ -1,6 +1,6 @@
 package org.molgenis.data.transaction;
 
-public abstract class DefaultMolgenisTransactionListener implements MolgenisTransactionListener
+public abstract class DefaultMolgenisTransactionListener implements TransactionListener
 {
 	@Override
 	public void transactionStarted(String transactionId)

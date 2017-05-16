@@ -11,8 +11,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +51,13 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	private final TransactionInformation transactionInformation;
 
 	@Autowired
-	public L2Cache(MolgenisTransactionManager molgenisTransactionManager, EntityHydration entityHydration,
+	public L2Cache(TransactionManager transactionManager, EntityHydration entityHydration,
 			TransactionInformation transactionInformation)
 	{
 		this.entityHydration = requireNonNull(entityHydration);
 		this.transactionInformation = requireNonNull(transactionInformation);
 		caches = newConcurrentMap();
-		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
+		requireNonNull(transactionManager).addTransactionListener(this);
 	}
 
 	@Override

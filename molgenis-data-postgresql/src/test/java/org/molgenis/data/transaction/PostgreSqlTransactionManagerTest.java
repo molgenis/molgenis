@@ -10,9 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
-public class MolgenisTransactionManagerTest
+public class PostgreSqlTransactionManagerTest
 {
-	private MolgenisTransactionManager molgenisTransactionManager;
+	private PostgreSqlTransactionManager molgenisTransactionManager;
 	private IdGenerator idGenerator;
 
 	@BeforeMethod
@@ -22,7 +22,7 @@ public class MolgenisTransactionManagerTest
 		DataSource dataSource = mock(DataSource.class);
 		TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry = mock(
 				TransactionExceptionTranslatorRegistry.class);
-		molgenisTransactionManager = new MolgenisTransactionManager(idGenerator, dataSource,
+		molgenisTransactionManager = new PostgreSqlTransactionManager(idGenerator, dataSource,
 				transactionExceptionTranslatorRegistry);
 	}
 

@@ -2,7 +2,7 @@ package org.molgenis.data.postgresql.identifier;
 
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
+import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.bindResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.unbindResource;
 import static org.testng.Assert.assertEquals;
@@ -22,8 +22,8 @@ public class EntityTypeRegistryImplTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		MolgenisTransactionManager molgenisTransactionManager = mock(MolgenisTransactionManager.class);
-		entityTypeRegistryImpl = new EntityTypeRegistryImpl(molgenisTransactionManager);
+		TransactionManager transactionManager = mock(TransactionManager.class);
+		entityTypeRegistryImpl = new EntityTypeRegistryImpl(transactionManager);
 		bindResource(TRANSACTION_ID_RESOURCE_NAME, "1");
 	}
 

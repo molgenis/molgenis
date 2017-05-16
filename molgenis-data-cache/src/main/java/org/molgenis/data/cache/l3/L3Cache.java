@@ -10,8 +10,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,10 +44,10 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 	private final TransactionInformation transactionInformation;
 
 	@Autowired
-	public L3Cache(MolgenisTransactionManager molgenisTransactionManager, TransactionInformation transactionInformation)
+	public L3Cache(TransactionManager transactionManager, TransactionInformation transactionInformation)
 	{
 		this.transactionInformation = requireNonNull(transactionInformation);
-		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
+		requireNonNull(transactionManager).addTransactionListener(this);
 	}
 
 	@Override

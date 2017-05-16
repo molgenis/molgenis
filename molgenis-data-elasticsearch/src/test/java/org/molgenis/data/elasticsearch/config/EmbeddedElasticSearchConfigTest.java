@@ -14,7 +14,7 @@ import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.user.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -72,9 +72,9 @@ public class EmbeddedElasticSearchConfigTest
 		}
 
 		@Bean
-		public MolgenisTransactionManager molgenisTransactionManager()
+		public TransactionManager molgenisTransactionManager()
 		{
-			return mock(MolgenisTransactionManager.class);
+			return mock(TransactionManager.class);
 		}
 
 		@Bean

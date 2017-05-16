@@ -20,7 +20,7 @@ import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.integrationtest.data.TestAppSettings;
@@ -205,13 +205,13 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	// FIXME The bootstrapping of the data platform should be delegated to a specific bootstrapper so that updates
 	// are reflected in the test
 	@Autowired
-	MolgenisTransactionManager molgenisTransactionManager;
+	TransactionManager transactionManager;
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		TransactionTemplate transactionTemplate = new TransactionTemplate();
-		transactionTemplate.setTransactionManager(molgenisTransactionManager);
+		transactionTemplate.setTransactionManager(transactionManager);
 		transactionTemplate.execute((action) ->
 		{
 			try

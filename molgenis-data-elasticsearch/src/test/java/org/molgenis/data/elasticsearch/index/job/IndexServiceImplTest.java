@@ -8,8 +8,8 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionListener;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionListener;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -47,10 +47,10 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisTransactionManager molgenisTransactionManager;
+	private TransactionManager transactionManager;
 
 	@Autowired
-	private MolgenisTransactionListener molgenisTransactionListener;
+	private TransactionListener molgenisTransactionListener;
 
 	@Autowired
 	private ExecutorService executorService;
@@ -85,7 +85,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void setUp() throws Exception
 	{
-		verify(molgenisTransactionManager).addTransactionListener(molgenisTransactionListener);
+		verify(transactionManager).addTransactionListener(molgenisTransactionListener);
 	}
 
 	@BeforeMethod
@@ -141,7 +141,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		private MailSender mailSender;
 
 		@Mock
-		private MolgenisTransactionManager molgenisTransactionManager;
+		private TransactionManager transactionManager;
 
 		public Config()
 		{
@@ -166,9 +166,9 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public MolgenisTransactionManager molgenisTransactionManager()
+		public TransactionManager molgenisTransactionManager()
 		{
-			return molgenisTransactionManager;
+			return transactionManager;
 		}
 
 		@Bean

@@ -3,9 +3,9 @@ package org.molgenis.data.transaction;
 /**
  * Interface that can be implemented by classes that want to join transactions.
  * <p>
- * A MolgenisTransactionListener must bootstrap itself by the MolgenisTransactionManager
+ * A TransactionListener must bootstrap itself by the TransactionManager
  */
-public interface MolgenisTransactionListener
+public interface TransactionListener
 {
 	void transactionStarted(String transactionId);
 
@@ -16,5 +16,4 @@ public interface MolgenisTransactionListener
 	void rollbackTransaction(String transactionId);
 
 	void doCleanupAfterCompletion(String transactionId);
-
 }

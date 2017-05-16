@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +36,7 @@ import static org.testng.Assert.assertTrue;
 @ContextConfiguration(classes = L1CacheTest.Config.class)
 public class L1CacheTest extends AbstractMolgenisSpringTest
 {
-	private L1Cache l1Cache;
+	private TransactionListener l1Cache;
 	private EntityType entityType;
 	private Entity entity1;
 	private Entity entity2;
@@ -59,7 +59,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	private EntityHydration entityHydration;
 
 	@Mock
-	private MolgenisTransactionManager molgenisTransactionManager;
+	private TransactionManager transactionManager;
 
 	@BeforeClass
 	public void beforeClass()
@@ -82,7 +82,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		l1Cache = new L1Cache(molgenisTransactionManager, entityHydration);
+		l1Cache = new TransactionListener(transactionManager, entityHydration);
 	}
 
 	@Test
