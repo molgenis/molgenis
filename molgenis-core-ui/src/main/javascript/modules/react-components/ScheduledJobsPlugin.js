@@ -45,7 +45,6 @@ class ScheduledJobsPlugin extends Component {
                         <Table entity={scheduledJob.type.jobExecutionType.id}
                                enableAdd={false}
                                sort={{attr: {name: 'startDate'}, order: 'desc', path: []}}
-                               attrs={{status: null, startDate: null, endDate: null, progressMessage: null, file: null}}
                                query={{q: [{field: 'scheduledJobId', operator: 'EQUALS', value: scheduledJob.id}]}}/>
                     </div>
                 </div>}
