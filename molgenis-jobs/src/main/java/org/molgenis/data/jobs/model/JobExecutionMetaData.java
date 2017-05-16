@@ -31,6 +31,7 @@ public class JobExecutionMetaData extends SystemEntityType
 	public static final String RESULT_URL = "resultUrl";
 	public static final String SUCCESS_EMAIL = "successEmail";
 	public static final String FAILURE_EMAIL = "failureEmail";
+	public static final String SCHEDULED_JOB_ID = "scheduledJobId";
 	public static final String PENDING = "PENDING";
 	public static final String RUNNING = "RUNNING";
 	public static final String SUCCESS = "SUCCESS";
@@ -68,6 +69,9 @@ public class JobExecutionMetaData extends SystemEntityType
 				.setNillable(true);
 		addAttribute(SUCCESS_EMAIL).setDataType(STRING).setLabel("Success email")
 				.setDescription("Comma-separated email addresses to send email to if execution succeeds")
+				.setNillable(true);
+		addAttribute(SCHEDULED_JOB_ID).setDataType(STRING).setLabel("ScheduledJob ID")
+				.setDescription("ID of the ScheduledJob that was executed in this JobExecution, if applicable")
 				.setNillable(true);
 	}
 }
