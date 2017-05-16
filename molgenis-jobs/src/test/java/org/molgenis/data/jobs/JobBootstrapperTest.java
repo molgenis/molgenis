@@ -6,7 +6,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.model.JobType;
+import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
-import static org.molgenis.data.jobs.model.JobTypeMetadata.JOB_TYPE;
+import static org.molgenis.data.jobs.model.ScheduledJobTypeMetadata.SCHEDULED_JOB_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -42,10 +42,10 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	@Autowired
-	private JobType jobType;
+	private ScheduledJobType scheduledJobType;
 
 	@Mock
-	private Repository<JobType> jobTypeRepo;
+	private Repository<ScheduledJobType> jobTypeRepo;
 
 	@Mock
 	private SystemEntityType fileIngestJobExecutionType;
@@ -69,7 +69,7 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 	private ArgumentCaptor<String> stringCaptor;
 
 	@Autowired
-	JobScheduler jobScheduler;
+	private JobScheduler jobScheduler;
 
 	@Autowired
 	private Config config;
@@ -95,7 +95,7 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 
 		when(query.findAll()).thenReturn(Stream.of(fileIngestJob1, fileIngestJob2, fileIngestJob3));
 
-		when(dataService.getRepository(JOB_TYPE, JobType.class)).thenReturn(jobTypeRepo);
+		when(dataService.getRepository(SCHEDULED_JOB_TYPE, ScheduledJobType.class)).thenReturn(jobTypeRepo);
 
 		when(fileIngestJob1.get(LOG)).thenReturn("Current log");
 		when(fileIngestJob1.getEntityType()).thenReturn(fileIngestJobExecutionType);
@@ -129,7 +129,7 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		verify(dataService).update("sys_FileIngestJobExecution", fileIngestJob1);
 		verify(dataService).update("sys_FileIngestJobExecution", fileIngestJob2);
 		verify(jobScheduler).scheduleJobs();
-		verify(jobTypeRepo).upsertBatch(Collections.singletonList(jobType));
+		verify(jobTypeRepo).upsertBatch(Collections.singletonList(scheduledJobType));
 
 	}
 
@@ -140,15 +140,14 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		private JobFactory fileIngestJobFactory;
 
 		@Mock
-		private JobType fileIngestJobType;
+		private ScheduledJobType fileIngestScheduledJobType;
 
 		@Mock
 		private JobScheduler jobScheduler;
 
 		private void resetMocks()
 		{
-			reset(jobScheduler, fileIngestJobType, fileIngestJobFactory);
-			when(fileIngestJobFactory.getJobType()).thenReturn(fileIngestJobType);
+			reset(jobScheduler, fileIngestScheduledJobType, fileIngestJobFactory);
 		}
 
 		public Config()
@@ -163,9 +162,9 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public JobType jobType()
+		public ScheduledJobType jobType()
 		{
-			return fileIngestJobType;
+			return fileIngestScheduledJobType;
 		}
 
 		@Bean

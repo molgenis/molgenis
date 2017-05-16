@@ -4,28 +4,29 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.jobs.model.JobTypeMetadata.*;
+import static org.molgenis.data.jobs.model.ScheduledJobTypeMetadata.*;
 
 /**
  * Describes a schedulable Job type.
  */
-public class JobType extends StaticEntity
+public class ScheduledJobType extends StaticEntity
 {
-	public JobType(Entity entity)
+	public ScheduledJobType(Entity entity)
 	{
 		super(entity);
 	}
 
-	public JobType(EntityType entityType)
+	public ScheduledJobType(EntityType entityType)
 	{
 		super(entityType);
 	}
 
-	public JobType(String name, EntityType entityType)
+	public ScheduledJobType(String name, EntityType entityType)
 	{
 		super(entityType);
 		setName(name);
 	}
+
 	public String getName()
 	{
 		return getString(NAME);
@@ -66,7 +67,7 @@ public class JobType extends StaticEntity
 		set(JOB_EXECUTION_TYPE, jobExecutionType);
 	}
 
-	String getSchema()
+	public String getSchema()
 	{
 		return getString(SCHEMA);
 	}

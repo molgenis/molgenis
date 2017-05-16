@@ -394,7 +394,7 @@ paths:
           type: boolean
           required: false
           description: indicates if a source attribute should be added to the EntityType, ignored when mapping to an existing EntityType
-        - name: package
+        - name: packageId
           in: query
           type: string
           required: false

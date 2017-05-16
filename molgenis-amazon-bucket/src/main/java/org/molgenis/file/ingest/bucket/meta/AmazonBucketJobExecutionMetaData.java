@@ -41,10 +41,10 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 	{
 		setLabel("Amazon Bucket file ingest job execution");
 		setExtends(jobExecutionMetaData);
-		addAttribute(BUCKET).setLabel("Bucket name").setDescription("The name of the bucket.").setNillable(true);
-		addAttribute(KEY).setLabel("Key").setDescription("Expression to match the file key").setNillable(true);
+		addAttribute(BUCKET).setLabel("Bucket name").setDescription("The name of the bucket.").setNillable(false);
+		addAttribute(KEY).setLabel("Key").setDescription("Expression to match the file key").setNillable(false);
 		addAttribute(EXPRESSION).setDataType(BOOL).setLabel("Is key expression")
-				.setDescription("Is the key an expression or an exact match").setNillable(false);
+				.setDescription("Is the key an expression or an exact match").setNillable(true);
 		addAttribute(PROFILE).setLabel("the profile to be used to login to the bucket").setNillable(false);
 		addAttribute(TARGET_ENTITY_ID).setLabel("Target EntityType ID").setNillable(true);
 		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)

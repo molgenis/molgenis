@@ -1,5 +1,6 @@
 package org.molgenis.data.jobs.schedule;
 
+import org.molgenis.data.jobs.JobExecutor;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

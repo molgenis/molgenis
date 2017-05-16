@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @ContextConfiguration(classes = { AbstractMolgenisSpringTest.Config.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
 public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired

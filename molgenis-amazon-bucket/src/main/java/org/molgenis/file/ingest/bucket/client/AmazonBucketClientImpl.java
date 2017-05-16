@@ -3,7 +3,7 @@ package org.molgenis.file.ingest.bucket.client;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
@@ -24,7 +24,7 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 	@Override
 	public AmazonS3 getClient(String profile)
 	{
-		return new AmazonS3Client(new ProfileCredentialsProvider(profile).getCredentials());
+		return AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider(profile)).build();
 	}
 
 	@Override
