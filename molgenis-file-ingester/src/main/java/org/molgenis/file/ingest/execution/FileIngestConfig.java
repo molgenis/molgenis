@@ -6,25 +6,33 @@ import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+
+import static java.text.MessageFormat.format;
+import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @Import(FileIngester.class)
 public class FileIngestConfig
 {
-	@Autowired
-	FileIngester fileIngester;
+	private final FileIngester fileIngester;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
+	private final MenuReaderService menuReaderService;
 
-	@Autowired
-	ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
+	public FileIngestConfig(FileIngester fileIngester, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData, MenuReaderService menuReaderService)
+	{
+		this.fileIngester = requireNonNull(fileIngester);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.fileIngestJobExecutionMetaData = requireNonNull(fileIngestJobExecutionMetaData);
+		this.menuReaderService = requireNonNull(menuReaderService);
+	}
 
 	/**
 	 * The FileIngestJob Factory bean.
@@ -40,6 +48,8 @@ public class FileIngestConfig
 				final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
 				final String url = fileIngestJobExecution.getUrl();
 				final String loader = fileIngestJobExecution.getLoader();
+				String dataExplorerURL = menuReaderService.getMenu().findMenuItemPath("dataexplorer");
+				fileIngestJobExecution.setResultUrl(format("{0}?entity={1}", dataExplorerURL, targetEntityId));
 				return progress -> fileIngester
 						.ingest(targetEntityId, url, loader, fileIngestJobExecution.getIdentifier(), progress);
 			}

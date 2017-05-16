@@ -6,6 +6,8 @@ import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,9 @@ public class MappingJobConfig
 	@Autowired
 	private MappingJobExecutionMetadata mappingJobExecutionMetadata;
 
+	@Autowired
+	private MenuReaderService menuReaderService;
+
 	/**
 	 * The MappingJob Factory bean.
 	 */
@@ -42,6 +47,10 @@ public class MappingJobConfig
 				final String packageId = mappingJobExecution.getPackageId();
 				final String label = mappingJobExecution.getLabel();
 				final Boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
+				final String resultUrl =
+						menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
+								+ targetEntityTypeId;
+				mappingJobExecution.setResultUrl(resultUrl);
 				return progress -> mappingService
 						.applyMappings(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label,
 								progress);
