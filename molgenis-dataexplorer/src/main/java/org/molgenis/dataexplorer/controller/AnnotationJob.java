@@ -21,9 +21,9 @@ public class AnnotationJob extends TransactionalJob<Void>
 	private final String username;
 	private final List<RepositoryAnnotator> annotators;
 	private final Repository<Entity> repository;
-	List<String> successfulAnnotators = Lists.newArrayList();
-	List<String> failedAnnotators = Lists.newArrayList();
-	Exception firstException = null;
+	private List<String> successfulAnnotators = Lists.newArrayList();
+	private List<String> failedAnnotators = Lists.newArrayList();
+	private Exception firstException = null;
 
 	public AnnotationJob(CrudRepositoryAnnotator crudRepositoryAnnotator, String username,
 			List<RepositoryAnnotator> annotators, Repository<Entity> repository, Progress progress,
@@ -89,7 +89,6 @@ public class AnnotationJob extends TransactionalJob<Void>
 	private String getMessage(int i, RepositoryAnnotator annotator)
 	{
 		return String.format("Annotating \"%s\" with %s (annotator %d of %d, started by \"%s\")",
-				repository.getEntityType().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(),
-				username);
+				repository.getEntityType().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(), username);
 	}
 }

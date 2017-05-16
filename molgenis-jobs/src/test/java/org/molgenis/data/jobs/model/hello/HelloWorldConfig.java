@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
+import static java.util.Objects.requireNonNull;
+
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Import(HelloWorldService.class)
 @Configuration
@@ -21,9 +23,9 @@ public class HelloWorldConfig
 	public HelloWorldConfig(HelloWorldService helloWorldService, ScheduledJobTypeFactory scheduledJobTypeFactory,
 			HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata)
 	{
-		this.helloWorldService = helloWorldService;
-		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
-		this.helloWorldJobExecutionMetadata = helloWorldJobExecutionMetadata;
+		this.helloWorldService = requireNonNull(helloWorldService);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.helloWorldJobExecutionMetadata = requireNonNull(helloWorldJobExecutionMetadata);
 	}
 
 	@Bean

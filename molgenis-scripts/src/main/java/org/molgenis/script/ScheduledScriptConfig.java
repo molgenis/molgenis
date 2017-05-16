@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.text.MessageFormat.format;
+import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
@@ -34,9 +35,9 @@ public class ScheduledScriptConfig
 	public ScheduledScriptConfig(SavedScriptRunner savedScriptRunner, ScheduledJobTypeFactory scheduledJobTypeFactory,
 			ScriptJobExecutionMetadata scriptJobExecutionMetadata, Gson gson)
 	{
-		this.savedScriptRunner = savedScriptRunner;
-		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
-		this.scriptJobExecutionMetadata = scriptJobExecutionMetadata;
+		this.savedScriptRunner = requireNonNull(savedScriptRunner);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.scriptJobExecutionMetadata = requireNonNull(scriptJobExecutionMetadata);
 		this.gson = gson;
 	}
 

@@ -12,7 +12,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class FileIngesterPluginController extends MolgenisPluginController
 {
 	public static final String ID = "fileingest";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
 	public FileIngesterPluginController()

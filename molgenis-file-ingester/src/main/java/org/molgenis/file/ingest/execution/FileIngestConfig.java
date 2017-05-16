@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
+import static java.util.Objects.requireNonNull;
+
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @Import(FileIngester.class)
@@ -25,9 +27,9 @@ public class FileIngestConfig
 	public FileIngestConfig(FileIngester fileIngester, ScheduledJobTypeFactory scheduledJobTypeFactory,
 			FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
 	{
-		this.fileIngester = fileIngester;
-		this.scheduledJobTypeFactory = scheduledJobTypeFactory;
-		this.fileIngestJobExecutionMetaData = fileIngestJobExecutionMetaData;
+		this.fileIngester = requireNonNull(fileIngester);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.fileIngestJobExecutionMetaData = requireNonNull(fileIngestJobExecutionMetaData);
 	}
 
 	/**
