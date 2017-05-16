@@ -5,6 +5,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelUtils;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -14,7 +15,6 @@ import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -30,7 +30,6 @@ public class AmazonBucketIngester
 	private final FileStore fileStore;
 	private final AmazonBucketClient amazonBucketClient;
 
-	@Autowired
 	public AmazonBucketIngester(ImportServiceFactory importServiceFactory,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, FileMetaFactory fileMetaFactory,
 			FileStore fileStore, AmazonBucketClient amazonBucketClient)
@@ -38,8 +37,8 @@ public class AmazonBucketIngester
 		this.importServiceFactory = requireNonNull(importServiceFactory);
 		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
 		this.fileMetaFactory = requireNonNull(fileMetaFactory);
-		this.fileStore = fileStore;
-		this.amazonBucketClient = amazonBucketClient;
+		this.fileStore = requireNonNull(fileStore);
+		this.amazonBucketClient = requireNonNull(amazonBucketClient);
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
@@ -54,7 +53,7 @@ public class AmazonBucketIngester
 			progress.progress(1, "downloading...");
 			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
 
-			if (targetEntityTypeName != null) amazonBucketClient.renameSheet(targetEntityTypeName, file);
+			if (targetEntityTypeName != null) ExcelUtils.renameSheet(targetEntityTypeName, file);
 			progress.progress(2, "Importing...");
 			ImportService importService = importServiceFactory.getImportService(file.getName());
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory

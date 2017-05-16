@@ -8,8 +8,6 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.file.FileStore;
 import org.springframework.stereotype.Component;
@@ -32,7 +30,8 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 			String keyName, boolean isExpression) throws IOException, AmazonClientException
 	{
 		String key;
-		String identifier = "bucket_" + jobIdentifier;
+		//The key can be a regular expression instead of the actual key.
+		//This is indicated by the "isExpression" boolean
 		if (isExpression)
 		{
 			key = this.getMostRecentMatchingKey(s3Client, bucketName, keyName);
@@ -43,6 +42,13 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 		}
 		S3Object s3Object = s3Client.getObject(new GetObjectRequest(bucketName, key));
 		InputStream in = s3Object.getObjectContent();
+
+		return storeFile(fileStore, key, jobIdentifier, in);
+	}
+
+	private File storeFile(FileStore fileStore, String key, String jobIdentifier, InputStream in) throws IOException
+	{
+		String identifier = "bucket_" + jobIdentifier;
 		File folder = new File(fileStore.getStorageDir(), identifier);
 		folder.mkdir();
 
@@ -51,29 +57,7 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 		return fileStore.store(in, filename);
 	}
 
-	@Override
-	public void renameSheet(String targetEntityTypeName, File file)
-	{
-		try
-		{
-			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
-			if (workbook.getNumberOfSheets() == 1)
-			{
-				workbook.setSheetName(0, targetEntityTypeName);
-				workbook.write(new FileOutputStream(file));
-			}
-			else
-			{
-				throw new MolgenisDataException(
-						"Amazon Bucket imports to a specified entityType are only possible with one sheet");
-			}
-		}
-		catch (Exception e)
-		{
-			throw new MolgenisDataException(e);
-		}
-	}
-
+	//in case of an key expression all matching keys are collected and the most recent file is downloaded.
 	private String getMostRecentMatchingKey(AmazonS3 s3Client, String bucketName, String regex)
 	{
 		ObjectListing objectListing = s3Client.listObjects(bucketName);

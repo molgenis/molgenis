@@ -13,6 +13,4 @@ public interface AmazonBucketClient
 
 	File downloadFile(AmazonS3 s3Client, FileStore fileStore, String jobIdentifier, String bucketName, String keyName,
 			boolean isExpression) throws IOException, AmazonClientException;
-
-	void renameSheet(String targetEntityTypeName, File file);
 }
