@@ -61,7 +61,7 @@ public class ScheduledScriptConfig
 					{
 						scriptJobExecution.setResultUrl(format("/files/{0}", scriptResult.getOutputFile().getId()));
 					}
-					progress.appendLog(scriptResult.getOutput());
+					progress.appendLog("Script output:\n" + scriptResult.getOutput());
 					return scriptResult;
 				};
 			}
