@@ -53,7 +53,18 @@ public class AmazonBucketIngester
 			progress.progress(1, "downloading...");
 			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
 
-			if (targetEntityTypeName != null) ExcelUtils.renameSheet(targetEntityTypeName, file);
+			if (targetEntityTypeName != null)
+			{
+				if (ExcelUtils.getNumberOfSheets(file) == 1)
+				{
+					ExcelUtils.renameSheet(targetEntityTypeName, file, 0);
+				}
+				else
+				{
+					throw new MolgenisDataException(
+							"Amazon Bucket imports to a specified entityType are only possible with one sheet");
+				}
+			}
 			progress.progress(2, "Importing...");
 			ImportService importService = importServiceFactory.getImportService(file.getName());
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory

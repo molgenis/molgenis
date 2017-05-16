@@ -118,21 +118,28 @@ public class ExcelUtils
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
 	}
 
-	public static void renameSheet(String newSheetname, File file)
+	public static void renameSheet(String newSheetname, File file, int index)
 	{
 		try
 		{
 			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
-			if (workbook.getNumberOfSheets() == 1)
-			{
-				workbook.setSheetName(0, newSheetname);
+
+			workbook.setSheetName(index, newSheetname);
 				workbook.write(new FileOutputStream(file));
-			}
-			else
-			{
-				throw new MolgenisDataException(
-						"Amazon Bucket imports to a specified entityType are only possible with one sheet");
-			}
+
+		}
+		catch (Exception e)
+		{
+			throw new MolgenisDataException(e);
+		}
+	}
+
+	public static int getNumberOfSheets(File file)
+	{
+		try
+		{
+			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
+			return workbook.getNumberOfSheets();
 		}
 		catch (Exception e)
 		{

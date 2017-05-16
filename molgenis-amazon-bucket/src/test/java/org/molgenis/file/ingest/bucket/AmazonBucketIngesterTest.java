@@ -7,17 +7,14 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.ingest.bucket.config.AmazonBucketTestConfig;
 import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecution;
-import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecutionMetaData;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.file.model.FileMetaMetaData;
-import org.molgenis.security.owned.OwnedEntityType;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,13 +70,13 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 		when(report.getNrImportedEntitiesMap()).thenReturn(imported);
 		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
 				.thenReturn(fileRepositoryCollectionMock);
-		when(importServiceFactoryMock.getImportService("test")).thenReturn(importServiceMock);
+		when(importServiceFactoryMock.getImportService("test_data_only.xlsx")).thenReturn(importServiceMock);
 		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT))).thenReturn(report);
 		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
 		amazonBucketIngester
 				.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", "test", true, progress);
-		verify(importServiceFactoryMock).getImportService("test");
+		verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
 		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT));
 	}
 
@@ -129,10 +126,11 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 			AmazonBucketClient amazonBucketClient = mock(AmazonBucketClient.class);
 			try
 			{
+				File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
 				when(amazonBucketClient.getClient("test")).thenReturn(client);
 				when(amazonBucketClient
 						.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"), eq(true)))
-						.thenReturn(new File("test"));
+						.thenReturn(file);
 			}
 			catch (Exception e)
 			{
