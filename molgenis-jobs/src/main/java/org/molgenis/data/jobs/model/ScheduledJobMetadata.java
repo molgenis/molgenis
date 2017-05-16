@@ -28,13 +28,13 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String PARAMETERS = "parameters";
 	public static final String USER = "user";
 
-	private JobTypeMetadata jobTypeMetadata;
+	private ScheduledJobTypeMetadata scheduledJobTypeMetadata;
 
 	@Autowired
-	public ScheduledJobMetadata(JobTypeMetadata jobTypeMetadata)
+	public ScheduledJobMetadata(ScheduledJobTypeMetadata scheduledJobTypeMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.jobTypeMetadata = requireNonNull(jobTypeMetadata);
+		this.scheduledJobTypeMetadata = requireNonNull(scheduledJobTypeMetadata);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class ScheduledJobMetadata extends SystemEntityType
 	{
 		setLabel("Scheduled job");
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
 		addAttribute(CRON_EXPRESSION).setLabel("Cron expression").setNillable(false).setDescription(
 				"Cron expression. A cron expression is a string comprised of 6 or 7 fields separated by white space. "
@@ -51,15 +51,16 @@ public class ScheduledJobMetadata extends SystemEntityType
 						+ "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
 				.setValidationExpression("$('" + CRON_EXPRESSION + "').matches(" + RegexUtils.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
-		addAttribute(USER).setLabel("Username").setDescription("Name of the user to run the job as.")
-				.setNillable(false);
+		addAttribute(USER).setLabel("Username")
+				.setDescription("Name of the user to run the job as. Will be automatically filled in by the system.")
+				.setNillable(true);
 		addAttribute(FAILURE_EMAIL).setDataType(EMAIL).setLabel("Failure email").setDescription(
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs failed.")
 				.setNillable(true);
 		addAttribute(SUCCESS_EMAIL).setDataType(EMAIL).setLabel("Success email").setDescription(
 				"Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
 				.setNillable(true);
-		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(jobTypeMetadata).setNillable(false);
+		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(scheduledJobTypeMetadata).setNillable(false);
 		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("Job parameters").setNillable(false);
 	}
 }

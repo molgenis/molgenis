@@ -6,12 +6,11 @@ import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.importer.wizard.ImportWizardController;
+import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
-import org.molgenis.data.mapper.job.MappingJob;
 import org.molgenis.data.mapper.job.MappingJobExecution;
 import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
-import org.molgenis.data.mapper.job.MappingJobFactory;
 import org.molgenis.data.mapper.mapping.model.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.service.AlgorithmService;
@@ -49,7 +48,6 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -109,13 +107,10 @@ public class MappingServiceController extends MolgenisPluginController
 	private MappingJobExecutionFactory mappingJobExecutionFactory;
 
 	@Autowired
-	private MappingJobFactory mappingJobFactory;
-
-	@Autowired
 	private UserAccountService userAccountService;
 
 	@Autowired
-	private ExecutorService executorService;
+	private JobExecutor jobExecutor;
 
 	public MappingServiceController()
 	{
@@ -602,7 +597,6 @@ public class MappingServiceController extends MolgenisPluginController
 			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
 		}
 
-
 		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId,
 				label);
 		return created(new URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
@@ -630,8 +624,8 @@ public class MappingServiceController extends MolgenisPluginController
 		String resultUrl = menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
 				+ targetEntityTypeId;
 		mappingJobExecution.setResultUrl(resultUrl);
-		MappingJob job = mappingJobFactory.createJob(mappingJobExecution);
-		executorService.submit(job);
+		jobExecutor.submit(mappingJobExecution);
+
 		return concatEntityHref("/api/v2", mappingJobExecution.getEntityType().getId(),
 				mappingJobExecution.getIdValue());
 	}

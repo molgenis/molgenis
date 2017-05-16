@@ -167,9 +167,13 @@ public class MappingServiceImpl implements MappingService
 
 	@Override
 	@Transactional
-	public long applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute,
+	public long applyMappings(String mappingProjectId, String entityTypeId, Boolean addSourceAttribute,
 			String packageId, String label, Progress progress)
 	{
+		MappingProject mappingProject = getMappingProject(mappingProjectId);
+		MappingTarget mappingTarget = mappingProject.getMappingTargets().get(0);
+		progress.setProgressMax(calculateMaxProgress(mappingTarget));
+
 		progress.progress(0, format("Checking target repository [%s]...", entityTypeId));
 		EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
 				addSourceAttribute);
@@ -384,5 +388,30 @@ public class MappingServiceImpl implements MappingService
 		String targetAttributeName = attributeMapping.getTargetAttribute().getName();
 		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType);
 		target.set(targetAttributeName, typedValue);
+	}
+
+	int calculateMaxProgress(MappingTarget mappingTarget)
+	{
+		int batches = mappingTarget.getEntityMappings().stream().mapToInt(this::countBatches).sum();
+		if (mappingTarget.hasSelfReferences())
+		{
+			batches *= 2;
+		}
+		return batches;
+	}
+
+	private int countBatches(EntityMapping entityMapping)
+	{
+		long sourceRows = dataService.count(entityMapping.getSourceEntityType().getId());
+
+		long batches = sourceRows / MAPPING_BATCH_SIZE;
+		long remainder = sourceRows % MAPPING_BATCH_SIZE;
+
+		if (remainder > 0)
+		{
+			batches++;
+		}
+
+		return (int) batches;
 	}
 }
