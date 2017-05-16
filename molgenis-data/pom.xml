@@ -32,12 +32,6 @@
             <artifactId>molgenis-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- TODO remove dependency -->
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-security-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.eaio.uuid</groupId>
             <artifactId>uuid</artifactId>

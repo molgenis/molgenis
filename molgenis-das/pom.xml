@@ -42,6 +42,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-settings</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>uk.ac.ebi.das</groupId>
             <artifactId>jdas</artifactId>
             <version>1.0.4</version>
