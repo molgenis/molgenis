@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.Href.concatEntityHref;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller for running a script
@@ -39,7 +39,7 @@ public class ScriptRunnerController
 	private final MenuReaderService menuReaderService;
 	private final UserAccountService userAccountService;
 
-	private ScriptRunnerController(ScriptJobExecutionFactory scriptJobExecutionFactory, JobExecutor jobExecutor,
+	public ScriptRunnerController(ScriptJobExecutionFactory scriptJobExecutionFactory, JobExecutor jobExecutor,
 			SavedScriptRunner savedScriptRunner, Gson gson, MenuReaderService menuReaderService,
 			UserAccountService userAccountService)
 	{
@@ -51,9 +51,19 @@ public class ScriptRunnerController
 		this.userAccountService = requireNonNull(userAccountService);
 	}
 
-	@RequestMapping("/scripts/{name}/start")
+	/**
+	 * Starts a Script.
+	 * Will redirect the request to the jobs controller, showing the progress of the started {@link ScriptJobExecution}.
+	 * The Script's output will be written to the log of the {@link ScriptJobExecution}.
+	 * If the Script has an outputFile, the URL of that file will be written to the {@link ScriptJobExecution#getResultUrl()}
+	 *
+	 * @param scriptName name of the Script to start
+	 * @param parameters parameter values for the script
+	 * @throws IOException if an input or output exception occurs when redirecting
+	 */
+	@RequestMapping(value = "/scripts/{name}/start", method = POST)
 	public void startScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
-			HttpServletResponse response) throws IOException, URISyntaxException
+			HttpServletResponse response) throws IOException
 	{
 		ScriptJobExecution scriptJobExecution = scriptJobExecutionFactory.create();
 		scriptJobExecution.setName(scriptName);
@@ -68,6 +78,17 @@ public class ScriptRunnerController
 		response.sendRedirect(format("{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=1000", jobControllerURL, jobHref));
 	}
 
+	/**
+	 * Runs a Script, waits for it to finish and returns the result.
+	 *
+	 * If the result has an outputFile, will redirect to a URL where you can download the result file.
+	 * Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+	 * @param scriptName name of the Script to run
+	 * @param parameters parameter values for the script
+	 * @param response {@link HttpServletResponse} to return the result
+	 * @throws IOException if something goes wrong when redirecting or writing the result
+	 * @throws ScriptException if the script name is unknown or one of the script parameters is missing
+	 */
 	@RequestMapping("/scripts/{name}/run")
 	public void runScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
 			HttpServletResponse response) throws IOException

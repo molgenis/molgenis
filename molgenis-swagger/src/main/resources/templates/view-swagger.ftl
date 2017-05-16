@@ -22,6 +22,41 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /scripts/{name}/start:
+    post:
+      tags:
+        - Scripts
+      summary: Starts a Script Job.
+      description: Will redirect the request to the jobs controller, showing the progress of the started ScriptJobExecution. The Script's output will be written to the log of the ScriptJobExecution. If the Script has an outputFile, the URL of that file will be written to the ScriptJobExecution's resultUrl.
+      parameters:
+        - name: name
+          in: path
+          description: The name of the script to start
+        - name: any
+          in: param
+          description: Parameter names depend on the selected Script's parameters. Swagger doesn't allow us to specify such parameters.
+      responses:
+        302:
+          description: URL of a page showing the ScriptJobExecution
+  /scripts/{name}/run:
+    post:
+      tags:
+        - Scripts
+      summary: Runs a Script, waits for the result, serves the result
+      parameters:
+        - name: name
+          in: path
+          description: The name of the Script to run
+        - name: any
+          in: param
+          description: Parameter names depend on the selected Script's parameters. Swagger doesn't allow us to specify such parameters.
+      responses:
+        302:
+          description: If the result has an outputFile, will redirect to a URL where you can download the result file.
+        200:
+          description: Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+        400:
+          description: If the Script name is unknown or one of the Script's parameter values is missing
   /plugin/jobs/run/{scheduledJobId}:
     post:
       tags:
