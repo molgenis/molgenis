@@ -1,0 +1,11 @@
+.scheduled-jobs-table {
+	margin: 20px;
+}
+
+legend button {
+	margin-left: 10px;
+}
+
+th.expanded-left button.btn-xs.btn-default {
+	display: none;
+}
