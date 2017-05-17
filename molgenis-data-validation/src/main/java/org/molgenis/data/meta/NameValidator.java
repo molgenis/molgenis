@@ -1,24 +1,17 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.MolgenisReservedKeywords;
+import com.google.common.collect.Sets;
 import org.molgenis.data.MolgenisDataException;
 
 import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * Validates if metadata is internally consistent and correct.
  */
 public class NameValidator
 {
-	public static final Set<String> KEYWORDS = newHashSet();
-
-	static
-	{
-		// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
-		KEYWORDS.addAll(MolgenisReservedKeywords.MOLGENIS_KEYWORDS);
-	}
+	// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
+	public static final Set<String> KEYWORDS = Sets.newHashSet("login", "logout", "csv", "base", "exist", "meta");
 
 	/**
 	 * Checks if a name is a reserved keyword.

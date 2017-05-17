@@ -26,7 +26,6 @@
     </build>
 
     <dependencies>
-        <!-- TODO remove dependency -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core</artifactId>
