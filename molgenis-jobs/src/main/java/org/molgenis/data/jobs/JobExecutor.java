@@ -82,6 +82,7 @@ public class JobExecutor
 		jobExecution.setFailureEmail(scheduledJob.getFailureEmail());
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());
 		jobExecution.setUser(scheduledJob.getUser());
+		jobExecution.setScheduledJobId(scheduledJob.getId());
 		return jobExecution;
 	}
 
