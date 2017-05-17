@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest;
+package org.molgenis.ui.jobs;
 
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
-@RequestMapping(FileIngesterPluginController.URI)
-public class FileIngesterPluginController extends MolgenisPluginController
+@RequestMapping(ScheduledJobsController.URI)
+public class ScheduledJobsController extends MolgenisPluginController
 {
-	public static final String ID = "fileingest";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String ID = "scheduledjobs";
+	public static final String URI = PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
-	public FileIngesterPluginController()
+	public ScheduledJobsController()
 	{
 		super(URI);
 	}
@@ -23,6 +23,6 @@ public class FileIngesterPluginController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init()
 	{
-		return "view-file-ingest";
+		return "view-scheduled-jobs";
 	}
 }
