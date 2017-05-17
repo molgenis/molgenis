@@ -36,7 +36,7 @@ public class JobScheduler
 	private final Scheduler quartzScheduler;
 	private final DataService dataService;
 
-	public JobScheduler(Scheduler quartzScheduler, DataService dataService)
+	JobScheduler(Scheduler quartzScheduler, DataService dataService)
 	{
 		this.quartzScheduler = requireNonNull(quartzScheduler);
 		this.dataService = requireNonNull(dataService);
@@ -138,7 +138,7 @@ public class JobScheduler
 	 *
 	 * @param scheduledJobId ID of the ScheduledJob to unschedule
 	 */
-	public synchronized void unschedule(String scheduledJobId)
+	synchronized void unschedule(String scheduledJobId)
 	{
 		try
 		{

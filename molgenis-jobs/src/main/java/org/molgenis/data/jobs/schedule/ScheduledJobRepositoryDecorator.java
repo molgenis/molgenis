@@ -25,7 +25,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	private final Repository<ScheduledJob> decorated;
 	private final JobScheduler scheduler;
 
-	public ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler)
+	ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.scheduler = requireNonNull(scheduler);

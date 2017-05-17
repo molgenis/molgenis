@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -95,8 +94,7 @@ public class JobsController extends MolgenisPluginController
 					dataService.findAll(e.getId(), q).forEach(jobs::add);
 				});
 
-		Collections.sort(jobs,
-				(job1, job2) -> job2.getInstant(SUBMISSION_DATE).compareTo(job1.getInstant(SUBMISSION_DATE)));
+		jobs.sort((job1, job2) -> job2.getInstant(SUBMISSION_DATE).compareTo(job1.getInstant(SUBMISSION_DATE)));
 		if (jobs.size() > MAX_JOBS_TO_RETURN)
 		{
 			return jobs.subList(0, MAX_JOBS_TO_RETURN);

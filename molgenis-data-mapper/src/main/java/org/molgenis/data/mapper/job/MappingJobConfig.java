@@ -14,19 +14,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
+import static java.util.Objects.requireNonNull;
+
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @Import(MappingServiceImpl.class)
 public class MappingJobConfig
 {
-	@Autowired
-	private MappingService mappingService;
+	private final MappingService mappingService;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final MappingJobExecutionMetadata mappingJobExecutionMetadata;
 
 	@Autowired
-	private ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	private MappingJobExecutionMetadata mappingJobExecutionMetadata;
+	public MappingJobConfig(MappingService mappingService, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			MappingJobExecutionMetadata mappingJobExecutionMetadata)
+	{
+		this.mappingService = requireNonNull(mappingService);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.mappingJobExecutionMetadata = requireNonNull(mappingJobExecutionMetadata);
+	}
 
 	@Autowired
 	private MenuReaderService menuReaderService;

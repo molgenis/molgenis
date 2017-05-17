@@ -7,14 +7,21 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Quartz {@link Job} executes a {@link org.molgenis.data.jobs.model.ScheduledJob} using the {@link JobExecutor}.
  */
 @DisallowConcurrentExecution
 public class MolgenisQuartzJob implements Job
 {
+	private final JobExecutor jobExecutor;
+
 	@Autowired
-	private JobExecutor jobExecutor;
+	public MolgenisQuartzJob(JobExecutor jobExecutor)
+	{
+		this.jobExecutor = requireNonNull(jobExecutor);
+	}
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException
