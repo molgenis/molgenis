@@ -42,14 +42,14 @@ public class AmazonBucketIngester
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
-			String profile, boolean isExpression, Progress progress)
+			String profile, String region, boolean isExpression, Progress progress)
 	{
 		FileMeta fileMeta;
 		try
 		{
 			progress.setProgressMax(3);
 			progress.progress(0, "Connection to Amazon Bucket with profile '" + profile + "'");
-			AmazonS3 client = amazonBucketClient.getClient(profile);
+			AmazonS3 client = amazonBucketClient.getClient(profile, region);
 			progress.progress(1, "downloading...");
 			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
 

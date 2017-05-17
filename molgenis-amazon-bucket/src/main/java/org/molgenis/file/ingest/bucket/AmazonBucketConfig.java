@@ -47,9 +47,10 @@ public class AmazonBucketConfig
 				final String bucket = amazonBucketJobExecution.getBucket();
 				final String key = amazonBucketJobExecution.getKey();
 				final String profile = amazonBucketJobExecution.getProfile();
+				final String region = amazonBucketJobExecution.getRegion();
 				final boolean isExpression = amazonBucketJobExecution.isExpression();
 				return progress -> ingester
-						.ingest(jobExecutionID, targetEntityId, bucket, key, profile, isExpression, progress);
+						.ingest(jobExecutionID, targetEntityId, bucket, key, profile, region, isExpression, progress);
 			}
 		};
 	}

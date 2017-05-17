@@ -22,6 +22,7 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 	public static final String EXPRESSION = "expression";
 	public static final String PROFILE = "profile";
 	public static final String TARGET_ENTITY_ID = "targetEntityId";
+	public static final String REGION = "region";
 
 	private final FileMetaMetaData fileMetaMetaData;
 	private final JobExecutionMetaData jobExecutionMetaData;
@@ -41,11 +42,13 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 	{
 		setLabel("Amazon Bucket file ingest job execution");
 		setExtends(jobExecutionMetaData);
-		addAttribute(BUCKET).setLabel("Bucket name").setDescription("The name of the bucket.").setNillable(false);
+		addAttribute(BUCKET).setLabel("Bucket name").setDescription("The name of the amazon bucket.")
+				.setNillable(false);
 		addAttribute(KEY).setLabel("Key").setDescription("Expression to match the file key").setNillable(false);
 		addAttribute(EXPRESSION).setDataType(BOOL).setLabel("Is key expression")
 				.setDescription("Is the key an expression or an exact match").setNillable(true);
-		addAttribute(PROFILE).setLabel("the profile to be used to login to the bucket").setNillable(false);
+		addAttribute(PROFILE).setLabel("the profile to be used to login to the amazon bucket").setNillable(false);
+		addAttribute(REGION).setLabel("Region").setDescription("The region of the amazon bucket.").setNillable(false);
 		addAttribute(TARGET_ENTITY_ID).setLabel("Target EntityType ID").setNillable(true);
 		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)
 				.setRefEntity(fileMetaMetaData).setNillable(true);

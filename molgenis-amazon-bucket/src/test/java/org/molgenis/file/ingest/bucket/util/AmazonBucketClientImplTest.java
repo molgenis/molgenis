@@ -5,11 +5,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClientImpl;
@@ -17,7 +13,6 @@ import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,7 +21,6 @@ import java.util.Calendar;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
 
 public class AmazonBucketClientImplTest
 {
@@ -97,16 +91,5 @@ public class AmazonBucketClientImplTest
 
 		amazonBucketClient.downloadFile(client, fileStore, "ID", "bucket", "key(.*)", true);
 		verify(fileStore).store(any(), eq("bucket_ID/keyq.xlsx"));
-	}
-
-	@Test
-	public void renameSheetTest() throws IOException, InvalidFormatException
-	{
-		File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
-		File temp = File.createTempFile("unittest_", ".xlsx");
-		FileUtils.copyFile(file, temp);
-		amazonBucketClient.renameSheet("unittest", temp);
-		Workbook workbook = WorkbookFactory.create(new FileInputStream(temp));
-		assertEquals(workbook.getSheetAt(0).getSheetName(), "unittest");
 	}
 }
