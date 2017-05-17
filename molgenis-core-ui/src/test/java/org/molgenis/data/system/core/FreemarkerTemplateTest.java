@@ -1,9 +1,11 @@
 package org.molgenis.data.system.core;
 
+import org.mockito.Mockito;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 public class FreemarkerTemplateTest
@@ -27,6 +29,6 @@ public class FreemarkerTemplateTest
 	private FreemarkerTemplate getFreemarkerTemplateSpy()
 	{
 		EntityType entityType = mock(EntityType.class);
-		return spy(new FreemarkerTemplate(entityType));
+		return Mockito.spy(new FreemarkerTemplate(entityType));
 	}
 }
