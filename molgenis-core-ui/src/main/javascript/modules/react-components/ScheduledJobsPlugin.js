@@ -19,6 +19,12 @@ class ScheduledJobsPlugin extends Component {
         return <div>
             <legend>Scheduled Jobs</legend>
             <div className='scheduled-jobs-table'>
+                /*
+                 N.B. We lose access to jobExecutionType if the user collapses the type attribute.
+                 Table component doesn't allow us to control the collapse state.
+                 Therefore we hide the collapse button in scheduled-jobs.css.
+                 See also #6164
+                 */
                 <Table entity={'sys' + packageSeparator + 'ScheduledJob'}
                        attrs={{
                            name: null,
