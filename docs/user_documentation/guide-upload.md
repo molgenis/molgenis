@@ -197,6 +197,7 @@ The parameter field should be filled out with:
 - key: the key for the file you wish to download from the bucket
 - expression: boolean stating if the key was filled out as an exact match or a regular expression. If the key is an expression the most recent matching file is imported.
 - profile: your amazon bucket profile
+- [region](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html): the amazon region the bucket resides in.
 - targetEntityId: the name of the entity to import to, this is an optional field used for files that have a different sheet name instead of the targetted entityType
 Those parameters should be provided as json.
 
