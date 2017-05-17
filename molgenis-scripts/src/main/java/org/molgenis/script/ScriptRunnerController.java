@@ -18,7 +18,6 @@ import java.util.Map;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller for running a script
@@ -59,7 +58,7 @@ public class ScriptRunnerController
 	 * @param parameters parameter values for the script
 	 * @throws IOException if an input or output exception occurs when redirecting
 	 */
-	@RequestMapping(value = "/scripts/{name}/start", method = POST)
+	@RequestMapping(value = "/scripts/{name}/start")
 	public void startScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
 			HttpServletResponse response) throws IOException
 	{
