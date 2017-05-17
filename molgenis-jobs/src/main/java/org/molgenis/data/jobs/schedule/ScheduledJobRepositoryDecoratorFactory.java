@@ -1,7 +1,6 @@
 package org.molgenis.data.jobs.schedule;
 
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
@@ -15,15 +14,13 @@ public class ScheduledJobRepositoryDecoratorFactory
 		extends AbstractSystemRepositoryDecoratorFactory<ScheduledJob, ScheduledJobMetadata>
 {
 	private final JobScheduler jobScheduler;
-	private final DataService dataService;
 	private final JsonValidator jsonValidator;
 
-	public ScheduledJobRepositoryDecoratorFactory(ScheduledJobMetadata fileIngestMetaData, JobScheduler jobScheduler,
-			DataService dataService, JsonValidator jsonValidator)
+	public ScheduledJobRepositoryDecoratorFactory(ScheduledJobMetadata scheduledJobMetadata, JobScheduler jobScheduler,
+			JsonValidator jsonValidator)
 	{
-		super(fileIngestMetaData);
+		super(scheduledJobMetadata);
 		this.jobScheduler = requireNonNull(jobScheduler);
-		this.dataService = requireNonNull(dataService);
 		this.jsonValidator = jsonValidator;
 	}
 

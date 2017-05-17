@@ -43,7 +43,7 @@ public class GavinJob extends TransactionalJob<Void>
 	private final AnnotatorRunner annotatorRunner;
 	private final GavinJobExecution gavinJobExecution;
 
-	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
+	GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
 			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin, Parser parser,
 			AnnotatorRunner annotatorRunner, GavinJobExecution gavinJobExecution)

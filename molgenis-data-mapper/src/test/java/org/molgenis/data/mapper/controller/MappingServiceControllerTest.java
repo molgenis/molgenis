@@ -9,6 +9,9 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
+import org.molgenis.data.jobs.JobExecutor;
+import org.molgenis.data.mapper.job.MappingJobExecution;
+import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -22,13 +25,16 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
+import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,7 +60,7 @@ import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
@@ -72,6 +78,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private UserService userService;
+
+	@Mock
+	private MappingJobExecutionFactory mappingJobExecutionFactory;
 
 	@Mock
 	private MappingService mappingService;
@@ -113,8 +122,19 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private Package system;
 	@Mock
 	private Package base;
-
+	@Mock
+	private UserAccountService userAccountService;
+	@Mock
 	private User me;
+	@Mock
+	private JobExecutor jobExecutor;
+	@Mock
+	private MappingJobExecution mappingJobExecution;
+	@Mock
+	private EntityType mappingJobExecutionMetadata;
+	@Mock
+	private JobsController jobsController;
+
 
 	private EntityType lifeLines;
 	private EntityType hop;
@@ -151,7 +171,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = entityMapping.addAttributeMapping("age");
 		attributeMapping.setAlgorithm("$('dob').age()");
 
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
+		mockMvc = MockMvcBuilders.standaloneSetup(controller)
+				.setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter()).build();
 	}
 
 	@Test
@@ -314,6 +337,106 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		String actual3 = result3.getResponse().getContentAsString();
 
 		assertEquals(actual3, "");
+	}
+
+	@Test
+	public void testScheduleMappingJobUnknownMappingProjectId() throws Exception
+	{
+		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "package")
+				.accept("text/plain")).andExpect(status().isBadRequest()).andExpect(content().contentType("text/plain"))
+				.andExpect(content().string("No mapping project found with ID mappingProjectId"));
+	}
+
+	@Test
+	public void testScheduleMappingJobUnknownPackage() throws Exception
+	{
+		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
+
+		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "sys")
+				.accept("text/plain")).andExpect(status().isBadRequest()).andExpect(content().contentType("text/plain"))
+				.andExpect(content().string("No package found with ID sys"));
+	}
+
+	@Test
+	public void testScheduleMappingJobSystemPackage() throws Exception
+	{
+		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
+		Package systemPackage = mock(Package.class);
+		when(systemPackage.getId()).thenReturn("sys");
+		when(metaDataService.getPackage("sys")).thenReturn(systemPackage);
+
+		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "sys")
+				.accept("text/plain")).andExpect(status().isBadRequest()).andExpect(content().contentType("text/plain"))
+				.andExpect(content().string("Package [sys] is a system package."));
+	}
+
+	@Test
+	public void testMap() throws Exception
+	{
+		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
+		Package aPackage = mock(Package.class);
+		when(aPackage.getId()).thenReturn("base");
+		when(aPackage.getRootPackage()).thenReturn(null);
+		when(metaDataService.getPackage("base")).thenReturn(aPackage);
+
+		when(mappingJobExecutionFactory.create()).thenReturn(mappingJobExecution);
+		when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
+		when(mappingJobExecution.getIdValue()).thenReturn("abcde");
+		when(mappingJobExecutionMetadata.getId()).thenReturn("MappingJobExecution");
+
+		when(userAccountService.getCurrentUser()).thenReturn(me);
+
+		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "base")
+				.accept("text/plain")).andExpect(status().isCreated()).andExpect(content().contentType("text/plain"))
+				.andExpect(content().string("/api/v2/MappingJobExecution/abcde"));
+
+		verify(jobExecutor).submit(mappingJobExecution);
+		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
+		verify(mappingJobExecution).setLabel("label");
+		verify(mappingJobExecution).setAddSourceAttribute(null);
+		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
+		verify(mappingJobExecution).setPackageId("base");
+		verify(mappingJobExecution).setUser(me);
+		verify(mappingJobExecution).getEntityType();
+		verify(mappingJobExecution).getIdValue();
+		verifyNoMoreInteractions(mappingJobExecution);
+	}
+
+	@Test
+	public void testCreateIntegratedEntity() throws Exception
+	{
+		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
+		Package aPackage = mock(Package.class);
+		when(aPackage.getId()).thenReturn("base");
+		when(aPackage.getRootPackage()).thenReturn(null);
+		when(metaDataService.getPackage("base")).thenReturn(aPackage);
+
+		when(mappingJobExecutionFactory.create()).thenReturn(mappingJobExecution);
+		when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
+		when(mappingJobExecution.getIdValue()).thenReturn("abcde");
+		when(mappingJobExecutionMetadata.getId()).thenReturn("MappingJobExecution");
+
+		when(userAccountService.getCurrentUser()).thenReturn(me);
+		when(jobsController.createJobExecutionViewHref(mappingJobExecution, 1000))
+				.thenReturn("/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000");
+
+		mockMvc.perform(post(URI + "/createIntegratedEntity").param("mappingProjectId", "mappingProjectId")
+				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "base")
+				.accept("text/plain")).andExpect(status().isFound())
+				.andExpect(header().string("Location", "/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000"));
+
+		verify(jobExecutor).submit(mappingJobExecution);
+		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
+		verify(mappingJobExecution).setLabel("label");
+		verify(mappingJobExecution).setAddSourceAttribute(null);
+		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
+		verify(mappingJobExecution).setPackageId("base");
+		verify(mappingJobExecution).setUser(me);
+		verifyNoMoreInteractions(mappingJobExecution);
 	}
 
 	@Test

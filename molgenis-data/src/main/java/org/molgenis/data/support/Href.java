@@ -1,9 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -73,6 +70,11 @@ public class Href
 		{
 			throw new UnknownAttributeException(attributeName);
 		}
+	}
+
+	public static String concatEntityHref(Entity entity)
+	{
+		return concatEntityHref("/api/v2", entity.getEntityType().getId(), entity.getIdValue());
 	}
 
 	/**

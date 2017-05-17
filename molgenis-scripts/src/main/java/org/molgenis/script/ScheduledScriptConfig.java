@@ -15,6 +15,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.text.MessageFormat.format;
+import static java.util.Objects.requireNonNull;
+
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 public class ScheduledScriptConfig
@@ -23,17 +26,20 @@ public class ScheduledScriptConfig
 	{
 	}.getType();
 
-	@Autowired
-	SavedScriptRunner savedScriptRunner;
+	private final SavedScriptRunner savedScriptRunner;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final ScriptJobExecutionMetadata scriptJobExecutionMetadata;
+	private final Gson gson;
 
 	@Autowired
-	ScheduledJobTypeFactory scheduledJobTypeFactory;
-
-	@Autowired
-	ScriptJobExecutionMetadata scriptJobExecutionMetadata;
-
-	@Autowired
-	Gson gson;
+	public ScheduledScriptConfig(SavedScriptRunner savedScriptRunner, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			ScriptJobExecutionMetadata scriptJobExecutionMetadata, Gson gson)
+	{
+		this.savedScriptRunner = requireNonNull(savedScriptRunner);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.scriptJobExecutionMetadata = requireNonNull(scriptJobExecutionMetadata);
+		this.gson = gson;
+	}
 
 	/**
 	 * The Script JobFactory bean.
@@ -43,8 +49,9 @@ public class ScheduledScriptConfig
 	{
 		return new JobFactory<ScriptJobExecution>()
 		{
+
 			@Override
-			public Job createJob(ScriptJobExecution scriptJobExecution)
+			public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution)
 			{
 				final String name = scriptJobExecution.getName();
 				final String parameterString = scriptJobExecution.getParameters();
@@ -54,7 +61,11 @@ public class ScheduledScriptConfig
 					params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
 					params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
 					ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
-					progress.status(scriptResult.getOutput());
+					if (scriptResult.getOutputFile() != null)
+					{
+						scriptJobExecution.setResultUrl(format("/files/{0}", scriptResult.getOutputFile().getId()));
+					}
+					progress.appendLog("Script output:\n" + scriptResult.getOutput());
 					return scriptResult;
 				};
 			}
@@ -68,7 +79,9 @@ public class ScheduledScriptConfig
 		ScheduledJobType result = scheduledJobTypeFactory.create("script");
 		result.setLabel("Script");
 		result.setDescription("This job executes a script created in the Scripts plugin.");
-		result.setSchema("TODO");
+		result.setSchema("{\n\"title\": \"Script Job\",\n\"type\": \"object\",\n\"properties\": {\n"
+				+ "\"name\": {\"type\": \"string\"},\n\"parameters\": {\"type\": \"string\"}},\n"
+				+ "\"required\": [\"name\", \"parameters\"]\n" + "}");
 		result.setJobExecutionType(scriptJobExecutionMetadata);
 		return result;
 	}
