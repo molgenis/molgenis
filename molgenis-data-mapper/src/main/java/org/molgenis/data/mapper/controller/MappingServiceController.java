@@ -112,6 +112,9 @@ public class MappingServiceController extends MolgenisPluginController
 	@Autowired
 	private JobExecutor jobExecutor;
 
+	@Autowired
+	private JobsController jobsController;
+
 	public MappingServiceController()
 	{
 		super(URI);
@@ -546,10 +549,9 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = false, name = "package") String packageId,
 			@RequestParam(required = false) Boolean addSourceAttribute)
 	{
-		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId,
-				label);
-		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(JobsController.ID);
-		return format("redirect:{0}/viewJob/?jobHref={1}&refreshTimeoutMillis=1000", jobControllerURL, jobHref);
+		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
+				addSourceAttribute, packageId, label);
+		return format("redirect:{0}", jobsController.createJobExecutionViewHref(mappingJobExecution, 1000));
 	}
 
 	/**
@@ -597,8 +599,9 @@ public class MappingServiceController extends MolgenisPluginController
 			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
 		}
 
-		String jobHref = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId,
-				label);
+		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
+				addSourceAttribute, packageId, label);
+		String jobHref = concatEntityHref(mappingJobExecution);
 		return created(new URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
 	}
 
@@ -610,7 +613,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param addSourceAttribute indication if a source attribute should be added to the target {@link EntityType}
 	 * @return the HREF for the scheduled {@link MappingJobExecution}
 	 */
-	private String scheduleMappingJobInternal(String mappingProjectId, String targetEntityTypeId,
+	private MappingJobExecution scheduleMappingJobInternal(String mappingProjectId, String targetEntityTypeId,
 			Boolean addSourceAttribute, String packageId, String label)
 	{
 		MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
@@ -621,13 +624,9 @@ public class MappingServiceController extends MolgenisPluginController
 		mappingJobExecution.setPackageId(packageId);
 		mappingJobExecution.setLabel(label);
 
-		String resultUrl = menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
-				+ targetEntityTypeId;
-		mappingJobExecution.setResultUrl(resultUrl);
 		jobExecutor.submit(mappingJobExecution);
 
-		return concatEntityHref("/api/v2", mappingJobExecution.getEntityType().getId(),
-				mappingJobExecution.getIdValue());
+		return mappingJobExecution;
 	}
 
 	/**

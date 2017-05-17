@@ -64,7 +64,7 @@ public class MappingServiceImpl implements MappingService
 		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.defaultPackage = defaultPackage;
+		this.defaultPackage = requireNonNull(defaultPackage);
 	}
 
 	@Override
