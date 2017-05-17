@@ -82,7 +82,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		GsonConfig.class, PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
 		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
-		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
+		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
