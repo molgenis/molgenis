@@ -9,7 +9,7 @@
             script = $(this).parent().siblings(".name").text();
             var hasAttributes = $(this).attr("data-hasAttributes");
             if (hasAttributes == 'false') {
-                window.open("/scripts/" + encodeURIComponent(script) + "/run");
+                window.open("/scripts/" + encodeURIComponent(script) + "/start");
             } else {
                 var parametersTemplate = Handlebars.compile($("#parameters-template").html());
                 restApi.getAsync('/api/v1/sys' + molgenis.packageSeparator + 'scr' + molgenis.packageSeparator + 'Script', {
@@ -26,7 +26,7 @@
             var form = $('#parametersForm');
             form.validate();
             if (form.valid()) {
-                window.open("/scripts/" + encodeURIComponent(script) + "/run?" + form.serialize());
+                window.open("/scripts/" + encodeURIComponent(script) + "/start?" + form.serialize());
             }
         });
 

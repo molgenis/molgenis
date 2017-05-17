@@ -124,7 +124,7 @@ public class JobScheduler
 					.withSchedule(cronSchedule(cronExpression)).build();
 			schedule(scheduledJob, trigger);
 
-			LOG.info("Scheduled FileIngesterJob '{}' with trigger '{}'", name, trigger);
+			LOG.info("Scheduled Job '{}' with trigger '{}'", name, trigger);
 		}
 		catch (SchedulerException e)
 		{
