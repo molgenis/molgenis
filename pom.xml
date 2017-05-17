@@ -697,5 +697,6 @@
         <module>molgenis-util</module>
         <module>molgenis-settings</module>
         <module>molgenis-swagger</module>
+        <module>molgenis-amazon-bucket</module>
     </modules>
 </project>
