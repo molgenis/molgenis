@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -34,6 +36,9 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.testng.Assert.assertEquals;
@@ -642,6 +647,23 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 	private void delete()
 	{
+		@SuppressWarnings("unchecked")
+		Query<UserAuthority> userAuthorityQ = mock(Query.class);
+		when(userAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
+		UserAuthority userAuthority = mock(UserAuthority.class);
+		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
+		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
+		@SuppressWarnings("unchecked")
+		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
+		when(groupAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
+						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
+		GroupAuthority groupAuthority = mock(GroupAuthority.class);
+		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
+		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
+
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn("entity").getMock();
 		when(entityType.getLabel()).thenReturn("entity").getMock();
