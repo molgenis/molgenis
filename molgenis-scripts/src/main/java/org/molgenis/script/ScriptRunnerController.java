@@ -69,7 +69,7 @@ public class ScriptRunnerController
 
 		jobExecutor.submit(scriptJobExecution);
 
-		response.sendRedirect(jobsController.createJobExecutionHref(scriptJobExecution, 1000));
+		response.sendRedirect(jobsController.createJobExecutionViewHref(scriptJobExecution, 1000));
 	}
 
 	/**

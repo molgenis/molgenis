@@ -16,14 +16,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static java.text.MessageFormat.format;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
@@ -113,11 +112,11 @@ public class JobsController extends MolgenisPluginController
 		jobScheduler.runNow(scheduledJobId);
 	}
 
-	public String createJobExecutionHref(JobExecution jobExecution, int refreshTimeoutMillis) throws IOException
+	public String createJobExecutionViewHref(JobExecution jobExecution, int refreshTimeoutMillis)
 	{
-		String jobHref = concatEntityHref("/api/v2", jobExecution.getEntityType().getId(), jobExecution.getIdValue());
+		String jobHref = concatEntityHref(jobExecution);
 		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(ID);
-		return format("{0}/viewJob/?jobHref={1}&refreshTimeoutMillis={2}", jobControllerURL, jobHref,
+		return format("%s/viewJob/?jobHref=%s&refreshTimeoutMillis=%s", jobControllerURL, jobHref,
 				refreshTimeoutMillis);
 	}
 }
