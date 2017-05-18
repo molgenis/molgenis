@@ -34,7 +34,7 @@ var AlertMessage = React.createClass({
                     }, // TODO use Button
                     span({'aria-hidden': true,}, String.fromCharCode(215)) // &times;
                 ) : null,
-                this.props.type === 'danger' ? span(null, Icon({name: 'exclamation-sign'}), '&nbsp;') : null,
+                this.props.type === 'danger' ? span(null, Icon({name: 'exclamation-sign'}), ' ') : null,
                 ...intersperse(messages, br(null))
             )
         );

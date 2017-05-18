@@ -534,7 +534,7 @@ var Form = React.createClass({
     _handleSubmitError: function (e) {
         var message = this.state.entity.label + (this.props.mode === 'create' ? ' could not be created.' : ' changes could not be saved.');
         if (e.responseJSON && e.responseJSON.errors && e.responseJSON.errors.length > 0) {
-            message = [message, ...e.responseJSON.errors].join('\n')
+            message = [message, ...e.responseJSON.errors.map(error => error.message)].join('\n')
         }
         this.setState({
             submitMsg: {type: 'danger', message}
