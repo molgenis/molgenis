@@ -14,6 +14,11 @@ public class MyPluginController extends MolgenisPluginController
 {
   public static final String ID = "myplugin";
   public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+    
+  public MyPluginController()
+  {
+    super(URI);
+  }
   
   @RequestMapping(method = RequestMethod.GET)
   public String init(Model model) throws Exception
@@ -38,11 +43,11 @@ The layout of this is determined via a freemarker file matching the 'return' abo
 ```
 
 # Reusing components
-Via the myplugin.js you can use MOLGENIS standard UI components (Table, Form, Entity select etc.) that retrieve data via the REST API (see [REST reference](/documentation). See components at [Github](https://github.com/molgenis/molgenis/tree/master//molgenis-core-ui/src/main/resources/js/component)
+Via the myplugin.js you can use MOLGENIS standard UI components (Table, Form, Entity select etc.) that retrieve data via the REST API (see [REST reference](/developer_documentation/guide-rest). See components at [Github](https://github.com/molgenis/molgenis/tree/master//molgenis-core-ui/src/main/resources/js/component)
 
 # Adding to your menu
 
-Finally you can use this component within your menu (see [Customization guide](/documentation/guide-customize)) and give it permissions so users can see it (see [Admin guide](/documentation/guide-admin))
+Finally you can use this component within your menu (see [Customization guide](/user_documentation/guide-customize)) and give it permissions so users can see it (see [Admin guide](/user_documentation/guide-admin))
 
 # Advanced topics
 
