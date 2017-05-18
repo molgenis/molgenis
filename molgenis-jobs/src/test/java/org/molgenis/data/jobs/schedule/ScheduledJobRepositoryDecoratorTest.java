@@ -79,7 +79,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	public void testUpdate()
 	{
 		scheduledJobRepositoryDecorator.update(scheduledJob);
-		verify(jsonValidator).validateJson(parameters, schema);
+		verify(jsonValidator).validate(parameters, schema);
 		verify(decoratedRepo).update(scheduledJob);
 		verify(jobScheduler).schedule(scheduledJob);
 	}
