@@ -57,7 +57,7 @@ public class HelloWorldConfig
 		result.setLabel("Hello World");
 		result.setDescription("Simple job example");
 		String schema = gson.toJson(of("title", "Hello World Job", "type", "object", "properties",
-				of("delay", of("type", "int"), "required", singletonList("delay"))));
+				of("delay", of("type", "integer")), "required", singletonList("delay")));
 		result.setSchema(schema);
 		return result;
 	}
