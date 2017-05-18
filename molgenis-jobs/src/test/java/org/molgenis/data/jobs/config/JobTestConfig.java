@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Import;
 import static org.mockito.Mockito.mock;
 
 @Configuration
-@Import({ EntityBaseTestConfig.class, JobExecutionMetaData.class, ScheduledJobMetadata.class, ScheduledJobTypeMetadata.class,
-		ScheduledJobTypeFactory.class, ScheduledJobFactory.class })
+@Import({ EntityBaseTestConfig.class, JobExecutionMetaData.class, ScheduledJobMetadata.class,
+		ScheduledJobTypeMetadata.class, ScheduledJobTypeFactory.class, ScheduledJobFactory.class, JobPackage.class })
 public class JobTestConfig
 {
 	@Bean
