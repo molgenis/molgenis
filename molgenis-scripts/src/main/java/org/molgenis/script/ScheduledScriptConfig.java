@@ -1,5 +1,6 @@
 package org.molgenis.script;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.jobs.Job;
@@ -15,6 +16,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 
@@ -79,9 +81,9 @@ public class ScheduledScriptConfig
 		ScheduledJobType result = scheduledJobTypeFactory.create("script");
 		result.setLabel("Script");
 		result.setDescription("This job executes a script created in the Scripts plugin.");
-		result.setSchema("{\n\"title\": \"Script Job\",\n\"type\": \"object\",\n\"properties\": {\n"
-				+ "\"name\": {\"type\": \"string\"},\n\"parameters\": {\"type\": \"string\"}},\n"
-				+ "\"required\": [\"name\", \"parameters\"]\n" + "}");
+		result.setSchema(gson.toJson(of("title", "Script Job", "type", "object", "properties",
+				of("name", of("type", "string"), "parameters", of("type", "string")), "required",
+				ImmutableList.of("name", "parameters"))));
 		result.setJobExecutionType(scriptJobExecutionMetadata);
 		return result;
 	}

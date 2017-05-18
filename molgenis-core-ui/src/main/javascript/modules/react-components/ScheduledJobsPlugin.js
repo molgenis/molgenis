@@ -15,16 +15,15 @@ class ScheduledJobsPlugin extends Component {
 
     render() {
         let scheduledJob = this.state.selectedScheduledJob
-
+        /*
+         N.B. We lose access to jobExecutionType if the user collapses the type attribute.
+         Table component doesn't allow us to control the collapse state.
+         Therefore we hide the collapse button in scheduled-jobs.css.
+         See also #6164
+         */
         return <div>
             <legend>Scheduled Jobs</legend>
             <div className='scheduled-jobs-table'>
-                /*
-                 N.B. We lose access to jobExecutionType if the user collapses the type attribute.
-                 Table component doesn't allow us to control the collapse state.
-                 Therefore we hide the collapse button in scheduled-jobs.css.
-                 See also #6164
-                 */
                 <Table entity={'sys' + packageSeparator + 'ScheduledJob'}
                        attrs={{
                            name: null,
@@ -33,7 +32,7 @@ class ScheduledJobsPlugin extends Component {
                            active: null,
                            parameters: null,
                            user: null,
-                           type: {jobExecutionType: null, label: null, name: null}
+                           type: {jobExecutionType: null, label: null}
                        }}
                        defaultSelectFirstRow={true}
                        selectedRow={this.state.selectedScheduledJob}
