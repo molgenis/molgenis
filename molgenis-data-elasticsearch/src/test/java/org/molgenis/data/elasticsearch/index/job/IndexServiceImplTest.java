@@ -10,7 +10,6 @@ import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
-import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,9 +56,6 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private Repository<Entity> repository;
-
-	@Mock
-	private UserService userService;
 
 	@Autowired
 	private IndexService indexService;

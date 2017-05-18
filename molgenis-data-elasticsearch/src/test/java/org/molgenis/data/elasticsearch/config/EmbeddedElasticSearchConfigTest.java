@@ -15,7 +15,6 @@ import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.TransactionManager;
-import org.molgenis.security.user.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -87,12 +86,6 @@ public class EmbeddedElasticSearchConfigTest
 		public MailSender mailSender()
 		{
 			return mock(MailSender.class);
-		}
-
-		@Bean
-		public UserService molgenisUserService()
-		{
-			return mock(UserService.class);
 		}
 
 		@Bean
