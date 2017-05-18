@@ -11,6 +11,7 @@ public class ResourceFingerprintRegistryTest
 	@Test
 	public void getFingerprint() throws IOException
 	{
-		assertEquals(new ResourceFingerprintRegistry().getFingerprint(getClass(), "/resource.txt"), "czpzLA");
+		assertEquals(new ResourceFingerprintRegistry().getFingerprint(getClass(), "/src/test/resources/resource.txt"),
+				"czpzLA");
 	}
 }

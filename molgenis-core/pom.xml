@@ -21,11 +21,10 @@
     </build>
 
     <dependencies>
-        <!-- database hibernate, connectionpool, driver -->
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>${hibernate.validator.version}</version>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-util</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- Commons Utils -->
         <dependency>
@@ -79,11 +78,6 @@
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapdb</groupId>
-            <artifactId>mapdb</artifactId>
-            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.quartz-scheduler</groupId>

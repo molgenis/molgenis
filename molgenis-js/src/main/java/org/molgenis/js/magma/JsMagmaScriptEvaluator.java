@@ -1,7 +1,7 @@
 package org.molgenis.js.magma;
 
-import com.google.api.client.util.Maps;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;

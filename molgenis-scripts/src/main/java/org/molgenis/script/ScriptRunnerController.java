@@ -66,6 +66,12 @@ public class ScriptRunnerController
 		}
 	}
 
+	@ExceptionHandler(UnknownScriptException.class)
+	public void handleUnknownScriptException(UnknownScriptException e, HttpServletResponse response) throws IOException
+	{
+		response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+	}
+
 	@ExceptionHandler(ScriptException.class)
 	public void handleGenerateScriptException(ScriptException e, HttpServletResponse response) throws IOException
 	{
