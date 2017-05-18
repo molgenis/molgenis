@@ -31,6 +31,7 @@
             <artifactId>molgenis-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- third party dependencies -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -41,6 +42,7 @@
             <artifactId>uuid</artifactId>
             <version>3.2</version>
         </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>
