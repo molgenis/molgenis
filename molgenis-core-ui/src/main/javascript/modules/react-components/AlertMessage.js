@@ -2,7 +2,11 @@ import React from "react";
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import Icon from "./Icon";
 
-var div = React.DOM.div, span = React.DOM.span, button = React.DOM.button;
+var div = React.DOM.div, span = React.DOM.span, button = React.DOM.button, br = React.DOM.br;
+
+function intersperse(arr, sep) {
+    return arr.reduce((a, v) => [...a, v, sep], []).slice(0, -1)
+}
 
 /**
  * @memberOf component
@@ -16,6 +20,10 @@ var AlertMessage = React.createClass({
         onDismiss: React.PropTypes.func,
     },
     render: function () {
+        let messages = null;
+        if (this.props.message) {
+            messages = this.props.message.split('\n');
+        }
         return (
             div({className: 'alert alert-' + this.props.type + ' alert-dismissible', role: 'alert'},
                 this.props.onDismiss ? button({
@@ -26,8 +34,8 @@ var AlertMessage = React.createClass({
                     }, // TODO use Button
                     span({'aria-hidden': true,}, String.fromCharCode(215)) // &times;
                 ) : null,
-                this.props.type === 'danger' ? Icon({name: 'exclamation-sign'}) : null,
-                this.props.type === 'danger' ? ' ' + this.props.message : this.props.message
+                this.props.type === 'danger' ? span(null, Icon({name: 'exclamation-sign'}), '&nbsp;') : null,
+                ...intersperse(messages, br(null))
             )
         );
     }
