@@ -41,6 +41,7 @@
             <artifactId>molgenis-settings</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
