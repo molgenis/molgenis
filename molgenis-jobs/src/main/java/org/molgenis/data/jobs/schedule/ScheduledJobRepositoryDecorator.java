@@ -134,7 +134,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 
 	private void validateJobParameters(ScheduledJob scheduledJob)
 	{
-		jsonValidator.validateJson(scheduledJob.getParameters(), scheduledJob.getType().getSchema());
+		jsonValidator.validate(scheduledJob.getParameters(), scheduledJob.getType().getSchema());
 	}
 
 	private static void setUsername(ScheduledJob job)

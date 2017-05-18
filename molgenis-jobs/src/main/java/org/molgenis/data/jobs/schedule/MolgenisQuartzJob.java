@@ -11,14 +11,17 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Quartz {@link Job} executes a {@link org.molgenis.data.jobs.model.ScheduledJob} using the {@link JobExecutor}.
+ * This job's setters get autowired after construction by the{@link org.molgenis.scheduler.AutowiringSpringBeanJobFactory}.
+ * Only one MolgenisQuartzJob of a specific {@link org.quartz.JobKey} can run at a time.
  */
+@SuppressWarnings("SpringJavaAutowiredMembersInspection")
 @DisallowConcurrentExecution
 public class MolgenisQuartzJob implements Job
 {
-	private final JobExecutor jobExecutor;
+	private JobExecutor jobExecutor;
 
 	@Autowired
-	public MolgenisQuartzJob(JobExecutor jobExecutor)
+	public void setJobExecutor(JobExecutor jobExecutor)
 	{
 		this.jobExecutor = requireNonNull(jobExecutor);
 	}
