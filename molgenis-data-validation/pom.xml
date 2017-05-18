@@ -24,6 +24,7 @@
             <artifactId>molgenis-js</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>
