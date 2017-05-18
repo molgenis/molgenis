@@ -1,16 +1,11 @@
 package org.molgenis.data.jobs.schedule;
 
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
+import org.molgenis.data.validation.JsonValidator;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.stream.Stream;
@@ -24,11 +19,14 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 {
 	private final Repository<ScheduledJob> decorated;
 	private final JobScheduler scheduler;
+	private final JsonValidator jsonValidator;
 
-	ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler)
+	ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler,
+			JsonValidator jsonValidator)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.scheduler = requireNonNull(scheduler);
+		this.jsonValidator = jsonValidator;
 	}
 
 	@Override
@@ -134,18 +132,9 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 		}));
 	}
 
-	private static void validateJobParameters(ScheduledJob scheduledJob)
+	private void validateJobParameters(ScheduledJob scheduledJob)
 	{
-		try
-		{
-			JSONObject rawSchema = new JSONObject(new JSONTokener(scheduledJob.getType().getSchema()));
-			Schema schema = SchemaLoader.load(rawSchema);
-			schema.validate(new JSONObject(scheduledJob.getParameters()));
-		}
-		catch (ValidationException validationException)
-		{
-			throw new MolgenisDataException(String.join(", ", validationException.getAllMessages()));
-		}
+		jsonValidator.validateJson(scheduledJob.getParameters(), scheduledJob.getType().getSchema());
 	}
 
 	private static void setUsername(ScheduledJob job)
