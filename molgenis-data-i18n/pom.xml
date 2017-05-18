@@ -19,6 +19,11 @@
             <artifactId>molgenis-data-security</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>

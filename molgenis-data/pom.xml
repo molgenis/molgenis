@@ -33,6 +33,10 @@
         </dependency>
         <!-- third party dependencies -->
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.kenai.nbpwr</groupId>
             <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
         </dependency>
