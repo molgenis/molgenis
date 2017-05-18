@@ -38,6 +38,11 @@
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>

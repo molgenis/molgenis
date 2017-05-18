@@ -33,6 +33,10 @@
         </dependency>
         <!-- third party dependencies -->
         <dependency>
+            <groupId>com.kenai.nbpwr</groupId>
+            <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
         </dependency>
