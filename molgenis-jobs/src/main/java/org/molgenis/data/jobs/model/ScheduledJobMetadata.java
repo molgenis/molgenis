@@ -6,16 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
 public class ScheduledJobMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "ScheduledJob";
-	public static final String SCHEDULED_JOB = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String SCHEDULED_JOB = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String NAME = "name";
@@ -29,18 +29,21 @@ public class ScheduledJobMetadata extends SystemEntityType
 	public static final String USER = "user";
 
 	private ScheduledJobTypeMetadata scheduledJobTypeMetadata;
+	private final JobPackage jobPackage;
 
 	@Autowired
-	public ScheduledJobMetadata(ScheduledJobTypeMetadata scheduledJobTypeMetadata)
+	public ScheduledJobMetadata(ScheduledJobTypeMetadata scheduledJobTypeMetadata, JobPackage jobPackage)
 	{
-		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+		super(SIMPLE_NAME, PACKAGE_JOB);
 		this.scheduledJobTypeMetadata = requireNonNull(scheduledJobTypeMetadata);
+		this.jobPackage = requireNonNull(jobPackage);
 	}
 
 	@Override
 	public void init()
 	{
 		setLabel("Scheduled job");
+		setPackage(jobPackage);
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
