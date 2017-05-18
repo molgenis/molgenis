@@ -45,6 +45,24 @@
             <artifactId>molgenis-jobs</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- TODO remove molgenis-data-rest dependency (required by SortaServiceController) -->
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- TODO remove molgenis-data-i18n dependency (required by SortaServiceController) -->
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
@@ -64,18 +82,6 @@
             <artifactId>molgenis-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-        <!-- TODO remove molgenis-data-rest dependency (required by SortaServiceController) -->
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-rest</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- TODO remove molgenis-data-i18n dependency (required by SortaServiceController) -->
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-i18n</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

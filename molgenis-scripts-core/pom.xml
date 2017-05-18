@@ -41,6 +41,10 @@
             <artifactId>freemarker</artifactId>
             <version>2.3.23</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>

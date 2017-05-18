@@ -40,6 +40,11 @@
             <artifactId>molgenis-data-vcf</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
@@ -55,6 +60,7 @@
             <artifactId>jdom</artifactId>
             <version>1.1</version>
         </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>
