@@ -1,6 +1,5 @@
 package org.molgenis.data.excel;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -47,9 +46,9 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@AfterMethod
-	public void afterMethod()
+	public void afterMethod() throws IOException
 	{
-		IOUtils.closeQuietly(is);
+		is.close();
 	}
 
 	@SuppressWarnings("resource")
