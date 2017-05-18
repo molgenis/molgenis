@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-file</artifactId>
+            <artifactId>molgenis-data-file</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

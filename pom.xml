@@ -723,7 +723,7 @@
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-questionnaires</module>
-        <module>molgenis-file</module>
+        <module>molgenis-data-file</module>
         <module>molgenis-catalogue</module>
         <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
