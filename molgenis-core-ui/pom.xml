@@ -204,6 +204,10 @@
         </dependency>
         <!-- third party dependencies -->
         <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.api.freemarker</groupId>
             <artifactId>freemarker-java8</artifactId>
             <version>1.1.2</version>

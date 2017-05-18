@@ -54,8 +54,6 @@
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
-            <version>${google.auto-value.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -85,7 +83,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-vcf</artifactId>

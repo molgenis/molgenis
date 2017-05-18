@@ -613,16 +613,16 @@
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.auto.value</groupId>
+                <artifactId>auto-value</artifactId>
+                <version>${google.auto-value.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <!-- common utilities -->
-        <dependency>
-            <groupId>com.google.auto.value</groupId>
-            <artifactId>auto-value</artifactId>
-            <version>${google.auto-value.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
