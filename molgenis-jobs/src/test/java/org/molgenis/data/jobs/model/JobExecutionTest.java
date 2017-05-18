@@ -3,6 +3,7 @@ package org.molgenis.data.jobs.model;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.hello.HelloWorldJobExecution;
 import org.molgenis.data.jobs.model.hello.HelloWorldJobExecutionFactory;
 import org.molgenis.data.jobs.model.hello.HelloWorldJobExecutionMetadata;
@@ -15,7 +16,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { HelloWorldJobExecutionFactory.class, HelloWorldJobExecutionMetadata.class,
-		JobExecutionMetaData.class })
+		JobExecutionMetaData.class, JobTestConfig.class })
 public class JobExecutionTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
@@ -70,5 +71,4 @@ public class JobExecutionTest extends AbstractMolgenisSpringTest
 		String common = StringUtils.getCommonPrefix(actual, longMessage);
 		assertEquals(actual, common + "...");
 	}
-
 }
