@@ -71,8 +71,8 @@ public class FileIngestConfig
 		result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
 		result.setSchema(gson.toJson(of("title", "FileIngest Job", "type", "object", "properties", of("url",
 				of("type", "string", "format", "uri", "description", "URL to download the file to ingest from"),
-				"loader", of("enum", ImmutableList.of("CSV")), "targetEntityId",
-				of("type", "string", "description", "ID of the entity to import to")), "required",
+				"loader", of("enum", ImmutableList.of("CSV"), "description", "Loader used to ingest the file"),
+				"targetEntityId", of("type", "string", "description", "ID of the entity to import to")), "required",
 				ImmutableList.of("url", "loader", "targetEntityId"))));
 		result.setJobExecutionType(fileIngestJobExecutionMetaData);
 		return result;

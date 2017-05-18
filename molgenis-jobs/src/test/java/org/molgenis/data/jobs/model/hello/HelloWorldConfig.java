@@ -39,7 +39,7 @@ public class HelloWorldConfig
 		return new JobFactory<HelloWorldJobExecution>()
 		{
 			@Override
-			public Job createJob(HelloWorldJobExecution jobExecution)
+			public Job<String> createJob(HelloWorldJobExecution jobExecution)
 			{
 				final String who = jobExecution.getUser();
 				final int delay = jobExecution.getDelay();
