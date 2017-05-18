@@ -24,7 +24,7 @@ class ScheduledJobsPlugin extends Component {
         return <div>
             <legend>Scheduled Jobs</legend>
             <div className='scheduled-jobs-table'>
-                <Table entity={'sys' + packageSeparator + 'ScheduledJob'}
+                <Table entity={'sys' + packageSeparator + 'job' + packageSeparator + 'ScheduledJob'}
                        attrs={{
                            name: null,
                            description: null,
