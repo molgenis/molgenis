@@ -8,16 +8,6 @@
     </parent>
     <artifactId>molgenis-data-elasticsearch</artifactId>
 
-    <build>
-        <plugins>
-            <!-- minify css/js -->
-            <plugin>
-                <groupId>com.samaxes.maven</groupId>
-                <artifactId>minify-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
