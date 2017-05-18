@@ -6,16 +6,17 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
 public class JobExecutionMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "JobExecution";
-	public static final String JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IDENTIFIER = "identifier"; // Job ID
 	public static final String USER = "user"; // Owner of the job
@@ -39,10 +40,12 @@ public class JobExecutionMetaData extends SystemEntityType
 	public static final String CANCELED = "CANCELED";
 
 	private final List<String> jobStatusOptions = newArrayList(PENDING, RUNNING, SUCCESS, FAILED, CANCELED);
+	private JobPackage jobPackage;
 
-	JobExecutionMetaData()
+	JobExecutionMetaData(JobPackage jobPackage)
 	{
-		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+		super(SIMPLE_NAME, PACKAGE_JOB);
+		this.jobPackage = requireNonNull(jobPackage);
 	}
 
 	@Override
@@ -50,6 +53,7 @@ public class JobExecutionMetaData extends SystemEntityType
 	{
 		setLabel("Job execution");
 		setAbstract(true);
+		setPackage(jobPackage);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);
 		addAttribute(STATUS).setDataType(ENUM).setEnumOptions(jobStatusOptions).setLabel("Job status")

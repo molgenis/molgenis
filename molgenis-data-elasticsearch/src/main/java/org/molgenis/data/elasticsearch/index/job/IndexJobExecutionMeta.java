@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.index.job;
 
-import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 /**
@@ -20,7 +20,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 public class IndexJobExecutionMeta extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "IndexJobExecution";
-	public static final String INDEX_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String INDEX_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	/**
 	 * Example: Transaction id can be used to group all actions into one transaction.
@@ -28,14 +28,14 @@ public class IndexJobExecutionMeta extends SystemEntityType
 	public static final String ID = "id";
 	public static final String INDEX_ACTION_JOB_ID = "indexActionJobID";
 
-	private final IndexPackage indexPackage;
+	private final JobPackage jobPackage;
 	private final JobExecutionMetaData jobExecutionMetaData;
 
 	@Autowired
-	public IndexJobExecutionMeta(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData)
+	public IndexJobExecutionMeta(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
-		super(SIMPLE_NAME, PACKAGE_INDEX);
-		this.indexPackage = requireNonNull(indexPackage);
+		super(SIMPLE_NAME, PACKAGE_JOB);
+		this.jobPackage = requireNonNull(jobPackage);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 	}
 
@@ -43,7 +43,7 @@ public class IndexJobExecutionMeta extends SystemEntityType
 	public void init()
 	{
 		setLabel("Index job execution");
-		setPackage(indexPackage);
+		setPackage(jobPackage);
 
 		setExtends(jobExecutionMetaData);
 		addAttribute(INDEX_ACTION_JOB_ID).setDescription(

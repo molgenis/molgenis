@@ -1,13 +1,13 @@
 package org.molgenis.gavin.job.meta;
 
-import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -18,7 +18,7 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 	private final JobExecutionMetaData jobExecutionMetaData;
 
 	private static final String SIMPLE_NAME = "GavinJobExecution";
-	public static final String GAVIN_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String GAVIN_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String FILENAME = "filename";
 	public static final String INPUT_FILE_EXTENSION = "extension";
@@ -29,13 +29,13 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 	public static final String SKIPPEDS = "skippeds";
 	public static final String INDELS_NOCADD = "indels";
 
-	private final IndexPackage indexPackage;
+	private final JobPackage jobPackage;
 
 	@Autowired
-	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData)
+	public GavinJobExecutionMetaData(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
-		super(SIMPLE_NAME, PACKAGE_INDEX);
-		this.indexPackage = requireNonNull(indexPackage);
+		super(SIMPLE_NAME, PACKAGE_JOB);
+		this.jobPackage = requireNonNull(jobPackage);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 	}
 
@@ -43,7 +43,7 @@ public class GavinJobExecutionMetaData extends SystemEntityType
 	public void init()
 	{
 		setLabel("Gavin job execution");
-		setPackage(indexPackage);
+		setPackage(jobPackage);
 		setExtends(jobExecutionMetaData);
 		addAttribute(FILENAME).setDataType(STRING).setNillable(false);
 		addAttribute(INPUT_FILE_EXTENSION).setDataType(STRING).setNillable(false);
