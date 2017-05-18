@@ -591,12 +591,31 @@
                 <version>${spring.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <!-- Enable exclusions when dependency management import supports exclusions: https://issues.apache.org/jira/browse/MNG-5600 -->
+                <!--
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
+                -->
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <version>${spring.security.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+                <!-- Enable exclusions when dependency management import supports exclusions: https://issues.apache.org/jira/browse/MNG-5600 -->
+                <!--
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+                -->
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
@@ -642,11 +661,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${google.guava.version}</version>
-        </dependency>
-        <!-- annotations -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
         </dependency>
         <!-- logging -->
         <dependency>

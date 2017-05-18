@@ -204,6 +204,28 @@
         </dependency>
         <!-- third party dependencies -->
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <!-- Remove exclusions when https://issues.apache.org/jira/browse/MNG-5600 has been resolved -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <!-- Remove exclusions when https://issues.apache.org/jira/browse/MNG-5600 has been resolved -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
         </dependency>
@@ -216,14 +238,6 @@
             <groupId>cz.jirutka.rsql</groupId>
             <artifactId>rsql-parser</artifactId>
             <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
