@@ -3,7 +3,7 @@ package org.molgenis.data.validation;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import org.everit.json.schema.Schema;
-import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.util.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,7 +22,7 @@ public class JsonValidatorTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private Gson gson;
 
-	@Test(expectedExceptions = MolgenisInvalidFormatException.class)
+	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testLoadSchemaInvalid() throws Exception
 	{
 		jsonValidator.loadSchema("");
@@ -54,15 +54,4 @@ public class JsonValidatorTest extends AbstractTestNGSpringContextTests
 							new ConstraintViolation("#: required key [p2] not found")));
 		}
 	}
-
-	@Test
-	public void testValidate() throws Exception
-	{
-	}
-
-	@Test
-	public void testValidate1() throws Exception
-	{
-	}
-
 }
