@@ -19,6 +19,7 @@
             <artifactId>molgenis-data-security</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
