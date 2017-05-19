@@ -14,35 +14,133 @@ The job gets executed once.
 An example of a scheduled job is a nightly job that imports data from a URL.
 A scheduled job can get executed more than once.
 
-## Job Execution
+### Example: Creating a Hello World job
+Let's create a new kind of job, a Hello World job that waits for a specified amount of seconds and
+then says Hello to the calling user.
+
+#### Service method
+The implementation sits in a method @Service bean.
+
+```java
+@Service
+public class HelloWorldService
+{
+  // This is a Service bean, so you can ask Spring to @Autowire any dependency you need to do the job
+  
+  /**
+   * Greets the user.
+   */
+  public String helloWorld(Progress progress, String who, int delay) throws InterruptedException
+  {
+    sleep(delay * 1000);
+    return "Hello " + who + "!";
+  }
+}
+```
+Take a look at the method's parameters. `String who` is needed to create the greeting.
+`int delay` determines how long the service waits before returning the greeting.
+The `Progress progress` parameter allows the job to easily report on its progress.
+
+#### JobExecution entity
 Each time a job gets executed, its execution is represented by an instance of
 an entity that extends from the `JobExecution` entity.
 This helps:
-* To keep a record of all information used to create the job
+* To keep a record of all information used to create the job, in particular the parameter values.
 * To uniformly log the progress and status of the job execution
 * To uniformly show Progress bars and a list of recently executed jobs in the Jobs plugin.
 
-The `JobExecution` entity is abstract, so you will not find a repository for it.
-Extend the entity for new job types.
+The `JobExecution` entity is abstract. You will not find a repository for it.
+So let's extend the JobExecution entity and add a `delay` attribute to store the value of the delay 
+parameter. We could also add an attribute to store the value of the who String. But instead, we'll 
+use the `user` attribute which we inherit from `JobExecution`
 
-If your job runs outside of Molgenis, like in R or on the cluster, it should update its JobExecution entity through the REST API to keep track of progress and status.
+```java
+public class HelloWorldJobExecution extends JobExecution
+{
+  [... standard constructors go here ...]
+  
+  // getter and setter for the job-specific parameters
+  public int getDelay()
+  {
+    return getInt(DELAY);
+  }
 
-### Job class
-There's an abstract `Job` class that you should probably extend to implement a molgenis job
-that runs in Java.
+  public void setDelay(int delay)
+  {
+    set(DELAY, delay);
+  }
+}
+```
 
-You implement the `call(Progress)` method. If you the method returns normally, the job status
-will be set to `SUCCESS`. If it throws an exception, the job status will be set to `FAILED`.
-There's no support yet to cancel a running job.
+You'll also need to create classes `HelloWorldJobExecutionMetadata` and `HelloWorldJobExecutionFactory`, 
+just like for any system entity you create.
 
-The result type of the call method is a template parameter of the Job class.
-It can be any type you like. You can use specify class `Void` and return null if you're not
-interested in the result of the job execution.
+#### Job Factory
+Now we must call the service method with the parameters from the HelloWorldJobExecution.
+Configure a JobFactory bean that links them together:
+```java
+  @Bean
+  public JobFactory<HelloWorldJobExecution> helloWorldJobFactory()
+  {
+    return new JobFactory<HelloWorldJobExecution>()
+    {
+      @Override
+      public Job<String> createJob(HelloWorldJobExecution jobExecution)
+      {
+        final String who = jobExecution.getUser();
+        final int delay = jobExecution.getDelay();
+        return progress -> helloWorldService.helloWorld(progress, who, delay);
+      }
+    };
+  }
+```
 
-You can start the job execution synchronously by calling `call()` on the `Job` instance or
-you can use a standard Java `ExecutorService` to schedule it in a different thread.
+#### Running the job
+If you want to run a Hello World job, you should
+ * `@Autowire` the `HelloWorldJobExecutionFactory`
+ * use it to create a new instance of `HelloWorldJobExecution`
+ * set the parameter values
+ * submit it for execution using `JobExecutor.submit()`
+ 
+ ```java
+HelloWorldJobExecution jobExecution = factory.create();
+jobExecution.setDelay(1);
+jobExecution.setUser("user");
+jobExecutor.submit(jobExecution);
+```
 
-### Progress interface
+#### Scheduling the job
+But perhaps you want to allow the Hello World job to be scheduled. In that case all you have
+to do is add a `ScheduledJobType` bean:
+```java
+@Lazy
+@Bean
+public ScheduledJobType helloWorldJobType()
+{
+  ScheduledJobType result = scheduledJobTypeFactory.create("helloWorld");
+  result.setJobExecutionType(helloWorldJobExecutionMetadata);
+  result.setLabel("Hello World");
+  result.setDescription("Simple job example");
+  result.setSchema("{\"title\":\"Hello World Job\",\"type\":\"object\",\"properties\":{\"delay\":{\"type\":\"integer\"}},\"required\":[\"delay\"]}");
+  return result;
+}
+```
+> Make sure you specify a unique name for your bean!
+
+The Schema property contains a [JSON schema](http://json-schema.org) that will be used to validate the parameters
+attribute for the ScheduledJob when it is scheduled.
+The value of the parameters object will be parsed as a Map<String, Object> and the values
+will be written to the JobExecution using JavaBean setters. So make sure that the parameter names
+match the bean's property names and types. In this particular case, the `delay` property of type integer
+will get written to `HelloWorldJobExcution.setDelay()`.
+
+For scheduled jobs, the value of the `user` property of the JobExecution will get set automatically to the user who created 
+the `ScheduledJob`.
+
+#### Complete code
+Check out [the complete Hello World job example](https://github.com/molgenis/molgenis/tree/master/molgenis-jobs/src/test/java/org/molgenis/data/jobs/model/hello).
+
+### A bit more about the Progress interface
 Use the `Progress` interface to log the progress of the job execution.
 
 You, as creator of the job, decide how to report and scale the job's progress.
@@ -56,25 +154,13 @@ while running.
 The progress message plus the time the method was called will be logged in the `log`
 attribute of the `JobExecution` entity.
 
-### Job Factory
-All information needed to run the job is written to the `JobExecution` entity.
-This means that all information needed to run the job is serialized to primitive
-attribute values and references to other entities.
-
-Create a Job factory class to instantiate your Job instances. The Job objects aren't beans
-so you cannot autowire them and cannot annotate the methods. The Job factory probably
-is a bean so you for example the `DataService` can be an `@Autowired` field of the
-Job factory and the Job factory can pass it to the `Job` instance when it creates the `Job`.
+If your job runs outside of Molgenis, like in R or on the cluster, it should update its 
+JobExecution entity through the REST API to keep track of progress and status.
 
 ### Transactions and running as user
-The Job class will make sure that the job gets executed in a transaction, and run with
-as the user that is specified in the `JobExecution` entity.
-Progress will get logged outside of the transaction, so that it is available even if
-the job is still running.
-
-The wisdom of having such long-running transactions is debatable, so we probably should
-make the transactionality optional in the long run.
-But so far the jobs that we've created all needed to be transactional.
+If you want to run the job as a transaction, annotate your @Service method with @Transactional.
+The wisdom of having long-running transactions is debatable, so you may want to think up 
+some compensating actions instead to run if the job fails and put those in a catch block.
 
 ### Job React Components
 You can use the Job React Components to easily display a uniform progress bar.
@@ -85,40 +171,3 @@ and in the past.
 It needs a URL prop that it'll query regularly to keep the overview up to date.
 The mechanism for updating the screen is very simply polling the server for a complete
 overview for all jobs, so be careful not to overdo it.
-
-## Job Scheduling
-The execution of scheduled jobs is not that different from executing an ordinary job.
-Create the `JobExecution` entity instance at execution time, one for each execution of
-the scheduled job and feed it to the Job factory.
-
-### Quartz Jobs
-If you use quartz to schedule a job, you implement the `QuartzJob` interface and schedule
-its class to be run.
-
-#### Quartz Job details
-Job-specific data can be stored in the `JobDataMap` which is passed to quartz when you schedule the job.
-
-But since we have repositories to store information, you can also create a repository or settings
-object to store the details for the scheduled job. As a benefit the details of that entity can
-be updated in the settings editor.
-
-If there's more than one instance of the job scheduled, you can store its ID in the JobDataMap when you schedule it.
-
-#### Quartz job execution
-
-The `QuartzJob`'s fields will get `@Autowired` by the molgenis `AutowiringSpringBeanJobFactory`.
-So you can autowire a field in your `QuartzJob` to contain your Job factory bean.
-
-![quartz job sequence diagram](../images/jobs/quartz-job.png?raw=true, "quartz job")
-
-Upon execution of the QuartzJob, instantiate a `JobExecution` entity.
-Send it to the (autowired) Job factory to create a molgenis `Job` instance.
-
-The `QuartzJob`'s `execute` method will already be run on a separate thread so you can then
-call the `call` method of your `Job` instance synchronously.
-
-#### Example of an existing Quartz job
-Take a look at the `FileIngesterQuartzJob` class for an example.
-
-Take a look at the `FileIngestRepositoryDecorator` that decorates the `FileIngest` repository
-to reschedule the `FileIngesterQuartzJob` when its entities get updated or deleted.

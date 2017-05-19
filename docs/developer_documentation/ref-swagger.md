@@ -21,8 +21,8 @@ The specification uses enums for the `entity_name` parameter, and fills in the e
 user can see.
 
 ### URL
-Admins can add the plugin to the menu in the Menu Manager. Then users can access it by selecting the menu item.
-If you do not wish to add it to the menu, users with plugin permissions can still access the plugin on the url 
+By default, the API documentation is added to the menu.
+If you remove it from the menu, users with plugin permissions can still access the plugin on the url 
 `<server>/plugin/swagger/`.
 
 ## Authorization
