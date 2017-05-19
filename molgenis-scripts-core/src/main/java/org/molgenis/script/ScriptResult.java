@@ -1,19 +1,21 @@
 package org.molgenis.script;
 
+import org.molgenis.file.model.FileMeta;
+
 public class ScriptResult
 {
-	private final String outputFile;
+	private final FileMeta fileMeta;
 	private final String output;
 
-	public ScriptResult(String outputFile, String output)
+	public ScriptResult(FileMeta fileMeta, String output)
 	{
-		this.outputFile = outputFile;
+		this.fileMeta = fileMeta;
 		this.output = output;
 	}
 
-	public String getOutputFile()
+	public FileMeta getOutputFile()
 	{
-		return outputFile;
+		return fileMeta;
 	}
 
 	public String getOutput()

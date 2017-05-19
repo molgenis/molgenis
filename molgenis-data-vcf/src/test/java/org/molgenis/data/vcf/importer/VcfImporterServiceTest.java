@@ -12,6 +12,7 @@ import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -47,6 +48,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	@Mock
 	private MetaDataService metaDataService;
 	@Mock
+	private DefaultPackage defaultPackage;
+	@Mock
 	private SecurityContext securityContext;
 	@Mock
 	private RepositoryCollection repositoryCollection;
@@ -57,7 +60,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService);
+		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService,
+				defaultPackage);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		SecurityContextHolder.setContext(securityContext);
 		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);

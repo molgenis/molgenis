@@ -45,7 +45,7 @@
                 <tbody>
                 <#assign count = 0 />
                 <#list sourceAttributeEntities as sourceEntity>
-                    <#assign id = sourceEntity.getString(sourceAttributeIdAttribute)>
+                    <#assign id = sourceEntity.getIdValue()?string>
                 <tr id="${id?html}">
                     <td>${sourceEntity.get(sourceAttributeLabelAttribute)?html}</td>
                     <td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
@@ -63,9 +63,9 @@
                             </#if>
                             <#list targetAttributeEntities as targetEntity>
                                 <option <#if categoryMapping.map[id]?? >
-                                    <#if categoryMapping.map[id]=targetEntity.getString(targetAttributeIdAttribute)>selected </#if>
+                                    <#if categoryMapping.map[id]=targetEntity.getIdValue()?string>selected </#if>
                                 </#if>
-                                    value="${targetEntity.get(targetAttributeIdAttribute)}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option>
+                                    value="${targetEntity.getIdValue()?string}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option>
                             </#list>
                         </select>
                     </td>

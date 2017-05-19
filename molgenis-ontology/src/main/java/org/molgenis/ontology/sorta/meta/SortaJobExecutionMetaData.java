@@ -1,21 +1,21 @@
 package org.molgenis.ontology.sorta.meta;
 
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
 public class SortaJobExecutionMetaData extends SystemEntityType
 {
 	public static final String SIMPLE_NAME = "SortaJobExecution";
-	public static final String SORTA_JOB_EXECUTION = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String SORTA_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public final static String ONTOLOGY_IRI = "ontologyIri";
 	public final static String NAME = "name";
@@ -26,14 +26,14 @@ public class SortaJobExecutionMetaData extends SystemEntityType
 
 	public static final String SORTA_MATCH_JOB_TYPE = "SORTA";
 
-	private final OntologyPackage ontologyPackage;
+	private final JobPackage jobPackage;
 	private final JobExecutionMetaData jobExecutionMetaData;
 
 	@Autowired
-	SortaJobExecutionMetaData(OntologyPackage ontologyPackage, JobExecutionMetaData jobExecutionMetaData)
+	SortaJobExecutionMetaData(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
-		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
-		this.ontologyPackage = requireNonNull(ontologyPackage);
+		super(SIMPLE_NAME, PACKAGE_JOB);
+		this.jobPackage = requireNonNull(jobPackage);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 	}
 
@@ -41,7 +41,7 @@ public class SortaJobExecutionMetaData extends SystemEntityType
 	public void init()
 	{
 		setLabel("SORTA job execution");
-		setPackage(ontologyPackage);
+		setPackage(jobPackage);
 
 		setExtends(jobExecutionMetaData);
 		addAttribute(NAME).setDataType(STRING).setNillable(false);

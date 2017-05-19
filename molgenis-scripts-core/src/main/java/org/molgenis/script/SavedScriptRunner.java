@@ -3,15 +3,22 @@ package org.molgenis.script;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMeta;
+import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.net.URLConnection.guessContentTypeFromName;
+import static java.text.MessageFormat.format;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.script.ScriptMetaData.SCRIPT;
 
 /**
@@ -33,23 +40,25 @@ public class SavedScriptRunner
 	private final DataService dataService;
 	private final FileStore fileStore;
 	private final TokenService tokenService;
+	private final FileMetaFactory fileMetaFactory;
 
 	@Autowired
 	public SavedScriptRunner(ScriptRunnerFactory scriptRunnerFactory, DataService dataService, FileStore fileStore,
-			TokenService tokenService)
+			TokenService tokenService, FileMetaFactory fileMetaFactory)
 	{
 		this.scriptRunnerFactory = scriptRunnerFactory;
 		this.dataService = dataService;
 		this.fileStore = fileStore;
 		this.tokenService = tokenService;
+		this.fileMetaFactory = fileMetaFactory;
 	}
 
 	/**
-	 * Run a script with parameters
+	 * Run a script with parameters.
 	 *
-	 * @param scriptName
-	 * @param parameters
-	 * @return ScripResult
+	 * @param scriptName name of the script to run
+	 * @param parameters parameters for the script
+	 * @return ScriptResult
 	 * @throws UnknownScriptException  if scriptName is unknown
 	 * @throws GenerateScriptException , if parameter is missing
 	 */
@@ -81,18 +90,31 @@ public class SavedScriptRunner
 			parameters.put("molgenisToken", token);
 		}
 
-		String outputFile = null;
+		FileMeta fileMeta = null;
 		if (StringUtils.isNotEmpty(script.getResultFileExtension()))
 		{
 			String name = generateRandomString();
-			outputFile = fileStore.getFile(name + "." + script.getResultFileExtension()).getAbsolutePath();
-			parameters.put("outputFile", outputFile);
+			File file = fileStore.getFile(name + "." + script.getResultFileExtension());
+			parameters.put("outputFile", file.getAbsolutePath());
+			fileMeta = createFileMeta(name, file);
+			dataService.add(FILE_META, fileMeta);
 		}
 
 		ScriptRunner scriptRunner = scriptRunnerFactory.getScriptRunner(script.getScriptType().getName());
+
 		String output = scriptRunner.runScript(script, parameters);
 
-		return new ScriptResult(outputFile, output);
+		return new ScriptResult(fileMeta, output);
+	}
+
+	private FileMeta createFileMeta(String fileMetaId, File file)
+	{
+		FileMeta fileMeta = fileMetaFactory.create(fileMetaId);
+		fileMeta.setContentType(guessContentTypeFromName(file.getName()));
+		fileMeta.setSize(file.length());
+		fileMeta.setFilename(file.getName());
+		fileMeta.setUrl(format("{0}/{1}", FileDownloadController.URI, fileMetaId));
+		return fileMeta;
 	}
 
 	private String generateRandomString()
