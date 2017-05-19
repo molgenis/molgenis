@@ -692,57 +692,57 @@
     </dependencies>
 
     <modules>
+        <module>molgenis-app</module>
         <module>molgenis-apps</module>
         <module>molgenis-bootstrap</module>
-        <module>molgenis-core</module>
+        <module>molgenis-catalogue</module>
+        <module>molgenis-charts</module>
         <module>molgenis-core-ui</module>
-        <module>molgenis-ontology-core</module>
-        <module>molgenis-ontology</module>
+        <module>molgenis-core</module>
         <module>molgenis-das</module>
-        <module>molgenis-dataexplorer</module>
-        <module>molgenis-app</module>
-        <module>molgenis-security</module>
-        <module>molgenis-security-core</module>
         <module>molgenis-data-annotators</module>
-        <module>molgenis-data-excel</module>
+        <module>molgenis-data-cache</module>
         <module>molgenis-data-csv</module>
-        <module>molgenis-data-googlespreadsheet</module>
-        <module>molgenis-data</module>
-        <module>molgenis-data-postgresql</module>
-        <module>molgenis-data-vcf</module>
-        <module>molgenis-data-rest</module>
         <module>molgenis-data-elasticsearch</module>
+        <module>molgenis-data-excel</module>
+        <module>molgenis-data-file</module>
+        <module>molgenis-data-googlespreadsheet</module>
+        <module>molgenis-data-i18n</module>
+        <module>molgenis-data-import</module>
+        <module>molgenis-data-index</module>
+        <module>molgenis-data-mapper</module>
+        <module>molgenis-data-migrate</module>
+        <module>molgenis-data-platform</module>
+        <module>molgenis-data-postgresql</module>
+        <module>molgenis-data-rest-client</module>
+        <module>molgenis-data-rest</module>
+        <module>molgenis-data-security</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
-        <module>molgenis-data-i18n</module>
-        <module>molgenis-data-security</module>
-        <module>molgenis-data-index</module>
+        <module>molgenis-data-vcf</module>
+        <module>molgenis-data</module>
+        <module>molgenis-dataexplorer</module>
         <module>molgenis-fair</module>
-        <module>molgenis-python</module>
-        <module>molgenis-r</module>
-        <module>molgenis-charts</module>
-        <module>molgenis-js</module>
-        <module>molgenis-model-registry</module>
-        <module>molgenis-scripts</module>
-        <module>molgenis-scripts-core</module>
-        <module>molgenis-data-import</module>
-        <module>molgenis-data-mapper</module>
-        <module>molgenis-pathways</module>
-        <module>molgenis-data-rest-client</module>
-        <module>molgenis-data-migrate</module>
-        <module>molgenis-questionnaires</module>
-        <module>molgenis-data-file</module>
-        <module>molgenis-catalogue</module>
         <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
         <module>molgenis-genetics-diag</module>
         <module>molgenis-jobs</module>
+        <module>molgenis-js</module>
+        <module>molgenis-model-registry</module>
+        <module>molgenis-ontology-core</module>
+        <module>molgenis-ontology</module>
+        <module>molgenis-pathways</module>
         <module>molgenis-platform-integration-tests</module>
-        <module>molgenis-test</module>
-        <module>molgenis-data-cache</module>
-        <module>molgenis-data-platform</module>
-        <module>molgenis-util</module>
+        <module>molgenis-python</module>
+        <module>molgenis-questionnaires</module>
+        <module>molgenis-r</module>
+        <module>molgenis-scripts-core</module>
+        <module>molgenis-scripts</module>
+        <module>molgenis-security-core</module>
+        <module>molgenis-security</module>
         <module>molgenis-settings</module>
         <module>molgenis-swagger</module>
+        <module>molgenis-test</module>
+        <module>molgenis-util</module>
     </modules>
 </project>
