@@ -2,7 +2,8 @@ package org.molgenis.file.ingest.bucket;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import org.molgenis.auth.SecurityPackage;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;

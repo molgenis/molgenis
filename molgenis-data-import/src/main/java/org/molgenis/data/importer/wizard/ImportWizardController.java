@@ -478,8 +478,7 @@ public class ImportWizardController extends AbstractWizardController
 		return filename;
 	}
 
-	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify,
-			String packageId)
+	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify, String packageId)
 	{
 		// no action specified? default is ADD just like the importerPlugin
 		ImportRun importRun;

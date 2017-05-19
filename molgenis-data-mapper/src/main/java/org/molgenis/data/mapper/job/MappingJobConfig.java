@@ -27,6 +27,7 @@ public class MappingJobConfig
 	private final MappingService mappingService;
 	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
 	private final MappingJobExecutionMetadata mappingJobExecutionMetadata;
+	private final Gson gson;
 
 	@Autowired
 	public MappingJobConfig(MappingService mappingService, ScheduledJobTypeFactory scheduledJobTypeFactory,
@@ -35,13 +36,11 @@ public class MappingJobConfig
 		this.mappingService = requireNonNull(mappingService);
 		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
 		this.mappingJobExecutionMetadata = requireNonNull(mappingJobExecutionMetadata);
+		this.gson = new Gson();
 	}
 
 	@Autowired
 	private MenuReaderService menuReaderService;
-
-	@Autowired
-	private Gson gson;
 
 	/**
 	 * The MappingJob Factory bean.

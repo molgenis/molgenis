@@ -12,7 +12,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.file.FileStore;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.TreeMap;
 

@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import org.everit.json.schema.Schema;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.util.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -14,13 +13,13 @@ import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 
-@ContextConfiguration(classes = { JsonValidator.class, GsonConfig.class })
+@ContextConfiguration(classes = { JsonValidator.class })
 public class JsonValidatorTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private JsonValidator jsonValidator;
-	@Autowired
-	private Gson gson;
+
+	private Gson gson = new Gson();
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testLoadSchemaInvalid() throws Exception

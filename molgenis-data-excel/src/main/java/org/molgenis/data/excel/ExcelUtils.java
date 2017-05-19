@@ -125,7 +125,7 @@ public class ExcelUtils
 			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
 
 			workbook.setSheetName(index, newSheetname);
-				workbook.write(new FileOutputStream(file));
+			workbook.write(new FileOutputStream(file));
 
 		}
 		catch (Exception e)

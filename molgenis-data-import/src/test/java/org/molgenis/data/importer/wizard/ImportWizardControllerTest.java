@@ -352,8 +352,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller
-				.importFile(request, multipartFile, null, null, "update", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, null, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -385,8 +384,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller
-				.importFile(request, multipartFile, null, null, "addsss", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, null, "addsss", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -450,8 +448,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller
-				.importFile(request, multipartFile, "newName", null, "add", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, "newName", null, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
@@ -551,8 +548,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
-		ImportJob expectedJob = new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, DatabaseAction.ADD,
-				importRun.getId(), importRunService, request.getSession(), PACKAGE_DEFAULT);
+		ImportJob expectedJob = new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection,
+				DatabaseAction.ADD, importRun.getId(), importRunService, request.getSession(), PACKAGE_DEFAULT);
 
 		verify(executorService).execute(expectedJob);
 		verify(executorService, times(1)).execute(expectedJob);
@@ -586,8 +583,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		// the actual test
 		controller.importFile(request, multipartFile, null, "test", "add", null);
-		ImportJob expectedJob = new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, DatabaseAction.ADD,
-				importRun.getId(), importRunService, request.getSession(), "test");
+		ImportJob expectedJob = new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection,
+				DatabaseAction.ADD, importRun.getId(), importRunService, request.getSession(), "test");
 
 		verify(executorService).execute(expectedJob);
 	}

@@ -3,7 +3,6 @@ package org.molgenis.script;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
@@ -113,7 +112,7 @@ public class SavedScriptRunner
 		fileMeta.setContentType(guessContentTypeFromName(file.getName()));
 		fileMeta.setSize(file.length());
 		fileMeta.setFilename(file.getName());
-		fileMeta.setUrl(format("{0}/{1}", FileDownloadController.URI, fileMetaId));
+		fileMeta.setUrl(format("{0}/{1}", "/files", fileMetaId));
 		return fileMeta;
 	}
 

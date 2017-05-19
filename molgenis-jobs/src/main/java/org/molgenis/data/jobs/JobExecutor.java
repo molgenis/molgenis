@@ -36,28 +36,27 @@ public class JobExecutor
 
 	private final DataService dataService;
 	private final EntityManager entityManager;
-	private final Gson gson;
 	private final JobExecutionTemplate jobExecutionTemplate = new JobExecutionTemplate();
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final MailSender mailSender;
 	private final UserDetailsService userDetailsService;
 	private final ExecutorService executorService;
 	private final JobFactoryRegistry jobFactoryRegistry;
+	private final Gson gson;
 
 	@Autowired
-	public JobExecutor(DataService dataService, EntityManager entityManager, Gson gson,
-			UserDetailsService userDetailsService,
+	public JobExecutor(DataService dataService, EntityManager entityManager, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
 			JobFactoryRegistry jobFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
-		this.gson = requireNonNull(gson);
 		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
 		this.executorService = requireNonNull(executorService);
 		this.jobFactoryRegistry = jobFactoryRegistry;
+		this.gson = new Gson();
 	}
 
 	/**
