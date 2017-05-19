@@ -59,7 +59,10 @@
             <artifactId>gson-javatime-serialisers</artifactId>
             <version>1.1.1</version>
         </dependency>
-        <!-- Spring -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
