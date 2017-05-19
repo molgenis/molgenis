@@ -6,8 +6,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
-import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.jobs.TransactionalJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -15,15 +15,15 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public class AnnotationJob extends Job<Void>
+public class AnnotationJob extends TransactionalJob<Void>
 {
 	private final CrudRepositoryAnnotator crudRepositoryAnnotator;
 	private final String username;
 	private final List<RepositoryAnnotator> annotators;
 	private final Repository<Entity> repository;
-	List<String> successfulAnnotators = Lists.newArrayList();
-	List<String> failedAnnotators = Lists.newArrayList();
-	Exception firstException = null;
+	private List<String> successfulAnnotators = Lists.newArrayList();
+	private List<String> failedAnnotators = Lists.newArrayList();
+	private Exception firstException = null;
 
 	public AnnotationJob(CrudRepositoryAnnotator crudRepositoryAnnotator, String username,
 			List<RepositoryAnnotator> annotators, Repository<Entity> repository, Progress progress,
@@ -89,7 +89,6 @@ public class AnnotationJob extends Job<Void>
 	private String getMessage(int i, RepositoryAnnotator annotator)
 	{
 		return String.format("Annotating \"%s\" with %s (annotator %d of %d, started by \"%s\")",
-				repository.getEntityType().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(),
-				username);
+				repository.getEntityType().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(), username);
 	}
 }

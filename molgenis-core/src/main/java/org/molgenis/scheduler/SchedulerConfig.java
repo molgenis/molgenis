@@ -4,16 +4,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 /**
  * Configure a scheduler factory based on a Quartz scheduler with jobs supporting autowiring.
  */
 @Configuration
+@EnableScheduling
 public class SchedulerConfig
 {
+	private final ApplicationContext applicationContext;
+
 	@Autowired
-	private ApplicationContext applicationContext;
+	public SchedulerConfig(ApplicationContext applicationContext)
+	{
+		this.applicationContext = applicationContext;
+	}
 
 	@Bean
 	public SchedulerFactoryBean schedulerFactoryBean()

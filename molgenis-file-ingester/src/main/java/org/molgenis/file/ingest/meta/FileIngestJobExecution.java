@@ -12,18 +12,19 @@ public class FileIngestJobExecution extends JobExecution
 	public FileIngestJobExecution(Entity entity)
 	{
 		super(entity);
+		setType(FILE_INGEST_JOB_TYPE);
 	}
 
 	public FileIngestJobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
+		setType(FILE_INGEST_JOB_TYPE);
 	}
 
 	public FileIngestJobExecution(String identifier, EntityType entityType)
 	{
 		super(identifier, entityType);
-		setDefaultValues();
+		setType(FILE_INGEST_JOB_TYPE);
 	}
 
 	public FileMeta getFile()
@@ -36,18 +37,34 @@ public class FileIngestJobExecution extends JobExecution
 		set(FILE, value);
 	}
 
-	public Entity getFileIngest()
+	public void setUrl(String url)
 	{
-		return getEntity(FILE_INGEST);
+		set(URL, url);
 	}
 
-	public void setFileIngest(FileIngest fileIngest)
+	public String getUrl()
 	{
-		set(FILE_INGEST, fileIngest);
+		return getString(URL);
 	}
 
-	private void setDefaultValues()
+	public String getTargetEntityId()
 	{
-		setType(FILE_INGEST_JOB_TYPE);
+		return getString(TARGET_ENTITY_ID);
 	}
+
+	public void setTargetEntityId(String targetEntityId)
+	{
+		set(TARGET_ENTITY_ID, targetEntityId);
+	}
+
+	public void setLoader(String loader)
+	{
+		set(LOADER, loader);
+	}
+
+	public String getLoader()
+	{
+		return getString(LOADER);
+	}
+
 }

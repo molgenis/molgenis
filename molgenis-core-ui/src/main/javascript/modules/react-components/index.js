@@ -36,7 +36,7 @@ import Table from "./Table";
 import ConfirmClick from "./ConfirmClick";
 import TextArea from "./TextArea";
 import ProgressBar from "./ProgressBar";
-import FileIngestPlugin from "./FileIngestPlugin";
+import ScheduledJobsPlugin from "./ScheduledJobsPlugin";
 import jobs from "./jobs";
 import UploadContainer from "./UploadContainer";
 import UploadForm from "./UploadForm";
@@ -75,7 +75,7 @@ export default {
     'TextArea': TextArea,
     'ProgressBar': ProgressBar,
     'jobs': jobs,
-    'FileIngestPlugin': FileIngestPlugin,
+    'ScheduledJobsPlugin': ScheduledJobsPlugin,
     'ConfirmClick': ConfirmClick,
     'UploadContainer': UploadContainer,
     'UploadForm': UploadForm

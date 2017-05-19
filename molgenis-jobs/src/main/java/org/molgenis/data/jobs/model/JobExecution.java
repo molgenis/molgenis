@@ -39,15 +39,11 @@ public class JobExecution extends StaticEntity
 	public JobExecution(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
-
 	}
 
 	public JobExecution(String identifier, EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
-
 		setIdentifier(identifier);
 	}
 
@@ -206,6 +202,16 @@ public class JobExecution extends StaticEntity
 		set(FAILURE_EMAIL, failureEmail);
 	}
 
+	public void setScheduledJobId(String scheduledJobId)
+	{
+		set(SCHEDULED_JOB_ID, scheduledJobId);
+	}
+
+	public String getScheduledJobId()
+	{
+		return getString(SCHEDULED_JOB_ID);
+	}
+
 	/**
 	 * Appends a log message to the execution log.
 	 * The first time the log exceeds MAX_LOG_LENGTH, it gets truncated and the TRUNCATION_BANNER gets added.
@@ -229,11 +235,5 @@ public class JobExecution extends StaticEntity
 	public enum Status
 	{
 		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
-	}
-
-	private void setDefaultValues()
-	{
-		setSubmissionDate(Instant.now());
-		setStatus(Status.PENDING);
 	}
 }

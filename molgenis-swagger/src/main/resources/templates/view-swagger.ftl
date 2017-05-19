@@ -22,6 +22,76 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /scripts/{name}/start:
+    get:
+      tags:
+        - Scripts
+      summary: Starts a Script Job.
+      description: Will redirect the request to the jobs controller, showing the progress of the started ScriptJobExecution. The Script's output will be written to the log of the ScriptJobExecution. If the Script has an outputFile, the URL of that file will be written to the ScriptJobExecution's resultUrl. The Swagger UI can only be used to start Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the script to start
+      responses:
+        302:
+          description: URL of a page showing the ScriptJobExecution
+    post:
+      tags:
+        - Scripts
+      summary: Starts a Script Job.
+      description: Will redirect the request to the jobs controller, showing the progress of the started ScriptJobExecution. The Script's output will be written to the log of the ScriptJobExecution. If the Script has an outputFile, the URL of that file will be written to the ScriptJobExecution's resultUrl. The Swagger UI can only be used to start Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the script to start
+      responses:
+        302:
+          description: URL of a page showing the ScriptJobExecution
+  /scripts/{name}/run:
+    get:
+      tags:
+        - Scripts
+      summary: Runs a Script, waits for the result, serves the result
+      description: The Swagger UI can only be used to run Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the Script to run
+      responses:
+        302:
+          description: If the result has an outputFile, will redirect to a URL where you can download the result file.
+        200:
+          description: Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+        400:
+          description: If the Script name is unknown or one of the Script's parameter values is missing
+    post:
+      tags:
+        - Scripts
+      summary: Runs a Script, waits for the result, serves the result
+      description: The Swagger UI can only be used to run Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the Script to run
+      responses:
+        302:
+          description: If the result has an outputFile, will redirect to a URL where you can download the result file.
+        200:
+          description: Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+        400:
+          description: If the Script name is unknown or one of the Script's parameter values is missing
+  /plugin/jobs/run/{scheduledJobId}:
+    post:
+      tags:
+        - Jobs
+      summary: Runs a job
+      parameters:
+        - name: scheduledJobId
+          in: path
   /api/v1/login:
     post:
       tags:
@@ -386,7 +456,7 @@ paths:
           type: boolean
           required: false
           description: indicates if a source attribute should be added to the EntityType, ignored when mapping to an existing EntityType
-        - name: package
+        - name: packageId
           in: query
           type: string
           required: false

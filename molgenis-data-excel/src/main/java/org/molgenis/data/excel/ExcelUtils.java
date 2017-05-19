@@ -1,21 +1,21 @@
 package org.molgenis.data.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
 
-class ExcelUtils
+public class ExcelUtils
 {
 	static String toValue(Cell cell)
 	{
@@ -118,6 +118,34 @@ class ExcelUtils
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
 	}
 
+	public static void renameSheet(String newSheetname, File file, int index)
+	{
+		try
+		{
+			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
+
+			workbook.setSheetName(index, newSheetname);
+				workbook.write(new FileOutputStream(file));
+
+		}
+		catch (Exception e)
+		{
+			throw new MolgenisDataException(e);
+		}
+	}
+
+	public static int getNumberOfSheets(File file)
+	{
+		try
+		{
+			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
+			return workbook.getNumberOfSheets();
+		}
+		catch (Exception e)
+		{
+			throw new MolgenisDataException(e);
+		}
+	}
 	/**
 	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
 	 *

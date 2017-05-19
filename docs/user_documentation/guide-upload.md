@@ -163,7 +163,7 @@ The href can be used to poll the status of the import by checking the status fie
     201 CREATED
     /api/v2/ImportRun/[ImportRunID]
 
-### importFile example using cURL(https://curl.haxx.se):
+### importFile example using [cURL](https://curl.haxx.se):
     curl -H "x-molgenis-token:[TOKEN]" -X POST -F"file=@path/to/file/test.vcf" -Faction=update -FentityTypeId=newName
     -Fnotify=true https://[SERVER URL]/plugin/importwizard/importFile
 

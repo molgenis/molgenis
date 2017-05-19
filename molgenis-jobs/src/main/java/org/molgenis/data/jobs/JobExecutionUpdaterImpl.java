@@ -7,12 +7,14 @@ import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
+@Component
 public class JobExecutionUpdaterImpl implements JobExecutionUpdater
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionUpdater.class);

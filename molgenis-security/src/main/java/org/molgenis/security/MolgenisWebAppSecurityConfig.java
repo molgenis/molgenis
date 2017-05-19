@@ -162,6 +162,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.antMatchers("/scripts/**/run").authenticated()
 
+				.antMatchers("/scripts/**/start").authenticated()
+
 				.antMatchers("/files/**").permitAll()
 
 				.antMatchers('/' + PATH_SEGMENT_APPS + "/**").permitAll()

@@ -47,14 +47,14 @@ public class JobTest
 	private Answer<Authentication> authenticationAnswer = (call) -> SecurityContextHolder.getContext()
 			.getAuthentication();
 
-	private Job<Authentication> job;
-	private Job<Authentication> jobWithoutTransaction;
+	private TransactionalJob<Authentication> job;
+	private NontransactionalJob<Authentication> jobWithoutTransaction;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
-		job = new Job<Authentication>(progress, transactionOperations, authentication)
+		job = new TransactionalJob<Authentication>(progress, transactionOperations, authentication)
 		{
 			@Override
 			public Authentication call(Progress progress) throws Exception
@@ -63,7 +63,7 @@ public class JobTest
 			}
 		};
 
-		jobWithoutTransaction = new Job<Authentication>(progress, null, authentication)
+		jobWithoutTransaction = new NontransactionalJob<Authentication>(progress, authentication)
 		{
 			@Override
 			public Authentication call(Progress progress) throws Exception
@@ -126,20 +126,6 @@ public class JobTest
 	}
 
 	@Test
-	public void testNontransactionalJob() throws Exception
-	{
-		when(callable.call()).thenAnswer(authenticationAnswer);
-		Authentication actual = jobWithoutTransaction.call();
-
-		assertSame(actual, authentication, "Job should run with authentication");
-
-		verify(progress).start();
-		verify(progress).success();
-		verify(callable).call();
-		verifyNoMoreInteractions(callable, progress, transactionOperations);
-	}
-
-	@Test
 	public void testTransactionalJobFailure() throws Exception
 	{
 		when(transactionOperations.execute(actionCaptor.capture()))
@@ -150,7 +136,7 @@ public class JobTest
 		try
 		{
 			job.call();
-			fail("Job call should throw exception if subclass execution fails.");
+			fail("TransactionalJob call should throw exception if subclass execution fails.");
 		}
 		catch (JobExecutionException ex)
 		{
@@ -158,28 +144,6 @@ public class JobTest
 		}
 
 		verify(transactionOperations).execute(any());
-		verify(progress).start();
-		verify(callable).call();
-		verify(progress).failed(mde);
-		verifyNoMoreInteractions(callable, progress, transactionOperations);
-	}
-
-	@Test
-	public void testNontransactionalJobFailure() throws Exception
-	{
-		MolgenisDataException mde = new MolgenisDataException();
-		when(callable.call()).thenThrow(mde);
-
-		try
-		{
-			jobWithoutTransaction.call();
-			fail("Job call should throw exception if subclass execution fails.");
-		}
-		catch (JobExecutionException ex)
-		{
-			assertSame(ex.getCause(), mde);
-		}
-
 		verify(progress).start();
 		verify(callable).call();
 		verify(progress).failed(mde);
