@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
-import static java.text.MessageFormat.format;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
@@ -65,9 +65,9 @@ public class ScheduledScriptConfig
 					ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
 					if (scriptResult.getOutputFile() != null)
 					{
-						scriptJobExecution.setResultUrl(format("/files/{0}", scriptResult.getOutputFile().getId()));
+						scriptJobExecution.setResultUrl(format("/files/%s", scriptResult.getOutputFile().getId()));
 					}
-					progress.appendLog("Script output:\n" + scriptResult.getOutput());
+					progress.appendLog(format("Script output:\n%s\n", scriptResult.getOutput()));
 					return scriptResult;
 				};
 			}
