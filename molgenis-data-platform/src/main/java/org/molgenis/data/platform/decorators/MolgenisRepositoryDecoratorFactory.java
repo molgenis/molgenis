@@ -3,8 +3,8 @@ package org.molgenis.data.platform.decorators;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateAnonymizer;
 import org.molgenis.data.aggregation.AggregateAnonymizerRepositoryDecorator;
+import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
-import org.molgenis.data.cache.l1.TransactionListener;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
 import org.molgenis.data.cache.l3.L3Cache;
@@ -40,7 +40,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final SearchService searchService;
-	private final TransactionListener l1Cache;
+	private final L1Cache l1Cache;
 	private final EntityListenersService entityListenersService;
 	private final L2Cache l2Cache;
 	private final TransactionInformation transactionInformation;
@@ -53,8 +53,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
 			AppSettings appSettings, DataService dataService, ExpressionValidator expressionValidator,
 			SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
-			TransactionListener l1Cache,
+			IndexActionRegisterService indexActionRegisterService, SearchService searchService, L1Cache l1Cache,
 			L2Cache l2Cache, TransactionInformation transactionInformation,
 			EntityListenersService entityListenersService, L3Cache l3Cache,
 			PlatformTransactionManager transactionManager, QueryValidator queryValidator)

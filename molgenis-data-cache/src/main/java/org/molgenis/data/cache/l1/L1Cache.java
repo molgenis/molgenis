@@ -26,15 +26,15 @@ import static org.slf4j.LoggerFactory.getLogger;
  * cache. When the transaction is committed the cache is removed.
  */
 @Component
-public class TransactionListener extends DefaultMolgenisTransactionListener
+public class L1Cache extends DefaultMolgenisTransactionListener
 {
-	private static final Logger LOG = getLogger(TransactionListener.class);
+	private static final Logger LOG = getLogger(L1Cache.class);
 	private static final int MAX_CACHE_SIZE = 1000;
 	private final ThreadLocal<CombinedEntityCache> caches;
 	private final EntityHydration entityHydration;
 
 	@Autowired
-	public TransactionListener(TransactionManager transactionManager, EntityHydration entityHydration)
+	public L1Cache(TransactionManager transactionManager, EntityHydration entityHydration)
 	{
 		caches = new ThreadLocal<>();
 		this.entityHydration = requireNonNull(entityHydration);

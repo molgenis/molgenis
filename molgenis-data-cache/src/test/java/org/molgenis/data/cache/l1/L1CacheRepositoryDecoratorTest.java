@@ -66,7 +66,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 
 	@Mock
-	private TransactionListener l1Cache;
+	private L1Cache l1Cache;
 
 	@Mock
 	private Repository<Entity> authorRepository;

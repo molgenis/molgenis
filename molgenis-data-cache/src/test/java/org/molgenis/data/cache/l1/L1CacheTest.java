@@ -36,7 +36,7 @@ import static org.testng.Assert.assertTrue;
 @ContextConfiguration(classes = L1CacheTest.Config.class)
 public class L1CacheTest extends AbstractMolgenisSpringTest
 {
-	private TransactionListener l1Cache;
+	private L1Cache l1Cache;
 	private EntityType entityType;
 	private Entity entity1;
 	private Entity entity2;
@@ -82,7 +82,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		l1Cache = new TransactionListener(transactionManager, entityHydration);
+		l1Cache = new L1Cache(transactionManager, entityHydration);
 	}
 
 	@Test
