@@ -89,8 +89,8 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.kenai.nbpwr</groupId>
-            <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>findbugs-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

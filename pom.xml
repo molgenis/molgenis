@@ -643,9 +643,9 @@
                 <version>${jsr305.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.kenai.nbpwr</groupId>
-                <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
-                <version>${findbugs.annotations.version}</version>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>findbugs-annotations</artifactId>
+                <version>3.0.1</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
