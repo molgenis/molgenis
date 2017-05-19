@@ -173,10 +173,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-das</artifactId>
             <version>${project.version}</version>
