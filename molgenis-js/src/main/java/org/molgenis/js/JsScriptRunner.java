@@ -2,6 +2,7 @@ package org.molgenis.js;
 
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
+import org.molgenis.script.ScriptUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class JsScriptRunner implements ScriptRunner
 	@Override
 	public String runScript(Script script, Map<String, Object> parameters)
 	{
-		String jsScript = script.generateScript(parameters);
+		String jsScript = ScriptUtils.generateScript(script, parameters);
 		Object scriptResult = jsScriptExecutor.executeScript(jsScript);
 		return scriptResult != null ? scriptResult.toString() : null;
 	}
