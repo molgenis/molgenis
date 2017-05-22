@@ -12,7 +12,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.file.FileStore;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.TreeMap;
 
@@ -49,12 +51,12 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 
 	private File storeFile(FileStore fileStore, String key, String jobIdentifier, InputStream in) throws IOException
 	{
-		String identifier = "bucket_" + jobIdentifier;
-		File folder = new File(fileStore.getStorageDir(), identifier);
+		String relativePath = "bucket_" + jobIdentifier;
+		File folder = new File(fileStore.getStorageDir(), relativePath);
 		folder.mkdir();
 
-		key = key.replaceAll("[\\/:*?\"<>|]", "_");
-		String filename = identifier + '/' + key + ".xlsx";
+		String fileRoot = key.replaceAll("[\\/:*?\"<>|]", "_");
+		String filename = String.format("%s%s%s.xlsx", relativePath, File.separatorChar, fileRoot);
 		return fileStore.store(in, filename);
 	}
 
