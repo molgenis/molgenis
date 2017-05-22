@@ -9,6 +9,8 @@
     <artifactId>molgenis-data-annotators</artifactId>
     <packaging>jar</packaging>
 
+    <name>data-annotators</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

@@ -10,6 +10,8 @@
     <artifactId>molgenis-das</artifactId>
     <packaging>jar</packaging>
 
+    <name>das</name>
+
     <repositories>
         <repository>
             <id>corp1</id>

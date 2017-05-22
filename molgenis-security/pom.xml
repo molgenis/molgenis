@@ -9,6 +9,8 @@
     <artifactId>molgenis-security</artifactId>
     <packaging>jar</packaging>
 
+    <name>security</name>
+
     <repositories>
         <repository>
             <id>enonic</id>

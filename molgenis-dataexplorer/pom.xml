@@ -9,6 +9,8 @@
     <artifactId>molgenis-dataexplorer</artifactId>
     <packaging>jar</packaging>
 
+    <name>dataexplorer</name>
+
     <build>
         <plugins>
             <!-- minify css/js -->

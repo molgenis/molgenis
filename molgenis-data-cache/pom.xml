@@ -10,6 +10,8 @@
     </parent>
     <artifactId>molgenis-data-cache</artifactId>
 
+    <name>data-cache</name>
+
     <properties>
         <caffeine.version>2.3.5</caffeine.version>
     </properties>

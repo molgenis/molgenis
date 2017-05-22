@@ -9,6 +9,8 @@
     <artifactId>molgenis-ontology-core</artifactId>
     <packaging>jar</packaging>
 
+    <name>ontology-core</name>
+
     <build>
         <plugins>
             <plugin>

@@ -11,6 +11,8 @@
 
     <artifactId>molgenis-data-platform</artifactId>
 
+    <name>data-platform</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

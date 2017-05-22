@@ -10,6 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>molgenis-bootstrap</artifactId>
+
+    <name>bootstrap</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

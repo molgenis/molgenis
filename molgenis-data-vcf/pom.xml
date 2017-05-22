@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-vcf</artifactId>
 
+    <name>data-vcf</name>
+
     <build>
         <plugins>
             <plugin>

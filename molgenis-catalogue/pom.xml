@@ -10,6 +10,8 @@
 
     <artifactId>molgenis-catalogue</artifactId>
 
+    <name>catalogue</name>
+
     <build>
         <plugins>
             <!-- minify css/js -->

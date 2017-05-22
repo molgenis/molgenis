@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-python</artifactId>
 
+    <name>python</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

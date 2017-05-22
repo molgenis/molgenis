@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-file</artifactId>
 
+    <name>data-file</name>
+
     <build>
         <plugins>
             <plugin>

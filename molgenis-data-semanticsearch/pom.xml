@@ -8,6 +8,9 @@
     </parent>
     <artifactId>molgenis-data-semanticsearch</artifactId>
     <packaging>jar</packaging>
+
+    <name>data-semanticsearch</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-validation</artifactId>
 
+    <name>data-validation</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

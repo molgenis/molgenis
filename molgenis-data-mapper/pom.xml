@@ -10,6 +10,8 @@
 
     <artifactId>molgenis-data-mapper</artifactId>
 
+    <name>data-mapper</name>
+
     <build>
         <plugins>
             <!-- minify resources -->

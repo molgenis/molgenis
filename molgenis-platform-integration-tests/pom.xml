@@ -7,6 +7,9 @@
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-platform-integration-tests</artifactId>
+
+    <name>platform-integration-tests</name>
+
     <build>
         <plugins>
             <plugin>

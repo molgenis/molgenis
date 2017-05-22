@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-googlespreadsheet</artifactId>
 
+    <name>data-googlespreadsheet</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

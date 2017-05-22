@@ -9,6 +9,8 @@
     <artifactId>molgenis-app</artifactId>
     <packaging>war</packaging>
 
+    <name>app</name>
+
     <build>
         <resources>
             <resource>

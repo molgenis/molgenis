@@ -9,6 +9,8 @@
     <artifactId>molgenis-data-security</artifactId>
     <packaging>jar</packaging>
 
+    <name>data-security</name>
+
     <build>
         <plugins>
             <plugin>

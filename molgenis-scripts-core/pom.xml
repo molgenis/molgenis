@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-scripts-core</artifactId>
 
+    <name>scripts-core</name>
+
     <build>
         <plugins>
             <plugin>

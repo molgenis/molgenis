@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-excel</artifactId>
 
+    <name>data-excel</name>
+
     <properties>
         <apache.poi.version>3.15</apache.poi.version>
     </properties>

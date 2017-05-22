@@ -8,6 +8,9 @@
     </parent>
     <artifactId>molgenis-data-rest-client</artifactId>
     <packaging>jar</packaging>
+
+    <name>data-rest-client</name>
+
     <build>
         <plugins>
             <plugin>

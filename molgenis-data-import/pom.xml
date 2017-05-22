@@ -9,6 +9,8 @@
     <artifactId>molgenis-data-import</artifactId>
     <packaging>jar</packaging>
 
+    <name>data-import</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-index</artifactId>
 
+    <name>data-index</name>
+
     <build>
         <plugins>
             <plugin>

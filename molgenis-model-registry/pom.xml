@@ -9,6 +9,8 @@
     <artifactId>molgenis-model-registry</artifactId>
     <packaging>jar</packaging>
 
+    <name>model-registry</name>
+
     <build>
         <plugins>
             <!-- minify css/js -->

@@ -11,6 +11,8 @@
 
     <artifactId>molgenis-swagger</artifactId>
 
+    <name>swagger</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

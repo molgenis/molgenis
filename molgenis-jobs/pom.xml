@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-jobs</artifactId>
 
+    <name>jobs</name>
+
     <build>
         <plugins>
             <plugin>

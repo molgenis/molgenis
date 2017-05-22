@@ -11,6 +11,8 @@
 
     <artifactId>molgenis-util</artifactId>
 
+    <name>util</name>
+
     <dependencies>
         <!-- third party dependencies -->
         <dependency>

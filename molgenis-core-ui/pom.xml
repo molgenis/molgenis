@@ -9,6 +9,8 @@
     <artifactId>molgenis-core-ui</artifactId>
     <packaging>jar</packaging>
 
+    <name>core-ui</name>
+
     <build>
         <plugins>
             <!-- Bundle the javascript specified in webpack.config.js to target/generated-resources/js/dist -->

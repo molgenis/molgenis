@@ -9,6 +9,8 @@
     <artifactId>molgenis-core</artifactId>
     <packaging>jar</packaging>
 
+    <name>core</name>
+
     <build>
         <resources>
             <resource>

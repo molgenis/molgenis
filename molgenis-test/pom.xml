@@ -11,6 +11,8 @@
 
     <artifactId>molgenis-test</artifactId>
 
+    <name>test</name>
+
     <build>
         <plugins>
             <plugin>

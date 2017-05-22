@@ -8,6 +8,9 @@
     </parent>
     <artifactId>molgenis-file-ingester</artifactId>
     <packaging>jar</packaging>
+
+    <name>file-ingester</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
