@@ -299,6 +299,13 @@
             <scope>provided</scope>
         </dependency>
         <!-- test dependencies -->
+
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.2</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
