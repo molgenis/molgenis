@@ -4,6 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.file.model.FileMeta;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -40,7 +41,6 @@ class PostgreSqlUtils
 			case BOOL:
 				return entity.getBoolean(attrName);
 			case CATEGORICAL:
-			case FILE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
 				return xrefEntity != null ? getPostgreSqlValue(xrefEntity,
@@ -68,6 +68,10 @@ class PostgreSqlUtils
 			case STRING:
 			case TEXT:
 				return entity.getString(attrName);
+			case FILE:
+				FileMeta fileEntity = entity.getEntity(attrName, FileMeta.class);
+				return fileEntity != null ? getPostgreSqlValue(fileEntity,
+						fileEntity.getEntityType().getIdAttribute()) : null;
 			case INT:
 				return entity.getInt(attrName);
 			case LONG:

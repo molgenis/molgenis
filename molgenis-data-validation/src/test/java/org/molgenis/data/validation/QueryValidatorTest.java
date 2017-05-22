@@ -8,6 +8,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.model.FileMeta;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -100,7 +101,7 @@ public class QueryValidatorTest
 
 			// FILE
 			Entity fileEntityType = createEntityType(FILE, STRING);
-			asList("file0", mock(Entity.class), null).forEach(
+			asList("file0", mock(FileMeta.class), null).forEach(
 					idValue -> queries.add(new Object[] { fileEntityType, new QueryImpl<>().eq("attr", idValue) }));
 
 			// ENUM

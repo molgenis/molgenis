@@ -4,6 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.file.model.FileMeta;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -148,7 +149,6 @@ public class QueryValidator
 				value = convertEnum(attr, queryRuleValue);
 				break;
 			case CATEGORICAL:
-			case FILE:
 			case XREF:
 			case CATEGORICAL_MREF:
 			case MREF:
@@ -163,6 +163,9 @@ public class QueryValidator
 				break;
 			case DECIMAL:
 				value = convertDecimal(attr, queryRuleValue);
+				break;
+			case FILE:
+				value = convertFile(attr, queryRuleValue);
 				break;
 			case INT:
 				value = convertInt(attr, queryRuleValue);
@@ -292,6 +295,22 @@ public class QueryValidator
 							Number.class.getSimpleName())));
 		}
 		return integerValue;
+	}
+
+	private FileMeta convertFile(Attribute attr, Object paramValue)
+	{
+		Entity entity = convertRef(attr, paramValue);
+		if (entity == null)
+		{
+			return null;
+		}
+		if (!(entity instanceof FileMeta))
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
+							entity.getClass().getSimpleName(), FileMeta.class.getSimpleName())));
+		}
+		return (FileMeta) entity;
 	}
 
 	private static Double convertDecimal(Attribute attr, Object value)

@@ -5,6 +5,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.file.model.FileMeta;
+import org.molgenis.file.model.FileMetaMetaData;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -74,7 +76,7 @@ public class PostgreSqlUtilsTest
 	private static Double decimalValue;
 	private static String emailValue;
 	private static String enumValue;
-	private static Entity fileValue;
+	private static FileMeta fileValue;
 	private static String fileValueId;
 	private static String htmlValue;
 	private static String hyperlinkValue;
@@ -111,12 +113,12 @@ public class PostgreSqlUtilsTest
 		when(refIntIdEntityType.getIdAttribute()).thenReturn(attrRefIntId);
 		when(refIntIdEntityType.toString()).thenReturn("refIntId");
 
-		String attrRefFileIdName = "id";
+		String attrRefFileIdName = FileMetaMetaData.ID;
 		Attribute attrRefFileId = mock(Attribute.class);
 		when(attrRefFileId.getName()).thenReturn(attrRefFileIdName);
 		when(attrRefFileId.getDataType()).thenReturn(STRING);
 
-		EntityType fileMetaMeta = mock(EntityType.class);
+		FileMetaMetaData fileMetaMeta = mock(FileMetaMetaData.class);
 		when(fileMetaMeta.getIdAttribute()).thenReturn(attrRefFileId);
 		when(fileMetaMeta.toString()).thenReturn("fileMeta");
 
@@ -247,12 +249,12 @@ public class PostgreSqlUtilsTest
 		when(entity.getString(attrEnumNillableName)).thenReturn(null);
 
 		fileValueId = "id0";
-		fileValue = when(mock(EntityType.class).getEntityType()).thenReturn(fileMetaMeta).getMock();
+		fileValue = when(mock(FileMeta.class).getEntityType()).thenReturn(fileMetaMeta).getMock();
 		when(fileValue.toString()).thenReturn("fileValue");
 		when(fileValue.getIdValue()).thenReturn(fileValueId);
 		when(fileValue.getString(attrRefFileIdName)).thenReturn(fileValueId);
-		when(entity.getEntity(attrFileName)).thenReturn(fileValue);
-		when(entity.getEntity(attrFileNillableName)).thenReturn(null);
+		when(entity.getEntity(attrFileName, FileMeta.class)).thenReturn(fileValue);
+		when(entity.getEntity(attrFileNillableName, FileMeta.class)).thenReturn(null);
 
 		htmlValue = "<p>text</p>";
 		when(entity.getString(attrHtmlName)).thenReturn(htmlValue);
