@@ -32,7 +32,6 @@ import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,15 +71,14 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
  in org.molgenis.data and subpackages from included modules
   */
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
-		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
-		"org.molgenis.data.platform", "org.molgenis.data.meta.model", "org.molgenis.data.meta.util",
-		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
-		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
-		"org.molgenis.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
-		"org.molgenis.data.importer.emx", "org.molgenis.data.importer.config", "org.molgenis.data.excel",
-		"org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
+		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.data.platform",
+		"org.molgenis.data.meta.model", "org.molgenis.data.meta.util", "org.molgenis.data.system.model",
+		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
+		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
+		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
+		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
-		GsonConfig.class, PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
+		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
 		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
