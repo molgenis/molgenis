@@ -1,11 +1,10 @@
-package org.molgenis.data.elasticsearch;
+package org.molgenis.data.index;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;

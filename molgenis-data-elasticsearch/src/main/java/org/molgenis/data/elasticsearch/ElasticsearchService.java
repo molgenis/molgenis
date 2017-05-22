@@ -22,6 +22,8 @@ import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.index.IndexingMode;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -54,11 +56,6 @@ public class ElasticsearchService implements SearchService
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
 
 	private static final int BATCH_SIZE = 1000;
-
-	public enum IndexingMode
-	{
-		ADD, UPDATE
-	}
 
 	private final String indexName;
 	private final DataService dataService;

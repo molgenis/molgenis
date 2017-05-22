@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch;
+package org.molgenis.data.index;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;

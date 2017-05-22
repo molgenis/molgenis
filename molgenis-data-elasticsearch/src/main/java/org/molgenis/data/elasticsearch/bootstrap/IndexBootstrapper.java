@@ -1,10 +1,10 @@
 package org.molgenis.data.elasticsearch.bootstrap;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
 import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;

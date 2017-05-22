@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.EntityTypeFactory;

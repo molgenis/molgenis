@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.index.IndexingMode;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
