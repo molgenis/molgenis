@@ -49,6 +49,12 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${apache.poi.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>stax-api</artifactId>
+                    <groupId>stax</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- test dependencies -->
         <dependency>

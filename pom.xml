@@ -522,6 +522,9 @@
                                         <exclude>commons-logging:commons-logging</exclude>
                                         <exclude>org.apache.logging.log4j:log4j</exclude>
                                         <exclude>com.google.guava:guava-jdk5</exclude>
+                                        <!-- As of Java 1.6 StAX is part of the standard API -->
+                                        <exclude>javax.xml.stream:stax-api</exclude>
+                                        <exclude>stax:stax-api</exclude>
                                     </excludes>
                                     <searchTransitive>true</searchTransitive>
                                 </bannedDependencies>

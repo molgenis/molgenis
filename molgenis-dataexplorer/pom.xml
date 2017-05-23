@@ -85,6 +85,16 @@
             <groupId>com.github.jmchilton.blend4j</groupId>
             <artifactId>blend4j</artifactId>
             <version>0.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>stax-api</artifactId>
+                    <groupId>javax.xml.stream</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>stax-api</artifactId>
+                    <groupId>stax</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.auto.value</groupId>
