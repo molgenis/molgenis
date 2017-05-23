@@ -155,7 +155,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mapper</artifactId>
+            <artifactId>molgenis-semantic-mapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -191,7 +191,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-semanticsearch</artifactId>
+            <artifactId>molgenis-semantic-search</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

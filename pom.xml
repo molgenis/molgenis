@@ -750,14 +750,12 @@
         <module>molgenis-data-i18n</module>
         <module>molgenis-data-import</module>
         <module>molgenis-data-index</module>
-        <module>molgenis-data-mapper</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-data-platform</module>
         <module>molgenis-data-postgresql</module>
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-rest</module>
         <module>molgenis-data-security</module>
-        <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
         <module>molgenis-data-vcf</module>
         <module>molgenis-data</module>
@@ -780,6 +778,8 @@
         <module>molgenis-scripts</module>
         <module>molgenis-security-core</module>
         <module>molgenis-security</module>
+        <module>molgenis-semantic-mapper</module>
+        <module>molgenis-semantic-search</module>
         <module>molgenis-settings</module>
         <module>molgenis-swagger</module>
         <module>molgenis-test</module>
