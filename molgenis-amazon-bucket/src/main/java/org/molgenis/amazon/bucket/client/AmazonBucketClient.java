@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest.bucket.client;
+package org.molgenis.amazon.bucket.client;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
