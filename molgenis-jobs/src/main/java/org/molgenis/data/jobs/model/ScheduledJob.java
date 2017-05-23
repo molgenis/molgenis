@@ -80,12 +80,12 @@ public class ScheduledJob extends StaticEntity
 		return getString(PARAMETERS);
 	}
 
-	public JobType getType()
+	public ScheduledJobType getType()
 	{
-		return getEntity(TYPE, JobType.class);
+		return getEntity(TYPE, ScheduledJobType.class);
 	}
 
-	public void setType(JobType type)
+	public void setType(ScheduledJobType type)
 	{
 		set(TYPE, type);
 	}

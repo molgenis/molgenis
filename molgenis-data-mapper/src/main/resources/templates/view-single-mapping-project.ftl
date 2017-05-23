@@ -158,7 +158,7 @@
     <div class="col-md-8">
         <a id="create-integrated-entity-open-modal-btn" href="#" class="btn btn-success pull-right" data-toggle="modal"
            data-target="#create-integrated-entity-modal">
-            <span class="glyphicon glyphicon-play"></span> Create integrated dataset
+            <span class="glyphicon glyphicon-play"></span> Create integrated data set
         </a>
     </div>
 </#if>
@@ -231,9 +231,9 @@
                     <div class="tab-pane panel-collapse" id="new">
                         <form method="post" action="${context_url}/createIntegratedEntity"
                               id="newIntegratedDatasetForm">
-                            <p class="help-block">Creates a new integrated dataset.</p>
+                            <p class="help-block">Creates a new integrated data set.</p>
                             <div>
-                                <label for="targetEntityTypeId">ID</label>
+                                <label for="targetEntityTypeId">Identifier</label>
                                 <input type="text" value="" name="targetEntityTypeId" id="targetEntityTypeId"
                                        class="form-control"
                                        required minlength="1" maxlength="150"
@@ -241,14 +241,14 @@
                                        data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed. Must start with a letter."
                                        data-rule-remote="${context_url}/isNewEntity"
                                        data-msg-remote="This is an existing entity."/>
-                                <p class="help-block">Enter an ID for the integrated dataset.</p>
+                                <p class="help-block">Enter an identifier for the integrated data set.</p>
                             </div>
                             <div>
                                 <label for="newTargetEntityLabel">Label</label>
                                 <input type="text" value="" name="label" id="newTargetEntityLabel"
                                        class="form-control">
                                 <p class="help-block">Optionally, enter a custom label for the integrated
-                                    dataset.</p>
+                                    data set.</p>
                             </div>
                             <div>
                                 <label for="newTargetEntityPackage">Package</label>
@@ -258,15 +258,15 @@
                                     </option>
                                 </#list>
                                 </select>
-                                <p class="help-block">Choose the package where the integrated dataset will be
+                                <p class="help-block">Choose the package where the integrated data set will be
                                     created</p>
                             </div>
                             <div class="checkbox">
                                 <label>
                                     <input type="checkbox" name="addSourceAttribute"> <b>Add source attribute</b>
                                 </label>
-                                <p class="help-block">Will add a source attribute to the integrated dataset, and
-                                    fill it with the ID of the source dataset</p>
+                                <p class="help-block">Will add a source attribute to the integrated data set, and
+                                    fill it with the identifier of the source data set</p>
                             </div>
                             <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
                         </form>

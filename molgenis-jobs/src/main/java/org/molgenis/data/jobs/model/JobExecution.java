@@ -202,6 +202,16 @@ public class JobExecution extends StaticEntity
 		set(FAILURE_EMAIL, failureEmail);
 	}
 
+	public void setScheduledJobId(String scheduledJobId)
+	{
+		set(SCHEDULED_JOB_ID, scheduledJobId);
+	}
+
+	public String getScheduledJobId()
+	{
+		return getString(SCHEDULED_JOB_ID);
+	}
+
 	/**
 	 * Appends a log message to the execution log.
 	 * The first time the log exceeds MAX_LOG_LENGTH, it gets truncated and the TRUNCATION_BANNER gets added.

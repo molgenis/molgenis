@@ -86,4 +86,14 @@ public class AmazonBucketJobExecution extends JobExecution
 	{
 		set(TARGET_ENTITY_ID, targetEntityId);
 	}
+
+	public String getRegion()
+	{
+		return getString(REGION);
+	}
+
+	public void setRegion(String region)
+	{
+		set(REGION, region);
+	}
 }

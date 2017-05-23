@@ -8,4 +8,9 @@ public class MolgenisInvalidFormatException extends Exception
 	{
 		super(message);
 	}
+
+	public MolgenisInvalidFormatException(String message, Exception cause)
+	{
+		super(message, cause);
+	}
 }

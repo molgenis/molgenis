@@ -183,25 +183,3 @@ In case anything went wrong even before starting the importrun a **400 BAD REQUE
 * Invalid action: [ILLEGAL VALUE] valid values: ADD, ADD_UPDATE_EXISTING, UPDATE, ADD_IGNORE_EXISTING
 * Update mode UPDATE is not supported, only ADD is supported for VCF
 * A repository with name NewEntity already exists
-
-# Amazon Bucket file ingest
-Files stored in an [Amazon Bucket](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) can be imported automatically using a Bucket Job.
-The [AWS CLI](https://aws.amazon.com/cli/) needs to be installed on the server where MOLGENIS is running for this to work.
-A profile should be configured for bucket access:
-
-    >aws configure --profile yourprofilename
-    AWS Access Key ID [None]: secret
-    AWS Secret Access Key [None]: ultrasecret
-    Default region name [None]:
-    Default output format [None]:
-    
-A job to download files from the bucket to MOLGENIS can be added by creating a new "Scheduled Job" via the data explorer plugin.
-The parameter field should be filled out with:
-- bucket: the name of the bucket to download from
-- key: the key for the file you wish to download from the bucket
-- expression: boolean stating if the key was filled out as an exact match or a regular expression. If the key is an expression the most recent matching file is imported.
-- profile: your amazon bucket profile
-- targetEntityId: the name of the entity to import to, this is an optional field used for files that have a different sheet name instead of the targetted entityType
-Those parameters should be provided as json.
-
-For information on the other fields of the scheduled job, visit the "Jobs" section of the documentation.

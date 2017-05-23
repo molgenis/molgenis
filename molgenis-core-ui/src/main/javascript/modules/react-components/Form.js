@@ -504,7 +504,7 @@ var Form = React.createClass({
     _handleSubmitSuccess: function (responseText, statusText, xhr, element) {
         var message = this.props.mode === 'create' ? 'has been created.' : 'changes have been saved.';
         var stateProps = {
-            submitMsg: {type: 'success', message: this.state.entity.label + ' ' + message},
+            submitMsg: {type: 'success', message: this.state.entity.label + '\n' + message},
             errorMessages: {},
             validate: false,
         };
@@ -532,12 +532,12 @@ var Form = React.createClass({
         this.props.onSubmitSuccess(e);
     },
     _handleSubmitError: function (e) {
-        var message = this.props.mode === 'create' ? 'could not be created.' : 'changes could not be saved.';
-        if (e.responseJSON && e.responseJSON.errors && e.responseJSON.errors.length > 0 && e.responseJSON.errors[0].message) {
-            message += ' ' + e.responseJSON.errors[0].message;
+        var message = this.state.entity.label + (this.props.mode === 'create' ? ' could not be created.' : ' changes could not be saved.');
+        if (e.responseJSON && e.responseJSON.errors && e.responseJSON.errors.length > 0) {
+            message = [message, ...e.responseJSON.errors.map(error => error.message)].join('\n')
         }
         this.setState({
-            submitMsg: {type: 'danger', message: this.state.entity.label + ' ' + message}
+            submitMsg: {type: 'danger', message}
         });
 
         if (!this.props.modal) {

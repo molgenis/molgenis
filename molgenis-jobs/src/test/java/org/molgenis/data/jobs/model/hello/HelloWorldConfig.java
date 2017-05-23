@@ -1,26 +1,37 @@
 package org.molgenis.data.jobs.model.hello;
 
+import com.google.gson.Gson;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
+import static com.google.common.collect.ImmutableMap.of;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Import(HelloWorldService.class)
 @Configuration
 public class HelloWorldConfig
 {
-	@Autowired
-	HelloWorldService helloWorldService;
+	private HelloWorldService helloWorldService;
+	private ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata;
+	private Gson gson;
 
-	@Autowired
-	JobTypeFactory jobTypeFactory;
-
-	@Autowired
-	HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata;
+	public HelloWorldConfig(HelloWorldService helloWorldService, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			HelloWorldJobExecutionMetadata helloWorldJobExecutionMetadata, Gson gson)
+	{
+		this.helloWorldService = requireNonNull(helloWorldService);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.helloWorldJobExecutionMetadata = requireNonNull(helloWorldJobExecutionMetadata);
+		this.gson = requireNonNull(gson);
+	}
 
 	@Bean
 	public JobFactory<HelloWorldJobExecution> helloWorldJobFactory()
@@ -34,17 +45,20 @@ public class HelloWorldConfig
 				final int delay = jobExecution.getDelay();
 				return progress -> helloWorldService.helloWorld(progress, who, delay);
 			}
-
-			@Override
-			public JobType getJobType()
-			{
-				JobType result = jobTypeFactory.create("helloWorld");
-				result.setJobExecutionType(helloWorldJobExecutionMetadata);
-				result.setLabel("Hello World");
-				result.setDescription("Simple job example");
-				result.setSchema("TODO! JSON schema goes here for parameter validation");
-				return result;
-			}
 		};
+	}
+
+	@Lazy
+	@Bean
+	public ScheduledJobType helloWorldJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("helloWorld");
+		result.setJobExecutionType(helloWorldJobExecutionMetadata);
+		result.setLabel("Hello World");
+		result.setDescription("Simple job example");
+		String schema = gson.toJson(of("title", "Hello World Job", "type", "object", "properties",
+				of("delay", of("type", "integer")), "required", singletonList("delay")));
+		result.setSchema(schema);
+		return result;
 	}
 }

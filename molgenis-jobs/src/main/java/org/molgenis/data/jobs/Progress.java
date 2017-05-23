@@ -12,6 +12,8 @@ public interface Progress
 
 	void increment(int amount);
 
+	void appendLog(String log);
+
 	void status(String message);
 
 	void failed(Exception ex);

@@ -5,17 +5,17 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class JobTypeMetadata extends SystemEntityType
+public class ScheduledJobTypeMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "JobType";
-	public static final String JOB_TYPE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "ScheduledJobType";
+	public static final String SCHEDULED_JOB_TYPE = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
 	public static final String LABEL = "label";
@@ -23,17 +23,20 @@ public class JobTypeMetadata extends SystemEntityType
 	public static final String JOB_EXECUTION_TYPE = "jobExecutionType";
 	public static final String SCHEMA = "schema";
 	private EntityTypeMetadata entityTypeMetadata;
+	private final JobPackage jobPackage;
 
-	JobTypeMetadata(EntityTypeMetadata entityTypeMetadata)
+	ScheduledJobTypeMetadata(EntityTypeMetadata entityTypeMetadata, JobPackage jobPackage)
 	{
-		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+		super(SIMPLE_NAME, PACKAGE_JOB);
 		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
+		this.jobPackage = requireNonNull(jobPackage);
 	}
 
 	@Override
 	public void init()
 	{
-		setLabel("Job Type");
+		setLabel("Scheduled Job Type");
+		setPackage(jobPackage);
 		addAttribute(NAME, ROLE_ID).setLabel("Name");
 		addAttribute(LABEL, ROLE_LABEL).setDataType(STRING).setLabel("Label").setNillable(true);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);

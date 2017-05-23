@@ -5,6 +5,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
+import org.molgenis.data.validation.JsonValidator;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.stream.Stream;
 
@@ -17,11 +19,14 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 {
 	private final Repository<ScheduledJob> decorated;
 	private final JobScheduler scheduler;
+	private final JsonValidator jsonValidator;
 
-	public ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler)
+	ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler,
+			JsonValidator jsonValidator)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.scheduler = requireNonNull(scheduler);
+		this.jsonValidator = jsonValidator;
 	}
 
 	@Override
@@ -31,18 +36,22 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	}
 
 	@Override
-	public void update(ScheduledJob entity)
+	public void update(ScheduledJob scheduledJob)
 	{
-		decorated.update(entity);
-		scheduler.schedule(entity);
+		validateJobParameters(scheduledJob);
+		setUsername(scheduledJob);
+		decorated.update(scheduledJob);
+		scheduler.schedule(scheduledJob);
 	}
 
 	@Override
-	public void update(Stream<ScheduledJob> entities)
+	public void update(Stream<ScheduledJob> scheduledJobs)
 	{
-		decorated.update(entities.filter(e ->
+		decorated.update(scheduledJobs.filter(job ->
 		{
-			scheduler.schedule(e);
+			validateJobParameters(job);
+			setUsername(job);
+			scheduler.schedule(job);
 			return true;
 		}));
 	}
@@ -105,6 +114,8 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public void add(ScheduledJob scheduledJob)
 	{
+		validateJobParameters(scheduledJob);
+		setUsername(scheduledJob);
 		decorated.add(scheduledJob);
 		scheduler.schedule(scheduledJob);
 	}
@@ -114,8 +125,20 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		return decorated.add(jobs.filter(job ->
 		{
+			validateJobParameters(job);
+			setUsername(job);
 			scheduler.schedule(job);
 			return true;
 		}));
+	}
+
+	private void validateJobParameters(ScheduledJob scheduledJob)
+	{
+		jsonValidator.validate(scheduledJob.getParameters(), scheduledJob.getType().getSchema());
+	}
+
+	private static void setUsername(ScheduledJob job)
+	{
+		job.setUser(SecurityUtils.getCurrentUsername());
 	}
 }

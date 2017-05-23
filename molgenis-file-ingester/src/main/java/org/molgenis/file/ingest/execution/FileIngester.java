@@ -9,9 +9,9 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -35,7 +35,6 @@ public class FileIngester
 	private final FileMetaFactory fileMetaFactory;
 	private final DataService dataService;
 
-	@Autowired
 	public FileIngester(FileStoreDownload fileStoreDownload, ImportServiceFactory importServiceFactory,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, FileMetaFactory fileMetaFactory,
 			DataService dataService)
@@ -44,13 +43,13 @@ public class FileIngester
 		this.importServiceFactory = requireNonNull(importServiceFactory);
 		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
 		this.fileMetaFactory = requireNonNull(fileMetaFactory);
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
 	}
 
 	/**
 	 * Imports a csv file defined in the fileIngest entity
 	 *
-	 * @see org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData
+	 * @see FileIngestJobExecutionMetaData
 	 */
 	public FileMeta ingest(String entityTypeId, String url, String loader, String jobExecutionID, Progress progress)
 	{
@@ -76,7 +75,6 @@ public class FileIngester
 
 		FileIngestJobExecution fileIngestJobExecution = (FileIngestJobExecution) progress.getJobExecution();
 		fileIngestJobExecution.setFile(fileMeta);
-
 		dataService.add(FILE_META, fileMeta);
 
 		return fileMeta;

@@ -14,8 +14,13 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 @EnableScheduling
 public class SchedulerConfig
 {
+	private final ApplicationContext applicationContext;
+
 	@Autowired
-	private ApplicationContext applicationContext;
+	public SchedulerConfig(ApplicationContext applicationContext)
+	{
+		this.applicationContext = applicationContext;
+	}
 
 	@Bean
 	public SchedulerFactoryBean schedulerFactoryBean()

@@ -1,29 +1,44 @@
 package org.molgenis.file.ingest.execution;
 
+import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.molgenis.file.model.FileMeta;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
+import static com.google.common.collect.ImmutableMap.of;
+import static java.text.MessageFormat.format;
+import static java.util.Objects.requireNonNull;
+
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @Import(FileIngester.class)
 public class FileIngestConfig
 {
-	@Autowired
-	FileIngester fileIngester;
+	private final FileIngester fileIngester;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
+	private final MenuReaderService menuReaderService;
+	private final Gson gson;
 
-	@Autowired
-	JobTypeFactory jobTypeFactory;
-
-	@Autowired
-	FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
+	public FileIngestConfig(FileIngester fileIngester, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData, MenuReaderService menuReaderService,
+			Gson gson)
+	{
+		this.fileIngester = requireNonNull(fileIngester);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.fileIngestJobExecutionMetaData = requireNonNull(fileIngestJobExecutionMetaData);
+		this.menuReaderService = requireNonNull(menuReaderService);
+		this.gson = requireNonNull(gson);
+	}
 
 	/**
 	 * The FileIngestJob Factory bean.
@@ -34,31 +49,32 @@ public class FileIngestConfig
 		return new JobFactory<FileIngestJobExecution>()
 		{
 			@Override
-			public Job<FileMeta> createJob(FileIngestJobExecution fileIngestJobExecution)
+			public Job createJob(FileIngestJobExecution fileIngestJobExecution)
 			{
 				final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
 				final String url = fileIngestJobExecution.getUrl();
 				final String loader = fileIngestJobExecution.getLoader();
+				String dataExplorerURL = menuReaderService.getMenu().findMenuItemPath("dataexplorer");
+				fileIngestJobExecution.setResultUrl(format("{0}?entity={1}", dataExplorerURL, targetEntityId));
 				return progress -> fileIngester
 						.ingest(targetEntityId, url, loader, fileIngestJobExecution.getIdentifier(), progress);
-			}
-
-			@Override
-			public JobType getJobType()
-			{
-				JobType result = jobTypeFactory.create("fileIngest");
-				result.setLabel("File ingest");
-				result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
-				result.setSchema("{\"title\": \"Mapping Job\",\n \"type\": \"object\",\n \"properties\": {\n"
-						+ "\"url\": {\n\"type\": \"string\",\n\"format\": \"uri\",\n"
-						+ "\"description\": \"URL to download the file to ingest from\"\n    },\n"
-						+ "\"loader\": {\n \"enum\": [ \"CSV\" ]\n },\n \"targetEntityId\": {\n"
-						+ "\"type\": \"string\",\n \"description\": \"ID of the entity to import to\"\n"
-						+ "}\n  },\n  \"required\": [\n \"url\",\n \"loader\",\n \"targetEntityId\"\n]\n}");
-				result.setJobExecutionType(fileIngestJobExecutionMetaData);
-				return result;
 			}
 		};
 	}
 
+	@Lazy
+	@Bean
+	public ScheduledJobType fileIngestJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("fileIngest");
+		result.setLabel("File ingest");
+		result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
+		result.setSchema(gson.toJson(of("title", "FileIngest Job", "type", "object", "properties", of("url",
+				of("type", "string", "format", "uri", "description", "URL to download the file to ingest from"),
+				"loader", of("enum", ImmutableList.of("CSV"), "description", "Loader used to ingest the file"),
+				"targetEntityId", of("type", "string", "description", "ID of the entity to import to")), "required",
+				ImmutableList.of("url", "loader", "targetEntityId"))));
+		result.setJobExecutionType(fileIngestJobExecutionMetaData);
+		return result;
+	}
 }

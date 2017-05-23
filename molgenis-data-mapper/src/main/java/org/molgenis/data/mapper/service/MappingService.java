@@ -46,7 +46,7 @@ public interface MappingService
 	/**
 	 * Applies all mappings in a {@link MappingTarget}
 	 *
-	 * @param mappingTarget      the MappingTarget whose mappings are applied
+	 * @param mappingProjectId   the id of the MappingProject whose mappings are applied
 	 * @param entityTypeId       the name of the entity to map to
 	 * @param addSourceAttribute boolean indicating if the 'source' attribute should be added to the target repository
 	 * @param packageId          the id of the destination Package, ignored when mapping to existing EntityType
@@ -54,7 +54,7 @@ public interface MappingService
 	 * @param progress           progress of the mapping
 	 * @return the total amount of entities mapped
 	 */
-	long applyMappings(MappingTarget mappingTarget, String entityTypeId, Boolean addSourceAttribute, String packageId,
+	long applyMappings(String mappingProjectId, String entityTypeId, Boolean addSourceAttribute, String packageId,
 			String label, Progress progress);
 
 	/**
@@ -84,6 +84,7 @@ public interface MappingService
 
 	/**
 	 * Retrieves a Stream of existing compatible {@link EntityType}s that are valid as a mapping target.
+	 *
 	 * @param target EntityType of the mapping target
 	 * @return Stream of compatible {@link EntityType}s
 	 */

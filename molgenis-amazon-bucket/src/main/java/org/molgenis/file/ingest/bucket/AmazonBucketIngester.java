@@ -5,6 +5,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelUtils;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -14,7 +15,6 @@ import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -30,7 +30,6 @@ public class AmazonBucketIngester
 	private final FileStore fileStore;
 	private final AmazonBucketClient amazonBucketClient;
 
-	@Autowired
 	public AmazonBucketIngester(ImportServiceFactory importServiceFactory,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, FileMetaFactory fileMetaFactory,
 			FileStore fileStore, AmazonBucketClient amazonBucketClient)
@@ -38,23 +37,34 @@ public class AmazonBucketIngester
 		this.importServiceFactory = requireNonNull(importServiceFactory);
 		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
 		this.fileMetaFactory = requireNonNull(fileMetaFactory);
-		this.fileStore = fileStore;
-		this.amazonBucketClient = amazonBucketClient;
+		this.fileStore = requireNonNull(fileStore);
+		this.amazonBucketClient = requireNonNull(amazonBucketClient);
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
-			String profile, boolean isExpression, Progress progress)
+			String profile, String region, boolean isExpression, Progress progress)
 	{
 		FileMeta fileMeta;
 		try
 		{
 			progress.setProgressMax(3);
 			progress.progress(0, "Connection to Amazon Bucket with profile '" + profile + "'");
-			AmazonS3 client = amazonBucketClient.getClient(profile);
+			AmazonS3 client = amazonBucketClient.getClient(profile, region);
 			progress.progress(1, "downloading...");
 			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
 
-			if (targetEntityTypeName != null) amazonBucketClient.renameSheet(targetEntityTypeName, file);
+			if (targetEntityTypeName != null)
+			{
+				if (ExcelUtils.getNumberOfSheets(file) == 1)
+				{
+					ExcelUtils.renameSheet(targetEntityTypeName, file, 0);
+				}
+				else
+				{
+					throw new MolgenisDataException(
+							"Amazon Bucket imports to a specified entityType are only possible with one sheet");
+				}
+			}
 			progress.progress(2, "Importing...");
 			ImportService importService = importServiceFactory.getImportService(file.getName());
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory

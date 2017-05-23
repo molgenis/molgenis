@@ -1,19 +1,26 @@
 package org.molgenis.script;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.JobType;
-import org.molgenis.data.jobs.model.JobTypeFactory;
+import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableMap.of;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 public class ScheduledScriptConfig
 {
@@ -21,28 +28,32 @@ public class ScheduledScriptConfig
 	{
 	}.getType();
 
-	@Autowired
-	SavedScriptRunner savedScriptRunner;
+	private final SavedScriptRunner savedScriptRunner;
+	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
+	private final ScriptJobExecutionMetadata scriptJobExecutionMetadata;
+	private final Gson gson;
 
 	@Autowired
-	JobTypeFactory jobTypeFactory;
-
-	@Autowired
-	ScriptJobExecutionMetadata scriptJobExecutionMetadata;
-
-	@Autowired
-	Gson gson;
+	public ScheduledScriptConfig(SavedScriptRunner savedScriptRunner, ScheduledJobTypeFactory scheduledJobTypeFactory,
+			ScriptJobExecutionMetadata scriptJobExecutionMetadata, Gson gson)
+	{
+		this.savedScriptRunner = requireNonNull(savedScriptRunner);
+		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
+		this.scriptJobExecutionMetadata = requireNonNull(scriptJobExecutionMetadata);
+		this.gson = gson;
+	}
 
 	/**
 	 * The Script JobFactory bean.
 	 */
 	@Bean
-	public JobFactory scriptJobFactory()
+	public JobFactory<ScriptJobExecution> scriptJobFactory()
 	{
 		return new JobFactory<ScriptJobExecution>()
 		{
+
 			@Override
-			public Job createJob(ScriptJobExecution scriptJobExecution)
+			public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution)
 			{
 				final String name = scriptJobExecution.getName();
 				final String parameterString = scriptJobExecution.getParameters();
@@ -52,21 +63,28 @@ public class ScheduledScriptConfig
 					params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
 					params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
 					ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
-					progress.status(scriptResult.getOutput());
+					if (scriptResult.getOutputFile() != null)
+					{
+						scriptJobExecution.setResultUrl(format("/files/%s", scriptResult.getOutputFile().getId()));
+					}
+					progress.appendLog(format("Script output:%n%s%n", scriptResult.getOutput()));
 					return scriptResult;
 				};
 			}
-
-			@Override
-			public JobType getJobType()
-			{
-				JobType result = jobTypeFactory.create("script");
-				result.setLabel("Script");
-				result.setDescription("This job executes a script created in the Scripts plugin.");
-				result.setSchema("TODO");
-				result.setJobExecutionType(scriptJobExecutionMetadata);
-				return result;
-			}
 		};
+	}
+
+	@Lazy
+	@Bean
+	public ScheduledJobType scriptJobType()
+	{
+		ScheduledJobType result = scheduledJobTypeFactory.create("script");
+		result.setLabel("Script");
+		result.setDescription("This job executes a script created in the Scripts plugin.");
+		result.setSchema(gson.toJson(of("title", "Script Job", "type", "object", "properties",
+				of("name", of("type", "string"), "parameters", of("type", "string")), "required",
+				ImmutableList.of("name", "parameters"))));
+		result.setJobExecutionType(scriptJobExecutionMetadata);
+		return result;
 	}
 }

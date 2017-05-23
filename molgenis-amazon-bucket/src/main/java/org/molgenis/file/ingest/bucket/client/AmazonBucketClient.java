@@ -9,10 +9,8 @@ import java.io.IOException;
 
 public interface AmazonBucketClient
 {
-	AmazonS3 getClient(String profile);
+	AmazonS3 getClient(String profile, String region);
 
 	File downloadFile(AmazonS3 s3Client, FileStore fileStore, String jobIdentifier, String bucketName, String keyName,
 			boolean isExpression) throws IOException, AmazonClientException;
-
-	void renameSheet(String targetEntityTypeName, File file);
 }
