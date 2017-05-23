@@ -1,7 +1,7 @@
-package org.molgenis.data.elasticsearch.admin;
+package org.molgenis.data.index.admin;
 
 import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,16 +17,17 @@ import static java.util.Objects.requireNonNull;
  * Elasticsearch index manager service that handles authorization
  */
 @Service
-public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexManagerService
+public class IndexManagerServiceImpl implements IndexManagerService
 {
 	private final DataService dataService;
-	private final ElasticsearchService elasticsearchService;
+	private final SearchService searchService;
 
 	@Autowired
-	public ElasticsearchIndexManagerServiceImpl(DataService dataService, @SuppressWarnings("SpringJavaAutowiringInspection") ElasticsearchService elasticsearchService)
+	public IndexManagerServiceImpl(DataService dataService,
+			@SuppressWarnings("SpringJavaAutowiringInspection") SearchService searchService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.elasticsearchService = requireNonNull(elasticsearchService);
+		this.searchService = requireNonNull(searchService);
 	}
 
 	@Override
@@ -58,6 +59,6 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityTypeId + "] is not an indexed repository");
 		}
-		elasticsearchService.rebuildIndex(repository);
+		searchService.rebuildIndex(repository);
 	}
 }

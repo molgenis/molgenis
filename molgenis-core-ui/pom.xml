@@ -171,7 +171,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <artifactId>molgenis-data-index</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

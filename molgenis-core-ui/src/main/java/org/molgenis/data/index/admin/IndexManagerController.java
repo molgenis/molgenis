@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.admin;
+package org.molgenis.data.index.admin;
 
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,22 +13,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import static org.molgenis.data.elasticsearch.admin.ElasticsearchIndexManagerController.URI;
+import static org.molgenis.data.index.admin.IndexManagerController.URI;
 
 /**
  * Index manager plugin
  */
 @Controller
 @RequestMapping(URI)
-public class ElasticsearchIndexManagerController extends MolgenisPluginController
+public class IndexManagerController extends MolgenisPluginController
 {
 	public static final String ID = "indexmanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
-	private ElasticsearchIndexManagerService elasticsearchIndexManagerService;
+	private IndexManagerService elasticsearchIndexManagerService;
 
-	public ElasticsearchIndexManagerController()
+	public IndexManagerController()
 	{
 		super(URI);
 	}
