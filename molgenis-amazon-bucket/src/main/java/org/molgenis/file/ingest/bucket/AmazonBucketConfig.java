@@ -1,6 +1,5 @@
 package org.molgenis.file.ingest.bucket;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Objects.requireNonNull;
 
 @Configuration
@@ -46,11 +44,13 @@ public class AmazonBucketConfig
 				final String jobExecutionID = amazonBucketJobExecution.getIdentifier();
 				final String bucket = amazonBucketJobExecution.getBucket();
 				final String key = amazonBucketJobExecution.getKey();
-				final String profile = amazonBucketJobExecution.getProfile();
+				final String accessKey = amazonBucketJobExecution.getAccessKey();
+				final String secretKey = amazonBucketJobExecution.getSecretKey();
 				final String region = amazonBucketJobExecution.getRegion();
 				final boolean isExpression = amazonBucketJobExecution.isExpression();
 				return progress -> ingester
-						.ingest(jobExecutionID, targetEntityId, bucket, key, profile, region, isExpression, progress);
+						.ingest(jobExecutionID, targetEntityId, bucket, key, accessKey, secretKey, region, isExpression,
+								progress);
 			}
 		};
 	}
@@ -62,13 +62,15 @@ public class AmazonBucketConfig
 		ScheduledJobType result = scheduledJobTypeFactory.create("BucketIngest");
 		result.setLabel("Bucket ingest");
 		result.setDescription("This job downloads a file from a URL and imports it into MOLGENIS.");
-		result.setSchema(gson.toJson(of("title", "Bucket Ingest Job", "type", "object", "properties",
-				of("bucket", of("type", "string", "description", "The name of the bucket."), "key",
-						of("type", "string", "description", "Expression to match the file key"), "expression",
-						of("type", "boolean", "description", "Is the key an expression or an exact match"), "profile",
-						of("type", "string", "description", "the profile to be used to login to the bucket"),
-						"targetEntityId", of("type", "string", "description", "Target EntityType ID")), "required",
-				ImmutableList.of("bucket", "key", "profile"))));
+		result.setSchema(
+				"{'title': 'Bucket Ingest Job','type': 'object','properties': { 'bucket': {'type': 'string', 'description': 'The name of the bucket.'},"
+						+ "'key': {'type': 'string', 'description': 'Expression to match the file key'}, 'accessKey': { 'type': 'string', "
+						+ "'description': 'the access key to be used to login to the amazon bucket'},'secretKey': {'type': 'string', "
+						+ "'description': 'the secretkey to be used to login to the amazon bucket'},'expression': {'type': 'boolean', "
+						+ "'description': 'Is the key an expression or an exact match'},'region': {'type': 'string', "
+						+ "'description': 'The region where the amazon bucket is located'},'targetEntityId': {'type': 'string', "
+						+ "'description': 'Target EntityType ID'}},"
+						+ "'required': ['bucket','key','accessKey','secretKey']}");
 		result.setJobExecutionType(amazonBucketJobExecutionMetaData);
 		return result;
 	}

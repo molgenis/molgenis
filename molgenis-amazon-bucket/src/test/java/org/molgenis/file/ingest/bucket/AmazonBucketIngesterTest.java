@@ -2,7 +2,8 @@ package org.molgenis.file.ingest.bucket;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import org.molgenis.auth.SecurityPackage;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -75,7 +76,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
 		amazonBucketIngester
-				.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", "test", "region1", true,
+				.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", "test", "test", "region1", true,
 						progress);
 		verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
 		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT));
@@ -128,7 +129,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 			try
 			{
 				File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
-				when(amazonBucketClient.getClient("test", "region1")).thenReturn(client);
+				when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
 				when(amazonBucketClient
 						.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"), eq(true)))
 						.thenReturn(file);
