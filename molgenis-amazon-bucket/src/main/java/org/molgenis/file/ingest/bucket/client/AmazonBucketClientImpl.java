@@ -56,7 +56,7 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 		folder.mkdir();
 
 		key = key.replaceAll("[\\/:*?\"<>|]", "_");
-		String filename = identifier + '/' + key + ".xlsx";
+		String filename = identifier + File.separatorChar + key + ".xlsx";
 		return fileStore.store(in, filename);
 	}
 

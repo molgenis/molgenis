@@ -10,7 +10,6 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.model.FileMeta;
@@ -89,7 +88,7 @@ public class AmazonBucketIngester
 		fileMeta.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 		fileMeta.setSize(file.length());
 		fileMeta.setFilename(jobExecutionID + '/' + file.getName());
-		fileMeta.setUrl(FileDownloadController.URI + '/' + jobExecutionID);
+		fileMeta.setUrl("/files/" + jobExecutionID);
 		return fileMeta;
 	}
 }
