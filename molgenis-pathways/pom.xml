@@ -37,11 +37,6 @@
             <artifactId>molgenis-data</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-vcf</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
         <!-- third party dependencies -->
         <dependency>
             <groupId>com.google.auto.value</groupId>
@@ -51,11 +46,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <version>2.2.8</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
