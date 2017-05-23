@@ -521,6 +521,7 @@
                                     <excludes>
                                         <exclude>commons-logging:commons-logging</exclude>
                                         <exclude>org.apache.logging.log4j:log4j</exclude>
+                                        <exclude>com.google.guava:guava-jdk5</exclude>
                                     </excludes>
                                     <searchTransitive>true</searchTransitive>
                                 </bannedDependencies>
@@ -655,6 +656,11 @@
                 -->
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${google.guava.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${apache.commons.io.version}</version>
@@ -716,7 +722,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${google.guava.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

@@ -26,7 +26,7 @@ public class IndexManagerController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
-	private IndexManagerService elasticsearchIndexManagerService;
+	private IndexManagerService indexManagerService;
 
 	public IndexManagerController()
 	{
@@ -36,7 +36,7 @@ public class IndexManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		model.addAttribute("entities", elasticsearchIndexManagerService.getIndexedEntities());
+		model.addAttribute("entities", indexManagerService.getIndexedEntities());
 		return "view-indexmanager";
 	}
 
@@ -44,7 +44,7 @@ public class IndexManagerController extends MolgenisPluginController
 	@ResponseStatus(value = HttpStatus.OK)
 	public void reindexType(@Valid @ModelAttribute ReindexRequest reindexRequest)
 	{
-		elasticsearchIndexManagerService.rebuildIndex(reindexRequest.getType());
+		indexManagerService.rebuildIndex(reindexRequest.getType());
 	}
 
 	private static class ReindexRequest
