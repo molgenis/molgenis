@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 
 /**
  * Decorator for the attribute repository:
@@ -59,7 +59,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public long count()
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.count();
 		}
@@ -73,7 +73,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public long count(Query<Attribute> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.count(q);
 		}
@@ -90,7 +90,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Stream<Attribute> findAll(Query<Attribute> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findAll(q);
 		}
@@ -116,7 +116,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Iterator<Attribute> iterator()
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.iterator();
 		}
@@ -130,7 +130,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Attribute>> consumer, int batchSize)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 		}
@@ -144,7 +144,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Attribute findOne(Query<Attribute> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findOne(q);
 		}
@@ -158,7 +158,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Attribute findOneById(Object id)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findOneById(id);
 		}
@@ -171,7 +171,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Attribute findOneById(Object id, Fetch fetch)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findOneById(id, fetch);
 		}
@@ -184,7 +184,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findAll(ids);
 		}
@@ -197,7 +197,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findAll(ids, fetch);
 		}
@@ -210,7 +210,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.aggregate(aggregateQuery);
 		}

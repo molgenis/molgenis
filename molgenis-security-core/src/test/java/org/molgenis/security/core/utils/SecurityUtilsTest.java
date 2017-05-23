@@ -12,10 +12,11 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.security.core.runas.SystemSecurityToken.USER_SYSTEM;
+import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 import static org.testng.Assert.*;
 
@@ -73,11 +74,15 @@ public class SecurityUtilsTest
 		assertFalse(SecurityUtils.currentUserIsAuthenticated());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void currentUserIsAuthenticated_falseAnonymous()
 	{
-		when(userDetails.getUsername()).thenReturn(ANONYMOUS_USERNAME);
 		when(authentication.isAuthenticated()).thenReturn(true);
+		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_ANONYMOUS)
+				.getMock();
+		when((Collection<GrantedAuthority>) authentication.getAuthorities())
+				.thenReturn(Collections.<GrantedAuthority>singletonList(authoritySu));
 		assertFalse(SecurityUtils.currentUserIsAuthenticated());
 	}
 
@@ -95,16 +100,20 @@ public class SecurityUtilsTest
 		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_SU)
 				.getMock();
 		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(Arrays.<GrantedAuthority>asList(authoritySu));
+				.thenReturn(Collections.<GrantedAuthority>singletonList(authoritySu));
 		assertTrue(SecurityUtils.currentUserIsSu());
 		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void currentUserIsSystemTrue() throws Exception
 	{
-		when(userDetails.getUsername()).thenReturn(USER_SYSTEM);
-		assertTrue(SecurityUtils.currentUserisSystem());
+		GrantedAuthority authoritySystem = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(ROLE_SYSTEM)
+				.getMock();
+		when((Collection<GrantedAuthority>) authentication.getAuthorities())
+				.thenReturn(Collections.<GrantedAuthority>singletonList(authoritySystem));
+		assertTrue(SecurityUtils.currentUserIsSystem());
 		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
@@ -112,7 +121,7 @@ public class SecurityUtilsTest
 	public void currentUserIsSystemFalse() throws Exception
 	{
 		when(userDetails.getUsername()).thenReturn("user");
-		assertFalse(SecurityUtils.currentUserisSystem());
+		assertFalse(SecurityUtils.currentUserIsSystem());
 		assertFalse(SecurityUtils.currentUserIsSuOrSystem());
 	}
 
