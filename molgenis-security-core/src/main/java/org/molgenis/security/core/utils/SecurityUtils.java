@@ -67,7 +67,7 @@ public class SecurityUtils
 		if (authentication != null)
 		{
 			Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-			if (authorities == null) throw new IllegalStateException("No current user logged in");
+			if (authorities == null) throw new IllegalStateException("No user currently logged in");
 
 			for (String role : roles)
 			{
