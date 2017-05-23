@@ -37,7 +37,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 /**
@@ -73,7 +73,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public long count()
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.count();
 		}
@@ -87,7 +87,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public long count(Query<EntityType> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.count(q);
 		}
@@ -104,7 +104,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public Stream<EntityType> findAll(Query<EntityType> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findAll(q);
 		}
@@ -129,7 +129,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public Iterator<EntityType> iterator()
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.iterator();
 		}
@@ -143,7 +143,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<EntityType>> consumer, int batchSize)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 		}
@@ -157,7 +157,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public EntityType findOne(Query<EntityType> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findOne(q);
 		}
@@ -171,7 +171,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public EntityType findOneById(Object id)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findOneById(id);
 		}
@@ -184,7 +184,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public EntityType findOneById(Object id, Fetch fetch)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findOneById(id, fetch);
 		}
@@ -197,7 +197,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findAll(ids);
 		}
@@ -210,7 +210,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.findAll(ids, fetch);
 		}
@@ -223,7 +223,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSu() || currentUserIsSystem())
 		{
 			return decoratedRepo.aggregate(aggregateQuery);
 		}
@@ -364,7 +364,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityType.getId());
 		//FIXME: should only be possible to update system entities during bootstrap!
-		if (systemEntityType != null && !currentUserisSystem())
+		if (systemEntityType != null && !currentUserIsSystem())
 		{
 			throw new MolgenisDataException(
 					format("Updating system entity meta data [%s] is not allowed", entityType.getLabel()));
