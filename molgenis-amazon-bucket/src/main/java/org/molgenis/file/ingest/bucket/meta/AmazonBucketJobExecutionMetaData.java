@@ -21,7 +21,8 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 	public static final String BUCKET = "bucket";
 	public static final String KEY = "key";
 	public static final String EXPRESSION = "expression";
-	public static final String PROFILE = "profile";
+	public static final String ACCESS_KEY = "accessKey";
+	public static final String SECRET_KEY = "secretKey";
 	public static final String TARGET_ENTITY_ID = "targetEntityId";
 	public static final String REGION = "region";
 
@@ -52,7 +53,8 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 		addAttribute(KEY).setLabel("Key").setDescription("Expression to match the file key").setNillable(false);
 		addAttribute(EXPRESSION).setDataType(BOOL).setLabel("Is key expression")
 				.setDescription("Is the key an expression or an exact match").setNillable(true);
-		addAttribute(PROFILE).setLabel("the profile to be used to login to the amazon bucket").setNillable(false);
+		addAttribute(ACCESS_KEY).setLabel("the access key to be used to login to the amazon bucket").setNillable(false);
+		addAttribute(SECRET_KEY).setLabel("the secret key to be used to login to the amazon bucket").setNillable(false);
 		addAttribute(REGION).setLabel("Region").setDescription("The region of the amazon bucket.").setNillable(false);
 		addAttribute(TARGET_ENTITY_ID).setLabel("Target EntityType ID").setNillable(true);
 		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)

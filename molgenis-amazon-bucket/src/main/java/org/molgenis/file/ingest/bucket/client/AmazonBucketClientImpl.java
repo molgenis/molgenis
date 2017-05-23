@@ -1,7 +1,8 @@
 package org.molgenis.file.ingest.bucket.client;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -22,10 +23,12 @@ import java.util.TreeMap;
 public class AmazonBucketClientImpl implements AmazonBucketClient
 {
 	@Override
-	public AmazonS3 getClient(String profile, String region)
+	public AmazonS3 getClient(String accessKey, String secretKey, String region)
 	{
-		return AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider(profile))
+		BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+		AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCreds))
 				.withRegion(region).build();
+		return s3Client;
 	}
 
 	@Override

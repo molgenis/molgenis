@@ -47,16 +47,6 @@ public class AmazonBucketJobExecution extends JobExecution
 		set(BUCKET, bucket);
 	}
 
-	public String getProfile()
-	{
-		return getString(PROFILE);
-	}
-
-	public void setProfile(String profile)
-	{
-		set(PROFILE, profile);
-	}
-
 	public boolean isExpression()
 	{
 		return getBoolean(EXPRESSION);
@@ -95,5 +85,25 @@ public class AmazonBucketJobExecution extends JobExecution
 	public void setRegion(String region)
 	{
 		set(REGION, region);
+	}
+
+	public void setAccessKey(String key)
+	{
+		set(ACCESS_KEY, key);
+	}
+
+	public String getAccessKey()
+	{
+		return getString(ACCESS_KEY);
+	}
+
+	public void setSecretKey(String key)
+	{
+		set(SECRET_KEY, key);
+	}
+
+	public String getSecretKey()
+	{
+		return getString(SECRET_KEY);
 	}
 }
