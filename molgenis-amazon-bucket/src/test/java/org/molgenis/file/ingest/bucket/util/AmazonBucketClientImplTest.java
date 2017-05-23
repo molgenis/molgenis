@@ -13,6 +13,7 @@ import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class AmazonBucketClientImplTest
 						httpRequestBase));
 
 		amazonBucketClient.downloadFile(client, fileStore, "ID", "bucket", "key", false);
-		verify(fileStore).store(any(), eq("bucket_ID/key.xlsx"));
+		verify(fileStore).store(any(), eq("bucket_ID" + File.separatorChar + "key.xlsx"));
 	}
 
 	@Test
@@ -90,6 +91,6 @@ public class AmazonBucketClientImplTest
 				.thenReturn(Arrays.asList(s3ObjectSummary1, s3ObjectSummary2, s3ObjectSummary3, s3ObjectSummary4));
 
 		amazonBucketClient.downloadFile(client, fileStore, "ID", "bucket", "key(.*)", true);
-		verify(fileStore).store(any(), eq("bucket_ID/keyq.xlsx"));
+		verify(fileStore).store(any(), eq("bucket_ID" + File.separatorChar + "keyq.xlsx"));
 	}
 }
