@@ -1,6 +1,7 @@
-package org.molgenis.file.ingest.bucket;
+package org.molgenis.amazon.bucket;
 
 import com.amazonaws.services.s3.AmazonS3;
+import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
@@ -12,7 +13,6 @@ import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.springframework.stereotype.Component;

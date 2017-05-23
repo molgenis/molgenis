@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest.bucket.util;
+package org.molgenis.amazon.bucket.util;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -6,9 +6,9 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.molgenis.amazon.bucket.client.AmazonBucketClient;
+import org.molgenis.amazon.bucket.client.AmazonBucketClientImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
-import org.molgenis.file.ingest.bucket.client.AmazonBucketClientImpl;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

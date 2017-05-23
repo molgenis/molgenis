@@ -1,6 +1,9 @@
-package org.molgenis.file.ingest.bucket;
+package org.molgenis.amazon.bucket;
 
 import com.amazonaws.services.s3.AmazonS3Client;
+import org.molgenis.amazon.bucket.client.AmazonBucketClient;
+import org.molgenis.amazon.bucket.config.AmazonBucketTestConfig;
+import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -10,9 +13,6 @@ import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
-import org.molgenis.file.ingest.bucket.config.AmazonBucketTestConfig;
-import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecution;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.util.ResourceUtils;

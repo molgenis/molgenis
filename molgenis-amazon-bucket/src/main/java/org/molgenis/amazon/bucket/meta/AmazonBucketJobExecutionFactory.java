@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest.bucket.meta;
+package org.molgenis.amazon.bucket.meta;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;

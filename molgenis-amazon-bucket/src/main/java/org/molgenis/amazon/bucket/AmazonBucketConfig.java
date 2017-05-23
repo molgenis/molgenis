@@ -1,12 +1,12 @@
-package org.molgenis.file.ingest.bucket;
+package org.molgenis.amazon.bucket;
 
 import com.google.gson.Gson;
+import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
+import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecutionMetaData;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
-import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecution;
-import org.molgenis.file.ingest.bucket.meta.AmazonBucketJobExecutionMetaData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
