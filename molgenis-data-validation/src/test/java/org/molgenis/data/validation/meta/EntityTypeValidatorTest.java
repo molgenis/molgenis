@@ -87,7 +87,9 @@ public class EntityTypeValidatorTest
 		Package package_ = when(mock(Package.class).getId()).thenReturn(packageName).getMock();
 		when(entityType.getPackage()).thenReturn(package_);
 		String name = "name";
+		String label = "label";
 		when(entityType.getId()).thenReturn(packageName + PACKAGE_SEPARATOR + name);
+		when(entityType.getLabel()).thenReturn(label);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
@@ -96,6 +98,20 @@ public class EntityTypeValidatorTest
 		when(entityType.isAbstract()).thenReturn(false);
 		when(entityType.getExtends()).thenReturn(null);
 		when(entityType.getBackend()).thenReturn(backendName);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label of EntityType \\[package_name\\] is empty")
+	public void testValidateLabelIsEmpty()
+	{
+		when(entityType.getLabel()).thenReturn("");
+		entityTypeValidator.validate(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label of EntityType \\[package_name\\] contains only white space")
+	public void testValidateLabelIsWhiteSpace()
+	{
+		when(entityType.getLabel()).thenReturn("  ");
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[logout\\] is not allowed because it is a reserved keyword.")
