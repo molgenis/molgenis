@@ -215,6 +215,17 @@
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <!-- Remove exclusions when https://issues.apache.org/jira/browse/MNG-5600 has been resolved -->
@@ -275,12 +286,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-runtime</artifactId>
-            <version>${apache.rdf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-api</artifactId>
+            <artifactId>rdf4j-rio-turtle</artifactId>
             <version>${apache.rdf4j.version}</version>
         </dependency>
         <dependency>
