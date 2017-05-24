@@ -36,22 +36,16 @@ So for example:
 
 ### Amazon Bucket file ingest
 Files stored in an [Amazon Bucket](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) can be imported automatically using a Bucket Job.
-The [AWS CLI](https://aws.amazon.com/cli/) needs to be installed on the server where MOLGENIS is running for this to work.
-A profile should be configured for bucket access:
 
-    >aws configure --profile yourprofilename
-    AWS Access Key ID [None]: secret
-    AWS Secret Access Key [None]: ultrasecret
-    Default region name [None]:
-    Default output format [None]:
-    
 #### parameters
 | name           | description                                                       |
 |----------------|-------------------------------------------------------------------|
 | bucket         | the name of the bucket to download from                           |
 | key            | the key for the file you wish to download from the bucket         |
 | expression     | boolean stating if the key was filled out as an exact match or a regular expression. If the key is an expression the most recent matching file is imported. |
-| profile        | your amazon bucket profile |
+| accessKey      | the access key from your amazon bucket account |
+| secretKey      | the secret key from your amazon bucket account |
+| region         | the region in which the amazon bucket is located |
 | targetEntityId | the name of the entity to import to, this is an optional field used for files that have a different sheet name instead of the targeted entityType |
 
 ### Mapping
