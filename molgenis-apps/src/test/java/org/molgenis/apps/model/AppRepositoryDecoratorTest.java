@@ -228,6 +228,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 			when(fileMeta.getFilename()).thenReturn(resourceFilename);
 			when(app.getSourceFiles()).thenReturn(fileMeta);
 			when(fileStore.getFile(resourceFilename)).thenReturn(getFile(getClass(), '/' + resourceFilename));
+			when(fileStore.getStorageDir()).thenReturn("target/generated-test-resources");
 		}
 		return app;
 	}

@@ -219,7 +219,7 @@ public class JobExecution extends StaticEntity
 	 *
 	 * @param formattedMessage The formatted message to append to the log.
 	 */
-	public void appendLog(String formattedMessage)
+	void appendLog(String formattedMessage)
 	{
 		if (logTruncated) return;
 		String combined = join(getLog(), formattedMessage);

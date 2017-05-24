@@ -56,6 +56,7 @@ public class EntityTypeValidator
 	public void validate(EntityType entityType)
 	{
 		validateEntityName(entityType);
+		validateEntityLabel(entityType);
 		validatePackage(entityType);
 		validateExtends(entityType);
 		validateOwnAttributes(entityType);
@@ -285,6 +286,32 @@ public class EntityTypeValidator
 			catch (MolgenisDataException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
+			}
+		}
+	}
+
+	/**
+	 * Validates the entity label:
+	 * - Validates that the label is not an empty string
+	 * - Validates that the label does not only consist of white space
+	 *
+	 * @param entityType entity meta data
+	 * @throws MolgenisValidationException if the entity label is invalid
+	 */
+	private static void validateEntityLabel(EntityType entityType)
+	{
+		String label = entityType.getLabel();
+		if (label != null)
+		{
+			if (label.isEmpty())
+			{
+				throw new MolgenisValidationException(
+						new ConstraintViolation(format("Label of EntityType [%s] is empty", entityType.getId())));
+			}
+			else if (label.trim().equals(""))
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Label of EntityType [%s] contains only white space", entityType.getId())));
 			}
 		}
 	}

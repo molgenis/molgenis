@@ -786,7 +786,6 @@
         <module>molgenis-fair</module>
         <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
-        <module>molgenis-genetics-diag</module>
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>
         <module>molgenis-model-registry</module>
