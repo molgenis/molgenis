@@ -12,7 +12,6 @@ import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.utils.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -87,18 +86,18 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	public OntologyRepositoryCollection(File file)
 	{
-		super(GenericImporterExtensions.getOntology());
+		super(OntologyFileExtensions.getOntology());
 		this.file = requireNonNull(file);
 
 		String name = file.getName();
-		if (name.endsWith(GenericImporterExtensions.OBO_ZIP.toString()))
+		if (name.endsWith(OntologyFileExtensions.OBO_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OBO_ZIP.toString()))
+			name = name.substring(0, name.lastIndexOf('.' + OntologyFileExtensions.OBO_ZIP.toString()))
 					.replace('.', '_');
 		}
-		else if (name.endsWith(GenericImporterExtensions.OWL_ZIP.toString()))
+		else if (name.endsWith(OntologyFileExtensions.OWL_ZIP.toString()))
 		{
-			name = name.substring(0, name.lastIndexOf('.' + GenericImporterExtensions.OWL_ZIP.toString()))
+			name = name.substring(0, name.lastIndexOf('.' + OntologyFileExtensions.OWL_ZIP.toString()))
 					.replace('.', '_');
 		}
 		else

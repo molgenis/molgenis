@@ -3,10 +3,8 @@ package org.molgenis.data.importer.wizard;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -464,7 +462,7 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		String filename;
 		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(originalFileName, GenericImporterExtensions.getAll());
+				.findExtensionFromPossibilities(originalFileName, importServiceFactory.getSupportedFileExtensions());
 		if (entityTypeId == null)
 		{
 			filename = originalFileName;
@@ -472,8 +470,6 @@ public class ImportWizardController extends AbstractWizardController
 		else
 		{
 			filename = entityTypeId + "." + extension;
-			if (!extension.equals("vcf") && (!extension.equals("vcf.gz") && (!extension.equals("vcf.zip"))))
-				LOG.warn("Specifying a filename for a non-VCF file has no effect on entity names.");
 		}
 		return filename;
 	}
@@ -515,19 +511,6 @@ public class ImportWizardController extends AbstractWizardController
 				throw new IllegalArgumentException(
 						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays
 								.toString(DatabaseAction.values())));
-			}
-		}
-
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(file.getName(), GenericImporterExtensions.getAll());
-
-		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
-		{
-			NameValidator.validateEntityName(file.getName().replace("." + extension, ""));
-			if (!DatabaseAction.ADD.equals(databaseAction))
-			{
-				throw new IllegalArgumentException(
-						"Update mode " + databaseAction + " is not supported, only ADD is supported for VCF");
 			}
 		}
 		return databaseAction;
