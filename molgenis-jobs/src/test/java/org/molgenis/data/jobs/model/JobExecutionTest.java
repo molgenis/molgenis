@@ -35,8 +35,8 @@ public class JobExecutionTest extends AbstractMolgenisSpringTest
 		String message1 = "Small message 1\n";
 		String message2 = "Small message 2\n";
 
-		jobExecution.appendLog(message1);
-		jobExecution.appendLog(message2);
+		((JobExecution) jobExecution).appendLog(message1);
+		((JobExecution) jobExecution).appendLog(message2);
 
 		assertEquals(jobExecution.getLog(), StringUtils.join(message1, message2));
 	}
@@ -47,7 +47,7 @@ public class JobExecutionTest extends AbstractMolgenisSpringTest
 		int i = 0;
 		while (StringUtils.length(jobExecution.getLog()) < JobExecution.MAX_LOG_LENGTH)
 		{
-			jobExecution.appendLog("Small message " + i++ + "\n");
+			((JobExecution) jobExecution).appendLog("Small message " + i++ + "\n");
 		}
 		String truncatedLog = jobExecution.getLog();
 		assertEquals(truncatedLog.length(), JobExecution.MAX_LOG_LENGTH, "Log message grows up to MAX_LOG_LENGTH");
@@ -57,7 +57,7 @@ public class JobExecutionTest extends AbstractMolgenisSpringTest
 		assertTrue(truncatedLog.endsWith(JobExecution.TRUNCATION_BANNER),
 				"Truncated log should end with TRUNCATION_BANNER");
 
-		jobExecution.appendLog("Ignored");
+		((JobExecution) jobExecution).appendLog("Ignored");
 		assertEquals(jobExecution.getLog(), truncatedLog, "Once truncated, the log should stop appending");
 	}
 
