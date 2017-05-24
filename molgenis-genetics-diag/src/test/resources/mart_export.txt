@@ -1,4 +1,0 @@
-Ensembl Gene ID	HGNC symbol
-E1	H1
-E2	H2
-E3	H3
