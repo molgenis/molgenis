@@ -48,8 +48,9 @@ public class JobExecutor
 	private final Gson gson;
 
 	@Autowired
-	public JobExecutor(DataService dataService, EntityManager entityManager, UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
-			ExecutorService executorService, JobFactoryRegistry jobFactoryRegistry)
+	public JobExecutor(DataService dataService, EntityManager entityManager, UserDetailsService userDetailsService,
+			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
+			JobFactoryRegistry jobFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
