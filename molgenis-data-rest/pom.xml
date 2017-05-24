@@ -28,22 +28,12 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-csv</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-file</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-js</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- third party dependencies -->
