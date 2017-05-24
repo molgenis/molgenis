@@ -36,11 +36,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-i18n</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-security</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -54,11 +49,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>jsr250-api</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>nl.captcha</groupId>
