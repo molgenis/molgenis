@@ -148,6 +148,15 @@ class Session():
 		response.raise_for_status();
 		return response;
 
+	def update_one(self, entity, id, attr, value):
+        '''Updates one attribute of a given entity in a table with a given value'''
+        print(entity, id, attr, value)
+        response = self.session.put(self.url + "v1/" + quote_plus(entity)+"/"+id+"/"+attr,
+                                     headers=self._get_token_header_with_content_type(),
+                                     data=json.dumps(value))
+        response.raise_for_status()
+        return response
+
 	def delete(self, entity, id):
 		'''Deletes a single entity row from an entity repository.'''
 		response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(id), headers =

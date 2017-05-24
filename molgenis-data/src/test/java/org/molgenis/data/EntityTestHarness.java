@@ -6,15 +6,13 @@ import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -67,8 +65,8 @@ public class EntityTestHarness
 	@Autowired
 	private TestPackage testPackage;
 
-	private Date date;
-	private Date dateTime;
+	private final LocalDate date = LocalDate.parse("2012-12-21");
+	private final Instant dateTime = Instant.parse("1985-08-12T06:12:13Z");
 
 	@PostConstruct
 	public void postConstruct()
@@ -146,8 +144,6 @@ public class EntityTestHarness
 
 	private Entity createEntity(EntityType entityType, int id, Entity refEntity)
 	{
-		if (date == null || dateTime == null) generateDateAndDateTime();
-
 		Entity entity = new DynamicEntity(entityType);
 		entity.set(ATTR_ID, "" + id);
 		entity.set(ATTR_STRING, "string1");
@@ -168,21 +164,6 @@ public class EntityTestHarness
 		entity.set(ATTR_COMPOUND_CHILD_INT, 10 + id);
 
 		return new EntityWithComputedAttributes(entity);
-	}
-
-	private void generateDateAndDateTime()
-	{
-		DateFormat dateFormat = MolgenisDateFormat.getDateFormat();
-		DateFormat dateTimeFormat = MolgenisDateFormat.getDateTimeFormat();
-		try
-		{
-			date = dateFormat.parse("2012-12-21");
-			dateTime = dateTimeFormat.parse("1985-08-12T11:12:13+0500");
-		}
-		catch (ParseException e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	public void addSelfReference(EntityType selfXrefEntityType)

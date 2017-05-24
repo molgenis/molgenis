@@ -27,11 +27,11 @@ The **-Dmolgenis.home** property tells tomcat where to find your properties file
 Inside the specified molgenis home folder, create a file called *molgenis-server.properties*, and depending on the version of your MOLGENIS, write the following:
 
 ```
-	db_user=molgenis  
-	db_password=molgenis  
+	db_user=molgenis
+	db_password=molgenis
 	db_uri=jdbc\:postgresql\://localhost/molgenis?reWriteBatchedInserts=true&autosave=CONSERVATIVE
-	admin.password=admin  
-	user.password=admin  
+	admin.password=admin
+	user.password=admin
 ```
 
 Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostGreSQL. This effectively means that whatever you call your database, your db_uri should point to it.

@@ -1,8 +1,17 @@
 package org.molgenis.data.excel;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import static org.apache.poi.ss.usermodel.CellType.FORMULA;
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -14,7 +23,7 @@ public class ExcelUtilsTest
 	public void testToValueNumericLong() throws Exception
 	{
 		Cell cell = mock(Cell.class);
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_NUMERIC);
+		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
 		when(cell.getNumericCellValue()).thenReturn(1.2342151234E10);
 		assertEquals(ExcelUtils.toValue(cell), "12342151234");
 	}
@@ -38,9 +47,27 @@ public class ExcelUtilsTest
 		Sheet sheet = mock(Sheet.class);
 		when(sheet.getWorkbook()).thenReturn(workbook);
 
-		when(cell.getCellType()).thenReturn(Cell.CELL_TYPE_FORMULA);
+		when(cell.getCellTypeEnum()).thenReturn(FORMULA);
 		when(cell.getSheet()).thenReturn(sheet);
 		when(cell.getNumericCellValue()).thenReturn(1.2342151234E10);
 		assertEquals(ExcelUtils.toValue(cell), "12342151234");
+	}
+
+	@Test
+	public void renameSheetTest() throws IOException, InvalidFormatException
+	{
+		File file = ResourceUtils.getFile(getClass(), "/test.xls");
+		File temp = File.createTempFile("unittest_", ".xls");
+		FileUtils.copyFile(file, temp);
+		ExcelUtils.renameSheet("unittest", temp, 0);
+		Workbook workbook = WorkbookFactory.create(new FileInputStream(temp));
+		assertEquals(workbook.getSheetAt(0).getSheetName(), "unittest");
+	}
+
+	@Test
+	public void getNumberOfSheetsTest()
+	{
+		File file = ResourceUtils.getFile(getClass(), "/test.xls");
+		assertEquals(ExcelUtils.getNumberOfSheets(file), 3);
 	}
 }

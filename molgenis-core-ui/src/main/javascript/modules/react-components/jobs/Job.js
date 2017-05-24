@@ -22,29 +22,40 @@ var Job = React.createClass({
         job: React.PropTypes.object.isRequired,
         onClick: React.PropTypes.func
     },
+    getInitialState: () => ({
+        showLog: false
+    }),
     render: function () {
         const {job, onClick} = this.props;
+        const {showLog} = this.state;
         return <div>
-            <p>{job.type} job
-                <div>
-                    {job.progressMessage}
-                    <ProgressBar
-                        progressMessage={this._formatProgressMessage()}
-                        progressPct={job.progressMax !== undefined ? this._getProgressPct() : 100}
-                        status={this._getCssClass() || 'primary'}
-                        active={this._isActive()}
-                    />
-                </div>
-                <div className="btn-group" role="group">
-                    {onClick &&
-                    <button type="button" className="btn btn-default"
-                            onClick={this.props.onClick}>Show details</button>}
-                    {job.resultUrl &&
-                    <a className="btn btn-default" role="button"
-                       href={job.resultUrl}>Go to result</a>}
-                </div>
-            </p>
+            <p>{job.type} job</p>
+            <div>
+                {job.progressMessage}
+                <ProgressBar
+                    progressMessage={this._formatProgressMessage()}
+                    progressPct={job.progressMax !== undefined ? this._getProgressPct() : 100}
+                    status={this._getCssClass() || 'primary'}
+                    active={this._isActive()}
+                />
+            </div>
+            {job && showLog && <div>
+                <pre>{job.log}</pre>
+            </div>}
+            <div className="btn-group" role="group">
+                {onClick && <button type="button" className="btn btn-default"
+                                    onClick={onClick}>Show details</button>}
+                <button type="button" className="btn btn-default"
+                        onClick={this._showLogClick}>{showLog ? 'Hide' : 'Show'} log
+                </button>
+                {job.resultUrl &&
+                <a className="btn btn-default" role="button"
+                   href={job.resultUrl}>Go to result</a>}
+            </div>
         </div>
+    },
+    _showLogClick: function () {
+        this.setState({showLog: !this.state.showLog})
     },
     _getCssClass: function () {
         let cssTable = {

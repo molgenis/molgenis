@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecution.Status.*;
@@ -21,7 +22,6 @@ import static org.molgenis.data.jobs.model.JobExecution.Status.*;
  */
 public class ProgressImpl implements Progress
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
 	private static final Logger JOB_EXECUTION_LOG = LoggerFactory.getLogger(JobExecution.class);
 
 	private final JobExecution jobExecution;
@@ -45,7 +45,7 @@ public class ProgressImpl implements Progress
 	{
 		JobExecutionContext.set(jobExecution);
 		JOB_EXECUTION_LOG.info("Execution started.");
-		jobExecution.setStartDate(new Date());
+		jobExecution.setStartDate(Instant.now());
 		jobExecution.setStatus(RUNNING);
 		update();
 	}
@@ -60,15 +60,30 @@ public class ProgressImpl implements Progress
 	}
 
 	@Override
+	public void increment(int amount)
+	{
+		jobExecution.setProgressInt(jobExecution.getProgressInt() + amount);
+		update();
+	}
+
+	@Override
+	public void appendLog(String log)
+	{
+		jobExecution.appendLog(log);
+		update();
+	}
+
+	@Override
 	public void success()
 	{
-		jobExecution.setEndDate(new Date());
+		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(SUCCESS);
 		jobExecution.setProgressInt(jobExecution.getProgressMax());
 		Duration yourDuration = Duration.millis(timeRunning());
 		Period period = yourDuration.toPeriod();
-		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendMinutes()
-				.appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis().appendSuffix("ms ").toFormatter();
+		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendHours()
+				.appendSuffix("h ").appendMinutes().appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis()
+				.appendSuffix("ms ").toFormatter();
 		String timeSpent = periodFormatter.print(period);
 		JOB_EXECUTION_LOG.info("Execution successful. Time spent: {}", timeSpent);
 		sendEmail(jobExecution.getSuccessEmail(), jobExecution.getType() + " job succeeded.", jobExecution.getLog());
@@ -80,7 +95,7 @@ public class ProgressImpl implements Progress
 	public void failed(Exception ex)
 	{
 		JOB_EXECUTION_LOG.error("Failed. " + ex.getMessage(), ex);
-		jobExecution.setEndDate(new Date());
+		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(FAILED);
 		jobExecution.setProgressMessage(ex.getMessage());
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
@@ -112,7 +127,7 @@ public class ProgressImpl implements Progress
 	public void canceled()
 	{
 		JOB_EXECUTION_LOG.warn("Canceled");
-		jobExecution.setEndDate(new Date());
+		jobExecution.setEndDate(Instant.now());
 		jobExecution.setStatus(CANCELED);
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
@@ -122,12 +137,12 @@ public class ProgressImpl implements Progress
 	@Override
 	public Long timeRunning()
 	{
-		Date startDate = jobExecution.getStartDate();
+		Instant startDate = jobExecution.getStartDate();
 		if (startDate == null)
 		{
 			return null;
 		}
-		return System.currentTimeMillis() - startDate.getTime();
+		return ChronoUnit.MILLIS.between(startDate, Instant.now());
 	}
 
 	@Override
@@ -156,5 +171,4 @@ public class ProgressImpl implements Progress
 	{
 		return jobExecution;
 	}
-
 }

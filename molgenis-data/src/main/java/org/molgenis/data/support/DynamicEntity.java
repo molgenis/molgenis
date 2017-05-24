@@ -7,8 +7,8 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -136,24 +136,15 @@ public class DynamicEntity implements Entity
 	}
 
 	@Override
-	public Date getDate(String attrName)
+	public Instant getInstant(String attrName)
 	{
-		Object value = get(attrName);
-		return value != null ? new java.sql.Date(((java.util.Date) value).getTime()) : null;
+		return (Instant) get(attrName);
 	}
 
 	@Override
-	public java.util.Date getUtilDate(String attrName)
+	public LocalDate getLocalDate(String attrName)
 	{
-		Object value = get(attrName);
-		return value != null ? new java.util.Date(((java.util.Date) value).getTime()) : null;
-	}
-
-	@Override
-	public Timestamp getTimestamp(String attrName)
-	{
-		Object value = get(attrName);
-		return value != null ? new java.sql.Timestamp(((java.util.Date) value).getTime()) : null;
+		return (LocalDate) get(attrName);
 	}
 
 	@Override
@@ -253,12 +244,19 @@ public class DynamicEntity implements Entity
 				throw new IllegalArgumentException(
 						format("Unexpected data type [%s] for attribute: [%s]", dataType.toString(), attrName));
 			case DATE:
-			case DATE_TIME:
-				if (!(value instanceof java.util.Date))
+				if (!(value instanceof LocalDate))
 				{
 					throw new MolgenisDataException(
 							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
-									value.getClass().getSimpleName(), java.util.Date.class.getSimpleName(), attrName));
+									value.getClass().getSimpleName(), LocalDate.class.getSimpleName(), attrName));
+				}
+				break;
+			case DATE_TIME:
+				if (!(value instanceof Instant))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s] for attribute: [%s]", value.toString(),
+									value.getClass().getSimpleName(), Instant.class.getSimpleName(), attrName));
 				}
 				break;
 			case DECIMAL:

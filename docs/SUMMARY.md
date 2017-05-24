@@ -11,6 +11,7 @@
     - [Exploring data](user_documentation/guide-explore.md)
     - [Admin features](user_documentation/guide-admin.md)
     - [Customize your MOLGENIS](user_documentation/guide-customize.md)
+    - [Scheduled Jobs](user_documentation/guide-schedule.md)
     - [Localization](user_documentation/guide-l10n.md)
     - [Using the Appstore](user_documentation/guide-appstore.md)
     - [Scripts](user_documentation/guide-scripts.md)
@@ -20,7 +21,6 @@
     - [Python](user_documentation/guide-python.md)
     - [Biobank Directory](user_documentation/biobank-directory.md)
     - [Biobanking](user_documentation/biobanking.md)
-    - [Custom reports](user_documentation/reports.md)
 - Developer documentation
     - [REST](developer_documentation/guide-rest.md)
         - [REST api V1](developer_documentation/ref-rest.md)

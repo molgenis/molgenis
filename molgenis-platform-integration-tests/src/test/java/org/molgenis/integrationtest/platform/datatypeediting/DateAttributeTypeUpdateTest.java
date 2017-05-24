@@ -7,10 +7,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 
+import static java.time.ZoneId.systemDefault;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -38,8 +39,9 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	@DataProvider(name = "validConversionTestCases")
 	public Object[][] validConversionTestCases()
 	{
-		return new Object[][] { { "2016-11-13", STRING, "2016-11-13" }, { "2016-11-13", TEXT, "2016-11-13" },
-				{ "2016-11-13", DATE_TIME, "2016-11-13T00:00:00+0100" } };
+		return new Object[][] { { LocalDate.parse("2016-11-13"), STRING, "2016-11-13" },
+				{ LocalDate.parse("2016-11-13"), TEXT, "2016-11-13" }, { LocalDate.parse("2016-11-13"), DATE_TIME,
+				LocalDate.parse("2016-11-13").atStartOfDay(systemDefault()).toInstant() } };
 	}
 
 	/**
@@ -52,13 +54,10 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	 * @throws ParseException
 	 */
 	@Test(dataProvider = "validConversionTestCases")
-	public void testValidConversion(Object valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
+	public void testValidConversion(LocalDate valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
 	{
-		valueToConvert = getDateFormat().parse(valueToConvert.toString());
 		testTypeConversion(valueToConvert, typeToConvertTo);
-
-		if (typeToConvertTo.equals(DATE_TIME)) convertedValue = getDateTimeFormat().parse(convertedValue.toString());
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);
@@ -117,7 +116,7 @@ public class DateAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	{
 		try
 		{
-			valueToConvert = getDateFormat().parse(valueToConvert.toString());
+			valueToConvert = parseLocalDate(valueToConvert.toString());
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}

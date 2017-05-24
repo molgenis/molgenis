@@ -9,8 +9,8 @@ import org.testng.annotations.*;
 import java.text.ParseException;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -60,8 +60,8 @@ public class TextAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	{
 		testTypeConversion(valueToConvert, typeToConvertTo);
 
-		if (typeToConvertTo.equals(DATE)) convertedValue = getDateFormat().parse(convertedValue.toString());
-		if (typeToConvertTo.equals(DATE_TIME)) convertedValue = getDateTimeFormat().parse(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE)) convertedValue = parseLocalDate(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE_TIME)) convertedValue = parseInstant(convertedValue.toString());
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);

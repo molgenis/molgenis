@@ -18,6 +18,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -40,15 +41,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.time.ZoneId.systemDefault;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -106,95 +113,62 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		assertEquals(algorithmService.getSourceAttributeNames("$(id)"), singletonList("id"));
 	}
 
-	@Test
-	public void testInt() throws ParseException
+	@DataProvider(name = "testApplyProvider")
+	public Object[][] testApplyProvider()
 	{
-		String identifier = "id";
-		String sourceIntAttribute = "age";
-
-		EntityType entityType = entityTypeFactory.create("testInt");
-		entityType.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
-		entityType.addAttribute(attrMetaFactory.create().setName(sourceIntAttribute).setDataType(INT));
-
-		Entity source = new DynamicEntity(entityType);
-		source.set(identifier, 1);
-		source.set(sourceIntAttribute, 25);
-
-		String targetIntAttribute = "years_lived";
-
-		Attribute targetAttribute = attrMetaFactory.create().setName(targetIntAttribute).setDataType(INT);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
-		attributeMapping.setAlgorithm("$('age').value()");
-
-		Object result = algorithmService.apply(attributeMapping, source, entityType);
-		assertEquals(result, 25);
+		String april20DMY = "2017-04-20";
+		LocalDate april20 = LocalDate.parse(april20DMY);
+		Instant april20defaultTimezone = april20.atStartOfDay(systemDefault()).toInstant();
+		Instant april20UTC = april20.atStartOfDay(UTC).toInstant();
+		return new Object[][] { { INT, 25, "$('source').value()", INT, 25, "map INT value" },
+				{ LONG, 529387981723498L, "$('source').value()", LONG, 529387981723498L, "map LONG value" },
+				{ BOOL, false, "$('source').value()", BOOL, false, "map BOOL value false" },
+				{ BOOL, true, "$('source').value()", BOOL, true, "map BOOL value true" },
+				{ DATE, april20, "$('source').value()", DATE, april20, "map DATE to DATE" },
+				{ DATE, april20, "$('source').value()", DATE_TIME, april20defaultTimezone,
+						"DATE should map to DATE_TIME containing start of day in default timezone" },
+				{ STRING, april20DMY, "new Date($('source').value())", DATE_TIME, april20UTC,
+						"ymd STRING to DATE_TIME parsed by JavaScript returns start of day in UTC (BEWARE!)" },
+				{ STRING, april20DMY,
+						"var date = $('source').value().split('-'); new Date(date[0], date[1]-1, date[2])", DATE_TIME,
+						april20defaultTimezone,
+						"ymd STRING to DATE_TIME parsed manually returns start of day in default timezone" },
+				{ STRING, april20DMY,
+						"var date = $('source').value().split('-'); new Date(date[0], date[1]-1, date[2])", DATE,
+						april20, "ymd STRING to DATE parsed manually returns correct day" },
+				{ STRING, april20DMY, "new Date($('source').value())", DATE,
+						april20UTC.atZone(ZoneId.systemDefault()).toLocalDate(),
+						"ymd STRING to DATE parsed by JavaScript returns wrong day, depending on default timezone (BEWARE!)" },
+				{ STRING, april20.toString(),
+						"var date = $('source').value().split('-'); new Date(date[0], date[1]-1, date[2])", DATE_TIME,
+						april20defaultTimezone,
+						"ymd STRING to DATE_TIME parsed manually returns start of day in system default timezone" },
+				{ DATE_TIME, april20defaultTimezone, "$('source').value()", DATE, april20,
+						"DATE_TIME to DATE returns day in default timeZone" },
+				{ DATE_TIME, april20UTC, "$('source').value()", LONG, april20UTC.toEpochMilli(),
+						"DATE_TIME to LONG returns epoch millis" },
+				{ DATE, april20, "$('source').value()", LONG, april20defaultTimezone.toEpochMilli(),
+						"DATE to LONG returns epoch millis at start of day in default timezone" } };
 	}
 
-	@Test
-	public void testBool() throws ParseException
-	{
-		String identifier = "id";
-		String sourceBoolAttribute = "has_had_coffee";
-
-		EntityType entityType = entityTypeFactory.create("testInt");
-		entityType.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
-		entityType.addAttribute(attrMetaFactory.create().setName(sourceBoolAttribute).setDataType(BOOL));
-
-		Entity source = new DynamicEntity(entityType);
-		source.set(identifier, 1);
-		source.set(sourceBoolAttribute, false);
-
-		String targetBoolAttribute = "awake";
-
-		Attribute targetAttribute = attrMetaFactory.create().setName(targetBoolAttribute).setDataType(BOOL);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
-		attributeMapping.setAlgorithm("$('has_had_coffee').value()");
-
-		Object result = algorithmService.apply(attributeMapping, source, entityType);
-		assertEquals(result, false);
-	}
-
-	@Test
-	public void testLong() throws ParseException
-	{
-		String identifier = "id";
-		String sourceLongAttribute = "serial_number";
-
-		EntityType entityType = entityTypeFactory.create("testInt");
-		entityType.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
-		entityType.addAttribute(attrMetaFactory.create().setName(sourceLongAttribute).setDataType(LONG));
-
-		Entity source = new DynamicEntity(entityType);
-		source.set(identifier, 1);
-		source.set(sourceLongAttribute, 529387981723498l);
-
-		String targetLongAttribute = "super_id_code";
-
-		Attribute targetAttribute = attrMetaFactory.create().setName(targetLongAttribute).setDataType(LONG);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
-		attributeMapping.setAlgorithm("$('serial_number').value()");
-
-		Object result = algorithmService.apply(attributeMapping, source, entityType);
-		assertEquals(result, 529387981723498l);
-	}
-
-	@Test
-	public void testDate() throws ParseException
+	@Test(dataProvider = "testApplyProvider")
+	public void testApply(AttributeType sourceAttributeType, Object sourceAttributeValue, String algorithm,
+			AttributeType targetAttributeType, Object expected, String message)
 	{
 		String idAttrName = "id";
 		EntityType entityType = entityTypeFactory.create("LL");
 		entityType.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
-		entityType.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
+		entityType.addAttribute(attrMetaFactory.create().setName("source").setDataType(sourceAttributeType));
 		Entity source = new DynamicEntity(entityType);
 		source.set(idAttrName, 1);
-		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
+		source.set("source", sourceAttributeValue);
 
-		Attribute targetAttribute = attrMetaFactory.create().setName("bob");
-		targetAttribute.setDataType(DATE);
+		Attribute targetAttribute = attrMetaFactory.create().setName("target");
+		targetAttribute.setDataType(targetAttributeType);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
-		attributeMapping.setAlgorithm("$('dob').value()");
+		attributeMapping.setAlgorithm(algorithm);
 		Object result = algorithmService.apply(attributeMapping, source, entityType);
-		assertEquals(result.toString(), "Wed May 13 00:00:00 CEST 2015");
+		assertEquals(result, expected, message);
 	}
 
 	@Test
@@ -206,13 +180,13 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		entityType.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
 		Entity source = new DynamicEntity(entityType);
 		source.set(idAttrName, 1);
-		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("28-08-1973"));
+		source.set("dob", LocalDate.of(1973, Month.AUGUST, 28));
 
 		Attribute targetAttribute = attrMetaFactory.create().setName("age");
 		targetAttribute.setDataType(INT);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm(
-				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
+				"Math.floor((new Date(2015, 2, 12) - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityType);
 		assertEquals(result, 41);
 	}

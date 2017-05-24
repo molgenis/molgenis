@@ -9,9 +9,10 @@ import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.jobs.JobConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -71,7 +72,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
  in org.molgenis.data and subpackages from included modules
   */
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
-		"org.molgenis.data.jobs", "org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
+		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth",
 		"org.molgenis.data.platform", "org.molgenis.data.meta.model", "org.molgenis.data.meta.util",
 		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n",
 		"org.molgenis.data.postgresql", "org.molgenis.file.model", "org.molgenis.security.owned",
@@ -80,7 +81,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
 		GsonConfig.class, PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
-		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class,
+		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
@@ -185,8 +186,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public ConversionService conversionService()
 	{
 		DefaultConversionService defaultConversionService = new DefaultConversionService();
-		defaultConversionService.addConverter(new DateToStringConverter());
 		defaultConversionService.addConverter(new StringToDateConverter());
+		defaultConversionService.addConverter(new StringToDateTimeConverter());
 		return defaultConversionService;
 	}
 

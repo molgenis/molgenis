@@ -7,15 +7,48 @@ import org.molgenis.data.meta.model.EntityType;
 
 import java.io.Closeable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
  */
 public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 {
+	/**
+	 * Checks if IDs are present in this {@link Repository}.
+	 *
+	 * @param ids the set of ID values to check
+	 * @return the {@link Set} of IDs that are present in the repository
+	 */
+	default Set<Object> getExistingIDs(Set<Object> ids)
+	{
+		Fetch idFetch = new Fetch().field(getEntityType().getIdAttribute().getName());
+		return findAll(ids.stream(), idFetch).map(Entity::getIdValue).collect(toSet());
+	}
+
+	/**
+	 * Upserts a batch of entities into this repository.
+	 * Entities that are already present are updated, new entities are added.
+	 *
+	 * @param entities List of Entities to upsert
+	 */
+	default void upsertBatch(List<E> entities)
+	{
+		Set<Object> existingIDs = getExistingIDs(entities.stream().map(Entity::getIdValue).collect(toSet()));
+		Map<Boolean, List<E>> partitioned = entities.stream()
+				.collect(partitioningBy(entity -> existingIDs.contains(entity.getIdValue())));
+		add(partitioned.get(FALSE).stream());
+		update(partitioned.get(TRUE).stream());
+	}
+
 	/**
 	 * Executes a function for each batch of entities.
 	 *

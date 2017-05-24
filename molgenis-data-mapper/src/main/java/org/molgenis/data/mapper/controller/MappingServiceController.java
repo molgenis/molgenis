@@ -6,8 +6,11 @@ import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.importer.wizard.ImportWizardController;
+import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
+import org.molgenis.data.mapper.job.MappingJobExecution;
+import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
 import org.molgenis.data.mapper.mapping.model.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.service.AlgorithmService;
@@ -15,6 +18,7 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -25,19 +29,24 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,13 +54,19 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
+import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
+import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
+import static org.molgenis.data.meta.NameValidator.validateEntityName;
+import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.http.ResponseEntity.created;
 
 @Controller
 @RequestMapping(URI)
@@ -87,6 +102,18 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@Autowired
 	private MenuReaderService menuReaderService;
+
+	@Autowired
+	private MappingJobExecutionFactory mappingJobExecutionFactory;
+
+	@Autowired
+	private UserAccountService userAccountService;
+
+	@Autowired
+	private JobExecutor jobExecutor;
+
+	@Autowired
+	private JobsController jobsController;
 
 	public MappingServiceController()
 	{
@@ -397,26 +424,24 @@ public class MappingServiceController extends MolgenisPluginController
 	 * Displays a mapping project.
 	 *
 	 * @param identifier identifier of the {@link MappingProject}
-	 * @param target     Name of the selected {@link MappingTarget}'s target entity
 	 * @param model      the model
-	 * @return View name of the
+	 * @return View name for a single mapping project
 	 */
 	@RequestMapping("/mappingproject/{id}")
-	public String viewMappingProject(@PathVariable("id") String identifier,
-			@RequestParam(value = "target", required = false) String target, Model model)
+	public String viewMappingProject(@PathVariable("id") String identifier, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(identifier);
-		if (target == null)
-		{
-			target = project.getMappingTargets().get(0).getName();
-		}
-
+		MappingTarget mappingTarget = project.getMappingTargets().get(0);
+		String target = mappingTarget.getName();
+		model.addAttribute("entityTypes", getNewSources(mappingTarget));
+		model.addAttribute("compatibleTargetEntities",
+				mappingService.getCompatibleEntityTypes(mappingTarget.getTarget()).collect(toList()));
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
-		model.addAttribute("entityTypes", getNewSources(project.getMappingTarget(target)));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
-
+		model.addAttribute("packages",
+				dataService.getMeta().getPackages().stream().filter(p -> !isSystemPackage(p)).collect(toList()));
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
@@ -499,32 +524,109 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	/**
+	 * Checks if an entityTypeID already exists.
+	 * Used to validate ID field in the "New dataset" tab when creating a new integrated dataset.
+	 */
+	@RequestMapping("/isNewEntity")
+	@ResponseBody
+	public boolean isNewEntity(@RequestParam String targetEntityTypeId)
+	{
+		return dataService.getEntityType(targetEntityTypeId) == null;
+	}
+
+	/**
 	 * Creates the integrated entity for a mapping project's target
 	 *
-	 * @param mappingProjectId ID of the mapping project
-	 * @param target           name of the target of the {@link EntityMapping}
-	 * @param newEntityName    name of the new entity to create
+	 * @param mappingProjectId   ID of the mapping project
+	 * @param targetEntityTypeId ID of the target entity to create or update
+	 * @param label              label of the target entity to create
+	 * @param packageId          ID of the package to put the newly created entity in
 	 * @return redirect URL to the data explorer displaying the newly generated entity
 	 */
 	@RequestMapping("/createIntegratedEntity")
-	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam() String newEntityName, @RequestParam(required = false) boolean addSourceAttribute,
-			Model model)
+	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String targetEntityTypeId,
+			@RequestParam(required = false) String label,
+			@RequestParam(required = false, name = "package") String packageId,
+			@RequestParam(required = false) Boolean addSourceAttribute)
 	{
+		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
+				addSourceAttribute, packageId, label);
+		return format("redirect:{0}", jobsController.createJobExecutionViewHref(mappingJobExecution, 1000));
+	}
+
+	/**
+	 * Schedules a {@link MappingJobExecution}.
+	 *
+	 * @param mappingProjectId   ID of the mapping project
+	 * @param targetEntityTypeId ID of the target entity to create or update
+	 * @param label              label of the target entity to create
+	 * @param packageId          ID of the package to put the newly created entity in
+	 * @return the href of the created MappingJobExecution
+	 */
+	@RequestMapping(value = "/map", method = RequestMethod.POST, produces = TEXT_PLAIN_VALUE)
+	public ResponseEntity<String> scheduleMappingJob(@RequestParam String mappingProjectId,
+			@RequestParam String targetEntityTypeId, @RequestParam(required = false) String label,
+			@RequestParam(required = false, name = "package") String packageId,
+			@RequestParam(required = false) Boolean addSourceAttribute) throws URISyntaxException
+	{
+		mappingProjectId = mappingProjectId.trim();
+		targetEntityTypeId = targetEntityTypeId.trim();
+		label = trim(label);
+		packageId = trim(packageId);
+
 		try
 		{
-			MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
-			String name = mappingService.applyMappings(mappingTarget, newEntityName, addSourceAttribute);
-			return "redirect:" + menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
-					+ name;
+			validateEntityName(targetEntityTypeId);
+			if (mappingService.getMappingProject(mappingProjectId) == null)
+			{
+				throw new MolgenisDataException("No mapping project found with ID " + mappingProjectId);
+			}
+			if (packageId != null)
+			{
+				Package package_ = dataService.getMeta().getPackage(packageId);
+				if (package_ == null)
+				{
+					throw new MolgenisDataException("No package found with ID " + packageId);
+				}
+				if (isSystemPackage(package_))
+				{
+					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
+				}
+			}
 		}
-		catch (RuntimeException ex)
+		catch (MolgenisDataException mde)
 		{
-			model.addAttribute("heading", "Failed to create integrated entity.");
-			model.addAttribute("message", ex.getMessage());
-			model.addAttribute("href", getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId);
-			return "error-msg";
+			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
 		}
+
+		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
+				addSourceAttribute, packageId, label);
+		String jobHref = concatEntityHref(mappingJobExecution);
+		return created(new URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
+	}
+
+	/**
+	 * Schedules a mappingJob for the current user.
+	 *
+	 * @param mappingProjectId   ID for the mapping project to run
+	 * @param targetEntityTypeId ID for the integrated dataset
+	 * @param addSourceAttribute indication if a source attribute should be added to the target {@link EntityType}
+	 * @return the HREF for the scheduled {@link MappingJobExecution}
+	 */
+	private MappingJobExecution scheduleMappingJobInternal(String mappingProjectId, String targetEntityTypeId,
+			Boolean addSourceAttribute, String packageId, String label)
+	{
+		MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
+		mappingJobExecution.setUser(userAccountService.getCurrentUser());
+		mappingJobExecution.setMappingProjectId(mappingProjectId);
+		mappingJobExecution.setTargetEntityTypeId(targetEntityTypeId);
+		mappingJobExecution.setAddSourceAttribute(addSourceAttribute);
+		mappingJobExecution.setPackageId(packageId);
+		mappingJobExecution.setLabel(label);
+
+		jobExecutor.submit(mappingJobExecution);
+
+		return mappingJobExecution;
 	}
 
 	/**
@@ -678,7 +780,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String targetAttributeIdAttribute = null;
 		String targetAttributeLabelAttribute = null;
 
-		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
+		if (EntityTypeUtils.isReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService
 					.findAll(dataService.getEntityType(target).getAttribute(targetAttribute).getRefEntity().getId());
@@ -714,7 +816,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
+		if (EntityTypeUtils.isReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService
 					.findAll(dataService.getEntityType(source).getAttribute(sourceAttribute).getRefEntity().getId());

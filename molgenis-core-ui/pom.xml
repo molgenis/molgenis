@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-core-ui</artifactId>
     <packaging>jar</packaging>
@@ -147,6 +147,11 @@
     </profiles>
 
     <dependencies>
+        <dependency>
+            <groupId>no.api.freemarker</groupId>
+            <artifactId>freemarker-java8</artifactId>
+            <version>1.1.2</version>
+        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core</artifactId>

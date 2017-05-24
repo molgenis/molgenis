@@ -2,7 +2,8 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['mapping-service.css']>
-<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
+<#assign js=['single-mapping-project.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js',
+'jquery.validate.min.js']>
 
 <@header css js/>
 
@@ -128,7 +129,8 @@
                             <#if source.getAttributeMapping(attribute.name)??>
                                 <#assign attributeMapping = source.getAttributeMapping(attribute.name)>
                                 <#list attributeMapping.sourceAttributes as mappedSourceAttribute>
-                                <#if mappedSourceAttribute??>${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if></#if>
+                                    <#if mappedSourceAttribute??>${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>
+                                        , </#if></#if>
                                     <#if attributeMapping.algorithmState??></#if>
                                 </#list>
                             <#elseif !attribute.nillable>
@@ -156,7 +158,7 @@
     <div class="col-md-8">
         <a id="create-integrated-entity-open-modal-btn" href="#" class="btn btn-success pull-right" data-toggle="modal"
            data-target="#create-integrated-entity-modal">
-            <span class="glyphicon glyphicon-play"></span> Create integrated dataset
+            <span class="glyphicon glyphicon-play"></span> Create integrated data set
         </a>
     </div>
 </#if>
@@ -200,30 +202,81 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title" id="create-integrated-entity-modal-label">Create integrated dataset</h4>
+                <h4 class="modal-title" id="create-integrated-entity-modal-label">Where shall we store the integrated
+                    dataset?</h4>
             </div>
             <div class="modal-body">
-                <form id="create-integrated-entity-form" method="post" action="${context_url}/createIntegratedEntity">
-
-                    <div>
-                        <label>Enter a name for the integrated dataset.</label>
-                        <input name="newEntityName" type="text" value="" required/>
-                        <p></p>
-                        <small>The mapped entity will be placed in the same package as the target.</small>
-                        </p>
+                <ul class="nav nav-pills" id="tabContent">
+                    <li><a href="#existing" data-toggle="tab">Existing dataset</a></li>
+                    <li><a href="#new" data-toggle="tab">New dataset</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane panel-collapse" id="existing">
+                        <form method="post" action="${context_url}/createIntegratedEntity"
+                              id="existingIntegratedDatasetForm">
+                            <p class="help-block">Maps to an existing compatible dataset.<br/>
+                                New sources will be added to this dataset, any existing rows will be updated.</p>
+                            <div>
+                                <label for="existingTargetEntityId">Target dataset</label>
+                                <select id="existingTargetEntityId" name="targetEntityTypeId" class="form-control">
+                                <#list compatibleTargetEntities as target>
+                                    <option value="${target.id?html}">${target.id?html}(${target.label?html})
+                                    </option>
+                                </#list>
+                                </select>
+                            </div>
+                            <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+                        </form>
                     </div>
-                    <div>
-                        <label>Add source attribute</label>
-                        <input name="addSourceAttribute" type="checkbox"/>
+                    <div class="tab-pane panel-collapse" id="new">
+                        <form method="post" action="${context_url}/createIntegratedEntity"
+                              id="newIntegratedDatasetForm">
+                            <p class="help-block">Creates a new integrated data set.</p>
+                            <div>
+                                <label for="targetEntityTypeId">Identifier</label>
+                                <input type="text" value="" name="targetEntityTypeId" id="targetEntityTypeId"
+                                       class="form-control"
+                                       required minlength="1" maxlength="150"
+                                       data-rule-regex="^[a-zA-Z][a-zA-Z0-9_#]*$"
+                                       data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed. Must start with a letter."
+                                       data-rule-remote="${context_url}/isNewEntity"
+                                       data-msg-remote="This is an existing entity."/>
+                                <p class="help-block">Enter an identifier for the integrated data set.</p>
+                            </div>
+                            <div>
+                                <label for="newTargetEntityLabel">Label</label>
+                                <input type="text" value="" name="label" id="newTargetEntityLabel"
+                                       class="form-control">
+                                <p class="help-block">Optionally, enter a custom label for the integrated
+                                    data set.</p>
+                            </div>
+                            <div>
+                                <label for="newTargetEntityPackage">Package</label>
+                                <select id="newTargetEntityPackage" name="package" class="form-control">
+                                <#list packages as package>
+                                    <option value="${package.id?html}">${package.id?html} (${package.label?html})
+                                    </option>
+                                </#list>
+                                </select>
+                                <p class="help-block">Choose the package where the integrated data set will be
+                                    created</p>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="addSourceAttribute"> <b>Add source attribute</b>
+                                </label>
+                                <p class="help-block">Will add a source attribute to the integrated data set, and
+                                    fill it with the identifier of the source data set</p>
+                            </div>
+                            <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+                        </form>
                     </div>
-
-                    <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
-                    <input type="hidden" name="target" value="${selectedTarget}">
+                </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" id="create-integrated-entity-btn" class="btn btn-primary">Create integrated
-                    dataset
+                <button type="button" id="create-integrated-entity-btn" class="btn btn-primary"
+                        onclick="$('#create-integrated-entity-modal form:visible').submit()">Start mapping!
                 </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>

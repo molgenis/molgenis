@@ -13,9 +13,10 @@ import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
+import static java.time.ZonedDateTime.now;
+import static java.time.format.FormatStyle.MEDIUM;
 import static org.molgenis.ui.MolgenisMenuController.URI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
 
@@ -46,7 +47,7 @@ public class MolgenisMenuController
 		this.molgenisVersion = molgenisVersion;
 		// workaround for Eclipse bug: https://github.com/molgenis/molgenis/issues/2667
 		this.molgenisBuildData = molgenisBuildData.equals("${maven.build.timestamp}") ?
-				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()) + " by Eclipse" : molgenisBuildData;
+				DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by Eclipse" : molgenisBuildData;
 	}
 
 	@RequestMapping

@@ -10,14 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-import static java.time.OffsetDateTime.now;
-import static java.util.Date.from;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -105,7 +104,7 @@ public class IndexServiceImpl implements IndexService
 			runAsSystem(() ->
 			{
 				LOG.trace("Clean up Index job executions...");
-				Date fiveMinutesAgo = from(now().minusMinutes(5).toInstant());
+				Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
 				boolean indexJobExecutionExists = dataService.hasRepository(INDEX_JOB_EXECUTION);
 				if (indexJobExecutionExists)
 				{

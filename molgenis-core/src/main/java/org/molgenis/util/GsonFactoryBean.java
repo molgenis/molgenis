@@ -1,12 +1,12 @@
 package org.molgenis.util;
 
+import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,9 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 
 	private boolean disableHtmlEscaping = false;
 
-	private String dateFormatPattern = MolgenisDateFormat.getDateTimeFormat().toPattern();
+	private String dateFormatPattern = null;
+
+	private boolean registerJavaTimeConverters = true;
 
 	private List<TypeAdapterFactory> typeAdapterFactoryList;
 
@@ -84,6 +86,26 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 		this.dateFormatPattern = dateFormatPattern;
 	}
 
+	/**
+	 * Indicates if the java 8 date time {@link com.fatboyindustrial.gsonjavatime.Converters} should be registered
+	 * with Gson.
+	 * <p>
+	 * This is equivalent to writing
+	 * <code>
+	 * GsonBuilder builder = new GsonBuilder()
+	 * Converters.registerInstant(builder);
+	 * Converters.registerLocalDate(builder);
+	 * builder.create();
+	 * </code>
+	 * The builders will be registered after the other type adapters and type adapter factories you set.
+	 *
+	 * @param registerJavaTimeConverters true if they should be registered
+	 */
+	public void setRegisterJavaTimeConverters(boolean registerJavaTimeConverters)
+	{
+		this.registerJavaTimeConverters = registerJavaTimeConverters;
+	}
+
 	public void registerTypeAdapterFactory(TypeAdapterFactory typeAdapterFactory)
 	{
 		if (typeAdapterFactoryList == null) typeAdapterFactoryList = new ArrayList<TypeAdapterFactory>();
@@ -124,6 +146,11 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 		{
 			typeAdapterHierarchyFactoryMap.forEach(builder::registerTypeHierarchyAdapter);
 		}
+		if (this.registerJavaTimeConverters)
+		{
+			Converters.registerInstant(builder);
+			Converters.registerLocalDate(builder);
+		}
 		this.gson = builder.create();
 	}
 
@@ -147,4 +174,5 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	{
 		return true;
 	}
+
 }

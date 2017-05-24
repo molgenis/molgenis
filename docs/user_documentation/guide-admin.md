@@ -8,7 +8,7 @@ You can find the mail settings in the Admin menu, under Settings.
 At the top of the page, type "Mail settings" into the selection box.
 
 For backwards compatability, the default settings are filled with the values provided in `molgenis-server.properties` 
-under the keys `mail.user` and `mail.password`, but the values provided here will override those settings.
+under the keys `mail.username` and `mail.password`, but the values provided here will override those settings.
 
 For basic configuration, you only need to provide the username and password fields with a valid Gmail username and password.
 But you may also specify a different (non-Gmail) SMTP server.

@@ -10,8 +10,8 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 import static java.util.Objects.requireNonNull;
@@ -109,21 +109,15 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	}
 
 	@Override
-	public Date getDate(String attributeName)
+	public Instant getInstant(String attributeName)
 	{
-		return getEntity().getDate(attributeName);
+		return getEntity().getInstant(attributeName);
 	}
 
 	@Override
-	public java.util.Date getUtilDate(String attributeName)
+	public LocalDate getLocalDate(String attributeName)
 	{
-		return getEntity().getUtilDate(attributeName);
-	}
-
-	@Override
-	public Timestamp getTimestamp(String attributeName)
-	{
-		return getEntity().getTimestamp(attributeName);
+		return getEntity().getLocalDate(attributeName);
 	}
 
 	@Override

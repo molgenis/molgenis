@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -44,6 +44,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
         <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
+        <apache.poi.version>3.15</apache.poi.version>
     </properties>
 
     <build>
@@ -696,5 +697,6 @@
         <module>molgenis-util</module>
         <module>molgenis-settings</module>
         <module>molgenis-swagger</module>
+        <module>molgenis-amazon-bucket</module>
     </modules>
 </project>

@@ -62,12 +62,12 @@ public class EmxImportService implements ImportService
 
 	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction,
-			String defaultPackage)
+			String packageId)
 	{
-		ParsedMetaData parsedMetaData = parser.parse(source, defaultPackage);
+		ParsedMetaData parsedMetaData = parser.parse(source, packageId);
 
 		// TODO altered entities (merge, see getEntityType)
-		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData, defaultPackage));
+		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData, packageId));
 	}
 
 	/**

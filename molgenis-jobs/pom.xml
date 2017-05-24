@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-jobs</artifactId>
 
@@ -42,6 +42,11 @@
             <artifactId>molgenis-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-validation</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

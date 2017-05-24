@@ -7,7 +7,7 @@ info:
 host: ${host}
 schemes:
   - ${scheme}
-basePath: /api/
+basePath: /
 consumes:
   - application/json
   - application/x-www-form-urlencoded
@@ -22,7 +22,77 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
-  /v1/login:
+  /scripts/{name}/start:
+    get:
+      tags:
+        - Scripts
+      summary: Starts a Script Job.
+      description: Will redirect the request to the jobs controller, showing the progress of the started ScriptJobExecution. The Script's output will be written to the log of the ScriptJobExecution. If the Script has an outputFile, the URL of that file will be written to the ScriptJobExecution's resultUrl. The Swagger UI can only be used to start Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the script to start
+      responses:
+        302:
+          description: URL of a page showing the ScriptJobExecution
+    post:
+      tags:
+        - Scripts
+      summary: Starts a Script Job.
+      description: Will redirect the request to the jobs controller, showing the progress of the started ScriptJobExecution. The Script's output will be written to the log of the ScriptJobExecution. If the Script has an outputFile, the URL of that file will be written to the ScriptJobExecution's resultUrl. The Swagger UI can only be used to start Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the script to start
+      responses:
+        302:
+          description: URL of a page showing the ScriptJobExecution
+  /scripts/{name}/run:
+    get:
+      tags:
+        - Scripts
+      summary: Runs a Script, waits for the result, serves the result
+      description: The Swagger UI can only be used to run Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the Script to run
+      responses:
+        302:
+          description: If the result has an outputFile, will redirect to a URL where you can download the result file.
+        200:
+          description: Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+        400:
+          description: If the Script name is unknown or one of the Script's parameter values is missing
+    post:
+      tags:
+        - Scripts
+      summary: Runs a Script, waits for the result, serves the result
+      description: The Swagger UI can only be used to run Scripts without parameters. To start Scripts with parameters, make a regular call to the API.
+      parameters:
+        - name: name
+          type: string
+          in: path
+          description: The name of the Script to run
+      responses:
+        302:
+          description: If the result has an outputFile, will redirect to a URL where you can download the result file.
+        200:
+          description: Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+        400:
+          description: If the Script name is unknown or one of the Script's parameter values is missing
+  /plugin/jobs/run/{scheduledJobId}:
+    post:
+      tags:
+        - Jobs
+      summary: Runs a job
+      parameters:
+        - name: scheduledJobId
+          in: path
+  /api/v1/login:
     post:
       tags:
         - V1
@@ -43,7 +113,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /v2/version:
+  /api/v2/version:
     get:
       tags:
         - V2
@@ -52,14 +122,14 @@ paths:
       responses:
         200:
           description: Server version
-  /v2/i18n:
+  /api/v2/i18n:
     get:
       produces:
         - application/json
       tags:
         - V2
       summary: Get all localization tokens for the user's current language
-  /v2/i18n/{namespace}/{language}:
+  /api/v2/i18n/{namespace}/{language}:
     get:
       produces:
         - application/json;charset=UTF-8
@@ -80,7 +150,7 @@ paths:
       responses:
         200:
           description: JSON file
-  /v2/i18n/{namespace}_{language}.properties:
+  /api/v2/i18n/{namespace}_{language}.properties:
     get:
       produces:
         - text/plain;charset=UTF-8
@@ -101,7 +171,7 @@ paths:
       responses:
         200:
           description: Properties file
-  /v2/i18n/{namespace}:
+  /api/v2/i18n/{namespace}:
     post:
       tags:
         - V2
@@ -135,7 +205,7 @@ paths:
       responses:
         204:
           description: Deleted namespace
-  /v2/{entity_name}:
+  /api/v2/{entity_name}:
     get:
       tags:
         - V2
@@ -250,7 +320,7 @@ paths:
           description: "Internal Server Error. Happens if a RuntimeException is thrown during the execution of the request"
           schema:
             $ref: "#/definitions/ErrorMessageResponse"
-  /v2/{entity_name}/{id}:
+  /api/v2/{entity_name}/{id}:
     get:
       tags:
         - V2
@@ -301,7 +371,7 @@ paths:
       responses:
         204:
           description: No content
-  /v2/{entity_name}/meta/{attribute_name}:
+  /api/v2/{entity_name}/meta/{attribute_name}:
     get:
       tags:
         - V2
@@ -328,7 +398,7 @@ paths:
       responses:
         200:
           description: OK
-  /v2/copy/{entity_name}:
+  /api/v2/copy/{entity_name}:
     post:
       tags:
         - V2
@@ -362,6 +432,48 @@ paths:
           description: If a runtime exception occurs.
           schema:
             $ref: "#/definitions/ErrorMessageResponse"
+  /plugin/mappingservice/map:
+    post:
+      tags:
+        - mapping service
+      produces:
+        - text/plain
+      summary: Run mapping service
+      description: Runs the mappings in a mapping project.
+      parameters:
+        - name: mappingProjectId
+          in: query
+          type: string
+          required: true
+          description: ID of the mapping project
+        - name: targetEntityTypeId
+          in: query
+          type: string
+          required: true
+          description: ID of the created EntityType, may be an existing EntityType
+        - name: addSourceAttribute
+          in: query
+          type: boolean
+          required: false
+          description: indicates if a source attribute should be added to the EntityType, ignored when mapping to an existing EntityType
+        - name: packageId
+          in: query
+          type: string
+          required: false
+          description: ID of the target package, ignored when mapping to an existing EntityType
+        - name: label
+          in: query
+          type: string
+          required: false
+          description: label of the target EntityType, ignored when mapping to an existing EntityType
+      responses:
+        201:
+          description: If the mapping job was successfully created
+          headers:
+            Location:
+              description: The HREF where the mapping job can be found
+              type: string
+              format: uri
 definitions:
   CopyEntityRequest:
     type: object

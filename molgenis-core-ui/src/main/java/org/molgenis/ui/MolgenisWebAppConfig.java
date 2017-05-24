@@ -3,8 +3,8 @@ package org.molgenis.ui;
 import com.google.common.collect.Maps;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
@@ -158,7 +158,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addFormatters(FormatterRegistry registry)
 	{
-		registry.addConverter(new DateToStringConverter());
+		registry.addConverter(new StringToDateTimeConverter());
 		registry.addConverter(new StringToDateConverter());
 	}
 

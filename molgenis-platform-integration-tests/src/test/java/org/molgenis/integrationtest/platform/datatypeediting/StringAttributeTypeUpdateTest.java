@@ -9,8 +9,8 @@ import org.testng.annotations.*;
 import java.text.ParseException;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -42,7 +42,8 @@ public class StringAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTe
 				{ "A VERY LONG TEXT!!!!@#$#{@}{@}{#%$#*($&@#", TEXT, "A VERY LONG TEXT!!!!@#$#{@}{@}{#%$#*($&@#" },
 				{ "1", ENUM, "1" }, { "<h1>Hello World</h1>", HTML, "<h1>Hello World</h1>" },
 				{ "Compounds go!", COMPOUND, null }, { "1990-11-13", DATE, "1990-11-13" },
-				{ "2016-11-13T20:20:20+0100", DATE_TIME, "2016-11-13T20:20:20+0100" } };
+				{ "2016-11-13T20:20:20+0100", DATE_TIME, "2016-11-13T20:20:20+0100" },
+				{ "2016-11-13T20:20:20+0500", DATE_TIME, "2016-11-13T20:20:20+0500" } };
 	}
 
 	/**
@@ -60,8 +61,8 @@ public class StringAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTe
 	{
 		testTypeConversion(valueToConvert, typeToConvertTo);
 
-		if (typeToConvertTo.equals(DATE)) convertedValue = getDateFormat().parse(convertedValue.toString());
-		if (typeToConvertTo.equals(DATE_TIME)) convertedValue = getDateTimeFormat().parse(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE)) convertedValue = parseLocalDate(convertedValue.toString());
+		if (typeToConvertTo.equals(DATE_TIME)) convertedValue = parseInstant(convertedValue.toString());
 
 		// Assert if conversion was successful
 		assertEquals(getActualDataType(), typeToConvertTo);

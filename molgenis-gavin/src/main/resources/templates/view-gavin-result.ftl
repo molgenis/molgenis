@@ -10,7 +10,7 @@
             <div class="panel-heading">
                 <h4 class="panel-title">
                     GAVIN annotation job ${jobExecution.filename?html} submitted
-                    on ${jobExecution.submissionDate?datetime}
+                    on ${jobExecution.submissionDate.format('MMM d, yyyy HH:mm:ss')}
                 </h4>
             </div>
             <div class="panel-body">

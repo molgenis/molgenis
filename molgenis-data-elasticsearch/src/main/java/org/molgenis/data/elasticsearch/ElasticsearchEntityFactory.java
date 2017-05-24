@@ -10,12 +10,12 @@ import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -142,11 +142,10 @@ public class ElasticsearchEntityFactory
 				}
 				break;
 			case DATE:
-				Date date = entity.getDate(attrName);
+				LocalDate date = entity.getLocalDate(attrName);
 				if (date != null)
 				{
-					String dateValue = MolgenisDateFormat.getDateFormat().format(date);
-					generator.writeString(dateValue);
+					generator.writeString(date.toString());
 				}
 				else
 				{
@@ -154,11 +153,10 @@ public class ElasticsearchEntityFactory
 				}
 				break;
 			case DATE_TIME:
-				Date dateTime = entity.getDate(attrName);
+				Instant dateTime = entity.getInstant(attrName);
 				if (dateTime != null)
 				{
-					String dateTimeValue = MolgenisDateFormat.getDateTimeFormat().format(dateTime);
-					generator.writeString(dateTimeValue);
+					generator.writeString(dateTime.toString());
 				}
 				else
 				{

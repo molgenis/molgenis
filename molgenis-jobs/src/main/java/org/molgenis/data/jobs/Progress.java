@@ -10,6 +10,10 @@ public interface Progress
 
 	void progress(int progress, String message);
 
+	void increment(int amount);
+
+	void appendLog(String log);
+
 	void status(String message);
 
 	void failed(Exception ex);

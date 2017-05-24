@@ -21,8 +21,8 @@
       "gitbookConfigURL": "https://raw.githubusercontent.com/molgenis/molgenis/master/book.json",
       "options": [
         {
-          "value": "https://molgenis.gitbooks.io/molgenis/content/v/4.0/",
-          "text": "MOLGENIS 4.0.x",
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/4.1/",
+          "text": "MOLGENIS 4.1",
           "selected": true
         }
       ]
