@@ -549,6 +549,11 @@ public class MappingServiceController extends MolgenisPluginController
 			@RequestParam(required = false, name = "package") String packageId,
 			@RequestParam(required = false) Boolean addSourceAttribute)
 	{
+		if (label != null && label.trim().isEmpty())
+		{
+			label = null;
+		}
+
 		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
 				addSourceAttribute, packageId, label);
 		return format("redirect:{0}", jobsController.createJobExecutionViewHref(mappingJobExecution, 1000));
@@ -623,8 +628,6 @@ public class MappingServiceController extends MolgenisPluginController
 		mappingJobExecution.setAddSourceAttribute(addSourceAttribute);
 		mappingJobExecution.setPackageId(packageId);
 		mappingJobExecution.setLabel(label);
-
-		jobExecutor.submit(mappingJobExecution);
 
 		return mappingJobExecution;
 	}
