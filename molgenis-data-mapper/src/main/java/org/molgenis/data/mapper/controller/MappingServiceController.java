@@ -629,6 +629,8 @@ public class MappingServiceController extends MolgenisPluginController
 		mappingJobExecution.setPackageId(packageId);
 		mappingJobExecution.setLabel(label);
 
+		jobExecutor.submit(mappingJobExecution);
+
 		return mappingJobExecution;
 	}
 
