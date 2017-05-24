@@ -688,7 +688,6 @@
         <module>molgenis-catalogue</module>
         <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
-        <module>molgenis-genetics-diag</module>
         <module>molgenis-jobs</module>
         <module>molgenis-platform-integration-tests</module>
         <module>molgenis-test</module>
