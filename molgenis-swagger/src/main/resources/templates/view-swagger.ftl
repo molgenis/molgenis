@@ -219,7 +219,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType}
+            - "${entityType?json_string}"
 </#list>
         - name: attrs
           type: array
@@ -295,7 +295,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType}
+            - "${entityType?json_string}"
 </#list>
         - name: body
           in: body
@@ -334,7 +334,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType}
+            - "${entityType?json_string}"
 </#list>
         - name: id
           in: path
@@ -412,7 +412,7 @@ paths:
           required: true
           enum:
 <#list entityTypes as entityType>
-            - ${entityType}
+            - "${entityType?json_string}"
 </#list>
         - name: body
           schema:
