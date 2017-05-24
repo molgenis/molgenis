@@ -1,9 +1,9 @@
-package org.molgenis.data.jobs;
+package org.molgenis.data.jobs.model;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.JobExecutionContext;
 
 /**
  * Appender that appends to the log attribute of a {@link JobExecution} entity.
