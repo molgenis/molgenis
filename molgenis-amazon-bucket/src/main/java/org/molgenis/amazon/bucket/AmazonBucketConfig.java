@@ -1,6 +1,5 @@
 package org.molgenis.amazon.bucket;
 
-import com.google.gson.Gson;
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecutionMetaData;
 import org.molgenis.data.jobs.Job;
@@ -21,15 +20,13 @@ public class AmazonBucketConfig
 	private final AmazonBucketIngester ingester;
 	private final ScheduledJobTypeFactory scheduledJobTypeFactory;
 	private final AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData;
-	private final Gson gson;
 
 	public AmazonBucketConfig(AmazonBucketIngester ingester, ScheduledJobTypeFactory scheduledJobTypeFactory,
-			AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData, Gson gson)
+			AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData)
 	{
 		this.ingester = requireNonNull(ingester);
 		this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
 		this.amazonBucketJobExecutionMetaData = requireNonNull(amazonBucketJobExecutionMetaData);
-		this.gson = requireNonNull(gson);
 	}
 
 	@Bean
@@ -70,7 +67,7 @@ public class AmazonBucketConfig
 						+ "'description': 'Is the key an expression or an exact match'},'region': {'type': 'string', "
 						+ "'description': 'The region where the amazon bucket is located'},'targetEntityId': {'type': 'string', "
 						+ "'description': 'Target EntityType ID'}},"
-						+ "'required': ['bucket','key','accessKey','secretKey']}");
+						+ "'required': ['bucket','key','accessKey','secretKey','expression','region']}");
 		result.setJobExecutionType(amazonBucketJobExecutionMetaData);
 		return result;
 	}

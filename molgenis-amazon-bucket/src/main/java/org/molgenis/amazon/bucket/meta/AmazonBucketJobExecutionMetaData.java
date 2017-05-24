@@ -52,7 +52,8 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 				.setNillable(false);
 		addAttribute(KEY).setLabel("Key").setDescription("Expression to match the file key").setNillable(false);
 		addAttribute(EXPRESSION).setDataType(BOOL).setLabel("Is key expression")
-				.setDescription("Is the key an expression or an exact match").setNillable(true);
+				.setDescription("Is the key an expression or an exact match").setNillable(false)
+				.setDefaultValue(Boolean.FALSE.toString());
 		addAttribute(ACCESS_KEY).setLabel("the access key to be used to login to the amazon bucket").setNillable(false);
 		addAttribute(SECRET_KEY).setLabel("the secret key to be used to login to the amazon bucket").setNillable(false);
 		addAttribute(REGION).setLabel("Region").setDescription("The region of the amazon bucket.").setNillable(false);

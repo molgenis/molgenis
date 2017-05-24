@@ -4,7 +4,6 @@ import org.molgenis.data.jobs.JobExecutor;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static java.util.Objects.requireNonNull;
@@ -27,7 +26,7 @@ public class MolgenisQuartzJob implements Job
 	}
 
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException
+	public void execute(JobExecutionContext context)
 	{
 		jobExecutor.executeScheduledJob(context.getMergedJobDataMap().getString(JobScheduler.SCHEDULED_JOB_ID));
 	}
