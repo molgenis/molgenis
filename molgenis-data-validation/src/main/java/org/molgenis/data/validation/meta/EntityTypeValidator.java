@@ -301,15 +301,18 @@ public class EntityTypeValidator
 	private static void validateEntityLabel(EntityType entityType)
 	{
 		String label = entityType.getLabel();
-		if (label.isEmpty())
+		if (label != null)
 		{
-			throw new MolgenisValidationException(
-					new ConstraintViolation(format("Label of EntityType [%s] is empty", entityType.getId())));
-		}
-		else if (label.trim().equals(""))
-		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Label of EntityType [%s] contains only white space", entityType.getId())));
+			if (label.isEmpty())
+			{
+				throw new MolgenisValidationException(
+						new ConstraintViolation(format("Label of EntityType [%s] is empty", entityType.getId())));
+			}
+			else if (label.trim().equals(""))
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Label of EntityType [%s] contains only white space", entityType.getId())));
+			}
 		}
 	}
 
