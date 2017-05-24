@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.molgenis.security.core.runas.SystemSecurityToken.USER_SYSTEM;
+import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 public class SecurityUtils
 {
@@ -67,13 +67,14 @@ public class SecurityUtils
 		if (authentication != null)
 		{
 			Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+			if (authorities == null) throw new IllegalStateException("No user currently logged in");
+
 			for (String role : roles)
 			{
 				for (GrantedAuthority grantedAuthority : authorities)
 				{
 					if (role.equals(grantedAuthority.getAuthority())) return true;
 				}
-
 			}
 		}
 		return false;
@@ -84,7 +85,7 @@ public class SecurityUtils
 	 */
 	public static boolean currentUserIsSuOrSystem()
 	{
-		return currentUserIsSu() || currentUserisSystem();
+		return currentUserIsSu() || currentUserIsSystem();
 	}
 
 	/**
@@ -94,18 +95,7 @@ public class SecurityUtils
 	 */
 	public static boolean currentUserIsSu()
 	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null) return false;
-
-		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-		if (authorities == null) throw new IllegalStateException("No current user logged in");
-
-		for (GrantedAuthority authority : authorities)
-		{
-			if (authority.getAuthority().equals(AUTHORITY_SU)) return true;
-		}
-
-		return false;
+		return currentUserHasRole(AUTHORITY_SU);
 	}
 
 	/**
@@ -113,9 +103,9 @@ public class SecurityUtils
 	 *
 	 * @return
 	 */
-	public static boolean currentUserisSystem()
+	public static boolean currentUserIsSystem()
 	{
-		return getCurrentUsername().equals(USER_SYSTEM);
+		return currentUserHasRole(ROLE_SYSTEM);
 	}
 
 	/**
@@ -125,14 +115,8 @@ public class SecurityUtils
 	 */
 	public static boolean currentUserIsAuthenticated()
 	{
-		String username;
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null) return false;
-
-		Object principal = authentication.getPrincipal();
-		if (principal instanceof UserDetails) username = ((UserDetails) principal).getUsername();
-		else username = principal.toString();
-		return authentication.isAuthenticated() && !username.equals(ANONYMOUS_USERNAME);
+		return authentication != null && authentication.isAuthenticated() && !currentUserHasRole(AUTHORITY_ANONYMOUS);
 	}
 
 	/**
