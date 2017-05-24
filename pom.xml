@@ -625,6 +625,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.23</version>
+            </dependency>
             <!-- see http://docs.spring.io/spring-security/site/docs/3.2.x/reference/htmlsingle/#maven-bom -->
             <dependency>
                 <groupId>org.springframework</groupId>
