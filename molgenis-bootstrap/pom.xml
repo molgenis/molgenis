@@ -41,12 +41,17 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-file-ingester</artifactId>
+            <artifactId>molgenis-jobs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-jobs</artifactId>
+            <artifactId>molgenis-core-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-security</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
