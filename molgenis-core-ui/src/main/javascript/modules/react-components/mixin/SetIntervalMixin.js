@@ -10,8 +10,11 @@ var SetIntervalMixin = {
     setInterval: function () {
         this.intervals.push(setInterval.apply(null, arguments));
     },
-    componentWillUnmount: function () {
+    clearIntervals: function () {
         this.intervals.forEach(clearInterval);
+    },
+    componentWillUnmount: function () {
+        this.clearIntervals()
     }
 };
 
