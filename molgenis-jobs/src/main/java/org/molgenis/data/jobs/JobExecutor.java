@@ -7,6 +7,8 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -33,6 +35,7 @@ public class JobExecutor
 	private static final Type MAP_TOKEN = new TypeToken<Map<String, Object>>()
 	{
 	}.getType();
+	private static final Logger LOG = LoggerFactory.getLogger(JobExecutor.class);
 
 	private final DataService dataService;
 	private final EntityManager entityManager;
@@ -46,9 +49,8 @@ public class JobExecutor
 
 	@Autowired
 	public JobExecutor(DataService dataService, EntityManager entityManager, Gson gson,
-			UserDetailsService userDetailsService,
-			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
-			JobFactoryRegistry jobFactoryRegistry)
+			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
+			ExecutorService executorService, JobFactoryRegistry jobFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
@@ -102,8 +104,18 @@ public class JobExecutor
 	{
 		String entityTypeId = jobExecution.getEntityType().getId();
 		dataService.add(entityTypeId, jobExecution);
-		JobFactory jobFactory = jobFactoryRegistry.getJobFactory(jobExecution);
-		return jobFactory.createJob(jobExecution);
+		try
+		{
+			JobFactory jobFactory = jobFactoryRegistry.getJobFactory(jobExecution);
+			return jobFactory.createJob(jobExecution);
+		}
+		catch (RuntimeException ex)
+		{
+			LOG.error("Error creating job for JobExecution.", ex);
+			jobExecution.setStatus(JobExecution.Status.FAILED);
+			dataService.update(entityTypeId, jobExecution);
+			throw ex;
+		}
 	}
 
 	private void runJob(JobExecution jobExecution, Job<?> molgenisJob)

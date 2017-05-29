@@ -67,13 +67,6 @@ public class ProgressImpl implements Progress
 	}
 
 	@Override
-	public void appendLog(String log)
-	{
-		jobExecution.appendLog(log);
-		update();
-	}
-
-	@Override
 	public void success()
 	{
 		jobExecution.setEndDate(Instant.now());

@@ -1,6 +1,7 @@
-package org.molgenis.file.ingest.bucket;
+package org.molgenis.amazon.bucket;
 
 import com.amazonaws.services.s3.AmazonS3;
+import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
@@ -12,7 +13,6 @@ import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.bucket.client.AmazonBucketClient;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.springframework.stereotype.Component;
@@ -42,14 +42,14 @@ public class AmazonBucketIngester
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
-			String profile, String region, boolean isExpression, Progress progress)
+			String accessKey, String secretKey, String region, boolean isExpression, Progress progress)
 	{
 		FileMeta fileMeta;
 		try
 		{
 			progress.setProgressMax(3);
-			progress.progress(0, "Connection to Amazon Bucket with profile '" + profile + "'");
-			AmazonS3 client = amazonBucketClient.getClient(profile, region);
+			progress.progress(0, "Connection to Amazon Bucket with accessKey '" + accessKey + "'");
+			AmazonS3 client = amazonBucketClient.getClient(accessKey, secretKey, region);
 			progress.progress(1, "downloading...");
 			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
 
