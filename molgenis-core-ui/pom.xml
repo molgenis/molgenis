@@ -9,6 +9,8 @@
     <artifactId>molgenis-core-ui</artifactId>
     <packaging>jar</packaging>
 
+    <name>core-ui</name>
+
     <build>
         <plugins>
             <!-- Bundle the javascript specified in webpack.config.js to target/generated-resources/js/dist -->
@@ -169,12 +171,17 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <artifactId>molgenis-data-index</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-import</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -197,15 +204,21 @@
             <artifactId>molgenis-jobs</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-cache</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- third party dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -268,12 +281,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-runtime</artifactId>
-            <version>${apache.rdf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-api</artifactId>
+            <artifactId>rdf4j-rio-turtle</artifactId>
             <version>${apache.rdf4j.version}</version>
         </dependency>
         <dependency>
@@ -294,9 +302,23 @@
             <scope>provided</scope>
         </dependency>
         <!-- test dependencies -->
+
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.2</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-import</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>

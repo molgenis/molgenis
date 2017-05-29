@@ -7,6 +7,9 @@
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-gavin</artifactId>
+
+    <name>gavin</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.entity.impl.framework;
 
-import org.elasticsearch.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;

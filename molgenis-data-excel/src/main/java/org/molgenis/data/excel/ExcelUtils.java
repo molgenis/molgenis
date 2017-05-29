@@ -120,10 +120,8 @@ public class ExcelUtils
 
 	public static void renameSheet(String newSheetname, File file, int index)
 	{
-		try
+		try (FileInputStream fis = new FileInputStream(file); Workbook workbook = WorkbookFactory.create(fis))
 		{
-			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
-
 			workbook.setSheetName(index, newSheetname);
 			workbook.write(new FileOutputStream(file));
 
@@ -132,13 +130,13 @@ public class ExcelUtils
 		{
 			throw new MolgenisDataException(e);
 		}
+
 	}
 
 	public static int getNumberOfSheets(File file)
 	{
-		try
+		try (FileInputStream fis = new FileInputStream(file); Workbook workbook = WorkbookFactory.create(fis))
 		{
-			Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
 			return workbook.getNumberOfSheets();
 		}
 		catch (Exception e)

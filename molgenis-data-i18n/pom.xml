@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-i18n</artifactId>
 
+    <name>data-i18n</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

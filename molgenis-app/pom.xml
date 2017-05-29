@@ -9,6 +9,8 @@
     <artifactId>molgenis-app</artifactId>
     <packaging>war</packaging>
 
+    <name>app</name>
+
     <build>
         <resources>
             <resource>
@@ -153,7 +155,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mapper</artifactId>
+            <artifactId>molgenis-semantic-mapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -189,7 +191,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-semanticsearch</artifactId>
+            <artifactId>molgenis-semantic-search</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -225,11 +227,6 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-gavin</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-genetics-diag</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

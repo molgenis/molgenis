@@ -10,15 +10,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>molgenis-bootstrap</artifactId>
+
+    <name>bootstrap</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-annotators</artifactId>
+            <artifactId>molgenis-data-migrate</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <artifactId>molgenis-data-annotators</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -28,12 +31,27 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-file-ingester</artifactId>
+            <artifactId>molgenis-data-index</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-postgresql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-jobs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-core-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-security</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

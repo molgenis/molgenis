@@ -10,10 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>molgenis-fair</artifactId>
+
+    <name>fair</name>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-runtime</artifactId>
+            <artifactId>rdf4j-rio-turtle</artifactId>
             <version>${apache.rdf4j.version}</version>
         </dependency>
         <dependency>
@@ -28,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-semanticsearch</artifactId>
+            <artifactId>molgenis-semantic-search</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

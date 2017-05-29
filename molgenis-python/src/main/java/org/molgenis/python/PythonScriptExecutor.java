@@ -8,6 +8,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Executes a Python script with the Python version installed on server executable in a new process.
@@ -33,7 +38,7 @@ public class PythonScriptExecutor
 	/**
 	 * Execute a python script and wait for it to finish
 	 */
-	public void executeScript(File script, PythonOutputHandler outputHandler)
+	public void executeScript(String pythonScript, PythonOutputHandler outputHandler)
 	{
 		// Check if Python is installed
 		File file = new File(pythonScriptExecutable);
@@ -49,17 +54,16 @@ public class PythonScriptExecutor
 					"Can not execute [" + pythonScriptExecutable + "]. Does it have executable permissions?");
 		}
 
-		// Check if the Pyhton script exists
-		if (!script.exists())
-		{
-			throw new MolgenisPythonException("File [" + script + "] does not exist");
-		}
-
+		Path tempFile = null;
 		try
 		{
+			tempFile = Files.createTempFile(null, ".py");
+			Files.write(tempFile, pythonScript.getBytes(UTF_8), StandardOpenOption.WRITE);
+			String tempScriptFilePath = tempFile.toAbsolutePath().toString();
+
 			// Create r process
-			LOG.info("Running python script [" + script.getAbsolutePath() + "]");
-			Process process = Runtime.getRuntime().exec(pythonScriptExecutable + " " + script.getAbsolutePath());
+			LOG.info("Running python script [" + tempScriptFilePath + "]");
+			Process process = Runtime.getRuntime().exec(pythonScriptExecutable + " " + tempScriptFilePath);
 
 			// Capture the error output
 			final StringBuilder sb = new StringBuilder();
@@ -87,10 +91,10 @@ public class PythonScriptExecutor
 			// Check for errors
 			if (process.exitValue() > 0)
 			{
-				throw new MolgenisPythonException("Error running [" + script.getAbsolutePath() + "]." + sb.toString());
+				throw new MolgenisPythonException("Error running [" + tempScriptFilePath + "]." + sb.toString());
 			}
 
-			LOG.info("Script [" + script.getAbsolutePath() + "] done");
+			LOG.info("Script [" + tempScriptFilePath + "] done");
 		}
 		catch (IOException e)
 		{
@@ -99,6 +103,20 @@ public class PythonScriptExecutor
 		catch (InterruptedException e)
 		{
 			throw new MolgenisPythonException("Exception waiting for PythonScipt to finish", e);
+		}
+		finally
+		{
+			if (tempFile != null)
+			{
+				try
+				{
+					Files.delete(tempFile);
+				}
+				catch (IOException e)
+				{
+					LOG.error("", e);
+				}
+			}
 		}
 	}
 }

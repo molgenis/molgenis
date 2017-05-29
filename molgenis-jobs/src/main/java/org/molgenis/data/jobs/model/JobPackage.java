@@ -31,4 +31,24 @@ public class JobPackage extends SystemPackage
 		setDescription("Package containing al job related entities");
 		setParent(rootSystemPackage);
 	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+
+		JobPackage that = (JobPackage) o;
+
+		return rootSystemPackage.equals(that.rootSystemPackage);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int result = super.hashCode();
+		result = 31 * result + rootSystemPackage.hashCode();
+		return result;
+	}
 }

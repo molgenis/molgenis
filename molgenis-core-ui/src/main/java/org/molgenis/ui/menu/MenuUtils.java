@@ -1,6 +1,6 @@
 package org.molgenis.ui.menu;
 
-import org.elasticsearch.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.Stack;

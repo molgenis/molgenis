@@ -11,7 +11,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -47,7 +46,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors)
 			throws MolgenisInvalidFormatException, IOException
 	{
-		super(GenericImporterExtensions.getCSV(), cellProcessors);
+		super(CsvFileExtensions.getCSV(), cellProcessors);
 		this.file = file;
 
 		loadEntityNames();
@@ -82,7 +81,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		entityTypeIds = Lists.newArrayList();
 		entityTypeIdsLowerCase = Lists.newArrayList();
 
-		if (extension.equalsIgnoreCase(GenericImporterExtensions.ZIP.toString()))
+		if (extension.equalsIgnoreCase("zip"))
 		{
 			ZipFile zipFile = null;
 			try

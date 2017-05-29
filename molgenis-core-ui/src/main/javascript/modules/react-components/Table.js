@@ -583,8 +583,8 @@ var TableBody = React.createClass({
                             var expandedSelectedAttrs = $.extend({'*': null}, selectedAttrs)
                             this._createColsRec(item, entity, attr.attributes, expandedSelectedAttrs, Cols, path, expanded, behindMref);
                         } else {
-                            behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF' || attr.fieldType === 'ONE_TO_MANY';
                             if (this._isExpandedAttr(attr, selectedAttrs)) {
+                                behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF' || attr.fieldType === 'ONE_TO_MANY';
                                 Cols.push(td({className: 'expanded-left', key: attrPath.join()}));
                                 this._createColsRec(this._getAttributeValues(item, attr.name), attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true, behindMref);
                             } else {

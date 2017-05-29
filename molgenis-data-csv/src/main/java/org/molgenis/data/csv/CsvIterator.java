@@ -10,7 +10,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.util.CloseableIterator;
 import org.springframework.util.StringUtils;
 
@@ -49,9 +48,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 		try
 		{
-
-			if (StringUtils.getFilenameExtension(file.getName())
-					.equalsIgnoreCase(GenericImporterExtensions.ZIP.toString()))
+			if (StringUtils.getFilenameExtension(file.getName()).equalsIgnoreCase("zip"))
 			{
 				zipFile = new ZipFile(file.getAbsolutePath());
 				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); )
@@ -177,13 +174,13 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 		if (null == separator)
 		{
-			if (fileName.toLowerCase().endsWith('.' + GenericImporterExtensions.CSV.toString()) || fileName
-					.toLowerCase().endsWith('.' + GenericImporterExtensions.TXT.toString()))
+			if (fileName.toLowerCase().endsWith('.' + CsvFileExtensions.CSV.toString()) || fileName.toLowerCase()
+					.endsWith('.' + CsvFileExtensions.TXT.toString()))
 			{
 				return new CSVReader(reader);
 			}
 
-			if (fileName.toLowerCase().endsWith('.' + GenericImporterExtensions.TSV.toString()))
+			if (fileName.toLowerCase().endsWith('.' + CsvFileExtensions.TSV.toString()))
 			{
 				return new CSVReader(reader, '\t');
 			}

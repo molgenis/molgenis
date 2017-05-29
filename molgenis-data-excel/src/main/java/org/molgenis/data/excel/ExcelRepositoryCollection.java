@@ -16,7 +16,6 @@ import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
@@ -53,7 +52,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
 			throws IOException, MolgenisInvalidFormatException
 	{
-		super(GenericImporterExtensions.getExcel(), cellProcessors);
+		super(ExcelFileExtensions.getExcel(), cellProcessors);
 		this.name = name;
 		try
 		{

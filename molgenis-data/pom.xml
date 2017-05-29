@@ -9,6 +9,8 @@
     <artifactId>molgenis-data</artifactId>
     <packaging>jar</packaging>
 
+    <name>data</name>
+
     <build>
         <plugins>
             <plugin>

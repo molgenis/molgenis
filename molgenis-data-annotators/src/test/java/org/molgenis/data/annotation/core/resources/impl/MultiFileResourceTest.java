@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.core.resources.impl;
 
 import com.google.common.collect.ImmutableMap;
-import org.elasticsearch.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;

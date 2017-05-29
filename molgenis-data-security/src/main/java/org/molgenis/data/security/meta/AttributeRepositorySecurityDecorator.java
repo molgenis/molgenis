@@ -21,8 +21,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 /**
  * Decorator for the attribute repository:
@@ -53,7 +52,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public long count()
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.count();
 		}
@@ -67,7 +66,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public long count(Query<Attribute> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.count(q);
 		}
@@ -84,7 +83,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Stream<Attribute> findAll(Query<Attribute> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.findAll(q);
 		}
@@ -110,7 +109,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Iterator<Attribute> iterator()
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.iterator();
 		}
@@ -124,7 +123,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Attribute>> consumer, int batchSize)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 		}
@@ -138,7 +137,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Attribute findOne(Query<Attribute> q)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.findOne(q);
 		}
@@ -152,7 +151,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Attribute findOneById(Object id)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.findOneById(id);
 		}
@@ -165,7 +164,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Attribute findOneById(Object id, Fetch fetch)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.findOneById(id, fetch);
 		}
@@ -178,7 +177,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.findAll(ids);
 		}
@@ -191,7 +190,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.findAll(ids, fetch);
 		}
@@ -204,7 +203,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
+		if (currentUserIsSuOrSystem())
 		{
 			return decoratedRepo.aggregate(aggregateQuery);
 		}

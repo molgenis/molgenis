@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-index</artifactId>
 
+    <name>data-index</name>
+
     <build>
         <plugins>
             <plugin>
@@ -28,6 +30,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-jobs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -23,8 +23,6 @@
             <plugin id="scripts" name="Scripts" url="scripts" />
             <plugin id="jobs" name="Jobs" url="jobs" />
             <plugin id="gavin-app" name="Gavin" url="gavin-app"/>
-            <plugin id="genenetwork" name="Gene network" url="genenetwork"/>
-            <plugin id="genetics-diag-app" name="Genetics diagnostics" url="genetics-diag-app"/>
             <plugin id="swagger" name="API documentation" url="swagger"/>
 	    </menu>
         <menu label="Admin" name="admin">

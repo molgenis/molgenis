@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-data-elasticsearch</artifactId>
 
+    <name>data-elasticsearch</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>

@@ -9,6 +9,8 @@
     <artifactId>molgenis-security-core</artifactId>
     <packaging>jar</packaging>
 
+    <name>security-core</name>
+
     <dependencies>
         <!-- third party dependencies -->
         <dependency>

@@ -7,6 +7,9 @@
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-data-rest</artifactId>
+
+    <name>data-rest</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -25,22 +28,12 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-csv</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-file</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-js</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- third party dependencies -->
@@ -97,6 +90,12 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>3.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
         <dependency>

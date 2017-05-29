@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 @ContextConfiguration(classes = { JobExecutorTest.Config.class, JobExecutor.class, JobTestConfig.class })
@@ -167,6 +168,28 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 		jobCaptor.getValue().run();
 		verify(job).call(any(Progress.class));
+	}
+
+	@Test
+	public void submitJobExecutionJobFactoryThrowsException() throws Exception
+	{
+		when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
+		when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
+		when(jobExecution.getUser()).thenReturn("fjant");
+
+		when(jobFactory.createJob(jobExecution)).thenThrow(new NullPointerException());
+
+		try
+		{
+			jobExecutor.submit(jobExecution);
+		}
+		catch (NullPointerException expected)
+		{
+		}
+
+		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
+		verify(jobExecution).setStatus(FAILED);
+		verify(dataService).update("sys_FileIngestJobExecution", jobExecution);
 	}
 
 	public static class TestJobExecution extends JobExecution
