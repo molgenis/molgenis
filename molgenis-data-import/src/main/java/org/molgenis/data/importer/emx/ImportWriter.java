@@ -9,6 +9,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.MetaDataChanges;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
