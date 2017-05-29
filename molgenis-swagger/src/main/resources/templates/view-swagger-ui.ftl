@@ -42,6 +42,7 @@
             }
             window.swaggerUi = new SwaggerUi({
                 url: url,
+                validatorUrl: null,
                 authorizations: authorizations,
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
