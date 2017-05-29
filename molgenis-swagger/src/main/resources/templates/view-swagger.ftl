@@ -32,6 +32,7 @@ paths:
         - name: name
           type: string
           in: path
+          required: true
           description: The name of the script to start
       responses:
         302:
@@ -46,6 +47,7 @@ paths:
           type: string
           in: path
           description: The name of the script to start
+          required: true
       responses:
         302:
           description: URL of a page showing the ScriptJobExecution
@@ -60,6 +62,7 @@ paths:
           type: string
           in: path
           description: The name of the Script to run
+          required: true
       responses:
         302:
           description: If the result has an outputFile, will redirect to a URL where you can download the result file.
@@ -77,6 +80,7 @@ paths:
           type: string
           in: path
           description: The name of the Script to run
+          required: true
       responses:
         302:
           description: If the result has an outputFile, will redirect to a URL where you can download the result file.
@@ -92,6 +96,11 @@ paths:
       parameters:
         - name: scheduledJobId
           in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: ok
   /api/v1/login:
     post:
       tags:
@@ -129,6 +138,9 @@ paths:
       tags:
         - V2
       summary: Get all localization tokens for the user's current language
+      responses:
+        200:
+          description: JSON object with token as key, translation as value
   /api/v2/i18n/{namespace}/{language}:
     get:
       produces:
@@ -183,12 +195,15 @@ paths:
           description: the localization namespace
           required: true
         - name: _t
-          in: form
+          in: formData
+          description: time of submission
           type: string
+          required: false
         - name: placeholder_key
-          in: form
+          in: formData
           description: one or more keys to add to this namespace
           type: string
+          required: false
       responses:
         201:
           description: Keys were created
