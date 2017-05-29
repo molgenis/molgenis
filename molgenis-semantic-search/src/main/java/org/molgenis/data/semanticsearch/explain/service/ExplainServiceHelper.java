@@ -2,9 +2,9 @@ package org.molgenis.data.semanticsearch.explain.service;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 

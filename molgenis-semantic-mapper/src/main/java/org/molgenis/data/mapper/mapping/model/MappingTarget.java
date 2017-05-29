@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.mapping.model;
 
-import org.elasticsearch.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 

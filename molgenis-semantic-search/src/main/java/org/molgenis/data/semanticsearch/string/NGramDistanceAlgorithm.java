@@ -1,8 +1,8 @@
 package org.molgenis.data.semanticsearch.string;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Sets;
 
 import java.util.HashMap;
 import java.util.List;

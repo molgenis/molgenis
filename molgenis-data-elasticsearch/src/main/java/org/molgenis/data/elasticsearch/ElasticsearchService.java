@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequest;
@@ -7,8 +9,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.collect.FluentIterable;
-import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.data.*;

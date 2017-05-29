@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.mapping.model;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
