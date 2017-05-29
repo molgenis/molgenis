@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch.response;
 
+import com.google.common.base.Joiner;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
-import org.elasticsearch.common.base.Joiner;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregations;
