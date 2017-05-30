@@ -11,16 +11,41 @@
 
     <artifactId>molgenis-util</artifactId>
 
+    <name>util</name>
+
     <dependencies>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
+            <!-- Remove exclusions when https://issues.apache.org/jira/browse/MNG-5600 has been resolved -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>findbugs-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>1.5.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>

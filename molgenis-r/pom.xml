@@ -8,17 +8,9 @@
     </parent>
     <artifactId>molgenis-r</artifactId>
 
+    <name>r</name>
+
     <dependencies>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-file</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security</artifactId>
@@ -29,6 +21,13 @@
             <artifactId>molgenis-scripts-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>

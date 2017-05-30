@@ -7,7 +7,6 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,7 @@ public class EmxImportService implements ImportService
 	public boolean canImport(File file, RepositoryCollection source)
 	{
 		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
-		if (GenericImporterExtensions.getEMX().contains(fileNameExtension.toLowerCase()))
+		if (getSupportedFileExtensions().contains(fileNameExtension.toLowerCase()))
 		{
 			for (String entityTypeId : source.getEntityTypeIds())
 			{
@@ -116,7 +115,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public Set<String> getSupportedFileExtensions()
 	{
-		return GenericImporterExtensions.getEMX();
+		return EmxFileExtensions.getEmx();
 	}
 
 	@Override

@@ -1,11 +1,10 @@
 package org.molgenis.js.magma;
 
-import com.google.api.client.util.Maps;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.file.model.FileMeta;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.script.ScriptException;
 import org.slf4j.Logger;
@@ -95,6 +94,7 @@ public class JsMagmaScriptEvaluator
 				value = entity.getBoolean(attrName);
 				break;
 			case CATEGORICAL:
+			case FILE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
 				value = xrefEntity != null ? toScriptEngineValue(xrefEntity,
@@ -133,11 +133,6 @@ public class JsMagmaScriptEvaluator
 			case STRING:
 			case TEXT:
 				value = entity.getString(attrName);
-				break;
-			case FILE:
-				FileMeta fileEntity = entity.getEntity(attrName, FileMeta.class);
-				value = fileEntity != null ? toScriptEngineValue(fileEntity,
-						fileEntity.getEntityType().getIdAttribute()) : null;
 				break;
 			case INT:
 				value = entity.getInt(attrName);

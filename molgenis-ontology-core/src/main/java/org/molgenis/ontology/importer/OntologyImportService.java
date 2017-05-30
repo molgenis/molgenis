@@ -7,9 +7,9 @@ import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.importer.repository.OntologyFileExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,8 +40,7 @@ public class OntologyImportService implements ImportService
 
 	@Override
 	@Transactional
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
-			String packageId)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageId)
 	{
 		if (databaseAction != DatabaseAction.ADD)
 		{
@@ -101,7 +100,7 @@ public class OntologyImportService implements ImportService
 	@Override
 	public boolean canImport(File file, RepositoryCollection source)
 	{
-		for (String extension : GenericImporterExtensions.getOntology())
+		for (String extension : OntologyFileExtensions.getOntology())
 		{
 			if (file.getName().toLowerCase().endsWith(extension))
 			{
@@ -133,7 +132,7 @@ public class OntologyImportService implements ImportService
 	@Override
 	public Set<String> getSupportedFileExtensions()
 	{
-		return GenericImporterExtensions.getOntology();
+		return OntologyFileExtensions.getOntology();
 	}
 
 	@Override

@@ -6,16 +6,9 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -39,20 +32,6 @@ public class DataServiceImplTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Collection<? extends GrantedAuthority> authorities = singletonList(
-				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
-
-		Authentication authentication = mock(Authentication.class);
-
-		doReturn(authorities).when(authentication).getAuthorities();
-
-		when(authentication.isAuthenticated()).thenReturn(true);
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn(SecurityUtils.AUTHORITY_SU)
-				.getMock();
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
 		dataService = new DataServiceImpl();
 		repo1 = when(mock(Repository.class).getName()).thenReturn("Entity1").getMock();
 

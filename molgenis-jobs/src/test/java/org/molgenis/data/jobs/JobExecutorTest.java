@@ -7,13 +7,11 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.GsonConfig;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -226,7 +224,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import({ UserTestConfig.class, JobTestConfig.class, GsonConfig.class })
+	@Import({ JobTestConfig.class })
 	public static class Config
 	{
 		public Config()

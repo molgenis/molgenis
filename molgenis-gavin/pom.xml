@@ -7,6 +7,9 @@
         <version>4.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-gavin</artifactId>
+
+    <name>gavin</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -15,14 +18,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-file</artifactId>
+            <artifactId>molgenis-data-file</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -39,6 +35,40 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-jobs</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <!-- Remove exclusions when https://issues.apache.org/jira/browse/MNG-5600 has been resolved -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -58,6 +88,18 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <!-- Remove exclusions when https://issues.apache.org/jira/browse/MNG-5600 has been resolved -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
     </dependencies>

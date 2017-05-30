@@ -74,13 +74,14 @@ public class ScriptRunnerController
 
 	/**
 	 * Runs a Script, waits for it to finish and returns the result.
-	 *
+	 * <p>
 	 * If the result has an outputFile, will redirect to a URL where you can download the result file.
 	 * Otherwise, if the result has output, will write the script output to the response and serve it as /text/plain.
+	 *
 	 * @param scriptName name of the Script to run
 	 * @param parameters parameter values for the script
-	 * @param response {@link HttpServletResponse} to return the result
-	 * @throws IOException if something goes wrong when redirecting or writing the result
+	 * @param response   {@link HttpServletResponse} to return the result
+	 * @throws IOException     if something goes wrong when redirecting or writing the result
 	 * @throws ScriptException if the script name is unknown or one of the script parameters is missing
 	 */
 	@RequestMapping("/scripts/{name}/run")
@@ -101,6 +102,12 @@ public class ScriptRunnerController
 			pw.write(result.getOutput());
 			pw.flush();
 		}
+	}
+
+	@ExceptionHandler(UnknownScriptException.class)
+	public void handleUnknownScriptException(UnknownScriptException e, HttpServletResponse response) throws IOException
+	{
+		response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
 	}
 
 	@ExceptionHandler(ScriptException.class)

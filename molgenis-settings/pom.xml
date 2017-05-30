@@ -11,10 +11,17 @@
 
     <artifactId>molgenis-settings</artifactId>
 
+    <name>settings</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

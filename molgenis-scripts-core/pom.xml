@@ -8,6 +8,8 @@
     </parent>
     <artifactId>molgenis-scripts-core</artifactId>
 
+    <name>scripts-core</name>
+
     <build>
         <plugins>
             <plugin>
@@ -27,30 +29,30 @@
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core</artifactId>
+            <artifactId>molgenis-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- third party dependencies -->
         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-file</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+        </dependency>
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-security-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-test</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

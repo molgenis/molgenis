@@ -1,7 +1,7 @@
 package org.molgenis.ontology;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.support.GenericImporterExtensions;
+import org.molgenis.ontology.importer.repository.OntologyFileExtensions;
 import org.molgenis.ontology.importer.repository.OntologyRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct;
 @Configuration
 public class OntologyDataConfig
 {
-
 	@Autowired
 	private FileRepositoryCollectionFactory fileRepositorySourceFactory;
 
@@ -23,7 +22,6 @@ public class OntologyDataConfig
 	public void registerOntologyRepositorySource()
 	{
 		fileRepositorySourceFactory.addFileRepositoryCollectionClass(OntologyRepositoryCollection.class,
-				GenericImporterExtensions.getOntology());
+				OntologyFileExtensions.getOntology());
 	}
-
 }

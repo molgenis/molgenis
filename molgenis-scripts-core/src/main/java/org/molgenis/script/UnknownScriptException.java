@@ -1,9 +1,5 @@
 package org.molgenis.script;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
 public class UnknownScriptException extends ScriptException
 {
 	private static final long serialVersionUID = 4808852834196162476L;

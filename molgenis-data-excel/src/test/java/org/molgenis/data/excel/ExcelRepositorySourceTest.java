@@ -1,7 +1,6 @@
 package org.molgenis.data.excel;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -41,9 +40,9 @@ public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 	}
 
 	@AfterMethod
-	public void afterMethod()
+	public void afterMethod() throws IOException
 	{
-		IOUtils.closeQuietly(is);
+		is.close();
 	}
 
 	@Test

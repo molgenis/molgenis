@@ -123,7 +123,7 @@ public class ExcelUtils
 		try (FileInputStream fis = new FileInputStream(file); Workbook workbook = WorkbookFactory.create(fis))
 		{
 			workbook.setSheetName(index, newSheetname);
-				workbook.write(new FileOutputStream(file));
+			workbook.write(new FileOutputStream(file));
 
 		}
 		catch (Exception e)

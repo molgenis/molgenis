@@ -1,9 +1,9 @@
 package org.molgenis.data.rest.v2;
 
+import com.google.common.base.Strings;
 import io.restassured.RestAssured;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.elasticsearch.common.Strings;
 import org.molgenis.data.rest.RestControllerIT;
 import org.molgenis.data.rest.convert.RestTestUtils;
 import org.slf4j.Logger;
@@ -42,15 +42,15 @@ public class RestControllerV2IT
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
-		RestAssured.baseURI = Strings.isEmpty(envHost) ? DEFAULT_HOST : envHost;
+		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
 		LOG.info("baseURI: " + baseURI);
 
 		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-		String adminUserName = Strings.isEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
+		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = RestTestUtils.login(adminUserName, adminPassword);

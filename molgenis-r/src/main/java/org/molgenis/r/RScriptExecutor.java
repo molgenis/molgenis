@@ -8,7 +8,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -43,7 +47,7 @@ public class RScriptExecutor
 	/**
 	 * Execute a r script and wait for it to finish
 	 */
-	public void executeScript(File script, ROutputHandler outputHandler)
+	public void executeScript(String rScript, ROutputHandler outputHandler)
 	{
 		// Check if r is installed
 		File file = new File(rScriptExecutable);
@@ -59,17 +63,16 @@ public class RScriptExecutor
 					"Can not execute [" + rScriptExecutable + "]. Does it have executable permissions?");
 		}
 
-		// Check if the r script exists
-		if (!script.exists())
-		{
-			throw new MolgenisRException("File [" + script + "] does not exist");
-		}
-
+		Path tempFile = null;
 		try
 		{
+			tempFile = Files.createTempFile(null, ".R");
+			Files.write(tempFile, rScript.getBytes(UTF_8), StandardOpenOption.WRITE);
+			String tempScriptFilePath = tempFile.toAbsolutePath().toString();
+
 			// Create r process
-			LOG.info("Running r script [" + script.getAbsolutePath() + "]");
-			ProcessBuilder processBuilder = new ProcessBuilder(rScriptExecutable, script.getAbsolutePath());
+			LOG.info("Running r script [" + tempScriptFilePath + "]");
+			ProcessBuilder processBuilder = new ProcessBuilder(rScriptExecutable, tempScriptFilePath);
 			processBuilder.environment().put("R_LIBS", rLibs);
 			Process process = processBuilder.start();
 
@@ -98,10 +101,10 @@ public class RScriptExecutor
 			// Check for errors
 			if (process.exitValue() > 0)
 			{
-				throw new MolgenisRException("Error running [" + script.getAbsolutePath() + "]." + sb.toString());
+				throw new MolgenisRException("Error running [" + tempScriptFilePath + "]." + sb.toString());
 			}
 
-			LOG.info("Script [" + script.getAbsolutePath() + "] done");
+			LOG.info("Script [" + tempScriptFilePath + "] done");
 		}
 		catch (IOException e)
 		{
@@ -110,6 +113,20 @@ public class RScriptExecutor
 		catch (InterruptedException e)
 		{
 			throw new MolgenisRException("Exception waiting for RScipt to finish", e);
+		}
+		finally
+		{
+			if (tempFile != null)
+			{
+				try
+				{
+					Files.delete(tempFile);
+				}
+				catch (IOException e)
+				{
+					LOG.error("", e);
+				}
+			}
 		}
 	}
 }

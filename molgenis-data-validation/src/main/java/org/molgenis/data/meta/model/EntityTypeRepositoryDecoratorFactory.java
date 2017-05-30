@@ -5,6 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.meta.EntityTypeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -38,8 +39,9 @@ public class EntityTypeRepositoryDecoratorFactory
 	@Override
 	public Repository<EntityType> createDecoratedRepository(Repository<EntityType> repository)
 	{
-		repository = new EntityTypeRepositoryDecorator(repository, dataService, systemEntityTypeRegistry,
-				permissionService);
-		return new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
+		repository = new EntityTypeRepositoryDecorator(repository, dataService);
+		repository = new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
+		return new EntityTypeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService,
+				dataService);
 	}
 }

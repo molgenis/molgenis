@@ -1,9 +1,9 @@
 .scheduled-jobs-table {
-	margin: 20px;
+    margin: 20px;
 }
 
 legend button {
-	margin-left: 10px;
+    margin-left: 10px;
 }
 
 /*
@@ -11,5 +11,5 @@ legend button {
 	expanded. See #6164.
  */
 th.expanded-left button.btn-xs.btn-default {
-	display: none;
+    display: none;
 }

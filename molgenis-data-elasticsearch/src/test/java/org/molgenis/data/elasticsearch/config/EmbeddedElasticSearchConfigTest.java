@@ -6,16 +6,15 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.converter.SourceToEntityConverter;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.security.user.UserService;
+import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,9 +71,9 @@ public class EmbeddedElasticSearchConfigTest
 		}
 
 		@Bean
-		public MolgenisTransactionManager molgenisTransactionManager()
+		public TransactionManager molgenisTransactionManager()
 		{
-			return mock(MolgenisTransactionManager.class);
+			return mock(TransactionManager.class);
 		}
 
 		@Bean
@@ -87,12 +86,6 @@ public class EmbeddedElasticSearchConfigTest
 		public MailSender mailSender()
 		{
 			return mock(MailSender.class);
-		}
-
-		@Bean
-		public UserService molgenisUserService()
-		{
-			return mock(UserService.class);
 		}
 
 		@Bean

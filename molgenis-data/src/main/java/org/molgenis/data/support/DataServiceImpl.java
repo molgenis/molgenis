@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 /**
  * Implementation of the DataService interface
@@ -150,7 +149,6 @@ public class DataServiceImpl implements DataService
 	public void deleteAll(String entityTypeId)
 	{
 		getRepository(entityTypeId).deleteAll();
-		LOG.info("All entities of repository [{}] deleted by user [{}]", entityTypeId, getCurrentUsername());
 	}
 
 	@Override

@@ -23,10 +23,10 @@
             <plugin id="scripts" name="Scripts" url="scripts" />
             <plugin id="jobs" name="Jobs" url="jobs" />
             <plugin id="gavin-app" name="Gavin" url="gavin-app"/>
-			<plugin id="swagger" name="API documentation" url="swagger"/>
+            <plugin id="swagger" name="API documentation" url="swagger"/>
 	    </menu>
         <menu label="Admin" name="admin">
-			<plugin id="scheduledjobs" name="Scheduled Jobs" url="scheduledjobs"/>
+            <plugin id="scheduledjobs" name="Scheduled Jobs" url="scheduledjobs"/>
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
         	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>

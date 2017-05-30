@@ -10,6 +10,8 @@
 
     <artifactId>molgenis-catalogue</artifactId>
 
+    <name>catalogue</name>
+
     <build>
         <plugins>
             <!-- minify css/js -->
@@ -23,11 +25,6 @@
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -36,6 +33,12 @@
             <artifactId>molgenis-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- third party dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>

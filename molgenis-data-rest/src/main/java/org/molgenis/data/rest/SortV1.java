@@ -15,7 +15,7 @@
  */
 package org.molgenis.data.rest;
 
-import org.elasticsearch.common.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;

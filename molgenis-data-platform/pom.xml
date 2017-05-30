@@ -11,6 +11,8 @@
 
     <artifactId>molgenis-data-platform</artifactId>
 
+    <name>data-platform</name>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -24,12 +26,17 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <artifactId>molgenis-data-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-postgresql</artifactId>
+            <artifactId>molgenis-data-index</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-security</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -39,24 +46,8 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-i18n</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-settings</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-test</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

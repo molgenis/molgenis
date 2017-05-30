@@ -62,8 +62,8 @@ public class JsonValidator
 	 *
 	 * @param json       the JSON string to check
 	 * @param schemaJson the JSON string for the schema
-	 * @throws MolgenisDataException if the JSON schema cannot be loaded
-	 * @throws MolgenisValidationException    if the JSON string doesn't conform to the schema
+	 * @throws MolgenisDataException       if the JSON schema cannot be loaded
+	 * @throws MolgenisValidationException if the JSON string doesn't conform to the schema
 	 */
 	public void validate(String json, String schemaJson) throws MolgenisDataException
 	{

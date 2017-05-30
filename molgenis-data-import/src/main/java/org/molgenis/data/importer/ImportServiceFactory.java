@@ -12,6 +12,9 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class ImportServiceFactory
@@ -72,5 +75,11 @@ public class ImportServiceFactory
 		if (importService == null) throw new MolgenisDataException("Can not import file. No suitable importer found");
 
 		return importService;
+	}
+
+	public Set<String> getSupportedFileExtensions()
+	{
+		return importServices.stream().flatMap(importService -> importService.getSupportedFileExtensions().stream())
+				.collect(toSet());
 	}
 }

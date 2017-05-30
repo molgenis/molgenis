@@ -20,11 +20,11 @@ class JobExecutionTemplate
 	/**
 	 * Executes a job in the calling thread within a transaction.
 	 *
-	 * @param job            the {@link Job} to execute.
-	 * @param progress       {@link Progress} to report progress to
-	 * @param authentication {@link Authentication} to run the job with
+	 * @param job                   the {@link Job} to execute.
+	 * @param progress              {@link Progress} to report progress to
+	 * @param authentication        {@link Authentication} to run the job with
 	 * @param transactionOperations TransactionOperations to use for a transactional call
-	 * @param <T>            Job result type
+	 * @param <T>                   Job result type
 	 * @return the result of the job execution
 	 * @throws JobExecutionException if job execution throws an exception
 	 * @deprecated Create a service bean with a @Transactional annotation instead

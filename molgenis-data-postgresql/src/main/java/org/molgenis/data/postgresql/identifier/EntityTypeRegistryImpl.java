@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.postgresql.PostgreSqlNameGenerator;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
+import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 @Component
 public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener implements EntityTypeRegistry
@@ -26,11 +26,11 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	private final ConcurrentMap<String, Map<String, EntityTypeDescription>> transactionsEntityTypeDescriptionMap;
 
 	@Autowired
-	public EntityTypeRegistryImpl(MolgenisTransactionManager molgenisTransactionManager)
+	public EntityTypeRegistryImpl(TransactionManager transactionManager)
 	{
 		entityTypeDescriptionMap = new ConcurrentHashMap<>();
 		transactionsEntityTypeDescriptionMap = new ConcurrentHashMap<>();
-		molgenisTransactionManager.addTransactionListener(this);
+		transactionManager.addTransactionListener(this);
 	}
 
 	@Override

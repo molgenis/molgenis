@@ -11,8 +11,8 @@ import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +56,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	private EntityManager entityManager;
 
 	@Mock
-	private MolgenisTransactionManager molgenisTransactionManager;
+	private TransactionManager transactionManager;
 	@Mock
 	private Repository<Entity> repository;
 	@Mock
@@ -97,7 +97,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		when(repository.getEntityType()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getId());
 
-		l2Cache = new L2Cache(molgenisTransactionManager, entityHydration, transactionInformation);
+		l2Cache = new L2Cache(transactionManager, entityHydration, transactionInformation);
 	}
 
 	@Test

@@ -1,6 +1,6 @@
 package org.molgenis.annotation.test.cmd.conversion;
 
-import org.elasticsearch.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
