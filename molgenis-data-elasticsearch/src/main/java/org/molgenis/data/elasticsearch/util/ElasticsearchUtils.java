@@ -7,6 +7,7 @@ import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.byscroll.BulkByScrollResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -18,6 +19,8 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
@@ -223,19 +226,12 @@ public class ElasticsearchUtils
 	public boolean deleteAllDocumentsOfType(String type, String indexName)
 	{
 		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
-		// FIXME
-		//		if (1 == 1) throw new UnsupportedOperationException("FIXME");
-		//		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-		//				.setQuery(new TermQueryBuilder("_type", type)).get();
-		//
-		//		if (deleteByQueryResponse != null)
-		//		{
-		//			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
-		//			if (idbqr != null && idbqr.getFailedShards() > 0)
-		//			{
-		//				return false;
-		//			}
-		//		}
+		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+				.filter(QueryBuilders.termQuery("_type", type)).source(indexName).get();
+		if (!response.getBulkFailures().isEmpty())
+		{
+			return false;
+		}
 		LOG.debug("Deleted all Elasticsearch '{}' docs.", type);
 		return true;
 	}
