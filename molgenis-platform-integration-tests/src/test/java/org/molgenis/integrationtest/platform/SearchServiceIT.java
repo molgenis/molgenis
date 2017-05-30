@@ -1,9 +1,8 @@
 package org.molgenis.integrationtest.platform;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySelfXrefTestHarness;
-import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.index.IndexingMode;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.molgenis.data.*;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -14,13 +13,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.EntityTestHarness.ATTR_HTML;
+import static org.molgenis.data.EntityTestHarness.ATTR_ID;
+import static org.molgenis.data.index.IndexingMode.ADD;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class SearchServiceIT extends AbstractTestNGSpringContextTests
@@ -62,7 +69,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	public void testIndex() throws InterruptedException
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
-		searchService.index(entities.stream(), entityTypeDynamic, IndexingMode.ADD);
+		searchService.index(entities.stream(), entityTypeDynamic, ADD);
 		searchService.refreshIndex();
 
 		assertEquals(searchService.count(entityTypeDynamic), 2);
@@ -72,7 +79,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	public void testCount()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
-		searchService.index(entities.stream(), entityTypeDynamic, IndexingMode.ADD);
+		searchService.index(entities.stream(), entityTypeDynamic, ADD);
 		searchService.refreshIndex();
 
 		assertEquals(searchService.count(new QueryImpl<>(), entityTypeDynamic), 2);
@@ -83,7 +90,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	public void testDelete()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
-		searchService.index(entity, entityTypeDynamic, IndexingMode.ADD);
+		searchService.index(entity, entityTypeDynamic, ADD);
 		searchService.refreshIndex();
 
 		searchService.delete(entity, entityTypeDynamic);
@@ -518,774 +525,92 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	//		}
 	//	}
 	//
-	//	@DataProvider(name = "findQueryOperatorSearch")
-	//	private static Object[][] findQueryOperatorSearch()
-	//	{
-	//		return new Object[][] { { "body", asList(1) }, { "head", asList(1) }, { "unknownString", emptyList() } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
-	//	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(2).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.search(ATTR_HTML, searchStr).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindQueryLimit2_Offset2_sortOnInt()
-	//	{
-	//		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
-	//		List<Entity> testEntities = testHarness.createTestEntities(entityTypeDynamic, 10, testRefEntities)
-	//				.collect(toList());
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.add(refEntityTypeDynamic.getId(), testRefEntities.stream());
-	//			dataService.add(entityTypeDynamic.getId(), testEntities.stream());
-	//		});
-	//		waitForIndexToBeStable(refEntityTypeDynamic, indexService, LOG);
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.findAll(entityTypeDynamic.getId(),
-	//				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, Sort.Direction.DESC)));
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), 2);
-	//		assertTrue(EntityUtils.equals(foundAsList.get(0), testEntities.get(7)));
-	//		assertTrue(EntityUtils.equals(foundAsList.get(1), testEntities.get(6)));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindQueryTypedStatic()
-	//	{
-	//		List<Entity> entities = createStatic(5).collect(toList());
-	//		dataService.add(entityTypeStatic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-	//		Supplier<Stream<TestEntityStatic>> found = () -> dataService.findAll(entityTypeStatic.getId(),
-	//				new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntityStatic.class);
-	//		assertEquals(found.get().count(), 1);
-	//		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindOne()
-	//	{
-	//		Entity entity = createDynamic(1).findFirst().get();
-	//		dataService.add(entityTypeDynamic.getId(), Stream.of(entity));
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		assertNotNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue()));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindOneTypedStatic()
-	//	{
-	//		Entity entity = createStatic(1).findFirst().get();
-	//		dataService.add(entityTypeStatic.getId(), Stream.of(entity));
-	//		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-	//		TestEntityStatic testEntityStatic = dataService
-	//				.findOneById(entityTypeStatic.getId(), entity.getIdValue(), TestEntityStatic.class);
-	//		assertNotNull(testEntityStatic);
-	//		assertEquals(testEntityStatic.getId(), entity.getIdValue());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindOneFetch()
-	//	{
-	//		Entity entity = createDynamic(1).findFirst().get();
-	//		dataService.add(entityTypeDynamic.getId(), Stream.of(entity));
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		assertNotNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue(),
-	//				new Fetch().field(ATTR_ID)));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindOneFetchTypedStatic()
-	//	{
-	//		TestEntityStatic entity = new TestEntityStatic(entityTypeStatic);
-	//		entity.set(ATTR_ID, "1");
-	//		entity.set(ATTR_STRING, "string1");
-	//		entity.set(ATTR_BOOL, true);
-	//
-	//		dataService.add(entityTypeStatic.getId(), Stream.of(entity));
-	//		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-	//		TestEntityStatic testEntityStatic = dataService
-	//				.findOneById(entityTypeStatic.getId(), entity.getIdValue(), new Fetch().field(ATTR_ID),
-	//						TestEntityStatic.class);
-	//		assertNotNull(testEntityStatic);
-	//		assertEquals(testEntityStatic.getIdValue(), entity.getIdValue());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindOneQuery()
-	//	{
-	//		Entity entity = createDynamic(1).findFirst().get();
-	//		dataService.add(entityTypeDynamic.getId(), entity);
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		entity = dataService.findOne(entityTypeDynamic.getId(), new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
-	//		assertNotNull(entity);
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testFindOneQueryTypedStatic()
-	//	{
-	//		Entity entity = createStatic(1).findFirst().get();
-	//		dataService.add(entityTypeStatic.getId(), entity);
-	//		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-	//		TestEntityStatic testEntityStatic = dataService.findOne(entityTypeStatic.getId(),
-	//				new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()), TestEntityStatic.class);
-	//		assertNotNull(testEntityStatic);
-	//		assertEquals(testEntityStatic.getId(), entity.getIdValue());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testGetCapabilities()
-	//	{
-	//		Set<RepositoryCapability> capabilities = dataService.getCapabilities(entityTypeDynamic.getId());
-	//		assertNotNull(capabilities);
-	//		assertTrue(capabilities.containsAll(asList(MANAGABLE, QUERYABLE, WRITABLE, VALIDATE_REFERENCE_CONSTRAINT)));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testGetEntityType()
-	//	{
-	//		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
-	//		assertNotNull(entityType);
-	//		assertTrue(EntityUtils.equals(entityType, entityTypeDynamic));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testGetEntityNames()
-	//	{
-	//		Stream<String> names = dataService.getEntityTypeIds();
-	//		assertNotNull(names);
-	//		assertTrue(names.filter(entityTypeDynamic.getId()::equals).findFirst().isPresent());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testGetMeta()
-	//	{
-	//		assertNotNull(dataService.getMeta());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testGetKnownRepository()
-	//	{
-	//		Repository<Entity> repo = dataService.getRepository(entityTypeDynamic.getId());
-	//		assertNotNull(repo);
-	//		assertEquals(repo.getName(), entityTypeDynamic.getId());
-	//	}
-	//
-	//	@Test(singleThreaded = true, expectedExceptions = UnknownEntityException.class)
-	//	public void testGetUnknownRepository()
-	//	{
-	//		dataService.getRepository("bogus");
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testHasRepository()
-	//	{
-	//		assertTrue(dataService.hasRepository(entityTypeDynamic.getId()));
-	//		assertFalse(dataService.hasRepository("bogus"));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testIterator()
-	//	{
-	//		assertNotNull(dataService.iterator());
-	//		StreamSupport.stream(dataService.spliterator(), false).forEach(repo -> LOG.info(repo.getName()));
-	//		Repository repo = dataService.getRepository(entityTypeDynamic.getId());
-	//
-	//		/*
-	//			Repository equals is not implemented. The repository from dataService
-	//			and from the dataService.getRepository are not the same instances.
-	//		*/
-	//		assertTrue(StreamSupport.stream(dataService.spliterator(), false)
-	//				.anyMatch(e -> repo.getName().equals(e.getName())));
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testQuery()
-	//	{
-	//		assertNotNull(dataService.query(entityTypeDynamic.getId()));
-	//		try
-	//		{
-	//			dataService.query("bogus");
-	//			fail("Should have thrown UnknownEntityException");
-	//		}
-	//		catch (UnknownEntityException e)
-	//		{
-	//			// Expected
-	//		}
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testUpdate()
-	//	{
-	//		Entity entity = createDynamic(1).findFirst().get();
-	//		dataService.add(entityTypeDynamic.getId(), entity);
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
-	//		assertNotNull(entity);
-	//		assertEquals(entity.get(ATTR_STRING), "string1");
-	//
-	//		Query<Entity> q = new QueryImpl<>();
-	//		q.eq(ATTR_STRING, "qwerty");
-	//		entity.set(ATTR_STRING, "qwerty");
-	//
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 0);
-	//		dataService.update(entityTypeDynamic.getId(), entity);
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 1);
-	//
-	//		assertPresent(entityTypeDynamic, entity);
-	//
-	//		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
-	//		assertNotNull(entity.get(ATTR_STRING));
-	//		assertEquals(entity.get(ATTR_STRING), "qwerty");
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testUpdateSingleRefEntityIndexesReferencingEntities()
-	//	{
-	//		dataService.add(entityTypeDynamic.getId(), createDynamic(30));
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		Entity refEntity4 = dataService.findOneById(refEntityTypeDynamic.getId(), "4");
-	//
-	//		Query<Entity> q = new QueryImpl<>().search("refstring4");
-	//
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 5);
-	//		refEntity4.set(ATTR_REF_STRING, "qwerty");
-	//		runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity4));
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 0);
-	//		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityTypeDynamic), 5);
-	//	}
-	//
-	//	@Test(singleThreaded = true, enabled = false) //FIXME: sys_md_attributes spam
-	//	public void testUpdateSingleRefEntityIndexesLargeAmountOfReferencingEntities()
-	//	{
-	//		dataService.add(entityTypeDynamic.getId(), createDynamic(10000));
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		Query<Entity> q = new QueryImpl<>().search("refstring4").or().search("refstring5");
-	//
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 3333);
-	//		Entity refEntity4 = dataService.findOneById(refEntityTypeDynamic.getId(), "4");
-	//		refEntity4.set(ATTR_REF_STRING, "qwerty");
-	//		runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity4));
-	//
-	//		Entity refEntity5 = dataService.findOneById(refEntityTypeDynamic.getId(), "5");
-	//		refEntity5.set(ATTR_REF_STRING, "qwerty");
-	//		runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity5));
-	//
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 0);
-	//
-	//		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityTypeDynamic), 3333);
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testUpdateStream()
-	//	{
-	//		Entity entity = createDynamic(1).findFirst().get();
-	//
-	//		dataService.add(entityTypeDynamic.getId(), entity);
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		assertPresent(entityTypeDynamic, entity);
-	//
-	//		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
-	//		assertNotNull(entity);
-	//		assertEquals(entity.get(ATTR_STRING), "string1");
-	//
-	//		entity.set(ATTR_STRING, "qwerty");
-	//		Query<Entity> q = new QueryImpl<>();
-	//		q.eq(ATTR_STRING, "qwerty");
-	//
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 0);
-	//
-	//		dataService.update(entityTypeDynamic.getId(), of(entity));
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 1);
-	//
-	//		assertPresent(entityTypeDynamic, entity);
-	//		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
-	//		assertNotNull(entity.get(ATTR_STRING));
-	//		assertEquals(entity.get(ATTR_STRING), "qwerty");
-	//	}
-	//
+	@DataProvider(name = "findQueryOperatorSearch")
+	private static Object[][] findQueryOperatorSearch()
+	{
+		return new Object[][] { { "body", singletonList("1") }, { "head", singletonList("1") },
+				{ "unknownString", emptyList() } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
+	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIds)
+	{
+		List<Entity> testEntities = createDynamic(2).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>().search(ATTR_HTML, searchStr);
+		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+
+		assertEquals(ids, expectedEntityIds);
+	}
+
+	@Test(singleThreaded = true)
+	public void testSearchQueryLimit2_Offset2_sortOnInt()
+	{
+		List<Entity> testEntities = createDynamic(10).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, Sort.Direction.DESC));
+		Iterable<Entity> result = searchService.search(query, entityTypeDynamic);
+
+		List<Object> ids = Lists.newArrayList(Iterables.transform(result, Entity::getIdValue));
+		List<Object> expected = Arrays.asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
+		assertEquals(ids, expected);
+	}
+
+	@Test(singleThreaded = true)
+	public void testSearchAsStreamQueryLimit2_Offset2_sortOnInt()
+	{
+		List<Entity> testEntities = createDynamic(10).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, Sort.Direction.DESC));
+		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+
+		List<Object> expected = Arrays.asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
+		assertEquals(ids, expected);
+	}
+
+	@Test(singleThreaded = true)
+	public void testFindOneQuery()
+	{
+		Entity entity = createDynamic(1).findFirst().get();
+		searchService.index(entity, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		entity = searchService.findOne(new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()), entityTypeDynamic);
+		assertNotNull(entity);
+	}
+
 	private Stream<Entity> createDynamic(int count)
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
-		searchService.index(refEntities.stream(), refEntityTypeDynamic, IndexingMode.ADD);
+		searchService.index(refEntities.stream(), refEntityTypeDynamic, ADD);
 		return testHarness.createTestEntities(entityTypeDynamic, count, refEntities);
 	}
-	//
-	//	private Stream<Entity> createStatic(int count)
-	//	{
-	//		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeStatic, 6);
-	//		runAsSystem(() -> dataService.add(refEntityTypeStatic.getId(), refEntities.stream()));
-	//		return testHarness.createTestEntities(entityTypeStatic, count, refEntities);
-	//	}
-	//
-	//	private void assertPresent(EntityType emd, List<Entity> entities)
-	//	{
-	//		entities.forEach(e -> assertPresent(emd, e));
-	//	}
-	//
-	//	private void assertPresent(EntityType emd, Entity entity)
-	//	{
-	//		// Found in PostgreSQL
-	//		assertNotNull(dataService.findOneById(emd.getId(), entity.getIdValue()));
-	//
-	//		// Found in index Elasticsearch
-	//		Query<Entity> q = new QueryImpl<>();
-	//		q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
-	//		assertEquals(searchService.count(q, emd), 1);
-	//	}
-	//
-	//	private void assertNotPresent(Entity entity)
-	//	{
-	//		// Found in PostgreSQL
-	//		assertNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue()));
-	//
-	//		// Not found in index Elasticsearch
-	//		Query<Entity> q = new QueryImpl<>();
-	//		q.eq(entityTypeDynamic.getIdAttribute().getName(), entity.getIdValue());
-	//		assertEquals(searchService.count(q, entityTypeDynamic), 0);
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testCreateSelfXref()
-	//	{
-	//		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityType, 1).collect(toList())
-	//				.get(0);
-	//
-	//		//Create
-	//		dataService.add(selfXrefEntityType.getId(), entitySelfXref);
-	//		waitForIndexToBeStable(selfXrefEntityType, indexService, LOG);
-	//		Entity entity = dataService.findOneById(selfXrefEntityType.getId(), entitySelfXref.getIdValue());
-	//		assertPresent(selfXrefEntityType, entity);
-	//
-	//		Query<Entity> q1 = new QueryImpl<>();
-	//		q1.eq(ATTR_STRING, "attr_string_old");
-	//		Query<Entity> q2 = new QueryImpl<>();
-	//		q2.eq(ATTR_STRING, "attr_string_new");
-	//		entity.set(ATTR_STRING, "attr_string_new");
-	//
-	//		// Verify value in elasticsearch before update
-	//		assertEquals(searchService.count(q1, selfXrefEntityType), 1);
-	//		assertEquals(searchService.count(q2, selfXrefEntityType), 0);
-	//
-	//		// Update
-	//		dataService.update(selfXrefEntityType.getId(), entity);
-	//		waitForIndexToBeStable(selfXrefEntityType, indexService, LOG);
-	//		assertPresent(selfXrefEntityType, entity);
-	//
-	//		// Verify value in elasticsearch after update
-	//		assertEquals(searchService.count(q2, selfXrefEntityType), 1);
-	//		assertEquals(searchService.count(q1, selfXrefEntityType), 0);
-	//
-	//		// Verify value in PostgreSQL after update
-	//		entity = dataService.findOneById(selfXrefEntityType.getId(), entity.getIdValue());
-	//		assertNotNull(entity.get(ATTR_STRING));
-	//		assertEquals(entity.get(ATTR_STRING), "attr_string_new");
-	//
-	//		// Check id are equals
-	//		assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testIndexCreateMetaData()
-	//	{
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexCreateMetaData(searchService, entityTypeStatic, entityTypeDynamic, metaDataService);
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testIndexDeleteMetaData()
-	//	{
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexDeleteMetaData(searchService, dataService, entityTypeDynamic, metaDataService, indexService);
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testIndexUpdateMetaDataUpdateAttribute()
-	//	{
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataUpdateAttribute(searchService, entityTypeDynamic, metaDataService,
-	//						indexService);
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	public void testIndexUpdateMetaDataRemoveAttribute()
-	//	{
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_CATEGORICAL,
-	//						searchService, metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_BOOL, searchService,
-	//						metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_DATE, searchService,
-	//						metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_XREF, searchService,
-	//						metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_DATETIME,
-	//						searchService, metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_DECIMAL,
-	//						searchService, metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_EMAIL, searchService,
-	//						metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HTML, searchService,
-	//						metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_INT, searchService,
-	//						metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HYPERLINK,
-	//						searchService, metaDataService, indexService);
-	//
-	//		IndexMetadataCUDOperationsPlatformIT
-	//				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_COMPOUND,
-	//						searchService, metaDataService, indexService);
-	//	}
-	//
-	//	// Derived from fix: https://github.com/molgenis/molgenis/issues/5227
-	//	@Test(singleThreaded = true)
-	//	public void testIndexBatchUpdate()
-	//	{
-	//		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-	//		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
-	//			dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//
-	//		// test string1 from entity
-	//		Query<Entity> q0 = new QueryImpl<>();
-	//		q0.search("string1");
-	//		Stream<Entity> result0 = searchService.searchAsStream(q0, entityTypeDynamic);
-	//		assertEquals(result0.count(), 2);
-	//
-	//		// test refstring1 from ref entity
-	//		Query<Entity> q1 = new QueryImpl<>();
-	//		q1.search("refstring0");
-	//		Stream<Entity> result1 = searchService.searchAsStream(q1, entityTypeDynamic);
-	//		assertEquals(result1.count(), 1);
-	//
-	//		// test refstring1 from ref entity
-	//		Query<Entity> q2 = new QueryImpl<>();
-	//		q2.search("refstring1");
-	//		Stream<Entity> result2 = searchService.searchAsStream(q2, entityTypeDynamic);
-	//		assertEquals(result2.count(), 1);
-	//
-	//		refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.update(refEntityTypeDynamic.getId(), refEntities.stream());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//
-	//		// test string1 from entity
-	//		Stream<Entity> result3 = searchService.searchAsStream(q0, entityTypeDynamic);
-	//		assertEquals(result3.count(), 2);
-	//
-	//		// test refstring1 from ref entity
-	//		Query<Entity> q4 = new QueryImpl<>();
-	//		q4.search("refstring0");
-	//		Stream<Entity> result4 = searchService.searchAsStream(q4, entityTypeDynamic);
-	//		assertEquals(result4.count(), 0);
-	//
-	//		// test refstring1 from ref entity
-	//		Query<Entity> q5 = new QueryImpl<>();
-	//		q5.search("refstring1");
-	//		Stream<Entity> result5 = searchService.searchAsStream(q5, entityTypeDynamic);
-	//		assertEquals(result5.count(), 1);
-	//
-	//		// test refstring1 from ref entity
-	//		Query<Entity> q6 = new QueryImpl<>();
-	//		q6.search("searchTestBatchUpdate");
-	//		Stream<Entity> result6 = searchService.searchAsStream(q6, entityTypeDynamic);
-	//		assertEquals(result6.count(), 1);
-	//	}
-	//
-	//	/**
-	//	 * Test add and remove of a single attribute of a dynamic entity
-	//	 */
-	//	@Test(singleThreaded = true)
-	//	public void addAndDeleteSingleAttribute()
-	//	{
-	//		final String NEW_ATTRIBUTE = "new_attribute";
-	//		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
-	//		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
-	//		newAttr.setEntity(entityType);
-	//
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.getMeta().addAttribute(newAttr);
-	//
-	//			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-	//			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-	//
-	//			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
-	//			dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//			dataService.update(entityType.getId(),
-	//					StreamSupport.stream(dataService.findAll(entityType.getId()).spliterator(), false)
-	//							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
-	//		});
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		// Tunnel via L3 flow
-	//		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
-	//				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
-	//		q0.pageSize(10); // L3 only caches queries with a page size
-	//		q0.sort(new Sort().on(NEW_ATTRIBUTE));
-	//
-	//		runAsSystem(() ->
-	//		{
-	//			List expected = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue)
-	//					.collect(toList());
-	//			assertEquals(expected, Arrays.asList("0", "1"));
-	//
-	//			// Remove added attribute
-	//			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//
-	//		// verify attribute is deleted by adding and removing it again
-	//		runAsSystem(() ->
-	//		{
-	//			// Add attribute
-	//			dataService.getMeta().addAttribute(newAttr);
-	//
-	//			// Delete attribute
-	//			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//	}
-	//
-	//	/**
-	//	 * Test add stream attribute of a dynamic entity
-	//	 */
-	//	@Test(singleThreaded = true)
-	//	public void addStreamAttribute()
-	//	{
-	//		final String NEW_ATTRIBUTE = "new_attribute";
-	//		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
-	//		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
-	//		newAttr.setEntity(entityType);
-	//
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.getMeta().addAttributes(entityType.getId(), Stream.of(newAttr));
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//			Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
-	//			assertNotNull(attribute);
-	//
-	//			// Tunnel via L3 flow
-	//			Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
-	//					.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
-	//			q0.pageSize(10); // L3 only caches queries with a page size
-	//			q0.sort(new Sort().on(NEW_ATTRIBUTE));
-	//
-	//			List actual = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue)
-	//					.collect(toList());
-	//			assertEquals(actual, Arrays.asList());
-	//
-	//			// Remove added attribute
-	//			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//	}
-	//
-	//	/**
-	//	 * Test update of a single attribute of a dynamic entity
-	//	 */
-	//	@Test(singleThreaded = true)
-	//	public void updateAttribute()
-	//	{
-	//		final String NEW_ATTRIBUTE = "new_attribute";
-	//		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
-	//		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
-	//		newAttr.setEntity(entityType);
-	//
-	//		// Add attribute
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.getMeta().addAttribute(newAttr);
-	//
-	//			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-	//			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-	//
-	//			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
-	//			dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//			dataService.update(entityType.getId(),
-	//					StreamSupport.stream(dataService.findAll(entityType.getId()).spliterator(), false)
-	//							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
-	//		});
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		// Verify old values
-	//		assertNotEquals(newAttr.getSequenceNumber(), 0);
-	//		assertFalse(newAttr.isReadOnly());
-	//		assertFalse(newAttr.isUnique());
-	//		assertNotEquals(newAttr.getLabel(), "test");
-	//		assertNotEquals(newAttr.getDescription(), "test");
-	//		assertTrue(newAttr.isNillable());
-	//
-	//		// New values
-	//		newAttr.setSequenceNumber(0);
-	//		newAttr.setReadOnly(true);
-	//		newAttr.setUnique(true);
-	//		newAttr.setLabel("test");
-	//		newAttr.setNillable(false);
-	//		newAttr.setDescription("test");
-	//
-	//		// Update attribute
-	//		runAsSystem(() ->
-	//		{
-	//			// Update added attribute
-	//			dataService.update(ATTRIBUTE_META_DATA, newAttr);
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//
-	//		Attribute attr = dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdValue(), Attribute.class);
-	//		assertEquals(attr.getSequenceNumber(), Integer.valueOf(0));
-	//		assertTrue(attr.isReadOnly());
-	//		assertTrue(attr.isUnique());
-	//		assertEquals(attr.getLabel(), "test");
-	//		assertEquals(attr.getDescription(), "test");
-	//
-	//		// Delete attribute
-	//		runAsSystem(() ->
-	//		{
-	//			// Remove added attribute
-	//			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//	}
-	//
-	//	/*
-	//	 * Test add and remove of a single attribute of a dynamic entity
-	//	 */
-	//	@Test(singleThreaded = true)
-	//	public void addAndDeleteSingleAttributeStream()
-	//	{
-	//		final String NEW_ATTRIBUTE = "new_attribute";
-	//		Attribute newAttr = attributeFactory.create().setName(NEW_ATTRIBUTE);
-	//		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
-	//		newAttr.setEntity(entityType);
-	//		newAttr.setSequenceNumber(2);
-	//		entityType.addAttribute(newAttr);
-	//
-	//		assertEquals(newAttr.getSequenceNumber(), Integer.valueOf(2)); // Test if sequence number is 2
-	//
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType)); // Adds the column to the table
-	//			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
-	//
-	//			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-	//			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-	//
-	//			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
-	//			dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//			dataService.update(entityType.getId(),
-	//					StreamSupport.stream(dataService.findAll(entityType.getId()).spliterator(), false)
-	//							.peek(e -> e.set(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_" + e.getIdValue())));
-	//		});
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		// Tunnel via L3 flow
-	//		Query<Entity> q0 = new QueryImpl<>().eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_0").or()
-	//				.eq(NEW_ATTRIBUTE, "NEW_ATTRIBUTE_1");
-	//		q0.pageSize(10); // L3 only caches queries with a page size
-	//		q0.sort(new Sort().on(NEW_ATTRIBUTE));
-	//
-	//		runAsSystem(() ->
-	//		{
-	//			List expected = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue)
-	//					.collect(toList());
-	//			assertEquals(expected, Arrays.asList("0", "1"));
-	//
-	//			// Remove added attribute
-	//			entityType.removeAttribute(newAttr);
-	//			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
-	//			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//
-	//		// verify attribute is deleted by adding and removing it again
-	//		runAsSystem(() ->
-	//		{
-	//			entityType.addAttribute(newAttr);
-	//			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
-	//			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
-	//
-	//			// Remove added attribute
-	//			entityType.removeAttribute(newAttr);
-	//			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
-	//			dataService.delete(ATTRIBUTE_META_DATA, Stream.of(newAttr));
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//	}
-	//
-	//	@Test(singleThreaded = true)
-	//	@Transactional
-	//	public void storeIndexActions()
-	//	{
-	//		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
-	//		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-	//		runAsSystem(() ->
-	//		{
-	//			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
-	//			dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//			indexActionRegisterService.register(entityTypeDynamic, "1");
-	//			indexActionRegisterService.register(entityTypeDynamic, null);
-	//
-	//			Query<IndexAction> q = new QueryImpl<>();
-	//			q.eq(IndexActionMetaData.ENTITY_TYPE_ID, "sys_test_TypeTestDynamic");
-	//			Stream<IndexAction> all = dataService
-	//					.findAll(IndexActionMetaData.INDEX_ACTION, q, IndexAction.class);
-	//			all.forEach(e ->
-	//			{
-	//				LOG.info(e.getEntityTypeId() + "." + e.getEntityId());
-	//			});
-	//			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		});
-	//	}
+
+	private void assertPresent(EntityType emd, Entity entity)
+	{
+		// Found in index Elasticsearch
+		Query<Entity> q = new QueryImpl<>();
+		q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
+		assertEquals(searchService.count(q, emd), 1);
+	}
+
+	private void assertNotPresent(Entity entity)
+	{
+		// Not found in index Elasticsearch
+		Query<Entity> q = new QueryImpl<>();
+		q.eq(entityTypeDynamic.getIdAttribute().getName(), entity.getIdValue());
+		assertEquals(searchService.count(q, entityTypeDynamic), 0);
+	}
+
+
+
+
 }
