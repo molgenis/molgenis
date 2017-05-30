@@ -80,7 +80,7 @@ public class ElasticsearchService implements SearchService
 
 	private SearchResult search(SearchRequest request)
 	{
-		SearchResponse response = elasticsearchFacade.search(SearchType.QUERY_AND_FETCH, request, indexName);
+		SearchResponse response = elasticsearchFacade.search(SearchType.QUERY_THEN_FETCH, request, indexName);
 		return responseParser.parseSearchResponse(request, response, dataService);
 	}
 
@@ -355,7 +355,7 @@ public class ElasticsearchService implements SearchService
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
 	{
 		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_AND_FETCH, entityType, query, null, null,
+				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_THEN_FETCH, entityType, query, null, null,
 						null);
 
 		String documentType = documentIdGenerator.generateId(entityType);

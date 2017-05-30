@@ -7,7 +7,6 @@ import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -112,178 +111,178 @@ public class AggregateResponseParser
 	{
 		Map<String, Object> counts = new HashMap<String, Object>();
 
-		boolean isAttr1Nested = AggregateQueryGenerator.isNestedType(aggAttr1);
-		boolean isAttr1Nillable = aggAttr1.isNillable();
-
-		if (isAttr1Nested) aggs = removeNesting(aggs);
-		Terms terms = getTermsAggregation(aggs, aggAttr1);
-
-		for (Bucket bucket : terms.getBuckets())
-		{
-			String key = bucket.getKey();
-			Object value;
-			if (aggAttr2 != null)
-			{
-				Map<String, Long> subCounts = new HashMap<String, Long>();
-
-				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
-				boolean isAttr2Nillable = aggAttr2.isNillable();
-
-				Aggregations subAggs = bucket.getAggregations();
-				if (isAttr1Nested) subAggs = removeReverseNesting(subAggs);
-				if (isAttr2Nested) subAggs = removeNesting(subAggs);
-				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
-
-				for (Bucket subBucket : subTerms.getBuckets())
-				{
-					String subKey = subBucket.getKey();
-					Long subValue;
-
-					if (aggAttrDistinct != null)
-					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
-
-						Aggregations distinctAggs = subBucket.getAggregations();
-						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
-						if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
-						Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
-						subValue = distinctAgg.getValue();
-					}
-					else
-					{
-						subValue = subBucket.getDocCount();
-					}
-
-					subCounts.put(subKey, subValue);
-				}
-
-				if (isAttr2Nillable)
-				{
-					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
-					String subKey = null;
-					Long subValue;
-
-					if (aggAttrDistinct != null)
-					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
-
-						Aggregations subDistinctAggs = subMissing.getAggregations();
-						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
-						if (isAttrDistinctNested) subDistinctAggs = removeNesting(subDistinctAggs);
-						Cardinality distinctAgg = getDistinctAggregation(subDistinctAggs, aggAttrDistinct);
-						subValue = distinctAgg.getValue();
-					}
-					else
-					{
-						subValue = subMissing.getDocCount();
-					}
-					subCounts.put(subKey, subValue);
-				}
-				value = subCounts;
-			}
-			else
-			{
-				if (aggAttrDistinct != null)
-				{
-					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
-
-					Aggregations distinctAggs = bucket.getAggregations();
-					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
-					if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
-					Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
-					value = distinctAgg.getValue();
-				}
-				else
-				{
-					value = bucket.getDocCount();
-				}
-			}
-			counts.put(key, value);
-		}
-
-		if (isAttr1Nillable)
-		{
-			Missing missing = getMissingAggregation(aggs, aggAttr1);
-			String key = null;
-			Object value;
-			if (aggAttr2 != null)
-			{
-				Map<String, Long> subCounts = new HashMap<String, Long>();
-
-				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
-				boolean isAttr2Nillable = aggAttr2.isNillable();
-
-				Aggregations subAggs = missing.getAggregations();
-				if (isAttr1Nested) subAggs = removeReverseNesting(subAggs);
-				if (isAttr2Nested) subAggs = removeNesting(subAggs);
-				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
-
-				for (Bucket subBucket : subTerms.getBuckets())
-				{
-					String subKey = subBucket.getKey();
-					Long subValue;
-
-					if (aggAttrDistinct != null)
-					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
-
-						Aggregations distinctAggs = subBucket.getAggregations();
-						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
-						if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
-						Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
-						subValue = distinctAgg.getValue();
-					}
-					else
-					{
-						subValue = subBucket.getDocCount();
-					}
-
-					subCounts.put(subKey, subValue);
-				}
-
-				if (isAttr2Nillable)
-				{
-					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
-					String subKey = null;
-					Long subValue;
-
-					if (aggAttrDistinct != null)
-					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
-
-						Aggregations subDistinctAggs = subMissing.getAggregations();
-						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
-						if (isAttrDistinctNested) subDistinctAggs = removeNesting(subDistinctAggs);
-						Cardinality distinctAgg = getDistinctAggregation(subDistinctAggs, aggAttrDistinct);
-						subValue = distinctAgg.getValue();
-					}
-					else
-					{
-						subValue = subMissing.getDocCount();
-					}
-					subCounts.put(subKey, subValue);
-				}
-				value = subCounts;
-			}
-			else
-			{
-				if (aggAttrDistinct != null)
-				{
-					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
-
-					Aggregations distinctAggs = missing.getAggregations();
-					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
-					if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
-					Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
-					value = distinctAgg.getValue();
-				}
-				else
-				{
-					value = missing.getDocCount();
-				}
-			}
-			counts.put(key, value);
-		}
+		//		boolean isAttr1Nested = AggregateQueryGenerator.isNestedType(aggAttr1);
+		//		boolean isAttr1Nillable = aggAttr1.isNillable();
+		//
+		//		if (isAttr1Nested) aggs = removeNesting(aggs);
+		//		Terms terms = getTermsAggregation(aggs, aggAttr1);
+		//
+		//		for (Bucket bucket : terms.getBuckets())
+		//		{
+		//			String key = bucket.getKey();
+		//			Object value;
+		//			if (aggAttr2 != null)
+		//			{
+		//				Map<String, Long> subCounts = new HashMap<String, Long>();
+		//
+		//				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
+		//				boolean isAttr2Nillable = aggAttr2.isNillable();
+		//
+		//				Aggregations subAggs = bucket.getAggregations();
+		//				if (isAttr1Nested) subAggs = removeReverseNesting(subAggs);
+		//				if (isAttr2Nested) subAggs = removeNesting(subAggs);
+		//				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
+		//
+		//				for (Bucket subBucket : subTerms.getBuckets())
+		//				{
+		//					String subKey = subBucket.getKey();
+		//					Long subValue;
+		//
+		//					if (aggAttrDistinct != null)
+		//					{
+		//						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+		//
+		//						Aggregations distinctAggs = subBucket.getAggregations();
+		//						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
+		//						if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+		//						Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+		//						subValue = distinctAgg.getValue();
+		//					}
+		//					else
+		//					{
+		//						subValue = subBucket.getDocCount();
+		//					}
+		//
+		//					subCounts.put(subKey, subValue);
+		//				}
+		//
+		//				if (isAttr2Nillable)
+		//				{
+		//					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
+		//					String subKey = null;
+		//					Long subValue;
+		//
+		//					if (aggAttrDistinct != null)
+		//					{
+		//						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+		//
+		//						Aggregations subDistinctAggs = subMissing.getAggregations();
+		//						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
+		//						if (isAttrDistinctNested) subDistinctAggs = removeNesting(subDistinctAggs);
+		//						Cardinality distinctAgg = getDistinctAggregation(subDistinctAggs, aggAttrDistinct);
+		//						subValue = distinctAgg.getValue();
+		//					}
+		//					else
+		//					{
+		//						subValue = subMissing.getDocCount();
+		//					}
+		//					subCounts.put(subKey, subValue);
+		//				}
+		//				value = subCounts;
+		//			}
+		//			else
+		//			{
+		//				if (aggAttrDistinct != null)
+		//				{
+		//					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+		//
+		//					Aggregations distinctAggs = bucket.getAggregations();
+		//					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
+		//					if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+		//					Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+		//					value = distinctAgg.getValue();
+		//				}
+		//				else
+		//				{
+		//					value = bucket.getDocCount();
+		//				}
+		//			}
+		//			counts.put(key, value);
+		//		}
+		//
+		//		if (isAttr1Nillable)
+		//		{
+		//			Missing missing = getMissingAggregation(aggs, aggAttr1);
+		//			String key = null;
+		//			Object value;
+		//			if (aggAttr2 != null)
+		//			{
+		//				Map<String, Long> subCounts = new HashMap<String, Long>();
+		//
+		//				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
+		//				boolean isAttr2Nillable = aggAttr2.isNillable();
+		//
+		//				Aggregations subAggs = missing.getAggregations();
+		//				if (isAttr1Nested) subAggs = removeReverseNesting(subAggs);
+		//				if (isAttr2Nested) subAggs = removeNesting(subAggs);
+		//				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
+		//
+		//				for (Bucket subBucket : subTerms.getBuckets())
+		//				{
+		//					String subKey = subBucket.getKey();
+		//					Long subValue;
+		//
+		//					if (aggAttrDistinct != null)
+		//					{
+		//						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+		//
+		//						Aggregations distinctAggs = subBucket.getAggregations();
+		//						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
+		//						if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+		//						Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+		//						subValue = distinctAgg.getValue();
+		//					}
+		//					else
+		//					{
+		//						subValue = subBucket.getDocCount();
+		//					}
+		//
+		//					subCounts.put(subKey, subValue);
+		//				}
+		//
+		//				if (isAttr2Nillable)
+		//				{
+		//					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
+		//					String subKey = null;
+		//					Long subValue;
+		//
+		//					if (aggAttrDistinct != null)
+		//					{
+		//						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+		//
+		//						Aggregations subDistinctAggs = subMissing.getAggregations();
+		//						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
+		//						if (isAttrDistinctNested) subDistinctAggs = removeNesting(subDistinctAggs);
+		//						Cardinality distinctAgg = getDistinctAggregation(subDistinctAggs, aggAttrDistinct);
+		//						subValue = distinctAgg.getValue();
+		//					}
+		//					else
+		//					{
+		//						subValue = subMissing.getDocCount();
+		//					}
+		//					subCounts.put(subKey, subValue);
+		//				}
+		//				value = subCounts;
+		//			}
+		//			else
+		//			{
+		//				if (aggAttrDistinct != null)
+		//				{
+		//					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+		//
+		//					Aggregations distinctAggs = missing.getAggregations();
+		//					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
+		//					if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+		//					Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+		//					value = distinctAgg.getValue();
+		//				}
+		//				else
+		//				{
+		//					value = missing.getDocCount();
+		//				}
+		//			}
+		//			counts.put(key, value);
+		//		}
 		return counts;
 	}
 

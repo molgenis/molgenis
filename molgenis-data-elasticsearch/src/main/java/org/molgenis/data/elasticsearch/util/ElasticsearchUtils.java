@@ -4,12 +4,9 @@ import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
-import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -21,7 +18,6 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
@@ -143,11 +139,13 @@ public class ElasticsearchUtils
 			LOG.trace("Counting Elasticsearch [{}] docs", type);
 		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, SearchType.COUNT, entityType, q, null, null, null);
+		// FIXME search type should be count
+		generator.buildSearchRequest(searchRequestBuilder, SearchType.DEFAULT, entityType, q, null, null, null);
 		SearchResponse searchResponse = searchRequestBuilder.get();
 		if (searchResponse.getFailedShards() > 0)
 		{
-			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
+			// FIXME .getHeaders()
+			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse);
 		}
 		long count = searchResponse.getHits().totalHits();
 		long ms = searchResponse.getTookInMillis();
@@ -207,9 +205,11 @@ public class ElasticsearchUtils
 	 */
 	public boolean deleteMapping(String type, String indexName)
 	{
-		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-				.setType(type).get();
-		return deleteMappingResponse.isAcknowledged();
+		// FIXME
+		throw new UnsupportedOperationException("FIXME");
+		//		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
+		//				.setType(type).get();
+		//		return deleteMappingResponse.isAcknowledged();
 	}
 
 	/**
@@ -222,17 +222,19 @@ public class ElasticsearchUtils
 	public boolean deleteAllDocumentsOfType(String type, String indexName)
 	{
 		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
-		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).get();
-
-		if (deleteByQueryResponse != null)
-		{
-			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
-			if (idbqr != null && idbqr.getFailedShards() > 0)
-			{
-				return false;
-			}
-		}
+		// FIXME
+		if (1 == 1) throw new UnsupportedOperationException("FIXME");
+		//		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
+		//				.setQuery(new TermQueryBuilder("_type", type)).get();
+		//
+		//		if (deleteByQueryResponse != null)
+		//		{
+		//			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
+		//			if (idbqr != null && idbqr.getFailedShards() > 0)
+		//			{
+		//				return false;
+		//			}
+		//		}
 		LOG.debug("Deleted all Elasticsearch '{}' docs.", type);
 		return true;
 	}
