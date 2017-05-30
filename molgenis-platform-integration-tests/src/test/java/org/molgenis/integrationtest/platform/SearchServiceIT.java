@@ -16,15 +16,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.EntityTestHarness.ATTR_HTML;
-import static org.molgenis.data.EntityTestHarness.ATTR_ID;
+import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.index.IndexingMode.ADD;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -332,199 +331,132 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	//		}
 	//	}
 	//
-	//	@DataProvider(name = "findQueryOperatorGreaterEqual")
-	//	private static Object[][] findQueryOperatorGreaterEqual()
-	//	{
-	//		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(0, 1, 2) }, { 11, asList(1, 2) },
-	//				{ 12, singletonList(2) }, { 13, emptyList() } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreaterEqual")
-	//	public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(3).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.ge(ATTR_INT, value).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	@DataProvider(name = "findQueryOperatorRange")
-	//	private static Object[][] findQueryOperatorRange()
-	//	{
-	//		return new Object[][] { { 0, 9, emptyList() }, { 0, 10, asList(0) }, { 10, 10, asList(0) },
-	//				{ 10, 11, asList(0, 1) }, { 10, 12, asList(0, 1, 2) }, { 12, 20, asList(2) } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
-	//	public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(3).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.rng(ATTR_INT, low, high).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	@DataProvider(name = "findQueryOperatorLike")
-	//	private static Object[][] findQueryOperatorLike()
-	//	{
-	//		return new Object[][] { { "ring", asList(0, 1) }, { "Ring", emptyList() }, { "nomatch", emptyList() } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLike")
-	//	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(2).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.like(ATTR_STRING, likeStr).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	@DataProvider(name = "findQueryOperatorNot")
-	//	private static Object[][] findQueryOperatorNot()
-	//	{
-	//		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, asList(0, 2) },
-	//				{ 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNot")
-	//	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(3).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).not()
-	//				.eq(ATTR_INT, value).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	/**
-	//	 * Test used as a caching benchmark
-	//	 */
-	//	@Test(singleThreaded = true, enabled = false)
-	//	public void cachePerformanceTest()
-	//	{
-	//		List<Entity> entities = createDynamic(10000).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//
-	//		Query<Entity> q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
-	//		q1.pageSize(1000);
-	//
-	//		Query<Entity> q2 = new QueryImpl<>().eq(EntityTestHarness.ATTR_BOOL, true);
-	//		q2.pageSize(500);
-	//
-	//		Query<Entity> q3 = new QueryImpl<>().eq(ATTR_DECIMAL, 1.123);
-	//
-	//		runAsSystem(() ->
-	//		{
-	//			for (int i = 0; i < 100000; i++)
-	//			{
-	//				dataService.findAll(entityTypeDynamic.getId(), q1);
-	//				dataService.findAll(entityTypeDynamic.getId(), q2);
-	//				dataService.findOne(entityTypeDynamic.getId(), q3);
-	//			}
-	//		});
-	//	}
-	//
-	//	@DataProvider(name = "findQueryOperatorAnd")
-	//	private static Object[][] findQueryOperatorAnd()
-	//	{
-	//		return new Object[][] { { "string1", 10, asList(0) }, { "unknownString", 10, emptyList() },
-	//				{ "string1", -1, emptyList() }, { "unknownString", -1, emptyList() } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorAnd")
-	//	public void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(3).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	@DataProvider(name = "findQueryOperatorOr")
-	//	private static Object[][] findQueryOperatorOr()
-	//	{
-	//		return new Object[][] { { "string1", 10, asList(0, 1, 2) }, { "unknownString", 10, asList(0) },
-	//				{ "string1", -1, asList(0, 1, 2) }, { "unknownString", -1, emptyList() } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorOr")
-	//	public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(3).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
-	//	@DataProvider(name = "findQueryOperatorNested")
-	//	private static Object[][] findQueryOperatorNested()
-	//	{
-	//		return new Object[][] { { true, "string1", 10, asList(0, 2) }, { true, "unknownString", 10, asList(0) },
-	//				{ true, "string1", -1, asList(0, 2) }, { true, "unknownString", -1, emptyList() },
-	//				{ false, "string1", 10, singletonList(1) }, { false, "unknownString", 10, emptyList() },
-	//				{ false, "string1", -1, asList(1) }, { false, "unknownString", -1, emptyList() } };
-	//	}
-	//
-	//	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNested")
-	//	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
-	//			List<Integer> expectedEntityIndices)
-	//	{
-	//		List<Entity> entities = createDynamic(3).collect(toList());
-	//		dataService.add(entityTypeDynamic.getId(), entities.stream());
-	//		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-	//		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-	//				.eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest()
-	//				.findAll();
-	//		List<Entity> foundAsList = found.get().collect(toList());
-	//		assertEquals(foundAsList.size(), expectedEntityIndices.size());
-	//		for (int i = 0; i < expectedEntityIndices.size(); ++i)
-	//		{
-	//			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
-	//		}
-	//	}
-	//
+
+	@DataProvider(name = "findQueryOperatorRange")
+	private static Object[][] findQueryOperatorRange()
+	{
+		return new Object[][] { { 0, 9, emptyList() }, { 0, 10, singletonList("0") }, { 10, 10, singletonList("0") },
+				{ 10, 11, asList("0", "1") }, { 10, 12, asList("0", "1", "2") }, { 12, 20, singletonList("2") } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
+	public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIDs)
+	{
+		List<Entity> testEntities = createDynamic(3).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> nestedQuery = new QueryImpl<>().rng(ATTR_INT, low, high);
+		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+		assertEquals(foundAsList, expectedEntityIDs);
+	}
+
+	@DataProvider(name = "findQueryOperatorLike")
+	private static Object[][] findQueryOperatorLike()
+	{
+		return new Object[][] { { "ring", asList("0", "1") }, { "Ring", asList("0", "1") },
+				{ "nomatch", emptyList() } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLike")
+	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIDs)
+	{
+		List<Entity> testEntities = createDynamic(2).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> nestedQuery = new QueryImpl<>().like(ATTR_STRING, likeStr);
+		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+		assertEquals(foundAsList, expectedEntityIDs);
+	}
+
+	@DataProvider(name = "findQueryOperatorNot")
+	private static Object[][] findQueryOperatorNot()
+	{
+		return new Object[][] { { 9, asList("0", "1", "2") }, { 10, asList("1", "2") }, { 11, asList("0", "2") },
+				{ 12, asList("0", "1") }, { 13, asList("0", "1", "2") } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNot")
+	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIDs)
+	{
+		List<Entity> testEntities = createDynamic(3).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> nestedQuery = new QueryImpl<>().not().eq(ATTR_INT, value);
+		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+		assertEquals(foundAsList, expectedEntityIDs);
+	}
+
+	@DataProvider(name = "findQueryOperatorAnd")
+	private static Object[][] findQueryOperatorAnd()
+	{
+		return new Object[][] { { "string1", 10, asList("0") }, { "unknownString", 10, emptyList() },
+				{ "string1", -1, emptyList() }, { "unknownString", -1, emptyList() } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorAnd")
+	public void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIDs)
+	{
+		List<Entity> testEntities = createDynamic(3).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value);
+		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+		assertEquals(foundAsList, expectedEntityIDs);
+	}
+
+	@DataProvider(name = "findQueryOperatorOr")
+	private static Object[][] findQueryOperatorOr()
+	{
+		return new Object[][] { { "string1", 10, asList("0", "1", "2") }, { "unknownString", 10, singletonList("0") },
+				{ "string1", -1, asList("0", "1", "2") }, { "unknownString", -1, emptyList() } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorOr")
+	public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIDs)
+	{
+		List<Entity> testEntities = createDynamic(3).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value);
+		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+		assertEquals(foundAsList, expectedEntityIDs);
+	}
+
+	@DataProvider(name = "findQueryOperatorNested")
+	private static Object[][] findQueryOperatorNested()
+	{
+		return new Object[][] { { true, "string1", 10, asList("0", "2") },
+				{ true, "unknownString", 10, singletonList("0") }, { true, "string1", -1, asList("0", "2") },
+				{ true, "unknownString", -1, emptyList() }, { false, "string1", 10, singletonList("1") },
+				{ false, "unknownString", 10, emptyList() }, { false, "string1", -1, singletonList("1") },
+				{ false, "unknownString", -1, emptyList() } };
+	}
+
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNested")
+	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
+			List<Integer> expectedEntityIDs)
+	{
+		List<Entity> testEntities = createDynamic(3).collect(toList());
+		searchService.index(testEntities, entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue)
+				.or().eq(ATTR_INT, value).unnest();
+		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+		assertEquals(foundAsList, expectedEntityIDs);
+	}
+
 	@DataProvider(name = "findQueryOperatorSearch")
 	private static Object[][] findQueryOperatorSearch()
 	{
@@ -557,7 +489,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		Iterable<Entity> result = searchService.search(query, entityTypeDynamic);
 
 		List<Object> ids = Lists.newArrayList(Iterables.transform(result, Entity::getIdValue));
-		List<Object> expected = Arrays.asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
+		List<Object> expected = asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
 		assertEquals(ids, expected);
 	}
 
@@ -572,7 +504,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic).map(Entity::getIdValue)
 				.collect(toList());
 
-		List<Object> expected = Arrays.asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
+		List<Object> expected = asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
 		assertEquals(ids, expected);
 	}
 
