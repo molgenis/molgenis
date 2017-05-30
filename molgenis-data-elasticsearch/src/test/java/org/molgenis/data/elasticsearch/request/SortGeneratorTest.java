@@ -61,7 +61,7 @@ public class SortGeneratorTest
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder).addSort(argument.capture());
 		FieldSortBuilder sortBuilder = argument.getValue();
-		assertEquals(sortBuilder.toString().replaceAll("\\s", ""), "\"int\"{\"order\":\"asc\",\"mode\":\"min\"}");
+		assertEquals(sortBuilder.toString().replaceAll("\\s", ""), "{\"int\":{\"order\":\"asc\",\"mode\":\"min\"}}");
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class SortGeneratorTest
 		verify(searchRequestBuilder).addSort(argument.capture());
 		FieldSortBuilder sortBuilder = argument.getValue();
 		assertEquals(sortBuilder.toString().replaceAll("\\s", ""),
-				"\"string.raw\"{\"order\":\"asc\",\"mode\":\"min\"}");
+				"{\"string.raw\":{\"order\":\"asc\",\"mode\":\"min\"}}");
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class SortGeneratorTest
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder).addSort(argument.capture());
 		FieldSortBuilder sortBuilder = argument.getValue();
-		assertEquals(sortBuilder.toString().replaceAll("\\s", ""), "\"int\"{\"order\":\"desc\",\"mode\":\"min\"}");
+		assertEquals(sortBuilder.toString().replaceAll("\\s", ""), "{\"int\":{\"order\":\"desc\",\"mode\":\"min\"}}");
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class SortGeneratorTest
 		verify(searchRequestBuilder).addSort(argument.capture());
 		FieldSortBuilder sortBuilder = argument.getValue();
 		assertEquals(sortBuilder.toString().replaceAll("\\s", ""),
-				"\"string.raw\"{\"order\":\"desc\",\"mode\":\"min\"}");
+				"{\"string.raw\":{\"order\":\"desc\",\"mode\":\"min\"}}");
 	}
 
 	@Test
@@ -110,8 +110,8 @@ public class SortGeneratorTest
 		List<FieldSortBuilder> sortBuilder = argument.getAllValues();
 		assertEquals(sortBuilder.size(), 2);
 		assertEquals(sortBuilder.get(0).toString().replaceAll("\\s", ""),
-				"\"int\"{\"order\":\"desc\",\"mode\":\"min\"}");
+				"{\"int\":{\"order\":\"desc\",\"mode\":\"min\"}}");
 		assertEquals(sortBuilder.get(1).toString().replaceAll("\\s", ""),
-				"\"string.raw\"{\"order\":\"asc\",\"mode\":\"min\"}");
+				"{\"string.raw\":{\"order\":\"asc\",\"mode\":\"min\"}}");
 	}
 }

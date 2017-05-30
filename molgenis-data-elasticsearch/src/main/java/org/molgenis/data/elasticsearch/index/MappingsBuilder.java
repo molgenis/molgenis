@@ -5,6 +5,7 @@ import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.EntityTypeUtils;
 
 import java.io.IOException;
 
@@ -74,9 +75,6 @@ public class MappingsBuilder
 		{
 			case BOOL:
 				jsonBuilder.field("type", "boolean");
-				// disable norms for numeric fields
-				// note: https://github.com/elasticsearch/elasticsearch/issues/5502
-				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -87,8 +85,7 @@ public class MappingsBuilder
 				EntityType refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
-					jsonBuilder.field("type", "nested");
-					jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+					jsonBuilder.field("type", EntityTypeUtils.isSingleReferenceType(attr) ? "object" : "nested");
 					jsonBuilder.startObject("properties");
 					for (Attribute refAttr : refEntity.getAtomicAttributes())
 					{
@@ -108,8 +105,6 @@ public class MappingsBuilder
 				throw new UnsupportedOperationException();
 			case DATE:
 				jsonBuilder.field("type", "date").field("format", "date");
-				// disable norms for numeric fields
-				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				// not-analyzed field for aggregation
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
@@ -118,8 +113,6 @@ public class MappingsBuilder
 				break;
 			case DATE_TIME:
 				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
-				// disable norms for numeric fields
-				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				// not-analyzed field for aggregation
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
@@ -128,20 +121,14 @@ public class MappingsBuilder
 				break;
 			case DECIMAL:
 				jsonBuilder.field("type", "double");
-				// disable norms for numeric fields
-				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case INT:
 				jsonBuilder.field("type", "integer");
 				// Fix sorting by using disk-based "fielddata" instead of in-memory "fielddata"
 				jsonBuilder.field("doc_values", true);
-				// disable norms for numeric fields
-				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case LONG:
 				jsonBuilder.field("type", "long");
-				// disable norms for numeric fields
-				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case EMAIL:
 			case ENUM:
@@ -150,7 +137,7 @@ public class MappingsBuilder
 			case TEXT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "string");
-				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+				jsonBuilder.field("norms", enableNorms);
 				// not-analyzed field for sorting and wildcard queries
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
@@ -168,7 +155,7 @@ public class MappingsBuilder
 			case SCRIPT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "string");
-				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+				jsonBuilder.field("norms", enableNorms);
 				// not-analyzed field for sorting and wildcard queries
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields

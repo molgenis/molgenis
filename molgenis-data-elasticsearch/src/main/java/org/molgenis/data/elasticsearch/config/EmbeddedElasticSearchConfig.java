@@ -1,8 +1,6 @@
 package org.molgenis.data.elasticsearch.config;
 
 import com.google.common.collect.Maps;
-import org.elasticsearch.common.logging.ESLoggerFactory;
-import org.elasticsearch.common.logging.slf4j.Slf4jESLoggerFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
@@ -30,12 +28,6 @@ import java.util.Map;
 @Import({ IndexConfig.class })
 public class EmbeddedElasticSearchConfig
 {
-	static
-	{
-		// force Elasticsearch to use slf4j instead of default log4j logging
-		ESLoggerFactory.setDefaultFactory(new Slf4jESLoggerFactory());
-	}
-
 	@Value("${elasticsearch.transport.tcp.port:@null}")
 	private String elasticsearchTransportTcpPort;
 
@@ -72,6 +64,7 @@ public class EmbeddedElasticSearchConfig
 
 		Map<String, String> providedSettings = Maps.newHashMapWithExpectedSize(2);
 		providedSettings.put("path.data", molgenisDataDirStr);
+		providedSettings.put("cluster.name", "molgenis");
 		if (elasticsearchTransportTcpPort != null)
 		{
 			providedSettings.put("transport.tcp.port", elasticsearchTransportTcpPort);

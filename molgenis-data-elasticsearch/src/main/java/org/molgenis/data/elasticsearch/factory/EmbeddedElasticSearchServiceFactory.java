@@ -1,22 +1,22 @@
 package org.molgenis.data.elasticsearch.factory;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.node.Node;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
+import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Map;
-
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
  * Factory for creating an embedded ElasticSearch server service. An elastic search config file named
@@ -31,7 +31,6 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
 	public static final String DEFAULT_INDEX_NAME = "molgenis";
 	private final Client client;
-	private final Node node;
 	private final String indexName;
 
 	public EmbeddedElasticSearchServiceFactory()
@@ -66,12 +65,22 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	{
 		this.indexName = indexName;
 
-		Builder builder = ImmutableSettings.settingsBuilder().loadFromClasspath(CONFIG_FILE_NAME);
+		File file = ResourceUtils.getFile(getClass(), "/" + CONFIG_FILE_NAME);
+		Settings.Builder builder = null;
+		try
+		{
+			builder = Settings.builder().loadFromPath(file.toPath());
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Error loading Elasticsearch settings from file " + CONFIG_FILE_NAME);
+		}
 		if (providedSettings != null) builder.put(providedSettings);
 
 		Settings settings = builder.build();
-		node = nodeBuilder().settings(settings).local(true).node();
-		client = node.client();
+
+		client = new PreBuiltTransportClient(settings)
+				.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress("127.0.0.1", 9300)));
 
 		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
@@ -91,7 +100,6 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	@Override
 	public void close() throws IOException
 	{
-
 		try
 		{
 			client.close();
@@ -100,17 +108,6 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		{
 			LOG.error("Error closing client", e);
 		}
-
-		try
-		{
-			node.close();
-		}
-		catch (Exception e)
-		{
-			LOG.error("Error closing node", e);
-		}
-
-		LOG.info("Elastic search server stopped");
 	}
 
 }

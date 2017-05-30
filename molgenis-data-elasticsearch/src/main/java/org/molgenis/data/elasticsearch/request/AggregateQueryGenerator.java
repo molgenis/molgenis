@@ -1,23 +1,16 @@
 package org.molgenis.data.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.nested.NestedBuilder;
-import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static java.lang.Integer.MAX_VALUE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
@@ -36,8 +29,8 @@ public class AggregateQueryGenerator
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
-	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1,
-			Attribute aggAttr2, Attribute aggAttrDistinct)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2,
+			Attribute aggAttrDistinct)
 	{
 		// validate request
 		if (aggAttr1 == null)
@@ -61,8 +54,7 @@ public class AggregateQueryGenerator
 		if (aggAttr1.isNillable() && isReferenceType(aggAttr1))
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
-			throw new IllegalArgumentException(
-					"Aggregatable attribute of type [" + dataType1 + "] cannot be nillable");
+			throw new IllegalArgumentException("Aggregatable attribute of type [" + dataType1 + "] cannot be nillable");
 		}
 		if (aggAttr2 != null)
 		{
@@ -84,132 +76,133 @@ public class AggregateQueryGenerator
 		{
 			aggAttrs.add(aggAttr2);
 		}
-		List<AggregationBuilder<?>> aggregationBuilders = createAggregations(aggAttrs, null, aggAttrDistinct);
+		// TODO fixme
+		List<AggregationBuilder> aggregationBuilders = createAggregations(aggAttrs, null, aggAttrDistinct);
 
 		// add all aggregations to builder
-		for (AggregationBuilder<?> aggregationBuilder : aggregationBuilders)
+		for (AggregationBuilder aggregationBuilder : aggregationBuilders)
 		{
 			searchRequestBuilder.addAggregation(aggregationBuilder);
 		}
 	}
 
-	private List<AggregationBuilder<?>> createAggregations(LinkedList<Attribute> attrs,
-			Attribute parentAttr, Attribute distinctAttr)
+	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr,
+			Attribute distinctAttr)
 	{
 		Attribute attr = attrs.pop();
 
-		List<AggregationBuilder<?>> aggs = new ArrayList<AggregationBuilder<?>>();
+		List<AggregationBuilder> aggs = new ArrayList<>();
 
-		// term aggregation
-		String termsAggName = attr.getName() + AGGREGATION_TERMS_POSTFIX;
-		String termsAggFieldName = getAggregateFieldName(attr);
-		AggregationBuilder<?> termsAgg = AggregationBuilders.terms(termsAggName).size(MAX_VALUE)
-				.field(termsAggFieldName);
-		aggs.add(termsAgg);
-
-		// missing term aggregation
-		if (attr.isNillable())
-		{
-			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
-			String missingAggFieldName = getAggregateFieldName(attr);
-			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName)
-					.field(missingAggFieldName);
-			aggs.add(missingTermsAgg);
-		}
-
-		// add distinct term aggregations
-		if (attrs.isEmpty() && distinctAttr != null)
-		{
-			// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
-			// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below
-			// which counts are expected to be close to accurate. Above this value, counts might become a bit more
-			// fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
-			// threshold of 40000.
-			String cardinalityAggName = distinctAttr.getName() + AGGREGATION_DISTINCT_POSTFIX;
-			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
-			CardinalityBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
-					.field(cardinalityAggFieldName).precisionThreshold(40000L);
-
-			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
-			AbstractAggregationBuilder wrappedDistinctAgg;
-			if (isNestedType(distinctAttr))
-			{
-				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
-				String nestedAggFieldName = getAggregatePathName(distinctAttr);
-				NestedBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
-				nestedBuilder.subAggregation(distinctAgg);
-
-				if (isNestedType(attr))
-				{
-					String reverseAggName = attr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
-					reverseNestedBuilder.subAggregation(nestedBuilder);
-					wrappedDistinctAgg = reverseNestedBuilder;
-				}
-				else
-				{
-					wrappedDistinctAgg = nestedBuilder;
-				}
-			}
-			else
-			{
-				if (isNestedType(attr))
-				{
-					String reverseAggName = attr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
-					reverseNestedBuilder.subAggregation(distinctAgg);
-					wrappedDistinctAgg = reverseNestedBuilder;
-				}
-				else
-				{
-					wrappedDistinctAgg = distinctAgg;
-				}
-			}
-
-			// add wrapped distinct term aggregation to aggregations
-			for (AggregationBuilder<?> agg : aggs)
-			{
-				agg.subAggregation(wrappedDistinctAgg);
-			}
-		}
-
-		// add sub aggregations
-		if (!attrs.isEmpty())
-		{
-			List<AggregationBuilder<?>> subAggs = createAggregations(attrs, attr, distinctAttr);
-			for (AggregationBuilder<?> agg : aggs)
-			{
-				for (AggregationBuilder<?> subAgg : subAggs)
-				{
-					agg.subAggregation(subAgg);
-				}
-			}
-		}
-
-		// wrap in nested aggregation is this aggregation is nested
-		if (isNestedType(attr))
-		{
-			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
-			String nestedAggFieldName = getAggregatePathName(attr);
-			NestedBuilder nestedAgg = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
-			for (AggregationBuilder<?> agg : aggs)
-			{
-				nestedAgg.subAggregation(agg);
-			}
-			aggs = Collections.<AggregationBuilder<?>>singletonList(nestedAgg);
-		}
-
-		// wrap in reverse nested aggregation if parent aggregation is nested
-		if (parentAttr != null && isNestedType(parentAttr))
-		{
-			String reverseAggName = parentAttr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
-			ReverseNestedBuilder reverseNestedAgg = AggregationBuilders.reverseNested(reverseAggName);
-			for (AggregationBuilder<?> agg : aggs)
-			{
-				reverseNestedAgg.subAggregation(agg);
-			}
-			aggs = Collections.<AggregationBuilder<?>>singletonList(reverseNestedAgg);
-		}
+		//		// term aggregation
+		//		String termsAggName = attr.getName() + AGGREGATION_TERMS_POSTFIX;
+		//		String termsAggFieldName = getAggregateFieldName(attr);
+		//		AggregationBuilder<?> termsAgg = AggregationBuilders.terms(termsAggName).size(MAX_VALUE)
+		//				.field(termsAggFieldName);
+		//		aggs.add(termsAgg);
+		//
+		//		// missing term aggregation
+		//		if (attr.isNillable())
+		//		{
+		//			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
+		//			String missingAggFieldName = getAggregateFieldName(attr);
+		//			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName)
+		//					.field(missingAggFieldName);
+		//			aggs.add(missingTermsAgg);
+		//		}
+		//
+		//		// add distinct term aggregations
+		//		if (attrs.isEmpty() && distinctAttr != null)
+		//		{
+		//			// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
+		//			// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below
+		//			// which counts are expected to be close to accurate. Above this value, counts might become a bit more
+		//			// fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
+		//			// threshold of 40000.
+		//			String cardinalityAggName = distinctAttr.getName() + AGGREGATION_DISTINCT_POSTFIX;
+		//			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
+		//			CardinalityBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
+		//					.field(cardinalityAggFieldName).precisionThreshold(40000L);
+		//
+		//			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
+		//			AbstractAggregationBuilder wrappedDistinctAgg;
+		//			if (isNestedType(distinctAttr))
+		//			{
+		//				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
+		//				String nestedAggFieldName = getAggregatePathName(distinctAttr);
+		//				NestedBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
+		//				nestedBuilder.subAggregation(distinctAgg);
+		//
+		//				if (isNestedType(attr))
+		//				{
+		//					String reverseAggName = attr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
+		//					ReverseNestedBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
+		//					reverseNestedBuilder.subAggregation(nestedBuilder);
+		//					wrappedDistinctAgg = reverseNestedBuilder;
+		//				}
+		//				else
+		//				{
+		//					wrappedDistinctAgg = nestedBuilder;
+		//				}
+		//			}
+		//			else
+		//			{
+		//				if (isNestedType(attr))
+		//				{
+		//					String reverseAggName = attr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
+		//					ReverseNestedBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
+		//					reverseNestedBuilder.subAggregation(distinctAgg);
+		//					wrappedDistinctAgg = reverseNestedBuilder;
+		//				}
+		//				else
+		//				{
+		//					wrappedDistinctAgg = distinctAgg;
+		//				}
+		//			}
+		//
+		//			// add wrapped distinct term aggregation to aggregations
+		//			for (AggregationBuilder<?> agg : aggs)
+		//			{
+		//				agg.subAggregation(wrappedDistinctAgg);
+		//			}
+		//		}
+		//
+		//		// add sub aggregations
+		//		if (!attrs.isEmpty())
+		//		{
+		//			List<AggregationBuilder<?>> subAggs = createAggregations(attrs, attr, distinctAttr);
+		//			for (AggregationBuilder<?> agg : aggs)
+		//			{
+		//				for (AggregationBuilder<?> subAgg : subAggs)
+		//				{
+		//					agg.subAggregation(subAgg);
+		//				}
+		//			}
+		//		}
+		//
+		//		// wrap in nested aggregation is this aggregation is nested
+		//		if (isNestedType(attr))
+		//		{
+		//			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
+		//			String nestedAggFieldName = getAggregatePathName(attr);
+		//			NestedBuilder nestedAgg = AggregationBuilders.nested(nestedAggName).path(nestedAggFieldName);
+		//			for (AggregationBuilder<?> agg : aggs)
+		//			{
+		//				nestedAgg.subAggregation(agg);
+		//			}
+		//			aggs = Collections.<AggregationBuilder<?>>singletonList(nestedAgg);
+		//		}
+		//
+		//		// wrap in reverse nested aggregation if parent aggregation is nested
+		//		if (parentAttr != null && isNestedType(parentAttr))
+		//		{
+		//			String reverseAggName = parentAttr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
+		//			ReverseNestedBuilder reverseNestedAgg = AggregationBuilders.reverseNested(reverseAggName);
+		//			for (AggregationBuilder<?> agg : aggs)
+		//			{
+		//				reverseNestedAgg.subAggregation(agg);
+		//			}
+		//			aggs = Collections.<AggregationBuilder<?>>singletonList(reverseNestedAgg);
+		//		}
 
 		return aggs;
 	}

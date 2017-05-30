@@ -3,8 +3,7 @@ package org.molgenis.data.elasticsearch.index;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ public class ElasticsearchIndexCreator
 	private void createIndexInternal(String indexName) throws IOException
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch index [" + indexName + "] ...");
-		Builder settings = ImmutableSettings.settingsBuilder().loadFromSource(
+		Settings.Builder settings = Settings.builder().loadFromSource(
 				XContentFactory.jsonBuilder().startObject().startObject("analysis").startObject("analyzer")
 						.startObject(DEFAULT_ANALYZER).field("type", "custom")
 						.field("filter", new String[] { "lowercase", DEFAULT_STEMMER })

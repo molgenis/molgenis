@@ -47,8 +47,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	public Explanation explain(Query<Entity> q, EntityType entityType, String documentId)
 	{
 		String type = documentIdGenerator.generateId(entityType);
-		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, DEFAULT_INDEX_NAME, type,
-				documentId);
+		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, null, DEFAULT_INDEX_NAME, type,
+				documentId); // FIXME
 		QueryBuilder queryBuilder = queryGenerator.createQueryBuilder(q.getRules(), entityType);
 		explainRequestBuilder.setQuery(queryBuilder);
 		ExplainResponse explainResponse = explainRequestBuilder.get();

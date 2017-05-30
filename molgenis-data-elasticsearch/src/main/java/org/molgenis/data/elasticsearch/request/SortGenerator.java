@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.request;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortMode;
 import org.elasticsearch.search.sort.SortOrder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -49,7 +50,8 @@ public class SortGenerator implements QueryPartGenerator
 
 				String sortField = getSortField(sortAttr);
 				SortOrder sortOrder = sortDirection == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
-				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder).sortMode("min");
+				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder)
+						.sortMode(SortMode.MIN);
 				searchRequestBuilder.addSort(sortBuilder);
 			}
 		}
