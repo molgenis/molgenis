@@ -1,8 +1,5 @@
 indices.query.bool.max_clause_count: 131072
 
 # disable automatic mapping creation
-#index.mapper.dynamic: false
-#index.number_of_shards: 1
-#index.number_of_replicas: 0
 network.host: localhost
 http.enabled: false
