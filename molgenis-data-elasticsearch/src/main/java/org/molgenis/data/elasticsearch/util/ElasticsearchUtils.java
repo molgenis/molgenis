@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.util;
 import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -26,6 +27,7 @@ import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
@@ -76,6 +79,10 @@ public class ElasticsearchUtils
 
 	private void refreshIndex(String index)
 	{
+		if (index == null)
+		{
+			index = "_all";
+		}
 		client.admin().indices().refresh(refreshRequest(index)).actionGet();
 	}
 
@@ -208,12 +215,31 @@ public class ElasticsearchUtils
 	 */
 	public boolean deleteMapping(String type, String indexName)
 	{
-		// FIXME
-		//throw new UnsupportedOperationException("FIXME");
-		//		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-		//				.setType(type).get();
-		//		return deleteMappingResponse.isAcknowledged();
-		return true;
+		DeleteIndexResponse deleteIndexResponse = client.admin().indices().prepareDelete(type).get();
+		return deleteIndexResponse.isAcknowledged();
+	}
+
+	public void createIndex(String indexName)
+	{
+		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
+		//		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
+		//		CreateIndexResponse createIndexResponse = client.admin().indices().prepareCreate(indexName).get();
+		//		if (!createIndexResponse.isAcknowledged())
+		//		{
+		//			throw new ElasticsearchException(format("Error creating index '%s'", indexName));
+		//		}
+		//		LOG.debug("Created Elasticsearch index '{}'.", indexName);
+	}
+
+	public void deleteIndex(String indexName)
+	{
+		LOG.trace("Deleting Elasticsearch index '{}' ...", indexName);
+		DeleteIndexResponse deleteIndexResponse = client.admin().indices().prepareDelete(indexName).get();
+		if (!deleteIndexResponse.isAcknowledged())
+		{
+			throw new ElasticsearchException(format("Error deleting index '%s'", indexName));
+		}
+		LOG.debug("Deleted Elasticsearch index '{}'.", indexName);
 	}
 
 	/**

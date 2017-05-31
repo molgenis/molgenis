@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.AtomicLongMap;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -57,7 +56,6 @@ public class ElasticsearchService implements SearchService
 
 	private static final int BATCH_SIZE = 1000;
 
-	private final String indexName;
 	private final DataService dataService;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final DocumentIdGenerator documentIdGenerator;
@@ -69,7 +67,6 @@ public class ElasticsearchService implements SearchService
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, DocumentIdGenerator documentIdGenerator)
 	{
-		this.indexName = requireNonNull(indexName);
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
@@ -80,6 +77,7 @@ public class ElasticsearchService implements SearchService
 
 	private SearchResult search(SearchRequest request)
 	{
+		String indexName = request.getEntityType() != null ? getIndexName(request.getEntityType()) : null;
 		SearchResponse response = elasticsearchFacade.search(SearchType.QUERY_THEN_FETCH, request, indexName);
 		return responseParser.parseSearchResponse(request, response, dataService);
 	}
@@ -87,8 +85,8 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public boolean hasMapping(EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
-		return elasticsearchFacade.getMappings(indexName).containsKey(documentType);
+		String indexName = getIndexName(entityType);
+		return elasticsearchFacade.indexExists(indexName);
 	}
 
 	@Override
@@ -97,13 +95,17 @@ public class ElasticsearchService implements SearchService
 		createMappings(entityType, true, true);
 	}
 
-	private void createMappings(String index, EntityType entityType, boolean enableNorms, boolean createAllIndex)
+	@Override
+	public void createMappings(EntityType entityType, boolean enableNorms, boolean createAllIndex)
 	{
+		String indexName = getIndexName(entityType);
+		elasticsearchFacade.createIndex(indexName);
+
 		try (XContentBuilder jsonBuilder = XContentFactory.jsonBuilder())
 		{
-			String documentType = documentIdGenerator.generateId(entityType);
+			String documentType = getIndexName(entityType);
 			MappingsBuilder.buildMapping(jsonBuilder, entityType, documentIdGenerator, enableNorms, createAllIndex);
-			elasticsearchFacade.putMapping(index, jsonBuilder, documentType);
+			elasticsearchFacade.putMapping(indexName, jsonBuilder, documentType);
 		}
 		catch (IOException e)
 		{
@@ -112,21 +114,9 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void createMappings(EntityType entityType, boolean enableNorms, boolean createAllIndex)
-	{
-		createMappings(indexName, entityType, enableNorms, createAllIndex);
-	}
-
-	@Override
-	public void refresh()
-	{
-		refreshIndex();
-	}
-
-	@Override
 	public void refreshIndex()
 	{
-		elasticsearchFacade.refresh(indexName);
+		elasticsearchFacade.refresh(null);
 	}
 
 	@Override
@@ -138,8 +128,8 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public long count(Query<Entity> q, EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
-		return elasticsearchFacade.getCount(q, entityType, documentType, indexName);
+		String documentType = getIndexName(entityType);
+		return elasticsearchFacade.getCount(q, entityType, documentType, documentType);
 	}
 
 	@Override
@@ -165,7 +155,7 @@ public class ElasticsearchService implements SearchService
 
 	private long index(Stream<? extends Entity> entityStream, EntityType entityType, boolean addReferences)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
+		String documentType = getIndexName(entityType);
 
 		Stream<IndexRequest> indexRequestStream = entityStream
 				.flatMap(entity -> createIndexRequestStreamForEntity(entity, entityType, documentType, addReferences));
@@ -267,7 +257,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	/**
-	 * Creates an IndexRequest for an entity in index {@link #indexName}.
+	 * Creates an IndexRequest for an entity.
 	 *
 	 * @param entity     the entity that will be indexed
 	 * @param entityType {@link EntityType} of the entity
@@ -275,6 +265,7 @@ public class ElasticsearchService implements SearchService
 	 */
 	private IndexRequest createIndexRequestForEntity(Entity entity, EntityType entityType, String type)
 	{
+		String indexName = getIndexName(entityType);
 		String id = toElasticsearchId(entity, entityType);
 		XContentBuilder xContentBuilder = elasticsearchEntityFactory.create(entity);
 		LOG.trace("Indexing [{}] with id [{}] in index [{}]...", type, id, indexName);
@@ -291,8 +282,8 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void deleteById(String id, EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
-		elasticsearchFacade.deleteById(indexName, id, documentType);
+		String indexName = getIndexName(entityType);
+		elasticsearchFacade.deleteById(indexName, id, indexName);
 	}
 
 	@Override
@@ -318,18 +309,8 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void delete(EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
-
-		if (elasticsearchFacade.isTypeExists(documentType, indexName) && !elasticsearchFacade
-				.deleteMapping(documentType, indexName))
-		{
-			throw new ElasticsearchException("Delete of mapping for type '" + documentType + "' failed.");
-		}
-
-		if (!elasticsearchFacade.deleteAllDocumentsOfType(documentType, indexName))
-		{
-			throw new ElasticsearchException("Deleting all documents of type '" + documentType + "' failed.");
-		}
+		String documentType = getIndexName(entityType);
+		elasticsearchFacade.deleteIndex(documentType);
 	}
 
 	@Override
@@ -347,9 +328,9 @@ public class ElasticsearchService implements SearchService
 
 	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityType entityType)
 	{
-		String documentType = documentIdGenerator.generateId(entityType);
+		String indexName = getIndexName(entityType);
 		return new ElasticsearchEntityIterable(q, entityType, elasticsearchFacade, elasticsearchEntityFactory,
-				searchRequestGenerator, indexName, documentType);
+				searchRequestGenerator, indexName, indexName);
 	}
 
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
@@ -358,9 +339,9 @@ public class ElasticsearchService implements SearchService
 				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_THEN_FETCH, entityType, query, null, null,
 						null);
 
-		String documentType = documentIdGenerator.generateId(entityType);
+		String indexName = getIndexName(entityType);
 		return elasticsearchFacade
-				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), documentType, indexName)
+				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), indexName, indexName)
 				.map(idString -> convert(idString, entityType.getIdAttribute()))
 				.map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject));
 	}
@@ -375,12 +356,6 @@ public class ElasticsearchService implements SearchService
 		SearchRequest searchRequest = SearchRequest.create(entityType, q, xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
-	}
-
-	@Override
-	public void flush()
-	{
-		elasticsearchFacade.flushIndex(indexName);
 	}
 
 	@Override
@@ -405,5 +380,10 @@ public class ElasticsearchService implements SearchService
 	public Entity findOne(Query<Entity> q, EntityType entityType)
 	{
 		return FluentIterable.from(search(q, entityType)).first().orNull();
+	}
+
+	private String getIndexName(EntityType entityType)
+	{
+		return documentIdGenerator.generateId(entityType);
 	}
 }

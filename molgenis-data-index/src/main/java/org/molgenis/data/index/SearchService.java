@@ -17,11 +17,6 @@ public interface SearchService
 
 	void createMappings(EntityType entityType, boolean enableNorms, boolean createAllIndex);
 
-	/**
-	 * Refresh index, making all operations performed since the last refresh available for search
-	 */
-	void refresh();
-
 	long count(EntityType entityType);
 
 	long count(Query<Entity> q, EntityType entityType);
@@ -84,11 +79,6 @@ public interface SearchService
 	Stream<Entity> searchAsStream(Query<Entity> q, EntityType entityType);
 
 	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityType entityType);
-
-	/**
-	 * Frees memory from the index by flushing data to the index storage and clearing the internal transaction log
-	 */
-	void flush();
 
 	void rebuildIndex(Repository<? extends Entity> repository);
 

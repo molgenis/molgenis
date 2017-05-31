@@ -60,7 +60,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 
 	private String cleanName(String name)
 	{
-		return PATTERN_ALPHANUMERIC_REPLACE.matcher(name).replaceAll("");
+		return PATTERN_ALPHANUMERIC_REPLACE.matcher(name).replaceAll("").toLowerCase();
 	}
 
 	private String truncateName(String name)
