@@ -55,6 +55,13 @@ public class RestControllerV2IT
 
 		adminToken = RestTestUtils.login(adminUserName, adminPassword);
 
+		LOG.info("Clean up test entities if they already exist...");
+		removeEntity(adminToken, "it_emx_datatypes_TypeTestv2");
+		removeEntity(adminToken, "it_emx_datatypes_TypeTestRefv2");
+		removeEntity(adminToken, "it_emx_datatypes_Locationv2");
+		removeEntity(adminToken, "it_emx_datatypes_Personv2");
+		LOG.info("Cleaned up existing test entities.");
+
 		LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
 		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
 		LOG.info("Importing Done");
