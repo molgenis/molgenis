@@ -102,6 +102,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private IndexActionRegisterServiceImpl indexActionRegisterService;
 	@Autowired
 	private L10nStringFactory l10nStringFactory;
+
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
 	 */
@@ -455,7 +456,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
 
 		Supplier<Stream<TestEntityStatic>> retrieved = () -> dataService.findAll(entityTypeStatic.getId(),
-						Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntityStatic.class);
+				Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntityStatic.class);
 		assertEquals(retrieved.get().count(), entities.size());
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
@@ -500,8 +501,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(attrName, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(attrName, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -523,8 +524,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(2).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.in(ATTR_ID, ids).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).in(ATTR_ID, ids).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -546,8 +546,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.lt(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).lt(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -569,8 +569,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.le(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).le(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -592,8 +592,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.gt(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).gt(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -615,8 +615,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.ge(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).ge(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -638,8 +638,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.rng(ATTR_INT, low, high).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).rng(ATTR_INT, low, high)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -660,8 +660,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(2).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.like(ATTR_STRING, likeStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).like(ATTR_STRING, likeStr)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -683,8 +683,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).not()
-				.eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).not().eq(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -735,8 +735,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(ATTR_STRING, strValue)
+				.and().eq(ATTR_INT, value).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -758,8 +758,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(ATTR_STRING, strValue)
+				.or().eq(ATTR_INT, value).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -784,9 +784,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest()
-				.findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(ATTR_BOOL, boolValue)
+				.and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest().findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -807,8 +806,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = createDynamic(2).collect(toList());
 		dataService.add(entityTypeDynamic.getId(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.search(ATTR_HTML, searchStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).search(ATTR_HTML, searchStr)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -877,14 +876,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity entity = createDynamic(1).findFirst().get();
 		dataService.add(entityTypeDynamic.getId(), Stream.of(entity));
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		assertNotNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue(),
-				new Fetch().field(ATTR_ID)));
+		assertNotNull(
+				dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
 	@Test(singleThreaded = true)
 	public void testFindOneFetchTypedStatic()
 	{
-		TestEntityStatic entity = new TestEntityStatic(entityTypeStatic);
+		Entity entity = createStatic(1).findFirst().get();
 		entity.set(ATTR_ID, "1");
 		entity.set(ATTR_STRING, "string1");
 		entity.set(ATTR_BOOL, true);
@@ -914,8 +913,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity entity = createStatic(1).findFirst().get();
 		dataService.add(entityTypeStatic.getId(), entity);
 		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-		TestEntityStatic testEntityStatic = dataService.findOne(entityTypeStatic.getId(),
-				new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()), TestEntityStatic.class);
+		TestEntityStatic testEntityStatic = dataService
+				.findOne(entityTypeStatic.getId(), new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()),
+						TestEntityStatic.class);
 		assertNotNull(testEntityStatic);
 		assertEquals(testEntityStatic.getId(), entity.getIdValue());
 	}
@@ -1393,8 +1393,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			q0.pageSize(10); // L3 only caches queries with a page size
 			q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-			List actual = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue)
-					.collect(toList());
+			List actual = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue).collect(toList());
 			assertEquals(actual, Arrays.asList());
 
 			// Remove added attribute

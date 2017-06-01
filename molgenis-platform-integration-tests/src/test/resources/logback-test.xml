@@ -5,6 +5,7 @@
         </encoder>
     </appender>
     <logger name="org.molgenis" level="INFO"/>
+    <logger name="org.molgenis.data.elasticsearch" level="TRACE"/>
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
