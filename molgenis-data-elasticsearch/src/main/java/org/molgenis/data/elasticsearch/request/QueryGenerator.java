@@ -3,10 +3,7 @@ package org.molgenis.data.elasticsearch.request;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.DisMaxQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.molgenis.data.*;
@@ -17,6 +14,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -149,8 +147,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case GREATER_EQUAL:
 			case LESS:
 			case LESS_EQUAL:
-				throw new RuntimeException("FIXME not implemented");
-				//return createQueryClauseRangeOpen(queryRule, entityType);
+				return createQueryClauseRangeOpen(queryRule, entityType);
 			case IN:
 				throw new RuntimeException("FIXME not implemented");
 				// return createQueryClauseIn(queryRule, entityType);
@@ -159,8 +156,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case NESTED:
 				return createQueryClauseNested(queryRule, entityType);
 			case RANGE:
-				throw new RuntimeException("FIXME not implemented");
-				// return createQueryClauseRangeClosed(queryRule, entityType);
+				return createQueryClauseRangeClosed(queryRule, entityType);
 			case SEARCH:
 				return createQueryClauseSearch(queryRule, entityType);
 			case SHOULD:
@@ -506,7 +502,8 @@ public class QueryGenerator implements QueryPartGenerator
 			case HYPERLINK:
 			case STRING:
 				return nestedQueryBuilder(attributePath,
-						QueryBuilders.matchQuery(fieldName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue).analyzer(DEFAULT_ANALYZER));
+						QueryBuilders.matchQuery(fieldName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue)
+								.analyzer(DEFAULT_ANALYZER));
 			case BOOL:
 			case COMPOUND:
 			case DATE:
@@ -541,34 +538,31 @@ public class QueryGenerator implements QueryPartGenerator
 		return createQueryBuilder(nestedQueryRules, entityType);
 	}
 
-	/*
-		private QueryBuilder createQueryClauseRangeClosed(QueryRule queryRule, EntityType entityType)
+	private QueryBuilder createQueryClauseRangeClosed(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+		validateNumericalQueryField(attr);
+		String fieldName = getQueryFieldName(attributePath);
+
+		Object queryValue = getQueryValue(attr, queryRule.getValue());
+		if (queryValue == null)
 		{
-			List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
-			Attribute attr = attributePath.get(attributePath.size() - 1);
-			validateNumericalQueryField(attr);
-			String fieldName = getQueryFieldName(attributePath);
-
-			Object queryValue = getQueryValue(attr, queryRule.getValue());
-			if (queryValue == null)
-			{
-				throw new MolgenisQueryException("Query value cannot be null");
-			}
-			if (!(queryValue instanceof Iterable<?>))
-			{
-				throw new MolgenisQueryException(
-						format("Query value must be a Iterable instead of [%s]", queryValue.getClass().getSimpleName()));
-			}
-			Iterator<?> queryValuesIterator = ((Iterable<?>) queryValue).iterator();
-			Object queryValueFrom = getQueryValue(attr, queryValuesIterator.next());
-			Object queryValueTo = getQueryValue(attr, queryValuesIterator.next());
-
-			FilterBuilder filterBuilder = FilterBuilders.rangeFilter(fieldName).gte(queryValueFrom).lte(queryValueTo);
-			filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-			return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+			throw new MolgenisQueryException("Query value cannot be null");
 		}
-	*/
-/*
+		if (!(queryValue instanceof Iterable<?>))
+		{
+			throw new MolgenisQueryException(
+					format("Query value must be a Iterable instead of [%s]", queryValue.getClass().getSimpleName()));
+		}
+		Iterator<?> queryValuesIterator = ((Iterable<?>) queryValue).iterator();
+		Object queryValueFrom = getQueryValue(attr, queryValuesIterator.next());
+		Object queryValueTo = getQueryValue(attr, queryValuesIterator.next());
+
+		return QueryBuilders.constantScoreQuery(nestedQueryBuilder(attributePath,
+				QueryBuilders.rangeQuery(fieldName).gte(queryValueFrom).lte(queryValueTo)));
+	}
+
 	private QueryBuilder createQueryClauseRangeOpen(QueryRule queryRule, EntityType entityType)
 	{
 		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
@@ -582,7 +576,7 @@ public class QueryGenerator implements QueryPartGenerator
 			throw new MolgenisQueryException("Query value cannot be null");
 		}
 
-		RangeFilterBuilder filterBuilder = FilterBuilders.rangeFilter(fieldName);
+		RangeQueryBuilder filterBuilder = QueryBuilders.rangeQuery(fieldName);
 		QueryRule.Operator operator = queryRule.getOperator();
 		switch (operator)
 		{
@@ -616,10 +610,9 @@ public class QueryGenerator implements QueryPartGenerator
 				throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
 		}
 
-		return QueryBuilders
-				.filteredQuery(QueryBuilders.matchAllQuery(), nestedFilterBuilder(attributePath, filterBuilder));
+		return QueryBuilders.constantScoreQuery(nestedQueryBuilder(attributePath, filterBuilder));
 	}
-*/
+
 	private QueryBuilder createQueryClauseSearch(QueryRule queryRule, EntityType entityType)
 	{
 		if (queryRule.getValue() == null)
