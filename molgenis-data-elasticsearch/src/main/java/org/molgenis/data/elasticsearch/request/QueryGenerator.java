@@ -138,17 +138,16 @@ public class QueryGenerator implements QueryPartGenerator
 			case EQUALS:
 				return createQueryClauseEquals(queryRule, entityType);
 			case FUZZY_MATCH:
-				throw new RuntimeException("FIXME not implemented");
-				//return createQueryClauseFuzzyMatch(queryRule, entityType);
+				return createQueryClauseFuzzyMatch(queryRule, entityType);
 			case FUZZY_MATCH_NGRAM:
-				throw new RuntimeException("FIXME not implemented");
-				//return createQueryClauseFuzzyMatchNgram(queryRule, entityType);
+				return createQueryClauseFuzzyMatchNgram(queryRule, entityType);
 			case GREATER:
 			case GREATER_EQUAL:
 			case LESS:
 			case LESS_EQUAL:
 				return createQueryClauseRangeOpen(queryRule, entityType);
 			case IN:
+				// FIXME
 				throw new RuntimeException("FIXME not implemented");
 				// return createQueryClauseIn(queryRule, entityType);
 			case LIKE:
@@ -303,65 +302,63 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	/*
-		private QueryBuilder createQueryClauseFuzzyMatch(QueryRule queryRule, EntityType entityType)
+	private QueryBuilder createQueryClauseFuzzyMatch(QueryRule queryRule, EntityType entityType)
+	{
+		String queryField = queryRule.getField();
+		Object queryValue = queryRule.getValue();
+
+		QueryBuilder queryBuilder;
+		if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+
+		if (queryField == null)
 		{
-			String queryField = queryRule.getField();
-			Object queryValue = queryRule.getValue();
-
-			QueryBuilder queryBuilder;
-			if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-
-			if (queryField == null)
-			{
-				queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
-			}
-			else
-			{
-				Attribute attr = entityType.getAttribute(queryField);
-				if (attr == null) throw new UnknownAttributeException(queryField);
-				// construct query part
-				AttributeType dataType = attr.getDataType();
-				switch (dataType)
-				{
-					case DATE:
-					case DATE_TIME:
-					case DECIMAL:
-					case EMAIL:
-					case ENUM:
-					case HTML:
-					case HYPERLINK:
-					case INT:
-					case LONG:
-					case SCRIPT:
-					case STRING:
-					case TEXT:
-						queryBuilder = QueryBuilders.queryStringQuery(getQueryFieldName(attr) + ":(" + queryValue + ")");
-						break;
-					case MREF:
-					case XREF:
-					case CATEGORICAL:
-					case CATEGORICAL_MREF:
-					case ONE_TO_MANY:
-					case FILE:
-						queryField =
-								getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute());
-						queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
-								QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")")).scoreMode("max");
-						break;
-					case BOOL:
-					case COMPOUND:
-						throw new MolgenisQueryException(
-								"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH
-										+ "]");
-					default:
-						throw new RuntimeException("Unknown data type [" + dataType + "]");
-				}
-			}
-			return queryBuilder;
+			queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
 		}
-	*/
-/*
+		else
+		{
+			Attribute attr = entityType.getAttribute(queryField);
+			if (attr == null) throw new UnknownAttributeException(queryField);
+			// construct query part
+			AttributeType dataType = attr.getDataType();
+			switch (dataType)
+			{
+				case DATE:
+				case DATE_TIME:
+				case DECIMAL:
+				case EMAIL:
+				case ENUM:
+				case HTML:
+				case HYPERLINK:
+				case INT:
+				case LONG:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					queryBuilder = QueryBuilders.queryStringQuery(getQueryFieldName(attr) + ":(" + queryValue + ")");
+					break;
+				case MREF:
+				case XREF:
+				case CATEGORICAL:
+				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
+				case FILE:
+					queryField =
+							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute());
+					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
+							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
+					break;
+				case BOOL:
+				case COMPOUND:
+					throw new MolgenisQueryException(
+							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH
+									+ "]");
+				default:
+					throw new RuntimeException("Unknown data type [" + dataType + "]");
+			}
+		}
+		return queryBuilder;
+	}
+
 	private QueryBuilder createQueryClauseFuzzyMatchNgram(QueryRule queryRule, EntityType entityType)
 	{
 		String queryField = queryRule.getField();
@@ -403,7 +400,7 @@ public class QueryGenerator implements QueryPartGenerator
 							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute())
 									+ ".ngram";
 					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
-							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")")).scoreMode("max");
+							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
 					break;
 				default:
 					throw new RuntimeException("Unknown data type [" + dataType + "]");
@@ -411,82 +408,82 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 		return queryBuilder;
 	}
-*/
-/*
-	private QueryBuilder createQueryClauseIn(QueryRule queryRule, EntityType entityType)
-	{
-		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
-		Attribute attr = attributePath.get(attributePath.size() - 1);
 
-		Object queryRuleValue = queryRule.getValue();
-		if (queryRuleValue == null)
+	/*
+		private QueryBuilder createQueryClauseIn(QueryRule queryRule, EntityType entityType)
 		{
-			throw new MolgenisQueryException("Query value cannot be null");
-		}
-		if (!(queryRuleValue instanceof Iterable<?>))
-		{
-			throw new MolgenisQueryException(
-					"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
-		}
-		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
-				.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
+			List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+			Attribute attr = attributePath.get(attributePath.size() - 1);
 
-		FilterBuilder filterBuilder;
-		String fieldName = getQueryFieldName(attr);
-		AttributeType dataType = attr.getDataType();
-		switch (dataType)
-		{
-			case BOOL:
-			case DATE:
-			case DATE_TIME:
-			case DECIMAL:
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case INT:
-			case LONG:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				if (useNotAnalyzedField(attr))
-				{
-					fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
-				}
-				// note: inFilter expects array, not iterable
-				filterBuilder = FilterBuilders.inFilter(fieldName, queryValues);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-				break;
-			case CATEGORICAL:
-			case CATEGORICAL_MREF:
-			case MREF:
-			case XREF:
-			case FILE:
-			case ONE_TO_MANY:
-				if (attributePath.size() > 1)
-				{
-					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-				}
-
-				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
-				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
-				String indexFieldName = getQueryFieldName(refAttributePath);
-				if (useNotAnalyzedField(refIdAttr))
-				{
-					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
-				}
-				filterBuilder = FilterBuilders.inFilter(indexFieldName, queryValues);
-				filterBuilder = FilterBuilders.nestedFilter(fieldName, filterBuilder);
-				break;
-			case COMPOUND:
+			Object queryRuleValue = queryRule.getValue();
+			if (queryRuleValue == null)
+			{
+				throw new MolgenisQueryException("Query value cannot be null");
+			}
+			if (!(queryRuleValue instanceof Iterable<?>))
+			{
 				throw new MolgenisQueryException(
-						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
-			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+						"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
+			}
+			Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
+					.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
+
+			FilterBuilder filterBuilder;
+			String fieldName = getQueryFieldName(attr);
+			AttributeType dataType = attr.getDataType();
+			switch (dataType)
+			{
+				case BOOL:
+				case DATE:
+				case DATE_TIME:
+				case DECIMAL:
+				case EMAIL:
+				case ENUM:
+				case HTML:
+				case HYPERLINK:
+				case INT:
+				case LONG:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					if (useNotAnalyzedField(attr))
+					{
+						fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
+					}
+					// note: inFilter expects array, not iterable
+					filterBuilder = FilterBuilders.inFilter(fieldName, queryValues);
+					filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+					break;
+				case CATEGORICAL:
+				case CATEGORICAL_MREF:
+				case MREF:
+				case XREF:
+				case FILE:
+				case ONE_TO_MANY:
+					if (attributePath.size() > 1)
+					{
+						throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+					}
+
+					Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
+					List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
+					String indexFieldName = getQueryFieldName(refAttributePath);
+					if (useNotAnalyzedField(refIdAttr))
+					{
+						indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
+					}
+					filterBuilder = FilterBuilders.inFilter(indexFieldName, queryValues);
+					filterBuilder = FilterBuilders.nestedFilter(fieldName, filterBuilder);
+					break;
+				case COMPOUND:
+					throw new MolgenisQueryException(
+							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
+				default:
+					throw new RuntimeException("Unknown data type [" + dataType + "]");
+			}
+			return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 		}
-		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-	}
-*/
+	*/
 	private QueryBuilder createQueryClauseLike(QueryRule queryRule, EntityType entityType)
 	{
 		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
