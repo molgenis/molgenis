@@ -1,11 +1,41 @@
 package org.molgenis.data.elasticsearch.request;
 
+//import org.elasticsearch.action.search.SearchRequestBuilder;
+//import org.elasticsearch.index.query.BoolQueryBuilder;
+//import org.elasticsearch.index.query.QueryBuilder;
+//import org.elasticsearch.index.query.QueryBuilders;
+//import org.mockito.ArgumentCaptor;
+
 import org.molgenis.data.AbstractMolgenisSpringTest;
+//import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+//import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
+//import org.molgenis.data.meta.model.Attribute;
+//import org.molgenis.data.meta.model.AttributeFactory;
+//import org.molgenis.data.meta.model.EntityType;
+//import org.molgenis.data.meta.model.EntityTypeFactory;
+//import org.molgenis.data.support.DynamicEntity;
+//import org.molgenis.data.support.QueryImpl;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.testng.annotations.BeforeMethod;
+//import org.testng.annotations.Test;
+//
+//import java.text.ParseException;
+//import java.time.Instant;
+//import java.time.LocalDate;
+//import java.util.Arrays;
+//
+//import static java.util.Arrays.asList;
+//import static org.mockito.Matchers.any;
+//import static org.mockito.Mockito.*;
+//import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+//import static org.molgenis.data.meta.AttributeType.*;
+//import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+//import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+//import static org.testng.Assert.assertEquals;
 
 // FIXME add nillable tests
 public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 {
-	// FIXME
 	//	private static final String idAttrName = "xid";
 	//
 	//	private static final String boolAttrName = "xbool";
@@ -398,8 +428,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	//		queryGenerator.generate(searchRequestBuilder, q, entityType);
 	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.inFilter(dateAttrName, new Object[] { date1.toString(), date2.toString() }));
+	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+	//				FilterBuilders.inFilter(dateAttrName, new Object[] { date1.toString(), date2.toString() }));
 	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	//	}
 	//
@@ -413,8 +443,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	//		queryGenerator.generate(searchRequestBuilder, q, entityType);
 	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.inFilter(dateTimeAttrName, new Object[] { date1.toString(), date2.toString() }));
+	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+	//				FilterBuilders.inFilter(dateTimeAttrName, new Object[] { date1.toString(), date2.toString() }));
 	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	//	}
 	//
@@ -1657,8 +1687,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 	//		verify(searchRequestBuilder).setQuery(captor.capture());
 	//		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
-	//				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//						.termFilter(dateTimeAttrName, value.toString())));
+	//				.filteredQuery(QueryBuilders.matchAllQuery(),
+	//						FilterBuilders.termFilter(dateTimeAttrName, value.toString())));
 	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	//	}
 	//
