@@ -1,6 +1,5 @@
 package org.molgenis.data.elasticsearch.request;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.*;
@@ -39,7 +38,6 @@ public class QueryGenerator implements QueryPartGenerator
 
 	public QueryGenerator(DocumentIdGenerator documentIdGenerator)
 	{
-
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
@@ -800,40 +798,6 @@ public class QueryGenerator implements QueryPartGenerator
 		{
 			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
 		}
-	}
-
-	private String getFieldName(QueryRule queryRule, EntityType entityType)
-	{
-		String queryRuleFieldName = queryRule.getField();
-		if (queryRuleFieldName == null)
-		{
-			return null;
-		}
-
-		StringBuilder fieldNameBuilder = new StringBuilder();
-		String[] queryRuleFieldNameTokens = StringUtils.split(queryRuleFieldName, '.');
-		EntityType entityTypeAtDepth = entityType;
-		for (int depth = 0; depth < queryRuleFieldNameTokens.length; ++depth)
-		{
-			String attrName = queryRuleFieldNameTokens[depth];
-			Attribute attr = entityTypeAtDepth.getAttribute(attrName);
-			if (attr == null)
-			{
-				throw new UnknownAttributeException(
-						format("Unknown attribute [%s] of entity type [%s]", attrName, entityTypeAtDepth.getId()));
-			}
-			if (depth > 0)
-			{
-				fieldNameBuilder.append(ATTRIBUTE_SEPARATOR);
-			}
-			fieldNameBuilder.append(getQueryFieldName(attr));
-
-			if (depth < queryRuleFieldNameTokens.length - 1)
-			{
-				entityTypeAtDepth = attr.getRefEntity();
-			}
-		}
-		return fieldNameBuilder.toString();
 	}
 
 	private String getQueryFieldName(List<Attribute> attributePath)
