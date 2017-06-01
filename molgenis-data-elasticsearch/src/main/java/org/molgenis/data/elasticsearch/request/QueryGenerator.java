@@ -657,13 +657,15 @@ public class QueryGenerator implements QueryPartGenerator
 			case MREF:
 			case ONE_TO_MANY:
 			case XREF:
-				//				case FILE:
-				//					if (attributePath.size() > 1)
-				//					{
-				//						throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-				//					}
-				//					return QueryBuilders
-				//							.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue));
+			case FILE:
+				if (attributePath.size() > 1)
+				{
+					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+				}
+				// TODO which score mode?
+				return QueryBuilders
+						.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue),
+								ScoreMode.Avg);
 			case BOOL:
 				throw new MolgenisQueryException("Cannot execute search query on [" + dataType + "] attribute");
 			case COMPOUND:
