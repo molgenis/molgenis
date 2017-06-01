@@ -16,6 +16,7 @@ import org.molgenis.data.meta.model.EntityType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -147,9 +148,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case LESS_EQUAL:
 				return createQueryClauseRangeOpen(queryRule, entityType);
 			case IN:
-				// FIXME
-				throw new RuntimeException("FIXME not implemented");
-				// return createQueryClauseIn(queryRule, entityType);
+				return createQueryClauseIn(queryRule, entityType);
 			case LIKE:
 				return createQueryClauseLike(queryRule, entityType);
 			case NESTED:
@@ -409,81 +408,81 @@ public class QueryGenerator implements QueryPartGenerator
 		return queryBuilder;
 	}
 
-	/*
-		private QueryBuilder createQueryClauseIn(QueryRule queryRule, EntityType entityType)
+	private QueryBuilder createQueryClauseIn(QueryRule queryRule, EntityType entityType)
+	{
+		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+		Attribute attr = attributePath.get(attributePath.size() - 1);
+
+		Object queryRuleValue = queryRule.getValue();
+		if (queryRuleValue == null)
 		{
-			List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
-			Attribute attr = attributePath.get(attributePath.size() - 1);
-
-			Object queryRuleValue = queryRule.getValue();
-			if (queryRuleValue == null)
-			{
-				throw new MolgenisQueryException("Query value cannot be null");
-			}
-			if (!(queryRuleValue instanceof Iterable<?>))
-			{
-				throw new MolgenisQueryException(
-						"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
-			}
-			Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
-					.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
-
-			FilterBuilder filterBuilder;
-			String fieldName = getQueryFieldName(attr);
-			AttributeType dataType = attr.getDataType();
-			switch (dataType)
-			{
-				case BOOL:
-				case DATE:
-				case DATE_TIME:
-				case DECIMAL:
-				case EMAIL:
-				case ENUM:
-				case HTML:
-				case HYPERLINK:
-				case INT:
-				case LONG:
-				case SCRIPT:
-				case STRING:
-				case TEXT:
-					if (useNotAnalyzedField(attr))
-					{
-						fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
-					}
-					// note: inFilter expects array, not iterable
-					filterBuilder = FilterBuilders.inFilter(fieldName, queryValues);
-					filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-					break;
-				case CATEGORICAL:
-				case CATEGORICAL_MREF:
-				case MREF:
-				case XREF:
-				case FILE:
-				case ONE_TO_MANY:
-					if (attributePath.size() > 1)
-					{
-						throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-					}
-
-					Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
-					List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
-					String indexFieldName = getQueryFieldName(refAttributePath);
-					if (useNotAnalyzedField(refIdAttr))
-					{
-						indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
-					}
-					filterBuilder = FilterBuilders.inFilter(indexFieldName, queryValues);
-					filterBuilder = FilterBuilders.nestedFilter(fieldName, filterBuilder);
-					break;
-				case COMPOUND:
-					throw new MolgenisQueryException(
-							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
-				default:
-					throw new RuntimeException("Unknown data type [" + dataType + "]");
-			}
-			return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+			throw new MolgenisQueryException("Query value cannot be null");
 		}
-	*/
+		if (!(queryRuleValue instanceof Iterable<?>))
+		{
+			throw new MolgenisQueryException(
+					"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
+		}
+		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
+				.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
+
+		QueryBuilder queryBuilder;
+		String fieldName = getQueryFieldName(attr);
+		AttributeType dataType = attr.getDataType();
+		switch (dataType)
+		{
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				if (useNotAnalyzedField(attr))
+				{
+					fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
+				}
+				// note: inFilter expects array, not iterable
+				queryBuilder = QueryBuilders.termsQuery(fieldName, queryValues);
+				queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
+				break;
+			case CATEGORICAL:
+			case CATEGORICAL_MREF:
+			case MREF:
+			case XREF:
+			case FILE:
+			case ONE_TO_MANY:
+				if (attributePath.size() > 1)
+				{
+					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+				}
+
+				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
+				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
+				String indexFieldName = getQueryFieldName(refAttributePath);
+				if (useNotAnalyzedField(refIdAttr))
+				{
+					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
+				}
+				queryBuilder = QueryBuilders.termsQuery(indexFieldName, queryValues);
+				// TODO which score mode?
+				queryBuilder = QueryBuilders.nestedQuery(fieldName, queryBuilder, ScoreMode.Avg);
+				break;
+			case COMPOUND:
+				throw new MolgenisQueryException(
+						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
+		return QueryBuilders.constantScoreQuery(queryBuilder);
+	}
+
 	private QueryBuilder createQueryClauseLike(QueryRule queryRule, EntityType entityType)
 	{
 		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
