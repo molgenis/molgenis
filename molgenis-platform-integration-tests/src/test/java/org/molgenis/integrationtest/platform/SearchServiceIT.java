@@ -6,6 +6,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
 	@Autowired
 	private SearchService searchService;
+	@Autowired
+	private ElasticSearchExplainService explainService;
 
 	@BeforeMethod
 	public void setUp()
