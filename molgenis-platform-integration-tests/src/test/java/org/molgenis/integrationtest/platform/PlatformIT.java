@@ -1,6 +1,8 @@
 package org.molgenis.integrationtest.platform;
 
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.*;
@@ -13,6 +15,7 @@ import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.staticentity.TestEntityStatic;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -1563,5 +1566,104 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			});
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		});
+	}
+
+	@Test(singleThreaded = true)
+	public void testOneDimensionalAggregateQuery()
+	{
+		Stream<Entity> entities = createDynamic(6);
+		dataService.add(entityTypeDynamic.getId(), entities);
+		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		AggregateQuery query = new AggregateQueryImpl(x, null, null, new QueryImpl<>());
+		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(3L), singletonList(3L)),
+				asList("F", "T"), emptyList());
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testTwoDimensionalAggregateQuery()
+	{
+		Stream<Entity> entities = createDynamic(6);
+		dataService.add(entityTypeDynamic.getId(), entities);
+		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		Attribute y = entityTypeDynamic.getAttribute(ATTR_ENUM);
+		AggregateQuery query = new AggregateQueryImpl(x, y, null, new QueryImpl<>());
+		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 3L), asList(3L, 0L)), asList("F", "T"),
+				asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testOneDimensionalDistinctAggregateQuery()
+	{
+		Stream<Entity> entities = createDynamic(6);
+		dataService.add(entityTypeDynamic.getId(), entities);
+		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		Attribute distinct = entityTypeDynamic.getAttribute(ATTR_ENUM);
+		AggregateQuery query = new AggregateQueryImpl(x, null, distinct, new QueryImpl<>());
+		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult expectedResult = new AggregateResult(singletonList(asList(1L, 1L)), asList("F", "T"),
+				emptyList());
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testTwoDimensionalDistinctAggregateQuery()
+	{
+		Stream<Entity> entities = createDynamic(6);
+		dataService.add(entityTypeDynamic.getId(), entities);
+		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		Attribute y = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		Attribute distinct = entityTypeDynamic.getAttribute(ATTR_ENUM);
+		AggregateQuery query = new AggregateQueryImpl(x, y, distinct, new QueryImpl<>());
+		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList("F", "T"),
+				asList("F", "T"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testAggregateQueryWithQuery()
+	{
+		Stream<Entity> entities = createDynamic(6);
+		dataService.add(entityTypeDynamic.getId(), entities);
+		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		Attribute y = entityTypeDynamic.getAttribute(ATTR_ENUM);
+		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, 12); // last 3 entities
+		AggregateQuery aggregateQuery = new AggregateQueryImpl(x, y, null, query);
+		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), aggregateQuery));
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 2L), asList(1L, 0L)), asList("F", "T"),
+				asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testDistinctAggregateQueryWithQuery()
+	{
+		Stream<Entity> entities = createDynamic(6);
+		dataService.add(entityTypeDynamic.getId(), entities);
+		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
+		Attribute y = entityTypeDynamic.getAttribute(ATTR_ENUM);
+		Attribute distinct = entityTypeDynamic.getAttribute(ATTR_ENUM);
+		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, 12); // last 3 entities
+		AggregateQuery aggregateQuery = new AggregateQueryImpl(x, y, distinct, query);
+		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), aggregateQuery));
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 1L), asList(1L, 0L)), asList("F", "T"),
+				asList("option1", "option2"));
+		assertEquals(result, expectedResult);
 	}
 }
