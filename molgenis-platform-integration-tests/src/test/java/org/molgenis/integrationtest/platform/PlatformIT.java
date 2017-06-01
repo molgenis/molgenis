@@ -47,6 +47,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -810,7 +811,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindOneTypedStatic()
 	{
-		Entity entity = createStaticAndAdd(1).get(0);
+		Entity entity = createStatic(1).findFirst().get();
+		dataService.add(entityTypeStatic.getId(), Stream.of(entity));
+		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
 		TestEntityStatic testEntityStatic = dataService
 				.findOneById(entityTypeStatic.getId(), entity.getIdValue(), TestEntityStatic.class);
 		assertNotNull(testEntityStatic);
@@ -828,10 +831,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindOneFetchTypedStatic()
 	{
-		Entity entity = createStaticAndAdd(1).get(0);
+		Entity entity = createStatic(1).collect(toList()).get(0);
 		entity.set(ATTR_ID, "1");
 		entity.set(ATTR_STRING, "string1");
 		entity.set(ATTR_BOOL, true);
+
+		dataService.add(entityTypeStatic.getId(), Stream.of(entity));
+		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
 
 		TestEntityStatic testEntityStatic = dataService
 				.findOneById(entityTypeStatic.getId(), entity.getIdValue(), new Fetch().field(ATTR_ID),
@@ -1057,8 +1063,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private List<Entity> createStaticAndAdd(int count)
 	{
 		List<Entity> entities = createStatic(count).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		dataService.add(entityTypeStatic.getId(), entities.stream());
+		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
 		return entities;
 	}
 
@@ -1518,9 +1524,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testOneDimensionalAggregateQuery()
 	{
 		createDynamicAndAdd(6);
-		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		AggregateQuery query = new AggregateQueryImpl(x, null, null, new QueryImpl<>());
-		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, null, null, new QueryImpl<>());
 
 		AggregateResult expectedResult = new AggregateResult(asList(singletonList(3L), singletonList(3L)),
 				asList("F", "T"), emptyList());
@@ -1531,10 +1536,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testTwoDimensionalAggregateQuery()
 	{
 		createDynamicAndAdd(6);
-		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		Attribute y = entityTypeDynamic.getAttribute(ATTR_ENUM);
-		AggregateQuery query = new AggregateQueryImpl(x, y, null, new QueryImpl<>());
-		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, new QueryImpl<>());
 
 		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 3L), asList(3L, 0L)), asList("F", "T"),
 				asList("option1", "option2"));
@@ -1545,10 +1548,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testOneDimensionalDistinctAggregateQuery()
 	{
 		createDynamicAndAdd(6);
-		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		Attribute distinct = entityTypeDynamic.getAttribute(ATTR_ENUM);
-		AggregateQuery query = new AggregateQueryImpl(x, null, distinct, new QueryImpl<>());
-		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, null, ATTR_ENUM, new QueryImpl<>());
 
 		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)),
 				asList("F", "T"), emptyList());
@@ -1559,11 +1560,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testTwoDimensionalDistinctAggregateQuery()
 	{
 		createDynamicAndAdd(6);
-		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		Attribute y = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		Attribute distinct = entityTypeDynamic.getAttribute(ATTR_ENUM);
-		AggregateQuery query = new AggregateQueryImpl(x, y, distinct, new QueryImpl<>());
-		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), query));
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_BOOL, ATTR_ENUM, new QueryImpl<>());
 
 		AggregateResult expectedResult = new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList("F", "T"),
 				asList("F", "T"));
@@ -1574,11 +1572,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testAggregateQueryWithQuery()
 	{
 		createDynamicAndAdd(6);
-		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		Attribute y = entityTypeDynamic.getAttribute(ATTR_ENUM);
 		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, 12); // last 3 entities
-		AggregateQuery aggregateQuery = new AggregateQueryImpl(x, y, null, query);
-		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), aggregateQuery));
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, query);
 
 		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 2L), asList(1L, 0L)), asList("F", "T"),
 				asList("option1", "option2"));
@@ -1589,15 +1585,25 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testDistinctAggregateQueryWithQuery()
 	{
 		createDynamicAndAdd(6);
-		Attribute x = entityTypeDynamic.getAttribute(ATTR_BOOL);
-		Attribute y = entityTypeDynamic.getAttribute(ATTR_ENUM);
-		Attribute distinct = entityTypeDynamic.getAttribute(ATTR_ENUM);
 		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, 12); // last 3 entities
-		AggregateQuery aggregateQuery = new AggregateQueryImpl(x, y, distinct, query);
-		AggregateResult result = runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), aggregateQuery));
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
 
 		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 1L), asList(1L, 0L)), asList("F", "T"),
 				asList("option1", "option2"));
 		assertEquals(result, expectedResult);
+	}
+
+	private AggregateResult runAggregateQuery(String attrX, String attrY, String attrDistinct, Query<Entity> query)
+	{
+		requireNonNull(attrX);
+		requireNonNull(query);
+
+		Attribute x = entityTypeDynamic.getAttribute(attrX);
+		Attribute y = attrY != null ? entityTypeDynamic.getAttribute(attrY) : null;
+		Attribute distinct = attrDistinct != null ? entityTypeDynamic.getAttribute(attrDistinct) : null;
+
+		AggregateQuery aggregateQuery = new AggregateQueryImpl(x, y, distinct, query);
+		return runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), aggregateQuery));
 	}
 }
