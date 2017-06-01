@@ -13,7 +13,6 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
@@ -64,14 +63,13 @@ public class ElasticsearchService implements SearchService
 	private final ElasticsearchUtils elasticsearchFacade;
 	private final SearchRequestGenerator searchRequestGenerator;
 
-	public ElasticsearchService(Client client, String indexName, DataService dataService,
+	public ElasticsearchService(Client client, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, DocumentIdGenerator documentIdGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 		this.elasticsearchFacade = new ElasticsearchUtils(client);
-		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
 		this.searchRequestGenerator = new SearchRequestGenerator(documentIdGenerator);
 	}
 

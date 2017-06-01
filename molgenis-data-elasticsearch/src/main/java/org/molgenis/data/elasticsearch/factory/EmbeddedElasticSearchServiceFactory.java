@@ -29,44 +29,19 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	private static final Logger LOG = LoggerFactory.getLogger(EmbeddedElasticSearchServiceFactory.class);
 
 	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
-	public static final String DEFAULT_INDEX_NAME = "molgenis";
 	private final Client client;
-	private final String indexName;
-
-	public EmbeddedElasticSearchServiceFactory()
-	{
-		this(DEFAULT_INDEX_NAME);
-	}
-
-	/**
-	 * Create an embedded ElasticSearch server service using 'elasticsearch.yml' and provided settings. The provided
-	 * settings override settings specified in 'elasticsearch.yml'
-	 *
-	 * @param providedSettings
-	 */
-	public EmbeddedElasticSearchServiceFactory(Map<String, String> providedSettings)
-	{
-		this(DEFAULT_INDEX_NAME, providedSettings);
-	}
-
-	public EmbeddedElasticSearchServiceFactory(String indexName)
-	{
-		this(indexName, null);
-	}
 
 	/**
 	 * Create an embedded ElasticSearch server service with the given index name using 'elasticsearch.yml' and provided
 	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
 	 *
-	 * @param indexName
 	 * @param providedSettings
 	 */
-	public EmbeddedElasticSearchServiceFactory(String indexName, Map<String, String> providedSettings)
+	public EmbeddedElasticSearchServiceFactory(Map<String, String> providedSettings)
 	{
-		this.indexName = indexName;
 
 		File file = ResourceUtils.getFile(getClass(), "/" + CONFIG_FILE_NAME);
-		Settings.Builder builder = null;
+		Settings.Builder builder;
 		try
 		{
 			builder = Settings.builder().loadFromPath(file.toPath());
@@ -88,8 +63,7 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	public ElasticsearchService create(DataService dataService, ElasticsearchEntityFactory elasticsearchEntityFactory,
 			DocumentIdGenerator documentIdGenerator)
 	{
-		return new ElasticsearchService(client, indexName, dataService, elasticsearchEntityFactory,
-				documentIdGenerator);
+		return new ElasticsearchService(client, dataService, elasticsearchEntityFactory, documentIdGenerator);
 	}
 
 	public Client getClient()
