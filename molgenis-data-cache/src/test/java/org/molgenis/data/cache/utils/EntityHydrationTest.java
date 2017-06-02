@@ -82,16 +82,19 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_XREF, "0");
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
 		dehydratedEntity.put(ATTR_COMPOUND_CHILD_INT, 10);
+		dehydratedEntity.put(ATTR_ENUM, "option1");
 	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		// mock entity manager
-		EntityManager entityManager = when(mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
+		EntityManager entityManager = when(
+				mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
 				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityType))).getMock();
 		when(entityManager.getReference(entityTypeArgumentCaptor.capture(), eq("0"))).thenReturn(refEntities.get(0));
-		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0")))).thenReturn(refEntities);
+		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0"))))
+				.thenReturn(refEntities);
 		entityHydration = new EntityHydration(entityManager);
 	}
 
