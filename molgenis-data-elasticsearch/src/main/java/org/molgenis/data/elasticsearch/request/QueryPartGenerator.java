@@ -19,8 +19,6 @@ public interface QueryPartGenerator
 {
 	/**
 	 * Add the query part to the SearchRequestBuilder
-	 *
-	 * @param searchRequestBuilder
 	 */
 	void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityType entityType);
 }

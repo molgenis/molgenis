@@ -33,9 +33,8 @@ public class SourceToEntityConverter
 	public Entity convert(Map<String, Object> source, EntityType entityType)
 	{
 		Entity entity = entityManager.create(entityType, NO_POPULATE);
-		source.entrySet().forEach(entry ->
+		source.forEach((attrName, sourceValue) ->
 		{
-			String attrName = entry.getKey();
 			Attribute attr = entityType.getAttribute(attrName);
 			if (attr == null)
 			{
@@ -43,7 +42,6 @@ public class SourceToEntityConverter
 						"Unknown attribute [" + attrName + "] of entity [" + entityType.getId());
 			}
 
-			Object sourceValue = entry.getValue();
 			Object entityValue;
 			if (sourceValue != null)
 			{

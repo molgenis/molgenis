@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,7 +22,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateSize()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl<Entity>().pageSize(20), null);
+		gen.generate(searchRequestBuilderMock, new QueryImpl<>().pageSize(20), null);
 		verify(searchRequestBuilderMock).setSize(20);
 	}
 
@@ -39,7 +38,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateFrom()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl<Entity>().offset(20), null);
+		gen.generate(searchRequestBuilderMock, new QueryImpl<>().offset(20), null);
 		verify(searchRequestBuilderMock).setFrom(20);
 	}
 

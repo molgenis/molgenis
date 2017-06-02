@@ -27,7 +27,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -54,7 +53,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 
-	IndexBootstrapper indexBootstrapper;
+	private IndexBootstrapper indexBootstrapper;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -127,7 +126,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class))
-				.thenReturn(Collections.<IndexJobExecution>emptyList().stream());
+				.thenReturn(Stream.empty());
 		indexBootstrapper.bootstrap();
 
 		//verify that no new jobs are registered
@@ -183,8 +182,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		void resetMocks()
 		{
-			reset(searchService, indexActionRegisterService, metaDataService, attributeMetadata,
-					entityTypeFactory);
+			reset(searchService, indexActionRegisterService, metaDataService, attributeMetadata, entityTypeFactory);
 		}
 	}
 }

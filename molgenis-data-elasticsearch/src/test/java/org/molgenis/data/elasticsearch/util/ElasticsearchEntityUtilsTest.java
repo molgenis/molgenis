@@ -30,7 +30,7 @@ public class ElasticsearchEntityUtilsTest
 		String id0 = "id0";
 		String id1 = "id1";
 		assertEquals(ElasticsearchEntityUtils.toElasticsearchIds(Stream.of(id0, id1)).collect(toList()),
-				Arrays.<String>asList(id0, id1));
+				Arrays.asList(id0, id1));
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class ElasticsearchEntityUtilsTest
 		String id0 = "id0";
 		String id1 = "id1";
 		assertEquals(Arrays.<Object>asList(id0, id1),
-				Lists.newArrayList(ElasticsearchEntityUtils.toEntityIds(Arrays.<String>asList(id0, id1))));
+				Lists.newArrayList(ElasticsearchEntityUtils.toEntityIds(Arrays.asList(id0, id1))));
 	}
 
 	@Test

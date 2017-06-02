@@ -21,7 +21,7 @@ public class ElasticsearchIndexCreator
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchIndexCreator.class);
 
 	public static final String DEFAULT_ANALYZER = "default";
-	public static final String NGRAM_ANALYZER = "ngram_analyzer";
+	static final String NGRAM_ANALYZER = "ngram_analyzer";
 	private static final String NGRAM_TOKENIZER = "ngram_tokenizer";
 	private static final String DEFAULT_TOKENIZER = "default_tokenizer";
 	private static final String DEFAULT_STEMMER = "default_stemmer";

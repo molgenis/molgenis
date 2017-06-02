@@ -24,14 +24,14 @@ import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 public class AggregateQueryGenerator
 {
 	public static final String AGGREGATION_MISSING_POSTFIX = "_missing";
-	public static final String AGGREGATION_REVERSE_POSTFIX = "_reverse";
-	public static final String AGGREGATION_NESTED_POSTFIX = "_nested";
+	private static final String AGGREGATION_REVERSE_POSTFIX = "_reverse";
+	private static final String AGGREGATION_NESTED_POSTFIX = "_nested";
 	public static final String AGGREGATION_DISTINCT_POSTFIX = "_distinct";
 	public static final String AGGREGATION_TERMS_POSTFIX = "_terms";
 
 	private final DocumentIdGenerator documentIdGenerator;
 
-	public AggregateQueryGenerator(DocumentIdGenerator documentIdGenerator)
+	AggregateQueryGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}

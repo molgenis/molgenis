@@ -23,7 +23,7 @@ import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.*;
 public class AggregateResponseParser
 {
 	@SuppressWarnings("unchecked")
-	public AggregateResult parseAggregateResponse(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
+	AggregateResult parseAggregateResponse(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
 			Aggregations aggs, DataService dataService)
 	{
 		Map<Object, Object> aggsMap = parseAggregations(aggAttr1, aggAttr2, aggAttrDistinct, aggs);
@@ -44,7 +44,7 @@ public class AggregateResponseParser
 		}
 
 		List<Object> xLabels = new ArrayList<>(xLabelsIdx.keySet());
-		Collections.sort(xLabels, new AggregateLabelComparable());
+		xLabels.sort(new AggregateLabelComparable());
 		int nrXLabels = xLabels.size();
 		for (int i = 0; i < nrXLabels; ++i)
 			xLabelsIdx.put(xLabels.get(i), i);
@@ -53,7 +53,7 @@ public class AggregateResponseParser
 		if (aggAttr2 != null)
 		{
 			yLabels = new ArrayList<>(yLabelsIdx.keySet());
-			Collections.sort(yLabels, new AggregateLabelComparable());
+			yLabels.sort(new AggregateLabelComparable());
 			int nrYLabels = yLabels.size();
 			for (int i = 0; i < nrYLabels; ++i)
 				yLabelsIdx.put(yLabels.get(i), i);
@@ -61,11 +61,11 @@ public class AggregateResponseParser
 		else yLabels = Collections.emptyList();
 
 		// create value matrix
-		List<List<Long>> matrix = new ArrayList<List<Long>>(nrXLabels);
+		List<List<Long>> matrix = new ArrayList<>(nrXLabels);
 		int nrYLabels = aggAttr2 != null ? yLabels.size() : 1;
 		for (int i = 0; i < nrXLabels; ++i)
 		{
-			List<Long> yValues = new ArrayList<Long>(nrYLabels);
+			List<Long> yValues = new ArrayList<>(nrYLabels);
 			for (int j = 0; j < nrYLabels; ++j)
 				yValues.add(0L);
 			matrix.add(yValues);
@@ -359,10 +359,6 @@ public class AggregateResponseParser
 	/**
 	 * Convert matrix labels that contain ids to label attribute values. Keeps in mind that the last label on a axis is
 	 * "Total".
-	 *
-	 * @param idLabels
-	 * @param entityType
-	 * @param dataService
 	 */
 	private void convertIdtoLabelLabels(List<Object> idLabels, EntityType entityType, DataService dataService)
 	{
@@ -371,14 +367,12 @@ public class AggregateResponseParser
 		{
 			// Get entities for ids
 			// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
-			Stream<Object> idLabelsWithoutNull = idLabels.stream().filter(idLabel -> idLabel != null);
+			Stream<Object> idLabelsWithoutNull = idLabels.stream().filter(Objects::nonNull);
 
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
-			dataService.findAll(entityType.getId(), idLabelsWithoutNull).forEach(entity ->
-			{
-				idToLabelMap.put(entity.getIdValue().toString(), entity);
-			});
+			dataService.findAll(entityType.getId(), idLabelsWithoutNull)
+					.forEach(entity -> idToLabelMap.put(entity.getIdValue().toString(), entity));
 
 			for (int i = 0; i < nrLabels; ++i)
 			{

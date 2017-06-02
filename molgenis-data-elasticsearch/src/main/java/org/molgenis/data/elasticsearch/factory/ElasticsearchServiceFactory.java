@@ -34,8 +34,6 @@ public class ElasticsearchServiceFactory implements Closeable
 	/**
 	 * Create an Elasticsearch server service with the given index name using 'elasticsearch.yml' and provided
 	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
-	 *
-	 * @param providedSettings
 	 */
 	public ElasticsearchServiceFactory(Map<String, String> providedSettings)
 	{

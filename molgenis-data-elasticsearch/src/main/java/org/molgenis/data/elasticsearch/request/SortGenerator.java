@@ -27,7 +27,7 @@ public class SortGenerator implements QueryPartGenerator
 {
 	private final DocumentIdGenerator documentIdGenerator;
 
-	public SortGenerator(DocumentIdGenerator documentIdGenerator)
+	SortGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
@@ -81,8 +81,7 @@ public class SortGenerator implements QueryPartGenerator
 			case STRING:
 			case TEXT:
 				// use raw field for sorting
-				sortField = new StringBuilder(fieldName).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
-						.toString();
+				sortField = fieldName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -92,7 +91,7 @@ public class SortGenerator implements QueryPartGenerator
 			case XREF:
 				// use nested field for sorting
 				String refSortField = getSortField(attr.getRefEntity().getLabelAttribute());
-				sortField = new StringBuilder(fieldName).append('.').append(refSortField).toString();
+				sortField = fieldName + '.' + refSortField;
 				break;
 			case COMPOUND:
 				throw new UnsupportedOperationException();
