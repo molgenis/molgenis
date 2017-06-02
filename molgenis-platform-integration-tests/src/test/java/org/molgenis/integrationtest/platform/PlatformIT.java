@@ -1594,6 +1594,32 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result, expectedResult);
 	}
 
+	@Test(singleThreaded = true, enabled = false)
+	public void testDistinctAggregateQueryManyRows()
+	{
+		createDynamicAndAdd(20000);
+		Query<Entity> query = new QueryImpl<>().eq(ATTR_BOOL, true);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
+
+		AggregateResult expectedResult = new AggregateResult(singletonList(singletonList(1L)), singletonList("T"),
+				singletonList("option1"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true, enabled = false)
+	public void testAggregateQueryManyRows()
+	{
+		createDynamicAndAdd(1000000);
+		Query<Entity> query = new QueryImpl<>().eq(ATTR_BOOL, true).or().lt(ATTR_INT, 15000);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, query);
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 7495L), asList(500000L, 0L)),
+				asList("F", "T"), asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
 	private AggregateResult runAggregateQuery(String attrX, String attrY, String attrDistinct, Query<Entity> query)
 	{
 		requireNonNull(attrX);
