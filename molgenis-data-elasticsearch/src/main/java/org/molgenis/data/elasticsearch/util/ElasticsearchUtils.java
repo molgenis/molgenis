@@ -142,7 +142,7 @@ public class ElasticsearchUtils
 			// FIXME .getHeaders()
 			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse);
 		}
-		long count = searchResponse.getHits().totalHits();
+		long count = searchResponse.getHits().getTotalHits();
 		long ms = searchResponse.getTookInMillis();
 		if (q != null)
 		{
@@ -211,7 +211,7 @@ public class ElasticsearchUtils
 			String indexName)
 	{
 		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
-		return Arrays.stream(searchHits.hits()).map(SearchHit::getId);
+		return Arrays.stream(searchHits.getHits()).map(SearchHit::getId);
 	}
 
 	/**

@@ -50,27 +50,27 @@ public class ResponseParser
 			return new SearchResult(sb.toString());
 		}
 
-		List<Hit> searchHits = new ArrayList<Hit>();
-		long totalCount = response.getHits().totalHits();
+		List<Hit> searchHits = new ArrayList<>();
+		long totalCount = response.getHits().getTotalHits();
 
 		EntityType entityType = request.getEntityType();
-		for (SearchHit hit : response.getHits().hits())
+		for (SearchHit hit : response.getHits().getHits())
 		{
-			Map<String, Object> columnValueMap = new LinkedHashMap<String, Object>();
+			Map<String, Object> columnValueMap = new LinkedHashMap<>();
 
 			// If fieldsToReturn is used the "fields" field of the SearchHit is
 			// filled if not the "source" field is filled
-			if ((hit.fields() != null) && !hit.fields().isEmpty())
+			if ((hit.getFields() != null) && !hit.getFields().isEmpty())
 			{
-				for (SearchHitField searchHitField : hit.fields().values())
+				for (SearchHitField searchHitField : hit.getFields().values())
 				{
-					columnValueMap.put(searchHitField.name(), searchHitField.value());
+					columnValueMap.put(searchHitField.getName(), searchHitField.getValue());
 				}
 			}
 
-			if ((hit.sourceAsMap() != null) && !hit.sourceAsMap().isEmpty())
+			if ((hit.getSourceAsMap() != null) && !hit.getSourceAsMap().isEmpty())
 			{
-				for (Map.Entry<String, Object> entry : hit.sourceAsMap().entrySet())
+				for (Map.Entry<String, Object> entry : hit.getSourceAsMap().entrySet())
 				{
 					// Check if the field is MREF, if so, only extract the
 					// information for labelAttribute from refeEntity and put it
@@ -85,7 +85,7 @@ public class ResponseParser
 					else
 					{
 						Attribute attribute = entityType.getAttribute(fieldName).getRefEntity().getLabelAttribute();
-						List<Object> values = new ArrayList<Object>();
+						List<Object> values = new ArrayList<>();
 						if (entry.getValue() instanceof List<?>)
 						{
 							for (Object eachElement : (List<?>) entry.getValue())
@@ -121,7 +121,7 @@ public class ResponseParser
 						String.valueOf(hit.getScore()).equals("NaN") ? 0 : hit.getScore());
 			}
 
-			searchHits.add(new Hit(hit.id(), hit.type(), columnValueMap));
+			searchHits.add(new Hit(hit.getId(), hit.getType(), columnValueMap));
 		}
 
 		AggregateResult aggregate = null;

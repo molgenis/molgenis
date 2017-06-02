@@ -5,6 +5,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,8 @@ public class ElasticsearchIndexCreator
 						.field("name", "english").endObject().endObject().startObject("tokenizer")
 						.startObject(DEFAULT_TOKENIZER).field("type", "pattern").field("pattern", "([^a-zA-Z0-9]+)")
 						.endObject().startObject(NGRAM_TOKENIZER).field("type", "nGram").field("min_gram", 1)
-						.field("max_gram", 10).endObject().endObject().endObject().endObject().string());
+						.field("max_gram", 10).endObject().endObject().endObject().endObject().string(),
+				XContentType.JSON);
 
 		CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).setSettings(settings).execute()
 				.actionGet();

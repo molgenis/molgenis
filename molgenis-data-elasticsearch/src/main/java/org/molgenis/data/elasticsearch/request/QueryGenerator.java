@@ -113,7 +113,7 @@ public class QueryGenerator implements QueryPartGenerator
 						boolQuery.must(queryPartBuilder);
 						break;
 					case OR:
-						boolQuery.should(queryPartBuilder).minimumNumberShouldMatch(1);
+						boolQuery.should(queryPartBuilder).minimumShouldMatch(1);
 						break;
 					case NOT:
 						boolQuery.mustNot(queryPartBuilder);
