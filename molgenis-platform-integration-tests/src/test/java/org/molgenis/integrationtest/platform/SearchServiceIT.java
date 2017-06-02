@@ -27,6 +27,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
+import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
 import static org.molgenis.data.index.IndexingMode.ADD;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
@@ -71,6 +72,37 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		searchService.refreshIndex();
 	}
 
+	@Test
+	public void testFuzzyMatch()
+	{
+		// Fuzzy match is used to find child nodes of an OntologyTerm.
+		List<Entity> ontologyTerms = createDynamic(6).collect(toList());
+		ontologyTerms.get(0).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0]");
+		ontologyTerms.get(1).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1]");
+		ontologyTerms.get(2).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].0[2]");
+		ontologyTerms.get(3).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].1[2]");
+		ontologyTerms.get(4).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].1[2].0[3]");
+		ontologyTerms.get(5).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].1[2].0[3]");
+
+		Entity ontology1 = ontologyTerms.get(0).getEntity(ATTR_CATEGORICAL);
+		Entity ontology2 = ontologyTerms.get(1).getEntity(ATTR_CATEGORICAL);
+		for (Entity term : ontologyTerms)
+		{
+			term.set(ATTR_CATEGORICAL, ontology1);
+		}
+		ontologyTerms.get(5).set(ATTR_CATEGORICAL, ontology2);
+
+		searchService.index(ontologyTerms.stream(), entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>(new QueryRule(ATTR_XREF, FUZZY_MATCH, "\"0[0].1[1]\"")).and()
+				.eq(ATTR_CATEGORICAL, ontology1);
+		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+
+		assertEquals(ids, asList("1", "2", "3", "4"));
+
+	}
 	@Test(singleThreaded = true)
 	public void testIndex() throws InterruptedException
 	{
