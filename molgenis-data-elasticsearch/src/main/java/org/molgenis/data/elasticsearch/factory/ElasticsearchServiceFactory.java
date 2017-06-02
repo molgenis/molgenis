@@ -19,25 +19,25 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 /**
- * Factory for creating an embedded ElasticSearch server service. An elastic search config file named
+ * Factory for creating an Elasticsearch server service. An elastic search config file named
  * 'elasticsearch.yml' must be on the classpath
  *
  * @author erwin
  */
-public class EmbeddedElasticSearchServiceFactory implements Closeable
+public class ElasticsearchServiceFactory implements Closeable
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EmbeddedElasticSearchServiceFactory.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchServiceFactory.class);
 
 	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
 	private final Client client;
 
 	/**
-	 * Create an embedded ElasticSearch server service with the given index name using 'elasticsearch.yml' and provided
+	 * Create an Elasticsearch server service with the given index name using 'elasticsearch.yml' and provided
 	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
 	 *
 	 * @param providedSettings
 	 */
-	public EmbeddedElasticSearchServiceFactory(Map<String, String> providedSettings)
+	public ElasticsearchServiceFactory(Map<String, String> providedSettings)
 	{
 
 		File file = ResourceUtils.getFile(getClass(), "/" + CONFIG_FILE_NAME);
@@ -57,7 +57,7 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		client = new PreBuiltTransportClient(settings)
 				.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress("127.0.0.1", 9300)));
 
-		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
+		LOG.info("Connected to Elasticsearch server, data path=[" + settings.get("path.data") + "]");
 	}
 
 	public ElasticsearchService create(DataService dataService, ElasticsearchEntityFactory elasticsearchEntityFactory,

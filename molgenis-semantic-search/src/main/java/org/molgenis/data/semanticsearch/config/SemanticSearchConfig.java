@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.factory.ElasticsearchServiceFactory;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
@@ -44,7 +44,7 @@ public class SemanticSearchConfig
 	TermFrequencyService termFrequencyService;
 
 	@Autowired
-	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+	ElasticsearchServiceFactory elasticsearchServiceFactory;
 
 	@Autowired
 	TagMetadata tagMetadata;
@@ -95,7 +95,7 @@ public class SemanticSearchConfig
 	@Bean
 	ElasticSearchExplainService elasticSearchExplainService()
 	{
-		return new ElasticSearchExplainServiceImpl(embeddedElasticSearchServiceFactory.getClient(),
+		return new ElasticSearchExplainServiceImpl(elasticsearchServiceFactory.getClient(),
 				explainServiceHelper(), documentIdGenerator);
 	}
 }

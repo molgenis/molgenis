@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.config;
 import com.google.common.collect.Maps;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.factory.ElasticsearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.index.SearchService;
@@ -18,15 +18,15 @@ import java.io.File;
 import java.util.Map;
 
 /**
- * Spring config for embedded elastic search server. Use this in your own app by importing this in your spring config:
- * <code> @Import(EmbeddedElasticSearchConfig.class)</code>
+ * Spring config for Elasticsearch server. Use this in your own app by importing this in your spring config:
+ * <code> @Import(ElasticsearchConfig.class)</code>
  *
  * @author erwin
  */
 @Configuration
 @EnableScheduling
 @Import({ IndexConfig.class })
-public class EmbeddedElasticSearchConfig
+public class ElasticsearchConfig
 {
 	@Value("${elasticsearch.transport.tcp.port:@null}")
 	private String elasticsearchTransportTcpPort;
@@ -41,7 +41,7 @@ public class EmbeddedElasticSearchConfig
 	private DocumentIdGenerator documentIdGenerator;
 
 	@Bean(destroyMethod = "close")
-	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
+	public ElasticsearchServiceFactory elasticsearchServiceFactory()
 	{
 		// get molgenis home directory
 		String molgenisHomeDir = System.getProperty("molgenis.home");
@@ -69,13 +69,12 @@ public class EmbeddedElasticSearchConfig
 		{
 			providedSettings.put("transport.tcp.port", elasticsearchTransportTcpPort);
 		}
-		return new EmbeddedElasticSearchServiceFactory(providedSettings);
+		return new ElasticsearchServiceFactory(providedSettings);
 	}
 
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory()
-				.create(dataService, elasticsearchEntityFactory, documentIdGenerator);
+		return elasticsearchServiceFactory().create(dataService, elasticsearchEntityFactory, documentIdGenerator);
 	}
 }
