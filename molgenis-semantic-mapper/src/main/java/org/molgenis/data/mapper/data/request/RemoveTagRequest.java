@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 public abstract class RemoveTagRequest
 {
 	@NotNull
-	public abstract String getEntityName();
+	public abstract String getEntityTypeId();
 
 	@NotNull
 	public abstract String getAttributeName();

@@ -22,6 +22,7 @@ import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -184,6 +185,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
+	@Transactional
 	public void removeAllTagsFromEntity(String entityTypeId)
 	{
 		EntityType entityTypedata = dataService.getEntityType(entityTypeId);
@@ -199,6 +201,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
+	@Transactional
 	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<Attribute, OntologyTerm> tags)
 	{
 		Map<String, OntologyTag> result = new LinkedHashMap<>();

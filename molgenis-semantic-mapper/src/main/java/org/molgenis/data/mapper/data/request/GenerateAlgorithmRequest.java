@@ -12,13 +12,13 @@ import java.util.List;
 public abstract class GenerateAlgorithmRequest
 {
 	@NotNull
-	public abstract String getTargetEntityName();
+	public abstract String getTargetEntityTypeId();
 
 	@NotNull
 	public abstract String getTargetAttributeName();
 
 	@NotNull
-	public abstract String getSourceEntityName();
+	public abstract String getSourceEntityTypeId();
 
 	@NotEmpty
 	public abstract List<String> getSourceAttributes();
