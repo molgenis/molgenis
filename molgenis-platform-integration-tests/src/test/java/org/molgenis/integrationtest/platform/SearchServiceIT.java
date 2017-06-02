@@ -148,7 +148,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 				.map(id -> explainService.explain(query, entityTypeDynamic, id)).collect(toList());
 
 		List<Float> scores = explanations.stream().map(Explanation::getValue).collect(toList());
-		LOG.info("scores: {}", scores);
 		// FIXME these scores vary between runs
 		// assertEquals(scores, asList(0.3463153, 0, 0.7889965, 1.7814579, 0.76421005, 1.0707202));
 
