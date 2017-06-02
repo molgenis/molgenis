@@ -4,11 +4,8 @@ import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.byscroll.BulkByScrollResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -16,12 +13,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
@@ -108,14 +101,6 @@ public class ElasticsearchUtils
 		}
 	}
 
-	public ImmutableOpenMap<String, MappingMetaData> getMappings(String indexName)
-	{
-		LOG.trace("Retrieving Elasticsearch mappings ...");
-		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).get();
-		LOG.debug("Retrieved Elasticsearch mappings");
-		return mappingsResponse.getMappings().get(indexName);
-	}
-
 	public void putMapping(String index, XContentBuilder jsonBuilder, String type) throws IOException
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
@@ -189,46 +174,11 @@ public class ElasticsearchUtils
 		LOG.debug("Deleted Elasticsearch '{}' doc with id [{}]", type, id);
 	}
 
-	/**
-	 * Checks if a type exists in an index.
-	 *
-	 * @param type      the name of the type
-	 * @param indexName the name of the index
-	 * @return boolean indicating if the type exists in the index
-	 */
-	public boolean isTypeExists(String type, String indexName)
-	{
-		LOG.trace("Check whether type [{}] exists in index [{}]...", type, indexName);
-		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
-				.get();
-		boolean typeExists = typesExistsResponse.isExists();
-		LOG.trace("Checked whether type [{}] exists in index [{}]", type, indexName);
-		return typeExists;
-	}
-
-	/**
-	 * Tries to delete the mapping for a type in an index.
-	 *
-	 * @param type      name of the type
-	 * @param indexName name of the index
-	 * @return boolean indicating success of the deletion
-	 */
-	public boolean deleteMapping(String type, String indexName)
-	{
-		DeleteIndexResponse deleteIndexResponse = client.admin().indices().prepareDelete(type).get();
-		return deleteIndexResponse.isAcknowledged();
-	}
-
 	public void createIndex(String indexName)
 	{
+		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
 		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
-		//		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
-		//		CreateIndexResponse createIndexResponse = client.admin().indices().prepareCreate(indexName).get();
-		//		if (!createIndexResponse.isAcknowledged())
-		//		{
-		//			throw new ElasticsearchException(format("Error creating index '%s'", indexName));
-		//		}
-		//		LOG.debug("Created Elasticsearch index '{}'.", indexName);
+		LOG.debug("Created Elasticsearch index '{}'.", indexName);
 	}
 
 	public void deleteIndex(String indexName)
@@ -240,33 +190,6 @@ public class ElasticsearchUtils
 			throw new ElasticsearchException(format("Error deleting index '%s'", indexName));
 		}
 		LOG.debug("Deleted Elasticsearch index '{}'.", indexName);
-	}
-
-	/**
-	 * Deletes all documents of a type in an index.
-	 *
-	 * @param type      tye name of the type of the documents
-	 * @param indexName the name of the index
-	 * @return boolean indicating success of the deletion
-	 */
-	public boolean deleteAllDocumentsOfType(String type, String indexName)
-	{
-		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
-		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
-				.filter(QueryBuilders.termQuery("_type", type)).source(indexName).get();
-		if (!response.getBulkFailures().isEmpty())
-		{
-			return false;
-		}
-		LOG.debug("Deleted all Elasticsearch '{}' docs.", type);
-		return true;
-	}
-
-	public void flushIndex(String indexName)
-	{
-		LOG.trace("Flushing Elasticsearch index [{}] ...", indexName);
-		client.admin().indices().prepareFlush(indexName).get();
-		LOG.debug("Flushed Elasticsearch index [{}]", indexName);
 	}
 
 	public SearchResponse search(SearchType searchType, SearchRequest request, String indexName)

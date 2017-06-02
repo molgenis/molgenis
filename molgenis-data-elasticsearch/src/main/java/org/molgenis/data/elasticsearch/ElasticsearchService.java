@@ -1,6 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.action.index.IndexRequest;
@@ -43,6 +42,7 @@ import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
+import static org.molgenis.util.EntityUtils.asStream;
 
 /**
  * ElasticSearch implementation of the SearchService interface.
@@ -243,7 +243,7 @@ public class ElasticsearchService implements SearchService
 			}
 			q.eq(attribute.getName(), referredEntity);
 		}
-		LOG.debug("q: [{}], referringEntityType: [{}]", q.toString(), referringEntityType.getId());
+		LOG.debug("q: [{}], referringEntityType: [{}]", q != null ? q.toString() : "null", referringEntityType.getId());
 		if (hasMapping(referringEntityType))
 		{
 			return searchInternalWithScanScroll(q, referringEntityType);
@@ -377,7 +377,8 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Entity findOne(Query<Entity> q, EntityType entityType)
 	{
-		return FluentIterable.from(search(q, entityType)).first().orNull();
+		Iterable<Entity> entities = search(q, entityType);
+		return asStream(entities).findFirst().orElse(null);
 	}
 
 	private String getIndexName(EntityType entityType)
