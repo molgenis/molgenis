@@ -2,12 +2,19 @@ package org.molgenis.integrationtest.platform;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.molgenis.data.*;
+import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
+import org.apache.lucene.search.Explanation;
+import org.molgenis.data.*;
+import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,15 +24,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
+import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.index.IndexingMode.ADD;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
@@ -42,6 +52,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	private EntityTestHarness testHarness;
 	@Autowired
 	private SearchService searchService;
+	@Autowired
+	private ElasticSearchExplainService explainService;
 
 	@BeforeMethod
 	public void setUp()
@@ -60,6 +72,112 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		searchService.delete(entityTypeDynamic);
 		searchService.delete(refEntityTypeDynamic);
 		searchService.refreshIndex();
+	}
+
+	@Test
+	public void testFuzzyMatch()
+	{
+		// Fuzzy match is used to find child nodes of an OntologyTerm.
+		List<Entity> ontologyTerms = createDynamic(6).collect(toList());
+		ontologyTerms.get(0).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0]");
+		ontologyTerms.get(1).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1]");
+		ontologyTerms.get(2).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].0[2]");
+		ontologyTerms.get(3).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].1[2]");
+		ontologyTerms.get(4).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].1[2].0[3]");
+		ontologyTerms.get(5).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0].1[1].1[2].0[3]");
+
+		Entity ontology1 = ontologyTerms.get(0).getEntity(ATTR_CATEGORICAL);
+		Entity ontology2 = ontologyTerms.get(1).getEntity(ATTR_CATEGORICAL);
+		for (Entity term : ontologyTerms)
+		{
+			term.set(ATTR_CATEGORICAL, ontology1);
+		}
+		ontologyTerms.get(5).set(ATTR_CATEGORICAL, ontology2);
+
+		searchService.index(ontologyTerms.stream(), entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>(new QueryRule(ATTR_XREF, FUZZY_MATCH, "\"0[0].1[1]\"")).and()
+				.eq(ATTR_CATEGORICAL, ontology1);
+		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic).map(Entity::getIdValue)
+				.collect(toList());
+
+		assertEquals(ids, asList("1", "2", "3", "4"));
+	}
+
+	@Test
+	public void testSemanticSearch()
+	{
+		List<Entity> attributes = createDynamic(6).collect(toList());
+		attributes.get(0).set(ATTR_STRING, "High chance of pulmonary disease");
+		attributes.get(1).set(ATTR_STRING, "And now for something completely different...");
+		attributes.get(2).set(ATTR_STRING, "Are you taking hypertensive medication?");
+		attributes.get(3).set(ATTR_STRING, "Have you ever had high blood pressure? (Repeat) (1)");
+		attributes.get(4).set(ATTR_STRING, "Do you suffer from Ocular hypertension?");
+		attributes.get(5).set(ATTR_STRING, "Do you have a vascular disorder?");
+
+		Entity ontology1 = attributes.get(0).getEntity(ATTR_CATEGORICAL);
+		Entity ontology2 = attributes.get(1).getEntity(ATTR_CATEGORICAL);
+		for (Entity term : attributes)
+		{
+			term.set(ATTR_CATEGORICAL, ontology1);
+		}
+		attributes.get(5).set(ATTR_CATEGORICAL, ontology2);
+
+		searchService.index(attributes.stream(), entityTypeDynamic, ADD);
+		searchService.refreshIndex();
+
+		List<String> queryTerms = asList("hypertension", "disorder vascular hypertensive", "increased pressure blood",
+				"high pressure blood", "ocular^0.5 hypertension^0.5",
+				"hypertension^0.25 idiopathic^0.25 pulmonary^0.25");
+
+		QueryRule finalDisMaxQuery = new QueryRule(queryTerms.stream().flatMap(term -> Stream
+				.of(new QueryRule(ATTR_STRING, FUZZY_MATCH, term), new QueryRule(ATTR_SCRIPT, FUZZY_MATCH, term)))
+				.collect(toList()));
+		finalDisMaxQuery.setOperator(DIS_MAX);
+
+		List<String> attributeIds = asList("0", "1", "2", "3", "4", "5");
+		Query<Entity> query = new QueryImpl<>(
+				asList(new QueryRule(ATTR_ID, IN, attributeIds), new QueryRule(AND), finalDisMaxQuery));
+
+		List<Object> matchingAttributeIDs = searchService.searchAsStream(query, entityTypeDynamic)
+				.map(Entity::getIdValue).collect(toList());
+		assertEquals(matchingAttributeIDs, asList("3", "5", "2", "4", "0"));
+
+		List<Explanation> explanations = attributeIds.stream()
+				.map(id -> explainService.explain(query, entityTypeDynamic, id)).collect(toList());
+
+		List<Float> scores = explanations.stream().map(Explanation::getValue).collect(toList());
+		// FIXME these scores vary between runs
+		// assertEquals(scores, asList(0.3463153, 0, 0.7889965, 1.7814579, 0.76421005, 1.0707202));
+
+		Map<String, String> expandedQueryMap = new HashMap<>();
+		for (String term : asList("hypertens", "disord vascular hypertens", "increased pressur blood",
+				"high pressur blood", "ocular hypertens", "hypertens idiopathic pulmonary"))
+		{
+			expandedQueryMap.put(term, "hypertension");
+		}
+		List<Set<ExplainedQueryString>> explanationStrings = explanations.stream()
+				.map(explanation -> explainService.findQueriesFromExplanation(expandedQueryMap, explanation))
+				.collect(toList());
+
+		List<Set<ExplainedQueryString>> expectedExplanationStrings = asList(
+				// High chance of pulmonary disease
+				singleton(ExplainedQueryString.create("high", "high pressur blood", "hypertension", 41.66666666666667)),
+				// And now for something completely different...
+				emptySet(),
+				// Are you taking hypertensive medication?
+				singleton(ExplainedQueryString.create("hypertens", "hypertens", "hypertension", 100.0)),
+				// Have you ever had high blood pressure? (Repeat) (1)
+				singleton(
+						ExplainedQueryString.create("high pressur blood", "high pressur blood", "hypertension", 100.0)),
+				// Do you suffer from Ocular hypertension?
+				singleton(ExplainedQueryString.create("ocular hypertens", "ocular hypertens", "hypertension", 100.0)),
+				// Do you have a vascular disorder?
+				singleton(ExplainedQueryString
+						.create("disord vascular", "disord vascular hypertens", "hypertension", 78.04878048780488)));
+
+		assertEquals(explanationStrings, expectedExplanationStrings);
 	}
 
 	@Test(singleThreaded = true)
