@@ -429,7 +429,8 @@ var TableHeaderCell = React.createClass({
 
         var Label = this.props.attr.description ? span(null, Popover({
             value: this.props.attr.label,
-            popoverValue: this.props.attr.description
+            popoverValue: this.props.attr.description,
+            trigger: 'hover'
         })) : this.props.attr.label;
 
         return (
