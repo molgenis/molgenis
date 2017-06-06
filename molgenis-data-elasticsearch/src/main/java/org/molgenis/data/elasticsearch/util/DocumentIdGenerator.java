@@ -40,7 +40,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 	public String generateId(EntityType entityType)
 	{
 		String idHash = generateHashcode(entityType.getId());
-		String truncatedId = truncateName(cleanName(entityType.getId()));
+		String truncatedId = truncateName(cleanName(entityType.getId())).toLowerCase();
 		return truncatedId + SEPARATOR + idHash;
 	}
 
@@ -60,7 +60,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 
 	private String cleanName(String name)
 	{
-		return PATTERN_ALPHANUMERIC_REPLACE.matcher(name).replaceAll("").toLowerCase();
+		return PATTERN_ALPHANUMERIC_REPLACE.matcher(name).replaceAll("");
 	}
 
 	private String truncateName(String name)
