@@ -12,25 +12,34 @@ var Popover = React.createClass({
     propTypes: {
         value: React.PropTypes.string.isRequired,
         popoverValue: React.PropTypes.string.isRequired,
+        animation: React.PropTypes.boolean,
+        container: React.PropTypes.oneOfType(React.PropTypes.string, React.PropTypes.bool),
+        delay: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.object]),
+        html: React.PropTypes.bool,
+        placement: React.PropTypes.oneOfType(React.PropTypes.oneOf('top', 'bottom', 'left', 'right', 'auto'), React.PropTypes.func),
+        template: React.PropTypes.string,
+        title: React.PropTypes.string,
+        viewport: React.PropTypes.oneOfType(React.PropTypes.string, React.PropTypes.object, React.PropTypes.func)
     },
-    componentDidMount: function () {
-        var $container = $(this.refs.popover.getDOMNode());
-        $container.popover({
+    getDefaultProps: function () {
+        return {
             trigger: 'hover click',
             placement: 'bottom',
             container: 'body'
+        }
+    },
+    componentDidMount: function () {
+        const {value, popoverValue, ...otherOptions} = this.props;
+        $(this.getDOMNode()).popover({
+            content: popoverValue,
+            ...otherOptions
         });
     },
     componentWillUnmount: function () {
-        var $container = $(this.refs.popover.getDOMNode());
-        $container.popover('destroy');
+        $(this.getDOMNode()).popover('destroy');
     },
     render: function () {
-        return span({
-            'data-content': this.props.popoverValue,
-            'data-toggle': 'popover',
-            ref: 'popover'
-        }, this.props.value);
+        return span({}, this.props.value);
     }
 });
 
