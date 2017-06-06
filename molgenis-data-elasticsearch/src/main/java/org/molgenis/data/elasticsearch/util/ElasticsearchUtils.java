@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
@@ -133,14 +134,13 @@ public class ElasticsearchUtils
 		{
 			LOG.trace("Counting Elasticsearch [{}] docs", type);
 		}
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		// FIXME search type should be count
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setSize(0);
 		generator.buildSearchRequest(searchRequestBuilder, SearchType.DEFAULT, entityType, q, null, null, null);
 		SearchResponse searchResponse = searchRequestBuilder.get();
 		if (searchResponse.getFailedShards() > 0)
 		{
-			// FIXME .getHeaders()
-			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse);
+			throw new ElasticsearchException("Search failed:\n" + Arrays.stream(searchResponse.getShardFailures())
+					.map(ShardSearchFailure::toString).collect(joining("\n")));
 		}
 		long count = searchResponse.getHits().getTotalHits();
 		long ms = searchResponse.getTookInMillis();
