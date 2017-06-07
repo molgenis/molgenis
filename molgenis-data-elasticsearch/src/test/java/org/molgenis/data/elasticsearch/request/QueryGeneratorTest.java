@@ -899,8 +899,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = constantScoreQuery(
-				boolQuery().mustNot(nestedQuery(categoricalAttrName + ".xid", matchAllQuery(), ScoreMode.Avg)));
+		QueryBuilder expectedQuery = constantScoreQuery(boolQuery()
+				.mustNot(nestedQuery(categoricalAttrName, existsQuery(categoricalAttrName + ".xid"), ScoreMode.Avg)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1085,7 +1085,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = constantScoreQuery(
-				boolQuery().mustNot(nestedQuery(xrefAttrName + ".xid", matchAllQuery(), ScoreMode.Avg)));
+				boolQuery().mustNot(nestedQuery(xrefAttrName, existsQuery(xrefAttrName + ".xid"), ScoreMode.Avg)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1112,8 +1112,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = boolQuery().mustNot(constantScoreQuery(
-				boolQuery().mustNot(nestedQuery(categoricalAttrName + ".xid", matchAllQuery(), ScoreMode.Avg))));
+		QueryBuilder expectedQuery = boolQuery().mustNot(constantScoreQuery(boolQuery()
+				.mustNot(nestedQuery(categoricalAttrName, existsQuery(categoricalAttrName + ".xid"), ScoreMode.Avg))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1311,7 +1311,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = boolQuery().mustNot(constantScoreQuery(
-				boolQuery().mustNot(nestedQuery(xrefAttrName + ".xid", matchAllQuery(), ScoreMode.Avg))));
+				boolQuery().mustNot(nestedQuery(xrefAttrName, existsQuery(xrefAttrName + ".xid"), ScoreMode.Avg))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 

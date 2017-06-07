@@ -291,7 +291,7 @@ public class QueryGenerator implements QueryPartGenerator
 
 				// TODO which score mode to use?
 				return QueryBuilders.boolQuery().mustNot(
-						QueryBuilders.nestedQuery(indexFieldName, QueryBuilders.matchAllQuery(), ScoreMode.Avg));
+						QueryBuilders.nestedQuery(fieldName, QueryBuilders.existsQuery(indexFieldName), ScoreMode.Avg));
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:

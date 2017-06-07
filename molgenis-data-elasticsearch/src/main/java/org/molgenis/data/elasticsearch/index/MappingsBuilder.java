@@ -5,7 +5,6 @@ import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.EntityTypeUtils;
 
 import java.io.IOException;
 
@@ -85,7 +84,7 @@ public class MappingsBuilder
 				EntityType refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
-					jsonBuilder.field("type", EntityTypeUtils.isSingleReferenceType(attr) ? "object" : "nested");
+					jsonBuilder.field("type", "nested");
 					jsonBuilder.startObject("properties");
 					for (Attribute refAttr : refEntity.getAtomicAttributes())
 					{
