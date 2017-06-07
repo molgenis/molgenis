@@ -1,5 +1,0 @@
-indices.query.bool.max_clause_count: 131072
-
-# disable automatic mapping creation
-network.host: localhost
-http.enabled: false

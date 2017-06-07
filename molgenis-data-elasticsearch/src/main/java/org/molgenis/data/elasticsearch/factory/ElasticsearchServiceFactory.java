@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.factory;
 
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -8,19 +9,20 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
-import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
+
 /**
- * Factory for creating an Elasticsearch server service. An elastic search config file named
- * 'elasticsearch.yml' must be on the classpath
+ * Factory for creating an Elasticsearch server service.
  *
  * @author erwin
  */
@@ -28,34 +30,18 @@ public class ElasticsearchServiceFactory implements Closeable
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchServiceFactory.class);
 
-	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
 	private final Client client;
 
-	/**
-	 * Create an Elasticsearch server service with the given index name using 'elasticsearch.yml' and provided
-	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
-	 */
-	public ElasticsearchServiceFactory(Map<String, String> providedSettings)
+	public ElasticsearchServiceFactory(String clusterName, List<InetSocketAddress> socketAddresses)
 	{
+		this(clusterName, socketAddresses, null);
+	}
 
-		File file = ResourceUtils.getFile(getClass(), "/" + CONFIG_FILE_NAME);
-		Settings.Builder builder;
-		try
-		{
-			builder = Settings.builder().loadFromPath(file.toPath());
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException("Error loading Elasticsearch settings from file " + CONFIG_FILE_NAME);
-		}
-		if (providedSettings != null) builder.put(providedSettings);
-
-		Settings settings = builder.build();
-
-		client = new PreBuiltTransportClient(settings)
-				.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress("127.0.0.1", 9300)));
-
-		LOG.info("Connected to Elasticsearch server, data path=[" + settings.get("path.data") + "]");
+	public ElasticsearchServiceFactory(String clusterName, List<InetSocketAddress> socketAddresses,
+			Map<String, String> settings)
+	{
+		this.client = createElasticsearchClient(clusterName, socketAddresses, settings);
+		LOG.info("Connected to Elasticsearch cluster '{}' on {}", clusterName, socketAddresses.toString());
 	}
 
 	public ElasticsearchService create(DataService dataService, ElasticsearchEntityFactory elasticsearchEntityFactory,
@@ -76,10 +62,56 @@ public class ElasticsearchServiceFactory implements Closeable
 		{
 			client.close();
 		}
-		catch (Exception e)
+		catch (RuntimeException e)
 		{
-			LOG.error("Error closing client", e);
+			LOG.error("Error closing Elasticsearch client", e);
 		}
 	}
 
+	private Client createElasticsearchClient(String clusterName, List<InetSocketAddress> socketAddresses,
+			Map<String, String> settings)
+	{
+		Settings clientSettings = createSettings(clusterName, settings);
+		InetSocketTransportAddress[] socketTransportAddresses = createInetSocketTransportAddresses(socketAddresses);
+
+		TransportClient transportClient = new PreBuiltTransportClient(clientSettings)
+				.addTransportAddresses(socketTransportAddresses);
+
+		if (transportClient.connectedNodes().isEmpty())
+		{
+			throw new RuntimeException(
+					format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
+							clusterName, Arrays.toString(socketTransportAddresses)));
+		}
+		return transportClient;
+	}
+
+	private Settings createSettings(String clusterName, Map<String, String> settings)
+	{
+		if (clusterName == null)
+		{
+			throw new NullPointerException("clusterName cannot be null");
+		}
+
+		Settings.Builder builder = Settings.builder();
+		builder.put("cluster.name", clusterName);
+		if (settings != null)
+		{
+			builder.put(settings);
+		}
+		return builder.build();
+	}
+
+	private InetSocketTransportAddress[] createInetSocketTransportAddresses(List<InetSocketAddress> socketAddresses)
+	{
+		if (socketAddresses == null)
+		{
+			throw new NullPointerException("socketAddresses cannot be null");
+		}
+		if (socketAddresses.isEmpty())
+		{
+			throw new IllegalArgumentException("socketAddresses cannot be empty");
+		}
+		return socketAddresses.stream().map(InetSocketTransportAddress::new).toArray(InetSocketTransportAddress[]::new);
+	}
 }
