@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
@@ -11,10 +10,11 @@ import org.molgenis.data.meta.model.Package;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.reverse;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Package>
@@ -69,24 +69,23 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
 
 	private void deletePackage(Package package_)
 	{
-		// recursively delete sub packages
-		getPackageTreeTraversal(package_).forEach(this::deletePackageAndContents);
+		deleteEntityTypesInPackageAndSubPackages(package_);
+
+		// delete rows from package table
+		decoratedRepo.delete(getPackageTreeTraversal(package_));
 	}
 
-	private void deletePackageAndContents(Package package_)
+	private void deleteEntityTypesInPackageAndSubPackages(Package package_)
 	{
-		// delete entities in package
 		Repository<EntityType> entityRepo = getEntityRepository();
-		List<EntityType> entityTypes = Lists.newArrayList(package_.getEntityTypes());
-		entityRepo.delete(reverse(entityTypeDependencyResolver.resolve(entityTypes)).stream());
-
-		// delete row from package table
-		decoratedRepo.delete(package_);
+		List<EntityType> entityTypesToDelete = getPackageTreeTraversal(package_)
+				.flatMap(p -> stream(p.getEntityTypes().spliterator(), false)).collect(toList());
+		entityRepo.delete(reverse(entityTypeDependencyResolver.resolve(entityTypesToDelete)).stream());
 	}
 
 	private static Stream<Package> getPackageTreeTraversal(Package package_)
 	{
-		return StreamSupport.stream(new PackageTreeTraverser().postOrderTraversal(package_).spliterator(), false);
+		return stream(new PackageTreeTraverser().postOrderTraversal(package_).spliterator(), false);
 	}
 
 	private Repository<EntityType> getEntityRepository()

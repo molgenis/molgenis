@@ -12,8 +12,10 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -49,6 +51,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
@@ -106,6 +109,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private IndexActionRegisterServiceImpl indexActionRegisterService;
 	@Autowired
 	private L10nStringFactory l10nStringFactory;
+	@Autowired
+	private PackageFactory packageFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -399,6 +404,36 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.deleteAll(entityTypeDynamic.getId());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), 0);
+	}
+
+	@Test(singleThreaded = true)
+	public void testDeletePackage()
+	{
+		runAsSystem(() ->
+		{
+			MetaDataService metadataService = dataService.getMeta();
+
+			Package parentPackage = packageFactory.create("parent").setLabel("parent");
+			Package subPackage = packageFactory.create("parent_sub").setLabel("sub").setParent(parentPackage);
+			metadataService.upsertPackages(Stream.of(parentPackage, subPackage));
+
+			EntityType entityTypeInSubPackage = testHarness.createDynamicRefEntityType("entityInSub", subPackage);
+			EntityType entityTypeInParentPackage = testHarness
+					.createDynamicTestEntityType("entityInParent", parentPackage, entityTypeInSubPackage);
+
+			metadataService.upsertEntityTypes(asList(entityTypeInSubPackage, entityTypeInParentPackage));
+
+			List<Entity> entities = createAndAdd(entityTypeInParentPackage, entityTypeInSubPackage, 5);
+			Set<Entity> refEntities = entities.stream().map(e -> e.getEntity(ATTR_XREF)).collect(toSet());
+			assertPresent(entityTypeInParentPackage, entities);
+			assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
+
+			dataService.deleteById(PACKAGE, "parent");
+			assertNull(metadataService.getPackage("parent"));
+			assertNull(metadataService.getPackage("parent_sub"));
+			entities.forEach(this::assertNotPresent);
+			refEntities.forEach(this::assertNotPresent);
+		});
 	}
 
 	@Test(singleThreaded = true)
@@ -1038,34 +1073,34 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
 
-	private Stream<Entity> createDynamic(int count)
-	{
-		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
-		runAsSystem(() -> dataService.add(refEntityTypeDynamic.getId(), refEntities.stream()));
-		return testHarness.createTestEntities(entityTypeDynamic, count, refEntities);
-	}
-
 	private Stream<Entity> createStatic(int count)
 	{
-		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeStatic, 6);
-		runAsSystem(() -> dataService.add(refEntityTypeStatic.getId(), refEntities.stream()));
-		return testHarness.createTestEntities(entityTypeStatic, count, refEntities);
+		return createTestEntities(entityTypeStatic, refEntityTypeStatic, count);
 	}
 
 	private List<Entity> createDynamicAndAdd(int count)
 	{
-		List<Entity> entities = createDynamic(count).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		return createAndAdd(entityTypeDynamic, refEntityTypeDynamic, count);
+	}
+
+	private List<Entity> createAndAdd(EntityType entityType, EntityType refEntityType, int count)
+	{
+		List<Entity> entities = createTestEntities(entityType, refEntityType, count).collect(toList());
+		dataService.add(entityType.getId(), entities.stream());
+		waitForIndexToBeStable(entityType, indexService, LOG);
 		return entities;
 	}
 
 	private List<Entity> createStaticAndAdd(int count)
 	{
-		List<Entity> entities = createStatic(count).collect(toList());
-		dataService.add(entityTypeStatic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-		return entities;
+		return createAndAdd(entityTypeStatic, refEntityTypeStatic, count);
+	}
+
+	private Stream<Entity> createTestEntities(EntityType entityType, EntityType refEntityType, int count)
+	{
+		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityType, 6);
+		runAsSystem(() -> dataService.add(refEntityType.getId(), refEntities.stream()));
+		return testHarness.createTestEntities(entityType, count, refEntities);
 	}
 
 	private void assertPresent(EntityType emd, List<Entity> entities)
