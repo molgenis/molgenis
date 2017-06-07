@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class AutoTagRequest
 {
 	@NotBlank
-	public abstract String getEntityName();
+	public abstract String getEntityTypeId();
 
 	@NotEmpty
 	public abstract List<String> getOntologyIds();

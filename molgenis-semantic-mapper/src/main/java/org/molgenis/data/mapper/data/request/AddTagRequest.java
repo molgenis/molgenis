@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class AddTagRequest
 {
 	@NotNull
-	public abstract String getEntityName();
+	public abstract String getEntityTypeId();
 
 	@NotNull
 	public abstract String getAttributeName();

@@ -317,8 +317,8 @@
             var algorithm = editor.getSession().getValue();
 
             var generateAlgorithmRequest = {
-                'targetEntityName': $('[name="target"]').val(),
-                'sourceEntityName': $('[name="source"]').val(),
+                'targetEntityTypeId': $('[name="target"]').val(),
+                'sourceEntityTypeId': $('[name="source"]').val(),
                 'targetAttributeName': $('[name="targetAttribute"]').val(),
                 'sourceAttributes': selectedAttributes
             };

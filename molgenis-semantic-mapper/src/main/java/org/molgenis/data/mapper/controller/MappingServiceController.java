@@ -508,9 +508,9 @@ public class MappingServiceController extends MolgenisPluginController
 	@ResponseBody
 	public String getSuggestedAlgorithm(@RequestBody GenerateAlgorithmRequest generateAlgorithmRequest)
 	{
-		EntityType targetEntityType = dataService.getEntityType(generateAlgorithmRequest.getTargetEntityName());
+		EntityType targetEntityType = dataService.getEntityType(generateAlgorithmRequest.getTargetEntityTypeId());
 
-		EntityType sourceEntityType = dataService.getEntityType(generateAlgorithmRequest.getSourceEntityName());
+		EntityType sourceEntityType = dataService.getEntityType(generateAlgorithmRequest.getSourceEntityTypeId());
 
 		Attribute targetAttribute = targetEntityType.getAttribute(generateAlgorithmRequest.getTargetAttributeName());
 

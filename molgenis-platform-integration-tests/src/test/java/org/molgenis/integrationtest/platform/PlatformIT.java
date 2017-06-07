@@ -1,6 +1,8 @@
 package org.molgenis.integrationtest.platform;
 
 import org.molgenis.data.*;
+import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.*;
@@ -10,9 +12,12 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.staticentity.TestEntityStatic;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -44,7 +49,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
@@ -102,6 +109,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private IndexActionRegisterServiceImpl indexActionRegisterService;
 	@Autowired
 	private L10nStringFactory l10nStringFactory;
+	@Autowired
+	private PackageFactory packageFactory;
+
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
 	 */
@@ -336,10 +346,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testAdd()
 	{
-		List<Entity> entities = createDynamic(2).collect(toList());
 		assertEquals(searchService.count(entityTypeDynamic), 0);
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(2);
 		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityTypeDynamic), 2);
 		assertPresent(entityTypeDynamic, entities);
@@ -348,9 +356,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testCount()
 	{
-		List<Entity> entities = createDynamic(2).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(2);
 		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityTypeDynamic), 2);
 		assertPresent(entityTypeDynamic, entities);
@@ -359,9 +365,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testDelete()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
-		dataService.add(entityTypeDynamic.getId(), entity);
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Entity entity = createDynamicAndAdd(1).get(0);
 		assertPresent(entityTypeDynamic, entity);
 
 		dataService.delete(entityTypeDynamic.getId(), entity);
@@ -372,9 +376,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testDeleteById()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
-		dataService.add(entityTypeDynamic.getId(), entity);
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Entity entity = createDynamicAndAdd(1).get(0);
 		assertPresent(entityTypeDynamic, entity);
 
 		dataService.deleteById(entityTypeDynamic.getId(), entity.getIdValue());
@@ -385,9 +387,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testDeleteStream()
 	{
-		List<Entity> entities = createDynamic(2).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(2);
 		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), entities.size());
 
 		dataService.delete(entityTypeDynamic.getId(), entities.stream());
@@ -398,14 +398,42 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testDeleteAll()
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(5);
 		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), entities.size());
 
 		dataService.deleteAll(entityTypeDynamic.getId());
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), 0);
+	}
+
+	@Test(singleThreaded = true)
+	public void testDeletePackage()
+	{
+		runAsSystem(() ->
+		{
+			MetaDataService metadataService = dataService.getMeta();
+
+			Package parentPackage = packageFactory.create("parent").setLabel("parent");
+			Package subPackage = packageFactory.create("parent_sub").setLabel("sub").setParent(parentPackage);
+			metadataService.upsertPackages(Stream.of(parentPackage, subPackage));
+
+			EntityType entityTypeInSubPackage = testHarness.createDynamicRefEntityType("entityInSub", subPackage);
+			EntityType entityTypeInParentPackage = testHarness
+					.createDynamicTestEntityType("entityInParent", parentPackage, entityTypeInSubPackage);
+
+			metadataService.upsertEntityTypes(asList(entityTypeInSubPackage, entityTypeInParentPackage));
+
+			List<Entity> entities = createAndAdd(entityTypeInParentPackage, entityTypeInSubPackage, 5);
+			Set<Entity> refEntities = entities.stream().map(e -> e.getEntity(ATTR_XREF)).collect(toSet());
+			assertPresent(entityTypeInParentPackage, entities);
+			assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
+
+			dataService.deleteById(PACKAGE, "parent");
+			assertNull(metadataService.getPackage("parent"));
+			assertNull(metadataService.getPackage("parent_sub"));
+			entities.forEach(this::assertNotPresent);
+			refEntities.forEach(this::assertNotPresent);
+		});
 	}
 
 	@Test(singleThreaded = true)
@@ -418,9 +446,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindAll()
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(5);
 		Stream<Entity> retrieved = dataService.findAll(entityTypeDynamic.getId());
 		assertEquals(retrieved.count(), entities.size());
 	}
@@ -428,9 +454,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindAllTyped()
 	{
-		List<Entity> entities = createDynamic(1).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(1);
 		Supplier<Stream<Entity>> retrieved = () -> dataService.findAll(entityTypeDynamic.getId(), Entity.class);
 		assertEquals(retrieved.get().count(), 1);
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
@@ -439,9 +463,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindAllByIds()
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(5);
 		Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
 		Stream<Entity> retrieved = dataService.findAll(entityTypeDynamic.getId(), ids);
 		assertEquals(retrieved.count(), entities.size());
@@ -450,12 +472,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindAllByIdsTyped()
 	{
-		List<Entity> entities = createStatic(5).collect(toList());
-		dataService.add(entityTypeStatic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
+		List<Entity> entities = createStaticAndAdd(5);
 
 		Supplier<Stream<TestEntityStatic>> retrieved = () -> dataService.findAll(entityTypeStatic.getId(),
-						Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntityStatic.class);
+				Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntityStatic.class);
 		assertEquals(retrieved.get().count(), entities.size());
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
@@ -464,9 +484,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindAllStreamFetch()
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(5);
 		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
 		Stream<Entity> retrieved = dataService.findAll(entityTypeDynamic.getId(), ids, new Fetch().field(ATTR_ID));
 		assertEquals(retrieved.count(), entities.size());
@@ -497,11 +515,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorEq")
 	public void testFindQueryOperatorEq(String attrName, Object value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(attrName, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(attrName, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -520,11 +536,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorIn")
 	public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(2).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.in(ATTR_ID, ids).findAll();
+		List<Entity> entities = createDynamicAndAdd(2);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).in(ATTR_ID, ids).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -543,11 +556,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLess")
 	public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.lt(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(5);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).lt(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -566,11 +577,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLessEqual")
 	public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.le(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(5);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).le(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -589,11 +598,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreater")
 	public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.gt(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).gt(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -612,11 +619,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreaterEqual")
 	public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.ge(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).ge(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -635,11 +640,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
 	public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.rng(ATTR_INT, low, high).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).rng(ATTR_INT, low, high)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -657,11 +660,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLike")
 	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(2).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.like(ATTR_STRING, likeStr).findAll();
+		List<Entity> entities = createDynamicAndAdd(2);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).like(ATTR_STRING, likeStr)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -680,11 +681,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNot")
 	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).not()
-				.eq(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).not().eq(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -699,9 +698,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, enabled = false)
 	public void cachePerformanceTest()
 	{
-		List<Entity> entities = createDynamic(10000).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		List<Entity> entities = createDynamicAndAdd(10000);
 
 		Query<Entity> q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
 		q1.pageSize(1000);
@@ -732,11 +729,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorAnd")
 	public void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(ATTR_STRING, strValue)
+				.and().eq(ATTR_INT, value).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -755,11 +750,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorOr")
 	public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(ATTR_STRING, strValue)
+				.or().eq(ATTR_INT, value).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -781,12 +774,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
 			List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(3).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest()
-				.findAll();
+		List<Entity> entities = createDynamicAndAdd(3);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).eq(ATTR_BOOL, boolValue)
+				.and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest().findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -804,11 +794,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
 	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
 	{
-		List<Entity> entities = createDynamic(2).collect(toList());
-		dataService.add(entityTypeDynamic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId())
-				.search(ATTR_HTML, searchStr).findAll();
+		List<Entity> entities = createDynamicAndAdd(2);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getId()).search(ATTR_HTML, searchStr)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -841,9 +829,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindQueryTypedStatic()
 	{
-		List<Entity> entities = createStatic(5).collect(toList());
-		dataService.add(entityTypeStatic.getId(), entities.stream());
-		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
+		List<Entity> entities = createStaticAndAdd(5);
 		Supplier<Stream<TestEntityStatic>> found = () -> dataService.findAll(entityTypeStatic.getId(),
 				new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntityStatic.class);
 		assertEquals(found.get().count(), 1);
@@ -853,9 +839,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindOne()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
-		dataService.add(entityTypeDynamic.getId(), Stream.of(entity));
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Entity entity = createDynamicAndAdd(1).get(0);
 		assertNotNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue()));
 	}
 
@@ -874,23 +858,22 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindOneFetch()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
-		dataService.add(entityTypeDynamic.getId(), Stream.of(entity));
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		assertNotNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue(),
-				new Fetch().field(ATTR_ID)));
+		Entity entity = createDynamicAndAdd(1).get(0);
+		assertNotNull(
+				dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
 	@Test(singleThreaded = true)
 	public void testFindOneFetchTypedStatic()
 	{
-		TestEntityStatic entity = new TestEntityStatic(entityTypeStatic);
+		Entity entity = createStatic(1).collect(toList()).get(0);
 		entity.set(ATTR_ID, "1");
 		entity.set(ATTR_STRING, "string1");
 		entity.set(ATTR_BOOL, true);
 
 		dataService.add(entityTypeStatic.getId(), Stream.of(entity));
 		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
+
 		TestEntityStatic testEntityStatic = dataService
 				.findOneById(entityTypeStatic.getId(), entity.getIdValue(), new Fetch().field(ATTR_ID),
 						TestEntityStatic.class);
@@ -901,9 +884,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindOneQuery()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
-		dataService.add(entityTypeDynamic.getId(), entity);
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Entity entity = createDynamicAndAdd(1).get(0);
 		entity = dataService.findOne(entityTypeDynamic.getId(), new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
 		assertNotNull(entity);
 	}
@@ -911,11 +892,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindOneQueryTypedStatic()
 	{
-		Entity entity = createStatic(1).findFirst().get();
-		dataService.add(entityTypeStatic.getId(), entity);
-		waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-		TestEntityStatic testEntityStatic = dataService.findOne(entityTypeStatic.getId(),
-				new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()), TestEntityStatic.class);
+		Entity entity = createStaticAndAdd(1).get(0);
+		TestEntityStatic testEntityStatic = dataService
+				.findOne(entityTypeStatic.getId(), new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()),
+						TestEntityStatic.class);
 		assertNotNull(testEntityStatic);
 		assertEquals(testEntityStatic.getId(), entity.getIdValue());
 	}
@@ -941,7 +921,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		Stream<String> names = dataService.getEntityTypeIds();
 		assertNotNull(names);
-		assertTrue(names.filter(entityTypeDynamic.getId()::equals).findFirst().isPresent());
+		assertTrue(names.anyMatch(entityTypeDynamic.getId()::equals));
 	}
 
 	@Test(singleThreaded = true)
@@ -1004,9 +984,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testUpdate()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
-		dataService.add(entityTypeDynamic.getId(), entity);
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		Entity entity = createDynamicAndAdd(1).get(0);
 
 		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
 		assertNotNull(entity);
@@ -1031,8 +1009,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testUpdateSingleRefEntityIndexesReferencingEntities()
 	{
-		dataService.add(entityTypeDynamic.getId(), createDynamic(30));
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		createDynamicAndAdd(30);
 
 		Entity refEntity4 = dataService.findOneById(refEntityTypeDynamic.getId(), "4");
 
@@ -1049,8 +1026,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, enabled = false) //FIXME: sys_md_attributes spam
 	public void testUpdateSingleRefEntityIndexesLargeAmountOfReferencingEntities()
 	{
-		dataService.add(entityTypeDynamic.getId(), createDynamic(10000));
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+		createDynamicAndAdd(10000);
 
 		Query<Entity> q = new QueryImpl<>().search("refstring4").or().search("refstring5");
 
@@ -1072,10 +1048,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testUpdateStream()
 	{
-		Entity entity = createDynamic(1).findFirst().get();
+		Entity entity = createDynamicAndAdd(1).get(0);
 
-		dataService.add(entityTypeDynamic.getId(), entity);
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		assertPresent(entityTypeDynamic, entity);
 
 		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
@@ -1099,18 +1073,34 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
 
-	private Stream<Entity> createDynamic(int count)
-	{
-		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
-		runAsSystem(() -> dataService.add(refEntityTypeDynamic.getId(), refEntities.stream()));
-		return testHarness.createTestEntities(entityTypeDynamic, count, refEntities);
-	}
-
 	private Stream<Entity> createStatic(int count)
 	{
-		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeStatic, 6);
-		runAsSystem(() -> dataService.add(refEntityTypeStatic.getId(), refEntities.stream()));
-		return testHarness.createTestEntities(entityTypeStatic, count, refEntities);
+		return createTestEntities(entityTypeStatic, refEntityTypeStatic, count);
+	}
+
+	private List<Entity> createDynamicAndAdd(int count)
+	{
+		return createAndAdd(entityTypeDynamic, refEntityTypeDynamic, count);
+	}
+
+	private List<Entity> createAndAdd(EntityType entityType, EntityType refEntityType, int count)
+	{
+		List<Entity> entities = createTestEntities(entityType, refEntityType, count).collect(toList());
+		dataService.add(entityType.getId(), entities.stream());
+		waitForIndexToBeStable(entityType, indexService, LOG);
+		return entities;
+	}
+
+	private List<Entity> createStaticAndAdd(int count)
+	{
+		return createAndAdd(entityTypeStatic, refEntityTypeStatic, count);
+	}
+
+	private Stream<Entity> createTestEntities(EntityType entityType, EntityType refEntityType, int count)
+	{
+		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityType, 6);
+		runAsSystem(() -> dataService.add(refEntityType.getId(), refEntities.stream()));
+		return testHarness.createTestEntities(entityType, count, refEntities);
 	}
 
 	private void assertPresent(EntityType emd, List<Entity> entities)
@@ -1393,8 +1383,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			q0.pageSize(10); // L3 only caches queries with a page size
 			q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-			List actual = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue)
-					.collect(toList());
+			List actual = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue).collect(toList());
 			assertEquals(actual, Arrays.asList());
 
 			// Remove added attribute
@@ -1564,5 +1553,118 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			});
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		});
+	}
+
+	@Test(singleThreaded = true)
+	public void testOneDimensionalAggregateQuery()
+	{
+		createDynamicAndAdd(6);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, null, null, new QueryImpl<>());
+
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(3L), singletonList(3L)),
+				asList("F", "T"), emptyList());
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testTwoDimensionalAggregateQuery()
+	{
+		createDynamicAndAdd(6);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, new QueryImpl<>());
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 3L), asList(3L, 0L)), asList("F", "T"),
+				asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testOneDimensionalDistinctAggregateQuery()
+	{
+		createDynamicAndAdd(6);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, null, ATTR_ENUM, new QueryImpl<>());
+
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)),
+				asList("F", "T"), emptyList());
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testTwoDimensionalDistinctAggregateQuery()
+	{
+		createDynamicAndAdd(6);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_BOOL, ATTR_ENUM, new QueryImpl<>());
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList("F", "T"),
+				asList("F", "T"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testAggregateQueryWithQuery()
+	{
+		createDynamicAndAdd(6);
+		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, 12); // last 3 entities
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, query);
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 2L), asList(1L, 0L)), asList("F", "T"),
+				asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true)
+	public void testDistinctAggregateQueryWithQuery()
+	{
+		createDynamicAndAdd(6);
+		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, 12); // last 3 entities
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 1L), asList(1L, 0L)), asList("F", "T"),
+				asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true, enabled = false)
+	public void testDistinctAggregateQueryManyRows()
+	{
+		createDynamicAndAdd(20000);
+		Query<Entity> query = new QueryImpl<>().eq(ATTR_BOOL, true);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
+
+		AggregateResult expectedResult = new AggregateResult(singletonList(singletonList(1L)), singletonList("T"),
+				singletonList("option1"));
+		assertEquals(result, expectedResult);
+	}
+
+	@Test(singleThreaded = true, enabled = false)
+	public void testAggregateQueryManyRows()
+	{
+		createDynamicAndAdd(1000000);
+		Query<Entity> query = new QueryImpl<>().eq(ATTR_BOOL, true).or().lt(ATTR_INT, 15000);
+
+		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, query);
+
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 7495L), asList(500000L, 0L)),
+				asList("F", "T"), asList("option1", "option2"));
+		assertEquals(result, expectedResult);
+	}
+
+	private AggregateResult runAggregateQuery(String attrX, String attrY, String attrDistinct, Query<Entity> query)
+	{
+		requireNonNull(attrX);
+		requireNonNull(query);
+
+		Attribute x = entityTypeDynamic.getAttribute(attrX);
+		Attribute y = attrY != null ? entityTypeDynamic.getAttribute(attrY) : null;
+		Attribute distinct = attrDistinct != null ? entityTypeDynamic.getAttribute(attrDistinct) : null;
+
+		AggregateQuery aggregateQuery = new AggregateQueryImpl(x, y, distinct, query);
+		return runAsSystem(() -> dataService.aggregate(entityTypeDynamic.getId(), aggregateQuery));
 	}
 }

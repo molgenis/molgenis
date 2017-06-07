@@ -251,7 +251,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	@Override
 	public void delete(Stream<EntityType> entities)
 	{
-		super.update(entities.filter(entityType ->
+		super.delete(entities.filter(entityType ->
 		{
 			validateDeleteAllowed(entityType);
 			deleteEntityPermissions(entityType);
