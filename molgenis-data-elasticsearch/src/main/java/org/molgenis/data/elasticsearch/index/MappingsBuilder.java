@@ -107,16 +107,16 @@ public class MappingsBuilder
 				// not-analyzed field for aggregation
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
-						.field("index", "not_analyzed").endObject().endObject();
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
+						.field("index", true).endObject().endObject();
 				break;
 			case DATE_TIME:
 				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
 				// not-analyzed field for aggregation
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
-						.field("index", "not_analyzed").endObject().endObject();
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
+						.field("index", true).endObject().endObject();
 				break;
 			case DECIMAL:
 				jsonBuilder.field("type", "double");
@@ -135,17 +135,17 @@ public class MappingsBuilder
 			case STRING:
 			case TEXT:
 				// enable/disable norms based on given value
-				jsonBuilder.field("type", "string");
+				jsonBuilder.field("type", "text");
 				jsonBuilder.field("norms", enableNorms);
 				// not-analyzed field for sorting and wildcard queries
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
 				XContentBuilder fieldsObject = jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED)
-						.field("type", "string").field("index", "not_analyzed").endObject();
+						.field("type", "keyword").field("index", true).endObject();
 				if (enableNgramAnalyzer)
 				{
 					// add ngram analyzer (not applied to nested documents)
-					fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "string")
+					fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "text")
 							.field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER).endObject();
 				}
 				fieldsObject.endObject();
@@ -153,13 +153,13 @@ public class MappingsBuilder
 			case HTML:
 			case SCRIPT:
 				// enable/disable norms based on given value
-				jsonBuilder.field("type", "string");
+				jsonBuilder.field("type", "text");
 				jsonBuilder.field("norms", enableNorms);
 				// not-analyzed field for sorting and wildcard queries
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
-						.field("index", "not_analyzed").endObject().endObject();
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
+						.field("index", true).endObject().endObject();
 				break;
 			default:
 				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
