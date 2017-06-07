@@ -63,11 +63,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>4.2.1</version>
-        </dependency>
+        <!-- TODO Remove protonpack once we upgrade to JDK 9 -->
         <dependency>
             <groupId>com.codepoetics</groupId>
             <artifactId>protonpack</artifactId>
