@@ -241,7 +241,6 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
 				}
-				// TODO which score mode?
 				return QueryBuilders
 						.nestedQuery(fieldName, QueryBuilders.termQuery(indexFieldName, queryValue), ScoreMode.Avg);
 			case COMPOUND:
@@ -289,7 +288,6 @@ public class QueryGenerator implements QueryPartGenerator
 				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
 				String indexFieldName = getQueryFieldName(refAttributePath);
 
-				// TODO which score mode to use?
 				return QueryBuilders.boolQuery().mustNot(
 						QueryBuilders.nestedQuery(fieldName, QueryBuilders.existsQuery(indexFieldName), ScoreMode.Avg));
 			case COMPOUND:
@@ -469,7 +467,6 @@ public class QueryGenerator implements QueryPartGenerator
 					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
 				}
 				queryBuilder = QueryBuilders.termsQuery(indexFieldName, queryValues);
-				// TODO which score mode?
 				queryBuilder = QueryBuilders.nestedQuery(fieldName, queryBuilder, ScoreMode.Avg);
 				break;
 			case COMPOUND:
@@ -662,7 +659,6 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
 				}
-				// TODO which score mode?
 				return QueryBuilders
 						.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue),
 								ScoreMode.Avg);
@@ -793,7 +789,6 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 		else if (attributePath.size() == 2)
 		{
-			// TODO which score mode?
 			return QueryBuilders.nestedQuery(getQueryFieldName(attributePath.get(0)), queryBuilder, ScoreMode.Avg);
 		}
 		else
