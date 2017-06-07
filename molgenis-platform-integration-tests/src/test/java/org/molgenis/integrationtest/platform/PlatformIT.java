@@ -1637,7 +1637,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
 
-		AggregateResult expectedResult = new AggregateResult(singletonList(singletonList(1L)), singletonList("T"),
+		AggregateResult expectedResult = new AggregateResult(singletonList(singletonList(1L)), singletonList(1L),
 				singletonList("option1"));
 		assertEquals(result, expectedResult);
 	}
