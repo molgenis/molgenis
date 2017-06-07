@@ -9,6 +9,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -127,7 +128,14 @@ public class ElasticsearchService implements SearchService
 	public long count(Query<Entity> q, EntityType entityType)
 	{
 		String documentType = getIndexName(entityType);
-		return elasticsearchFacade.getCount(q, entityType, documentType, documentType);
+		try
+		{
+			return elasticsearchFacade.getCount(q, entityType, documentType, documentType);
+		}
+		catch (IndexNotFoundException e)
+		{
+			return 0L;
+		}
 	}
 
 	@Override
@@ -281,7 +289,14 @@ public class ElasticsearchService implements SearchService
 	public void deleteById(String id, EntityType entityType)
 	{
 		String indexName = getIndexName(entityType);
-		elasticsearchFacade.deleteById(indexName, id, indexName);
+		try
+		{
+			elasticsearchFacade.deleteById(indexName, id, indexName);
+		}
+		catch (IndexNotFoundException e)
+		{
+			// silently ignore
+		}
 	}
 
 	@Override
@@ -308,7 +323,14 @@ public class ElasticsearchService implements SearchService
 	public void delete(EntityType entityType)
 	{
 		String documentType = getIndexName(entityType);
-		elasticsearchFacade.deleteIndex(documentType);
+		try
+		{
+			elasticsearchFacade.deleteIndex(documentType);
+		}
+		catch (IndexNotFoundException e)
+		{
+			// silently ignore
+		}
 	}
 
 	@Override
