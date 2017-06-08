@@ -29,7 +29,7 @@ public interface SearchService
 
 	void deleteById(EntityType entityType, String id);
 
-	void deleteById(EntityType entityType, Stream<String> ids);
+	void deleteAll(EntityType entityType, Stream<String> ids);
 
 	/**
 	 * Deletes entities from index

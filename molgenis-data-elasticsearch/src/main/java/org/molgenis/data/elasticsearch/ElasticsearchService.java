@@ -285,7 +285,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void deleteById(EntityType entityType, Stream<String> ids)
+	public void deleteAll(EntityType entityType, Stream<String> ids)
 	{
 		ids.forEach(id -> deleteById(entityType, id));
 	}
@@ -295,7 +295,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Stream<Object> entityIds = entities.map(Entity::getIdValue);
 		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(
-				batchEntityIds -> deleteById(entityType, toElasticsearchIds(batchEntityIds.stream())));
+				batchEntityIds -> deleteAll(entityType, toElasticsearchIds(batchEntityIds.stream())));
 	}
 
 	@Override
