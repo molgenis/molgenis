@@ -17,9 +17,19 @@ public interface SearchService
 
 	void deleteIndex(EntityType entityType);
 
+	void rebuildIndex(Repository<? extends Entity> repository);
+
+	void refreshIndex();
+
 	long count(EntityType entityType);
 
 	long count(EntityType entityType, Query<Entity> q);
+
+	Object searchOne(EntityType entityType, Query<Entity> q);
+
+	Stream<Object> search(EntityType entityType, Query<Entity> q);
+
+	AggregateResult aggregate(EntityType entityType, AggregateQuery aggregateQuery);
 
 	void index(EntityType entityType, Entity entity, IndexingMode indexingMode);
 
@@ -27,25 +37,9 @@ public interface SearchService
 
 	void delete(EntityType entityType, Entity entity);
 
+	void delete(EntityType entityType, Stream<? extends Entity> entities);
+
 	void deleteById(EntityType entityType, Object entityId);
 
 	void deleteAll(EntityType entityType, Stream<Object> entityIds);
-
-	/**
-	 * Deletes entities from index
-	 *
-	 * @param entityType
-	 * @param entities       entity stream
-	 */
-	void delete(EntityType entityType, Stream<? extends Entity> entities);
-
-	Stream<Object> search(EntityType entityType, Query<Entity> q);
-
-	AggregateResult aggregate(EntityType entityType, AggregateQuery aggregateQuery);
-
-	void rebuildIndex(Repository<? extends Entity> repository);
-
-	void refreshIndex();
-
-	Object findOne(EntityType entityType, Query<Entity> q);
 }

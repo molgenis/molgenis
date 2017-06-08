@@ -65,7 +65,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			Object entityId = searchService.findOne(getEntityType(), q);
+			Object entityId = searchService.searchOne(getEntityType(), q);
 			return entityId != null ? decoratedRepo.findOneById(entityId, q.getFetch()) : null;
 		}
 

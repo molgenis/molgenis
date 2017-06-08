@@ -168,7 +168,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(emd.getIdAttribute().getName(), "entityId");
 
-		when(searchService.findOne(emd, q)).thenReturn("entityId");
+		when(searchService.searchOne(emd, q)).thenReturn("entityId");
 		this.rebuildIndexSingleEntityTest(IndexingMode.UPDATE);
 	}
 

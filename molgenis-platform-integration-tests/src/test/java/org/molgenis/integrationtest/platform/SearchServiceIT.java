@@ -541,7 +541,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = createAndIndexEntities(1).get(0);
 
-		Object entityId = searchService.findOne(entityTypeDynamic, new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
+		Object entityId = searchService
+				.searchOne(entityTypeDynamic, new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
 		assertNotNull(entity);
 	}
 

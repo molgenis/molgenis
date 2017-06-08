@@ -371,7 +371,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public Object findOne(EntityType entityType, Query<Entity> q)
+	public Object searchOne(EntityType entityType, Query<Entity> q)
 	{
 		return search(entityType, q).findFirst().orElse(null);
 	}

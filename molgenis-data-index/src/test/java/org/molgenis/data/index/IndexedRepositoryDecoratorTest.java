@@ -197,10 +197,10 @@ public class IndexedRepositoryDecoratorTest
 	public void findOneQueryUnsupported()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(searchService.findOne(repositoryEntityType, unsupportedQuery)).thenReturn(entity0);
+		when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenReturn(entity0);
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
-		verify(searchService).findOne(repositoryEntityType, unsupportedQuery);
+		verify(searchService).searchOne(repositoryEntityType, unsupportedQuery);
 		verify(decoratedRepo).findOneById(any(Object.class), any(Fetch.class));
 	}
 
