@@ -27,7 +27,7 @@ import static java.util.Arrays.asList;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexSettings.DEFAULT_ANALYZER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;

@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.util;
 import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -13,6 +14,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -20,7 +22,6 @@ import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
@@ -58,6 +59,18 @@ public class ElasticsearchClientFacade
 	{
 		this.client = client;
 		this.bulkProcessorFactory = bulkProcessorFactory;
+	}
+
+	public void createIndex(String indexName, Settings settings)
+	{
+		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
+		CreateIndexResponse createIndexResponse = client.admin().indices().prepareCreate(indexName)
+				.setSettings(settings).get();
+		if (!createIndexResponse.isAcknowledged())
+		{
+			throw new ElasticsearchException(String.format("Error creating index '%s'", indexName));
+		}
+		LOG.debug("Created Elasticsearch index '{}'.", indexName);
 	}
 
 	public boolean indexExists(String index)
@@ -172,13 +185,6 @@ public class ElasticsearchClientFacade
 			client.prepareDelete(index, type, id).get();
 		}
 		LOG.debug("Deleted Elasticsearch '{}' doc with id [{}]", type, id);
-	}
-
-	public void createIndex(String indexName)
-	{
-		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
-		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
-		LOG.debug("Created Elasticsearch index '{}'.", indexName);
 	}
 
 	public void deleteIndex(String indexName)

@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
-import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexSettings.DEFAULT_ANALYZER;
 import static org.molgenis.data.elasticsearch.index.MappingsBuilder.FIELD_NOT_ANALYZED;
 
 /**

@@ -5,7 +5,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.factory.ElasticsearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.elasticsearch.util.ElasticsearchClientFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -62,9 +62,9 @@ public class ElasticsearchConfig
 	}
 
 	@Bean
-	public SearchService searchService()
+	public ElasticsearchClientFacade elasticsearchClientFacade()
 	{
-		return elasticsearchServiceFactory().create(dataService, elasticsearchEntityFactory, documentIdGenerator);
+		return new ElasticsearchClientFacade(elasticsearchServiceFactory().getClient());
 	}
 
 	private List<InetSocketAddress> toIpSocketAddresses(List<String> elasticsearchTransportAddresses)

@@ -139,7 +139,7 @@ public class MappingsBuilder
 				{
 					// add ngram analyzer (not applied to nested documents)
 					fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "text")
-							.field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER).endObject();
+							.field("analyzer", ElasticsearchIndexSettings.NGRAM_ANALYZER).endObject();
 				}
 				fieldsObject.endObject();
 				break;

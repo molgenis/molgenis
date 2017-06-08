@@ -5,10 +5,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +38,6 @@ public class ElasticsearchServiceFactory implements Closeable
 	{
 		this.client = createElasticsearchClient(clusterName, socketAddresses, settings);
 		LOG.info("Connected to Elasticsearch cluster '{}' on {}", clusterName, socketAddresses.toString());
-	}
-
-	public ElasticsearchService create(DataService dataService, ElasticsearchEntityFactory elasticsearchEntityFactory,
-			DocumentIdGenerator documentIdGenerator)
-	{
-		return new ElasticsearchService(client, dataService, elasticsearchEntityFactory, documentIdGenerator);
 	}
 
 	public Client getClient()
