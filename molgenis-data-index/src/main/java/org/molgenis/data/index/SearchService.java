@@ -39,14 +39,7 @@ public interface SearchService
 	 */
 	void delete(EntityType entityType, Stream<? extends Entity> entities);
 
-	/**
-	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
-	 *
-	 * @param entityType
-	 * @param q
-	 * @return
-	 */
-	Stream<Entity> search(EntityType entityType, Query<Entity> q);
+	Stream<Object> search(EntityType entityType, Query<Entity> q);
 
 	AggregateResult aggregate(EntityType entityType, AggregateQuery aggregateQuery);
 
@@ -54,5 +47,5 @@ public interface SearchService
 
 	void refreshIndex();
 
-	Entity findOne(EntityType entityType, Query<Entity> q);
+	Object findOne(EntityType entityType, Query<Entity> q);
 }

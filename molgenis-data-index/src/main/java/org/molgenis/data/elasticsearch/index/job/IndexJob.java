@@ -211,9 +211,9 @@ class IndexJob extends NontransactionalJob<Void>
 
 			Query<Entity> q = new QueryImpl<>();
 			q.eq(entityType.getIdAttribute().getName(), entityId);
-			Entity indexEntity = searchService.findOne(entityType, q);
+			Object indexedEntityId = searchService.findOne(entityType, q);
 
-			if (null != indexEntity)
+			if (null != indexedEntityId)
 			{
 				// update
 				LOG.debug("Index update [{}].[{}].", entityTypeId, entityId);

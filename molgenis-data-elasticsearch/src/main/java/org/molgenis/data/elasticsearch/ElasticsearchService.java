@@ -10,7 +10,10 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.IndexNotFoundException;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
@@ -311,10 +314,10 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public Stream<Entity> search(EntityType entityType, Query<Entity> q)
+	public Stream<Object> search(EntityType entityType, Query<Entity> q)
 	{
 		ElasticsearchEntityIterable searchInternal = searchInternal(q, entityType);
-		return new EntityStream(searchInternal.stream(), true);
+		return searchInternal.stream().map(Entity::getIdValue);
 	}
 
 	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityType entityType)
@@ -368,7 +371,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public Entity findOne(EntityType entityType, Query<Entity> q)
+	public Object findOne(EntityType entityType, Query<Entity> q)
 	{
 		return search(entityType, q).findFirst().orElse(null);
 	}

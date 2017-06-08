@@ -1256,20 +1256,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// test string1 from entity
 		Query<Entity> q0 = new QueryImpl<>();
 		q0.search("string1");
-		Stream<Entity> result0 = searchService.search(entityTypeDynamic, q0);
-		assertEquals(result0.count(), 2);
+		long count0 = searchService.count(entityTypeDynamic, q0);
+		assertEquals(count0, 2L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q1 = new QueryImpl<>();
 		q1.search("refstring0");
-		Stream<Entity> result1 = searchService.search(entityTypeDynamic, q1);
-		assertEquals(result1.count(), 1);
+		long count1 = searchService.count(entityTypeDynamic, q1);
+		assertEquals(count1, 1L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q2 = new QueryImpl<>();
 		q2.search("refstring1");
-		Stream<Entity> result2 = searchService.search(entityTypeDynamic, q2);
-		assertEquals(result2.count(), 1);
+		long count2 = searchService.count(entityTypeDynamic, q2);
+		assertEquals(count2, 1L);
 
 		refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
 		runAsSystem(() ->
@@ -1279,26 +1279,26 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 
 		// test string1 from entity
-		Stream<Entity> result3 = searchService.search(entityTypeDynamic, q0);
-		assertEquals(result3.count(), 2);
+		long count3 = searchService.count(entityTypeDynamic, q0);
+		assertEquals(count3, 2L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q4 = new QueryImpl<>();
 		q4.search("refstring0");
-		Stream<Entity> result4 = searchService.search(entityTypeDynamic, q4);
-		assertEquals(result4.count(), 0);
+		long count4 = searchService.count(entityTypeDynamic, q4);
+		assertEquals(count4, 0L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q5 = new QueryImpl<>();
 		q5.search("refstring1");
-		Stream<Entity> result5 = searchService.search(entityTypeDynamic, q5);
-		assertEquals(result5.count(), 1);
+		long count5 = searchService.count(entityTypeDynamic, q5);
+		assertEquals(count5, 1L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q6 = new QueryImpl<>();
 		q6.search("searchTestBatchUpdate");
-		Stream<Entity> result6 = searchService.search(entityTypeDynamic, q6);
-		assertEquals(result6.count(), 1);
+		long count6 = searchService.count(entityTypeDynamic, q6);
+		assertEquals(count6, 1L);
 	}
 
 	/**

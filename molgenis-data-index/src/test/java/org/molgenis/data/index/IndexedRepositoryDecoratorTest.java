@@ -201,7 +201,7 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
 		verify(searchService).findOne(repositoryEntityType, unsupportedQuery);
-		verify(decoratedRepo, never()).findOne(unsupportedQuery);
+		verify(decoratedRepo).findOneById(any(Object.class), any(Fetch.class));
 	}
 
 	@Test
@@ -294,12 +294,13 @@ public class IndexedRepositoryDecoratorTest
 		verifyZeroInteractions(searchService);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void findAllQueryUnsupported()
 	{
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
 		verify(searchService).search(repositoryEntityType, unsupportedQuery);
-		verify(decoratedRepo, never()).findAll(unsupportedQuery);
+		verify(decoratedRepo).findAll(any(Stream.class), any(Fetch.class));
 	}
 
 	@Test
