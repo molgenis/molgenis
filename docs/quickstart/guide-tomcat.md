@@ -57,6 +57,11 @@ Start Elasticsearch from the command line:
 ./bin/elasticsearch
 ```
 
+By default MOLGENIS will try to connect to a node within cluster 'molgenis' on address 127.0.0.1:9300 (not to be confused with port 9200 which is used for REST communication). If the cluster is named differently or is running on another address then you will have to specify these properties in *molgenis-server.properties*:
+```
+elasticsearch.cluster.name=my-cluster-name
+elasticsearch.transport.addresses=127.1.2.3:9300,127.3.4.5:9301
+```
 **Launching MOLGENIS**  
 Now that your database server, Elasticsearch and properties file have been configured, restart the Apache Tomcat server.
 If you open up a web browser and navigate to where your apache-tomcat applications are deployed (often this is localhost:8080) you should see the following:  
