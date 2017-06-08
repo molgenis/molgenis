@@ -91,19 +91,13 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void createMappings(EntityType entityType)
 	{
-		createMappings(entityType, true, true);
-	}
-
-	@Override
-	public void createMappings(EntityType entityType, boolean enableNorms, boolean createAllIndex)
-	{
 		String indexName = getIndexName(entityType);
 		elasticsearchFacade.createIndex(indexName);
 
 		try (XContentBuilder jsonBuilder = XContentFactory.jsonBuilder())
 		{
 			String documentType = getIndexName(entityType);
-			MappingsBuilder.buildMapping(jsonBuilder, entityType, documentIdGenerator, enableNorms, createAllIndex);
+			MappingsBuilder.buildMapping(jsonBuilder, entityType, documentIdGenerator);
 			elasticsearchFacade.putMapping(indexName, jsonBuilder, documentType);
 		}
 		catch (IOException e)

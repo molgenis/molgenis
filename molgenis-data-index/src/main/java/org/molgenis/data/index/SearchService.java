@@ -15,8 +15,6 @@ public interface SearchService
 
 	void createMappings(EntityType entityType);
 
-	void createMappings(EntityType entityType, boolean enableNorms, boolean createAllIndex);
-
 	long count(EntityType entityType);
 
 	long count(Query<Entity> q, EntityType entityType);

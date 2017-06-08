@@ -28,14 +28,13 @@ public class MappingsBuilder
 	/**
 	 * Creates a Elasticsearch mapping for the given entity meta data
 	 *
-	 * @param jsonBuilder {@link XContentBuilder} to write the mapping to
-	 * @param entityType  {@link EntityType} for the entity to map
+	 * @param jsonBuilder         {@link XContentBuilder} to write the mapping to
+	 * @param entityType          {@link EntityType} for the entity to map
 	 * @param documentIdGenerator document id generator
 	 * @throws IOException writing to JSON builder
 	 */
 	public static void buildMapping(XContentBuilder jsonBuilder, EntityType entityType,
-			DocumentIdGenerator documentIdGenerator, boolean enableNorms,
-			boolean createAllIndex) throws IOException
+			DocumentIdGenerator documentIdGenerator) throws IOException
 	{
 		String docType = documentIdGenerator.generateId(entityType);
 		jsonBuilder.startObject().startObject(docType);
@@ -46,7 +45,7 @@ public class MappingsBuilder
 
 		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			createAttributeMapping(attr, documentIdGenerator, enableNorms, createAllIndex, true, true, jsonBuilder);
+			createAttributeMapping(attr, documentIdGenerator, true, true, jsonBuilder);
 		}
 		jsonBuilder.endObject();
 
@@ -55,18 +54,16 @@ public class MappingsBuilder
 
 	// TODO discuss: use null_value for nillable attributes?
 	private static void createAttributeMapping(Attribute attr, DocumentIdGenerator documentIdGenerator,
-			boolean enableNorms, boolean createAllIndex,
 			boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder) throws IOException
 	{
 		String attrName = documentIdGenerator.generateId(attr);
 		jsonBuilder.startObject(attrName);
-		createAttributeMappingContents(attr, documentIdGenerator, enableNorms, createAllIndex, nestRefs,
-				enableNgramAnalyzer, jsonBuilder);
+		createAttributeMappingContents(attr, documentIdGenerator, nestRefs, enableNgramAnalyzer, jsonBuilder);
 		jsonBuilder.endObject();
 	}
 
 	private static void createAttributeMappingContents(Attribute attr, DocumentIdGenerator documentIdGenerator,
-			boolean enableNorms, boolean createAllIndex,
+
 			boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder) throws IOException
 	{
 		AttributeType dataType = attr.getDataType();
@@ -88,15 +85,14 @@ public class MappingsBuilder
 					jsonBuilder.startObject("properties");
 					for (Attribute refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, documentIdGenerator, enableNorms, createAllIndex, false, true,
+						createAttributeMapping(refAttr, documentIdGenerator, false, true,
 								jsonBuilder);
 					}
 					jsonBuilder.endObject();
 				}
 				else
 				{
-					createAttributeMappingContents(refEntity.getLabelAttribute(), documentIdGenerator, enableNorms,
-							createAllIndex, false,
+					createAttributeMappingContents(refEntity.getLabelAttribute(), documentIdGenerator, false,
 							enableNgramAnalyzer, jsonBuilder);
 				}
 				break;
@@ -105,7 +101,6 @@ public class MappingsBuilder
 			case DATE:
 				jsonBuilder.field("type", "date").field("format", "date");
 				// not-analyzed field for aggregation
-				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
 				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
 						.field("index", true).endObject().endObject();
@@ -113,7 +108,6 @@ public class MappingsBuilder
 			case DATE_TIME:
 				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
 				// not-analyzed field for aggregation
-				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
 				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
 						.field("index", true).endObject().endObject();
@@ -136,9 +130,8 @@ public class MappingsBuilder
 			case TEXT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "text");
-				jsonBuilder.field("norms", enableNorms);
+				jsonBuilder.field("norms", true);
 				// not-analyzed field for sorting and wildcard queries
-				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
 				XContentBuilder fieldsObject = jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED)
 						.field("type", "keyword").field("index", true).endObject();
@@ -154,9 +147,8 @@ public class MappingsBuilder
 			case SCRIPT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "text");
-				jsonBuilder.field("norms", enableNorms);
+				jsonBuilder.field("norms", true);
 				// not-analyzed field for sorting and wildcard queries
-				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
 				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
 						.field("index", true).endObject().endObject();
@@ -164,8 +156,5 @@ public class MappingsBuilder
 			default:
 				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
-
-		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());
 	}
-
 }
