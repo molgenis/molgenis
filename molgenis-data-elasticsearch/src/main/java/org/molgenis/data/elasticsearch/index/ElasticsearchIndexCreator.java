@@ -6,7 +6,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
+import org.molgenis.data.elasticsearch.util.ElasticsearchClientFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +27,12 @@ public class ElasticsearchIndexCreator
 	private static final String DEFAULT_STEMMER = "default_stemmer";
 
 	private final Client client;
-	private ElasticsearchUtils elasticsearchUtils;
+	private ElasticsearchClientFacade elasticsearchUtils;
 
 	public ElasticsearchIndexCreator(Client client)
 	{
 		this.client = client;
-		elasticsearchUtils = new ElasticsearchUtils(client);
+		elasticsearchUtils = new ElasticsearchClientFacade(client);
 	}
 
 	public void createIndexIfNotExists(String indexName)

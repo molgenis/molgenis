@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
-import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
+import org.molgenis.data.elasticsearch.util.ElasticsearchClientFacade;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -28,13 +28,13 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	private static final int BATCH_SIZE = 1000;
 
 	private final EntityType entityType;
-	private final ElasticsearchUtils elasticsearchFacade;
+	private final ElasticsearchClientFacade elasticsearchFacade;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final SearchRequestGenerator searchRequestGenerator;
 	private final String indexName;
 	private final String documentType;
 
-	ElasticsearchEntityIterable(Query<Entity> q, EntityType entityType, ElasticsearchUtils elasticsearchFacade,
+	ElasticsearchEntityIterable(Query<Entity> q, EntityType entityType, ElasticsearchClientFacade elasticsearchFacade,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, SearchRequestGenerator searchRequestGenerator,
 			String indexName, String documentType)
 	{

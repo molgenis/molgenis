@@ -20,7 +20,7 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
-import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
+import org.molgenis.data.elasticsearch.util.ElasticsearchClientFacade;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.index.IndexingMode;
@@ -61,7 +61,7 @@ public class ElasticsearchService implements SearchService
 	private final DocumentIdGenerator documentIdGenerator;
 
 	private final ResponseParser responseParser = new ResponseParser();
-	private final ElasticsearchUtils elasticsearchFacade;
+	private final ElasticsearchClientFacade elasticsearchFacade;
 	private final SearchRequestGenerator searchRequestGenerator;
 
 	public ElasticsearchService(Client client, DataService dataService,
@@ -70,7 +70,7 @@ public class ElasticsearchService implements SearchService
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
-		this.elasticsearchFacade = new ElasticsearchUtils(client);
+		this.elasticsearchFacade = new ElasticsearchClientFacade(client);
 		this.searchRequestGenerator = new SearchRequestGenerator(documentIdGenerator);
 	}
 

@@ -39,9 +39,9 @@ import static org.elasticsearch.client.Requests.refreshRequest;
 /**
  * Facade in front of the ElasticSearch client.
  */
-public class ElasticsearchUtils
+public class ElasticsearchClientFacade
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchUtils.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchClientFacade.class);
 	private static final TimeValue SCROLL_KEEP_ALIVE = new TimeValue(5, TimeUnit.MINUTES);
 	private static final int SCROLL_SIZE = 1000;
 	private final Client client;
@@ -49,12 +49,12 @@ public class ElasticsearchUtils
 			new DocumentIdGenerator()); // TODO use ElasticsearchNameGenerator bean instead of creating a new instance
 	private final BulkProcessorFactory bulkProcessorFactory;
 
-	public ElasticsearchUtils(Client client)
+	public ElasticsearchClientFacade(Client client)
 	{
 		this(client, new BulkProcessorFactory());
 	}
 
-	private ElasticsearchUtils(Client client, BulkProcessorFactory bulkProcessorFactory)
+	private ElasticsearchClientFacade(Client client, BulkProcessorFactory bulkProcessorFactory)
 	{
 		this.client = client;
 		this.bulkProcessorFactory = bulkProcessorFactory;
