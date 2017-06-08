@@ -42,7 +42,6 @@ import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
-import static org.molgenis.util.EntityUtils.asStream;
 
 /**
  * ElasticSearch implementation of the SearchService interface.
@@ -314,13 +313,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public Iterable<Entity> search(final EntityType entityType, Query<Entity> q)
-	{
-		return searchInternal(q, entityType);
-	}
-
-	@Override
-	public Stream<Entity> searchAsStream(EntityType entityType, Query<Entity> q)
+	public Stream<Entity> search(EntityType entityType, Query<Entity> q)
 	{
 		ElasticsearchEntityIterable searchInternal = searchInternal(q, entityType);
 		return new EntityStream(searchInternal.stream(), true);
@@ -379,8 +372,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Entity findOne(EntityType entityType, Query<Entity> q)
 	{
-		Iterable<Entity> entities = search(entityType, q);
-		return asStream(entities).findFirst().orElse(null);
+		return search(entityType, q).findFirst().orElse(null);
 	}
 
 	private String getIndexName(EntityType entityType)

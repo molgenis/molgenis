@@ -83,7 +83,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			return searchService.searchAsStream(getEntityType(), q);
+			return searchService.search(getEntityType(), q);
 		}
 	}
 

@@ -39,9 +39,6 @@ public interface SearchService
 	 */
 	void delete(EntityType entityType, Stream<? extends Entity> entities);
 
-	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
-	Iterable<Entity> search(EntityType entityType, Query<Entity> q);
-
 	/**
 	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
 	 *
@@ -49,7 +46,7 @@ public interface SearchService
 	 * @param q
 	 * @return
 	 */
-	Stream<Entity> searchAsStream(EntityType entityType, Query<Entity> q);
+	Stream<Entity> search(EntityType entityType, Query<Entity> q);
 
 	AggregateResult aggregate(EntityType entityType, AggregateQuery aggregateQuery);
 

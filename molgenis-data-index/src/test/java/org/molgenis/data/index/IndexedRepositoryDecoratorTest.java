@@ -298,7 +298,7 @@ public class IndexedRepositoryDecoratorTest
 	public void findAllQueryUnsupported()
 	{
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
-		verify(searchService).searchAsStream(repositoryEntityType, unsupportedQuery);
+		verify(searchService).search(repositoryEntityType, unsupportedQuery);
 		verify(decoratedRepo, never()).findAll(unsupportedQuery);
 	}
 
