@@ -140,13 +140,6 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public long index(EntityType entityType, Iterable<? extends Entity> entities, IndexingMode indexingMode)
-	{
-		LOG.debug("Indexing multiple {} entities...", entityType.getId());
-		return index(stream(entities.spliterator(), false), entityType, indexingMode == IndexingMode.UPDATE);
-	}
-
-	@Override
 	public long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode)
 	{
 		LOG.debug("Indexing multiple {} entities...", entityType.getId());
@@ -386,7 +379,7 @@ public class ElasticsearchService implements SearchService
 		createIndex(entityType);
 		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityType),
-				entities -> index(entityType, entities, IndexingMode.ADD), BATCH_SIZE);
+				entities -> index(entityType, entities.stream(), IndexingMode.ADD), BATCH_SIZE);
 		LOG.debug("Create index for repository {}...", repository.getName());
 	}
 

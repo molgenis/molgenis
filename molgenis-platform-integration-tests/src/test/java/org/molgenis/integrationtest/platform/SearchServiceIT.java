@@ -556,7 +556,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	private List<Entity> createAndIndexEntities(int count)
 	{
 		List<Entity> entities = createDynamic(count).collect(toList());
-		searchService.index(entityTypeDynamic, entities, ADD);
+		searchService.index(entityTypeDynamic, entities.stream(), ADD);
 		searchService.refreshIndex();
 		return entities;
 	}

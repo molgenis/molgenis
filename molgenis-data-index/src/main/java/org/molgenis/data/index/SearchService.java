@@ -23,24 +23,6 @@ public interface SearchService
 
 	void index(EntityType entityType, Entity entity, IndexingMode indexingMode);
 
-	/**
-	 * Adds or updated the given entities in the index
-	 *
-	 * @param entityType
-	 * @param entities
-	 * @param indexingMode
-	 * @return number of indexed entities, which equals the size of the input entities iterable
-	 */
-	long index(EntityType entityType, Iterable<? extends Entity> entities, IndexingMode indexingMode);
-
-	/**
-	 * Adds or updated the given entities in the index
-	 *
-	 * @param entityType
-	 * @param entities
-	 * @param indexingMode
-	 * @return number of indexed entities
-	 */
 	long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode);
 
 	void delete(EntityType entityType, Entity entity);
