@@ -59,7 +59,8 @@ public class ElasticsearchIndexCreator
 		Settings.Builder settings = Settings.builder().loadFromSource(
 				XContentFactory.jsonBuilder().startObject().field("index.mapper.dynamic", false)
 						.field("index.number_of_shards", 1).field("index.number_of_replicas", 0)
-						.field("index.mapping.total_fields.limit", Long.MAX_VALUE).startObject("analysis")
+						.field("index.mapping.total_fields.limit", Long.MAX_VALUE)
+						.field("index.mapping.nested_fields.limit", Long.MAX_VALUE).startObject("analysis")
 						.startObject("analyzer").startObject(DEFAULT_ANALYZER).field("type", "custom")
 						.field("filter", new String[] { "lowercase", DEFAULT_STEMMER })
 						.field("tokenizer", DEFAULT_TOKENIZER).field("char_filter", "html_strip").endObject()
