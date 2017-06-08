@@ -11,9 +11,11 @@ import java.util.stream.Stream;
 
 public interface SearchService
 {
-	boolean hasMapping(EntityType entityType);
+	void createIndex(EntityType entityType);
 
-	void createMappings(EntityType entityType);
+	boolean hasIndex(EntityType entityType);
+
+	void deleteIndex(EntityType entityType);
 
 	long count(EntityType entityType);
 
@@ -56,13 +58,6 @@ public interface SearchService
 	 * @param entityType
 	 */
 	void delete(Stream<? extends Entity> entities, EntityType entityType);
-
-	/**
-	 * Deletes data and meta data
-	 *
-	 * @param entityType entity type
-	 */
-	void delete(EntityType entityType);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query<Entity> q, EntityType entityType);

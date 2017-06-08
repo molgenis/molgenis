@@ -82,7 +82,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		List<Repository<Entity>> repos = Arrays.asList(repo1, repo2, repo3);
 
-		when(searchService.hasMapping(attributeMetadata)).thenReturn(false);
+		when(searchService.hasIndex(attributeMetadata)).thenReturn(false);
 		when(metaDataService.getRepositories()).thenReturn(repos.stream());
 		indexBootstrapper.bootstrap();
 
@@ -95,7 +95,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupFailedIndexJobs()
 	{
-		when(searchService.hasMapping(attributeMetadata)).thenReturn(true);
+		when(searchService.hasIndex(attributeMetadata)).thenReturn(true);
 		IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
 		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
 		IndexAction action = mock(IndexAction.class);
@@ -122,7 +122,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupAllIsFine()
 	{
-		when(searchService.hasMapping(attributeMetadata)).thenReturn(true);
+		when(searchService.hasIndex(attributeMetadata)).thenReturn(true);
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class))

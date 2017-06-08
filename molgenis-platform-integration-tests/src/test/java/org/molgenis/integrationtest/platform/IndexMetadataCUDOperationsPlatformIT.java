@@ -65,7 +65,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		waitForWorkToBeFinished(indexService, LOG);
 
 		// 3. verify that mapping is removed
-		assertFalse(searchService.hasMapping(entityTypeDynamic));
+		assertFalse(searchService.hasIndex(entityTypeDynamic));
 
 		// Reset context
 		RunAsSystemProxy.runAsSystem(() ->
@@ -99,7 +99,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 			metaDataService.updateEntityType(entityTypeDynamic);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasMapping(entityTypeDynamic));
+		assertTrue(searchService.hasIndex(entityTypeDynamic));
 
 		// Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
@@ -141,7 +141,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 			metaDataService.updateEntityType(emd);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasMapping(emd));
+		assertTrue(searchService.hasIndex(emd));
 
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();

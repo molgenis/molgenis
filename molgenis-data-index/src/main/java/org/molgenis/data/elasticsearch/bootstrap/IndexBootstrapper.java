@@ -51,7 +51,7 @@ public class IndexBootstrapper
 
 	public void bootstrap()
 	{
-		if (!searchService.hasMapping(attrMetadata))
+		if (!searchService.hasIndex(attrMetadata))
 		{
 			LOG.debug(
 					"No index for Attribute found, asuming missing index, schedule (re)index for all entities");

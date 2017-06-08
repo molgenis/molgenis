@@ -202,7 +202,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	{
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 		EntityType entityType = dataService.getEntityType("TypeTestRefDynamic");
-		when(searchService.hasMapping(entityType)).thenReturn(true);
+		when(searchService.hasIndex(entityType)).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
 				.setEntityTypeId("entityType").setEntityId(null).setActionOrder(0)
@@ -278,13 +278,13 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(false);
 		when(dataService.getEntityType("entityTypeName")).thenReturn(null);
 
-		when(searchService.hasMapping(any(EntityType.class))).thenReturn(true);
+		when(searchService.hasIndex(any(EntityType.class))).thenReturn(true);
 
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
-		verify(this.searchService).delete(entityTypeCaptor.capture());
+		verify(this.searchService).deleteIndex(entityTypeCaptor.capture());
 		EntityType actualEntityType = entityTypeCaptor.getValue();
 		assertEquals(actualEntityType.getId(), entityTypeId);
 

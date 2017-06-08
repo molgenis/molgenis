@@ -82,14 +82,14 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public boolean hasMapping(EntityType entityType)
+	public boolean hasIndex(EntityType entityType)
 	{
 		String indexName = getIndexName(entityType);
 		return elasticsearchFacade.indexExists(indexName);
 	}
 
 	@Override
-	public void createMappings(EntityType entityType)
+	public void createIndex(EntityType entityType)
 	{
 		String indexName = getIndexName(entityType);
 		elasticsearchFacade.createIndex(indexName);
@@ -246,7 +246,7 @@ public class ElasticsearchService implements SearchService
 			q.eq(attribute.getName(), referredEntity);
 		}
 		LOG.debug("q: [{}], referringEntityType: [{}]", q != null ? q.toString() : "null", referringEntityType.getId());
-		if (hasMapping(referringEntityType))
+		if (hasIndex(referringEntityType))
 		{
 			return searchInternalWithScanScroll(q, referringEntityType);
 		}
@@ -314,7 +314,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void delete(EntityType entityType)
+	public void deleteIndex(EntityType entityType)
 	{
 		String documentType = getIndexName(entityType);
 		try
@@ -377,13 +377,13 @@ public class ElasticsearchService implements SearchService
 	{
 		EntityType entityType = repository.getEntityType();
 
-		if (hasMapping(entityType))
+		if (hasIndex(entityType))
 		{
 			LOG.debug("Delete index for repository {}...", repository.getName());
-			delete(entityType);
+			deleteIndex(entityType);
 		}
 
-		createMappings(entityType);
+		createIndex(entityType);
 		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityType),
 				entities -> index(entities, entityType, IndexingMode.ADD), BATCH_SIZE);

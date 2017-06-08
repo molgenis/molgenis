@@ -54,15 +54,15 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
 		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
 
-		searchService.createMappings(refEntityTypeDynamic);
-		searchService.createMappings(entityTypeDynamic);
+		searchService.createIndex(refEntityTypeDynamic);
+		searchService.createIndex(entityTypeDynamic);
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		searchService.delete(entityTypeDynamic);
-		searchService.delete(refEntityTypeDynamic);
+		searchService.deleteIndex(entityTypeDynamic);
+		searchService.deleteIndex(refEntityTypeDynamic);
 		searchService.refreshIndex();
 	}
 
@@ -226,7 +226,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		createAndIndexEntities(5);
 
-		searchService.delete(entityTypeDynamic);
+		searchService.deleteIndex(entityTypeDynamic);
 		searchService.refreshIndex();
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}

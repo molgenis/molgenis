@@ -140,10 +140,10 @@ class IndexJob extends NontransactionalJob<Void>
 			else
 			{
 				entityType = getEntityType(indexAction);
-				if (searchService.hasMapping(entityType))
+				if (searchService.hasIndex(entityType))
 				{
 					progress.progress(progressCount, format("Dropping entityType with id: {0}", entityType.getId()));
-					searchService.delete(entityType);
+					searchService.deleteIndex(entityType);
 				}
 				else
 				{
@@ -202,11 +202,11 @@ class IndexJob extends NontransactionalJob<Void>
 				return;
 			}
 
-			boolean indexEntityExists = searchService.hasMapping(entityType);
+			boolean indexEntityExists = searchService.hasIndex(entityType);
 			if (!indexEntityExists)
 			{
 				LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityTypeId);
-				searchService.createMappings(entityType);
+				searchService.createIndex(entityType);
 			}
 
 			Query<Entity> q = new QueryImpl<>();
