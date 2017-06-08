@@ -31,8 +31,6 @@ public interface SearchService
 
 	void deleteById(EntityType entityType, Stream<String> ids);
 
-	void delete(EntityType entityType, Iterable<? extends Entity> entities);
-
 	/**
 	 * Deletes entities from index
 	 *

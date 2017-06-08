@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
@@ -290,12 +289,6 @@ public class ElasticsearchService implements SearchService
 	public void deleteById(EntityType entityType, Stream<String> ids)
 	{
 		ids.forEach(id -> deleteById(entityType, id));
-	}
-
-	@Override
-	public void delete(EntityType entityType, Iterable<? extends Entity> entities)
-	{
-		delete(entityType, stream(entities.spliterator(), true));
 	}
 
 	@Override
