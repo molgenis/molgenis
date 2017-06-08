@@ -204,7 +204,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = createAndIndexEntities(1).get(0);
 
-		searchService.deleteById(entityTypeDynamic, entity.getIdValue().toString());
+		searchService.deleteById(entityTypeDynamic, entity.getIdValue());
 		searchService.refreshIndex();
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}

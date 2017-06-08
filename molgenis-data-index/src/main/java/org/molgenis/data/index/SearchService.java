@@ -27,9 +27,9 @@ public interface SearchService
 
 	void delete(EntityType entityType, Entity entity);
 
-	void deleteById(EntityType entityType, String id);
+	void deleteById(EntityType entityType, Object entityId);
 
-	void deleteAll(EntityType entityType, Stream<String> ids);
+	void deleteAll(EntityType entityType, Stream<Object> entityIds);
 
 	/**
 	 * Deletes entities from index

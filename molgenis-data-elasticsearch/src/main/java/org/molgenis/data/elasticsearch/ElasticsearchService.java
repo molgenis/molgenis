@@ -40,7 +40,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
 import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
 
 /**
@@ -266,17 +265,16 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void delete(EntityType entityType, Entity entity)
 	{
-		String elasticsearchId = toElasticsearchId(entity, entityType);
-		deleteById(entityType, elasticsearchId);
+		deleteById(entityType, entity.getIdValue());
 	}
 
 	@Override
-	public void deleteById(EntityType entityType, String id)
+	public void deleteById(EntityType entityType, Object entityId)
 	{
 		String indexName = getIndexName(entityType);
 		try
 		{
-			elasticsearchFacade.deleteById(indexName, id, indexName);
+			elasticsearchFacade.deleteById(indexName, toElasticsearchId(entityId), indexName);
 		}
 		catch (IndexNotFoundException e)
 		{
@@ -285,9 +283,9 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void deleteAll(EntityType entityType, Stream<String> ids)
+	public void deleteAll(EntityType entityType, Stream<Object> entityIds)
 	{
-		ids.forEach(id -> deleteById(entityType, id));
+		entityIds.forEach(entityId -> deleteById(entityType, entityId));
 	}
 
 	@Override
@@ -295,7 +293,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Stream<Object> entityIds = entities.map(Entity::getIdValue);
 		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(
-				batchEntityIds -> deleteAll(entityType, toElasticsearchIds(batchEntityIds.stream())));
+				batchEntityIds -> deleteAll(entityType, batchEntityIds.stream()));
 	}
 
 	@Override

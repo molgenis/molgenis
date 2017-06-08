@@ -198,7 +198,7 @@ class IndexJob extends NontransactionalJob<Void>
 			{
 				// Delete
 				LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-				searchService.deleteById(entityType, entityId.toString());
+				searchService.deleteById(entityType, entityId);
 				return;
 			}
 
