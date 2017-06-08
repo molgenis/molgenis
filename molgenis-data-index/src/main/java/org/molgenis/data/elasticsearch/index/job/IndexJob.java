@@ -198,7 +198,7 @@ class IndexJob extends NontransactionalJob<Void>
 			{
 				// Delete
 				LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-				searchService.deleteById(entityId.toString(), entityType);
+				searchService.deleteById(entityType, entityId.toString());
 				return;
 			}
 
@@ -211,19 +211,19 @@ class IndexJob extends NontransactionalJob<Void>
 
 			Query<Entity> q = new QueryImpl<>();
 			q.eq(entityType.getIdAttribute().getName(), entityId);
-			Entity indexEntity = searchService.findOne(q, entityType);
+			Entity indexEntity = searchService.findOne(entityType, q);
 
 			if (null != indexEntity)
 			{
 				// update
 				LOG.debug("Index update [{}].[{}].", entityTypeId, entityId);
-				searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.UPDATE);
+				searchService.index(actualEntity.getEntityType(), actualEntity, IndexingMode.UPDATE);
 			}
 			else
 			{
 				// Add
 				LOG.debug("Index add [{}].[{}].", entityTypeId, entityId);
-				searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.ADD);
+				searchService.index(actualEntity.getEntityType(), actualEntity, IndexingMode.ADD);
 			}
 		}
 		else

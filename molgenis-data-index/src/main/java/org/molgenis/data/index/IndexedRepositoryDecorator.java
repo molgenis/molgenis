@@ -65,7 +65,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			return searchService.findOne(q, getEntityType());
+			return searchService.findOne(getEntityType(), q);
 		}
 
 	}
@@ -83,7 +83,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			return searchService.searchAsStream(q, getEntityType());
+			return searchService.searchAsStream(getEntityType(), q);
 		}
 	}
 
@@ -121,14 +121,14 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public long count({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			return searchService.count(q, getEntityType());
+			return searchService.count(getEntityType(), q);
 		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return searchService.aggregate(aggregateQuery, getEntityType());
+		return searchService.aggregate(getEntityType(), aggregateQuery);
 	}
 
 	/**

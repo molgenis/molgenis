@@ -19,63 +19,63 @@ public interface SearchService
 
 	long count(EntityType entityType);
 
-	long count(Query<Entity> q, EntityType entityType);
+	long count(EntityType entityType, Query<Entity> q);
 
-	void index(Entity entity, EntityType entityType, IndexingMode indexingMode);
+	void index(EntityType entityType, Entity entity, IndexingMode indexingMode);
 
 	/**
 	 * Adds or updated the given entities in the index
 	 *
-	 * @param entities
 	 * @param entityType
+	 * @param entities
 	 * @param indexingMode
 	 * @return number of indexed entities, which equals the size of the input entities iterable
 	 */
-	long index(Iterable<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode);
+	long index(EntityType entityType, Iterable<? extends Entity> entities, IndexingMode indexingMode);
 
 	/**
 	 * Adds or updated the given entities in the index
 	 *
-	 * @param entities
 	 * @param entityType
+	 * @param entities
 	 * @param indexingMode
 	 * @return number of indexed entities
 	 */
-	long index(Stream<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode);
+	long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode);
 
-	void delete(Entity entity, EntityType entityType);
+	void delete(EntityType entityType, Entity entity);
 
-	void deleteById(String id, EntityType entityType);
+	void deleteById(EntityType entityType, String id);
 
-	void deleteById(Stream<String> ids, EntityType entityType);
+	void deleteById(EntityType entityType, Stream<String> ids);
 
-	void delete(Iterable<? extends Entity> entities, EntityType entityType);
+	void delete(EntityType entityType, Iterable<? extends Entity> entities);
 
 	/**
 	 * Deletes entities from index
 	 *
-	 * @param entities       entity stream
 	 * @param entityType
+	 * @param entities       entity stream
 	 */
-	void delete(Stream<? extends Entity> entities, EntityType entityType);
+	void delete(EntityType entityType, Stream<? extends Entity> entities);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
-	Iterable<Entity> search(Query<Entity> q, EntityType entityType);
+	Iterable<Entity> search(EntityType entityType, Query<Entity> q);
 
 	/**
 	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
 	 *
-	 * @param q
 	 * @param entityType
+	 * @param q
 	 * @return
 	 */
-	Stream<Entity> searchAsStream(Query<Entity> q, EntityType entityType);
+	Stream<Entity> searchAsStream(EntityType entityType, Query<Entity> q);
 
-	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityType entityType);
+	AggregateResult aggregate(EntityType entityType, AggregateQuery aggregateQuery);
 
 	void rebuildIndex(Repository<? extends Entity> repository);
 
 	void refreshIndex();
 
-	Entity findOne(Query<Entity> q, EntityType entityType);
+	Entity findOne(EntityType entityType, Query<Entity> q);
 }

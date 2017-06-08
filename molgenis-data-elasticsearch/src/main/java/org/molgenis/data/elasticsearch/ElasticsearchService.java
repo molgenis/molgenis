@@ -115,11 +115,11 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public long count(EntityType entityType)
 	{
-		return count(null, entityType);
+		return count(entityType, null);
 	}
 
 	@Override
-	public long count(Query<Entity> q, EntityType entityType)
+	public long count(EntityType entityType, Query<Entity> q)
 	{
 		String documentType = getIndexName(entityType);
 		try
@@ -133,21 +133,21 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void index(Entity entity, EntityType entityType, IndexingMode indexingMode)
+	public void index(EntityType entityType, Entity entity, IndexingMode indexingMode)
 	{
 		LOG.debug("Indexing single {}.{} entity ...", entityType.getId(), entity.getIdValue());
 		index(Stream.of(entity), entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
-	public long index(Iterable<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode)
+	public long index(EntityType entityType, Iterable<? extends Entity> entities, IndexingMode indexingMode)
 	{
 		LOG.debug("Indexing multiple {} entities...", entityType.getId());
 		return index(stream(entities.spliterator(), false), entityType, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
-	public long index(Stream<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode)
+	public long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode)
 	{
 		LOG.debug("Indexing multiple {} entities...", entityType.getId());
 		return index(entities, entityType, indexingMode == IndexingMode.UPDATE);
@@ -273,14 +273,14 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void delete(Entity entity, EntityType entityType)
+	public void delete(EntityType entityType, Entity entity)
 	{
 		String elasticsearchId = toElasticsearchId(entity, entityType);
-		deleteById(elasticsearchId, entityType);
+		deleteById(entityType, elasticsearchId);
 	}
 
 	@Override
-	public void deleteById(String id, EntityType entityType)
+	public void deleteById(EntityType entityType, String id)
 	{
 		String indexName = getIndexName(entityType);
 		try
@@ -294,23 +294,23 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void deleteById(Stream<String> ids, EntityType entityType)
+	public void deleteById(EntityType entityType, Stream<String> ids)
 	{
-		ids.forEach(id -> deleteById(id, entityType));
+		ids.forEach(id -> deleteById(entityType, id));
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities, EntityType entityType)
+	public void delete(EntityType entityType, Iterable<? extends Entity> entities)
 	{
-		delete(stream(entities.spliterator(), true), entityType);
+		delete(entityType, stream(entities.spliterator(), true));
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities, EntityType entityType)
+	public void delete(EntityType entityType, Stream<? extends Entity> entities)
 	{
 		Stream<Object> entityIds = entities.map(Entity::getIdValue);
 		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(
-				batchEntityIds -> deleteById(toElasticsearchIds(batchEntityIds.stream()), entityType));
+				batchEntityIds -> deleteById(entityType, toElasticsearchIds(batchEntityIds.stream())));
 	}
 
 	@Override
@@ -328,13 +328,13 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public Iterable<Entity> search(Query<Entity> q, final EntityType entityType)
+	public Iterable<Entity> search(final EntityType entityType, Query<Entity> q)
 	{
 		return searchInternal(q, entityType);
 	}
 
 	@Override
-	public Stream<Entity> searchAsStream(Query<Entity> q, EntityType entityType)
+	public Stream<Entity> searchAsStream(EntityType entityType, Query<Entity> q)
 	{
 		ElasticsearchEntityIterable searchInternal = searchInternal(q, entityType);
 		return new EntityStream(searchInternal.stream(), true);
@@ -361,7 +361,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityType entityType)
+	public AggregateResult aggregate(final EntityType entityType, AggregateQuery aggregateQuery)
 	{
 		Query<Entity> q = aggregateQuery.getQuery();
 		Attribute xAttr = aggregateQuery.getAttributeX();
@@ -386,14 +386,14 @@ public class ElasticsearchService implements SearchService
 		createIndex(entityType);
 		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityType),
-				entities -> index(entities, entityType, IndexingMode.ADD), BATCH_SIZE);
+				entities -> index(entityType, entities, IndexingMode.ADD), BATCH_SIZE);
 		LOG.debug("Create index for repository {}...", repository.getName());
 	}
 
 	@Override
-	public Entity findOne(Query<Entity> q, EntityType entityType)
+	public Entity findOne(EntityType entityType, Query<Entity> q)
 	{
-		Iterable<Entity> entities = search(q, entityType);
+		Iterable<Entity> entities = search(entityType, q);
 		return asStream(entities).findFirst().orElse(null);
 	}
 

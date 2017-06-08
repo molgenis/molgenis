@@ -140,7 +140,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexJob.call(progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(searchService).deleteById("entityId", testEntityType);
+		verify(searchService).deleteById(testEntityType, "entityId");
 
 		// verify progress messages
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
@@ -168,7 +168,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(emd.getIdAttribute().getName(), "entityId");
 
-		when(searchService.findOne(q, emd)).thenReturn(actualEntity);
+		when(searchService.findOne(emd, q)).thenReturn(actualEntity);
 		this.rebuildIndexSingleEntityTest(IndexingMode.UPDATE);
 	}
 
@@ -184,7 +184,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(this.searchService).index(toIndexEntity, testEntityType, indexingMode);
+		verify(this.searchService).index(testEntityType, toIndexEntity, indexingMode);
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
@@ -318,7 +318,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexActionGroup.setCount(3);
 
 		MolgenisDataException mde = new MolgenisDataException("Random unrecoverable exception");
-		doThrow(mde).when(searchService).deleteById("entityId2", testEntityType);
+		doThrow(mde).when(searchService).deleteById(testEntityType, "entityId2");
 
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
@@ -331,9 +331,9 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 			assertSame(expected, mde);
 		}
 
-		verify(searchService).deleteById("entityId1", testEntityType);
-		verify(searchService).deleteById("entityId2", testEntityType);
-		verify(searchService).deleteById("entityId3", testEntityType);
+		verify(searchService).deleteById(testEntityType, "entityId1");
+		verify(searchService).deleteById(testEntityType, "entityId2");
+		verify(searchService).deleteById(testEntityType, "entityId3");
 
 		verify(searchService).refreshIndex();
 
