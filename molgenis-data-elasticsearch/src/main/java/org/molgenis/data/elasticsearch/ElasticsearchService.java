@@ -56,11 +56,11 @@ public class ElasticsearchService implements SearchService
 
 	private static final int BATCH_SIZE = 1000;
 
+	private final ElasticsearchClientFacade elasticsearchClientFacade;
 	private final DataService dataService;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final DocumentIdGenerator documentIdGenerator;
 	private final ResponseParser responseParser = new ResponseParser();
-	private final ElasticsearchClientFacade elasticsearchClientFacade;
 	private final SearchRequestGenerator searchRequestGenerator;
 
 	public ElasticsearchService(ElasticsearchClientFacade elasticsearchClientFacade, DataService dataService,
@@ -71,20 +71,6 @@ public class ElasticsearchService implements SearchService
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 		this.elasticsearchClientFacade = requireNonNull(elasticsearchClientFacade);
 		this.searchRequestGenerator = new SearchRequestGenerator(documentIdGenerator);
-	}
-
-	private SearchResult search(SearchRequest request)
-	{
-		String indexName = request.getEntityType() != null ? getIndexName(request.getEntityType()) : null;
-		SearchResponse response = elasticsearchClientFacade.search(SearchType.QUERY_THEN_FETCH, request, indexName);
-		return responseParser.parseSearchResponse(request, response, dataService);
-	}
-
-	@Override
-	public boolean hasIndex(EntityType entityType)
-	{
-		String indexName = getIndexName(entityType);
-		return elasticsearchClientFacade.indexExists(indexName);
 	}
 
 	@Override
@@ -103,6 +89,45 @@ public class ElasticsearchService implements SearchService
 		{
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	@Override
+	public boolean hasIndex(EntityType entityType)
+	{
+		String indexName = getIndexName(entityType);
+		return elasticsearchClientFacade.indexExists(indexName);
+	}
+
+	@Override
+	public void deleteIndex(EntityType entityType)
+	{
+		String documentType = getIndexName(entityType);
+		try
+		{
+			elasticsearchClientFacade.deleteIndex(documentType);
+		}
+		catch (IndexNotFoundException e)
+		{
+			// silently ignore
+		}
+	}
+
+	@Override
+	public void rebuildIndex(Repository<? extends Entity> repository)
+	{
+		EntityType entityType = repository.getEntityType();
+
+		if (hasIndex(entityType))
+		{
+			LOG.debug("Delete index for repository {}...", repository.getName());
+			deleteIndex(entityType);
+		}
+
+		createIndex(entityType);
+		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
+		repository.forEachBatched(createFetchForReindexing(entityType),
+				entities -> index(entityType, entities.stream(), IndexingMode.ADD), BATCH_SIZE);
+		LOG.debug("Create index for repository {}...", repository.getName());
 	}
 
 	@Override
@@ -129,6 +154,41 @@ public class ElasticsearchService implements SearchService
 		{
 			return 0L;
 		}
+	}
+
+	@Override
+	public Stream<Object> search(EntityType entityType, Query<Entity> q)
+	{
+		String indexName = getIndexName(entityType);
+		ElasticsearchDocumentIdIterable documentIdIterable = new ElasticsearchDocumentIdIterable(q, entityType,
+				elasticsearchClientFacade, searchRequestGenerator, indexName, indexName);
+		Stream<String> documentIdStream = stream(documentIdIterable.spliterator(), false);
+		return ElasticsearchEntityUtils.toEntityIds(documentIdStream);
+	}
+
+	@Override
+	public Object searchOne(EntityType entityType, Query<Entity> q)
+	{
+		return search(entityType, q).findFirst().orElse(null);
+	}
+
+	private SearchResult search(SearchRequest request)
+	{
+		String indexName = request.getEntityType() != null ? getIndexName(request.getEntityType()) : null;
+		SearchResponse response = elasticsearchClientFacade.search(SearchType.QUERY_THEN_FETCH, request, indexName);
+		return responseParser.parseSearchResponse(request, response, dataService);
+	}
+
+	@Override
+	public AggregateResult aggregate(final EntityType entityType, AggregateQuery aggregateQuery)
+	{
+		Query<Entity> q = aggregateQuery.getQuery();
+		Attribute xAttr = aggregateQuery.getAttributeX();
+		Attribute yAttr = aggregateQuery.getAttributeY();
+		Attribute distinctAttr = aggregateQuery.getAttributeDistinct();
+		SearchRequest searchRequest = SearchRequest.create(entityType, q, xAttr, yAttr, distinctAttr);
+		SearchResult searchResults = search(searchRequest);
+		return searchResults.getAggregate();
 	}
 
 	@Override
@@ -298,30 +358,6 @@ public class ElasticsearchService implements SearchService
 				.forEachRemaining(batchEntityIds -> deleteAll(entityType, batchEntityIds.stream()));
 	}
 
-	@Override
-	public void deleteIndex(EntityType entityType)
-	{
-		String documentType = getIndexName(entityType);
-		try
-		{
-			elasticsearchClientFacade.deleteIndex(documentType);
-		}
-		catch (IndexNotFoundException e)
-		{
-			// silently ignore
-		}
-	}
-
-	@Override
-	public Stream<Object> search(EntityType entityType, Query<Entity> q)
-	{
-		String indexName = getIndexName(entityType);
-		ElasticsearchDocumentIdIterable documentIdIterable = new ElasticsearchDocumentIdIterable(q, entityType,
-				elasticsearchClientFacade, searchRequestGenerator, indexName, indexName);
-		Stream<String> documentIdStream = stream(documentIdIterable.spliterator(), false);
-		return ElasticsearchEntityUtils.toEntityIds(documentIdStream);
-	}
-
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
 	{
 		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
@@ -333,42 +369,6 @@ public class ElasticsearchService implements SearchService
 				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), indexName, indexName)
 				.map(idString -> convert(idString, entityType.getIdAttribute()))
 				.map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject));
-	}
-
-	@Override
-	public AggregateResult aggregate(final EntityType entityType, AggregateQuery aggregateQuery)
-	{
-		Query<Entity> q = aggregateQuery.getQuery();
-		Attribute xAttr = aggregateQuery.getAttributeX();
-		Attribute yAttr = aggregateQuery.getAttributeY();
-		Attribute distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = SearchRequest.create(entityType, q, xAttr, yAttr, distinctAttr);
-		SearchResult searchResults = search(searchRequest);
-		return searchResults.getAggregate();
-	}
-
-	@Override
-	public void rebuildIndex(Repository<? extends Entity> repository)
-	{
-		EntityType entityType = repository.getEntityType();
-
-		if (hasIndex(entityType))
-		{
-			LOG.debug("Delete index for repository {}...", repository.getName());
-			deleteIndex(entityType);
-		}
-
-		createIndex(entityType);
-		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
-		repository.forEachBatched(createFetchForReindexing(entityType),
-				entities -> index(entityType, entities.stream(), IndexingMode.ADD), BATCH_SIZE);
-		LOG.debug("Create index for repository {}...", repository.getName());
-	}
-
-	@Override
-	public Object searchOne(EntityType entityType, Query<Entity> q)
-	{
-		return search(entityType, q).findFirst().orElse(null);
 	}
 
 	private String getIndexName(EntityType entityType)
