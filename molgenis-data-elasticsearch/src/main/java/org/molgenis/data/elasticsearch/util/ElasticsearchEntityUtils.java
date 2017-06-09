@@ -30,6 +30,11 @@ public class ElasticsearchEntityUtils
 		return elasticsearchId;
 	}
 
+	public static Stream<Object> toEntityIds(Stream<String> documentIdStream)
+	{
+		return documentIdStream.map(ElasticsearchEntityUtils::toEntityId);
+	}
+
 	static Iterable<Object> toEntityIds(Iterable<String> elasticsearchIds)
 	{
 		return stream(elasticsearchIds.spliterator(), false).map(ElasticsearchEntityUtils::toEntityId)

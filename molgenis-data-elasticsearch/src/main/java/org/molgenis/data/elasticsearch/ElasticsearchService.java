@@ -19,10 +19,7 @@ import org.molgenis.data.elasticsearch.index.ElasticsearchIndexSettings;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
-import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
-import org.molgenis.data.elasticsearch.util.ElasticsearchClientFacade;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.elasticsearch.util.*;
 import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.Attribute;
@@ -42,12 +39,13 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
 
 /**
- * ElasticSearch implementation of the SearchService interface.
+ * Elasticsearch implementation of the SearchService interface.
  *
  * @author erwin
  */
@@ -61,7 +59,6 @@ public class ElasticsearchService implements SearchService
 	private final DataService dataService;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final DocumentIdGenerator documentIdGenerator;
-
 	private final ResponseParser responseParser = new ResponseParser();
 	private final ElasticsearchClientFacade elasticsearchClientFacade;
 	private final SearchRequestGenerator searchRequestGenerator;
@@ -318,15 +315,11 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Stream<Object> search(EntityType entityType, Query<Entity> q)
 	{
-		ElasticsearchEntityIterable searchInternal = searchInternal(q, entityType);
-		return searchInternal.stream().map(Entity::getIdValue);
-	}
-
-	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityType entityType)
-	{
 		String indexName = getIndexName(entityType);
-		return new ElasticsearchEntityIterable(q, entityType, elasticsearchClientFacade, elasticsearchEntityFactory,
-				searchRequestGenerator, indexName, indexName);
+		ElasticsearchDocumentIdIterable documentIdIterable = new ElasticsearchDocumentIdIterable(q, entityType,
+				elasticsearchClientFacade, searchRequestGenerator, indexName, indexName);
+		Stream<String> documentIdStream = stream(documentIdIterable.spliterator(), false);
+		return ElasticsearchEntityUtils.toEntityIds(documentIdStream);
 	}
 
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
