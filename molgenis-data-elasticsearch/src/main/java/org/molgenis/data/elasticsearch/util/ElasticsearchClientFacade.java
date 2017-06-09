@@ -78,12 +78,6 @@ public class ElasticsearchClientFacade
 		return client.admin().indices().prepareExists(index).execute().actionGet().isExists();
 	}
 
-	// Wait until elasticsearch is ready
-	public void waitForYellowStatus()
-	{
-		client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-	}
-
 	private void refreshIndex(String index)
 	{
 		if (index == null)
