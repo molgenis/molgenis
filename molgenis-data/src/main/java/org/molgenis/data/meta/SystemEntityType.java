@@ -58,7 +58,7 @@ public abstract class SystemEntityType extends EntityType
 	@Override
 	public Object get(String attributeName)
 	{
-		if(attributeName.equals(ID)) return entityTypeId;
+		if (attributeName.equals(ID)) return entityTypeId;
 		return super.get(attributeName);
 	}
 
@@ -71,7 +71,7 @@ public abstract class SystemEntityType extends EntityType
 	@Override
 	public String getString(String attributeName)
 	{
-		if(attributeName.equals(ID)) return entityTypeId;
+		if (attributeName.equals(ID)) return entityTypeId;
 		return super.getString(attributeName);
 	}
 

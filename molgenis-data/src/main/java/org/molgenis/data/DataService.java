@@ -106,8 +106,8 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Type-safe find entities that match a query
 	 *
-	 * @param q          query
-	 * @param clazz      entity class
+	 * @param q     query
+	 * @param clazz entity class
 	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> Stream<E> findAll(String entityTypeId, Query<E> q, Class<E> clazz);
@@ -115,7 +115,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
 	 *
-	 * @param ids        entity ids
+	 * @param ids entity ids
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 * @throws MolgenisDataAccessException
 	 */
@@ -134,8 +134,8 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
 	 *
 	 * @param entityTypeId entity name (case insensitive)
-	 * @param ids        entity ids
-	 * @param fetch      fetch defining which attributes to retrieve
+	 * @param ids          entity ids
+	 * @param fetch        fetch defining which attributes to retrieve
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 * @throws MolgenisDataAccessException
 	 */
@@ -144,9 +144,9 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Finds all entities with the given IDs, type-safely and with a fetch. Returns empty stream if no matches.
 	 *
-	 * @param ids        entity ids
-	 * @param fetch      fetch defining which attributes to retrieve
-	 * @param clazz      typed entity class
+	 * @param ids   entity ids
+	 * @param fetch fetch defining which attributes to retrieve
+	 * @param clazz typed entity class
 	 * @return (empty) Stream of entities of the give type where the order of entities matches the order of ids, never
 	 * null
 	 * @throws MolgenisDataAccessException
@@ -163,8 +163,8 @@ public interface DataService extends Iterable<Repository<Entity>>
 	Entity findOneById(String entityTypeId, Object id);
 
 	/**
-	 * @param id         entity id
-	 * @param clazz      entity type
+	 * @param id    entity id
+	 * @param clazz entity type
 	 * @return typed entity
 	 * @throws MolgenisDataAccessException
 	 */
@@ -173,8 +173,8 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Find one entity based on id.
 	 *
-	 * @param id         entity id
-	 * @param fetch      fetch defining which attributes to retrieve
+	 * @param id    entity id
+	 * @param fetch fetch defining which attributes to retrieve
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
@@ -183,9 +183,9 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Type-safe find one entity based on id.
 	 *
-	 * @param id         entity id
-	 * @param fetch      fetch defining which attributes to retrieve
-	 * @param clazz      typed entity class
+	 * @param id    entity id
+	 * @param fetch fetch defining which attributes to retrieve
+	 * @param clazz typed entity class
 	 * @return entity of the given type or null
 	 * @throws MolgenisDataAccessException
 	 */
@@ -202,7 +202,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * type-save find an entity by it's id
 	 *
-	 * @param q          query
+	 * @param q query
 	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> E findOne(String entityTypeId, Query<E> q, Class<E> clazz);
@@ -218,7 +218,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Adds entities to it's repository
 	 *
-	 * @param entities   entities
+	 * @param entities entities
 	 */
 	<E extends Entity> void add(String entityTypeId, Stream<E> entities);
 
@@ -233,7 +233,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Updates entities
 	 *
-	 * @param entities   entities
+	 * @param entities entities
 	 */
 	<E extends Entity> void update(String entityTypeId, Stream<E> entities);
 
@@ -248,14 +248,14 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Delete entities from it's repository
 	 *
-	 * @param entities   entities
+	 * @param entities entities
 	 */
 	<E extends Entity> void delete(String entityTypeId, Stream<E> entities);
 
 	/**
 	 * Deletes an entity by it's id
 	 *
-	 * @param id         entity id
+	 * @param id entity id
 	 * @throws MolgenisDataAccessException
 	 */
 	void deleteById(String entityTypeId, Object id);

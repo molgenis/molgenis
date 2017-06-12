@@ -10,7 +10,8 @@ public class FileIngestJobExecutionFactory
 		extends AbstractSystemEntityFactory<FileIngestJobExecution, FileIngestJobExecutionMetaData, String>
 {
 	@Autowired
-	FileIngestJobExecutionFactory(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData, EntityPopulator entityPopulator)
+	FileIngestJobExecutionFactory(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData,
+			EntityPopulator entityPopulator)
 	{
 		super(FileIngestJobExecution.class, fileIngestJobExecutionMetaData, entityPopulator);
 	}

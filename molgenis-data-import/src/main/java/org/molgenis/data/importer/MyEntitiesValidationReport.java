@@ -54,7 +54,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	 * Creates a new report, with an entity added to it.
 	 *
 	 * @param entityTypeId name of the entity
-	 * @param importable true if the entity is importable
+	 * @param importable   true if the entity is importable
 	 * @return this report
 	 */
 	public MyEntitiesValidationReport addEntity(String entityTypeId, boolean importable)

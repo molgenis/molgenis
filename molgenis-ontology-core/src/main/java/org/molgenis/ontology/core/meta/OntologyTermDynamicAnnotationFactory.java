@@ -13,6 +13,6 @@ public class OntologyTermDynamicAnnotationFactory extends
 	OntologyTermDynamicAnnotationFactory(OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMeta,
 			EntityPopulator entityPopulator)
 	{
-		super(OntologyTermDynamicAnnotation.class, ontologyTermDynamicAnnotationMeta, entityPopulator	);
+		super(OntologyTermDynamicAnnotation.class, ontologyTermDynamicAnnotationMeta, entityPopulator);
 	}
 }

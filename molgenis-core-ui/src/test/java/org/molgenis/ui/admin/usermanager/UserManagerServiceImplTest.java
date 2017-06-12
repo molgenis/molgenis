@@ -70,7 +70,8 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 		@Bean
 		@Override
-		public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean() throws Exception
+		public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean()
+				throws Exception
 		{
 			return userDetailsService();
 		}
@@ -136,28 +137,22 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		User user1 = when(mock(User.class).getId()).thenReturn(molgenisUserId1).getMock();
 		when(user1.getIdValue()).thenReturn(molgenisUserId1);
 		when(user1.getUsername()).thenReturn(molgenisUserName1);
-		when(dataService.findOneById(UserMetaData.USER, molgenisUserId0, User.class))
-				.thenReturn(user0);
-		when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class))
-				.thenReturn(user1);
-		when(dataService.findAll(UserMetaData.USER, User.class))
-				.thenReturn(Stream.of(user0, user1));
+		when(dataService.findOneById(UserMetaData.USER, molgenisUserId0, User.class)).thenReturn(user0);
+		when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class)).thenReturn(user1);
+		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user0, user1));
 		GroupMember groupMember0 = mock(GroupMember.class);
 		Group group0 = mock(Group.class);
 		when(groupMember0.getGroup()).thenReturn(group0);
 		GroupMember groupMember1 = mock(GroupMember.class);
 		Group group1 = mock(Group.class);
 		when(groupMember1.getGroup()).thenReturn(group1);
-		when(dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user0),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user0),
 				GroupMember.class)).thenReturn(Stream.of(groupMember0));
-		when(dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 		this.setSecurityContextSuperUser();
-		assertEquals(userManagerService.getAllUsers(),
-				Arrays.asList(new UserViewData(user0, singletonList(group0)),
-						new UserViewData(user1, singletonList(group1))));
+		assertEquals(userManagerService.getAllUsers(), Arrays.asList(new UserViewData(user0, singletonList(group0)),
+				new UserViewData(user1, singletonList(group1))));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
@@ -172,8 +167,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		Group group0 = mock(Group.class);
 		Group group1 = mock(Group.class);
-		when(dataService.findAll(GroupMetaData.GROUP, Group.class))
-				.thenReturn(Stream.of(group0, group1));
+		when(dataService.findAll(GroupMetaData.GROUP, Group.class)).thenReturn(Stream.of(group0, group1));
 		this.setSecurityContextSuperUser();
 		assertEquals(userManagerService.getAllGroups(), Arrays.asList(group0, group1));
 	}
@@ -210,8 +204,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		groupMemberTwo.setUser(user1);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(Stream.of(groupMemberOne, groupMemberTwo));
 		List<Group> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
 
@@ -243,11 +236,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getGroup()).thenReturn(group22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class))
-				.thenReturn(group22);
+		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
-		when(dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
 		{
 			@Override
@@ -257,8 +248,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 			}
 		});
 
-		when(dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group22),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group22),
 				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
 		{
 			@Override
@@ -295,11 +285,10 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
 
-		when(dataService.findAll(GroupMemberMetaData.USER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
-				GroupMember.class)).thenReturn(Stream.of(groupMember));
-		when(dataService.findAll(GroupMetaData.GROUP, Group.class))
-				.thenReturn(Stream.of(group22, group33, group44));
+		when(dataService
+				.findAll(GroupMemberMetaData.USER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+						GroupMember.class)).thenReturn(Stream.of(groupMember));
+		when(dataService.findAll(GroupMetaData.GROUP, Group.class)).thenReturn(Stream.of(group22, group33, group44));
 
 		groupMember = mock(GroupMember.class);
 		when(groupMember.getGroup()).thenReturn(group22);
@@ -307,8 +296,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		List<GroupMember> groupMemberships = new ArrayList<>();
 		groupMemberships.add(groupMember);
 
-		when(dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(groupMemberships.stream());
 
 		List<Group> groups = this.userManagerService.getGroupsWhereUserIsNotMember("1");
@@ -342,15 +330,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getGroup()).thenReturn(group22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class))
-				.thenReturn(group22);
+		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
-		Query<GroupMember> q = new QueryImpl<GroupMember>()
-				.eq(GroupMemberMetaData.USER, user1).and()
+		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1).and()
 				.eq(GroupMemberMetaData.GROUP, group22);
 
-		when(dataService.findAll(GROUP_MEMBER, q, GroupMember.class))
-				.thenReturn(Stream.of(groupMember));
+		when(dataService.findAll(GROUP_MEMBER, q, GroupMember.class)).thenReturn(Stream.of(groupMember));
 
 		this.userManagerService.removeUserFromGroup("22", "1");
 	}

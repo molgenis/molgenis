@@ -34,8 +34,8 @@ public class VcfAttributes
 
 	public Attribute getChromAttribute()
 	{
-		return attributeFactory.create().setName(CHROM).setDataType(STRING).setAggregatable(true)
-				.setNillable(false).setDescription("The chromosome on which the variant is observed");
+		return attributeFactory.create().setName(CHROM).setDataType(STRING).setAggregatable(true).setNillable(false)
+				.setDescription("The chromosome on which the variant is observed");
 	}
 
 	public Attribute getAltAttribute()
@@ -58,14 +58,14 @@ public class VcfAttributes
 
 	public Attribute getFilterAttribute()
 	{
-		return attributeFactory.create().setName(FILTER).setDataType(STRING).setAggregatable(true)
-				.setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+		return attributeFactory.create().setName(FILTER).setDataType(STRING).setAggregatable(true).setNillable(true)
+				.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 
 	public Attribute getQualAttribute()
 	{
-		return attributeFactory.create().setName(QUAL).setDataType(STRING).setAggregatable(true)
-				.setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+		return attributeFactory.create().setName(QUAL).setDataType(STRING).setAggregatable(true).setNillable(true)
+				.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 
 	public Attribute getIdAttribute()

@@ -19,8 +19,7 @@ public class ResourceUtilsTest
 	@Test
 	public void getStringClassStringCharset() throws IOException
 	{
-		assertEquals(ResourceUtils.getString(getClass(), "/resource.txt", UTF_8),
-				"example resource");
+		assertEquals(ResourceUtils.getString(getClass(), "/resource.txt", UTF_8), "example resource");
 	}
 
 	@Test

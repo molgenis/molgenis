@@ -115,7 +115,8 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void deleteStream()
 	{
-		@SuppressWarnings("unchecked") Stream<Entity> entities = mock(Stream.class);
+		@SuppressWarnings("unchecked")
+		Stream<Entity> entities = mock(Stream.class);
 		entityReferenceResolverDecorator.delete(entities);
 		verify(decoratedRepo, times(1)).delete(entities);
 		verifyZeroInteractions(entityManager);
@@ -141,7 +142,8 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void deleteByIdIterableObject()
 	{
-		@SuppressWarnings("unchecked") Iterable<Object> ids = mock(Iterable.class);
+		@SuppressWarnings("unchecked")
+		Iterable<Object> ids = mock(Iterable.class);
 		entityReferenceResolverDecorator.deleteById(ids);
 		verify(decoratedRepo, times(1)).deleteById(ids);
 		verifyZeroInteractions(entityManager);

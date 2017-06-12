@@ -25,8 +25,7 @@ public class GroupMemberMetaData extends SystemEntityType
 	private final GroupMetaData groupMetaData;
 
 	@Autowired
-	GroupMemberMetaData(SecurityPackage securityPackage, UserMetaData userMetaData,
-			GroupMetaData groupMetaData)
+	GroupMemberMetaData(SecurityPackage securityPackage, UserMetaData userMetaData, GroupMetaData groupMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);

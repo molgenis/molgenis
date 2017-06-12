@@ -378,8 +378,7 @@ public class QueryValidator
 			catch (DateTimeParseException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(),
-								paramStrValue)));
+						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramStrValue)));
 			}
 		}
 		else

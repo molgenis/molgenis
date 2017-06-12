@@ -76,7 +76,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<Object> getEntityClassIds()
 	{
-		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue()).collect(toList());
+		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue())
+				.collect(toList());
 	}
 
 	@Override
@@ -140,21 +141,20 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (user == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(user, authorityPrefix);
 
-		List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-				GroupMember.class).collect(toList());
+		List<GroupMember> groupMembers = dataService
+				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+						GroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists
-					.transform(groupMembers, new Function<GroupMember, Group>()
-					{
-						@Override
-						public Group apply(GroupMember molgenisGroupMember)
-						{
-							return molgenisGroupMember.getGroup();
-						}
-					});
+			List<Group> groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
+			{
+				@Override
+				public Group apply(GroupMember molgenisGroupMember)
+				{
+					return molgenisGroupMember.getGroup();
+				}
+			});
 			List<Authority> groupAuthorities = getGroupPermissions(groups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 		}
@@ -231,9 +231,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getUserPermissions(User user, final String authorityPrefix)
 	{
-		Stream<UserAuthority> authorities = dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-				UserAuthority.class);
+		Stream<UserAuthority> authorities = dataService
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+						UserAuthority.class);
 
 		return authorities.filter(authority ->
 		{
@@ -258,9 +258,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getGroupPermissions(List<Group> groups, final String authorityPrefix)
 	{
-		Stream<GroupAuthority> authorities = dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
-				GroupAuthority.class);
+		Stream<GroupAuthority> authorities = dataService
+				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
+						GroupAuthority.class);
 
 		return authorities.filter(authority ->
 		{
@@ -295,8 +295,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			List<Object> entityClassIds = this.getEntityClassIds();
 			List<EntityType> entityTypes = dataService
 					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityClassIds.stream(),
-							new Fetch().field(EntityTypeMetadata.ID)
-									.field(EntityTypeMetadata.PACKAGE), EntityType.class).collect(Collectors.toList());
+							new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE),
+							EntityType.class).collect(Collectors.toList());
 			if (entityClassIds != null)
 			{
 				Map<String, String> entityClassMap = new TreeMap<String, String>();

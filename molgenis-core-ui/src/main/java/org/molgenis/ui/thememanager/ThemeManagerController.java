@@ -50,8 +50,7 @@ public class ThemeManagerController extends MolgenisPluginController
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public
-	@ResponseBody
+	public @ResponseBody
 	void setBootstrapTheme(@Valid @RequestBody String styleName)
 	{
 		styleService.setSelectedStyle(styleName);

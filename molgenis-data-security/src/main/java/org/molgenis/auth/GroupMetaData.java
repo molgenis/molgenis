@@ -42,8 +42,7 @@ public class GroupMetaData extends SystemEntityType
 
 		setExtends(authorityMetaData);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false)
-				.setUnique(true);
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
 				.setDescription("Boolean to indicate whether this group is in use.").setAggregatable(true)
 				.setNillable(false);

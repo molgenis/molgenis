@@ -52,7 +52,6 @@ public class RestTestUtils
 		READ, WRITE, COUNT, NONE, WRITEMETA;
 	}
 
-
 	/**
 	 * Login with user name and password and return token on success.
 	 *
@@ -225,8 +224,7 @@ public class RestTestUtils
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
 	 * @param entity     a list of entity names
 	 */
-	public static void grantRights(String adminToken, String userId, String entity,
-			Permission permission)
+	public static void grantRights(String adminToken, String userId, String entity, Permission permission)
 	{
 		String entityTypeId = getEntityTypeId(adminToken, "id", entity, "sys_md_EntityType");
 		grantSystemRights(adminToken, userId, entityTypeId, permission);
@@ -240,8 +238,7 @@ public class RestTestUtils
 	 * @param entity     the entity on which the permissions are given
 	 * @param permission the type of permission to give
 	 */
-	public static void grantSystemRights(String adminToken, String userId, String entity,
-			Permission permission)
+	public static void grantSystemRights(String adminToken, String userId, String entity, Permission permission)
 	{
 		String right = "ROLE_ENTITY_" + permission + "_" + entity;
 		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));

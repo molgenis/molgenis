@@ -85,8 +85,7 @@ public class MappingsBuilder
 					jsonBuilder.startObject("properties");
 					for (Attribute refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, documentIdGenerator, false, true,
-								jsonBuilder);
+						createAttributeMapping(refAttr, documentIdGenerator, false, true, jsonBuilder);
 					}
 					jsonBuilder.endObject();
 				}

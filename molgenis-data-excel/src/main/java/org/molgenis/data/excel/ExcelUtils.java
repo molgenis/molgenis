@@ -144,6 +144,7 @@ public class ExcelUtils
 			throw new MolgenisDataException(e);
 		}
 	}
+
 	/**
 	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
 	 *

@@ -24,7 +24,7 @@ public interface OntologyService
 	/**
 	 * Finds ontology terms that are exact matches to a certain search string.
 	 *
-	 * @param pageSize   number of results to return.
+	 * @param pageSize number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
 	List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
@@ -32,7 +32,7 @@ public interface OntologyService
 	/**
 	 * Finds ontology terms that match a certain search string.
 	 *
-	 * @param pageSize   number of results to return.
+	 * @param pageSize number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);

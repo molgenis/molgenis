@@ -204,8 +204,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			validationResource.setRefEntitiesIds(refEntitiesIds);
 		}
 
-		validationResource.setSelfReferencing(refAttrs.stream()
-				.anyMatch(refAttr -> refAttr.getRefEntity().getId().equals(getEntityType().getId())));
+		validationResource.setSelfReferencing(
+				refAttrs.stream().anyMatch(refAttr -> refAttr.getRefEntity().getId().equals(getEntityType().getId())));
 		validationResource.setRefAttrs(refAttrs);
 	}
 
