@@ -28,9 +28,9 @@ public class DocumentIdGeneratorTest
 	public static Iterator<Object[]> generateIdEntityTypeProvider()
 	{
 		List<Object[]> dataList = new ArrayList<>(4);
-		dataList.add(new Object[] { "myEntity", "myEntity_061f7aef" });
-		dataList.add(new Object[] { "_my|En%ti-ty/", "myEntity_d8309562" });
-		dataList.add(new Object[] { "myEntitymyEntitymyEntitymyEntity", "myEntitymyEntitymyEntit_6e9381ec" });
+		dataList.add(new Object[] { "myEntity", "myentity_061f7aef" });
+		dataList.add(new Object[] { "_my|En%ti-ty/", "myentity_d8309562" });
+		dataList.add(new Object[] { "myEntitymyEntitymyEntitymyEntity", "myentitymyentitymyentit_6e9381ec" });
 		return dataList.iterator();
 	}
 

@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.request;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortMode;
 import org.elasticsearch.search.sort.SortOrder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -26,7 +27,7 @@ public class SortGenerator implements QueryPartGenerator
 {
 	private final DocumentIdGenerator documentIdGenerator;
 
-	public SortGenerator(DocumentIdGenerator documentIdGenerator)
+	SortGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
@@ -49,7 +50,8 @@ public class SortGenerator implements QueryPartGenerator
 
 				String sortField = getSortField(sortAttr);
 				SortOrder sortOrder = sortDirection == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
-				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder).sortMode("min");
+				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder)
+						.sortMode(SortMode.MIN);
 				searchRequestBuilder.addSort(sortBuilder);
 			}
 		}
@@ -79,8 +81,7 @@ public class SortGenerator implements QueryPartGenerator
 			case STRING:
 			case TEXT:
 				// use raw field for sorting
-				sortField = new StringBuilder(fieldName).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
-						.toString();
+				sortField = fieldName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -90,7 +91,7 @@ public class SortGenerator implements QueryPartGenerator
 			case XREF:
 				// use nested field for sorting
 				String refSortField = getSortField(attr.getRefEntity().getLabelAttribute());
-				sortField = new StringBuilder(fieldName).append('.').append(refSortField).toString();
+				sortField = fieldName + '.' + refSortField;
 				break;
 			case COMPOUND:
 				throw new UnsupportedOperationException();

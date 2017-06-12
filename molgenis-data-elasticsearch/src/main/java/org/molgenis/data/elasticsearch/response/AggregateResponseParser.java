@@ -7,7 +7,6 @@ import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -24,17 +23,17 @@ import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.*;
 public class AggregateResponseParser
 {
 	@SuppressWarnings("unchecked")
-	public AggregateResult parseAggregateResponse(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
+	AggregateResult parseAggregateResponse(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
 			Aggregations aggs, DataService dataService)
 	{
-		Map<String, Object> aggsMap = parseAggregations(aggAttr1, aggAttr2, aggAttrDistinct, aggs);
+		Map<Object, Object> aggsMap = parseAggregations(aggAttr1, aggAttr2, aggAttrDistinct, aggs);
 
 		// create labels
 		Map<Object, Integer> xLabelsIdx = new HashMap<>();
 		Map<Object, Integer> yLabelsIdx = aggAttr2 != null ? new HashMap<>() : null;
-		for (Map.Entry<String, Object> entry : aggsMap.entrySet())
+		for (Map.Entry<Object, Object> entry : aggsMap.entrySet())
 		{
-			String xLabel = entry.getKey();
+			Object xLabel = entry.getKey();
 			xLabelsIdx.put(xLabel, null);
 			if (aggAttr2 != null)
 			{
@@ -45,7 +44,7 @@ public class AggregateResponseParser
 		}
 
 		List<Object> xLabels = new ArrayList<>(xLabelsIdx.keySet());
-		Collections.sort(xLabels, new AggregateLabelComparable());
+		xLabels.sort(new AggregateLabelComparable());
 		int nrXLabels = xLabels.size();
 		for (int i = 0; i < nrXLabels; ++i)
 			xLabelsIdx.put(xLabels.get(i), i);
@@ -54,7 +53,7 @@ public class AggregateResponseParser
 		if (aggAttr2 != null)
 		{
 			yLabels = new ArrayList<>(yLabelsIdx.keySet());
-			Collections.sort(yLabels, new AggregateLabelComparable());
+			yLabels.sort(new AggregateLabelComparable());
 			int nrYLabels = yLabels.size();
 			for (int i = 0; i < nrYLabels; ++i)
 				yLabelsIdx.put(yLabels.get(i), i);
@@ -62,28 +61,28 @@ public class AggregateResponseParser
 		else yLabels = Collections.emptyList();
 
 		// create value matrix
-		List<List<Long>> matrix = new ArrayList<List<Long>>(nrXLabels);
+		List<List<Long>> matrix = new ArrayList<>(nrXLabels);
 		int nrYLabels = aggAttr2 != null ? yLabels.size() : 1;
 		for (int i = 0; i < nrXLabels; ++i)
 		{
-			List<Long> yValues = new ArrayList<Long>(nrYLabels);
+			List<Long> yValues = new ArrayList<>(nrYLabels);
 			for (int j = 0; j < nrYLabels; ++j)
 				yValues.add(0L);
 			matrix.add(yValues);
 		}
 
-		for (Map.Entry<String, Object> entry : aggsMap.entrySet())
+		for (Map.Entry<Object, Object> entry : aggsMap.entrySet())
 		{
-			String key = entry.getKey();
+			Object key = entry.getKey();
 			Integer idx = xLabelsIdx.get(key);
 			List<Long> yValues = matrix.get(idx);
 
 			if (aggAttr2 != null)
 			{
-				Map<String, Long> subValues = (Map<String, Long>) entry.getValue();
-				for (Map.Entry<String, Long> subEntry : subValues.entrySet())
+				Map<Object, Long> subValues = (Map<Object, Long>) entry.getValue();
+				for (Map.Entry<Object, Long> subEntry : subValues.entrySet())
 				{
-					String subKey = subEntry.getKey();
+					Object subKey = subEntry.getKey();
 					Integer subIdx = yLabelsIdx.get(subKey);
 					yValues.set(subIdx, subEntry.getValue());
 				}
@@ -107,10 +106,10 @@ public class AggregateResponseParser
 		return new AggregateResult(matrix, xLabels, yLabels);
 	}
 
-	private Map<String, Object> parseAggregations(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
+	private Map<Object, Object> parseAggregations(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
 			Aggregations aggs)
 	{
-		Map<String, Object> counts = new HashMap<String, Object>();
+		Map<Object, Object> counts = new HashMap<>();
 
 		boolean isAttr1Nested = AggregateQueryGenerator.isNestedType(aggAttr1);
 		boolean isAttr1Nillable = aggAttr1.isNillable();
@@ -118,13 +117,13 @@ public class AggregateResponseParser
 		if (isAttr1Nested) aggs = removeNesting(aggs);
 		Terms terms = getTermsAggregation(aggs, aggAttr1);
 
-		for (Bucket bucket : terms.getBuckets())
+		for (Terms.Bucket bucket : terms.getBuckets())
 		{
-			String key = bucket.getKey();
+			Object key = bucket.getKey();
 			Object value;
 			if (aggAttr2 != null)
 			{
-				Map<String, Long> subCounts = new HashMap<String, Long>();
+				Map<Object, Long> subCounts = new HashMap<>();
 
 				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
 				boolean isAttr2Nillable = aggAttr2.isNillable();
@@ -134,9 +133,9 @@ public class AggregateResponseParser
 				if (isAttr2Nested) subAggs = removeNesting(subAggs);
 				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
 
-				for (Bucket subBucket : subTerms.getBuckets())
+				for (Terms.Bucket subBucket : subTerms.getBuckets())
 				{
-					String subKey = subBucket.getKey();
+					Object subKey = subBucket.getKey();
 					Long subValue;
 
 					if (aggAttrDistinct != null)
@@ -208,7 +207,7 @@ public class AggregateResponseParser
 			Object value;
 			if (aggAttr2 != null)
 			{
-				Map<String, Long> subCounts = new HashMap<String, Long>();
+				Map<Object, Long> subCounts = new HashMap<>();
 
 				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
 				boolean isAttr2Nillable = aggAttr2.isNillable();
@@ -218,9 +217,9 @@ public class AggregateResponseParser
 				if (isAttr2Nested) subAggs = removeNesting(subAggs);
 				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
 
-				for (Bucket subBucket : subTerms.getBuckets())
+				for (Terms.Bucket subBucket : subTerms.getBuckets())
 				{
-					String subKey = subBucket.getKey();
+					Object subKey = subBucket.getKey();
 					Long subValue;
 
 					if (aggAttrDistinct != null)
@@ -360,10 +359,6 @@ public class AggregateResponseParser
 	/**
 	 * Convert matrix labels that contain ids to label attribute values. Keeps in mind that the last label on a axis is
 	 * "Total".
-	 *
-	 * @param idLabels
-	 * @param entityType
-	 * @param dataService
 	 */
 	private void convertIdtoLabelLabels(List<Object> idLabels, EntityType entityType, DataService dataService)
 	{
@@ -372,14 +367,12 @@ public class AggregateResponseParser
 		{
 			// Get entities for ids
 			// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
-			Stream<Object> idLabelsWithoutNull = idLabels.stream().filter(idLabel -> idLabel != null);
+			Stream<Object> idLabelsWithoutNull = idLabels.stream().filter(Objects::nonNull);
 
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
-			dataService.findAll(entityType.getId(), idLabelsWithoutNull).forEach(entity ->
-			{
-				idToLabelMap.put(entity.getIdValue().toString(), entity);
-			});
+			dataService.findAll(entityType.getId(), idLabelsWithoutNull)
+					.forEach(entity -> idToLabelMap.put(entity.getIdValue().toString(), entity));
 
 			for (int i = 0; i < nrLabels; ++i)
 			{

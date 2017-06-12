@@ -1,10 +1,9 @@
 package org.molgenis.data.elasticsearch.request;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.*;
 import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.AttributeType;
@@ -39,7 +38,6 @@ public class QueryGenerator implements QueryPartGenerator
 
 	public QueryGenerator(DocumentIdGenerator documentIdGenerator)
 	{
-
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
@@ -66,7 +64,7 @@ public class QueryGenerator implements QueryPartGenerator
 		else
 		{
 			// boolean query consisting of combination of query clauses
-			Operator occur = null;
+			QueryRule.Operator occur = null;
 			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
 			for (int i = 0; i < nrQueryRules; i += 2)
@@ -74,16 +72,16 @@ public class QueryGenerator implements QueryPartGenerator
 				QueryRule queryRule = queryRules.get(i);
 
 				// determine whether this query is a 'not' query
-				if (queryRule.getOperator() == Operator.NOT)
+				if (queryRule.getOperator() == QueryRule.Operator.NOT)
 				{
-					occur = Operator.NOT;
+					occur = QueryRule.Operator.NOT;
 					queryRule = queryRules.get(i + 1);
 					i += 1;
 				}
 				else if (i + 1 < nrQueryRules)
 				{
 					QueryRule occurQueryRule = queryRules.get(i + 1);
-					Operator occurOperator = occurQueryRule.getOperator();
+					QueryRule.Operator occurOperator = occurQueryRule.getOperator();
 					if (occurOperator == null) throw new MolgenisQueryException("Missing expected occur operator");
 
 					//noinspection EnumSwitchStatementWhichMissesCases
@@ -115,7 +113,7 @@ public class QueryGenerator implements QueryPartGenerator
 						boolQuery.must(queryPartBuilder);
 						break;
 					case OR:
-						boolQuery.should(queryPartBuilder).minimumNumberShouldMatch(1);
+						boolQuery.should(queryPartBuilder).minimumShouldMatch(1);
 						break;
 					case NOT:
 						boolQuery.mustNot(queryPartBuilder);
@@ -131,7 +129,7 @@ public class QueryGenerator implements QueryPartGenerator
 
 	private QueryBuilder createQueryClause(QueryRule queryRule, EntityType entityType)
 	{
-		Operator queryOperator = queryRule.getOperator();
+		QueryRule.Operator queryOperator = queryRule.getOperator();
 		switch (queryOperator)
 		{
 			case DIS_MAX:
@@ -185,19 +183,19 @@ public class QueryGenerator implements QueryPartGenerator
 
 	private QueryBuilder createQueryClauseEquals(QueryRule queryRule, EntityType entityType)
 	{
-		FilterBuilder filterBuilder;
+		QueryBuilder queryBuilder;
 		if (queryRule.getValue() != null)
 		{
-			filterBuilder = createQueryClauseEqualsValue(queryRule, entityType);
+			queryBuilder = createQueryClauseEqualsValue(queryRule, entityType);
 		}
 		else
 		{
-			filterBuilder = createQueryClauseEqualsNoValue(queryRule, entityType);
+			queryBuilder = createQueryClauseEqualsNoValue(queryRule, entityType);
 		}
-		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+		return QueryBuilders.constantScoreQuery(queryBuilder);
 	}
 
-	private FilterBuilder createQueryClauseEqualsValue(QueryRule queryRule, EntityType entityType)
+	private QueryBuilder createQueryClauseEqualsValue(QueryRule queryRule, EntityType entityType)
 	{
 		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
 		Attribute attr = attributePath.get(attributePath.size() - 1);
@@ -224,7 +222,7 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
 				}
-				return nestedFilterBuilder(attributePath, FilterBuilders.termFilter(fieldName, queryValue));
+				return nestedQueryBuilder(attributePath, QueryBuilders.termQuery(fieldName, queryValue));
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case XREF:
@@ -243,7 +241,8 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
 				}
-				return FilterBuilders.nestedFilter(fieldName, FilterBuilders.termFilter(indexFieldName, queryValue));
+				return QueryBuilders
+						.nestedQuery(fieldName, QueryBuilders.termQuery(indexFieldName, queryValue), ScoreMode.Avg);
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
@@ -251,7 +250,7 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	private FilterBuilder createQueryClauseEqualsNoValue(QueryRule queryRule, EntityType entityType)
+	private QueryBuilder createQueryClauseEqualsNoValue(QueryRule queryRule, EntityType entityType)
 	{
 		List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
 
@@ -273,7 +272,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				return FilterBuilders.missingFilter(fieldName).existence(true).nullValue(true);
+				return QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery(fieldName));
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case FILE:
@@ -289,9 +288,8 @@ public class QueryGenerator implements QueryPartGenerator
 				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
 				String indexFieldName = getQueryFieldName(refAttributePath);
 
-				// see https://github.com/elastic/elasticsearch/issues/3495
-				return FilterBuilders
-						.notFilter(FilterBuilders.nestedFilter(fieldName, FilterBuilders.existsFilter(indexFieldName)));
+				return QueryBuilders.boolQuery().mustNot(
+						QueryBuilders.nestedQuery(fieldName, QueryBuilders.existsQuery(indexFieldName), ScoreMode.Avg));
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
@@ -342,12 +340,13 @@ public class QueryGenerator implements QueryPartGenerator
 					queryField =
 							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute());
 					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
-							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")")).scoreMode("max");
+							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
 					break;
 				case BOOL:
 				case COMPOUND:
 					throw new MolgenisQueryException(
-							"Illegal data type [" + dataType + "] for operator [" + Operator.FUZZY_MATCH + "]");
+							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH
+									+ "]");
 				default:
 					throw new RuntimeException("Unknown data type [" + dataType + "]");
 			}
@@ -396,7 +395,7 @@ public class QueryGenerator implements QueryPartGenerator
 							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute())
 									+ ".ngram";
 					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
-							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")")).scoreMode("max");
+							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
 					break;
 				default:
 					throw new RuntimeException("Unknown data type [" + dataType + "]");
@@ -423,7 +422,7 @@ public class QueryGenerator implements QueryPartGenerator
 		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
 				.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
 
-		FilterBuilder filterBuilder;
+		QueryBuilder queryBuilder;
 		String fieldName = getQueryFieldName(attr);
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
@@ -446,8 +445,8 @@ public class QueryGenerator implements QueryPartGenerator
 					fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
 				}
 				// note: inFilter expects array, not iterable
-				filterBuilder = FilterBuilders.inFilter(fieldName, queryValues);
-				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+				queryBuilder = QueryBuilders.termsQuery(fieldName, queryValues);
+				queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
@@ -467,16 +466,16 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
 				}
-				filterBuilder = FilterBuilders.inFilter(indexFieldName, queryValues);
-				filterBuilder = FilterBuilders.nestedFilter(fieldName, filterBuilder);
+				queryBuilder = QueryBuilders.termsQuery(indexFieldName, queryValues);
+				queryBuilder = QueryBuilders.nestedQuery(fieldName, queryBuilder, ScoreMode.Avg);
 				break;
 			case COMPOUND:
 				throw new MolgenisQueryException(
-						"Illegal data type [" + dataType + "] for operator [" + Operator.IN + "]");
+						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
-		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+		return QueryBuilders.constantScoreQuery(queryBuilder);
 	}
 
 	private QueryBuilder createQueryClauseLike(QueryRule queryRule, EntityType entityType)
@@ -551,9 +550,8 @@ public class QueryGenerator implements QueryPartGenerator
 		Object queryValueFrom = getQueryValue(attr, queryValuesIterator.next());
 		Object queryValueTo = getQueryValue(attr, queryValuesIterator.next());
 
-		FilterBuilder filterBuilder = FilterBuilders.rangeFilter(fieldName).gte(queryValueFrom).lte(queryValueTo);
-		filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+		return QueryBuilders.constantScoreQuery(nestedQueryBuilder(attributePath,
+				QueryBuilders.rangeQuery(fieldName).gte(queryValueFrom).lte(queryValueTo)));
 	}
 
 	private QueryBuilder createQueryClauseRangeOpen(QueryRule queryRule, EntityType entityType)
@@ -569,8 +567,8 @@ public class QueryGenerator implements QueryPartGenerator
 			throw new MolgenisQueryException("Query value cannot be null");
 		}
 
-		RangeFilterBuilder filterBuilder = FilterBuilders.rangeFilter(fieldName);
-		Operator operator = queryRule.getOperator();
+		RangeQueryBuilder filterBuilder = QueryBuilders.rangeQuery(fieldName);
+		QueryRule.Operator operator = queryRule.getOperator();
 		switch (operator)
 		{
 			case GREATER:
@@ -603,8 +601,7 @@ public class QueryGenerator implements QueryPartGenerator
 				throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
 		}
 
-		return QueryBuilders
-				.filteredQuery(QueryBuilders.matchAllQuery(), nestedFilterBuilder(attributePath, filterBuilder));
+		return QueryBuilders.constantScoreQuery(nestedQueryBuilder(attributePath, filterBuilder));
 	}
 
 	private QueryBuilder createQueryClauseSearch(QueryRule queryRule, EntityType entityType)
@@ -663,12 +660,13 @@ public class QueryGenerator implements QueryPartGenerator
 					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
 				}
 				return QueryBuilders
-						.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue));
+						.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue),
+								ScoreMode.Avg);
 			case BOOL:
 				throw new MolgenisQueryException("Cannot execute search query on [" + dataType + "] attribute");
 			case COMPOUND:
 				throw new MolgenisQueryException(
-						"Illegal data type [" + dataType + "] for operator [" + Operator.SEARCH + "]");
+						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.SEARCH + "]");
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
@@ -780,26 +778,6 @@ public class QueryGenerator implements QueryPartGenerator
 	}
 
 	/**
-	 * Wraps the filter in a nested filter when a query is done on a reference entity. Returns the original filter when
-	 * it is applied to the current entity.
-	 */
-	private FilterBuilder nestedFilterBuilder(List<Attribute> attributePath, FilterBuilder filterBuilder)
-	{
-		if (attributePath.size() == 1)
-		{
-			return filterBuilder;
-		}
-		else if (attributePath.size() == 2)
-		{
-			return FilterBuilders.nestedFilter(getQueryFieldName(attributePath.get(0)), filterBuilder);
-		}
-		else
-		{
-			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
-		}
-	}
-
-	/**
 	 * Wraps the query in a nested query when a query is done on a reference entity. Returns the original query when it
 	 * is applied to the current entity.
 	 */
@@ -811,46 +789,12 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 		else if (attributePath.size() == 2)
 		{
-			return QueryBuilders.nestedQuery(getQueryFieldName(attributePath.get(0)), queryBuilder);
+			return QueryBuilders.nestedQuery(getQueryFieldName(attributePath.get(0)), queryBuilder, ScoreMode.Avg);
 		}
 		else
 		{
 			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
 		}
-	}
-
-	private String getFieldName(QueryRule queryRule, EntityType entityType)
-	{
-		String queryRuleFieldName = queryRule.getField();
-		if (queryRuleFieldName == null)
-		{
-			return null;
-		}
-
-		StringBuilder fieldNameBuilder = new StringBuilder();
-		String[] queryRuleFieldNameTokens = StringUtils.split(queryRuleFieldName, '.');
-		EntityType entityTypeAtDepth = entityType;
-		for (int depth = 0; depth < queryRuleFieldNameTokens.length; ++depth)
-		{
-			String attrName = queryRuleFieldNameTokens[depth];
-			Attribute attr = entityTypeAtDepth.getAttribute(attrName);
-			if (attr == null)
-			{
-				throw new UnknownAttributeException(
-						format("Unknown attribute [%s] of entity type [%s]", attrName, entityTypeAtDepth.getId()));
-			}
-			if (depth > 0)
-			{
-				fieldNameBuilder.append(ATTRIBUTE_SEPARATOR);
-			}
-			fieldNameBuilder.append(getQueryFieldName(attr));
-
-			if (depth < queryRuleFieldNameTokens.length - 1)
-			{
-				entityTypeAtDepth = attr.getRefEntity();
-			}
-		}
-		return fieldNameBuilder.toString();
 	}
 
 	private String getQueryFieldName(List<Attribute> attributePath)
@@ -921,5 +865,4 @@ public class QueryGenerator implements QueryPartGenerator
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 	}
-
 }

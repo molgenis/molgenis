@@ -1563,7 +1563,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, null, null, new QueryImpl<>());
 
 		AggregateResult expectedResult = new AggregateResult(asList(singletonList(3L), singletonList(3L)),
-				asList("F", "T"), emptyList());
+				asList(0L, 1L), emptyList());
 		assertEquals(result, expectedResult);
 	}
 
@@ -1574,7 +1574,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, new QueryImpl<>());
 
-		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 3L), asList(3L, 0L)), asList("F", "T"),
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 3L), asList(3L, 0L)), asList(0L, 1L),
 				asList("option1", "option2"));
 		assertEquals(result, expectedResult);
 	}
@@ -1587,7 +1587,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, null, ATTR_ENUM, new QueryImpl<>());
 
 		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)),
-				asList("F", "T"), emptyList());
+				asList(0L, 1L), emptyList());
 		assertEquals(result, expectedResult);
 	}
 
@@ -1598,8 +1598,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_BOOL, ATTR_ENUM, new QueryImpl<>());
 
-		AggregateResult expectedResult = new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList("F", "T"),
-				asList("F", "T"));
+		AggregateResult expectedResult = new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList(0L, 1L),
+				asList(0L, 1L));
 		assertEquals(result, expectedResult);
 	}
 
@@ -1611,7 +1611,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, query);
 
-		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 2L), asList(1L, 0L)), asList("F", "T"),
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 2L), asList(1L, 0L)), asList(0L, 1L),
 				asList("option1", "option2"));
 		assertEquals(result, expectedResult);
 	}
@@ -1624,7 +1624,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
 
-		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 1L), asList(1L, 0L)), asList("F", "T"),
+		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 1L), asList(1L, 0L)), asList(0L, 1L),
 				asList("option1", "option2"));
 		assertEquals(result, expectedResult);
 	}
@@ -1637,7 +1637,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, ATTR_ENUM, query);
 
-		AggregateResult expectedResult = new AggregateResult(singletonList(singletonList(1L)), singletonList("T"),
+		AggregateResult expectedResult = new AggregateResult(singletonList(singletonList(1L)), singletonList(1L),
 				singletonList("option1"));
 		assertEquals(result, expectedResult);
 	}
@@ -1651,7 +1651,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		AggregateResult result = runAggregateQuery(ATTR_BOOL, ATTR_ENUM, null, query);
 
 		AggregateResult expectedResult = new AggregateResult(asList(asList(0L, 7495L), asList(500000L, 0L)),
-				asList("F", "T"), asList("option1", "option2"));
+				asList(0L, 1L), asList("option1", "option2"));
 		assertEquals(result, expectedResult);
 	}
 

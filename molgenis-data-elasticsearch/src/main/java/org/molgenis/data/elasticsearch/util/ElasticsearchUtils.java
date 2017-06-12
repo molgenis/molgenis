@@ -3,13 +3,9 @@ package org.molgenis.data.elasticsearch.util;
 import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
-import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -17,16 +13,14 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
@@ -38,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
@@ -77,6 +73,10 @@ public class ElasticsearchUtils
 
 	private void refreshIndex(String index)
 	{
+		if (index == null)
+		{
+			index = "_all";
+		}
 		client.admin().indices().refresh(refreshRequest(index)).actionGet();
 	}
 
@@ -100,14 +100,6 @@ public class ElasticsearchUtils
 		{
 			LOG.debug("bulkProcessor closed.");
 		}
-	}
-
-	public ImmutableOpenMap<String, MappingMetaData> getMappings(String indexName)
-	{
-		LOG.trace("Retrieving Elasticsearch mappings ...");
-		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).get();
-		LOG.debug("Retrieved Elasticsearch mappings");
-		return mappingsResponse.getMappings().get(indexName);
 	}
 
 	public void putMapping(String index, XContentBuilder jsonBuilder, String type) throws IOException
@@ -142,14 +134,15 @@ public class ElasticsearchUtils
 		{
 			LOG.trace("Counting Elasticsearch [{}] docs", type);
 		}
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, SearchType.COUNT, entityType, q, null, null, null);
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setSize(0);
+		generator.buildSearchRequest(searchRequestBuilder, SearchType.DEFAULT, entityType, q, null, null, null);
 		SearchResponse searchResponse = searchRequestBuilder.get();
 		if (searchResponse.getFailedShards() > 0)
 		{
-			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
+			throw new ElasticsearchException("Search failed:\n" + Arrays.stream(searchResponse.getShardFailures())
+					.map(ShardSearchFailure::toString).collect(joining("\n")));
 		}
-		long count = searchResponse.getHits().totalHits();
+		long count = searchResponse.getHits().getTotalHits();
 		long ms = searchResponse.getTookInMillis();
 		if (q != null)
 		{
@@ -181,67 +174,22 @@ public class ElasticsearchUtils
 		LOG.debug("Deleted Elasticsearch '{}' doc with id [{}]", type, id);
 	}
 
-	/**
-	 * Checks if a type exists in an index.
-	 *
-	 * @param type      the name of the type
-	 * @param indexName the name of the index
-	 * @return boolean indicating if the type exists in the index
-	 */
-	public boolean isTypeExists(String type, String indexName)
+	public void createIndex(String indexName)
 	{
-		LOG.trace("Check whether type [{}] exists in index [{}]...", type, indexName);
-		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
-				.get();
-		boolean typeExists = typesExistsResponse.isExists();
-		LOG.trace("Checked whether type [{}] exists in index [{}]", type, indexName);
-		return typeExists;
+		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
+		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
+		LOG.debug("Created Elasticsearch index '{}'.", indexName);
 	}
 
-	/**
-	 * Tries to delete the mapping for a type in an index.
-	 *
-	 * @param type      name of the type
-	 * @param indexName name of the index
-	 * @return boolean indicating success of the deletion
-	 */
-	public boolean deleteMapping(String type, String indexName)
+	public void deleteIndex(String indexName)
 	{
-		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-				.setType(type).get();
-		return deleteMappingResponse.isAcknowledged();
-	}
-
-	/**
-	 * Deletes all documents of a type in an index.
-	 *
-	 * @param type      tye name of the type of the documents
-	 * @param indexName the name of the index
-	 * @return boolean indicating success of the deletion
-	 */
-	public boolean deleteAllDocumentsOfType(String type, String indexName)
-	{
-		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
-		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).get();
-
-		if (deleteByQueryResponse != null)
+		LOG.trace("Deleting Elasticsearch index '{}' ...", indexName);
+		DeleteIndexResponse deleteIndexResponse = client.admin().indices().prepareDelete(indexName).get();
+		if (!deleteIndexResponse.isAcknowledged())
 		{
-			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
-			if (idbqr != null && idbqr.getFailedShards() > 0)
-			{
-				return false;
-			}
+			throw new ElasticsearchException(format("Error deleting index '%s'", indexName));
 		}
-		LOG.debug("Deleted all Elasticsearch '{}' docs.", type);
-		return true;
-	}
-
-	public void flushIndex(String indexName)
-	{
-		LOG.trace("Flushing Elasticsearch index [{}] ...", indexName);
-		client.admin().indices().prepareFlush(indexName).get();
-		LOG.debug("Flushed Elasticsearch index [{}]", indexName);
+		LOG.debug("Deleted Elasticsearch index '{}'.", indexName);
 	}
 
 	public SearchResponse search(SearchType searchType, SearchRequest request, String indexName)
@@ -263,7 +211,7 @@ public class ElasticsearchUtils
 			String indexName)
 	{
 		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
-		return Arrays.stream(searchHits.hits()).map(SearchHit::getId);
+		return Arrays.stream(searchHits.getHits()).map(SearchHit::getId);
 	}
 
 	/**

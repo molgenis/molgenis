@@ -27,8 +27,6 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
 
-	private static final String DEFAULT_INDEX_NAME = "molgenis";
-
 	private final Client client;
 	private final ExplainServiceHelper explainServiceHelper;
 	private final DocumentIdGenerator documentIdGenerator;
@@ -46,9 +44,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 
 	public Explanation explain(Query<Entity> q, EntityType entityType, String documentId)
 	{
-		String type = documentIdGenerator.generateId(entityType);
-		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, DEFAULT_INDEX_NAME, type,
-				documentId);
+		String indexName = documentIdGenerator.generateId(entityType);
+		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, documentId);
 		QueryBuilder queryBuilder = queryGenerator.createQueryBuilder(q.getRules(), entityType);
 		explainRequestBuilder.setQuery(queryBuilder);
 		ExplainResponse explainResponse = explainRequestBuilder.get();
@@ -67,7 +64,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	public Set<ExplainedQueryString> findQueriesFromExplanation(Map<String, String> originalQueryInMap,
 			Explanation explanation)
 	{
-		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<ExplainedQueryString>();
+		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<>();
 		Set<String> matchedQueryTerms = explainServiceHelper.findMatchedWords(explanation);
 		for (String matchedQueryTerm : matchedQueryTerms)
 		{
@@ -77,13 +74,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 			if (matchedQueryRule.size() > 0)
 			{
 				Entry<String, Double> entry = matchedQueryRule.entrySet().stream()
-						.max(new Comparator<Entry<String, Double>>()
-						{
-							public int compare(Entry<String, Double> o1, Entry<String, Double> o2)
-							{
-								return Double.compare(o1.getValue(), o2.getValue());
-							}
-						}).get();
+						.max(Comparator.comparingDouble(Entry::getValue)).get();
 
 				matchedQueryStrings.add(ExplainedQueryString
 						.create(matchedQueryTerm, entry.getKey(), originalQueryInMap.get(entry.getKey()),

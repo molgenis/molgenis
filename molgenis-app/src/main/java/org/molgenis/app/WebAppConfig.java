@@ -4,7 +4,7 @@ import freemarker.template.TemplateException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.config.HttpClientConfig;
-import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.elasticsearch.config.ElasticsearchConfig;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.freemarker.RepositoryTemplateLoader;
@@ -26,7 +26,7 @@ import java.util.Map;
 @EnableWebMvc
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis")
-@Import({ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
+@Import({ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, ElasticsearchConfig.class,
 		GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {

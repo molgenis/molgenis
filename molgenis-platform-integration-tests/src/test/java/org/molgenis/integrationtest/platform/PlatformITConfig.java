@@ -11,7 +11,7 @@ import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
-import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.elasticsearch.config.ElasticsearchConfig;
 import org.molgenis.data.jobs.JobConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
@@ -79,7 +79,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
-@Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
+@Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class,
 		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
 		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,

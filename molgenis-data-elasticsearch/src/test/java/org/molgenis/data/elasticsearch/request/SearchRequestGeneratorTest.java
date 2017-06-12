@@ -2,9 +2,7 @@ package org.molgenis.data.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.mockito.Matchers;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
 import org.molgenis.data.meta.model.Attribute;
@@ -41,15 +39,14 @@ public class SearchRequestGeneratorTest
 		when(entityType.getBackend()).thenReturn("notElasticsearch");
 
 		String entityTypeId = "test";
-		SearchType searchType = SearchType.COUNT;
+		SearchType searchType = SearchType.QUERY_THEN_FETCH;
 
 		searchRequestGenerator.buildSearchRequest(searchRequestBuilderMock, searchType, entityType,
-				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null,
-				null);
+				new QueryImpl<>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null, null);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityTypeId);
-		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder>anyObject());
+		verify(searchRequestBuilderMock).setQuery(Matchers.anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}
 
@@ -58,7 +55,7 @@ public class SearchRequestGeneratorTest
 	{
 		when(entityType.getBackend()).thenReturn("notElasticsearch");
 		String entityTypeId = "test";
-		SearchType searchType = SearchType.COUNT;
+		SearchType searchType = SearchType.QUERY_THEN_FETCH;
 
 		searchRequestGenerator
 				.buildSearchRequest(searchRequestBuilderMock, searchType, entityType, new QueryImpl<>().search("test"),
@@ -66,7 +63,7 @@ public class SearchRequestGeneratorTest
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityTypeId);
-		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder>anyObject());
+		verify(searchRequestBuilderMock).setQuery(Matchers.anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}
 }

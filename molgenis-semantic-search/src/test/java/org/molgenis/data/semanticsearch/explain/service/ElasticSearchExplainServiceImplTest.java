@@ -62,21 +62,16 @@ public class ElasticSearchExplainServiceImplTest
 	@Test
 	public void testDiscoverMatchedQueries()
 	{
-		Explanation explanation_1 = new Explanation(Float.valueOf("5.381672"), "sum of:");
-		Explanation explanation_2 = new Explanation(Float.valueOf("3.6267629"), "sum of:");
+		Explanation explanation_2 = Explanation.match(Float.valueOf("3.6267629"), "sum of:", Explanation
+						.match(Float.valueOf("2.0587344"), "weight(label:high in 328) [PerFieldSimilarity], result of:"),
+				Explanation.match(Float.valueOf("1.5680285"),
+						"weight(label:blood in 328) [PerFieldSimilarity], result of:"));
 
-		explanation_2.addDetail(new Explanation(Float.valueOf("2.0587344"),
-				"weight(label:high in 328) [PerFieldSimilarity], result of:"));
-		explanation_2.addDetail(new Explanation(Float.valueOf("1.5680285"),
-				"weight(label:blood in 328) [PerFieldSimilarity], result of:"));
+		Explanation explanation_3 = Explanation.match(Float.valueOf("1.754909"), "max of:", Explanation
+				.match(Float.valueOf("1.754909"), "weight(label:medication in 328) [PerFieldSimilarity], result of:"));
 
-		Explanation explanation_3 = new Explanation(Float.valueOf("1.754909"), "max of:");
-		explanation_3.addDetail(new Explanation(Float.valueOf("1.754909"),
-				"weight(label:medication in 328) [PerFieldSimilarity], result of:"));
-		explanation_1.addDetail(explanation_2);
-		explanation_1.addDetail(explanation_3);
-
-		System.out.println(explanation_1);
+		Explanation explanation_1 = Explanation
+				.match(Float.valueOf("5.381672"), "sum of:", explanation_2, explanation_3);
 
 		Set<String> actual = explainServiceHelper.findMatchedWords(explanation_1);
 		assertEquals(actual.size(), 2);
@@ -87,7 +82,7 @@ public class ElasticSearchExplainServiceImplTest
 	@Test
 	public void testRecursivelyFindQuery()
 	{
-		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+		Map<String, String> expanedQueryMap = new HashMap<>();
 		expanedQueryMap.put("hypertension", "hypertension");
 		expanedQueryMap.put("hypertensive disorder", "hypertension");
 		expanedQueryMap.put("high blood pressure", "hypertension");
@@ -105,19 +100,16 @@ public class ElasticSearchExplainServiceImplTest
 	@Test
 	public void testReverseSearchQueryStrings()
 	{
-		Explanation explanation_1 = new Explanation(Float.valueOf("5.381672"), "sum of:");
-		Explanation explanation_2 = new Explanation(Float.valueOf("3.6267629"), "sum of:");
-		explanation_2.addDetail(new Explanation(Float.valueOf("2.0587344"),
-				"weight(label:high in 328) [PerFieldSimilarity], result of:"));
-		explanation_2.addDetail(new Explanation(Float.valueOf("1.5680285"),
-				"weight(label:blood in 328) [PerFieldSimilarity], result of:"));
-		Explanation explanation_3 = new Explanation(Float.valueOf("1.754909"), "max of:");
-		explanation_3.addDetail(new Explanation(Float.valueOf("1.754909"),
-				"weight(label:medication in 328) [PerFieldSimilarity], result of:"));
-		explanation_1.addDetail(explanation_2);
-		explanation_1.addDetail(explanation_3);
+		Explanation explanation_2 = Explanation.match(Float.valueOf("3.6267629"), "sum of:", Explanation
+						.match(Float.valueOf("2.0587344"), "weight(label:high in 328) [PerFieldSimilarity], result of:"),
+				Explanation.match(Float.valueOf("1.5680285"),
+						"weight(label:blood in 328) [PerFieldSimilarity], result of:"));
+		Explanation explanation_3 = Explanation.match(Float.valueOf("1.754909"), "max of:", Explanation
+				.match(Float.valueOf("1.754909"), "weight(label:medication in 328) [PerFieldSimilarity], result of:"));
+		Explanation explanation_1 = Explanation
+				.match(Float.valueOf("5.381672"), "sum of:", explanation_2, explanation_3);
 
-		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+		Map<String, String> expanedQueryMap = new HashMap<>();
 		expanedQueryMap.put("hypertension", "hypertension");
 		expanedQueryMap.put("hypertensive disorder", "hypertension");
 		expanedQueryMap.put("high blood pressure", "hypertension");

@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -91,13 +91,6 @@
                     <version>2.4</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
-                        <!--
-                            Exclude JCL and LOG4J since all logging should go through SLF4J.
-                            Note that we're excluding log4j-<version>.jar but keeping log4j-over-slf4j-<version>.jar
-                        -->
-                        <packagingExcludes>
-                            WEB-INF/lib/commons-logging-*.jar,%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]
-                        </packagingExcludes>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
@@ -625,6 +618,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.15</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
