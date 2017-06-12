@@ -42,8 +42,7 @@ public class BatchingQueryResultTest
 			assertEquals(q.getPageSize(), batchSize);
 
 			if (++batchCount == 3) return Lists.newArrayList();
-			return Arrays.asList(new DynamicEntity(mock(EntityType.class)),
-					new DynamicEntity(mock(EntityType.class)));
+			return Arrays.asList(new DynamicEntity(mock(EntityType.class)), new DynamicEntity(mock(EntityType.class)));
 		}
 	}
 }

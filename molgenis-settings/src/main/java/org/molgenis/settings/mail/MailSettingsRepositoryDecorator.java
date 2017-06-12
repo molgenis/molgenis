@@ -12,8 +12,7 @@ public class MailSettingsRepositoryDecorator extends AbstractRepositoryDecorator
 	private final Repository<Entity> decoratedRepository;
 	private final MailSenderFactory mailSenderFactory;
 
-	public MailSettingsRepositoryDecorator(Repository<Entity> decoratedRepository,
-			MailSenderFactory mailSenderFactory)
+	public MailSettingsRepositoryDecorator(Repository<Entity> decoratedRepository, MailSenderFactory mailSenderFactory)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.mailSenderFactory = requireNonNull(mailSenderFactory);

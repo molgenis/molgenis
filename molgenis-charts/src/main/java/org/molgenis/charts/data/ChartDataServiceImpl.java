@@ -38,17 +38,17 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		// Sanity check
 		if (AttributeType.DECIMAL.equals(attributeXFieldTypeEnum) || AttributeType.INT.equals(attributeXFieldTypeEnum)
-				|| AttributeType.LONG.equals(attributeXFieldTypeEnum) || AttributeType.DATE
-				.equals(attributeXFieldTypeEnum) || AttributeType.DATE_TIME.equals(attributeXFieldTypeEnum)
-				|| AttributeType.DECIMAL.equals(attributeYFieldTypeEnum) || AttributeType.INT
-				.equals(attributeYFieldTypeEnum) || AttributeType.LONG.equals(attributeYFieldTypeEnum)
-				|| AttributeType.DATE.equals(attributeYFieldTypeEnum) || AttributeType.DATE_TIME
-				.equals(attributeYFieldTypeEnum))
+				|| AttributeType.LONG.equals(attributeXFieldTypeEnum) || AttributeType.DATE.equals(
+				attributeXFieldTypeEnum) || AttributeType.DATE_TIME.equals(attributeXFieldTypeEnum)
+				|| AttributeType.DECIMAL.equals(attributeYFieldTypeEnum) || AttributeType.INT.equals(
+				attributeYFieldTypeEnum) || AttributeType.LONG.equals(attributeYFieldTypeEnum)
+				|| AttributeType.DATE.equals(attributeYFieldTypeEnum) || AttributeType.DATE_TIME.equals(
+				attributeYFieldTypeEnum))
 		{
 			if (!StringUtils.isNotBlank(split))
 			{
-				xYDataSeries = Arrays.asList(this
-						.getXYDataSerie(repo, entityTypeId, attributeNameXaxis, attributeNameYaxis,
+				xYDataSeries = Arrays.asList(
+						this.getXYDataSerie(repo, entityTypeId, attributeNameXaxis, attributeNameYaxis,
 								attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
 			}
 			else
@@ -75,8 +75,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		EntityType entityType = repo.getEntityType();
 
 		XYDataSerie serie = new XYDataSerie();
-		serie.setName(entityType.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityType
-				.getAttribute(attributeNameYaxis).getLabel());
+		serie.setName(entityType.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityType.getAttribute(
+				attributeNameYaxis).getLabel());
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 
@@ -138,7 +138,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else if (o instanceof List)
 		{
-			@SuppressWarnings("unchecked") Iterable<Object> refObjects = (Iterable<Object>) o;
+			@SuppressWarnings("unchecked")
+			Iterable<Object> refObjects = (Iterable<Object>) o;
 			StringBuilder strBuilder = new StringBuilder();
 			for (Object ob : refObjects)
 			{
@@ -301,9 +302,9 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * get a Iterable holding entitys
 	 *
 	 * @param entityTypeId (String) the name of the entity to be used
-	 * @param repo       (Repository<? extends Entity>) the repository where the data exists
-	 * @param queryRules (List<QueryRule>) the query rules to be used getting the data from the repo
-	 * @param sort       (Sort)
+	 * @param repo         (Repository<? extends Entity>) the repository where the data exists
+	 * @param queryRules   (List<QueryRule>) the query rules to be used getting the data from the repo
+	 * @param sort         (Sort)
 	 * @return
 	 */
 

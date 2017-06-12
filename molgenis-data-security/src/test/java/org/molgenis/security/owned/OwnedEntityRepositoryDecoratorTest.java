@@ -77,8 +77,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		ownedEntityRepositoryDecorator.add(entities);
 
-		@SuppressWarnings({ "unchecked", "rawtypes" }) ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor
-				.forClass((Class) Stream.class);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepository, times(1)).add(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(entity0, entity1));
@@ -109,8 +109,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity notMyEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		ownedEntityRepositoryDecorator.delete(Stream.of(myEntity, notMyEntity));
 
-		@SuppressWarnings("unchecked") ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor
-				.forClass((Class) Stream.class);
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepository, times(1)).delete(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(myEntity));

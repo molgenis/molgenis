@@ -23,7 +23,8 @@ public class JobFactoryRegistry
 	public JobFactoryRegistry(List<JobFactory> jobFactories)
 	{
 		this.jobFactories = jobFactories.stream()
-				.collect(toMap(factory -> resolveTypeArgument(factory.getClass(), JobFactory.class), identity()));
+										.collect(toMap(factory -> resolveTypeArgument(factory.getClass(),
+												JobFactory.class), identity()));
 	}
 
 	public JobFactory getJobFactory(JobExecution jobExecution)

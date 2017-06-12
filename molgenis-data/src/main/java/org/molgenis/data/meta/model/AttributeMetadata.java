@@ -86,47 +86,77 @@ public class AttributeMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false)
-				.setReadOnly(true);
-		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number")
-				.setDescription("Number that defines order of attributes in a entity").setNillable(false);
-		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
-				.setLabel("Data type");
-		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute")
-				.setValidationExpression(getIdAttributeValidationExpression());
+		addAttribute(ENTITY).setDataType(XREF)
+							.setRefEntity(entityTypeMeta)
+							.setLabel("Entity")
+							.setNillable(false)
+							.setReadOnly(true);
+		addAttribute(SEQUENCE_NR).setDataType(INT)
+								 .setLabel("Sequence number")
+								 .setDescription("Number that defines order of attributes in a entity")
+								 .setNillable(false);
+		addAttribute(TYPE).setDataType(ENUM)
+						  .setEnumOptions(AttributeType.getOptionsLowercase())
+						  .setNillable(false)
+						  .setLabel("Data type");
+		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL)
+									 .setLabel("ID attribute")
+									 .setValidationExpression(getIdAttributeValidationExpression());
 		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute");
-		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT).setLabel("Lookup attribute index")
-				.setValidationExpression(getLookupAttributeValidationExpression());
+		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT)
+											.setLabel("Lookup attribute index")
+											.setValidationExpression(getLookupAttributeValidationExpression());
 		Attribute parentAttr = addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Attribute parent");
-		addAttribute(CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setOrderBy(new Sort(SEQUENCE_NR)).setLabel("Attribute parts");
-		addAttribute(REF_ENTITY_TYPE).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
-				.setValidationExpression(getRefEntityValidationExpression());
-		addAttribute(IS_CASCADE_DELETE).setDataType(BOOL).setLabel("Cascade delete")
-				.setDescription("Delete corresponding referenced entities on delete")
-				.setValidationExpression(getCascadeDeleteValidationExpression());
-		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
-				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
-				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
-		addAttribute(ORDER_BY).setLabel("Order by").setDescription(
-				"Order expression that defines entity collection order of a onetomany attribute (e.g. \"attr0\", \"attr0,ASC\", \"attr0,DESC\" or \"attr0,ASC;attr1,DESC\"")
-				.setValidationExpression(getOrderByValidationExpression());
-		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
-				.setDescription("Computed value expression in Magma JavaScript");
+		addAttribute(CHILDREN).setDataType(ONE_TO_MANY)
+							  .setRefEntity(this)
+							  .setMappedBy(parentAttr)
+							  .setOrderBy(new Sort(SEQUENCE_NR))
+							  .setLabel("Attribute parts");
+		addAttribute(REF_ENTITY_TYPE).setDataType(XREF)
+									 .setRefEntity(entityTypeMeta)
+									 .setLabel("Referenced entity")
+									 .setValidationExpression(getRefEntityValidationExpression());
+		addAttribute(IS_CASCADE_DELETE).setDataType(BOOL)
+									   .setLabel("Cascade delete")
+									   .setDescription("Delete corresponding referenced entities on delete")
+									   .setValidationExpression(getCascadeDeleteValidationExpression());
+		addAttribute(MAPPED_BY).setDataType(XREF)
+							   .setRefEntity(this)
+							   .setLabel("Mapped by")
+							   .setDescription(
+									   "Attribute in the referenced entity that owns the relationship of a onetomany attribute")
+							   .setValidationExpression(getMappedByValidationExpression())
+							   .setReadOnly(true);
+		addAttribute(ORDER_BY).setLabel("Order by")
+							  .setDescription(
+									  "Order expression that defines entity collection order of a onetomany attribute (e.g. \"attr0\", \"attr0,ASC\", \"attr0,DESC\" or \"attr0,ASC;attr1,DESC\"")
+							  .setValidationExpression(getOrderByValidationExpression());
+		addAttribute(EXPRESSION).setNillable(true)
+								.setLabel("Expression")
+								.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(IS_NULLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable").setDefaultValue("true");
-		addAttribute(IS_AUTO).setDataType(BOOL).setNillable(false).setLabel("Auto")
-				.setDescription("Auto generated values").setValidationExpression(getAutoValidationExpression());
+		addAttribute(IS_AUTO).setDataType(BOOL)
+							 .setNillable(false)
+							 .setLabel("Auto")
+							 .setDescription("Auto generated values")
+							 .setValidationExpression(getAutoValidationExpression());
 		addAttribute(IS_VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(IS_AGGREGATABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable")
-				.setValidationExpression(getAggregatableExpression());
-		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM")
-				.setValidationExpression(getEnumOptionsValidationExpression());
-		addAttribute(RANGE_MIN).setDataType(LONG).setLabel("Range min")
-				.setValidationExpression(getRangeValidationExpression(RANGE_MIN));
-		addAttribute(RANGE_MAX).setDataType(LONG).setLabel("Range max")
-				.setValidationExpression(getRangeValidationExpression(RANGE_MAX));
+		addAttribute(IS_AGGREGATABLE).setDataType(BOOL)
+									 .setNillable(false)
+									 .setLabel("Aggregatable")
+									 .setValidationExpression(getAggregatableExpression());
+		addAttribute(ENUM_OPTIONS).setDataType(TEXT)
+								  .setLabel("Enum values")
+								  .setDescription("For data type ENUM")
+								  .setValidationExpression(getEnumOptionsValidationExpression());
+		addAttribute(RANGE_MIN).setDataType(LONG)
+							   .setLabel("Range min")
+							   .setValidationExpression(getRangeValidationExpression(RANGE_MIN));
+		addAttribute(RANGE_MAX).setDataType(LONG)
+							   .setLabel("Range max")
+							   .setValidationExpression(getRangeValidationExpression(RANGE_MAX));
 		addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
 		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
@@ -171,8 +201,10 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getRefEntityValidationExpression()
 	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values())
+									 .filter(EntityTypeUtils::isReferenceType)
+									 .map(AttributeType::getValueString)
+									 .collect(Collectors.joining("|")) + ")$/";
 
 		return "$('" + REF_ENTITY_TYPE + "').isNull().and($('" + TYPE + "').matches(" + regex + ").not()).or(" + "$('"
 				+ REF_ENTITY_TYPE + "').isNull().not().and($('" + TYPE + "').matches(" + regex + "))).value()";
@@ -180,16 +212,20 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getCascadeDeleteValidationExpression()
 	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values())
+									 .filter(EntityTypeUtils::isReferenceType)
+									 .map(AttributeType::getValueString)
+									 .collect(Collectors.joining("|")) + ")$/";
 
 		return "$('" + IS_CASCADE_DELETE + "').isNull().or(" + "$('" + REF_ENTITY_TYPE + "').isNull().not()).value()";
 	}
 
 	private static String getAutoValidationExpression()
 	{
-		String dateTypeRegex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isDateType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String dateTypeRegex = "/^(" + Arrays.stream(AttributeType.values())
+											 .filter(EntityTypeUtils::isDateType)
+											 .map(AttributeType::getValueString)
+											 .collect(Collectors.joining("|")) + ")$/";
 
 		String autoIsTrue = "$('" + IS_AUTO + "').eq(true)";
 		String autoIsFalse = "$('" + IS_AUTO + "').eq(false)";
@@ -206,8 +242,10 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getRangeValidationExpression(String attribute)
 	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isIntegerType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values())
+									 .filter(EntityTypeUtils::isIntegerType)
+									 .map(AttributeType::getValueString)
+									 .collect(Collectors.joining("|")) + ")$/";
 		String rangeIsNull = "$('" + attribute + "').isNull()";
 
 		return rangeIsNull + ".or(" + rangeIsNull + ".not().and($('" + TYPE + "').matches(" + regex + "))).value()";
@@ -221,8 +259,9 @@ public class AttributeMetadata extends SystemEntityType
 
 		// Use the valid ID attribute types to constuct the validation expression
 		List<String> typeExpressions = getValidIdAttributeTypes().stream()
-				.map(attributeType -> "$('" + TYPE + "').eq('" + getValueString(attributeType) + "')")
-				.collect(Collectors.toList());
+																 .map(attributeType -> "$('" + TYPE + "').eq('"
+																		 + getValueString(attributeType) + "')")
+																 .collect(Collectors.toList());
 
 		boolean first = true;
 		String typeIsNullOrStringOrIntOrLong = "";
@@ -246,8 +285,10 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getLookupAttributeValidationExpression()
 	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values())
+									 .filter(EntityTypeUtils::isReferenceType)
+									 .map(AttributeType::getValueString)
+									 .collect(Collectors.joining("|")) + ")$/";
 
 		return "$('" + LOOKUP_ATTRIBUTE_INDEX + "').isNull().or(" + "$('" + LOOKUP_ATTRIBUTE_INDEX
 				+ "').isNull().not().and($('" + TYPE + "').matches(" + regex + ").not())).value()";
@@ -257,8 +298,10 @@ public class AttributeMetadata extends SystemEntityType
 	{
 		String aggregatableIsNullOrFalse =
 				"$('" + IS_AGGREGATABLE + "').isNull().or($('" + IS_AGGREGATABLE + "').eq(false))";
-		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityTypeUtils::isReferenceType)
-				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values())
+									 .filter(EntityTypeUtils::isReferenceType)
+									 .map(AttributeType::getValueString)
+									 .collect(Collectors.joining("|")) + ")$/";
 		return aggregatableIsNullOrFalse + ".or(" + "$('" + TYPE + "')" + ".matches(" + regex + ")" + ".and(" + "$('"
 				+ IS_NULLABLE + "')" + ".eq(false)" + ")" + ")" + ".or(" + "$('" + TYPE + "')" + ".matches(" + regex
 				+ ").not()).value()";

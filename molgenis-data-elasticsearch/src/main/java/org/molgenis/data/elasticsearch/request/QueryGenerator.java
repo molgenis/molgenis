@@ -290,8 +290,8 @@ public class QueryGenerator implements QueryPartGenerator
 				String indexFieldName = getQueryFieldName(refAttributePath);
 
 				// see https://github.com/elastic/elasticsearch/issues/3495
-				return FilterBuilders
-						.notFilter(FilterBuilders.nestedFilter(fieldName, FilterBuilders.existsFilter(indexFieldName)));
+				return FilterBuilders.notFilter(
+						FilterBuilders.nestedFilter(fieldName, FilterBuilders.existsFilter(indexFieldName)));
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
@@ -421,7 +421,8 @@ public class QueryGenerator implements QueryPartGenerator
 					"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
 		}
 		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
-				.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
+											.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue))
+											.toArray();
 
 		FilterBuilder filterBuilder;
 		String fieldName = getQueryFieldName(attr);
@@ -495,7 +496,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case STRING:
 				return nestedQueryBuilder(attributePath,
 						QueryBuilders.matchQuery(fieldName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, queryValue)
-								.analyzer(DEFAULT_ANALYZER));
+									 .analyzer(DEFAULT_ANALYZER));
 			case BOOL:
 			case COMPOUND:
 			case DATE:
@@ -603,8 +604,8 @@ public class QueryGenerator implements QueryPartGenerator
 				throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
 		}
 
-		return QueryBuilders
-				.filteredQuery(QueryBuilders.matchAllQuery(), nestedFilterBuilder(attributePath, filterBuilder));
+		return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				nestedFilterBuilder(attributePath, filterBuilder));
 	}
 
 	private QueryBuilder createQueryClauseSearch(QueryRule queryRule, EntityType entityType)
@@ -662,8 +663,8 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
 				}
-				return QueryBuilders
-						.nestedQuery(fieldName, QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue));
+				return QueryBuilders.nestedQuery(fieldName,
+						QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue));
 			case BOOL:
 				throw new MolgenisQueryException("Cannot execute search query on [" + dataType + "] attribute");
 			case COMPOUND:

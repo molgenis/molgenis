@@ -163,15 +163,17 @@ public class RepositoryValidationDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		when(decoratedRepo.getName()).thenReturn(entityTypeId);
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName))))
-				.thenReturn(Stream.empty());
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(
+				new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName)))).thenReturn(Stream.empty());
 		refRepo = mock(Repository.class);
 		when(refRepo.getEntityType()).thenReturn(refEntityType);
 
 		dataService = mock(DataService.class);
 		when(dataService.getRepository(entityTypeId)).thenReturn(decoratedRepo);
 		when(dataService.getRepository(refEntityName)).thenReturn(refRepo);
-		when(dataService.findAll(refEntityName, new QueryImpl<Entity>().fetch(new Fetch().field(refAttrIdName)))).thenReturn(Stream.of(refEntity0, refEntity1));
+		when(dataService.findAll(refEntityName,
+				new QueryImpl<Entity>().fetch(new Fetch().field(refAttrIdName)))).thenReturn(
+				Stream.of(refEntity0, refEntity1));
 
 		metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
@@ -220,8 +222,8 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addEntityDoesNotRequireValidationDueToRepoCapabilities()
 	{
-		when(decoratedRepo.getCapabilities())
-				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT)));
+		when(decoratedRepo.getCapabilities()).thenReturn(
+				new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT)));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -251,8 +253,8 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addEntityCrossRepositoryCollectionReference()
 	{
-		when(decoratedRepo.getCapabilities())
-				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT)));
+		when(decoratedRepo.getCapabilities()).thenReturn(
+				new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT)));
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		// references need to be validated because they are stored in another repository collection
 		RepositoryCollection thisBackend = mock(RepositoryCollection.class);
@@ -471,8 +473,8 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
 		// actual tests
-		when(dataService.findAll(entityTypeId, new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entity0));
+		when(dataService.findAll(entityTypeId,
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.add(entity0);
 
 		verify(decoratedRepo, times(1)).add(entity0);
@@ -627,8 +629,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -688,8 +690,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -739,8 +741,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -1032,8 +1034,8 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
-		when(dataService.findAll(entityTypeId, new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entity0));
+		when(dataService.findAll(entityTypeId,
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -1091,8 +1093,8 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0, entity1);
-		when(dataService.findAll(entityTypeId, new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.empty());
+		when(dataService.findAll(entityTypeId,
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.empty());
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -1336,8 +1338,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -1405,8 +1407,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -1528,8 +1530,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -1776,8 +1778,8 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
 		// actual tests
-		when(dataService.findAll(entityTypeId, new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entity0));
+		when(dataService.findAll(entityTypeId,
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
@@ -1931,8 +1933,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -1992,8 +1994,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2043,8 +2045,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2085,8 +2087,8 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyStringName = "readonlyStringAttr";
 
-		Attribute readonlyStringAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyStringName).getMock();
+		Attribute readonlyStringAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyStringName)
+																			.getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
@@ -2157,8 +2159,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -2222,8 +2223,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -2295,8 +2295,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -2430,8 +2429,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -2757,8 +2755,8 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
-		when(dataService.findAll(entityTypeId, new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entity0));
+		when(dataService.findAll(entityTypeId,
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -2816,8 +2814,8 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0, entity1);
-		when(dataService.findAll(entityTypeId, new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entity0, entity1));
+		when(dataService.findAll(entityTypeId,
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0, entity1));
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -3061,8 +3059,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -3130,8 +3128,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -3253,8 +3251,8 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName))))
-				.thenReturn(Stream.of(entityInBackend0));
+		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+				Stream.of(entityInBackend0));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -3303,8 +3301,8 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyStringName = "readonlyStringAttr";
 
-		Attribute readonlyStringAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyStringName).getMock();
+		Attribute readonlyStringAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyStringName)
+																			.getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
@@ -3383,8 +3381,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -3455,8 +3452,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -3536,8 +3532,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -3610,8 +3605,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -3725,8 +3719,9 @@ public class RepositoryValidationDecoratorTest
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);
 
-		@SuppressWarnings("resource") RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(
-				dataService, decoratedRepository, entityAttributesValidator, expressionValidator);
+		@SuppressWarnings("resource")
+		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
+				decoratedRepository, entityAttributesValidator, expressionValidator);
 
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();

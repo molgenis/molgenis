@@ -97,7 +97,8 @@ public class Pair<T, T2>
 	{
 		if (o instanceof Pair)
 		{
-			@SuppressWarnings("unchecked") Pair<T, T2> that = ((Pair<T, T2>) o);
+			@SuppressWarnings("unchecked")
+			Pair<T, T2> that = ((Pair<T, T2>) o);
 
 			return (this.a.equals(that.a) && this.b.equals(that.b));
 		}

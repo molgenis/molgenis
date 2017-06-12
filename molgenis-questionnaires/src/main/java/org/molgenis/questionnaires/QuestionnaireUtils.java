@@ -19,7 +19,8 @@ public class QuestionnaireUtils
 	 */
 	public static Stream<EntityType> findQuestionnairesMetaData(DataService dataService)
 	{
-		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)
-				.findAll();
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
+						  .eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)
+						  .findAll();
 	}
 }

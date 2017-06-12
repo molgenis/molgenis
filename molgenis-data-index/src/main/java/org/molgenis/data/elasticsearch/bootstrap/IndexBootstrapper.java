@@ -53,18 +53,17 @@ public class IndexBootstrapper
 	{
 		if (!searchService.hasMapping(attrMetadata))
 		{
-			LOG.debug(
-					"No index for Attribute found, asuming missing index, schedule (re)index for all entities");
+			LOG.debug("No index for Attribute found, asuming missing index, schedule (re)index for all entities");
 			metaDataService.getRepositories()
-					.forEach(repo -> indexActionRegisterService.register(repo.getEntityType(), null));
+						   .forEach(repo -> indexActionRegisterService.register(repo.getEntityType(), null));
 			LOG.debug("Done scheduling (re)index jobs for all entities");
 		}
 		else
 		{
 			LOG.debug("Index for Attribute found, index is present, no (re)index needed");
 			List<IndexJobExecution> failedIndexJobs = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
-					IndexJobExecution.class).collect(Collectors.toList());
+					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class)
+																 .collect(Collectors.toList());
 			failedIndexJobs.forEach(job -> registerNewIndexActionForDirtyJobs(job));
 		}
 	}
@@ -74,7 +73,7 @@ public class IndexBootstrapper
 		String id = indexJobExecution.getIndexActionJobID();
 		dataService.findAll(IndexActionMetaData.INDEX_ACTION,
 				new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, id), IndexAction.class)
-				.forEach(action -> indexActionRegisterService.register(getEntityType(action), action.getEntityId()));
+				   .forEach(action -> indexActionRegisterService.register(getEntityType(action), action.getEntityId()));
 		dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution);
 	}
 

@@ -30,8 +30,8 @@ public class SortGeneratorTest
 	public void beforeMethod()
 	{
 		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
-		when(documentIdGenerator.generateId(any(Attribute.class)))
-				.thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
+		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+				invocation -> ((Attribute) invocation.getArguments()[0]).getName());
 
 		sortGenerator = new SortGenerator(documentIdGenerator);
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
@@ -102,8 +102,8 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateDescAscRaw()
 	{
-		Query<Entity> query = new QueryImpl<>()
-				.sort(new Sort().on("int", Sort.Direction.DESC).on("string", Sort.Direction.ASC));
+		Query<Entity> query = new QueryImpl<>().sort(
+				new Sort().on("int", Sort.Direction.DESC).on("string", Sort.Direction.ASC));
 		sortGenerator.generate(searchRequestBuilder, query, entityType);
 		ArgumentCaptor<FieldSortBuilder> argument = ArgumentCaptor.forClass(FieldSortBuilder.class);
 		verify(searchRequestBuilder, times(2)).addSort(argument.capture());

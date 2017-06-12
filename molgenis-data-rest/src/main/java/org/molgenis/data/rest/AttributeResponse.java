@@ -131,15 +131,15 @@ public class AttributeResponse
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<Attribute> attributeParts = attr.getChildren();
-			this.attributes = attributeParts != null ? Lists
-					.newArrayList(Iterables.transform(attributeParts, new Function<Attribute, Object>()
+			this.attributes = attributeParts != null ? Lists.newArrayList(
+					Iterables.transform(attributeParts, new Function<Attribute, Object>()
 					{
 
 						@Override
 						public Object apply(Attribute attribute)
 						{
-							if (attributeExpandsSet != null && attributeExpandsSet
-									.containsKey("attributes".toLowerCase()))
+							if (attributeExpandsSet != null && attributeExpandsSet.containsKey(
+									"attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,

@@ -507,15 +507,14 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 		expectedResultEntity3.set(VcfAttributes.ALT, "GX,GC");
 		expectedResultEntity3.set(customAttrb, "-0.002|2.3,0.5|14.5");
 
-		Iterable<Entity> multiLineInput = Arrays
-				.asList(multiLineEntity1, multiLineEntity2, multiLineEntity3, multiLineEntity4, multiLineEntity5,
-						multiLineEntity6, multiLineEntity7, multiLineEntity8);
+		Iterable<Entity> multiLineInput = Arrays.asList(multiLineEntity1, multiLineEntity2, multiLineEntity3,
+				multiLineEntity4, multiLineEntity5, multiLineEntity6, multiLineEntity7, multiLineEntity8);
 
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
 				Lists.newArrayList((multiLineTestEMD.getAttribute(customAttrb))), vcfAttributes);
 
-		Iterable<Entity> expectedResult = Arrays
-				.asList(expectedResultEntity1, expectedResultEntity2, expectedResultEntity3);
+		Iterable<Entity> expectedResult = Arrays.asList(expectedResultEntity1, expectedResultEntity2,
+				expectedResultEntity3);
 
 		Iterable<Entity> actualResult = multiAllelicResultFilter.merge(multiLineInput);
 

@@ -36,8 +36,8 @@ public class AggregateQueryGenerator
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
-	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1,
-			Attribute aggAttr2, Attribute aggAttrDistinct)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2,
+			Attribute aggAttrDistinct)
 	{
 		// validate request
 		if (aggAttr1 == null)
@@ -61,8 +61,7 @@ public class AggregateQueryGenerator
 		if (aggAttr1.isNillable() && isReferenceType(aggAttr1))
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
-			throw new IllegalArgumentException(
-					"Aggregatable attribute of type [" + dataType1 + "] cannot be nillable");
+			throw new IllegalArgumentException("Aggregatable attribute of type [" + dataType1 + "] cannot be nillable");
 		}
 		if (aggAttr2 != null)
 		{
@@ -93,8 +92,8 @@ public class AggregateQueryGenerator
 		}
 	}
 
-	private List<AggregationBuilder<?>> createAggregations(LinkedList<Attribute> attrs,
-			Attribute parentAttr, Attribute distinctAttr)
+	private List<AggregationBuilder<?>> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr,
+			Attribute distinctAttr)
 	{
 		Attribute attr = attrs.pop();
 
@@ -103,8 +102,9 @@ public class AggregateQueryGenerator
 		// term aggregation
 		String termsAggName = attr.getName() + AGGREGATION_TERMS_POSTFIX;
 		String termsAggFieldName = getAggregateFieldName(attr);
-		AggregationBuilder<?> termsAgg = AggregationBuilders.terms(termsAggName).size(MAX_VALUE)
-				.field(termsAggFieldName);
+		AggregationBuilder<?> termsAgg = AggregationBuilders.terms(termsAggName)
+															.size(MAX_VALUE)
+															.field(termsAggFieldName);
 		aggs.add(termsAgg);
 
 		// missing term aggregation
@@ -113,7 +113,7 @@ public class AggregateQueryGenerator
 			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
 			String missingAggFieldName = getAggregateFieldName(attr);
 			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName)
-					.field(missingAggFieldName);
+																	   .field(missingAggFieldName);
 			aggs.add(missingTermsAgg);
 		}
 
@@ -128,7 +128,8 @@ public class AggregateQueryGenerator
 			String cardinalityAggName = distinctAttr.getName() + AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
 			CardinalityBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
-					.field(cardinalityAggFieldName).precisionThreshold(40000L);
+																.field(cardinalityAggFieldName)
+																.precisionThreshold(40000L);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;

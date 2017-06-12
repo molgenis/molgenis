@@ -113,8 +113,8 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		available.add(annotator4);
 		available.add(annotator5);
 
-		Queue<RepositoryAnnotator> result = resolver
-				.getAnnotatorSelectionDependencyList(available, requested, repo, entityTypeFactory);
+		Queue<RepositoryAnnotator> result = resolver.getAnnotatorSelectionDependencyList(available, requested, repo,
+				entityTypeFactory);
 
 		assertEquals(result.size(), 4);
 		assertEquals(result.poll().getSimpleName(), "annotator4");
@@ -138,8 +138,8 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		available.add(annotator3);
 		available.add(annotator5);
 
-		Queue<RepositoryAnnotator> result = resolver
-				.getAnnotatorSelectionDependencyList(available, requested, repo, entityTypeFactory);
+		Queue<RepositoryAnnotator> result = resolver.getAnnotatorSelectionDependencyList(available, requested, repo,
+				entityTypeFactory);
 	}
 
 	@Configuration

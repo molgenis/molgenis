@@ -82,7 +82,7 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory()
-				.create(dataService, elasticsearchEntityFactory, documentIdGenerator);
+		return embeddedElasticSearchServiceFactory().create(dataService, elasticsearchEntityFactory,
+				documentIdGenerator);
 	}
 }

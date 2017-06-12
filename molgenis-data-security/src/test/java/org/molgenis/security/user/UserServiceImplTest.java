@@ -61,7 +61,7 @@ public class UserServiceImplTest extends AbstractTestNGSpringContextTests
 		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("username").getMock();
 		Authentication authentication = when(mock(Authentication.class).getPrincipal()).thenReturn(userDetails)
-				.getMock();
+																					   .getMock();
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
@@ -81,9 +81,8 @@ public class UserServiceImplTest extends AbstractTestNGSpringContextTests
 		when(existingUser.getUsername()).thenReturn(username);
 		when(existingUser.getPassword()).thenReturn("encrypted-password");
 
-		when(dataService
-				.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
-						User.class)).thenReturn(existingUser);
+		when(dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
+				User.class)).thenReturn(existingUser);
 
 		assertEquals(molgenisUserServiceImpl.getUser(username), existingUser);
 	}

@@ -100,8 +100,8 @@ public class QueryValidator
 
 					// fix value types
 					Iterable<?> queryRuleValues = (Iterable<?>) queryRuleValue;
-					List<Object> values = stream(queryRuleValues.spliterator(), false)
-							.map(value -> toQueryRuleValue(value, attr)).collect(toList());
+					List<Object> values = stream(queryRuleValues.spliterator(), false).map(
+							value -> toQueryRuleValue(value, attr)).collect(toList());
 					queryRule.setValue(values);
 				}
 				break;
@@ -378,8 +378,7 @@ public class QueryValidator
 			catch (DateTimeParseException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(),
-								paramStrValue)));
+						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramStrValue)));
 			}
 		}
 		else

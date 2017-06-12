@@ -75,8 +75,8 @@ public class MolgenisClient
 	 */
 	public LoginResponse login(String uid, String pwd)
 	{
-		ResponseEntity<LoginResponse> result = template
-				.postForEntity("{apiHref}/login", LoginRequest.create(uid, pwd), LoginResponse.class, apiHref);
+		ResponseEntity<LoginResponse> result = template.postForEntity("{apiHref}/login", LoginRequest.create(uid, pwd),
+				LoginResponse.class, apiHref);
 		if (result.getStatusCode() == OK)
 		{
 			return result.getBody();
@@ -93,7 +93,7 @@ public class MolgenisClient
 	 * Retrieves an entity's metadata
 	 *
 	 * @param entityTypeId fully qualified name of the entity
-	 * @param token      molgenis session token
+	 * @param token        molgenis session token
 	 * @return {@link ResponseEntity} with the {@link MetaDataResponse}
 	 */
 	public ResponseEntity<MetaDataResponse> getMeta(String token, String entityTypeId)
@@ -105,7 +105,7 @@ public class MolgenisClient
 	/**
 	 * Queries an attribute for entities which have one specific attribute set to a specific value.
 	 *
-	 * @param entityTypeId    name of the entity
+	 * @param entityTypeId  name of the entity
 	 * @param attributeName name of the attribute
 	 * @param value         value of the attribute
 	 * @param token         molgenis session token
@@ -116,19 +116,18 @@ public class MolgenisClient
 	{
 		Map<String, Object> query = of("q",
 				singletonList(of("field", attributeName, "operator", "EQUALS", "value", value)));
-		ResponseEntity<QueryResponse> response = template
-				.exchange("{apiHref}/{entityTypeId}?_method=GET", POST, createHttpEntity(token, query),
-						QueryResponse.class, apiHref, entityTypeId);
+		ResponseEntity<QueryResponse> response = template.exchange("{apiHref}/{entityTypeId}?_method=GET", POST,
+				createHttpEntity(token, query), QueryResponse.class, apiHref, entityTypeId);
 		return response.getBody();
 	}
 
 	/**
 	 * Updates an entity.
 	 *
-	 * @param token      molgenis session token
+	 * @param token        molgenis session token
 	 * @param entityTypeId name of the entity
-	 * @param id         id of the entity
-	 * @param newEntity  new values for the entity
+	 * @param id           id of the entity
+	 * @param newEntity    new values for the entity
 	 */
 	public void update(String token, String entityTypeId, String id, ImmutableMap<String, Object> newEntity)
 	{
@@ -140,7 +139,7 @@ public class MolgenisClient
 	 * Updates an entity's attribute value.
 	 *
 	 * @param token         molgenis session token
-	 * @param entityTypeId    name of the entity
+	 * @param entityTypeId  name of the entity
 	 * @param id            id of the entity
 	 * @param attributeName name of the attribute to update
 	 * @param value         new value for the attribute
@@ -154,18 +153,15 @@ public class MolgenisClient
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> get(String token, String entityTypeId, Object id)
 	{
-		ResponseEntity<Map> responseEntity = template
-				.exchange("{apiHref}/{entityTypeId}/{id}", GET, createHttpEntity(token), Map.class, apiHref,
-						entityTypeId,
-						id);
+		ResponseEntity<Map> responseEntity = template.exchange("{apiHref}/{entityTypeId}/{id}", GET,
+				createHttpEntity(token), Map.class, apiHref, entityTypeId, id);
 		return responseEntity.getBody();
 	}
 
 	public QueryResponse get(String token, String entityTypeId)
 	{
-		ResponseEntity<QueryResponse> responseEntity = template
-				.exchange("{apiHref}/{entityTypeId}", GET, createHttpEntity(token), QueryResponse.class, apiHref,
-						entityTypeId);
+		ResponseEntity<QueryResponse> responseEntity = template.exchange("{apiHref}/{entityTypeId}", GET,
+				createHttpEntity(token), QueryResponse.class, apiHref, entityTypeId);
 		return responseEntity.getBody();
 	}
 

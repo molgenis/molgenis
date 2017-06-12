@@ -415,8 +415,8 @@ public class RestController
 			Query<Entity> q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
 			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
-			if (sortAttributeArray != null && sortAttributeArray.length == 1 && StringUtils
-					.isNotEmpty(sortAttributeArray[0]))
+			if (sortAttributeArray != null && sortAttributeArray.length == 1 && StringUtils.isNotEmpty(
+					sortAttributeArray[0]))
 			{
 				String sortAttribute = sortAttributeArray[0];
 				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
@@ -467,8 +467,8 @@ public class RestController
 		}
 
 		// Check attribute names
-		Iterable<String> attributesIterable = Iterables
-				.transform(meta.getAtomicAttributes(), attribute -> attribute.getName().toLowerCase());
+		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),
+				attribute -> attribute.getName().toLowerCase());
 
 		if (attributesSet != null)
 		{
@@ -484,8 +484,8 @@ public class RestController
 
 		if (attributesSet != null)
 		{
-			attributesIterable = Iterables
-					.filter(attributesIterable, attribute -> attributesSet.contains(attribute.toLowerCase()));
+			attributesIterable = Iterables.filter(attributesIterable,
+					attribute -> attributesSet.contains(attribute.toLowerCase()));
 		}
 
 		return new DefaultEntityCollection(entities, attributesIterable);
@@ -709,8 +709,7 @@ public class RestController
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPost(@PathVariable("entityTypeId") String entityTypeId,
-			@PathVariable("id") String untypedId,
-			HttpServletRequest request)
+			@PathVariable("id") String untypedId, HttpServletRequest request)
 	{
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -852,8 +851,8 @@ public class RestController
 			throw new BadCredentialsException("Unknown username or password");
 		}
 
-		User user = dataService
-				.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()), User.class);
+		User user = dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()),
+				User.class);
 
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -1099,7 +1098,7 @@ public class RestController
 		}
 
 		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(),
-						refAttributeName);
+				refAttributeName);
 		switch (attr.getDataType())
 		{
 			case COMPOUND:
@@ -1215,13 +1214,13 @@ public class RestController
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 					entityMap.put(attrName, new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null,
-									molgenisPermissionService, dataService, languageService));
+							molgenisPermissionService, dataService, languageService));
 				}
 				else
 				{
 					entityMap.put(attrName, Collections.singletonMap("href",
-							Href.concatAttributeHref(RestController.BASE_URI, meta.getId(),
-									entity.getIdValue(), attrName)));
+							Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(),
+									attrName)));
 				}
 			}
 			else if (attrType == DATE)
@@ -1269,9 +1268,8 @@ public class RestController
 						(long) refEntityMaps.size(), mrefEntities);
 
 				EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
-						Href.concatAttributeHref(RestController.BASE_URI, meta.getId(),
-								entity.getIdValue(), attrName), null, molgenisPermissionService, dataService,
-						languageService);
+						Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(), attrName),
+						null, molgenisPermissionService, dataService, languageService);
 
 				entityMap.put(attrName, ecr);
 			}
@@ -1281,8 +1279,8 @@ public class RestController
 			{
 				// Add href to ref field
 				Map<String, String> ref = new LinkedHashMap<String, String>();
-				ref.put("href", Href.concatAttributeHref(RestController.BASE_URI, meta.getId(),
-						entity.getIdValue(), attrName));
+				ref.put("href",
+						Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(), attrName));
 				entityMap.put(attrName, ref);
 			}
 		}

@@ -67,10 +67,9 @@ public class ParserTest extends AbstractMockitoTest
 	@Test
 	public void testTransform()
 	{
-		List<String> lines = Arrays
-				.asList("#Comment line", "#Another comment line", "11\t47359281\t.\tC\tG\t.\t.\tCADD_SCALED=33.0",
-						"11\t47359281\tC\tCC\t2.3\t33.0", "11\t47359281\t.\tC\tCG\t.\t.\tCADD_SCALED=33.0",
-						"11\t47359281\t.\tCG\tC\t.\t.\tCADD_SCALED=33.0");
+		List<String> lines = Arrays.asList("#Comment line", "#Another comment line",
+				"11\t47359281\t.\tC\tG\t.\t.\tCADD_SCALED=33.0", "11\t47359281\tC\tCC\t2.3\t33.0",
+				"11\t47359281\t.\tC\tCG\t.\t.\tCADD_SCALED=33.0", "11\t47359281\t.\tCG\tC\t.\t.\tCADD_SCALED=33.0");
 
 		Multiset<LineType> expected = ImmutableMultiset.of(COMMENT, COMMENT, VCF, CADD, INDEL_NOCADD, INDEL_NOCADD);
 		Assert.assertEquals(lineParser.transformLines(lines.stream(), output, error), expected);

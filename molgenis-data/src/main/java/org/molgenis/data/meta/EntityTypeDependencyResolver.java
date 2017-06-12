@@ -52,16 +52,19 @@ public class EntityTypeDependencyResolver
 
 		// EntityType doesn't have equals/hashcode methods, map to nodes first
 		// ensure that nodes exist for all dependencies
-		Set<EntityTypeNode> entityTypeNodes = entityTypes.stream().map(EntityTypeNode::new)
-				.flatMap(node -> Stream.concat(Stream.of(node), expandEntityTypeDependencies(node).stream()))
-				.collect(toCollection(HashSet::new));
+		Set<EntityTypeNode> entityTypeNodes = entityTypes.stream()
+														 .map(EntityTypeNode::new)
+														 .flatMap(node -> Stream.concat(Stream.of(node),
+																 expandEntityTypeDependencies(node).stream()))
+														 .collect(toCollection(HashSet::new));
 
 		// Sort nodes based on dependencies
-		List<EntityTypeNode> resolvedEntityMetaNodes = genericDependencyResolver
-				.resolve(entityTypeNodes, getDependencies());
+		List<EntityTypeNode> resolvedEntityMetaNodes = genericDependencyResolver.resolve(entityTypeNodes,
+				getDependencies());
 		// Map nodes back to EntityType
-		List<EntityType> resolvedEntityMetas = resolvedEntityMetaNodes.stream().map(EntityTypeNode::getEntityType)
-				.collect(toList());
+		List<EntityType> resolvedEntityMetas = resolvedEntityMetaNodes.stream()
+																	  .map(EntityTypeNode::getEntityType)
+																	  .collect(toList());
 
 		// getDependencies might have included items that are not in the input list, remove additional items
 		if (resolvedEntityMetas.size() == entityTypes.size())
@@ -71,10 +74,11 @@ public class EntityTypeDependencyResolver
 		else
 		{
 			Map<String, EntityType> entityTypeMap = entityTypes.stream()
-					.collect(toMap(EntityType::getId, Function.identity()));
+															   .collect(toMap(EntityType::getId, Function.identity()));
 			return resolvedEntityMetas.stream()
-					.filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getId()))
-					.collect(toList());
+									  .filter(resolvedEntityMeta -> entityTypeMap.containsKey(
+											  resolvedEntityMeta.getId()))
+									  .collect(toList());
 		}
 	}
 
@@ -89,19 +93,19 @@ public class EntityTypeDependencyResolver
 		{
 			// get referenced entities excluding entities of mappedBy attributes
 			EntityType entityType = entityTypeNode.getEntityType();
-			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
-					.flatMap(attr ->
-					{
-						EntityType refEntity = attr.getRefEntity();
-						if (refEntity != null && !attr.isMappedBy() && !refEntity.getId().equals(entityType.getId()))
-						{
-							return Stream.of(new EntityTypeNode(refEntity));
-						}
-						else
-						{
-							return Stream.empty();
-						}
-					}).collect(toCollection(HashSet::new));
+			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(),
+					false).flatMap(attr ->
+			{
+				EntityType refEntity = attr.getRefEntity();
+				if (refEntity != null && !attr.isMappedBy() && !refEntity.getId().equals(entityType.getId()))
+				{
+					return Stream.of(new EntityTypeNode(refEntity));
+				}
+				else
+				{
+					return Stream.empty();
+				}
+			}).collect(toCollection(HashSet::new));
 
 			EntityType extendsEntityMeta = entityType.getExtends();
 			if (extendsEntityMeta != null)
@@ -130,22 +134,22 @@ public class EntityTypeDependencyResolver
 		{
 			// get referenced entities excluding entities of mappedBy attributes
 			EntityType entityType = entityTypeNode.getEntityType();
-			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(), false)
-					.flatMap(attr ->
-					{
-						EntityType refEntity = attr.getRefEntity();
-						if (refEntity != null && !attr.isMappedBy() && !refEntity.getId().equals(entityType.getId()))
-						{
-							EntityTypeNode nodeRef = new EntityTypeNode(refEntity, entityTypeNode.getStack());
-							Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
-							dependenciesRef.add(nodeRef);
-							return dependenciesRef.stream();
-						}
-						else
-						{
-							return Stream.empty();
-						}
-					}).collect(toCollection(HashSet::new));
+			Set<EntityTypeNode> refEntityMetaSet = stream(entityType.getOwnAllAttributes().spliterator(),
+					false).flatMap(attr ->
+			{
+				EntityType refEntity = attr.getRefEntity();
+				if (refEntity != null && !attr.isMappedBy() && !refEntity.getId().equals(entityType.getId()))
+				{
+					EntityTypeNode nodeRef = new EntityTypeNode(refEntity, entityTypeNode.getStack());
+					Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
+					dependenciesRef.add(nodeRef);
+					return dependenciesRef.stream();
+				}
+				else
+				{
+					return Stream.empty();
+				}
+			}).collect(toCollection(HashSet::new));
 
 			EntityType extendsEntityMeta = entityType.getExtends();
 			if (extendsEntityMeta != null)
@@ -173,7 +177,7 @@ public class EntityTypeDependencyResolver
 	private static class EntityTypeNode
 	{
 		private final EntityType entityType;
-		private final Set<EntityTypeNode> stack ;
+		private final Set<EntityTypeNode> stack;
 		private boolean skip = false;
 
 		private EntityTypeNode(EntityType entityType)

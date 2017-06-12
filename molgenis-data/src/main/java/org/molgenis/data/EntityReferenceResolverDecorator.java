@@ -57,8 +57,8 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	{
 		decoratedRepo.forEachBatched(fetch, entities ->
 		{
-			List<Entity> resolvedEntities = resolveEntityReferences(entities.stream(), fetch)
-					.collect(Collectors.toList());
+			List<Entity> resolvedEntities = resolveEntityReferences(entities.stream(), fetch).collect(
+					Collectors.toList());
 			consumer.accept(resolvedEntities);
 		}, batchSize);
 	}

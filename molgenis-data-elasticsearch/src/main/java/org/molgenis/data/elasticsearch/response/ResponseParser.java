@@ -128,9 +128,9 @@ public class ResponseParser
 		Aggregations aggregations = response.getAggregations();
 		if (aggregations != null)
 		{
-			aggregate = aggregateResponseParser
-					.parseAggregateResponse(request.getAggregateAttribute1(), request.getAggregateAttribute2(),
-							request.getAggregateAttributeDistinct(), aggregations, dataService);
+			aggregate = aggregateResponseParser.parseAggregateResponse(request.getAggregateAttribute1(),
+					request.getAggregateAttribute2(), request.getAggregateAttributeDistinct(), aggregations,
+					dataService);
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);

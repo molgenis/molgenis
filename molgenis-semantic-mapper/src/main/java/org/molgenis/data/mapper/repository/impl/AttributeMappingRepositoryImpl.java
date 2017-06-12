@@ -120,9 +120,10 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(TARGET_ATTRIBUTE,
 				attributeMapping.getTargetAttribute() != null ? attributeMapping.getTargetAttribute().getName() : null);
 		attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(SOURCE_ATTRIBUTES,
-				attributeMapping.getSourceAttributes().stream().map(Attribute::getName)
-						.collect(Collectors.joining(",")));
+		attributeMappingEntity.set(SOURCE_ATTRIBUTES, attributeMapping.getSourceAttributes()
+																	  .stream()
+																	  .map(Attribute::getName)
+																	  .collect(Collectors.joining(",")));
 		attributeMappingEntity.set(ALGORITHM_STATE, attributeMapping.getAlgorithmState().toString());
 		return attributeMappingEntity;
 	}

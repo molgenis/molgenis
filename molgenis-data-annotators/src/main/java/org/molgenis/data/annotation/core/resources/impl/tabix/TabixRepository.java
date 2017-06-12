@@ -35,7 +35,7 @@ public class TabixRepository extends AbstractRepository
 	/**
 	 * Creates a new {@link TabixRepository}
 	 *
-	 * @param file           the Tabix file
+	 * @param file       the Tabix file
 	 * @param entityType {@link EntityType} for the tabix file. Attributes should be in the order of the file's columns
 	 * @throws IOException if something goes wrong creating the {@link TabixReader} for the file
 	 */
@@ -109,8 +109,8 @@ public class TabixRepository extends AbstractRepository
 		Builder<Entity> builder = ImmutableList.<Entity>builder();
 		try
 		{
-			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator = reader
-					.query(queryString);
+			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator = reader.query(
+					queryString);
 			if (iterator != null)
 			{
 				String line = iterator.next();

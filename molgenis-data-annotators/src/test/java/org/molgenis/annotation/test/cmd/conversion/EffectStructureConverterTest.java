@@ -68,8 +68,11 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		Attribute identifier = attributeFactory.create().setName("identifier").setDataType(STRING).setIdAttribute(true)
-				.setVisible(false);
+		Attribute identifier = attributeFactory.create()
+											   .setName("identifier")
+											   .setDataType(STRING)
+											   .setIdAttribute(true)
+											   .setVisible(false);
 		Attribute INFO = attributeFactory.create().setName("INFO").setDataType(COMPOUND);
 		Attribute AC = attributeFactory.create().setName("AC").setDataType(STRING).setParent(INFO);
 		Attribute AN = attributeFactory.create().setName("AN").setDataType(STRING).setParent(INFO);
@@ -96,8 +99,11 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		vcfInputEntityType.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
 		vcfInputEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		vcfInputEntityType.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING));
-		vcfInputEntityType.addAttribute(attributeFactory.create().setName(EFFECT).setDataType(STRING).setDescription(
-				"EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'"));
+		vcfInputEntityType.addAttribute(attributeFactory.create()
+														.setName(EFFECT)
+														.setDataType(STRING)
+														.setDescription(
+																"EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'"));
 		vcfInputEntityType.addAttribute(INFO);
 		vcfInputEntityType.addAttribute(AC);
 		vcfInputEntityType.addAttribute(AN);
@@ -111,8 +117,8 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		annotatedEntityType.addAttribute(attributeAlt);
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
-		annotatedEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING))
-				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
+		annotatedEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING)).setDescription(
+				"Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
 		annotatedEntityType.addAttribute(INFO);
 		annotatedEntityType.addAttribute(AC);
 		annotatedEntityType.addAttribute(AN);
@@ -126,17 +132,20 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		variantEntityType.addAttribute(attributeAlt);
 		variantEntityType.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
 		variantEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
-		variantEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING))
-				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
+		variantEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING)).setDescription(
+				"Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
 		variantEntityType.addAttribute(INFO);
 		variantEntityType.addAttribute(AC);
 		variantEntityType.addAttribute(AN);
 		variantEntityType.addAttribute(GTC);
 		variantEntityType.addAttribute(annoAttr);
 
-		effectEntityType.addAttribute(
-				attributeFactory.create().setName("identifier").setDataType(STRING).setIdAttribute(true).setAuto(true)
-						.setVisible(false));
+		effectEntityType.addAttribute(attributeFactory.create()
+													  .setName("identifier")
+													  .setDataType(STRING)
+													  .setIdAttribute(true)
+													  .setAuto(true)
+													  .setVisible(false));
 		effectEntityType.addAttribute(attributeFactory.create().setName("Alt_Allele").setDataType(STRING));
 		effectEntityType.addAttribute(attributeFactory.create().setName("Gene_Name").setDataType(STRING));
 		effectEntityType.addAttribute((attributeFactory.create().setName("Annotation").setDataType(STRING)));
@@ -272,8 +281,8 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		when(effect3.get("Transcript_biotype")).thenReturn("8");
 		when(effect3.get("Rank_total")).thenReturn("9");
 
-		Iterator<Entity> result = effectStructureConverter
-				.createVcfEntityStructure(Arrays.asList(effect1, effect2, effect3).iterator());
+		Iterator<Entity> result = effectStructureConverter.createVcfEntityStructure(
+				Arrays.asList(effect1, effect2, effect3).iterator());
 		assertTrue(result.hasNext());
 		Entity expectedVariant1 = result.next();
 		assertEquals(2, Iterables.size(expectedVariant1.getEntities("EFFECT")));
@@ -294,9 +303,8 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 		VcfRepository vcfRepository = mock(VcfRepository.class);
 		when(vcfRepository.getEntityType()).thenReturn(vcfInputEntityType);
 		when(vcfRepository.spliterator()).thenReturn(entities.spliterator());
-		List<Entity> resultEntities = effectStructureConverter
-				.createVariantEffectStructure(EFFECT, Collections.emptyList(), vcfRepository)
-				.collect(Collectors.toList());
+		List<Entity> resultEntities = effectStructureConverter.createVariantEffectStructure(EFFECT,
+				Collections.emptyList(), vcfRepository).collect(Collectors.toList());
 
 		assertEquals(resultEntities.size(), 3);
 

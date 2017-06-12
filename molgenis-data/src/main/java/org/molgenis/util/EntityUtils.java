@@ -72,9 +72,10 @@ public class EntityUtils
 				EntityType mrefEntity = attr.getRefEntity();
 				List<String> mrefIdStrValues = ListEscapeUtils.toList(valueStr);
 				return mrefIdStrValues.stream()
-						.map(mrefIdStrValue -> getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(),
-								entityManager)).map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
-						.collect(toList());
+									  .map(mrefIdStrValue -> getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(),
+											  entityManager))
+									  .map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
+									  .collect(toList());
 			case COMPOUND:
 				throw new IllegalArgumentException("Compound attribute has no value");
 			case DATE:
@@ -251,16 +252,16 @@ public class EntityUtils
 		Attribute otherOwnIdAttribute = otherEntityType.getOwnIdAttribute();
 		if (ownIdAttribute == null && otherOwnIdAttribute != null) return false;
 		if (ownIdAttribute != null && otherOwnIdAttribute == null) return false;
-		if (ownIdAttribute != null && otherOwnIdAttribute != null && !Objects
-				.equals(ownIdAttribute.getIdentifier(), otherOwnIdAttribute.getIdentifier())) return false;
+		if (ownIdAttribute != null && otherOwnIdAttribute != null && !Objects.equals(ownIdAttribute.getIdentifier(),
+				otherOwnIdAttribute.getIdentifier())) return false;
 
 		// compare label attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
 		Attribute ownLabelAttribute = entityType.getOwnLabelAttribute();
 		Attribute otherOwnLabelAttribute = otherEntityType.getOwnLabelAttribute();
 		if (ownLabelAttribute == null && otherOwnLabelAttribute != null) return false;
 		if (ownLabelAttribute != null && otherOwnLabelAttribute == null) return false;
-		if (ownLabelAttribute != null && otherOwnLabelAttribute != null && !Objects
-				.equals(ownLabelAttribute.getIdentifier(), otherOwnLabelAttribute.getIdentifier())) return false;
+		if (ownLabelAttribute != null && otherOwnLabelAttribute != null && !Objects.equals(
+				ownLabelAttribute.getIdentifier(), otherOwnLabelAttribute.getIdentifier())) return false;
 
 		// compare lookup attribute identifiers
 		List<Attribute> lookupAttrs = newArrayList(entityType.getOwnLookupAttributes());
@@ -281,7 +282,9 @@ public class EntityUtils
 		if (extendsEntityType == null && otherExtendsEntityType != null) return false;
 		if (extendsEntityType != null && otherExtendsEntityType == null) return false;
 		if (extendsEntityType != null && otherExtendsEntityType != null && !extendsEntityType.getId()
-				.equals(otherExtendsEntityType.getId())) return false;
+																							 .equals(otherExtendsEntityType
+																									 .getId()))
+			return false;
 
 		// compare attributes
 		if (!equals(entityType.getOwnAllAttributes(), otherEntityType.getOwnAllAttributes())) return false;
@@ -456,8 +459,7 @@ public class EntityUtils
 	{
 		if (entity == null && otherEntity != null) return false;
 		if (entity != null && otherEntity == null) return false;
-		if (!entity.getEntityType().getId().equals(otherEntity.getEntityType().getId()))
-			return false;
+		if (!entity.getEntityType().getId().equals(otherEntity.getEntityType().getId())) return false;
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attrName = attr.getName();
@@ -474,7 +476,8 @@ public class EntityUtils
 					if (xrefValue == null && otherXrefValue != null) return false;
 					if (xrefValue != null && otherXrefValue == null) return false;
 					if (xrefValue != null && otherXrefValue != null && !xrefValue.getIdValue()
-							.equals(otherXrefValue.getIdValue())) return false;
+																				 .equals(otherXrefValue.getIdValue()))
+						return false;
 					break;
 				case CATEGORICAL_MREF:
 				case ONE_TO_MANY:
@@ -489,7 +492,8 @@ public class EntityUtils
 						if (mrefValue == null && otherMrefValue != null) return false;
 						if (mrefValue != null && otherMrefValue == null) return false;
 						if (mrefValue != null && otherMrefValue != null && !mrefValue.getIdValue()
-								.equals(otherMrefValue.getIdValue())) return false;
+																					 .equals(otherMrefValue.getIdValue()))
+							return false;
 					}
 					break;
 				case COMPOUND:

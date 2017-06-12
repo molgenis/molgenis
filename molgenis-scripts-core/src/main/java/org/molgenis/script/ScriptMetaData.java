@@ -53,7 +53,9 @@ public class ScriptMetaData extends SystemEntityType
 		addAttribute(CONTENT).setNillable(false).setDataType(AttributeType.SCRIPT).setLabel("Content");
 		addAttribute(GENERATE_TOKEN).setDataType(BOOL).setLabel("Generate security token").setDefaultValue("false");
 		addAttribute(RESULT_FILE_EXTENSION).setNillable(true).setLabel("Result file extension");
-		addAttribute(PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MREF)
-				.setRefEntity(scriptParameterMetaData);
+		addAttribute(PARAMETERS).setNillable(true)
+								.setLabel("Parameters")
+								.setDataType(MREF)
+								.setRefEntity(scriptParameterMetaData);
 	}
 }

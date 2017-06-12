@@ -51,7 +51,7 @@ public class SystemEntityTypeInitializer
 
 		Map<String, SystemEntityType> systemEntityTypeMap = ctx.getBeansOfType(SystemEntityType.class);
 		genericDependencyResolver.resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
-				.forEach(systemEntityType -> initialize(systemEntityType, entityTypeMetaData));
+								 .forEach(systemEntityType -> initialize(systemEntityType, entityTypeMetaData));
 	}
 
 	private void initialize(SystemEntityType systemEntityType, EntityTypeMetadata entityTypeMetaData)

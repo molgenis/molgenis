@@ -58,7 +58,6 @@ public class Language extends StaticEntity
 		return this;
 	}
 
-
 	public boolean isActive()
 	{
 		return getBoolean(LanguageMetadata.ACTIVE);

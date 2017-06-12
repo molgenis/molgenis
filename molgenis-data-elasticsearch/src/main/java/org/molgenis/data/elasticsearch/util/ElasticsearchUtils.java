@@ -114,8 +114,12 @@ public class ElasticsearchUtils
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
 
-		PutMappingResponse response = client.admin().indices().preparePutMapping(index).setType(type)
-				.setSource(jsonBuilder).get();
+		PutMappingResponse response = client.admin()
+											.indices()
+											.preparePutMapping(index)
+											.setType(type)
+											.setSource(jsonBuilder)
+											.get();
 
 		if (!response.isAcknowledged())
 		{
@@ -191,8 +195,11 @@ public class ElasticsearchUtils
 	public boolean isTypeExists(String type, String indexName)
 	{
 		LOG.trace("Check whether type [{}] exists in index [{}]...", type, indexName);
-		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
-				.get();
+		TypesExistsResponse typesExistsResponse = client.admin()
+														.indices()
+														.prepareTypesExists(indexName)
+														.setTypes(type)
+														.get();
 		boolean typeExists = typesExistsResponse.isExists();
 		LOG.trace("Checked whether type [{}] exists in index [{}]", type, indexName);
 		return typeExists;
@@ -207,8 +214,11 @@ public class ElasticsearchUtils
 	 */
 	public boolean deleteMapping(String type, String indexName)
 	{
-		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-				.setType(type).get();
+		DeleteMappingResponse deleteMappingResponse = client.admin()
+															.indices()
+															.prepareDeleteMapping(indexName)
+															.setType(type)
+															.get();
 		return deleteMappingResponse.isAcknowledged();
 	}
 
@@ -223,7 +233,8 @@ public class ElasticsearchUtils
 	{
 		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
 		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).get();
+															.setQuery(new TermQueryBuilder("_type", type))
+															.get();
 
 		if (deleteByQueryResponse != null)
 		{
@@ -283,10 +294,13 @@ public class ElasticsearchUtils
 				originalSearchResponse.getTookInMillis());
 
 		Stream<SearchResponse> infiniteResponses = Stream.iterate(originalSearchResponse,
-				searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId()).setScroll(SCROLL_KEEP_ALIVE)
-						.execute().actionGet());
+				searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId())
+										.setScroll(SCROLL_KEEP_ALIVE)
+										.execute()
+										.actionGet());
 		return StreamUtils.takeWhile(infiniteResponses, searchResponse -> searchResponse.getHits().getHits().length > 0)
-				.flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits())).map(SearchHit::getId);
+						  .flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits()))
+						  .map(SearchHit::getId);
 	}
 
 	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type,

@@ -54,8 +54,10 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 			LOG.info("MetaData version:{}, current version:{} upgrade needed",
 					versionService.getMolgenisVersionFromServerProperties(), MolgenisVersionService.CURRENT_VERSION);
 
-			upgrades.stream().filter(upgrade -> upgrade.getFromVersion() >= versionService
-					.getMolgenisVersionFromServerProperties()).forEach(this::runUpgrade);
+			upgrades.stream()
+					.filter(upgrade -> upgrade.getFromVersion()
+							>= versionService.getMolgenisVersionFromServerProperties())
+					.forEach(this::runUpgrade);
 
 			versionService.updateToCurrentVersion();
 

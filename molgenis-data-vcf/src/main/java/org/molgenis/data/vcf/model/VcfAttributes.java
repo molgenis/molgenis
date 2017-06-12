@@ -34,43 +34,70 @@ public class VcfAttributes
 
 	public Attribute getChromAttribute()
 	{
-		return attributeFactory.create().setName(CHROM).setDataType(STRING).setAggregatable(true)
-				.setNillable(false).setDescription("The chromosome on which the variant is observed");
+		return attributeFactory.create()
+							   .setName(CHROM)
+							   .setDataType(STRING)
+							   .setAggregatable(true)
+							   .setNillable(false)
+							   .setDescription("The chromosome on which the variant is observed");
 	}
 
 	public Attribute getAltAttribute()
 	{
-		return attributeFactory.create().setName(ALT).setDataType(TEXT).setAggregatable(true).setNillable(false)
-				.setDescription("The alternative allele observed");
+		return attributeFactory.create()
+							   .setName(ALT)
+							   .setDataType(TEXT)
+							   .setAggregatable(true)
+							   .setNillable(false)
+							   .setDescription("The alternative allele observed");
 	}
 
 	public Attribute getPosAttribute()
 	{
-		return attributeFactory.create().setName(POS).setDataType(INT).setAggregatable(true).setNillable(false)
-				.setDescription("The position on the chromosome which the variant is observed");
+		return attributeFactory.create()
+							   .setName(POS)
+							   .setDataType(INT)
+							   .setAggregatable(true)
+							   .setNillable(false)
+							   .setDescription("The position on the chromosome which the variant is observed");
 	}
 
 	public Attribute getRefAttribute()
 	{
-		return attributeFactory.create().setName(REF).setDataType(TEXT).setAggregatable(true).setNillable(false)
-				.setDescription("The reference allele");
+		return attributeFactory.create()
+							   .setName(REF)
+							   .setDataType(TEXT)
+							   .setAggregatable(true)
+							   .setNillable(false)
+							   .setDescription("The reference allele");
 	}
 
 	public Attribute getFilterAttribute()
 	{
-		return attributeFactory.create().setName(FILTER).setDataType(STRING).setAggregatable(true)
-				.setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+		return attributeFactory.create()
+							   .setName(FILTER)
+							   .setDataType(STRING)
+							   .setAggregatable(true)
+							   .setNillable(true)
+							   .setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 
 	public Attribute getQualAttribute()
 	{
-		return attributeFactory.create().setName(QUAL).setDataType(STRING).setAggregatable(true)
-				.setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+		return attributeFactory.create()
+							   .setName(QUAL)
+							   .setDataType(STRING)
+							   .setAggregatable(true)
+							   .setNillable(true)
+							   .setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 
 	public Attribute getIdAttribute()
 	{
-		return attributeFactory.create().setName(ID).setDataType(STRING).setNillable(true)
-				.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+		return attributeFactory.create()
+							   .setName(ID)
+							   .setDataType(STRING)
+							   .setNillable(true)
+							   .setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 }

@@ -34,7 +34,8 @@ public class SearchRequestGenerator
 
 	/**
 	 * Writes a query to a {@link SearchRequestBuilder}.
-	 *  @param searchRequestBuilder
+	 *
+	 * @param searchRequestBuilder
 	 * @param searchType
 	 * @param entityType
 	 * @param aggAttr1             First Field to aggregate on

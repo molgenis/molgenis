@@ -58,8 +58,9 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	public void setUpBeforeMethod()
 	{
 		AppsController appsController = new AppsController(dataService, fileStore, permissionService);
-		mockMvc = MockMvcBuilders.standaloneSetup(appsController).setMessageConverters(gsonHttpMessageConverter)
-				.build();
+		mockMvc = MockMvcBuilders.standaloneSetup(appsController)
+								 .setMessageConverters(gsonHttpMessageConverter)
+								 .build();
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -95,12 +96,19 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
 		when(permissionService.hasPermissionOnEntity(APP, Permission.WRITE)).thenReturn(hasWriteAppPermission);
 
-		AppInfoDto appInfoDto0 = AppInfoDto.builder().setId("id0").setName("name0").setDescription("description0").setActive(true)
-				.setIconHref(new URI("/icon0.png")).build();
+		AppInfoDto appInfoDto0 = AppInfoDto.builder()
+										   .setId("id0")
+										   .setName("name0")
+										   .setDescription("description0")
+										   .setActive(true)
+										   .setIconHref(new URI("/icon0.png"))
+										   .build();
 		AppInfoDto appInfoDto1 = AppInfoDto.builder().setId("id1").setName("name1").setActive(false).build();
 
-		ResultActions resultActions = mockMvc.perform(get(AppsController.URI)).andExpect(status().isOk())
-				.andExpect(view().name("view-apps")).andExpect(model().attribute("appEntityTypeId", APP));
+		ResultActions resultActions = mockMvc.perform(get(AppsController.URI))
+											 .andExpect(status().isOk())
+											 .andExpect(view().name("view-apps"))
+											 .andExpect(model().attribute("appEntityTypeId", APP));
 		verify(sort).on(AppMetaData.NAME);
 		if (hasWriteAppPermission)
 		{
@@ -124,15 +132,20 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(app.getHtmlTemplate()).thenReturn(htmlTemplate);
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
 		AppInfoDto expectedAppInfo = AppInfoDto.builder().setId("id").setName("name").setActive(true).build();
-		mockMvc.perform(get(AppsController.URI + "/id")).andExpect(status().isOk()).andExpect(view().name("html")).andExpect(model().attribute("app", expectedAppInfo));
+		mockMvc.perform(get(AppsController.URI + "/id"))
+			   .andExpect(status().isOk())
+			   .andExpect(view().name("html"))
+			   .andExpect(model().attribute("app", expectedAppInfo));
 	}
 
 	@Test
 	public void testViewAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
-		mockMvc.perform(get(AppsController.URI + "/id")).andExpect(status().isBadRequest())
-				.andExpect(view().name("forward:/plugin/apps")).andExpect(model().attributeExists("errorMessage"));
+		mockMvc.perform(get(AppsController.URI + "/id"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(view().name("forward:/plugin/apps"))
+			   .andExpect(model().attributeExists("errorMessage"));
 	}
 
 	@Test
@@ -140,8 +153,10 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(get(AppsController.URI + "/id")).andExpect(status().isBadRequest())
-				.andExpect(view().name("forward:/plugin/apps")).andExpect(model().attributeExists("errorMessage"));
+		mockMvc.perform(get(AppsController.URI + "/id"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(view().name("forward:/plugin/apps"))
+			   .andExpect(model().attributeExists("errorMessage"));
 	}
 
 	@Test
@@ -158,8 +173,9 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	public void testActivateAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
-		mockMvc.perform(post(AppsController.URI + "/id/activate")).andExpect(status().isBadRequest())
-				.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
+		mockMvc.perform(post(AppsController.URI + "/id/activate"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
 	}
 
 	@Test
@@ -168,8 +184,9 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(post(AppsController.URI + "/id/activate")).andExpect(status().isBadRequest())
-				.andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already activated\"}]}"));
+		mockMvc.perform(post(AppsController.URI + "/id/activate"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already activated\"}]}"));
 	}
 
 	@Test
@@ -186,8 +203,9 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	public void testDeactivateAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
-		mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andExpect(status().isBadRequest())
-				.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
+		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
 	}
 
 	@Test
@@ -196,7 +214,8 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andExpect(status().isBadRequest())
-				.andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already deactivated\"}]}"));
+		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already deactivated\"}]}"));
 	}
 }

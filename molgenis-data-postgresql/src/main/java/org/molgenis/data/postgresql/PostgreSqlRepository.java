@@ -323,8 +323,9 @@ class PostgreSqlRepository extends AbstractRepository
 						batch.keySet(), refEntityType.getIdAttribute().getDataType());
 				for (Map.Entry entry : batch.entrySet())
 				{
-					batch.get(entry.getKey()).set(mrefAttr.getName(), postgreSqlEntityFactory
-							.getReferences(refEntityType, newArrayList(mrefIDs.get(entry.getKey()))));
+					batch.get(entry.getKey())
+						 .set(mrefAttr.getName(), postgreSqlEntityFactory.getReferences(refEntityType,
+								 newArrayList(mrefIDs.get(entry.getKey()))));
 				}
 			}
 		}
@@ -407,13 +408,13 @@ class PostgreSqlRepository extends AbstractRepository
 				List<Object> parameters = new ArrayList<>();
 
 				String sql = getSqlSelect(getEntityType(), batchQuery, parameters, true);
-				RowMapper<Entity> entityMapper = postgreSqlEntityFactory
-						.createRowMapper(getEntityType(), batchQuery.getFetch());
+				RowMapper<Entity> entityMapper = postgreSqlEntityFactory.createRowMapper(getEntityType(),
+						batchQuery.getFetch());
 				LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
 				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				Stopwatch sw = createStarted();
-				List<Entity> result = jdbcTemplate
-						.query(sql, parameters.toArray(new Object[parameters.size()]), entityMapper);
+				List<Entity> result = jdbcTemplate.query(sql, parameters.toArray(new Object[parameters.size()]),
+						entityMapper);
 				LOG.trace("That took {}", sw);
 				return result;
 			}
@@ -482,8 +483,7 @@ class PostgreSqlRepository extends AbstractRepository
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
 							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getId(),
-									entity.getIdValue().toString())));
+									attr.getName(), attr.getEntity().getId(), entity.getIdValue().toString())));
 				}
 
 				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
@@ -507,8 +507,8 @@ class PostgreSqlRepository extends AbstractRepository
 	{
 		final Attribute idAttr = entityType.getIdAttribute();
 		final List<Attribute> tableAttrs = getTableAttributes(entityType).collect(toList());
-		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType)
-				.filter(attr -> !attr.isReadOnly()).collect(toList());
+		final List<Attribute> junctionTableAttrs = getJunctionTableAttributes(entityType).filter(
+				attr -> !attr.isReadOnly()).collect(toList());
 		final String updateSql = getSqlUpdate(entityType);
 
 		// update values in entity table
@@ -522,8 +522,8 @@ class PostgreSqlRepository extends AbstractRepository
 					LOG.trace("SQL: {}", updateSql);
 				}
 			}
-			int[] counts = jdbcTemplate
-					.batchUpdate(updateSql, new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr));
+			int[] counts = jdbcTemplate.batchUpdate(updateSql,
+					new BatchUpdatePreparedStatementSetter(entitiesBatch, tableAttrs, idAttr));
 			verifyUpdate(entitiesBatch, counts, idAttr);
 
 			// update values in entity junction table
@@ -532,8 +532,9 @@ class PostgreSqlRepository extends AbstractRepository
 				Map<String, List<Map<String, Object>>> mrefs = createMrefMap(idAttr, junctionTableAttrs, entitiesBatch);
 
 				// update mrefs
-				List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
-						.collect(toList());
+				List<Object> ids = entitiesBatch.stream()
+												.map(entity -> getPostgreSqlValue(entity, idAttr))
+												.collect(toList());
 				for (Attribute attr : junctionTableAttrs)
 				{
 					removeMrefs(ids, attr);
@@ -550,8 +551,11 @@ class PostgreSqlRepository extends AbstractRepository
 		{
 			Set<Object> existingEntityIds = findAll(entitiesBatch.stream().map(Entity::getIdValue),
 					new Fetch().field(idAttr.getName())).map(Entity::getIdValue).collect(toSet());
-			Object nonExistingEntityId = entitiesBatch.stream().map(Entity::getIdValue)
-					.filter(entityId -> !existingEntityIds.contains(entityId)).findFirst().orElse(null);
+			Object nonExistingEntityId = entitiesBatch.stream()
+													  .map(Entity::getIdValue)
+													  .filter(entityId -> !existingEntityIds.contains(entityId))
+													  .findFirst()
+													  .orElse(null);
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getId(),
 							nonExistingEntityId.toString())));
@@ -565,8 +569,7 @@ class PostgreSqlRepository extends AbstractRepository
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", entityType.getId(),
-							attr.getName())));
+					format("Entity [%s] attribute [%s] value cannot be null", entityType.getId(), attr.getName())));
 		}
 
 		final Attribute idAttr = entityType.getIdAttribute();

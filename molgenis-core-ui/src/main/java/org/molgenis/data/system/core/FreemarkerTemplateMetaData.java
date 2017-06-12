@@ -33,8 +33,10 @@ public class FreemarkerTemplateMetaData extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setLabel("Id").setAuto(true).setVisible(false);
 		addAttribute(NAME, ROLE_LABEL).setLabel("Name")
-				.setDescription("Template name (must start with 'view-' and end with '.ftl')").setNillable(false)
-				.setUnique(true).setValidationExpression("$('" + NAME + "').matches(" + REGEX_NAME + ").value()");
+									  .setDescription("Template name (must start with 'view-' and end with '.ftl')")
+									  .setNillable(false)
+									  .setUnique(true)
+									  .setValidationExpression("$('" + NAME + "').matches(" + REGEX_NAME + ").value()");
 		addAttribute(VALUE).setLabel("Value").setDataType(SCRIPT).setNillable(false);
 	}
 }

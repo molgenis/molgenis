@@ -44,8 +44,7 @@ public class EmbeddedElasticSearchConfigTest
 
 		System.setProperty("molgenis.home", molgenisHomeDir.getAbsolutePath());
 		context = new AnnotationConfigApplicationContext(MetadataTestConfig.class, DataServiceImpl.class,
-				EmbeddedElasticSearchConfig.class,
-				ElasticsearchEntityFactory.class, Config.class);
+				EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, Config.class);
 	}
 
 	@AfterMethod

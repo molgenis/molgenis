@@ -77,8 +77,9 @@ public class JsMagmaScriptEvaluator
 	private static Map<String, Object> toScriptEngineValueMap(Entity entity)
 	{
 		Map<String, Object> map = Maps.newHashMap();
-		entity.getEntityType().getAtomicAttributes()
-				.forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr)));
+		entity.getEntityType()
+			  .getAtomicAttributes()
+			  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr)));
 		return map;
 	}
 
@@ -104,9 +105,9 @@ public class JsMagmaScriptEvaluator
 			case MREF:
 			case ONE_TO_MANY:
 				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
-				value = stream(mrefEntities.spliterator(), false)
-						.map(mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
-						.collect(toList());
+				value = stream(mrefEntities.spliterator(), false).map(
+						mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
+																 .collect(toList());
 				break;
 			case DATE:
 				LocalDate localDate = entity.getLocalDate(attrName);

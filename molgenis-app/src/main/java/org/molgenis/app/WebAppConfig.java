@@ -36,8 +36,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables
-				.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
+		freemarkerVariables.put("dataExplorerLink",
+				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
 	/**

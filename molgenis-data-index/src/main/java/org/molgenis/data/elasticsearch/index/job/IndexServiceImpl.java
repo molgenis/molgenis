@@ -56,15 +56,15 @@ public class IndexServiceImpl implements IndexService
 	public void rebuildIndex(String transactionId)
 	{
 		LOG.trace("Index transaction with id {}...", transactionId);
-		IndexActionGroup indexActionGroup = dataService
-				.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class);
+		IndexActionGroup indexActionGroup = dataService.findOneById(INDEX_ACTION_GROUP, transactionId,
+				IndexActionGroup.class);
 
 		if (indexActionGroup != null)
 		{
-			Stream<Entity> indexActions = dataService
-					.findAll(INDEX_ACTION, new QueryImpl<>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup));
-			Map<String, Long> numberOfActionsPerEntity = indexActions
-					.collect(groupingBy(indexAction -> indexAction.getString(ENTITY_TYPE_ID), counting()));
+			Stream<Entity> indexActions = dataService.findAll(INDEX_ACTION,
+					new QueryImpl<>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup));
+			Map<String, Long> numberOfActionsPerEntity = indexActions.collect(
+					groupingBy(indexAction -> indexAction.getString(ENTITY_TYPE_ID), counting()));
 			indexStatus.addActionCounts(numberOfActionsPerEntity);
 
 			IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
@@ -72,7 +72,7 @@ public class IndexServiceImpl implements IndexService
 			indexJobExecution.setIndexActionJobID(transactionId);
 			IndexJob job = indexJobFactory.createJob(indexJobExecution);
 			CompletableFuture.runAsync(job::call, executorService)
-					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
+							 .whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
 		{
@@ -101,23 +101,27 @@ public class IndexServiceImpl implements IndexService
 	@Scheduled(initialDelay = 1 * 60 * 1000, fixedRate = 5 * 60 * 1000)
 	public void cleanupJobExecutions()
 	{
-			runAsSystem(() ->
+		runAsSystem(() ->
+		{
+			LOG.trace("Clean up Index job executions...");
+			Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
+			boolean indexJobExecutionExists = dataService.hasRepository(INDEX_JOB_EXECUTION);
+			if (indexJobExecutionExists)
 			{
-				LOG.trace("Clean up Index job executions...");
-				Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
-				boolean indexJobExecutionExists = dataService.hasRepository(INDEX_JOB_EXECUTION);
-				if (indexJobExecutionExists)
-				{
-					Stream<Entity> executions = dataService.getRepository(INDEX_JOB_EXECUTION).query()
-							.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
-					dataService.delete(INDEX_JOB_EXECUTION, executions);
-					LOG.debug("Cleaned up Index job executions.");
-				}
-				else
-				{
-					LOG.warn(INDEX_JOB_EXECUTION + " does not exist");
-				}
-			});
+				Stream<Entity> executions = dataService.getRepository(INDEX_JOB_EXECUTION)
+													   .query()
+													   .lt(END_DATE, fiveMinutesAgo)
+													   .and()
+													   .eq(STATUS, SUCCESS.toString())
+													   .findAll();
+				dataService.delete(INDEX_JOB_EXECUTION, executions);
+				LOG.debug("Cleaned up Index job executions.");
+			}
+			else
+			{
+				LOG.warn(INDEX_JOB_EXECUTION + " does not exist");
+			}
+		});
 	}
 
 }

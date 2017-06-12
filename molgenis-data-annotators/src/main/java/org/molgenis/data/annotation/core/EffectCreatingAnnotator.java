@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 /**
  * Annotator that annotates variant but instead of adding columns to the variant
  * it creates new "effects" entities with an xref to the variant.
- * */
+ */
 public interface EffectCreatingAnnotator
 {
 	/**

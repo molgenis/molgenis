@@ -36,10 +36,10 @@ public class GoNLAnnotatorSettings extends DefaultSettingsEntity
 			setLabel("GoNL annotator settings");
 			addAttribute(ROOT_DIRECTORY).setLabel("Root directory");
 			addAttribute(CHROMOSOMES).setDefaultValue("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X")
-					.setLabel("Chromosomes");
+									 .setLabel("Chromosomes");
 			addAttribute(FILEPATTERN).setDefaultValue("gonl.chr%s.snps_indels.r5.vcf.gz").setLabel("Filepattern");
 			addAttribute(OVERRIDE_CHROMOSOME_FILES).setDefaultValue("X:gonl.chrX.release4.gtc.vcf.gz")
-					.setLabel("Override chromosomes file");
+												   .setLabel("Override chromosomes file");
 		}
 	}
 }

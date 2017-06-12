@@ -30,8 +30,8 @@ public class HasPermissionDirectiveTest
 		molgenisPermissionService = mock(MolgenisPermissionService.class);
 		directive = new HasPermissionDirective(molgenisPermissionService);
 		envWriter = new StringWriter();
-		fakeTemplate = Template
-				.getPlainTextTemplate("name", "content", new Configuration(Configuration.VERSION_2_3_21));
+		fakeTemplate = Template.getPlainTextTemplate("name", "content",
+				new Configuration(Configuration.VERSION_2_3_21));
 	}
 
 	@Test

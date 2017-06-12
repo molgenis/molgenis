@@ -199,12 +199,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Add or update a collection of entity type and entity type attributes.
 	 * Resolves the dependencies between them so that the entities and their metadata get added in proper order.
-	 *
+	 * <p>
 	 * Adds ONE_TO_MANY attributes in a two-pass algorithm.
 	 * <ol>
-	 *     <li>Add the Author {@link EntityType} without books attribute and the Book {@link EntityType} with its author
-	 *     attribute.</li>
-	 *     <li>Update the Author EntityType adding the books attribute</li>
+	 * <li>Add the Author {@link EntityType} without books attribute and the Book {@link EntityType} with its author
+	 * attribute.</li>
+	 * <li>Update the Author EntityType adding the books attribute</li>
 	 * </ol>
 	 *
 	 * @param entityTypes {@link EntityType}s to add

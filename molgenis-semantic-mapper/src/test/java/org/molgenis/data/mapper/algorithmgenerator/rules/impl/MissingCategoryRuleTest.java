@@ -14,22 +14,22 @@ public class MissingCategoryRuleTest
 	{
 		Assert.assertTrue(
 				rule.createCategoryMatchQuality(Category.create("3", "dont know"), Category.create("3", "MIssing"))
-						.isRuleApplied());
+					.isRuleApplied());
 		Assert.assertTrue(
 				rule.createCategoryMatchQuality(Category.create("3", "UNKNOWN"), Category.create("3", "missing"))
-						.isRuleApplied());
+					.isRuleApplied());
 		Assert.assertTrue(
 				rule.createCategoryMatchQuality(Category.create("3", "not know"), Category.create("3", "missing"))
-						.isRuleApplied());
+					.isRuleApplied());
 		Assert.assertTrue(
 				rule.createCategoryMatchQuality(Category.create("3", "don`t know"), Category.create("3", "missing"))
-						.isRuleApplied());
+					.isRuleApplied());
 		Assert.assertTrue(
 				rule.createCategoryMatchQuality(Category.create("3", "don't know"), Category.create("3", "missing"))
-						.isRuleApplied());
+					.isRuleApplied());
 		Assert.assertFalse(
 				rule.createCategoryMatchQuality(Category.create("0", "has had stroke"), Category.create("1", "NO"))
-						.isRuleApplied());
+					.isRuleApplied());
 	}
 
 	@Test
@@ -43,10 +43,10 @@ public class MissingCategoryRuleTest
 	@Test
 	public void getMatchedTermFromTheRulelabelContainsWords()
 	{
-		Assert.assertTrue(StringUtils
-				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string unknown contain the word!")));
-		Assert.assertTrue(StringUtils
-				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string MISSING contain the word!")));
+		Assert.assertTrue(StringUtils.isNotBlank(
+				rule.getMatchedTermFromTheRulelabelContainsWords("string unknown contain the word!")));
+		Assert.assertTrue(StringUtils.isNotBlank(
+				rule.getMatchedTermFromTheRulelabelContainsWords("string MISSING contain the word!")));
 		Assert.assertTrue(
 				StringUtils.isBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string YES contain the word!")));
 		Assert.assertTrue(

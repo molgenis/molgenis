@@ -72,8 +72,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public String generateAlgorithm(Attribute targetAttribute, EntityType targetEntityType,
 			List<Attribute> sourceAttributes, EntityType sourceEntityType)
 	{
-		return algorithmGeneratorService
-				.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+		return algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityType,
+				sourceEntityType);
 	}
 
 	@Override
@@ -82,14 +82,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Attribute targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
-				.getTagsForAttribute(targetEntityType, targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityType,
+				targetAttribute);
 
-		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService
-				.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute, tagsForAttribute.values(),
-						null);
-		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService
-				.generate(targetAttribute, relevantAttributes, targetEntityType, sourceEntityType);
+		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService.decisionTreeToFindRelevantAttributes(
+				sourceEntityType, targetAttribute, tagsForAttribute.values(), null);
+		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService.generate(targetAttribute, relevantAttributes,
+				targetEntityType, sourceEntityType);
 
 		if (StringUtils.isNotBlank(generatedAlgorithm.getAlgorithm()))
 		{
@@ -97,8 +96,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			attributeMapping.setAlgorithm(generatedAlgorithm.getAlgorithm());
 			attributeMapping.getSourceAttributes().addAll(generatedAlgorithm.getSourceAttributes());
 			attributeMapping.setAlgorithmState(generatedAlgorithm.getAlgorithmState());
-			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = " + generatedAlgorithm
-					.getAlgorithm());
+			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = "
+					+ generatedAlgorithm.getAlgorithm());
 		}
 	}
 
@@ -180,17 +179,18 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			case CATEGORICAL:
 			case XREF:
 			case FILE:
-				convertedValue = value != null ? entityManager
-						.getReference(attr.getRefEntity(), convert(value, attr.getRefEntity().getIdAttribute())) : null;
+				convertedValue = value != null ? entityManager.getReference(attr.getRefEntity(),
+						convert(value, attr.getRefEntity().getIdAttribute())) : null;
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
 				Collection<Object> valueIds = (Collection<Object>) value;
 
-				convertedValue = valueIds.stream().map(valueId -> entityManager
-						.getReference(attr.getRefEntity(), convert(valueId, attr.getRefEntity().getIdAttribute())))
-						.collect(toList());
+				convertedValue = valueIds.stream()
+										 .map(valueId -> entityManager.getReference(attr.getRefEntity(),
+												 convert(valueId, attr.getRefEntity().getIdAttribute())))
+										 .collect(toList());
 				break;
 			case DATE:
 				convertedValue = convertToDate(value);
@@ -230,7 +230,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		try
 		{
 			return value != null ? Instant.ofEpochMilli(Double.valueOf(value.toString()).longValue())
-					.atZone(ZoneId.systemDefault()).toLocalDate() : null;
+										  .atZone(ZoneId.systemDefault())
+										  .toLocalDate() : null;
 		}
 		catch (NumberFormatException e)
 		{

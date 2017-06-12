@@ -33,8 +33,8 @@ public class TokenAuthenticationProviderTest
 		RestAuthenticationToken authToken = new RestAuthenticationToken("token");
 		assertFalse(authToken.isAuthenticated());
 
-		when(tokenService.findUserByToken("token"))
-				.thenReturn(new User("username", "password", Arrays.asList(new SimpleGrantedAuthority("admin"))));
+		when(tokenService.findUserByToken("token")).thenReturn(
+				new User("username", "password", Arrays.asList(new SimpleGrantedAuthority("admin"))));
 
 		Authentication auth = tokenAuthenticationProvider.authenticate(authToken);
 		assertNotNull(auth);

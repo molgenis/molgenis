@@ -49,8 +49,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/activation", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public
-	@ResponseBody
+	public @ResponseBody
 	ActivationResponse activation(@RequestBody Activation activation)
 	{
 		ActivationResponse activationResponse = new ActivationResponse();
@@ -67,8 +66,8 @@ public class UserManagerController extends MolgenisPluginController
 			activationResponse.setSuccess(true);
 		}
 		else throw new RuntimeException(
-					"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: " + activation
-							.getType());
+					"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: "
+							+ activation.getType());
 
 		return activationResponse;
 	}
@@ -174,8 +173,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/changeGroupMembership", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public
-	@ResponseBody
+	public @ResponseBody
 	GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)
 	{
 		GroupMembershipResponse groupMembershipResponse = new GroupMembershipResponse();
@@ -189,8 +187,8 @@ public class UserManagerController extends MolgenisPluginController
 			}
 			else if (!groupMembership.getMember())
 			{
-				this.pluginUserManagerService
-						.removeUserFromGroup(groupMembership.getGroupId(), groupMembership.getUserId());
+				this.pluginUserManagerService.removeUserFromGroup(groupMembership.getGroupId(),
+						groupMembership.getUserId());
 			}
 
 			groupMembershipResponse.setSuccess(true);

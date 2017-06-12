@@ -157,18 +157,21 @@ public interface AppSettings
 
 	/**
 	 * Privacy friendly: as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf
+	 *
 	 * @return whether the 3rd Google Analytics account is configured to be privacy friendly
 	 */
 	boolean getGoogleAnalyticsAccountPrivacyFriendly();
 
 	/**
 	 * Privacy friendly: as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf
+	 *
 	 * @param googleAnalyticsAccountPrivacyFriendly whether the 3rd Google Analytics account is configured to be privacy friendly
 	 */
 	void setGoogleAnalyticsAccountPrivacyFriendly(boolean googleAnalyticsAccountPrivacyFriendly);
 
 	/**
 	 * Privacy friendly: as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf
+	 *
 	 * @return whether the MOLGENIS Google Analytics account is configured to be privacy friendly
 	 */
 	boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis();

@@ -44,7 +44,7 @@ public class Step29MigrateJobExecutionProgressMessage extends MolgenisUpgrade
 				"SELECT a.identifier " + "FROM entities_attributes ea " + "JOIN attributes a "
 						+ "ON ea.attributes = a.identifier " + "WHERE ea.fullName = '" + entityFullName + "' "
 						+ "AND a.name='" + attributeName + "'", String.class);
-		jdbcTemplate.update("UPDATE attributes SET dataType = '" + newDataType + "' WHERE identifier = '" + attributeId
-				+ "'");
+		jdbcTemplate.update(
+				"UPDATE attributes SET dataType = '" + newDataType + "' WHERE identifier = '" + attributeId + "'");
 	}
 }

@@ -39,10 +39,17 @@ public class JavaMailPropertyType extends SystemEntityType
 	public void init()
 	{
 		setLabel("Mail sender properties.");
-		setDescription("See https://javamail.java.net/nonav/docs/api/ for a description of the properties you can use.");
+		setDescription(
+				"See https://javamail.java.net/nonav/docs/api/ for a description of the properties you can use.");
 		setPackage(mailPackage);
 		setExtends(propertyType);
-		addAttribute(MAIL_SETTINGS_REF).setDataType(XREF).setRefEntity(mailSettings).setLabel("MailSettings").setDescription("Reference to the (unique) MailSettings entity that these properties belong to.")
-				.setVisible(false).setNillable(false).setReadOnly(true);
+		addAttribute(MAIL_SETTINGS_REF).setDataType(XREF)
+									   .setRefEntity(mailSettings)
+									   .setLabel("MailSettings")
+									   .setDescription(
+											   "Reference to the (unique) MailSettings entity that these properties belong to.")
+									   .setVisible(false)
+									   .setNillable(false)
+									   .setReadOnly(true);
 	}
 }

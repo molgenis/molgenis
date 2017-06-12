@@ -56,8 +56,8 @@ public class AnnotationServiceImpl implements AnnotationService
 		if (annotators == null)
 		{
 			annotators = new ArrayList<>();
-			Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
-					.getBeansOfType(RepositoryAnnotator.class); // FIXME use repository annotator registry
+			Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext.getBeansOfType(
+					RepositoryAnnotator.class); // FIXME use repository annotator registry
 			annotators.addAll(configuredAnnotators.values());
 		}
 		return annotators;

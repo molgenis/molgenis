@@ -71,23 +71,26 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		Set<String> matchedQueryTerms = explainServiceHelper.findMatchedWords(explanation);
 		for (String matchedQueryTerm : matchedQueryTerms)
 		{
-			Map<String, Double> matchedQueryRule = explainServiceHelper
-					.findMatchQueries(matchedQueryTerm, originalQueryInMap);
+			Map<String, Double> matchedQueryRule = explainServiceHelper.findMatchQueries(matchedQueryTerm,
+					originalQueryInMap);
 
 			if (matchedQueryRule.size() > 0)
 			{
-				Entry<String, Double> entry = matchedQueryRule.entrySet().stream()
-						.max(new Comparator<Entry<String, Double>>()
-						{
-							public int compare(Entry<String, Double> o1, Entry<String, Double> o2)
-							{
-								return Double.compare(o1.getValue(), o2.getValue());
-							}
-						}).get();
+				Entry<String, Double> entry = matchedQueryRule.entrySet()
+															  .stream()
+															  .max(new Comparator<Entry<String, Double>>()
+															  {
+																  public int compare(Entry<String, Double> o1,
+																		  Entry<String, Double> o2)
+																  {
+																	  return Double.compare(o1.getValue(),
+																			  o2.getValue());
+																  }
+															  })
+															  .get();
 
-				matchedQueryStrings.add(ExplainedQueryString
-						.create(matchedQueryTerm, entry.getKey(), originalQueryInMap.get(entry.getKey()),
-								entry.getValue()));
+				matchedQueryStrings.add(ExplainedQueryString.create(matchedQueryTerm, entry.getKey(),
+						originalQueryInMap.get(entry.getKey()), entry.getValue()));
 			}
 		}
 		return matchedQueryStrings;

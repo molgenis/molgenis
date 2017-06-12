@@ -68,8 +68,8 @@ public class AttributeValidator
 				validateAdd(attr);
 				break;
 			case UPDATE:
-				Attribute currentAttr = dataService
-						.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+				Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(),
+						Attribute.class);
 				validateUpdate(attr, currentAttr);
 				break;
 			default:
@@ -299,8 +299,8 @@ public class AttributeValidator
 					{
 						throw new MolgenisDataException(
 								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getId(), refAttrName, attr.getEntityType().getId(),
-										attr.getName(), orderBy.toSortString()));
+										refEntity.getId(), refAttrName, attr.getEntityType().getId(), attr.getName(),
+										orderBy.toSortString()));
 					}
 				}
 			}
@@ -359,11 +359,11 @@ public class AttributeValidator
 		// SCRIPT is an algorithm, which can not be anything else then STRING or TEXT
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(SCRIPT, EnumSet.of(STRING, TEXT));
 
-		DATA_TYPE_ALLOWED_TRANSITIONS
-				.put(STRING, EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, INT, LONG, HTML, SCRIPT, TEXT, ENUM, COMPOUND));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(STRING,
+				EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, INT, LONG, HTML, SCRIPT, TEXT, ENUM, COMPOUND));
 
-		DATA_TYPE_ALLOWED_TRANSITIONS
-				.put(TEXT, EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, INT, LONG, HTML, SCRIPT, STRING, ENUM, COMPOUND));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(TEXT,
+				EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, INT, LONG, HTML, SCRIPT, STRING, ENUM, COMPOUND));
 
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(ENUM, EnumSet.of(STRING, INT, LONG, TEXT));
 
@@ -378,7 +378,9 @@ public class AttributeValidator
 		EnumSet<AttributeType> referenceTypes = EnumSet.of(XREF, CATEGORICAL);
 
 		// Every type that is listed as a valid ID attribute type is allowed to be converted to an XREF and CATEGORICAL
-		DATA_TYPE_ALLOWED_TRANSITIONS.keySet().stream().filter(type -> allowedIdAttributeTypes.contains(type))
-				.forEach(type -> DATA_TYPE_ALLOWED_TRANSITIONS.get(type).addAll(referenceTypes));
+		DATA_TYPE_ALLOWED_TRANSITIONS.keySet()
+									 .stream()
+									 .filter(type -> allowedIdAttributeTypes.contains(type))
+									 .forEach(type -> DATA_TYPE_ALLOWED_TRANSITIONS.get(type).addAll(referenceTypes));
 	}
 }

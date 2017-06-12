@@ -207,8 +207,8 @@ public class VcfWriterUtils
 			if (attributesToInclude.isEmpty() || attributesToInclude.contains(annotatorInfoAttr.getName())
 					|| isReferenceType(annotatorInfoAttr))
 			{
-				outputVCFWriter
-						.write(createInfoStringFromAttribute(annotatorAttributes.get(annotatorInfoAttr.getName()),
+				outputVCFWriter.write(
+						createInfoStringFromAttribute(annotatorAttributes.get(annotatorInfoAttr.getName()),
 								attributesToInclude, infoHeaderLinesMap.get(annotatorInfoAttr.getName())));
 				outputVCFWriter.newLine();
 			}
@@ -236,8 +236,9 @@ public class VcfWriterUtils
 		{
 			if (isReferenceType(infoAttribute) && !attributeName.equals(SAMPLES))
 			{
-				String currentAttributesString = currentInfoField != null ? currentInfoField
-						.substring((currentInfoField.indexOf("'") + 1), currentInfoField.lastIndexOf("'")) : "";
+				String currentAttributesString =
+						currentInfoField != null ? currentInfoField.substring((currentInfoField.indexOf("'") + 1),
+								currentInfoField.lastIndexOf("'")) : "";
 				writeRefAttributePartsToInfoDescription(infoAttribute, attributesToInclude, attributeName, sb,
 						currentAttributesString);
 			}
@@ -265,17 +266,19 @@ public class VcfWriterUtils
 			sb.append(existingAttributes);
 			sb.append(" | ");
 		}
-		sb.append(
-				refAttributesToString(atomicAttributes, attributesToInclude).replace("\\", "\\\\").replace("\"", "\\\"")
-						.replace("\n", " "));
+		sb.append(refAttributesToString(atomicAttributes, attributesToInclude).replace("\\", "\\\\")
+																			  .replace("\"", "\\\"")
+																			  .replace("\n", " "));
 		sb.append("'");
 	}
 
 	private static String refAttributesToString(Iterable<Attribute> atomicAttributes, List<String> attributesToInclude)
 	{
 		Iterable<Attribute> attributes = StreamSupport.stream(atomicAttributes.spliterator(), false)
-				.filter(attribute -> (attribute.isVisible() && isOutputAttribute(attribute,
-						Lists.newArrayList(atomicAttributes), attributesToInclude))).collect(Collectors.toList());
+													  .filter(attribute -> (attribute.isVisible() && isOutputAttribute(
+															  attribute, Lists.newArrayList(atomicAttributes),
+															  attributesToInclude)))
+													  .collect(Collectors.toList());
 		return on(SPACE_PIPE_SEPERATOR).join(transform(attributes, Attribute::getName));
 	}
 
@@ -314,11 +317,14 @@ public class VcfWriterUtils
 	{
 		boolean hasInfoFields = false;
 
-		List<Attribute> attributes = StreamSupport
-				.stream(vcfEntity.getEntityType().getAllAttributes().spliterator(), false)
-				.filter(attr -> !(VCF_ATTRIBUTE_NAMES.contains(attr.getName()) || attr.getName().equals(INFO)))
-				.filter(attr -> isOutputAttribute(attr, annotatorAttributes, attributesToInclude))
-				.collect(Collectors.toList());
+		List<Attribute> attributes = StreamSupport.stream(vcfEntity.getEntityType().getAllAttributes().spliterator(),
+				false)
+												  .filter(attr -> !(VCF_ATTRIBUTE_NAMES.contains(attr.getName()) || attr
+														  .getName()
+														  .equals(INFO)))
+												  .filter(attr -> isOutputAttribute(attr, annotatorAttributes,
+														  attributesToInclude))
+												  .collect(Collectors.toList());
 
 		List<String> infoFieldStrs = new ArrayList<>();
 		for (Attribute attribute : attributes)
@@ -445,8 +451,8 @@ public class VcfWriterUtils
 					annotatorAttributes, attributesToInclude))
 			{
 				if (previousValuePresent) refEntityInfoFields.append(PIPE_SEPARATOR);
-				String value = refEntity.getString(refAttribute.getName()) == null ? "" : refEntity
-						.getString(refAttribute.getName());
+				String value = refEntity.getString(refAttribute.getName()) == null ? "" : refEntity.getString(
+						refAttribute.getName());
 				refEntityInfoFields.append(value);
 				previousValuePresent = true;
 			}
@@ -496,8 +502,8 @@ public class VcfWriterUtils
 			if (!sampleAttributeName.equals(FORMAT_GT) && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME))
 			{
 				// skip the field that were generated for the use of the entity within molgenis
-				if (!sampleAttribute.equals(entityType.getIdAttribute()) && !sampleAttribute
-						.equals(entityType.getLabelAttribute()))
+				if (!sampleAttribute.equals(entityType.getIdAttribute()) && !sampleAttribute.equals(
+						entityType.getLabelAttribute()))
 				{
 					if (sampleColumn.length() != 0) sampleColumn.append(":");
 					Object sampleAttrValue = sample.get(sampleAttributeName);
@@ -530,8 +536,8 @@ public class VcfWriterUtils
 			if (!sampleAttributeName.equals(FORMAT_GT) && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME))
 			{
 				// skip the field that were generated for the use of the entity within molgenis
-				if (!sampleAttribute.equals(entityType.getIdAttribute()) && !sampleAttribute
-						.equals(entityType.getLabelAttribute()))
+				if (!sampleAttribute.equals(entityType.getIdAttribute()) && !sampleAttribute.equals(
+						entityType.getLabelAttribute()))
 				{
 					if (formatColumn.length() != 0) formatColumn.append(':');
 					formatColumn.append(sampleAttributeName);
@@ -564,12 +570,13 @@ public class VcfWriterUtils
 			else expandedAddedAttributes.add(annotatorAttr);
 		}
 
-		List<String> annotatorAttributeNames = expandedAddedAttributes.stream().map(Attribute::getName)
-				.collect(Collectors.toList());
+		List<String> annotatorAttributeNames = expandedAddedAttributes.stream()
+																	  .map(Attribute::getName)
+																	  .collect(Collectors.toList());
 		// always write all fields that were not added by this annotation run.
 		// else write the field if it was specified or if nothing was sepcified at all.
-		return (!annotatorAttributeNames.contains(attribute.getName()) || attributesToInclude
-				.contains(attribute.getName()) || attributesToInclude.isEmpty()) && attribute.isVisible() && !attribute
-				.getName().equals(VcfAttributes.SAMPLES);
+		return (!annotatorAttributeNames.contains(attribute.getName()) || attributesToInclude.contains(
+				attribute.getName()) || attributesToInclude.isEmpty()) && attribute.isVisible() && !attribute.getName()
+																											 .equals(VcfAttributes.SAMPLES);
 	}
 }

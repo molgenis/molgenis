@@ -99,8 +99,8 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS) != null)
 		{
-			List<Entity> entityMappingEntities = Lists
-					.newArrayList(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS));
+			List<Entity> entityMappingEntities = Lists.newArrayList(
+					mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
 

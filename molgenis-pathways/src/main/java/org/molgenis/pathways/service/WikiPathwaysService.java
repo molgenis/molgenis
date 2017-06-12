@@ -36,16 +36,16 @@ public class WikiPathwaysService
 	public WikiPathwaysService(WikiPathwaysPortType wikiPathwaysProxy)
 	{
 		this.wikiPathwaysProxy = wikiPathwaysProxy;
-		this.allPathwaysCache = CacheFactory
-				.loadingPathwayCache(wikiPathwaysProxy::listPathways, (organism, pathway) -> true, Pathway::create);
-		this.pathwaysPerGeneCache = CacheFactory
-				.loadingPathwayCache(params -> wikiPathwaysProxy.findPathwaysByXref(params.getGeneArray(), HGNC_CODE),
-						(params, pathway) -> pathway.getSpecies().equals(params.getSpecies()), Pathway::create);
-		this.uncoloredPathwayImageCache = CacheFactory
-				.loadingCache(pathwayId -> toSingleLineString(wikiPathwaysProxy.getPathwayAs("svg", pathwayId, 0)));
-		this.coloredPathwayImageCache = CacheFactory.loadingCache(params -> toSingleLineString(wikiPathwaysProxy
-				.getColoredPathway(params.getPathwayId(), "0", params.getGraphIdArray(), params.getColorArray(),
-						"svg")));
+		this.allPathwaysCache = CacheFactory.loadingPathwayCache(wikiPathwaysProxy::listPathways,
+				(organism, pathway) -> true, Pathway::create);
+		this.pathwaysPerGeneCache = CacheFactory.loadingPathwayCache(
+				params -> wikiPathwaysProxy.findPathwaysByXref(params.getGeneArray(), HGNC_CODE),
+				(params, pathway) -> pathway.getSpecies().equals(params.getSpecies()), Pathway::create);
+		this.uncoloredPathwayImageCache = CacheFactory.loadingCache(
+				pathwayId -> toSingleLineString(wikiPathwaysProxy.getPathwayAs("svg", pathwayId, 0)));
+		this.coloredPathwayImageCache = CacheFactory.loadingCache(params -> toSingleLineString(
+				wikiPathwaysProxy.getColoredPathway(params.getPathwayId(), "0", params.getGraphIdArray(),
+						params.getColorArray(), "svg")));
 	}
 
 	/**
@@ -84,8 +84,9 @@ public class WikiPathwaysService
 	 */
 	public Collection<Pathway> getFilteredPathways(String searchTerm, String species) throws RemoteException
 	{
-		return Arrays.stream(wikiPathwaysProxy.findPathwaysByText(searchTerm, species)).map(Pathway::create)
-				.collect(Collectors.toList());
+		return Arrays.stream(wikiPathwaysProxy.findPathwaysByText(searchTerm, species))
+					 .map(Pathway::create)
+					 .collect(Collectors.toList());
 	}
 
 	/**
@@ -103,7 +104,7 @@ public class WikiPathwaysService
 	/**
 	 * Retrieves a colored pathway image
 	 *
-	 * @param pathwayId               ID of the pathway from WikiPathways
+	 * @param pathwayId        ID of the pathway from WikiPathways
 	 * @param impactPerGraphId
 	 * @return String containing the pathway svg
 	 * @throws ExecutionException if loading of the cache fails

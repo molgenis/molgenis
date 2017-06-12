@@ -50,7 +50,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 		if (edit.equalsIgnoreCase("true") && (questionnaireName != null)) model.addAttribute("edit", true);
 
 		List<EntityType> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService)
-				.collect(Collectors.toList());
+															.collect(Collectors.toList());
 		model.addAttribute("questionnaires", questionnaires);
 
 		if ((questionnaireName == null) && !questionnaires.isEmpty())
@@ -74,7 +74,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 		}
 
 		List<Entity> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService)
-				.collect(Collectors.toList());
+														.collect(Collectors.toList());
 		model.addAttribute("questionnaires", questionnaires);
 		model.addAttribute("content", content);
 		model.addAttribute("selectedQuestionnaire", questionnaireName);

@@ -79,8 +79,9 @@ public class SortGenerator implements QueryPartGenerator
 			case STRING:
 			case TEXT:
 				// use raw field for sorting
-				sortField = new StringBuilder(fieldName).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
-						.toString();
+				sortField = new StringBuilder(fieldName).append('.')
+														.append(MappingsBuilder.FIELD_NOT_ANALYZED)
+														.toString();
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:

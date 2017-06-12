@@ -17,8 +17,8 @@ public class LanguageFactory extends AbstractSystemEntityFactory<Language, Langu
 	/**
 	 * Creates a language with the given code and name
 	 *
-	 * @param code language code, e.g. "en"
-	 * @param name language name, e.g. "English"
+	 * @param code   language code, e.g. "en"
+	 * @param name   language name, e.g. "English"
 	 * @param active language active, e.g "true"
 	 * @return new language
 	 */

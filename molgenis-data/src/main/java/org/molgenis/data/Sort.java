@@ -99,8 +99,9 @@ public class Sort implements Iterable<Sort.Order>
 
 	public String toSortString()
 	{
-		return orders.stream().map(order -> order.getAttr() + ',' + order.getDirection().toString())
-				.collect(Collectors.joining(";"));
+		return orders.stream()
+					 .map(order -> order.getAttr() + ',' + order.getDirection().toString())
+					 .collect(Collectors.joining(";"));
 	}
 
 	public static class Order

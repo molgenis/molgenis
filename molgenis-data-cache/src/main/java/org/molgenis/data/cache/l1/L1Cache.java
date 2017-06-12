@@ -50,8 +50,8 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 	private CombinedEntityCache createCache()
 	{
-		Cache<EntityKey, Optional<Map<String, Object>>> cache = CaffeinatedGuava
-				.build(Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).recordStats());
+		Cache<EntityKey, Optional<Map<String, Object>>> cache = CaffeinatedGuava.build(
+				Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).recordStats());
 		return new CombinedEntityCache(entityHydration, cache);
 	}
 
@@ -100,7 +100,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 * Retrieves an entity from the L1 cache based on a combination of entity name and entity id.
 	 *
 	 * @param entityTypeId name of the entity to retrieve
-	 * @param id         id value of the entity to retrieve
+	 * @param id           id value of the entity to retrieve
 	 * @return the retrieved {@link Entity} or Optional.empty() if deletion of this entity is stored in the cache or
 	 * null if no information available about this entity in the cache
 	 */
@@ -128,7 +128,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 * Puts an entity into the L1 cache, if the cache exists for the current thread.
 	 *
 	 * @param entityTypeId name of the entity to put into the cache
-	 * @param entity     the entity to put into the cache
+	 * @param entity       the entity to put into the cache
 	 */
 	public void put(String entityTypeId, Entity entity)
 	{

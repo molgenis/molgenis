@@ -72,8 +72,8 @@ public class HighchartSeriesUtil
 				xYDataSerie.getAttributeYFieldTypeEnum()));
 
 		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType()) && (
-				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME
-						.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
+				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME.equals(
+						xYDataSerie.getAttributeXFieldTypeEnum())))
 		{
 			series.setLineWidth(0);
 			series.setMarker(new Marker(true, 4));
@@ -122,7 +122,7 @@ public class HighchartSeriesUtil
 	 * Convert values to match the Highcharts demand when using JSON.
 	 *
 	 * @param attributeType the type of the attribute
-	 * @param value the attribute value to convert
+	 * @param value         the attribute value to convert
 	 * @return Object the converted value
 	 */
 	public Object convertValue(AttributeType attributeType, Object value)

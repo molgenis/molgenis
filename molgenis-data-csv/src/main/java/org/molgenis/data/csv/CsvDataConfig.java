@@ -19,8 +19,8 @@ public class CsvDataConfig
 	@PostConstruct
 	public void registerCsvRepositorySource()
 	{
-		fileRepositorySourceFactory
-				.addFileRepositoryCollectionClass(CsvRepositoryCollection.class, CsvFileExtensions.getCSV());
+		fileRepositorySourceFactory.addFileRepositoryCollectionClass(CsvRepositoryCollection.class,
+				CsvFileExtensions.getCSV());
 	}
 
 }

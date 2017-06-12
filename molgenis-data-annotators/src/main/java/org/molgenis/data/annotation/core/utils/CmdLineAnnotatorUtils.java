@@ -59,9 +59,8 @@ public class CmdLineAnnotatorUtils
 			List<Attribute> outputMetaData = getOutputAttributeMetadatasForAnnotator(annotator, entityTypeFactory,
 					attributeFactory, attributesToInclude, vcfRepo);
 
-			VcfWriterUtils
-					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
-							attributesToInclude);
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
+					VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
 
 			Iterable<Entity> entitiesToAnnotate = addAnnotatorMetaDataToRepository(annotator, attributeFactory,
 					effectStructureConverter, vcfRepo);
@@ -108,8 +107,8 @@ public class CmdLineAnnotatorUtils
 		// Check if annotator is annotator that annotates effects (for example Gavin)
 		if (annotator instanceof EffectBasedAnnotator)
 		{
-			entitiesToAnnotate = effectStructureConverter
-					.createVariantEffectStructure(EFFECT, annotator.getOutputAttributes(), vcfRepo);
+			entitiesToAnnotate = effectStructureConverter.createVariantEffectStructure(EFFECT,
+					annotator.getOutputAttributes(), vcfRepo);
 		}
 		else
 		{
@@ -182,11 +181,15 @@ public class CmdLineAnnotatorUtils
 	{
 		// Check attribute names
 		List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputAttributes())
-				.stream().map(Attribute::getName).collect(Collectors.toList());
+													.stream()
+													.map(Attribute::getName)
+													.collect(Collectors.toList());
 
-		List<String> inputAttributeNames = VcfUtils
-				.getAtomicAttributesFromList(vcfRepo.getEntityType().getAtomicAttributes()).stream()
-				.map(Attribute::getName).collect(Collectors.toList());
+		List<String> inputAttributeNames = VcfUtils.getAtomicAttributesFromList(
+				vcfRepo.getEntityType().getAtomicAttributes())
+												   .stream()
+												   .map(Attribute::getName)
+												   .collect(Collectors.toList());
 
 		for (String attrName : attributesToInclude)
 		{

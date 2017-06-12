@@ -30,7 +30,7 @@ public class LanguageMetadata extends SystemEntityType
 		setDescription("Web application languages");
 		// 2 or 3 characters, alphanumeric, lowercase
 		addAttribute(CODE, ROLE_ID).setDescription("Lowercase ISO 639 alpha-2 or alpha-3 code")
-				.setValidationExpression("/^[a-z]{2,3}$/.test($('code').value())");
+								   .setValidationExpression("/^[a-z]{2,3}$/.test($('code').value())");
 		addAttribute(NAME).setNillable(false);
 		addAttribute(ACTIVE).setDataType(BOOL).setNillable(false);
 	}

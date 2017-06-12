@@ -66,8 +66,8 @@ public class UploadWizardPage extends AbstractWizardPage
 			{
 				importWizard.setFile(file);
 
-				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-						.createFileRepositoryCollection(file);
+				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+						file);
 				ImportService importService = importServiceFactory.getImportService(file, repositoryCollection);
 
 				importWizard.setSupportedDatabaseActions(importService.getSupportedDatabaseActions());
