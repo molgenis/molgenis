@@ -545,7 +545,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testSearchRankingMultipleWords()
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
+		List<Entity> entities = createDynamic(50).collect(toList());
 		entities.get(0).set(ATTR_STRING, "ligament carcinoma");
 		entities.get(1).set(ATTR_STRING, "cars in omaha");
 		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
