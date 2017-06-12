@@ -5,9 +5,9 @@ import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -23,6 +23,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
+import org.molgenis.data.index.IndexException;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,27 +65,79 @@ public class ElasticsearchClientFacade
 	public void createIndex(String indexName, Settings settings)
 	{
 		LOG.trace("Creating Elasticsearch index '{}' ...", indexName);
-		CreateIndexResponse createIndexResponse = client.admin().indices().prepareCreate(indexName)
-				.setSettings(settings).get();
+		CreateIndexResponse createIndexResponse;
+		try
+		{
+			createIndexResponse = client.admin().indices().prepareCreate(indexName).setSettings(settings).get();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error creating index '%s'.", indexName));
+		}
+
 		if (!createIndexResponse.isAcknowledged())
 		{
-			throw new ElasticsearchException(String.format("Error creating index '%s'", indexName));
+			throw new IndexException(format("Error creating index '%s'.", indexName));
 		}
 		LOG.debug("Created Elasticsearch index '{}'.", indexName);
 	}
 
-	public boolean indexExists(String index)
+	public boolean indexExists(String indexName)
 	{
-		return client.admin().indices().prepareExists(index).execute().actionGet().isExists();
+		LOG.trace("Determining Elasticsearch index '{}' existence ...", indexName);
+		IndicesExistsResponse indicesExistsResponse;
+		try
+		{
+			indicesExistsResponse = client.admin().indices().prepareExists(indexName).get();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error determining index '%s' existence.", indexName));
+		}
+		LOG.debug("Determined Elasticsearch index '{}' existence.", indexName);
+		return indicesExistsResponse.isExists();
 	}
 
-	private void refreshIndex(String index)
+	public void deleteIndex(String indexName)
 	{
-		if (index == null)
+		LOG.trace("Deleting Elasticsearch index '{}' ...", indexName);
+		DeleteIndexResponse deleteIndexResponse;
+		try
 		{
-			index = "_all";
+			deleteIndexResponse = client.admin().indices().prepareDelete(indexName).get();
 		}
-		client.admin().indices().refresh(refreshRequest(index)).actionGet();
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error deleting index '%s'.", indexName));
+		}
+
+		if (!deleteIndexResponse.isAcknowledged())
+		{
+			throw new ElasticsearchException(format("Error deleting index '%s'", indexName));
+		}
+		LOG.debug("Deleted Elasticsearch index '{}'.", indexName);
+	}
+
+	public void refreshIndex(String indexName)
+	{
+		LOG.trace("Refreshing Elasticsearch index [{}] ...", indexName);
+		if (indexName == null)
+		{
+			indexName = "_all";
+		}
+		try
+		{
+			client.admin().indices().refresh(refreshRequest(indexName)).actionGet();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error refreshing index '%s'.", indexName));
+		}
+		LOG.debug("Refreshed Elasticsearch index [{}]", indexName);
 	}
 
 	private void waitForCompletion(BulkProcessor bulkProcessor)
@@ -109,55 +162,81 @@ public class ElasticsearchClientFacade
 		}
 	}
 
-	public void putMapping(String index, XContentBuilder jsonBuilder, String type) throws IOException
+	// 0) String     : bad json --> exception
+	// 1) JsonObject
+	// 2) AutoValue  : easier for testing
+	// 1) or 2)? see what is most practical
+	public void createMapping(String indexName, String type, XContentBuilder jsonBuilder) throws IOException
 	{
-		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Creating Elasticsearch mapping in index '{}' for type '{}' with content '{}' ...", indexName,
+					type, jsonBuilder.string());
+		}
 
-		PutMappingResponse response = client.admin().indices().preparePutMapping(index).setType(type)
-				.setSource(jsonBuilder).get();
+		PutMappingResponse response;
+		try
+		{
+			response = client.admin().indices().preparePutMapping(indexName).setType(type).setSource(jsonBuilder).get();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error creating index metadata '%s'.", indexName));
+		}
 
 		if (!response.isAcknowledged())
 		{
-			throw new ElasticsearchException(
-					"Creation of mapping for documentType [" + type + "] failed. Response=" + response);
+			throw new IndexException(format("Error creating index metadata '%s'.", indexName));
 		}
-		if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [{}]", jsonBuilder.string());
-	}
 
-	public void refresh(String index)
-	{
-		LOG.trace("Refreshing Elasticsearch index [{}] ...", index);
-		refreshIndex(index);
-		LOG.debug("Refreshed Elasticsearch index [{}]", index);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating Elasticsearch mapping in index '{}' for type '{}' with content '{}'", indexName, type,
+					jsonBuilder.string());
+		}
 	}
 
 	public long getCount(Query<Entity> q, EntityType entityType, String type, String indexName)
 	{
 		if (q != null)
 		{
-			LOG.trace("Counting Elasticsearch [{}] docs using query [{}] ...", type, q);
+			LOG.trace("Counting Elasticsearch docs in index '{}' for type '{}' using query [{}] ...", indexName, type,
+					q);
 		}
 		else
 		{
-			LOG.trace("Counting Elasticsearch [{}] docs", type);
+			LOG.trace("Counting Elasticsearch docs in index '{}' for type '{}' ...", indexName, type);
 		}
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setSize(0);
-		generator.buildSearchRequest(searchRequestBuilder, SearchType.DEFAULT, entityType, q, null, null, null);
-		SearchResponse searchResponse = searchRequestBuilder.get();
-		if (searchResponse.getFailedShards() > 0)
+
+		SearchResponse searchResponse;
+		try
 		{
-			throw new ElasticsearchException("Search failed:\n" + Arrays.stream(searchResponse.getShardFailures())
-					.map(ShardSearchFailure::toString).collect(joining("\n")));
+			SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setSize(0);
+			generator.buildSearchRequest(searchRequestBuilder, SearchType.DEFAULT, entityType, q, null, null, null);
+			searchResponse = searchRequestBuilder.get();
+			if (searchResponse.getFailedShards() > 0)
+			{
+				throw new ElasticsearchException("Search failed:\n" + Arrays.stream(searchResponse.getShardFailures())
+						.map(ShardSearchFailure::toString).collect(joining("\n")));
+			}
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error counting documents in index '%s'.", indexName));
 		}
 		long count = searchResponse.getHits().getTotalHits();
-		long ms = searchResponse.getTookInMillis();
+
 		if (q != null)
 		{
-			LOG.debug("Counted {} Elasticsearch [{}] docs using query [{}] in {}ms", count, type, q, ms);
+			LOG.debug("Counted {} Elasticsearch docs in index '{}' for type '{}' using query [{}] in {}ms", count,
+					indexName, type, q, searchResponse.getTookInMillis());
 		}
 		else
 		{
-			LOG.debug("Counted {} Elasticsearch [{}] docs in {}ms", count, type, ms);
+			LOG.debug("Counted {} Elasticsearch docs in index '{}' for type '{}' in {}ms", count, indexName, type,
+					searchResponse.getTookInMillis());
 		}
 		return count;
 	}
@@ -165,42 +244,50 @@ public class ElasticsearchClientFacade
 	/**
 	 * Deletes a document from an index.
 	 *
-	 * @param index the name of the index
-	 * @param id    the ID of the document
-	 * @param type  tye type of the document
+	 * @param indexName the name of the index
+	 * @param id        the ID of the document
+	 * @param type      tye type of the document
 	 */
-	public void deleteById(String index, String id, String type)
+	public void deleteById(String indexName, String id, String type)
 	{
-		LOG.trace("Deleting Elasticsearch '{}' doc with id [{}] ...", type, id);
-		GetResponse response = client.prepareGet(index, type, id).get();
-		LOG.debug("Retrieved document type [{}] with id [{}] in index [{}]", type, id, index);
-		if (response.isExists())
+		LOG.trace("Deleting Elasticsearch doc with id '{}' in index '{}' for type '{}' ...", id, indexName, type);
+		try
 		{
-			client.prepareDelete(index, type, id).get();
+			client.prepareDelete(indexName, type, id).get();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error deleting doc '%s' from index '%s'.", id, indexName));
 		}
 		LOG.debug("Deleted Elasticsearch '{}' doc with id [{}]", type, id);
 	}
 
-	public void deleteIndex(String indexName)
-	{
-		LOG.trace("Deleting Elasticsearch index '{}' ...", indexName);
-		DeleteIndexResponse deleteIndexResponse = client.admin().indices().prepareDelete(indexName).get();
-		if (!deleteIndexResponse.isAcknowledged())
-		{
-			throw new ElasticsearchException(format("Error deleting index '%s'", indexName));
-		}
-		LOG.debug("Deleted Elasticsearch index '{}'.", indexName);
-	}
-
 	public SearchResponse search(SearchType searchType, SearchRequest request, String indexName)
 	{
-		SearchRequestBuilder builder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(builder, searchType, request.getEntityType(), request.getQuery(),
-				request.getAggregateAttribute1(), request.getAggregateAttribute2(),
-				request.getAggregateAttributeDistinct());
-		LOG.trace("*** REQUEST\n{}", builder);
-		SearchResponse response = builder.get();
-		LOG.trace("*** RESPONSE\n{}", response);
+		LOG.trace("Searching Elasticsearch docs in index '{}' ...", indexName);
+		SearchResponse response;
+		try
+		{
+			SearchRequestBuilder builder = client.prepareSearch(indexName);
+			generator.buildSearchRequest(builder, searchType, request.getEntityType(), request.getQuery(),
+					request.getAggregateAttribute1(), request.getAggregateAttribute2(),
+					request.getAggregateAttributeDistinct());
+			LOG.trace("*** REQUEST\n{}", builder);
+			response = builder.get();
+			LOG.trace("*** RESPONSE\n{}", response);
+			if (response.getFailedShards() > 0)
+			{
+				throw new ElasticsearchException("Search failed:\n" + Arrays.stream(response.getShardFailures())
+						.map(ShardSearchFailure::toString).collect(joining("\n")));
+			}
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error executing search in index '%s'", indexName));
+		}
+		LOG.trace("Searched Elasticsearch docs in index '{}' in {}ms.", indexName, response.getTookInMillis());
 		return response;
 	}
 
@@ -221,42 +308,60 @@ public class ElasticsearchClientFacade
 			String type, String indexName)
 	{
 		LOG.trace("Searching Elasticsearch '{}' docs using query [{}] ...", type, queryToString);
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		queryBuilder.accept(searchRequestBuilder);
-		searchRequestBuilder.setScroll(SCROLL_KEEP_ALIVE).setSize(SCROLL_SIZE);
-		LOG.trace("SearchRequest: {}", searchRequestBuilder);
-		SearchResponse originalSearchResponse = searchRequestBuilder.execute().actionGet();
+		try
+		{
+			SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+			queryBuilder.accept(searchRequestBuilder);
+			searchRequestBuilder.setScroll(SCROLL_KEEP_ALIVE).setSize(SCROLL_SIZE);
+			LOG.trace("SearchRequest: {}", searchRequestBuilder);
+			SearchResponse originalSearchResponse = searchRequestBuilder.execute().actionGet();
 
-		LOG.debug("Searched Elasticsearch '{}' docs using query [{}] in {}ms", type, queryToString,
-				originalSearchResponse.getTookInMillis());
+			LOG.debug("Searched Elasticsearch '{}' docs using query [{}] in {}ms", type, queryToString,
+					originalSearchResponse.getTookInMillis());
 
-		Stream<SearchResponse> infiniteResponses = Stream.iterate(originalSearchResponse,
-				searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId()).setScroll(SCROLL_KEEP_ALIVE)
-						.execute().actionGet());
-		return StreamUtils.takeWhile(infiniteResponses, searchResponse -> searchResponse.getHits().getHits().length > 0)
-				.flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits())).map(SearchHit::getId);
+			Stream<SearchResponse> infiniteResponses = Stream.iterate(originalSearchResponse,
+					searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId())
+							.setScroll(SCROLL_KEEP_ALIVE).execute().actionGet());
+			return StreamUtils
+					.takeWhile(infiniteResponses, searchResponse -> searchResponse.getHits().getHits().length > 0)
+					.flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits())).map(SearchHit::getId);
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException("");
+		}
 	}
 
 	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type,
 			String indexName)
 	{
 		LOG.trace("Searching Elasticsearch '{}' docs using query [{}] ...", type, queryToString);
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		queryBuilder.accept(searchRequestBuilder);
-		LOG.trace("SearchRequest: {}", searchRequestBuilder);
-		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
-
-		if (searchResponse.getFailedShards() > 0)
+		SearchResponse searchResponse;
+		try
 		{
-			StringBuilder sb = new StringBuilder("Search failed.");
-			for (ShardSearchFailure failure : searchResponse.getShardFailures())
+			SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+			queryBuilder.accept(searchRequestBuilder);
+			LOG.trace("SearchRequest: {}", searchRequestBuilder);
+			searchResponse = searchRequestBuilder.execute().actionGet();
+
+			if (searchResponse.getFailedShards() > 0)
 			{
-				sb.append("\n").append(failure.reason());
+				StringBuilder sb = new StringBuilder("Search failed.");
+				for (ShardSearchFailure failure : searchResponse.getShardFailures())
+				{
+					sb.append("\n").append(failure.reason());
+				}
+				throw new ElasticsearchException(sb.toString());
 			}
-			throw new ElasticsearchException(sb.toString());
+			LOG.debug("Searched Elasticsearch '{}' docs using query [{}] in {}ms", type, queryToString,
+					searchResponse.getTookInMillis());
 		}
-		LOG.debug("Searched Elasticsearch '{}' docs using query [{}] in {}ms", type, queryToString,
-				searchResponse.getTookInMillis());
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException("");
+		}
 		return searchResponse.getHits();
 	}
 
@@ -281,6 +386,11 @@ public class ElasticsearchClientFacade
 				bulkProcessor.add(request);
 			});
 			return nrIndexedEntitiesPerType;
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException("");
 		}
 		finally
 		{

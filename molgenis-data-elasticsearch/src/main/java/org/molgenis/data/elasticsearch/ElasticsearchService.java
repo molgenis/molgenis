@@ -83,7 +83,7 @@ public class ElasticsearchService implements SearchService
 		{
 			String documentType = getIndexName(entityType);
 			MappingsBuilder.buildMapping(jsonBuilder, entityType, documentIdGenerator);
-			elasticsearchClientFacade.putMapping(indexName, jsonBuilder, documentType);
+			elasticsearchClientFacade.createMapping(indexName, documentType, jsonBuilder);
 		}
 		catch (IOException e)
 		{
@@ -133,7 +133,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void refreshIndex()
 	{
-		elasticsearchClientFacade.refresh(null);
+		elasticsearchClientFacade.refreshIndex(null);
 	}
 
 	@Override
