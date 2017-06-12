@@ -44,10 +44,15 @@ public class TokenMetaData extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true).setNillable(false);
 		addAttribute(TOKEN_ATTR, ROLE_LABEL).setLabel("Token").setUnique(true).setNillable(false);
-		addAttribute(EXPIRATIONDATE).setDataType(DATE_TIME).setLabel("Expiration date").setNillable(true)
-				.setDescription("When expiration date is null it will never expire");
-		addAttribute(CREATIONDATE).setDataType(DATE_TIME).setLabel("Creation date").setAuto(true).setReadOnly(true)
-				.setNillable(false);
+		addAttribute(EXPIRATIONDATE).setDataType(DATE_TIME)
+									.setLabel("Expiration date")
+									.setNillable(true)
+									.setDescription("When expiration date is null it will never expire");
+		addAttribute(CREATIONDATE).setDataType(DATE_TIME)
+								  .setLabel("Creation date")
+								  .setAuto(true)
+								  .setReadOnly(true)
+								  .setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
 	}
 }

@@ -156,15 +156,15 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 				}
 
 			}
-			valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
-					.getString(descriptionAttribute) : "";
+			valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity.getString(
+					descriptionAttribute) : "";
 			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
 			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
 
-			valueRef = StringUtils.isNotEmpty(refAttribute) && StringUtils
-					.isNotEmpty(entity.getString(refAttribute)) ? entity.getString(refAttribute) : "";
-			valueAlt = StringUtils.isNotEmpty(altAttribute) && StringUtils
-					.isNotEmpty(entity.getString(altAttribute)) ? entity.getString(altAttribute) : "";
+			valueRef = StringUtils.isNotEmpty(refAttribute) && StringUtils.isNotEmpty(
+					entity.getString(refAttribute)) ? entity.getString(refAttribute) : "";
+			valueAlt = StringUtils.isNotEmpty(altAttribute) && StringUtils.isNotEmpty(
+					entity.getString(altAttribute)) ? entity.getString(altAttribute) : "";
 
 			List<String> notes = new ArrayList<String>();
 			if (StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute + "~" + valueRef);

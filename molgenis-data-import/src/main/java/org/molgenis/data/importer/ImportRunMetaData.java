@@ -47,18 +47,21 @@ public class ImportRunMetaData extends SystemEntityType
 
 		setLabel("Import");
 		setDescription("Data import reports");
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.");
+		addAttribute(ID, ROLE_ID).setAuto(true)
+								 .setVisible(false)
+								 .setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(STARTDATE).setDataType(DATE_TIME).setNillable(false);
 		addAttribute(ENDDATE).setDataType(DATE_TIME).setNillable(true);
 		addAttribute(USERNAME).setNillable(false);
-		addAttribute(STATUS).setDataType(ENUM).setNillable(false)
-				.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED"));
+		addAttribute(STATUS).setDataType(ENUM)
+							.setNillable(false)
+							.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED"));
 		addAttribute(MESSAGE).setDataType(TEXT).setNillable(true);
 		addAttribute(PROGRESS).setDataType(INT).setNillable(false);
 		addAttribute(IMPORTEDENTITIES).setDataType(TEXT).setNillable(true);
-		addAttribute(NOTIFY).setDataType(BOOL).setNillable(true)
-				.setDescription("Boolean to indicate whether or not to send an email on job completion");
+		addAttribute(NOTIFY).setDataType(BOOL)
+							.setNillable(true)
+							.setDescription("Boolean to indicate whether or not to send an email on job completion");
 	}
 
 	@Override

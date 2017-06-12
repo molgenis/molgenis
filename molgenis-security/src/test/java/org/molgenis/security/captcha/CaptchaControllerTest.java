@@ -39,15 +39,17 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(captchaController)
-				.setMessageConverters(new BufferedImageHttpMessageConverter(), new FormHttpMessageConverter(),
-						new GsonHttpMessageConverter(new Gson())).build();
+								 .setMessageConverters(new BufferedImageHttpMessageConverter(),
+										 new FormHttpMessageConverter(), new GsonHttpMessageConverter(new Gson()))
+								 .build();
 	}
 
 	@Test
 	public void getCaptcha() throws Exception
 	{
-		this.mockMvc.perform(get("/captcha").accept(MediaType.IMAGE_JPEG)).andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.IMAGE_JPEG));
+		this.mockMvc.perform(get("/captcha").accept(MediaType.IMAGE_JPEG))
+					.andExpect(status().isOk())
+					.andExpect(content().contentType(MediaType.IMAGE_JPEG));
 	}
 
 	@Test
@@ -55,7 +57,8 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	{
 		this.mockMvc.perform(
 				post("/captcha").content("{\"captcha\":\"captcha_answer\"}").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().string("true"));
+					.andExpect(status().isOk())
+					.andExpect(content().string("true"));
 	}
 
 	@Test
@@ -63,7 +66,8 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	{
 		this.mockMvc.perform(
 				post("/captcha").content("{\"captcha\":\"invalid_answer\"}").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().string("false"));
+					.andExpect(status().isOk())
+					.andExpect(content().string("false"));
 	}
 
 	@Test
@@ -71,7 +75,8 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	{
 		this.mockMvc.perform(
 				post("/captcha").param("captcha", "captcha_answer").contentType(MediaType.APPLICATION_FORM_URLENCODED))
-				.andExpect(status().isOk()).andExpect(content().string("true"));
+					.andExpect(status().isOk())
+					.andExpect(content().string("true"));
 	}
 
 	@Test
@@ -79,7 +84,8 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	{
 		this.mockMvc.perform(
 				post("/captcha").param("captcha", "invalid_answer").contentType(MediaType.APPLICATION_FORM_URLENCODED))
-				.andExpect(status().isOk()).andExpect(content().string("false"));
+					.andExpect(status().isOk())
+					.andExpect(content().string("false"));
 	}
 
 	@Configuration
@@ -95,8 +101,8 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 		public CaptchaService captchaService() throws CaptchaException
 		{
 			CaptchaService captchaService = mock(CaptchaService.class);
-			when(captchaService.createCaptcha(220, 50))
-					.thenReturn(new BufferedImage(220, 50, BufferedImage.TYPE_INT_RGB));
+			when(captchaService.createCaptcha(220, 50)).thenReturn(
+					new BufferedImage(220, 50, BufferedImage.TYPE_INT_RGB));
 			when(captchaService.validateCaptcha("captcha_answer")).thenReturn(true);
 			return captchaService;
 		}

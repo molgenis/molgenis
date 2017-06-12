@@ -119,8 +119,10 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatchRaw_kgm2()
 	{
-		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
-				.setDescription("area density (kg/m2)");
+		Attribute attr = attrMetaFactory.create()
+										.setName("attr")
+										.setLabel("label")
+										.setDescription("area density (kg/m2)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
 	}
@@ -128,8 +130,10 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch_kgm2()
 	{
-		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
-				.setDescription("area density (kg/m^2)");
+		Attribute attr = attrMetaFactory.create()
+										.setName("attr")
+										.setLabel("label")
+										.setDescription("area density (kg/m^2)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
 	}
@@ -137,8 +141,10 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch_kgm2_2()
 	{
-		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
-				.setDescription("area density (kg/m²)");
+		Attribute attr = attrMetaFactory.create()
+										.setName("attr")
+										.setLabel("label")
+										.setDescription("area density (kg/m²)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
 	}
@@ -154,8 +160,10 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch()
 	{
-		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
-				.setDescription("height (centimeter)");
+		Attribute attr = attrMetaFactory.create()
+										.setName("attr")
+										.setLabel("label")
+										.setDescription("height (centimeter)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("cm"));
 	}
@@ -184,15 +192,15 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 			OntologyService ontologyService = mock(OntologyService.class);
 			when(ontologyService.getOntology(UNIT_ONTOLOGY_IRI)).thenReturn(ontology);
 
-			when(ontologyService
-					.findExcatOntologyTerms(ontologyIds, Sets.newLinkedHashSet(asList("weight", "kilogram")),
-							Integer.MAX_VALUE)).thenReturn(singletonList(KG_ONTOLOGY_TERM));
-			when(ontologyService
-					.findExcatOntologyTerms(ontologyIds, Sets.newLinkedHashSet(asList("label", "height", "centimeter")),
-							Integer.MAX_VALUE)).thenReturn(singletonList(CM_ONTOLOGY_TERM));
+			when(ontologyService.findExcatOntologyTerms(ontologyIds,
+					Sets.newLinkedHashSet(asList("weight", "kilogram")), Integer.MAX_VALUE)).thenReturn(
+					singletonList(KG_ONTOLOGY_TERM));
+			when(ontologyService.findExcatOntologyTerms(ontologyIds,
+					Sets.newLinkedHashSet(asList("label", "height", "centimeter")), Integer.MAX_VALUE)).thenReturn(
+					singletonList(CM_ONTOLOGY_TERM));
 
-			when(ontologyService.findExcatOntologyTerms(ontologyIds, newHashSet(kgTerm, cmTerm), Integer.MAX_VALUE))
-					.thenReturn(asList(KG_ONTOLOGY_TERM, CM_ONTOLOGY_TERM));
+			when(ontologyService.findExcatOntologyTerms(ontologyIds, newHashSet(kgTerm, cmTerm),
+					Integer.MAX_VALUE)).thenReturn(asList(KG_ONTOLOGY_TERM, CM_ONTOLOGY_TERM));
 			return ontologyService;
 		}
 	}

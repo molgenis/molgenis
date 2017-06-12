@@ -415,8 +415,8 @@ public class RestController
 			Query<Entity> q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
 			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
-			if (sortAttributeArray != null && sortAttributeArray.length == 1 && StringUtils
-					.isNotEmpty(sortAttributeArray[0]))
+			if (sortAttributeArray != null && sortAttributeArray.length == 1 && StringUtils.isNotEmpty(
+					sortAttributeArray[0]))
 			{
 				String sortAttribute = sortAttributeArray[0];
 				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
@@ -467,8 +467,8 @@ public class RestController
 		}
 
 		// Check attribute names
-		Iterable<String> attributesIterable = Iterables
-				.transform(meta.getAtomicAttributes(), attribute -> attribute.getName().toLowerCase());
+		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),
+				attribute -> attribute.getName().toLowerCase());
 
 		if (attributesSet != null)
 		{
@@ -484,8 +484,8 @@ public class RestController
 
 		if (attributesSet != null)
 		{
-			attributesIterable = Iterables
-					.filter(attributesIterable, attribute -> attributesSet.contains(attribute.toLowerCase()));
+			attributesIterable = Iterables.filter(attributesIterable,
+					attribute -> attributesSet.contains(attribute.toLowerCase()));
 		}
 
 		return new DefaultEntityCollection(entities, attributesIterable);
@@ -851,8 +851,8 @@ public class RestController
 			throw new BadCredentialsException("Unknown username or password");
 		}
 
-		User user = dataService
-				.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()), User.class);
+		User user = dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()),
+				User.class);
 
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -1097,8 +1097,8 @@ public class RestController
 			throw new UnknownEntityException(entityTypeId + " " + id + " not found");
 		}
 
-		String attrHref = Href
-				.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(), refAttributeName);
+		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(),
+				refAttributeName);
 		switch (attr.getDataType())
 		{
 			case COMPOUND:

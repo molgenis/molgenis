@@ -54,12 +54,12 @@ public class DataExplorerDownloadHandler
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					excelSheetWriter = excelWriter
-							.createWritable(entityTypeId, attributes, AttributeWriteMode.ATTRIBUTE_LABELS);
+					excelSheetWriter = excelWriter.createWritable(entityTypeId, attributes,
+							AttributeWriteMode.ATTRIBUTE_LABELS);
 					break;
 				case ATTRIBUTE_NAMES:
-					excelSheetWriter = excelWriter
-							.createWritable(entityTypeId, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
+					excelSheetWriter = excelWriter.createWritable(entityTypeId, attributes,
+							AttributeWriteMode.ATTRIBUTE_NAMES);
 					break;
 			}
 			switch (dataRequest.getEntityValues())

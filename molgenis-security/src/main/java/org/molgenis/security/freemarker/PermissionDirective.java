@@ -33,8 +33,8 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		boolean hasPermission = true;
 		if (entityTypeId != null)
 		{
-			hasPermission = molgenisPermissionService
-					.hasPermissionOnEntity(entityTypeId, Permission.valueOf(permission));
+			hasPermission = molgenisPermissionService.hasPermissionOnEntity(entityTypeId,
+					Permission.valueOf(permission));
 		}
 
 		if ((plugin != null) && hasPermission)

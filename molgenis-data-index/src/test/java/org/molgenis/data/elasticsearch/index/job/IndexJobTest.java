@@ -76,8 +76,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		config.resetMocks();
 		indexJob = new IndexJob(progress, authentication, transactionId, dataService, searchService, entityTypeFactory);
 		indexActionGroup = indexActionGroupFactory.create(transactionId).setCount(0);
-		when(dataService.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class))
-				.thenReturn(indexActionGroup);
+		when(dataService.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class)).thenReturn(
+				indexActionGroup);
 		when(dataService.getMeta()).thenReturn(mds);
 		testEntityType = harness.createDynamicRefEntityType();
 		when(mds.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
@@ -129,9 +129,12 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	{
 		when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(null);
 
-		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId("entityId").setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction = indexActionFactory.create()
+													.setIndexActionGroup(indexActionGroup)
+													.setEntityTypeId("entityType")
+													.setEntityId("entityId")
+													.setActionOrder(0)
+													.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -174,9 +177,12 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 	private void rebuildIndexSingleEntityTest(IndexingMode indexingMode)
 	{
-		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId("entityId").setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction = indexActionFactory.create()
+													.setIndexActionGroup(indexActionGroup)
+													.setEntityTypeId("entityType")
+													.setEntityId("entityId")
+													.setActionOrder(0)
+													.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 		indexActionGroup.setCount(1);
@@ -204,9 +210,12 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		EntityType entityType = dataService.getEntityType("TypeTestRefDynamic");
 		when(searchService.hasMapping(entityType)).thenReturn(true);
 
-		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId(null).setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction = indexActionFactory.create()
+													.setIndexActionGroup(indexActionGroup)
+													.setEntityTypeId("entityType")
+													.setEntityId(null)
+													.setActionOrder(0)
+													.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -234,9 +243,12 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	{
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
-		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId(null).setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction = indexActionFactory.create()
+													.setIndexActionGroup(indexActionGroup)
+													.setEntityTypeId("entityType")
+													.setEntityId(null)
+													.setActionOrder(0)
+													.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -269,9 +281,12 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
 		when(entityType.getLabel()).thenReturn(entityTypeLabel);
-		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId(entityTypeId).setEntityId(null).setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction = indexActionFactory.create()
+													.setIndexActionGroup(indexActionGroup)
+													.setEntityTypeId(entityTypeId)
+													.setEntityId(null)
+													.setActionOrder(0)
+													.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -302,17 +317,26 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void indexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
-		IndexAction indexAction1 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId("entityId1").setActionOrder(0)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction1 = indexActionFactory.create()
+													 .setIndexActionGroup(indexActionGroup)
+													 .setEntityTypeId("entityType")
+													 .setEntityId("entityId1")
+													 .setActionOrder(0)
+													 .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
-		IndexAction indexAction2 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId("entityId2").setActionOrder(1)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction2 = indexActionFactory.create()
+													 .setIndexActionGroup(indexActionGroup)
+													 .setEntityTypeId("entityType")
+													 .setEntityId("entityId2")
+													 .setActionOrder(1)
+													 .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
-		IndexAction indexAction3 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId("entityType").setEntityId("entityId3").setActionOrder(2)
-				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+		IndexAction indexAction3 = indexActionFactory.create()
+													 .setIndexActionGroup(indexActionGroup)
+													 .setEntityTypeId("entityType")
+													 .setEntityId("entityId3")
+													 .setActionOrder(2)
+													 .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		mockGetAllIndexActions(of(indexAction1, indexAction2, indexAction3));
 		indexActionGroup.setCount(3);

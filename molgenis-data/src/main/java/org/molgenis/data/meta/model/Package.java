@@ -232,11 +232,11 @@ public class Package extends StaticEntity
 		if (o instanceof Package)
 		{
 			Package that = (Package) o;
-			return (this.getId().equals(that.getId())) && ((this.getLabel() == null) ? (that.getLabel() == null) : this
-					.getLabel().equals(that.getLabel())) && ((this.getDescription() == null) ? (that.getDescription()
-					== null) : this.getDescription().equals(that.getDescription())) && ((this.getParent() == null) ? (
-					that.getParent() == null) : this.getParent().equals(that.getParent())) && (newArrayList(
-					this.getTags()).equals(newArrayList(that.getTags())));
+			return (this.getId().equals(that.getId())) && ((this.getLabel() == null) ? (that.getLabel()
+					== null) : this.getLabel().equals(that.getLabel())) && ((this.getDescription() == null) ? (
+					that.getDescription() == null) : this.getDescription().equals(that.getDescription())) && ((
+					this.getParent() == null) ? (that.getParent() == null) : this.getParent().equals(that.getParent()))
+					&& (newArrayList(this.getTags()).equals(newArrayList(that.getTags())));
 		}
 		return false;
 	}

@@ -56,25 +56,59 @@ public class ElasticsearchIndexCreator
 	private void createIndexInternal(String indexName) throws IOException
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch index [" + indexName + "] ...");
-		Settings.Builder settings = Settings.builder().loadFromSource(
-				XContentFactory.jsonBuilder().startObject().field("index.mapper.dynamic", false)
-						.field("index.number_of_shards", 1).field("index.number_of_replicas", 0)
-						.field("index.mapping.total_fields.limit", Long.MAX_VALUE)
-						.field("index.mapping.nested_fields.limit", Long.MAX_VALUE).startObject("analysis")
-						.startObject("analyzer").startObject(DEFAULT_ANALYZER).field("type", "custom")
-						.field("filter", new String[] { "lowercase", DEFAULT_STEMMER })
-						.field("tokenizer", DEFAULT_TOKENIZER).field("char_filter", "html_strip").endObject()
-						.startObject(NGRAM_ANALYZER).field("type", "custom")
-						.field("filter", new String[] { "lowercase" }).field("tokenizer", NGRAM_TOKENIZER).endObject()
-						.endObject().startObject("filter").startObject(DEFAULT_STEMMER).field("type", "stemmer")
-						.field("name", "english").endObject().endObject().startObject("tokenizer")
-						.startObject(DEFAULT_TOKENIZER).field("type", "pattern").field("pattern", "([^a-zA-Z0-9]+)")
-						.endObject().startObject(NGRAM_TOKENIZER).field("type", "nGram").field("min_gram", 1)
-						.field("max_gram", 10).endObject().endObject().endObject().endObject().string(),
-				XContentType.JSON);
+		Settings.Builder settings = Settings.builder()
+											.loadFromSource(XContentFactory.jsonBuilder()
+																		   .startObject()
+																		   .field("index.mapper.dynamic", false)
+																		   .field("index.number_of_shards", 1)
+																		   .field("index.number_of_replicas", 0)
+																		   .field("index.mapping.total_fields.limit",
+																				   Long.MAX_VALUE)
+																		   .field("index.mapping.nested_fields.limit",
+																				   Long.MAX_VALUE)
+																		   .startObject("analysis")
+																		   .startObject("analyzer")
+																		   .startObject(DEFAULT_ANALYZER)
+																		   .field("type", "custom")
+																		   .field("filter", new String[] { "lowercase",
+																				   DEFAULT_STEMMER })
+																		   .field("tokenizer", DEFAULT_TOKENIZER)
+																		   .field("char_filter", "html_strip")
+																		   .endObject()
+																		   .startObject(NGRAM_ANALYZER)
+																		   .field("type", "custom")
+																		   .field("filter",
+																				   new String[] { "lowercase" })
+																		   .field("tokenizer", NGRAM_TOKENIZER)
+																		   .endObject()
+																		   .endObject()
+																		   .startObject("filter")
+																		   .startObject(DEFAULT_STEMMER)
+																		   .field("type", "stemmer")
+																		   .field("name", "english")
+																		   .endObject()
+																		   .endObject()
+																		   .startObject("tokenizer")
+																		   .startObject(DEFAULT_TOKENIZER)
+																		   .field("type", "pattern")
+																		   .field("pattern", "([^a-zA-Z0-9]+)")
+																		   .endObject()
+																		   .startObject(NGRAM_TOKENIZER)
+																		   .field("type", "nGram")
+																		   .field("min_gram", 1)
+																		   .field("max_gram", 10)
+																		   .endObject()
+																		   .endObject()
+																		   .endObject()
+																		   .endObject()
+																		   .string(), XContentType.JSON);
 
-		CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).setSettings(settings).execute()
-				.actionGet();
+		CreateIndexResponse response = client.admin()
+											 .indices()
+											 .prepareCreate(indexName)
+											 .setSettings(settings)
+											 .execute()
+											 .actionGet();
 
 		if (!response.isAcknowledged())
 		{

@@ -179,8 +179,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 						// we are in update mode, so let's check the source entity if there was an original value
 						if (sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix) != null)
 						{
-							newAttributeValue
-									.append(sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix));
+							newAttributeValue.append(
+									sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix));
 						}
 						// if there was no original value either, add "." for missing value
 						else

@@ -140,8 +140,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityType exonMetaData = entityTypeFactory.create(SOURCE_EXON_ENTITY).setPackage(package_);
 		exonMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
-		exonMetaData
-				.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
+		exonMetaData.addAttribute(
+				attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = mock(MetaDataService.class);
 		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityType>()
@@ -210,11 +210,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String projectName = "test_project";
 
-		MappingProject actualAddedMappingProject = mappingService
-				.addMappingProject(projectName, user, hopMetaData.getId());
+		MappingProject actualAddedMappingProject = mappingService.addMappingProject(projectName, user,
+				hopMetaData.getId());
 
 		String mappingTargetIdentifier = actualAddedMappingProject.getMappingTarget(hopMetaData.getId())
-				.getIdentifier();
+																  .getIdentifier();
 		MappingTarget expectedMappingTarget = getManualMappingTarget(mappingTargetIdentifier, emptyList());
 
 		String mappingProjectIdentifier = actualAddedMappingProject.getIdentifier();
@@ -225,8 +225,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER)).thenReturn(mappingTargetIdentifier);
 		when(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)).thenReturn(hopMetaData.getId());
 		when(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS)).thenReturn(null);
-		when(dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)))
-				.thenReturn(hopMetaData);
+		when(dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetaData.TARGET))).thenReturn(
+				hopMetaData);
 
 		Entity mappingProjectEntity = mock(Entity.class);
 		when(mappingProjectEntity.get(IDENTIFIER)).thenReturn(mappingProjectIdentifier);
@@ -300,8 +300,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		Package targetPackage = mock(Package.class);
 		when(metaDataService.getPackage("targetPackage")).thenReturn(targetPackage);
 
-		EntityType targetMetadata = mappingService
-				.createTargetMetadata(mappingTarget, "test", "targetPackage", "target label", true);
+		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "test", "targetPackage",
+				"target label", true);
 		assertEquals(targetMetadata.getId(), "test");
 		assertEquals(targetMetadata.getLabel(), "target label");
 		assertEquals(targetMetadata.getPackage(), targetPackage);
@@ -342,8 +342,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		doAnswer(invocationOnMock ->
 		{
 			@SuppressWarnings("unchecked")
-			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
-					.getArgumentAt(0, Consumer.class);
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.getArgumentAt(0,
+					Consumer.class);
 
 			consumer.accept(sourceGeneEntities);
 			return null;
@@ -409,8 +409,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		doAnswer(invocationOnMock ->
 		{
 			@SuppressWarnings("unchecked")
-			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
-					.getArgumentAt(0, Consumer.class);
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.getArgumentAt(0,
+					Consumer.class);
 			consumer.accept(sourceGeneEntities);
 			return null;
 		}).when(geneRepo).forEachBatched(any(Consumer.class), eq(MAPPING_BATCH_SIZE));
@@ -462,8 +462,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		List<Entity> batch = newArrayList(mock(Entity.class));
 		doAnswer(invocationOnMock ->
 		{
-			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
-					.getArgumentAt(0, Consumer.class);
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.getArgumentAt(0,
+					Consumer.class);
 
 			consumer.accept(batch);
 			consumer.accept(batch);
@@ -505,8 +505,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		doAnswer(invocationOnMock ->
 		{
-			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock
-					.getArgumentAt(0, Consumer.class);
+			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.getArgumentAt(0,
+					Consumer.class);
 			consumer.accept(batch);
 			consumer.accept(batch);
 			return null;
@@ -713,7 +713,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				public boolean matches(Object obj)
 				{
 					return obj instanceof AttributeMapping && ((AttributeMapping) obj).getAlgorithm()
-							.equals("$('id').value()");
+																					  .equals("$('id').value()");
 				}
 			}), eq(geneEntity), eq(geneMetaData))).thenReturn(geneEntity.getString("id"));
 
@@ -723,7 +723,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				public boolean matches(Object obj)
 				{
 					return obj instanceof AttributeMapping && ((AttributeMapping) obj).getAlgorithm()
-							.equals("$('length').value()");
+																					  .equals("$('length').value()");
 				}
 			}), eq(geneEntity), eq(geneMetaData))).thenReturn(geneEntity.getDouble("length"));
 

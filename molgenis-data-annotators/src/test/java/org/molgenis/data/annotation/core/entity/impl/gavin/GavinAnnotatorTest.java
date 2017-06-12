@@ -86,24 +86,42 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		List<Attribute> refAttributesList = Arrays.asList(CaddAnnotator.createCaddScaledAttr(attributeFactory),
 				ExacAnnotator.getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
 		entityType.addAttributes(refAttributesList);
-		Attribute refAttr = attributeFactory.create().setName("test_variant").setDataType(XREF).setRefEntity(entityType)
-				.setDescription("This annotator needs a references to an entity containing: " + StreamSupport
-						.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
-						.collect(Collectors.joining(", ")));
+		Attribute refAttr = attributeFactory.create()
+											.setName("test_variant")
+											.setDataType(XREF)
+											.setRefEntity(entityType)
+											.setDescription(
+													"This annotator needs a references to an entity containing: "
+															+ StreamSupport.stream(refAttributesList.spliterator(),
+															false)
+																		   .map(Attribute::getName)
+																		   .collect(Collectors.joining(", ")));
 
 		emd.addAttributes(Arrays.asList(refAttr, vcfAttributes.getAltAttribute()));
 
 		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true).setIdAttribute(true);
 		emd.addAttribute(idAttr);
 		emd.addAttributes(effectsMetaData.getOrderedAttributes());
-		emd.addAttribute(attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
-				.setRefEntity(entityType));
-		Attribute classification = attributeFactory.create().setName(CLASSIFICATION).setDataType(STRING)
-				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
-				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING).setDescription(REASON)
-				.setLabel(REASON);
+		emd.addAttribute(attributeFactory.create()
+										 .setName(EffectsMetaData.VARIANT)
+										 .setNillable(false)
+										 .setDataType(XREF)
+										 .setRefEntity(entityType));
+		Attribute classification = attributeFactory.create()
+												   .setName(CLASSIFICATION)
+												   .setDataType(STRING)
+												   .setDescription(CLASSIFICATION)
+												   .setLabel(CLASSIFICATION);
+		Attribute confidence = attributeFactory.create()
+											   .setName(CONFIDENCE)
+											   .setDataType(STRING)
+											   .setDescription(CONFIDENCE)
+											   .setLabel(CONFIDENCE);
+		Attribute reason = attributeFactory.create()
+										   .setName(REASON)
+										   .setDataType(STRING)
+										   .setDescription(REASON)
+										   .setLabel(REASON);
 		emd.addAttributes(Arrays.asList(classification, confidence, reason));
 
 		entityType.addAttribute(idAttr);
@@ -237,8 +255,8 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		public GavinAnnotatorSettings gavinAnnotatorSettings()
 		{
 			GavinAnnotatorSettings settings = mock(GavinAnnotatorSettings.class);
-			when(settings.getString(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/gavin/GAVIN_calibrations_r0.1.xlsx").getPath());
+			when(settings.getString(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/gavin/GAVIN_calibrations_r0.1.xlsx").getPath());
 
 			return settings;
 		}

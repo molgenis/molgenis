@@ -50,11 +50,12 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	@Override
 	protected List<Entity> getBatch(Query<Entity> q)
 	{
-		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_THEN_FETCH, entityType, q, null, null, null);
+		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator.buildSearchRequest(
+				searchRequestBuilder, SearchType.QUERY_THEN_FETCH, entityType, q, null, null, null);
 		return elasticsearchFacade.searchForIds(searchRequestBuilderConsumer, q.toString(), documentType, indexName)
-				.map(idString -> convert(idString, entityType.getIdAttribute()))
-				.map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject)).collect(toList());
+								  .map(idString -> convert(idString, entityType.getIdAttribute()))
+								  .map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject))
+								  .collect(toList());
 	}
 
 	@Override

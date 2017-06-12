@@ -25,8 +25,8 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			}
 
 			// one of the needed attributes not of the correct type? we can not annotate
-			if (repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType() != annotatorAttribute
-					.getDataType())
+			if (repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+					!= annotatorAttribute.getDataType())
 			{
 				// allow type string when required attribute is text (for backward compatibility)
 				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType().equals(AttributeType.STRING)
@@ -42,9 +42,10 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 				{
 					if (refEntity.getAttribute(refAttribute.getName()) == null)
 					{
-						return "the required referenced entity [" + StreamSupport
-								.stream(annotatorAttribute.getRefEntity().getAtomicAttributes().spliterator(), false)
-								.map(Attribute::getName).collect(Collectors.joining(", "))
+						return "the required referenced entity [" + StreamSupport.stream(
+								annotatorAttribute.getRefEntity().getAtomicAttributes().spliterator(), false)
+																				 .map(Attribute::getName)
+																				 .collect(Collectors.joining(", "))
 								+ "] is missing a required attribute";
 					}
 				}

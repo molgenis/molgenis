@@ -29,8 +29,8 @@ public class MolgenisClientTest
 	{
 		LoginResponse loginResponse = molgenis.login("admin", "secret");
 		String token = loginResponse.getToken();
-		QueryResponse queryResponse = molgenis
-				.queryEquals(token, "RuntimeProperty", "Name", "plugin.dataexplorer.mod.annotators");
+		QueryResponse queryResponse = molgenis.queryEquals(token, "RuntimeProperty", "Name",
+				"plugin.dataexplorer.mod.annotators");
 		Map<String, Object> item = queryResponse.getItems().get(0);
 		long id = Math.round((Double) item.get("id"));
 		molgenis.update(token, "RuntimeProperty", Long.toString(id), "Value", "true");

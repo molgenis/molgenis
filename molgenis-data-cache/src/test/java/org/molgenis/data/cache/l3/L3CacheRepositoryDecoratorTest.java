@@ -138,8 +138,8 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
 
 		when(l3Cache.get(decoratedRepository, query)).thenReturn(ids);
-		when(decoratedRepository.findAll(entityIdCaptor.capture(), eq(query.getFetch())))
-				.thenReturn(expectedEntities.stream());
+		when(decoratedRepository.findAll(entityIdCaptor.capture(), eq(query.getFetch()))).thenReturn(
+				expectedEntities.stream());
 
 		Stream<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query);
 

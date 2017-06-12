@@ -116,7 +116,7 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
 		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
-		dataService
-				.add(GROUP_AUTHORITY, Stream.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupAuthorities));
+		dataService.add(GROUP_AUTHORITY,
+				Stream.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupAuthorities));
 	}
 }

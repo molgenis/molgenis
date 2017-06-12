@@ -65,8 +65,8 @@ public class OntologyLoader
 		FileDocumentSource fileDocumentSource = new FileDocumentSource(ontologyFile);
 		// use silent import handling strategy to enable ontology loading without internet access
 		// see: https://github.com/molgenis/molgenis/issues/5301
-		OWLOntologyLoaderConfiguration owlOntologyLoaderConfiguration = new OWLOntologyLoaderConfiguration()
-				.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
+		OWLOntologyLoaderConfiguration owlOntologyLoaderConfiguration = new OWLOntologyLoaderConfiguration().setMissingImportHandlingStrategy(
+				MissingImportHandlingStrategy.SILENT);
 		return manager.loadOntologyFromOntologyDocument(fileDocumentSource, owlOntologyLoaderConfiguration);
 	}
 

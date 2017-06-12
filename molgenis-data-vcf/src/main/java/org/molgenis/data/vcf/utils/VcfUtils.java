@@ -41,12 +41,12 @@ public class VcfUtils
 	 */
 	public static String createId(Entity vcfEntity)
 	{
-		String idStr = StringUtils.strip(vcfEntity.get(CHROM).toString()) + "_" + StringUtils
-				.strip(vcfEntity.get(POS).toString()) + "_" + StringUtils.strip(vcfEntity.get(REF).toString()) + "_"
-				+ StringUtils.strip(vcfEntity.get(ALT).toString()) + "_" + StringUtils
-				.strip(vcfEntity.get(ID).toString()) + "_" + StringUtils
-				.strip(vcfEntity.get(QUAL) != null ? vcfEntity.get(QUAL).toString() : "") + "_" + StringUtils
-				.strip(vcfEntity.get(FILTER) != null ? vcfEntity.get(FILTER).toString() : "");
+		String idStr = StringUtils.strip(vcfEntity.get(CHROM).toString()) + "_" + StringUtils.strip(
+				vcfEntity.get(POS).toString()) + "_" + StringUtils.strip(vcfEntity.get(REF).toString()) + "_"
+				+ StringUtils.strip(vcfEntity.get(ALT).toString()) + "_" + StringUtils.strip(
+				vcfEntity.get(ID).toString()) + "_" + StringUtils.strip(
+				vcfEntity.get(QUAL) != null ? vcfEntity.get(QUAL).toString() : "") + "_" + StringUtils.strip(
+				vcfEntity.get(FILTER) != null ? vcfEntity.get(FILTER).toString() : "");
 
 		// use MD5 hash to prevent ids that are too long
 		MessageDigest messageDigest;

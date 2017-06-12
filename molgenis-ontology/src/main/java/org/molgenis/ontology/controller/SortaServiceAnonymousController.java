@@ -200,13 +200,14 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private List<String> createDownloadTableHeaders(SortaCsvRepository csvRepository)
 	{
 		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityType().getAtomicAttributes())
-				.transform(Attribute::getName)
-				.filter(attrName -> !StringUtils.equalsIgnoreCase(attrName, SortaCsvRepository.ALLOWED_IDENTIFIER))
-				.toList();
+														 .transform(Attribute::getName)
+														 .filter(attrName -> !StringUtils.equalsIgnoreCase(attrName,
+																 SortaCsvRepository.ALLOWED_IDENTIFIER))
+														 .toList();
 
 		List<String> columnHeaders = new ArrayList<String>(inputAttributeNames);
-		columnHeaders.addAll(Arrays
-				.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE,
+		columnHeaders.addAll(
+				Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE,
 						COMBINED_SCORE));
 		return columnHeaders;
 	}
@@ -251,8 +252,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private boolean validateUserInputHeader(Repository<Entity> repository)
 	{
 		return Iterables.any(repository.getEntityType().getAtomicAttributes(),
-				attr -> StringUtils.isNotEmpty(attr.getName()) && StringUtils
-						.equalsIgnoreCase(attr.getName(), SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
+				attr -> StringUtils.isNotEmpty(attr.getName()) && StringUtils.equalsIgnoreCase(attr.getName(),
+						SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
 	}
 
 	private boolean validateUserInputContent(SortaCsvRepository csvRepository)

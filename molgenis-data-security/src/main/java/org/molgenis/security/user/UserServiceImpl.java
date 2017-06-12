@@ -34,8 +34,8 @@ public class UserServiceImpl implements UserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		Stream<User> superUsers = dataService
-				.findAll(USER, new QueryImpl<User>().eq(UserMetaData.SUPERUSER, true), User.class);
+		Stream<User> superUsers = dataService.findAll(USER, new QueryImpl<User>().eq(UserMetaData.SUPERUSER, true),
+				User.class);
 		return superUsers.map(User::getEmail).collect(toList());
 	}
 
@@ -52,8 +52,10 @@ public class UserServiceImpl implements UserService
 	{
 		Fetch fetch = new Fetch().field(GroupMemberMetaData.GROUP,
 				new Fetch().field(GroupMetaData.ID).field(GroupMetaData.NAME).field(GroupMetaData.ACTIVE));
-		Stream<GroupMember> molgenisGroupMembers = dataService.query(GROUP_MEMBER, GroupMember.class).fetch(fetch)
-				.eq(GroupMemberMetaData.USER, getUser(username)).findAll();
+		Stream<GroupMember> molgenisGroupMembers = dataService.query(GROUP_MEMBER, GroupMember.class)
+															  .fetch(fetch)
+															  .eq(GroupMemberMetaData.USER, getUser(username))
+															  .findAll();
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return molgenisGroupMembers.map(GroupMember::getGroup).collect(toList());
 	}

@@ -84,72 +84,127 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			setLabel("Application settings");
 			setDescription("General application settings.");
 
-			addAttribute(TITLE).setDataType(STRING).setNillable(false).setDefaultValue(DEFAULT_TITLE)
-					.setLabel("Application title").setDescription("Displayed in browser toolbar.");
-			addAttribute(SIGNUP).setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_SIGNUP))
-					.setLabel("Allow users to sign up");
-			addAttribute(SIGNUP_MODERATION).setDataType(BOOL).setNillable(false)
-					.setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION)).setLabel("Sign up moderation")
-					.setDescription("Admins must accept sign up requests before account activation")
-					.setVisibleExpression("$('" + SIGNUP + "').eq(true).value()");
-			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL).setNillable(false)
-					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN)).setLabel("Enable Google Sign-In")
-					.setDescription("Enable users to sign in with their existing Google account").setVisibleExpression(
-					"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION + "').eq(false).value()");
-			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING).setNillable(false)
-					.setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID).setLabel("Google app client ID")
-					.setDescription("Google app client ID used during Google Sign-In")
-					.setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
-			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING).setNillable(true).setLabel("Logo in navigation bar")
-					.setDefaultValue(DEFAULT_LOGO_NAVBAR_HREF)
-					.setDescription("HREF to logo image used instead of home plugin label");
-			addAttribute(LOGO_TOP_HREF).setDataType(STRING).setNillable(true).setLabel("Logo above navigation bar")
-					.setDescription("HREF to logo image");
+			addAttribute(TITLE).setDataType(STRING)
+							   .setNillable(false)
+							   .setDefaultValue(DEFAULT_TITLE)
+							   .setLabel("Application title")
+							   .setDescription("Displayed in browser toolbar.");
+			addAttribute(SIGNUP).setDataType(BOOL)
+								.setNillable(false)
+								.setDefaultValue(String.valueOf(DEFAULT_SIGNUP))
+								.setLabel("Allow users to sign up");
+			addAttribute(SIGNUP_MODERATION).setDataType(BOOL)
+										   .setNillable(false)
+										   .setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION))
+										   .setLabel("Sign up moderation")
+										   .setDescription(
+												   "Admins must accept sign up requests before account activation")
+										   .setVisibleExpression("$('" + SIGNUP + "').eq(true).value()");
+			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL)
+										.setNillable(false)
+										.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN))
+										.setLabel("Enable Google Sign-In")
+										.setDescription("Enable users to sign in with their existing Google account")
+										.setVisibleExpression(
+												"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION
+														+ "').eq(false).value()");
+			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING)
+											  .setNillable(false)
+											  .setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID)
+											  .setLabel("Google app client ID")
+											  .setDescription("Google app client ID used during Google Sign-In")
+											  .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
+			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
+										  .setNillable(true)
+										  .setLabel("Logo in navigation bar")
+										  .setDefaultValue(DEFAULT_LOGO_NAVBAR_HREF)
+										  .setDescription("HREF to logo image used instead of home plugin label");
+			addAttribute(LOGO_TOP_HREF).setDataType(STRING)
+									   .setNillable(true)
+									   .setLabel("Logo above navigation bar")
+									   .setDescription("HREF to logo image");
 			addAttribute(FOOTER).setDataType(TEXT).setNillable(true).setLabel("Footer text");
-			addAttribute(MENU).setDataType(TEXT).setNillable(true).setDefaultValue(getDefaultMenuValue())
-					.setLabel("Menu").setDescription("JSON object that describes menu content.");
-			addAttribute(LANGUAGE_CODE).setDataType(STRING).setNillable(false).setDefaultValue(DEFAULT_LANGUAGE_CODE)
-					.setLabel("Language code").setDescription("ISO 639 alpha-2 or alpha-3 language code.");
-			addAttribute(BOOTSTRAP_THEME).setDataType(STRING).setNillable(false)
-					.setDefaultValue(DEFAULT_BOOTSTRAP_THEME).setLabel("Bootstrap theme")
-					.setDescription("CSS file name of theme (see molgenis-core-ui/src/main/resources/css/themes).");
-			addAttribute(CSS_HREF).setDataType(STRING).setNillable(true).setLabel("CSS href")
-					.setDescription("CSS file name to add custom CSS (see molgenis-core-ui/src/main/resources/css).");
+			addAttribute(MENU).setDataType(TEXT)
+							  .setNillable(true)
+							  .setDefaultValue(getDefaultMenuValue())
+							  .setLabel("Menu")
+							  .setDescription("JSON object that describes menu content.");
+			addAttribute(LANGUAGE_CODE).setDataType(STRING)
+									   .setNillable(false)
+									   .setDefaultValue(DEFAULT_LANGUAGE_CODE)
+									   .setLabel("Language code")
+									   .setDescription("ISO 639 alpha-2 or alpha-3 language code.");
+			addAttribute(BOOTSTRAP_THEME).setDataType(STRING)
+										 .setNillable(false)
+										 .setDefaultValue(DEFAULT_BOOTSTRAP_THEME)
+										 .setLabel("Bootstrap theme")
+										 .setDescription(
+												 "CSS file name of theme (see molgenis-core-ui/src/main/resources/css/themes).");
+			addAttribute(CSS_HREF).setDataType(STRING)
+								  .setNillable(true)
+								  .setLabel("CSS href")
+								  .setDescription(
+										  "CSS file name to add custom CSS (see molgenis-core-ui/src/main/resources/css).");
 
-			addAttribute(AGGREGATE_THRESHOLD).setDataType(INT).setNillable(true).setLabel("Aggregate threshold")
-					.setDescription(
-							"Aggregate value counts below this threshold are reported as the threshold. (e.g. a count of 1 is reported as <= 10)");
+			addAttribute(AGGREGATE_THRESHOLD).setDataType(INT)
+											 .setNillable(true)
+											 .setLabel("Aggregate threshold")
+											 .setDescription(
+													 "Aggregate value counts below this threshold are reported as the threshold. (e.g. a count of 1 is reported as <= 10)");
 
-			addAttribute(CUSTOM_JAVASCRIPT).setDataType(TEXT).setNillable(true).setLabel("Custom javascript headers")
-					.setDescription(
-							"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
+			addAttribute(CUSTOM_JAVASCRIPT).setDataType(TEXT)
+										   .setNillable(true)
+										   .setLabel("Custom javascript headers")
+										   .setDescription(
+												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
 
 			// tracking settings
 			Attribute trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
 
-			addAttribute(GOOGLE_ANALYTICS_IP_ANONYMIZATION).setParent(trackingAttr).setDataType(BOOL).setNillable(false)
-					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION))
-					.setLabel("IP anonymization").setDescription(
-					"Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
-			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID).setParent(trackingAttr).setDataType(STRING).setNillable(true)
-					.setLabel("Google analytics tracking ID")
-					.setDescription("Google analytics tracking ID (e.g. UA-XXXX-Y)");
-			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setParent(trackingAttr).setDataType(BOOL)
-					.setNillable(false)
-					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS))
-					.setLabel("Google analytics account privacy friendly").setDescription(
-					"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
-			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS).setParent(trackingAttr).setDataType(STRING)
-					.setNillable(true).setLabel("Google analytics tracking ID (MOLGENIS)")
-					.setDescription("Google analytics tracking ID used by MOLGENIS");
+			addAttribute(GOOGLE_ANALYTICS_IP_ANONYMIZATION).setParent(trackingAttr)
+														   .setDataType(BOOL)
+														   .setNillable(false)
+														   .setDefaultValue(String.valueOf(
+																   DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION))
+														   .setLabel("IP anonymization")
+														   .setDescription(
+																   "Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
+			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID).setParent(trackingAttr)
+													  .setDataType(STRING)
+													  .setNillable(true)
+													  .setLabel("Google analytics tracking ID")
+													  .setDescription("Google analytics tracking ID (e.g. UA-XXXX-Y)");
+			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setParent(trackingAttr)
+																			.setDataType(BOOL)
+																			.setNillable(false)
+																			.setDefaultValue(String.valueOf(
+																					DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS))
+																			.setLabel(
+																					"Google analytics account privacy friendly")
+																			.setDescription(
+																					"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS).setParent(trackingAttr)
+															   .setDataType(STRING)
+															   .setNillable(true)
+															   .setLabel("Google analytics tracking ID (MOLGENIS)")
+															   .setDescription(
+																	   "Google analytics tracking ID used by MOLGENIS");
 			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS).setParent(trackingAttr)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(
-					String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS))
-					.setReadOnly(true).setLabel("Google analytics account privacy friendly (MOLGENIS)").setDescription(
-					"Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
-			addAttribute(TRACKING_CODE_FOOTER).setParent(trackingAttr).setDataType(SCRIPT).setNillable(true)
-					.setLabel("Tracking code footer").setDescription(
-					"JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
+																					 .setDataType(BOOL)
+																					 .setNillable(false)
+																					 .setDefaultValue(String.valueOf(
+																							 DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS))
+																					 .setReadOnly(true)
+																					 .setLabel(
+																							 "Google analytics account privacy friendly (MOLGENIS)")
+																					 .setDescription(
+																							 "Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+			addAttribute(TRACKING_CODE_FOOTER).setParent(trackingAttr)
+											  .setDataType(SCRIPT)
+											  .setNillable(true)
+											  .setLabel("Tracking code footer")
+											  .setDescription(
+													  "JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
 		}
 
 		private String getDefaultMenuValue()

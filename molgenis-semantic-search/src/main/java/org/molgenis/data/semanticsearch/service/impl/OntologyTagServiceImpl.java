@@ -247,14 +247,15 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		EntityType entityEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entity, EntityType.class);
 		Iterable<Attribute> attributes = entityEntity.getOwnAllAttributes();
 		entityEntity.set(ATTRIBUTES, StreamSupport.stream(attributes.spliterator(), false)
-				.map(att -> att.getName().equals(attribute) ? attributeEntity : att).collect(Collectors.toList()));
+												  .map(att -> att.getName().equals(attribute) ? attributeEntity : att)
+												  .collect(Collectors.toList()));
 		dataService.update(ENTITY_TYPE_META_DATA, entityEntity);
 	}
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
-		return ontologyTermIRI.equals(e.getString(TagMetadata.OBJECT_IRI)) && relationIRI
-				.equals(e.getString(TagMetadata.RELATION_IRI));
+		return ontologyTermIRI.equals(e.getString(TagMetadata.OBJECT_IRI)) && relationIRI.equals(
+				e.getString(TagMetadata.RELATION_IRI));
 	}
 
 	@RunAsSystem
@@ -262,8 +263,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		EntityType entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
 
-		Optional<Attribute> result = stream(entityTypeEntity.getAttributes().spliterator(), false)
-				.filter(att -> attributeName.equals(att.getName())).findFirst();
+		Optional<Attribute> result = stream(entityTypeEntity.getAttributes().spliterator(), false).filter(
+				att -> attributeName.equals(att.getName())).findFirst();
 
 		if (!result.isPresent() && entityTypeEntity.getExtends() != null)
 		{

@@ -24,8 +24,9 @@ public class GenericDependencyResolver
 		while (!stillToResolve.isEmpty())
 		{
 			List<A> newlyResolved = stillToResolve.stream()
-					.filter(item -> alreadyResolved.containsAll(getDependencies.apply(item)))
-					.collect(Collectors.toList());
+												  .filter(item -> alreadyResolved.containsAll(
+														  getDependencies.apply(item)))
+												  .collect(Collectors.toList());
 			if (newlyResolved.isEmpty())
 			{
 				throw new MolgenisDataException("Could not resolve dependencies of items " + stillToResolve

@@ -101,8 +101,8 @@ public class IndexStatus
 		{
 			return true;
 		}
-		Set<String> referencedEntityIds = stream(emd.getAtomicAttributes().spliterator(), false)
-				.map(Attribute::getRefEntity).filter(e -> e != null).map(EntityType::getId).collect(toSet());
+		Set<String> referencedEntityIds = stream(emd.getAtomicAttributes().spliterator(), false).map(
+				Attribute::getRefEntity).filter(e -> e != null).map(EntityType::getId).collect(toSet());
 		referencedEntityIds.add(emd.getId());
 		return referencedEntityIds.stream().noneMatch(actionCountsPerEntity::containsKey);
 	}

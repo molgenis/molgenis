@@ -41,7 +41,8 @@ public class EntityMappingMetaData extends SystemEntityType
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(SOURCE_ENTITY_TYPE);
 		addAttribute(TARGET_ENTITY_TYPE);
-		addAttribute(ATTRIBUTE_MAPPINGS).setDataType(MREF).setRefEntity(attributeMappingMetaData)
-				.setCascadeDelete(true);
+		addAttribute(ATTRIBUTE_MAPPINGS).setDataType(MREF)
+										.setRefEntity(attributeMappingMetaData)
+										.setCascadeDelete(true);
 	}
 }

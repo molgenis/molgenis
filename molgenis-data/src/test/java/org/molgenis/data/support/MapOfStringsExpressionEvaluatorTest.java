@@ -34,19 +34,21 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
 	private EntityType createDynamicLocationMetaData()
 	{
 		return entityTypeFactory.create("Location")
-				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
-				.addAttribute(attributeFactory.create().setName("Chromosome").setDataType(STRING))
-				.addAttribute(attributeFactory.create().setName("Position").setDataType(STRING));
+								.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING),
+										ROLE_ID)
+								.addAttribute(attributeFactory.create().setName("Chromosome").setDataType(STRING))
+								.addAttribute(attributeFactory.create().setName("Position").setDataType(STRING));
 	}
 
 	private EntityType createDynamicSourceMetaData()
 	{
 		return entityTypeFactory.create("Source")
-				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
-				.addAttribute(attributeFactory.create().setName("Int").setDataType(INT))
-				.addAttribute(attributeFactory.create().setName("String").setDataType(STRING))
-				.addAttribute(attributeFactory.create().setName("NonNumericString").setDataType(STRING))
-				.addAttribute(attributeFactory.create().setName("Long").setDataType(LONG));
+								.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING),
+										ROLE_ID)
+								.addAttribute(attributeFactory.create().setName("Int").setDataType(INT))
+								.addAttribute(attributeFactory.create().setName("String").setDataType(STRING))
+								.addAttribute(attributeFactory.create().setName("NonNumericString").setDataType(STRING))
+								.addAttribute(attributeFactory.create().setName("Long").setDataType(LONG));
 	}
 
 	@BeforeMethod

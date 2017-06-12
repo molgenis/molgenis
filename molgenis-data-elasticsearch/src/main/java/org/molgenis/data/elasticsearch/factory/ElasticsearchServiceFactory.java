@@ -74,8 +74,8 @@ public class ElasticsearchServiceFactory implements Closeable
 		Settings clientSettings = createSettings(clusterName, settings);
 		InetSocketTransportAddress[] socketTransportAddresses = createInetSocketTransportAddresses(socketAddresses);
 
-		TransportClient transportClient = new PreBuiltTransportClient(clientSettings)
-				.addTransportAddresses(socketTransportAddresses);
+		TransportClient transportClient = new PreBuiltTransportClient(clientSettings).addTransportAddresses(
+				socketTransportAddresses);
 
 		if (transportClient.connectedNodes().isEmpty())
 		{

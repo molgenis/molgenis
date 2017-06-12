@@ -100,20 +100,29 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 			setDescription(
 					"Configuration properties for email support. Will be used to send email from Molgenis. See also the MailSenderProp entity.");
 			addAttribute(HOST).setDefaultValue(mailHost).setNillable(false).setDescription("SMTP server host.");
-			addAttribute(PORT).setDataType(AttributeType.INT).setDefaultValue(mailPort).setNillable(false)
-					.setDescription("SMTP server port.");
-			addAttribute(PROTOCOL).setDefaultValue(mailProtocol).setNillable(false)
-					.setDescription("Protocol used by the SMTP server.");
+			addAttribute(PORT).setDataType(AttributeType.INT)
+							  .setDefaultValue(mailPort)
+							  .setNillable(false)
+							  .setDescription("SMTP server port.");
+			addAttribute(PROTOCOL).setDefaultValue(mailProtocol)
+								  .setNillable(false)
+								  .setDescription("Protocol used by the SMTP server.");
 			addAttribute(USERNAME).setDefaultValue(mailUsername).setDescription("Login user of the SMTP server.");
 			addAttribute(PASSWORD).setDefaultValue(mailPassword).setDescription("Login password of the SMTP server.");
-			addAttribute(DEFAULT_ENCODING).setDefaultValue("UTF-8").setNillable(false)
-					.setDescription("Default MimeMessage encoding.");
+			addAttribute(DEFAULT_ENCODING).setDefaultValue("UTF-8")
+										  .setNillable(false)
+										  .setDescription("Default MimeMessage encoding.");
 			Attribute refAttr = mailSenderPropertyType.getAttribute(MAIL_SETTINGS_REF);
-			addAttribute(JAVA_MAIL_PROPS).setDataType(AttributeType.ONE_TO_MANY).setRefEntity(mailSenderPropertyType)
-					.setMappedBy(refAttr).setOrderBy(new Sort(KEY)).setNillable(true).setLabel("Properties")
-					.setDescription("JavaMail properties. The default values are tuned to connect with Google mail."
-							+ "If you want to connect to a different provider, these properties should be edited in the Data Explorer."
-							+ "Select the " + JAVA_MAIL_PROPERTY + " entity.");
+			addAttribute(JAVA_MAIL_PROPS).setDataType(AttributeType.ONE_TO_MANY)
+										 .setRefEntity(mailSenderPropertyType)
+										 .setMappedBy(refAttr)
+										 .setOrderBy(new Sort(KEY))
+										 .setNillable(true)
+										 .setLabel("Properties")
+										 .setDescription(
+												 "JavaMail properties. The default values are tuned to connect with Google mail."
+														 + "If you want to connect to a different provider, these properties should be edited in the Data Explorer."
+														 + "Select the " + JAVA_MAIL_PROPERTY + " entity.");
 			addAttribute(TEST_CONNECTION).setDataType(BOOL).setDefaultValue("true").setNillable(false).
 					setDescription("Indicates if the connection should be tested when saving these settings.");
 		}
@@ -165,8 +174,8 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	public Properties getJavaMailProperties()
 	{
 		Properties result = new Properties();
-		result.putAll(stream(getEntities(Meta.JAVA_MAIL_PROPS, JavaMailProperty.class).spliterator(), false)
-				.collect(toMap(JavaMailProperty::getKey, JavaMailProperty::getValue)));
+		result.putAll(stream(getEntities(Meta.JAVA_MAIL_PROPS, JavaMailProperty.class).spliterator(), false).collect(
+				toMap(JavaMailProperty::getKey, JavaMailProperty::getValue)));
 		return result;
 	}
 

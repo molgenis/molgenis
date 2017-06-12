@@ -372,7 +372,7 @@ public class AggregateResponseParser
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
 			dataService.findAll(entityType.getId(), idLabelsWithoutNull)
-					.forEach(entity -> idToLabelMap.put(entity.getIdValue().toString(), entity));
+					   .forEach(entity -> idToLabelMap.put(entity.getIdValue().toString(), entity));
 
 			for (int i = 0; i < nrLabels; ++i)
 			{

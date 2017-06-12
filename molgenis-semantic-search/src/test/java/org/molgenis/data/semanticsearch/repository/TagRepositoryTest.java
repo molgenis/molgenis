@@ -68,8 +68,8 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		when(q.findOne()).thenReturn(null);
 		when(dataService.query(TAG, Tag.class)).thenReturn(q);
 
-		assertTrue(EntityUtils.equals(tagRepository
-				.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
+		assertTrue(EntityUtils.equals(
+				tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 						"http://edamontology.org"), tag));
 
 		verify(dataService, times(1)).add(eq(TAG), any(Tag.class));
@@ -96,8 +96,8 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		when(q.findOne()).thenReturn(tag);
 		when(dataService.query(TAG, Tag.class)).thenReturn(q);
 
-		assertTrue(EntityUtils.equals(tagRepository
-				.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
+		assertTrue(EntityUtils.equals(
+				tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 						"http://edamontology.org"), tag));
 	}
 

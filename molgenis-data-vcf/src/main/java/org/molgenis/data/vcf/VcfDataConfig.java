@@ -19,8 +19,8 @@ public class VcfDataConfig
 	@PostConstruct
 	public void registerVcfRepositorySource()
 	{
-		fileRepositorySourceFactory
-				.addFileRepositoryCollectionClass(VcfRepositoryCollection.class, VcfRepositoryCollection.EXTENSIONS);
+		fileRepositorySourceFactory.addFileRepositoryCollectionClass(VcfRepositoryCollection.class,
+				VcfRepositoryCollection.EXTENSIONS);
 	}
 
 }

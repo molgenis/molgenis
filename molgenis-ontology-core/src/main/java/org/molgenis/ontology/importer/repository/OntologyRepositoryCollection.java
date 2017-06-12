@@ -93,12 +93,12 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		if (name.endsWith(OntologyFileExtensions.OBO_ZIP.toString()))
 		{
 			name = name.substring(0, name.lastIndexOf('.' + OntologyFileExtensions.OBO_ZIP.toString()))
-					.replace('.', '_');
+					   .replace('.', '_');
 		}
 		else if (name.endsWith(OntologyFileExtensions.OWL_ZIP.toString()))
 		{
 			name = name.substring(0, name.lastIndexOf('.' + OntologyFileExtensions.OWL_ZIP.toString()))
-					.replace('.', '_');
+					   .replace('.', '_');
 		}
 		else
 		{
@@ -115,10 +115,9 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 		ontologyTermRepository = new InMemoryRepository(ontologyTermFactory.getEntityType());
 		annotationRepository = new InMemoryRepository(ontologyTermDynamicAnnotationFactory.getEntityType());
 		synonymRepository = new InMemoryRepository(ontologyTermSynonymFactory.getEntityType());
-		repositories = ImmutableMap
-				.of(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, annotationRepository, ONTOLOGY_TERM_SYNONYM, synonymRepository,
-						ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository, ONTOLOGY_TERM,
-						ontologyTermRepository);
+		repositories = ImmutableMap.of(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, annotationRepository, ONTOLOGY_TERM_SYNONYM,
+				synonymRepository, ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository,
+				ONTOLOGY_TERM, ontologyTermRepository);
 
 		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		try
@@ -171,8 +170,8 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 
 		OWLClass pseudoRootClass = loader.createClass(PSEUDO_ROOT_CLASS_LABEL, loader.getRootClasses());
 
-		Iterator<OWLClassContainer> iterator = traverser
-				.preOrderTraversal(new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_NODEPATH, true)).iterator();
+		Iterator<OWLClassContainer> iterator = traverser.preOrderTraversal(
+				new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_NODEPATH, true)).iterator();
 
 		while (iterator.hasNext())
 		{
@@ -282,8 +281,10 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		StringBuilder nodePathStringBuilder = new StringBuilder();
 		if (!StringUtils.isEmpty(parentNodePath)) nodePathStringBuilder.append(parentNodePath).append('.');
-		nodePathStringBuilder.append(currentPosition).append('[')
-				.append(nodePathStringBuilder.toString().split("\\.").length - 1).append(']');
+		nodePathStringBuilder.append(currentPosition)
+							 .append('[')
+							 .append(nodePathStringBuilder.toString().split("\\.").length - 1)
+							 .append(']');
 		return nodePathStringBuilder.toString();
 	}
 

@@ -105,11 +105,11 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(entityType.getId()).thenReturn("myEntityTypeName");
 		when(entityTypeFactory.create("myEntityTypeName")).thenReturn(entityType);
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class))
-				.thenReturn(Stream.of(indexJobExecution));
+				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
+				IndexJobExecution.class)).thenReturn(Stream.of(indexJobExecution));
 		when(dataService.findAll(IndexActionMetaData.INDEX_ACTION,
-				new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, "id"), IndexAction.class))
-				.thenReturn(Stream.of(action));
+				new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, "id"),
+				IndexAction.class)).thenReturn(Stream.of(action));
 
 		indexBootstrapper.bootstrap();
 
@@ -125,8 +125,8 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(searchService.hasMapping(attributeMetadata)).thenReturn(true);
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class))
-				.thenReturn(Stream.empty());
+				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
+				IndexJobExecution.class)).thenReturn(Stream.empty());
 		indexBootstrapper.bootstrap();
 
 		//verify that no new jobs are registered
