@@ -11,7 +11,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class XrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
+public class XrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
 	@BeforeClass
 	public void setup()
