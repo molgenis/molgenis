@@ -852,6 +852,7 @@
         <module>molgenis-data-i18n</module>
         <module>molgenis-data-import</module>
         <module>molgenis-data-index</module>
+        <module>molgenis-metadata-manager</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-data-platform</module>
         <module>molgenis-data-postgresql</module>
