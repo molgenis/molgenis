@@ -23,7 +23,7 @@
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
 
   import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
-  import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
+  import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
   import { mapState } from 'vuex'
 
   export default {
@@ -54,11 +54,16 @@
     },
     watch: {
       '$route' (to, from) {
-        const entityTypeID = to.params.entityTypeID
-        const selectedEntityType = this.$store.state.entityTypes.find(entityType => entityType.id === entityTypeID)
+        // When switching attributes in the same entity,
+        // do not trigger reloads
+        if (from.params.entityTypeID !== to.params.entityTypeID) {
+          const entityTypeID = to.params.entityTypeID
+          const selectedEntityType = this.$store.state.entityTypes.find(entityType => entityType.id === entityTypeID)
 
-        this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType)
-        this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
+          this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType)
+          this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, null)
+          this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
+        }
       }
     }
   }
