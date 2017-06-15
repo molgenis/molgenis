@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
@@ -76,7 +77,7 @@ public class ElasticsearchClientFacade
 
 	public void createIndex(Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream)
 	{
-		LOG.trace("Creating index '{}' ...", toString(index));
+		LOG.trace("Creating index '{}' ...", index.getName());
 
 		CreateIndexRequestBuilder createIndexRequest = createIndexRequest(index, indexSettings, mappingStream);
 
@@ -88,26 +89,26 @@ public class ElasticsearchClientFacade
 		catch (ResourceAlreadyExistsException e)
 		{
 			LOG.debug("", e);
-			throw new IndexAlreadyExistsException(toString(index));
+			throw new IndexAlreadyExistsException(index.getName());
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error creating index '%s'.", toString(index)));
+			throw new IndexException(format("Error creating index '%s'.", index.getName()));
 		}
 
 		// 'acknowledged' indicates whether the index was successfully created in the cluster before the request timeout
 		if (!createIndexResponse.isAcknowledged())
 		{
-			LOG.warn("Index '{}' creation possibly failed (acknowledged=false)", toString(index));
+			LOG.warn("Index '{}' creation possibly failed (acknowledged=false)", index.getName());
 		}
 		// 'shards_acknowledged' indicates whether the requisite number of shard copies were started for each shard in the index before timing out
 		if (!createIndexResponse.isShardsAcked())
 		{
-			LOG.warn("Index '{}' creation possibly failed (shards_acknowledged=false)", toString(index));
+			LOG.warn("Index '{}' creation possibly failed (shards_acknowledged=false)", index.getName());
 		}
 
-		LOG.debug("Created index '{}'.", toString(index));
+		LOG.debug("Created index '{}'.", index.getName());
 	}
 
 	private CreateIndexRequestBuilder createIndexRequest(Index index, IndexSettings indexSettings,
@@ -126,11 +127,16 @@ public class ElasticsearchClientFacade
 		return createIndexRequest;
 	}
 
-	public boolean indexesExist(Index... indexes) // FIXME replace varargs with collection
+	public boolean indexesExist(Index index)
+	{
+		return indexesExist(singletonList(index));
+	}
+
+	private boolean indexesExist(List<Index> indexes)
 	{
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Determining indexes '{}' existence ...", toString(indexes));
+			LOG.trace("Determining index(es) '{}' existence ...", toString(indexes));
 		}
 
 		String[] indexNames = toIndexNames(indexes);
@@ -144,20 +150,25 @@ public class ElasticsearchClientFacade
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error determining indexes '%s' existence.", toString(indexes)));
+			throw new IndexException(format("Error determining index(es) '%s' existence.", toString(indexes)));
 		}
 
 		boolean exists = indicesExistsResponse.isExists();
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Determined indexes '{}' existence: {}.", toString(indexes), exists);
+			LOG.debug("Determined index(es) '{}' existence: {}.", toString(indexes), exists);
 		}
 		return exists;
 	}
 
-	public void deleteIndexes(Index... indexes)
+	public void deleteIndex(Index index)
 	{
-		LOG.trace("Deleting indexes '{}' ...", toString(indexes));
+		deleteIndexes(singletonList(index));
+	}
+
+	private void deleteIndexes(List<Index> indexes)
+	{
+		LOG.trace("Deleting index(es) '{}' ...", toString(indexes));
 
 		String[] indexNames = toIndexNames(indexes);
 		DeleteIndexRequestBuilder deleteIndexRequest = client.admin().indices().prepareDelete(indexNames);
@@ -175,28 +186,29 @@ public class ElasticsearchClientFacade
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error deleting indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Error deleting index(es) '%s'.", toString(indexes)));
 		}
 
 		if (!deleteIndexResponse.isAcknowledged())
 		{
-			throw new IndexException(format("Error deleting indexes '%s'", toString(indexes)));
+			throw new IndexException(format("Error deleting index(es) '%s'", toString(indexes)));
 		}
-		LOG.debug("Deleted indexes '{}'.", toString(indexes));
+		LOG.debug("Deleted index(es) '{}'.", toString(indexes));
 	}
 
 	public void refreshIndexes()
 	{
-		refreshIndexes("_all");
+		refreshIndexes(singletonList(Index.create("_all")));
 	}
 
-	private void refreshIndexes(String... indexNames)
+	private void refreshIndexes(List<Index> indexes)
 	{
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Refreshing indexes '{}' ...", indexNames);
+			LOG.trace("Refreshing index(es) '{}' ...", toString(indexes));
 		}
 
+		String[] indexNames = toIndexNames(indexes);
 		RefreshRequestBuilder refreshRequest = client.admin().indices().prepareRefresh(indexNames);
 
 		RefreshResponse refreshResponse;
@@ -207,43 +219,53 @@ public class ElasticsearchClientFacade
 		catch (ResourceNotFoundException e)
 		{
 			LOG.debug("", e);
-			throw new UnknownIndexException(indexNames);
+			throw new UnknownIndexException(toIndexNames(indexes));
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error refreshing indexes '%s'.", indexNames));
+			throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
 		}
 
 		if (refreshResponse.getFailedShards() > 0)
 		{
 			LOG.error(stream(refreshResponse.getShardFailures()).map(ShardOperationFailedException::toString)
 					.collect(joining("\n")));
-			throw new IndexException(format("Error refreshing index '%s'.", indexNames));
+			throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
 		}
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Refreshed indexes '{}'", indexNames);
+			LOG.debug("Refreshed index(es) '{}'", toString(indexes));
 		}
 	}
 
-	public long getCount(Index... indexes)
+	public long getCount(Index index)
+	{
+		return getCount(singletonList(index));
+	}
+
+	private long getCount(List<Index> indexes)
 	{
 		return getCount(null, indexes);
 	}
 
-	public long getCount(QueryBuilder query, Index... indexes)
+	public long getCount(QueryBuilder query, Index index)
+	{
+		return getCount(query, singletonList(index));
+	}
+
+	private long getCount(QueryBuilder query, List<Index> indexes)
 	{
 		if (LOG.isTraceEnabled())
 		{
 			if (query != null)
 			{
-				LOG.trace("Counting docs in indexes '{}' with query '{}' ...", toString(indexes), query);
+				LOG.trace("Counting docs in index(es) '{}' with query '{}' ...", toString(indexes), query);
 			}
 			else
 			{
-				LOG.trace("Counting docs in indexes '{}' ...", toString(indexes));
+				LOG.trace("Counting docs in index(es) '{}' ...", toString(indexes));
 			}
 		}
 
@@ -262,18 +284,18 @@ public class ElasticsearchClientFacade
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error counting docs in indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
 		}
 
 		if (searchResponse.getFailedShards() > 0)
 		{
 			LOG.error(
 					stream(searchResponse.getShardFailures()).map(ShardSearchFailure::toString).collect(joining("\n")));
-			throw new IndexException(format("Error counting docs in indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
 		}
 		if (searchResponse.isTimedOut())
 		{
-			throw new IndexException(format("Timeout while counting docs in indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Timeout while counting docs in index(es) '%s'.", toString(indexes)));
 		}
 
 		long totalHits = searchResponse.getHits().getTotalHits();
@@ -281,36 +303,40 @@ public class ElasticsearchClientFacade
 		{
 			if (query != null)
 			{
-				LOG.debug("Counted {} docs in indexes '{}' with query '{}' in {}ms.", totalHits, toString(indexes),
+				LOG.debug("Counted {} docs in index(es) '{}' with query '{}' in {}ms.", totalHits, toString(indexes),
 						query, searchResponse.getTookInMillis());
 			}
 			else
 			{
-				LOG.debug("Counted {} docs in indexes '{}' in {}ms.", totalHits, toString(indexes),
+				LOG.debug("Counted {} docs in index(es) '{}' in {}ms.", totalHits, toString(indexes),
 						searchResponse.getTookInMillis());
 			}
 		}
 		return totalHits;
 	}
 
-	public SearchHits search(QueryBuilder query, int from, int size, Index... indexes)
+	public SearchHits search(QueryBuilder query, int from, int size, List<Index> indexes)
 	{
 		return search(query, from, size, null, indexes);
 	}
 
-	// TODO replace List<SortBuilder> sorts with Sort (not data.Sort)
-	public SearchHits search(QueryBuilder query, int from, int size, Sort sort, Index... indexes)
+	public SearchHits search(QueryBuilder query, int from, int size, Sort sort, Index index)
+	{
+		return search(query, from, size, sort, singletonList(index));
+	}
+
+	private SearchHits search(QueryBuilder query, int from, int size, Sort sort, List<Index> indexes)
 	{
 		if (LOG.isTraceEnabled())
 		{
 			if (sort != null)
 			{
-				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' sorted by '{}' ...", from,
+				LOG.trace("Searching docs [{}-{}] in index(es) '{}' with query '{}' sorted by '{}' ...", from,
 						from + size, toString(indexes), query, sort);
 			}
 			else
 			{
-				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' ...", from, from + size,
+				LOG.trace("Searching docs [{}-{}] in index(es) '{}' with query '{}' ...", from, from + size,
 						toString(indexes), query);
 			}
 		}
@@ -331,19 +357,19 @@ public class ElasticsearchClientFacade
 		{
 			LOG.error("", e);
 			throw new IndexException(
-					format("Error searching docs in indexes '%s' with query '%s'.", toString(indexes), query));
+					format("Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
 		}
 		if (searchResponse.getFailedShards() > 0)
 		{
 			LOG.error(
 					stream(searchResponse.getShardFailures()).map(ShardSearchFailure::toString).collect(joining("\n")));
 			throw new IndexException(
-					format("Error searching docs in indexes '%s' with query '%s'.", toString(indexes), query));
+					format("Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
 		}
 		if (searchResponse.isTimedOut())
 		{
 			throw new IndexException(
-					format("Timeout searching counting docs in indexes '%s'  with query '%s'.", toString(indexes),
+					format("Timeout searching counting docs in index(es) '%s'  with query '%s'.", toString(indexes),
 							query));
 		}
 
@@ -351,13 +377,13 @@ public class ElasticsearchClientFacade
 		{
 			if (sort != null)
 			{
-				LOG.debug("Searched {} docs in indexes '{}' with query '{}' sorted by '{}' in {}ms.",
+				LOG.debug("Searched {} docs in index(es) '{}' with query '{}' sorted by '{}' in {}ms.",
 						searchResponse.getHits().getTotalHits(), toString(indexes), query, sort,
 						searchResponse.getTookInMillis());
 			}
 			else
 			{
-				LOG.debug("Searched {} docs in indexes '{}' with query '{}' in {}ms.",
+				LOG.debug("Searched {} docs in index(es) '{}' with query '{}' in {}ms.",
 						searchResponse.getHits().getTotalHits(), toString(indexes), query,
 						searchResponse.getTookInMillis());
 			}
@@ -366,7 +392,7 @@ public class ElasticsearchClientFacade
 	}
 
 	private SearchRequestBuilder createSearchRequest(QueryBuilder query, Integer from, Integer size, Sort sort,
-			List<AggregationBuilder> aggregations, Index... indexes)
+			List<AggregationBuilder> aggregations, List<Index> indexes)
 	{
 		String[] indexNames = toIndexNames(indexes);
 		SearchRequestBuilder searchRequest = client.prepareSearch(indexNames);
@@ -402,19 +428,23 @@ public class ElasticsearchClientFacade
 		return SearchHits.create(searchHits.getTotalHits(), searchHitList);
 	}
 
-	// TODO how hard is it to use own class instead of List<AggregationBuilder>?
-	public Aggregations aggregate(List<AggregationBuilder> aggregations, QueryBuilder query, Index... indexes)
+	public Aggregations aggregate(List<AggregationBuilder> aggregations, QueryBuilder query, Index index)
+	{
+		return aggregate(aggregations, query, singletonList(index));
+	}
+
+	private Aggregations aggregate(List<AggregationBuilder> aggregations, QueryBuilder query, List<Index> indexes)
 	{
 		if (LOG.isTraceEnabled())
 		{
 			if (query != null)
 			{
-				LOG.trace("Aggregating docs in indexes '{}' with aggregations '{}' and query '{}' ...",
+				LOG.trace("Aggregating docs in index(es) '{}' with aggregations '{}' and query '{}' ...",
 						toString(indexes), aggregations, query);
 			}
 			else
 			{
-				LOG.trace("Aggregating docs in indexes '{}' with aggregations '{}' ...", toString(indexes),
+				LOG.trace("Aggregating docs in index(es) '{}' with aggregations '{}' ...", toString(indexes),
 						aggregations);
 			}
 		}
@@ -433,29 +463,29 @@ public class ElasticsearchClientFacade
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error aggregating docs in indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
 		}
 		if (searchResponse.getFailedShards() > 0)
 		{
 			LOG.error(
 					stream(searchResponse.getShardFailures()).map(ShardSearchFailure::toString).collect(joining("\n")));
-			throw new IndexException(format("Error aggregating docs in indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
 		}
 		if (searchResponse.isTimedOut())
 		{
-			throw new IndexException(format("Timeout aggregating docs in indexes '%s'.", toString(indexes)));
+			throw new IndexException(format("Timeout aggregating docs in index(es) '%s'.", toString(indexes)));
 		}
 
 		if (LOG.isDebugEnabled())
 		{
 			if (query != null)
 			{
-				LOG.debug("Aggregated docs in indexes '{}' with aggregations '{}' and query '{}' in {}ms.",
+				LOG.debug("Aggregated docs in index(es) '{}' with aggregations '{}' and query '{}' in {}ms.",
 						toString(indexes), aggregations, query, searchResponse.getTookInMillis());
 			}
 			else
 			{
-				LOG.debug("Aggregated docs in indexes '{}' with aggregations '{}' in {}ms.", toString(indexes),
+				LOG.debug("Aggregated docs in index(es) '{}' with aggregations '{}' in {}ms.", toString(indexes),
 						aggregations, searchResponse.getTookInMillis());
 			}
 		}
@@ -483,7 +513,7 @@ public class ElasticsearchClientFacade
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(toIndexNames(index));
+			throw new UnknownIndexException(index.getName());
 		}
 		catch (ElasticsearchException e)
 		{
@@ -523,7 +553,7 @@ public class ElasticsearchClientFacade
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(toIndexNames(index));
+			throw new UnknownIndexException(index.getName());
 		}
 		catch (ElasticsearchException e)
 		{
@@ -601,13 +631,13 @@ public class ElasticsearchClientFacade
 		}
 	}
 
-	private String[] toIndexNames(Index... indexes)
+	private String[] toIndexNames(List<Index> indexes)
 	{
-		return Arrays.stream(indexes).map(Index::getName).toArray(String[]::new);
+		return indexes.stream().map(Index::getName).toArray(String[]::new);
 	}
 
-	private String toString(Index... indexes)
+	private String toString(List<Index> indexes)
 	{
-		return stream(indexes).map(Index::getName).collect(joining(", "));
+		return indexes.stream().map(Index::getName).collect(joining(", "));
 	}
 }

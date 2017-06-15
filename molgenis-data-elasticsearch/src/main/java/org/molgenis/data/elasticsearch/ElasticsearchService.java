@@ -70,7 +70,7 @@ public class ElasticsearchService implements SearchService
 	public void deleteIndex(EntityType entityType)
 	{
 		Index index = contentGenerators.createIndex(entityType);
-		elasticsearchClientFacade.deleteIndexes(index);
+		elasticsearchClientFacade.deleteIndex(index);
 	}
 
 	@Override
@@ -149,7 +149,6 @@ public class ElasticsearchService implements SearchService
 		throw new UnsupportedOperationException("FIXME"); // FIXME create response
 	}
 
-	// TODO can we get rid of indexing mode?
 	@Override
 	public void index(EntityType entityType, Entity entity, IndexingMode indexingMode)
 	{
