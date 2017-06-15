@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.settings;
+package org.molgenis.data.elasticsearch.generator.model;
 
 import com.google.auto.value.AutoValue;
 

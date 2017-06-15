@@ -1,16 +1,17 @@
 package org.molgenis.data.elasticsearch.generator;
 
-import org.elasticsearch.search.sort.SortBuilder;
-import org.molgenis.data.Sort;
+import org.molgenis.data.elasticsearch.generator.model.Sort;
+import org.molgenis.data.elasticsearch.generator.model.SortOrder;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
-
-import static java.util.Collections.emptyList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.elasticsearch.generator.model.SortDirection.ASC;
+import static org.molgenis.data.elasticsearch.generator.model.SortDirection.DESC;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
@@ -39,59 +40,49 @@ public class SortGeneratorTest
 	}
 
 	@Test
-	public void testGenerateNoSort()
-	{
-		assertEquals(emptyList(), sortGenerator.generate(null, entityType));
-	}
-
-	@Test
 	public void testGenerateAsc()
 	{
-		Sort sort = new Sort("int", Sort.Direction.ASC);
-		List<SortBuilder> sorts = sortGenerator.generate(sort, entityType);
-		assertEquals(sorts.size(), 1);
-		assertEquals(sorts.iterator().next().toString().replaceAll("\\s", ""),
-				"{\"int\":{\"order\":\"asc\",\"mode\":\"min\"}}");
+		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.ASC);
+		Sort elasticSort = sortGenerator.generateSort(sort, entityType);
+		Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("int", ASC)));
+		assertEquals(elasticSort, expectedElasticSort);
 	}
 
 	@Test
 	public void testGenerateAscRaw()
 	{
-		Sort sort = new Sort("string", Sort.Direction.ASC);
-		List<SortBuilder> sorts = sortGenerator.generate(sort, entityType);
-		assertEquals(sorts.size(), 1);
-		assertEquals(sorts.iterator().next().toString().replaceAll("\\s", ""),
-				"{\"string.raw\":{\"order\":\"asc\",\"mode\":\"min\"}}");
+		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("string", org.molgenis.data.Sort.Direction.ASC);
+		Sort elasticSort = sortGenerator.generateSort(sort, entityType);
+		Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("string.raw", ASC)));
+		assertEquals(elasticSort, expectedElasticSort);
 	}
 
 	@Test
 	public void testGenerateDesc()
 	{
-		Sort sort = new Sort("int", Sort.Direction.DESC);
-		List<SortBuilder> sorts = sortGenerator.generate(sort, entityType);
-		assertEquals(sorts.size(), 1);
-		assertEquals(sorts.iterator().next().toString().replaceAll("\\s", ""),
-				"{\"int\":{\"order\":\"desc\",\"mode\":\"min\"}}");
+		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.DESC);
+		Sort elasticSort = sortGenerator.generateSort(sort, entityType);
+		Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("int", DESC)));
+		assertEquals(elasticSort, expectedElasticSort);
 	}
 
 	@Test
 	public void testGenerateDescRaw()
 	{
-		Sort sort = new Sort("string", Sort.Direction.DESC);
-		List<SortBuilder> sorts = sortGenerator.generate(sort, entityType);
-		assertEquals(sorts.size(), 1);
-		assertEquals(sorts.iterator().next().toString().replaceAll("\\s", ""),
-				"{\"string.raw\":{\"order\":\"desc\",\"mode\":\"min\"}}");
+		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("string", org.molgenis.data.Sort.Direction.ASC);
+		Sort elasticSort = sortGenerator.generateSort(sort, entityType);
+		Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("string.raw", ASC)));
+		assertEquals(elasticSort, expectedElasticSort);
 	}
 
 	@Test
 	public void testGenerateDescAscRaw()
 	{
-		Sort sort = new Sort().on("int", Sort.Direction.DESC).on("string", Sort.Direction.ASC);
-		List<SortBuilder> sorts = sortGenerator.generate(sort, entityType);
-		assertEquals(sorts.size(), 2);
-		assertEquals(sorts.get(0).toString().replaceAll("\\s", ""), "{\"int\":{\"order\":\"desc\",\"mode\":\"min\"}}");
-		assertEquals(sorts.get(1).toString().replaceAll("\\s", ""),
-				"{\"string.raw\":{\"order\":\"asc\",\"mode\":\"min\"}}");
+		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.DESC)
+				.on("string", org.molgenis.data.Sort.Direction.ASC);
+		Sort elasticSort = sortGenerator.generateSort(sort, entityType);
+		Sort expectedElasticSort = Sort
+				.create(asList(SortOrder.create("int", DESC), SortOrder.create("string.raw", ASC)));
+		assertEquals(elasticSort, expectedElasticSort);
 	}
 }

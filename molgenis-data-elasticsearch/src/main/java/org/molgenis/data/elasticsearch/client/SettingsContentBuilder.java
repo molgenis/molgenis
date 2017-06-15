@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.molgenis.data.elasticsearch.settings.IndexSettings;
+import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
