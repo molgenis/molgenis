@@ -23,7 +23,7 @@
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
 
   import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
-  import { REMOVE_ALERT, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
+  import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
   import { mapState } from 'vuex'
 
   export default {
@@ -33,7 +33,7 @@
     },
     methods: {
       onDismiss: function () {
-        this.$store.commit(REMOVE_ALERT)
+        this.$store.commit(CREATE_ALERT, {type: null, message: null})
       }
     },
     components: {

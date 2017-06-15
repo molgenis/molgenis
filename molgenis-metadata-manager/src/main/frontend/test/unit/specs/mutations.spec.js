@@ -45,30 +45,6 @@ describe('mutations', () => {
     })
   })
 
-  describe('Testing mutation REMOVE_ALERT', () => {
-    it('Sets alert message to null', () => {
-      const state = {
-        alert: {
-          message: 'Hello',
-          type: 'success'
-        }
-      }
-      mutations.__REMOVE_ALERT__(state)
-      expect(state.alert.message).to.equal(null)
-    })
-
-    it('Sets alert type to null', () => {
-      const state = {
-        alert: {
-          message: 'Hello',
-          type: 'success'
-        }
-      }
-      mutations.__REMOVE_ALERT__(state)
-      expect(state.alert.type).to.equal(null)
-    })
-  })
-
   describe('Testing mutation SET_ENTITY_TYPES', () => {
     it('Sets entity types', () => {
       const state = {

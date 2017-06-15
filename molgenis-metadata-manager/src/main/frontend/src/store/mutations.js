@@ -8,7 +8,6 @@ export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
 export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
 
 export const CREATE_ALERT = '__CREATE_ALERT__'
-export const REMOVE_ALERT = '__REMOVE_ALERT__'
 
 export default {
   [SET_PACKAGES] (state, packages) {
@@ -41,9 +40,5 @@ export default {
    */
   [CREATE_ALERT] (state, alert) {
     state.alert = alert
-  },
-  [REMOVE_ALERT] (state) {
-    state.alert.message = null
-    state.alert.type = null
   }
 }
