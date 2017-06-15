@@ -53,7 +53,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAddInactiveNoResourceZip()
 	{
-		App app = getMockApp("id",false);
+		App app = getMockApp("id", false);
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 	}
@@ -61,7 +61,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAddActiveNoResourceZip()
 	{
-		App app = getMockApp("id",true);
+		App app = getMockApp("id", true);
 		appRepositoryDecorator.add(app);
 		verify(appRepository).add(app);
 	}

@@ -50,8 +50,7 @@ public class ExcelWriter implements WritableFactory
 		this(new FileOutputStream(file), attrMetaFactory, FileFormat.XLS);
 	}
 
-	public ExcelWriter(File file, AttributeFactory attrMetaFactory, FileFormat format)
-			throws FileNotFoundException
+	public ExcelWriter(File file, AttributeFactory attrMetaFactory, FileFormat format) throws FileNotFoundException
 	{
 		this(new FileOutputStream(file), attrMetaFactory, format);
 	}

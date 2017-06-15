@@ -78,9 +78,8 @@ public class IndexActionMetaData extends SystemEntityType
 		addAttribute(ENTITY_TYPE_ID)
 				.setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
 				.setNillable(false);
-		addAttribute(ENTITY_ID)
-				.setDescription("The id of the entity that needs to be indexed")
-				.setDataType(TEXT).setNillable(true);
+		addAttribute(ENTITY_ID).setDescription("The id of the entity that needs to be indexed").setDataType(TEXT)
+				.setNillable(true);
 		addAttribute(INDEX_STATUS).setDescription("The status of index action").setDataType(ENUM)
 				.setEnumOptions(IndexStatus.class).setNillable(false);
 	}

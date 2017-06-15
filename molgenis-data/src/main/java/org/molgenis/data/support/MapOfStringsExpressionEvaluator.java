@@ -43,8 +43,8 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		Gson gson = new Gson();
 		try
 		{
-			@SuppressWarnings("unchecked") Map<String, String> attributeExpressions = gson
-					.fromJson(expression, Map.class);
+			@SuppressWarnings("unchecked")
+			Map<String, String> attributeExpressions = gson.fromJson(expression, Map.class);
 			ImmutableMap.Builder<String, ExpressionEvaluator> builder = ImmutableMap.builder();
 			for (Entry<String, String> entry : attributeExpressions.entrySet())
 			{

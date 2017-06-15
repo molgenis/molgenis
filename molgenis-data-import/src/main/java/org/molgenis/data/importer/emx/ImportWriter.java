@@ -106,8 +106,7 @@ public class ImportWriter
 		}
 		upsertEntityTypes(groupedEntityTypes);
 
-		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getId)
-				.forEach(importReport::addNewEntity);
+		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getId).forEach(importReport::addNewEntity);
 	}
 
 	private void validateEntityTypePermissions(ImmutableCollection<EntityType> entityTypes)
@@ -139,7 +138,8 @@ public class ImportWriter
 			{
 				EntityType existing = dataService
 						.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
-				if(existing != null){
+				if (existing != null)
+				{
 					existingEntityTypeMap.put(entityType.getId(), entityType);
 				}
 			}
@@ -230,8 +230,8 @@ public class ImportWriter
 				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getId());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId()
-						.toLowerCase().startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId().toLowerCase()
+						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
 				{
 					emxEntityRepo = source.getRepository(entityType.getId().substring(defaultPackage.length() + 1));
 				}
@@ -391,7 +391,8 @@ public class ImportWriter
 		for (EntityType entityType : updatedEntityTypes)
 		{
 			EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
-			if(existing != null){
+			if (existing != null)
+			{
 				existingEntityTypeMap.put(entityType.getId(), existing);
 			}
 		}

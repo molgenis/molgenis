@@ -16,8 +16,7 @@ public class AggregateQueryImpl implements AggregateQuery
 	{
 	}
 
-	public AggregateQueryImpl(Attribute attrX, Attribute attrY, Attribute attrDistinct,
-			Query<Entity> q)
+	public AggregateQueryImpl(Attribute attrX, Attribute attrY, Attribute attrDistinct, Query<Entity> q)
 	{
 		this.attrX = attrX;
 		this.attrY = attrY;

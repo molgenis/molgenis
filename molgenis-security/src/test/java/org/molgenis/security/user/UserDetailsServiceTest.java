@@ -54,46 +54,46 @@ public class UserDetailsServiceTest
 				return authorities;
 			}
 		};
-		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, userUser), UserAuthority.class))
-				.thenAnswer(new Answer<Stream<UserAuthority>>()
-				{
-					@Override
-					public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.empty();
-					}
-				});
-		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, adminUser), UserAuthority.class))
-				.thenAnswer(new Answer<Stream<UserAuthority>>()
-				{
-					@Override
-					public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.empty();
-					}
-				});
-		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, userUser),
-				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
+		when(dataService
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, userUser),
+						UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 		{
 			@Override
-			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.empty();
+			}
+		});
+		when(dataService
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, adminUser),
+						UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
+		{
+			@Override
+			public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.empty();
 			}
 		});
 		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, adminUser),
-				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
-		{
-			@Override
-			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, userUser), GroupMember.class))
+				.thenAnswer(new Answer<Stream<GroupMember>>()
+				{
+					@Override
+					public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.empty();
+					}
+				});
+		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, adminUser), GroupMember.class))
+				.thenAnswer(new Answer<Stream<GroupMember>>()
+				{
+					@Override
+					public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.empty();
+					}
+				});
 		userDetailsService = new UserDetailsService(dataService, authoritiesMapper);
 	}
 

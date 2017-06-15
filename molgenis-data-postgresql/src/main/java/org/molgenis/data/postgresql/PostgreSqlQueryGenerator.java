@@ -216,8 +216,8 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateUpdateTrigger(EntityType entityType, Collection<Attribute> readonlyTableAttrs)
 	{
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
-				.append(getUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ")
-				.append(getTableName(entityType)).append(" FOR EACH ROW WHEN (");
+				.append(getUpdateTriggerName(entityType)).append(" AFTER UPDATE ON ").append(getTableName(entityType))
+				.append(" FOR EACH ROW WHEN (");
 		strBuilder.append(readonlyTableAttrs.stream()
 				.map(attr -> "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW." + getColumnName(attr))
 				.collect(joining(" OR ")));
@@ -234,10 +234,10 @@ class PostgreSqlQueryGenerator
 	{
 		Attribute idAttr = entityType.getIdAttribute();
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityType, attr))
-				.append(" (").append(getJunctionTableOrderColumnName()).append(" INT,")
-				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
-				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
-				.append(" NOT NULL").append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
+				.append(" (").append(getJunctionTableOrderColumnName()).append(" INT,").append(getColumnName(idAttr))
+				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
+				.append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute())).append(" NOT NULL")
+				.append(", FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName(entityType)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
 
@@ -271,8 +271,8 @@ class PostgreSqlQueryGenerator
 			default:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 		}
-		sql.append(", UNIQUE (").append(getJunctionTableOrderColumnName()).append(',')
-				.append(getColumnName(idAttr)).append(')');
+		sql.append(", UNIQUE (").append(getJunctionTableOrderColumnName()).append(',').append(getColumnName(idAttr))
+				.append(')');
 
 		sql.append(')');
 
@@ -324,8 +324,8 @@ class PostgreSqlQueryGenerator
 	static String getSqlInsertJunction(EntityType entityType, Attribute attr)
 	{
 		String junctionTableName = getJunctionTableName(entityType, attr);
-		return "INSERT INTO " + junctionTableName + " (" + getJunctionTableOrderColumnName() + ','
-				+ getColumnName(entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
+		return "INSERT INTO " + junctionTableName + " (" + getJunctionTableOrderColumnName() + ',' + getColumnName(
+				entityType.getIdAttribute()) + ',' + getColumnName(attr) + ") VALUES (?,?,?)";
 	}
 
 	static String getSqlDeleteAll(EntityType entityType)

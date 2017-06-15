@@ -45,7 +45,6 @@ public class CascadeDeleteRepositoryDecoratorTest
 	@Mock
 	private Entity refEntity;
 
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{

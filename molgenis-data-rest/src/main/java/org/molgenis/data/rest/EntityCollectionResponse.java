@@ -24,8 +24,7 @@ public class EntityCollectionResponse
 			LanguageService languageService)
 	{
 		this.href = href;
-		this.meta =
-				meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;
+		this.meta = meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

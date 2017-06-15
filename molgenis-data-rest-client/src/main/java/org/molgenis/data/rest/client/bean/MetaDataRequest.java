@@ -11,12 +11,10 @@ import java.util.Collection;
 public abstract class MetaDataRequest
 {
 
-	public abstract
-	@Nullable
+	public abstract @Nullable
 	Collection<String> getAttributes();
 
-	public abstract
-	@Nullable
+	public abstract @Nullable
 	Collection<String> getExpands();
 
 	public static MetaDataRequest create()

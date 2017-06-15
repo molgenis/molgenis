@@ -148,8 +148,8 @@ class IndexJob extends NontransactionalJob<Void>
 				else
 				{
 					// Index Job is finished, here we concluded that we don't have enough info to continue the index job
-					progress.progress(progressCount, format("Skip index entity {0}.{1}", entityType.getId(),
-									indexAction.getEntityId()));
+					progress.progress(progressCount,
+							format("Skip index entity {0}.{1}", entityType.getId(), indexAction.getEntityId()));
 				}
 			}
 			updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
@@ -178,7 +178,7 @@ class IndexJob extends NontransactionalJob<Void>
 	/**
 	 * Indexes one single entity instance.
 	 *
-	 * @param entityTypeId the id of the entity's repository
+	 * @param entityTypeId    the id of the entity's repository
 	 * @param untypedEntityId the identifier of the entity to update
 	 */
 	private void rebuildIndexOneEntity(String entityTypeId, String untypedEntityId)

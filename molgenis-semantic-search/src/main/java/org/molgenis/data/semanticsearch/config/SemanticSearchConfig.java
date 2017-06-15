@@ -95,7 +95,7 @@ public class SemanticSearchConfig
 	@Bean
 	ElasticSearchExplainService elasticSearchExplainService()
 	{
-		return new ElasticSearchExplainServiceImpl(elasticsearchServiceFactory.getClient(),
-				explainServiceHelper(), documentIdGenerator);
+		return new ElasticSearchExplainServiceImpl(elasticsearchServiceFactory.getClient(), explainServiceHelper(),
+				documentIdGenerator);
 	}
 }

@@ -122,7 +122,7 @@ public class HighchartSeriesUtil
 	 * Convert values to match the Highcharts demand when using JSON.
 	 *
 	 * @param attributeType the type of the attribute
-	 * @param value the attribute value to convert
+	 * @param value         the attribute value to convert
 	 * @return Object the converted value
 	 */
 	public Object convertValue(AttributeType attributeType, Object value)

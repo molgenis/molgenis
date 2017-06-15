@@ -44,7 +44,7 @@ public class I18nPopulator
 
 	/**
 	 * Populates dataService with localization strings from property files on the classpath.
-	 *
+	 * <p>
 	 * N.B. If you want to add a namespace with a localization resourcebundle, you need to
 	 * add a PropertiesMessageSource bean to the spring context for that namespace.
 	 */

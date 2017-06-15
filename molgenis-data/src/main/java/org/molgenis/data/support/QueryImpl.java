@@ -358,7 +358,8 @@ public class QueryImpl<E extends Entity> implements Query<E>
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		@SuppressWarnings("unchecked") QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
+		@SuppressWarnings("unchecked")
+		QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
 		if (offset != other.offset) return false;
 		if (pageSize != other.pageSize) return false;
 		if (rules == null)

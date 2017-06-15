@@ -48,8 +48,7 @@ public class VcfRepository extends AbstractRepository
 	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
 
 	public VcfRepository(File file, String entityTypeId, VcfAttributes vcfAttributes,
-			EntityTypeFactory entityTypeFactory,
-			AttributeFactory attrMetaFactory) throws IOException
+			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory) throws IOException
 	{
 		this(new VcfReaderFactoryImpl(file), entityTypeId, vcfAttributes, entityTypeFactory, attrMetaFactory);
 	}

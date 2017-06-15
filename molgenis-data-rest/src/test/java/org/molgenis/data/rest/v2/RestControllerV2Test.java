@@ -147,13 +147,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		reset(dataService);
 		reset(repoCopier);
 
-		EntityType refRefEntityType = entityTypeFactory.create(REF_REF_ENTITY_NAME)
-				.setLabel(REF_REF_ENTITY_NAME)
+		EntityType refRefEntityType = entityTypeFactory.create(REF_REF_ENTITY_NAME).setLabel(REF_REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
 				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
-		EntityType selfRefEntityType = entityTypeFactory.create(SELF_REF_ENTITY_NAME)
-				.setLabel(SELF_REF_ENTITY_NAME)
+		EntityType selfRefEntityType = entityTypeFactory.create(SELF_REF_ENTITY_NAME).setLabel(SELF_REF_ENTITY_NAME)
 				.addAttribute(attributeFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		selfRefEntityType.addAttribute(
 				attributeFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityType));
@@ -472,34 +470,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		// have count return a non null value irrespective of query
 		Long countResult = 2L;
 		when(dataService.count(anyString(), anyObject())).thenReturn(countResult);
-		mockMvc.perform(get(HREF_ENTITY_COLLECTION)
-				.param("num", "0"))
-				.andExpect(
-						status().isOk()
-				)
-				.andExpect(
-						jsonPath("$.items").isEmpty()
-				)
-				.andExpect(
-						jsonPath("$.total").value(countResult)
-				);
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION).param("num", "0")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty()).andExpect(jsonPath("$.total").value(countResult));
 	}
 
 	@Test
 	public void retrieveEntityCollectionWitNonZeroNumSize() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
-				.andExpect(
-						status().isOk()
-				)
-				.andExpect(
-						jsonPath("$.items").isNotEmpty()
-				)
-				.andExpect(
-						jsonPath("$.total").value(2L)
-				);
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isNotEmpty()).andExpect(jsonPath("$.total").value(2L));
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -1041,8 +1021,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityTypeId, String attributeName,
-			String content,
-			String message) throws Exception
+			String content, String message) throws Exception
 	{
 		ResultActions resultActions = mockMvc.perform(
 				put(RestControllerV2.BASE_URI + "/" + entityTypeId + "/" + attributeName).content(content)

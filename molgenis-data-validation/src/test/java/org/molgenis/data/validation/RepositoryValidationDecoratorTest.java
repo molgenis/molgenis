@@ -163,7 +163,8 @@ public class RepositoryValidationDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		when(decoratedRepo.getName()).thenReturn(entityTypeId);
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName))))
+		when(decoratedRepo.findAll(
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName))))
 				.thenReturn(Stream.empty());
 		refRepo = mock(Repository.class);
 		when(refRepo.getEntityType()).thenReturn(refEntityType);
@@ -171,7 +172,8 @@ public class RepositoryValidationDecoratorTest
 		dataService = mock(DataService.class);
 		when(dataService.getRepository(entityTypeId)).thenReturn(decoratedRepo);
 		when(dataService.getRepository(refEntityName)).thenReturn(refRepo);
-		when(dataService.findAll(refEntityName, new QueryImpl<Entity>().fetch(new Fetch().field(refAttrIdName)))).thenReturn(Stream.of(refEntity0, refEntity1));
+		when(dataService.findAll(refEntityName, new QueryImpl<Entity>().fetch(new Fetch().field(refAttrIdName))))
+				.thenReturn(Stream.of(refEntity0, refEntity1));
 
 		metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
@@ -2085,8 +2087,8 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyStringName = "readonlyStringAttr";
 
-		Attribute readonlyStringAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyStringName).getMock();
+		Attribute readonlyStringAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyStringName)
+				.getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
@@ -2157,8 +2159,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -2222,8 +2223,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -2295,8 +2295,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -2430,8 +2429,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -3303,8 +3301,8 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyStringName = "readonlyStringAttr";
 
-		Attribute readonlyStringAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyStringName).getMock();
+		Attribute readonlyStringAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyStringName)
+				.getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
@@ -3383,8 +3381,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -3455,8 +3452,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyXrefName = "readonlyXrefAttr";
 
-		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyXrefName).getMock();
+		Attribute readonlyXrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
@@ -3536,8 +3532,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -3610,8 +3605,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		String attrReadonlyMrefName = "readonlyMrefAttr";
 
-		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName())
-				.thenReturn(attrReadonlyMrefName).getMock();
+		Attribute readonlyMrefAttr = when(mock(Attribute.class).getName()).thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityType);
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
@@ -3725,8 +3719,9 @@ public class RepositoryValidationDecoratorTest
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);
 
-		@SuppressWarnings("resource") RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(
-				dataService, decoratedRepository, entityAttributesValidator, expressionValidator);
+		@SuppressWarnings("resource")
+		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
+				decoratedRepository, entityAttributesValidator, expressionValidator);
 
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();

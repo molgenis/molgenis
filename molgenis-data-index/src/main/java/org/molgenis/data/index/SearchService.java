@@ -52,7 +52,7 @@ public interface SearchService
 	/**
 	 * Deletes entities from index
 	 *
-	 * @param entities       entity stream
+	 * @param entities   entity stream
 	 * @param entityType
 	 */
 	void delete(Stream<? extends Entity> entities, EntityType entityType);

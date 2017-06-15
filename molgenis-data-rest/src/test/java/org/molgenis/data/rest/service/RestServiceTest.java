@@ -146,7 +146,8 @@ public class RestServiceTest
 	}
 
 	@Test
-	public void updateMappedByEntitiesEntity() {
+	public void updateMappedByEntitiesEntity()
+	{
 		String refEntityName = "refEntityName";
 		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getId()).thenReturn(refEntityName);
@@ -184,7 +185,8 @@ public class RestServiceTest
 	}
 
 	@Test
-	public void updateMappedByEntitiesEntityEntity() {
+	public void updateMappedByEntitiesEntityEntity()
+	{
 		String refEntityName = "refEntityName";
 		EntityType refEntityMeta = mock(EntityType.class);
 		when(refEntityMeta.getId()).thenReturn(refEntityName);

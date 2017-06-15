@@ -13,6 +13,5 @@ public interface WritableFactory extends Closeable
 {
 	Writable createWritable(String entityTypeId, List<String> attributeNames);
 
-	Writable createWritable(String entityTypeId, Iterable<Attribute> attributes,
-			AttributeWriteMode attributeWriteMode);
+	Writable createWritable(String entityTypeId, Iterable<Attribute> attributes, AttributeWriteMode attributeWriteMode);
 }

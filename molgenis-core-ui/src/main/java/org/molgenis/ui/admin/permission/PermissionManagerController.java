@@ -52,8 +52,8 @@ public class PermissionManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		model.addAttribute("users", Lists.newArrayList(
-				Iterables.filter(pluginPermissionManagerService.getUsers(), new Predicate<User>()
+		model.addAttribute("users",
+				Lists.newArrayList(Iterables.filter(pluginPermissionManagerService.getUsers(), new Predicate<User>()
 				{
 					@Override
 					public boolean apply(User user)

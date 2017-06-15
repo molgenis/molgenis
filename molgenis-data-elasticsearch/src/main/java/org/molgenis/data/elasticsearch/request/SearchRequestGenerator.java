@@ -34,8 +34,9 @@ public class SearchRequestGenerator
 
 	/**
 	 * Writes a query to a {@link SearchRequestBuilder}.
-	 * @param aggAttr1             First Field to aggregate on
-	 * @param aggAttr2             Second Field to aggregate on
+	 *
+	 * @param aggAttr1 First Field to aggregate on
+	 * @param aggAttr2 Second Field to aggregate on
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, SearchType searchType,
 			EntityType entityType, Query<Entity> query, Attribute aggAttr1, Attribute aggAttr2,

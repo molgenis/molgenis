@@ -124,14 +124,15 @@ public class EntityTestHarness
 	private EntityType createDynamicTestEntityType(EntityType entityType, EntityType refEntityType)
 	{
 		entityType.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL)
-				.addAttribute(createAttribute(ATTR_BOOL, BOOL).setAggregatable(true).setNillable(false)
+				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL).addAttribute(
+				createAttribute(ATTR_BOOL, BOOL).setAggregatable(true).setNillable(false)
 						.setDefaultValue(valueOf(true)))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_DATE, DATE)).addAttribute(
 				createAttribute(ATTR_ENUM, ENUM).setEnumOptions(asList("option1", "option2")).setNillable(false)
-						.setAggregatable(true).setDefaultValue("option1")).addAttribute(createAttribute(ATTR_DATETIME, DATE_TIME))
+						.setAggregatable(true).setDefaultValue("option1"))
+				.addAttribute(createAttribute(ATTR_DATETIME, DATE_TIME))
 				.addAttribute(createAttribute(ATTR_EMAIL, EMAIL)).addAttribute(createAttribute(ATTR_DECIMAL, DECIMAL))
 				.addAttribute(createAttribute(ATTR_HTML, HTML)).addAttribute(createAttribute(ATTR_HYPERLINK, HYPERLINK))
 				.addAttribute(createAttribute(ATTR_LONG, LONG)).addAttribute(

@@ -52,8 +52,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Autowired
 	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver,
-			PackagePersister packagePersister)
+			EntityTypeDependencyResolver entityTypeDependencyResolver, PackagePersister packagePersister)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.repoCollectionRegistry = requireNonNull(repoCollectionRegistry);
@@ -113,8 +112,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		else
 		{
 			return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(EntityTypeMetadata.ID, entityTypeId)
-					.and()
-					.eq(IS_ABSTRACT, false).findOne() != null;
+					.and().eq(IS_ABSTRACT, false).findOne() != null;
 		}
 	}
 
