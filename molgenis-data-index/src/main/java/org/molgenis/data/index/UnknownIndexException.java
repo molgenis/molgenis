@@ -2,17 +2,20 @@ package org.molgenis.data.index;
 
 import org.molgenis.data.MolgenisDataException;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
 public class UnknownIndexException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
 
-	public UnknownIndexException(String msg)
+	public UnknownIndexException(String indexName)
 	{
-		super(msg);
+		super(String.format("Index '%s' not found.", indexName));
 	}
 
-	public UnknownIndexException(String msg, Throwable t)
+	public UnknownIndexException(String[] indexNames)
 	{
-		super(msg, t);
+		super(String.format("One or more indexes '%s' not found.", stream(indexNames).collect(joining(", "))));
 	}
 }

@@ -11,14 +11,14 @@ import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
+import org.molgenis.data.elasticsearch.generator.AggregationGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.*;
+import static org.molgenis.data.elasticsearch.generator.AggregationGenerator.*;
 
 public class AggregateResponseParser
 {
@@ -94,11 +94,11 @@ public class AggregateResponseParser
 			}
 		}
 
-		if (AggregateQueryGenerator.isNestedType(aggAttr1))
+		if (AggregationGenerator.isNestedType(aggAttr1))
 		{
 			convertIdtoLabelLabels(xLabels, aggAttr1.getRefEntity(), dataService);
 		}
-		if (aggAttr2 != null && AggregateQueryGenerator.isNestedType(aggAttr2))
+		if (aggAttr2 != null && AggregationGenerator.isNestedType(aggAttr2))
 		{
 			convertIdtoLabelLabels(yLabels, aggAttr2.getRefEntity(), dataService);
 		}
@@ -111,7 +111,7 @@ public class AggregateResponseParser
 	{
 		Map<Object, Object> counts = new HashMap<>();
 
-		boolean isAttr1Nested = AggregateQueryGenerator.isNestedType(aggAttr1);
+		boolean isAttr1Nested = AggregationGenerator.isNestedType(aggAttr1);
 		boolean isAttr1Nillable = aggAttr1.isNillable();
 
 		if (isAttr1Nested) aggs = removeNesting(aggs);
@@ -125,7 +125,7 @@ public class AggregateResponseParser
 			{
 				Map<Object, Long> subCounts = new HashMap<>();
 
-				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
+				boolean isAttr2Nested = AggregationGenerator.isNestedType(aggAttr2);
 				boolean isAttr2Nillable = aggAttr2.isNillable();
 
 				Aggregations subAggs = bucket.getAggregations();
@@ -140,7 +140,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
 
 						Aggregations distinctAggs = subBucket.getAggregations();
 						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -164,7 +164,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
 
 						Aggregations subDistinctAggs = subMissing.getAggregations();
 						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
@@ -184,7 +184,7 @@ public class AggregateResponseParser
 			{
 				if (aggAttrDistinct != null)
 				{
-					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+					boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
 
 					Aggregations distinctAggs = bucket.getAggregations();
 					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -209,7 +209,7 @@ public class AggregateResponseParser
 			{
 				Map<Object, Long> subCounts = new HashMap<>();
 
-				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
+				boolean isAttr2Nested = AggregationGenerator.isNestedType(aggAttr2);
 				boolean isAttr2Nillable = aggAttr2.isNillable();
 
 				Aggregations subAggs = missing.getAggregations();
@@ -224,7 +224,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
 
 						Aggregations distinctAggs = subBucket.getAggregations();
 						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -248,7 +248,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
 
 						Aggregations subDistinctAggs = subMissing.getAggregations();
 						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
@@ -268,7 +268,7 @@ public class AggregateResponseParser
 			{
 				if (aggAttrDistinct != null)
 				{
-					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+					boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
 
 					Aggregations distinctAggs = missing.getAggregations();
 					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);

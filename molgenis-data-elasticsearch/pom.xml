@@ -63,12 +63,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- TODO Remove protonpack once we upgrade to JDK 9 -->
-        <dependency>
-            <groupId>com.codepoetics</groupId>
-            <artifactId>protonpack</artifactId>
-            <version>1.8</version>
-        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

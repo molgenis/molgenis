@@ -1,12 +1,7 @@
 package org.molgenis.data.elasticsearch.config;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.factory.ElasticsearchServiceFactory;
+import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
-import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
-import org.molgenis.data.elasticsearch.util.ElasticsearchClientFacade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,17 +31,8 @@ public class ElasticsearchConfig
 	@Value("${elasticsearch.transport.addresses:127.0.0.1:9300}")
 	private List<String> elasticsearchTransportAddresses;
 
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private ElasticsearchEntityFactory elasticsearchEntityFactory;
-
-	@Autowired
-	private DocumentIdGenerator documentIdGenerator;
-
 	@Bean(destroyMethod = "close")
-	public ElasticsearchServiceFactory elasticsearchServiceFactory()
+	public ClientFactory elasticsearchServiceFactory()
 	{
 		if (elasticsearchClusterName == null)
 		{
@@ -58,7 +44,7 @@ public class ElasticsearchConfig
 		}
 
 		List<InetSocketAddress> ipSocketAddresses = toIpSocketAddresses(elasticsearchTransportAddresses);
-		return new ElasticsearchServiceFactory(elasticsearchClusterName, ipSocketAddresses);
+		return new ClientFactory(elasticsearchClusterName, ipSocketAddresses);
 	}
 
 	@Bean

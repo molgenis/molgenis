@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch.util;
 
+import org.molgenis.data.elasticsearch.generator.DocumentIdGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
